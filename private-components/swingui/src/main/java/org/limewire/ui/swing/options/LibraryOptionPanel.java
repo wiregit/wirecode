@@ -1,13 +1,18 @@
 package org.limewire.ui.swing.options;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 
@@ -54,86 +59,56 @@ public class LibraryOptionPanel extends OptionPanel {
     /** Do you want to use the LW player? */
     private class LibraryPanel extends OptionPanel {
 
-        private JCheckBox audioCheckbox;
-
-        private JCheckBox videoCheckbox;
-
-        private JCheckBox imagesCheckbox;
-
-        private JCheckBox programsCheckbox;
-
-        private JCheckBox documentsCheckbox;
-
-        private JCheckBox otherCheckbox;
+        private Map<Category, JCheckBox> categoryCheckboxes;
 
         public LibraryPanel() {
             super("");
             setBorder(BorderFactory.createEmptyBorder());
             setLayout(new MigLayout("ins 0 0 0 0, gap 0"));
-
-            audioCheckbox = new JCheckBox(I18n.tr("Audio"));
-            audioCheckbox.setOpaque(false);
-
-            videoCheckbox = new JCheckBox(I18n.tr("Video"));
-            videoCheckbox.setOpaque(false);
-
-            imagesCheckbox = new JCheckBox(I18n.tr("Images"));
-            imagesCheckbox.setOpaque(false);
-
-            programsCheckbox = new JCheckBox(I18n.tr("Programs"));
-            programsCheckbox.setOpaque(false);
-
-            documentsCheckbox = new JCheckBox(I18n.tr("Documents"));
-            documentsCheckbox.setOpaque(false);
-
-            otherCheckbox = new JCheckBox(I18n.tr("Other"));
-            otherCheckbox.setOpaque(false);
-
-            add(audioCheckbox);
-            add(videoCheckbox);
-            add(imagesCheckbox);
-            add(programsCheckbox);
-            add(documentsCheckbox);
-            add(otherCheckbox);
+            categoryCheckboxes = new HashMap<Category, JCheckBox>();
+            
+            for(Category category : Category.values()) {
+                JCheckBox categoryCheckbox = new JCheckBox(category.getPluralName());
+                categoryCheckboxes.put(category, categoryCheckbox);
+                categoryCheckbox.setOpaque(false);
+                add(categoryCheckbox);
+            }
         }
 
         @Override
         boolean applyOptions() {
-            if(hasChanged()) {
-                LibrarySettings.MANAGE_AUDIO.set(audioCheckbox.isSelected());
-                LibrarySettings.MANAGE_VIDEO.set(videoCheckbox.isSelected());
-                LibrarySettings.MANAGE_IMAGES.set(imagesCheckbox.isSelected());
-                LibrarySettings.MANAGE_PROGRAMS.set(programsCheckbox.isSelected());
-                LibrarySettings.MANAGE_DOCUMENTS.set(documentsCheckbox.isSelected());
-                LibrarySettings.MANAGE_OTHER.set(otherCheckbox.isSelected());
-                
-                //libraryData.setCategoriesToIncludeWhenAddingFolders(managedCategories)
-            }
+            libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(getSelectedCategories());
             return false;
         }
 
         @Override
         boolean hasChanged() {
-            return LibrarySettings.MANAGE_AUDIO.getValue() != audioCheckbox.isSelected()
-                    || LibrarySettings.MANAGE_VIDEO.getValue() != videoCheckbox.isSelected()
-                    || LibrarySettings.MANAGE_IMAGES.getValue() != imagesCheckbox.isSelected()
-                    || LibrarySettings.MANAGE_DOCUMENTS.getValue() != documentsCheckbox
-                            .isSelected()
-                    || LibrarySettings.MANAGE_PROGRAMS.getValue() != programsCheckbox.isSelected()
-                    || LibrarySettings.MANAGE_OTHER.getValue() != otherCheckbox.isSelected();
+            Collection<Category> selectedCategories = getSelectedCategories();
+            Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
+            return selectedCategories.size() != managedCategories.size() || !selectedCategories.containsAll(managedCategories);
         }
 
         @Override
         public void initOptions() {
-            audioCheckbox.setSelected(LibrarySettings.MANAGE_AUDIO.getValue());
-            videoCheckbox.setSelected(LibrarySettings.MANAGE_VIDEO.getValue());
-            imagesCheckbox.setSelected(LibrarySettings.MANAGE_IMAGES.getValue());
-            programsCheckbox.setSelected(LibrarySettings.MANAGE_PROGRAMS.getValue());
-            documentsCheckbox.setSelected(LibrarySettings.MANAGE_DOCUMENTS.getValue());
-            otherCheckbox.setSelected(LibrarySettings.MANAGE_OTHER.getValue());
+            Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
+            for(Category category : categoryCheckboxes.keySet()) {
+                JCheckBox categoryCheckbox = categoryCheckboxes.get(category);
+                categoryCheckbox.setSelected(managedCategories.contains(category));
+            }
+        }
+        
+        private Collection<Category> getSelectedCategories() {
+            Collection<Category> categories = new ArrayList<Category>();
+            for(Category category : categoryCheckboxes.keySet()) {
+                JCheckBox categoryCheckbox = categoryCheckboxes.get(category);
+                if(categoryCheckbox.isSelected()) {
+                    categories.add(category);
+                }
+            }
+            return categories;
         }
     }
-
+    
     /** Do you want to use the LW player? */
     private class UsePlayerPanel extends OptionPanel {
 

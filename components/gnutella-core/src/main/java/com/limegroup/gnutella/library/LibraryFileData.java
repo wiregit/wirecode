@@ -92,8 +92,14 @@ class LibraryFileData extends AbstractSettingsGroup {
     
     private volatile boolean loaded = false;
 
+    private volatile Set<String> managedExtensions = Collections.unmodifiableSet(new HashSet<String>());
+    private volatile Set<String> extensionsInManagedCategories = Collections.unmodifiableSet(new HashSet<String>());
+    
+    
+
     LibraryFileData() {
         SettingsGroupManager.instance().addSettingsGroup(this);
+        updateManagedExtensions();
     }
     
     public boolean isLoaded() {
@@ -118,6 +124,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             userExtensions.clear();
             userRemoved.clear();
             fileData.clear();
+            updateManagedExtensions();
         } finally {
             lock.writeLock().unlock();
         }
@@ -226,6 +233,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             this.fileData.putAll(fileData);
             this.collectionNames.putAll(collectionNames);
             this.collectionShareData.putAll(collectionShareData);
+            updateManagedExtensions();
         } finally {
             lock.writeLock().unlock();
         }
@@ -354,19 +362,23 @@ class LibraryFileData extends AbstractSettingsGroup {
 
     /** Sets the new group of categories to manage. */
     public void setManagedCategories(Collection<Category> categoriesToManage) {
-        LibrarySettings.MANAGE_AUDIO.setValue(categoriesToManage.contains(Category.AUDIO));
-        LibrarySettings.MANAGE_VIDEO.setValue(categoriesToManage.contains(Category.VIDEO));
-        LibrarySettings.MANAGE_DOCUMENTS.setValue(categoriesToManage.contains(Category.DOCUMENT));
-        LibrarySettings.MANAGE_IMAGES.setValue(categoriesToManage.contains(Category.IMAGE));
-        LibrarySettings.MANAGE_PROGRAMS.setValue(categoriesToManage.contains(Category.PROGRAM));
-        LibrarySettings.MANAGE_OTHER.setValue(categoriesToManage.contains(Category.OTHER));
+    	lock.writeLock().lock();
+	    try {
+        	LibrarySettings.MANAGE_AUDIO.setValue(categoriesToManage.contains(Category.AUDIO));
+	        LibrarySettings.MANAGE_VIDEO.setValue(categoriesToManage.contains(Category.VIDEO));
+	        LibrarySettings.MANAGE_DOCUMENTS.setValue(categoriesToManage.contains(Category.DOCUMENT));
+    	    LibrarySettings.MANAGE_IMAGES.setValue(categoriesToManage.contains(Category.IMAGE));
+        	LibrarySettings.MANAGE_PROGRAMS.setValue(categoriesToManage.contains(Category.PROGRAM));
+	        LibrarySettings.MANAGE_OTHER.setValue(categoriesToManage.contains(Category.OTHER));
+            updateManagedExtensions();
+        } finally {
+        	lock.writeLock().unlock();
+        }
     }
 
-    /** Returns all extensions that are managed within the managed categories. */
-    public Collection<String> getExtensionsInManagedCategories() {
-        Map<Category, Collection<String>> map = getExtensionsPerCategory();
-        map.keySet().retainAll(getManagedCategories());
-        return CollectionUtils.flatten(map.values());        
+    /** Returns all extensions that are managed within the managed categories. The returned set cannot be mpodified.*/
+    public Set<String> getExtensionsInManagedCategories() {
+        return extensionsInManagedCategories;
     }
     
     /**
@@ -388,20 +400,36 @@ class LibraryFileData extends AbstractSettingsGroup {
         return extByCategory;
     }
 
+
     /**
-     * Returns a new Set with all the currently managed extensions contained within. 
+     * Should be called whenever a method is updating the extensions or the categories that the Library manages.
+     * It rebuilds the managedExtentiosn and extensions in Managed categories set. So that they are always up to 
+     * date and can be returned immediately.
+     */
+    private void updateManagedExtensions() {
+        Set<String> managedExtensions = new HashSet<String>();        
+        try {
+            lock.writeLock().lock();
+            managedExtensions.addAll(DEFAULT_MANAGED_EXTENSIONS);
+            managedExtensions.addAll(userExtensions);
+            managedExtensions.removeAll(userRemoved);
+            this.managedExtensions  = Collections.unmodifiableSet(managedExtensions);
+            
+            Map<Category, Collection<String>> map = getExtensionsPerCategory();
+            map.keySet().retainAll(getManagedCategories());
+            extensionsInManagedCategories = Collections.unmodifiableSet(new HashSet<String>(CollectionUtils.flatten(map.values()))); 
+            
+        } finally {
+            lock.writeLock().unlock();
+        }
+        
+    }
+    
+    /**
+     * Returns a new Set with all the currently managed extensions contained within. The returned set cannot be modified.
      */
     Set<String> getManagedExtensions() {
-        Set<String> extensions = new HashSet<String>();        
-        try {
-            lock.readLock().lock();
-            extensions.addAll(DEFAULT_MANAGED_EXTENSIONS);
-            extensions.addAll(userExtensions);
-            extensions.removeAll(userRemoved);
-        } finally {
-            lock.readLock().unlock();
-        }
-        return extensions;
+        return managedExtensions;
     }
 
     /** Sets all extensions that should be managed. */
@@ -428,7 +456,9 @@ class LibraryFileData extends AbstractSettingsGroup {
                 userExtensions.clear();
                 userExtensions.addAll(added);
             }
-            
+            if(changed) {
+                updateManagedExtensions();
+            }
             dirty |= changed;
         } finally {
             lock.writeLock().unlock();

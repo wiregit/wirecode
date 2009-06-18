@@ -190,14 +190,8 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         }
 
         @Override
-        public void reload() {
-
-        }
-
-        @Override
         public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
-            // TODO Auto-generated method stub
-
+            
         }
     }
 
@@ -208,7 +202,6 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
 
     @Override
     public EventList<SharedFileList> getModel() {
-        // TODO Auto-generated method stub
         return null;
     }
 

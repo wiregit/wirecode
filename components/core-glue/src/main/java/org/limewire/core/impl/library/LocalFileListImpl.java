@@ -14,6 +14,7 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileItemFilter;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.listener.EventListener;
@@ -228,5 +229,14 @@ abstract class LocalFileListImpl implements LocalFileList {
     @Override
     public boolean isFileAddable(File file) {
        return getCoreCollection().isFileAddable(file);
+    }
+    
+    @Override
+    public void removeFiles(LocalFileItemFilter fileFilter) {
+        for(LocalFileItem localFileItem : getModel()) {
+            if(fileFilter.accept(localFileItem)) {
+                removeFile(localFileItem.getFile());
+            }
+        }
     }
 }

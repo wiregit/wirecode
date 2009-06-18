@@ -1,13 +1,9 @@
-/**
- * 
- */
 package org.limewire.core.impl.library;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 
-import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 
@@ -54,13 +50,6 @@ class LibraryDataImpl implements LibraryData {
     
     @Override
     public void setManagedExtensions(Collection<String> extensions) {
-        library.setManagedExtensions(extensions);
-    }
-
-    @Override
-    public void reload() {
-        Map<Category, Collection<String>> managedExtensionsPerCategory = getExtensionsPerCategory();
-        Collection<String> extensions = CollectionUtils.flatten(managedExtensionsPerCategory.values());
         library.setManagedExtensions(extensions);
     }
     

@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.options;
 
+import java.util.Collection;
+
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -7,11 +9,17 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileItemFilter;
+import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.NotImplementedException;
+
+import ca.odell.glazedlists.EventList;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
@@ -19,12 +27,12 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     private JCheckBox documentCheckBox;
     private JButton okButton;
     private final LibraryManager libraryManager;
-  //  private final SharedFileListManager shareListManager;
+    private final SharedFileListManager shareListManager;
    
     public UnsafeTypeOptionPanel(Action okButtonAction, LibraryManager libraryManager,
             SharedFileListManager shareListManager) {
         this.libraryManager = libraryManager;
-  //      this.shareListManager = shareListManager;
+        this.shareListManager = shareListManager;
 
         setLayout(new MigLayout("gapy 10"));
         
@@ -47,12 +55,44 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(documentCheckBox.isSelected());
 
         if(!programCheckBox.isSelected()) {
-            libraryManager.getLibraryData().reload();
+        	Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
+        	managedCategories.remove(Category.PROGRAM);
+        	libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(managedCategories);
+        	BackgroundExecutorService.execute(new Runnable() {
+        	   @Override
+        	    public void run() {
+        	       libraryManager.getLibraryManagedList().removeFiles(new LocalFileItemFilter() {
+                       @Override
+                        public boolean accept(LocalFileItem localFileItem) {
+                            return localFileItem.getCategory() == Category.PROGRAM;
+                        } 
+                    });
+        	    } 
+        	});
         }
         
         if (!documentCheckBox.isSelected()) {
-            throw new NotImplementedException();
-       //     shareListManager.getGnutellaShareList().removeDocuments();
+            BackgroundExecutorService.execute(new Runnable() {
+               @Override
+                public void run() {
+                   EventList<SharedFileList> shareLists = shareListManager.getModel();
+                   shareLists.getReadWriteLock().readLock().lock();
+                   try {
+                       for(SharedFileList sharedFileList : shareLists) {
+                           if(sharedFileList.isPublic()) {
+                               sharedFileList.removeFiles(new LocalFileItemFilter() {
+                                   @Override
+                                   public boolean accept(LocalFileItem localFileItem) {
+                                       return localFileItem.getCategory() == Category.DOCUMENT;
+                                   } 
+                               });
+                           }
+                       }
+                   } finally {
+                       shareLists.getReadWriteLock().readLock().unlock();
+                   }
+                } 
+            });
         }
         return false;
     }

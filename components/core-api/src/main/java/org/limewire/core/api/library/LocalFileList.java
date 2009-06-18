@@ -47,5 +47,10 @@ public interface LocalFileList extends FileList<LocalFileItem> {
      * Returns true if the file is addable to the list. 
      */
     boolean isFileAddable(File file);
+    
+    /**
+     * Removes all files from the list that match the specified filter. 
+     */
+    public void removeFiles(LocalFileItemFilter fileFilter);
 
 }

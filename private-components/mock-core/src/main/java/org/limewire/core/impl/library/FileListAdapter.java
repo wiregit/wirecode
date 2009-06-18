@@ -14,6 +14,7 @@ import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileItemFilter;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.listener.EventListener;
 
@@ -124,6 +125,11 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
 
     @Override
     public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
+        
+    }
+
+    @Override
+    public void removeFiles(LocalFileItemFilter fileFilter) {
         
     }
 }

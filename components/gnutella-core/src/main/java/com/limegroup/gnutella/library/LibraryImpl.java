@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -48,7 +46,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -115,12 +112,6 @@ class LibraryImpl implements Library, FileCollection {
     private final Map<URN, IntSet> urnMap;
     
     /**
-     * The set of file extensions to manage, sorted by StringComparator. 
-     * INVARIANT: all extensions are lower case.
-     */
-    private final Set<String> extensions;
-    
-    /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
@@ -168,7 +159,6 @@ class LibraryImpl implements Library, FileCollection {
         this.folderLoader = ExecutorsHelper.newProcessingQueue("ManagedList Folder Loader");
         this.fileLoader = ExecutorsHelper.newProcessingQueue("ManagedList File Loader");
         this.files = new ArrayList<FileDesc>();
-        this.extensions = new ConcurrentSkipListSet<String>();
         this.urnMap = new HashMap<URN, IntSet>();
         this.fileToFileDescMap = new HashMap<File, FileDesc>();
         this.fileToFutures = new HashMap<File, Future>();
@@ -848,8 +838,6 @@ class LibraryImpl implements Library, FileCollection {
             files.clear();
             urnMap.clear();
             fileToFileDescMap.clear();
-            extensions.clear();
-            extensions.addAll(getLibraryData().getExtensionsInManagedCategories());
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -1047,15 +1035,10 @@ class LibraryImpl implements Library, FileCollection {
             throw new UnsupportedOperationException();
         }
     }
-    
-    /** Returns true if file has a manageable extension.  Case is ignored. */
-    boolean hasManageableExtension(File file) {
-        return extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US));
-    }
-    
+        
     /** Returns a filter used to get manageable files. */
     FileFilter newManageableFilter() {
-        return new ManageableFileFilter(extensions, true);
+        return new ManageableFileFilter(true);
     }
     
     @Override
@@ -1074,8 +1057,8 @@ class LibraryImpl implements Library, FileCollection {
         private final boolean includeContainedFiles;
         
         /** Constructs the filter with the given set of allowed extensions. */
-        public ManageableFileFilter(Collection<String> extensions, boolean includeContainedFiles) {
-            this.extensions = new HashSet<String>(extensions);
+        public ManageableFileFilter(boolean includeContainedFiles) {
+            this.extensions = getLibraryData().getExtensionsInManagedCategories();
             this.includeContainedFiles = includeContainedFiles;
         }
         
@@ -1118,12 +1101,12 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
-       throw new NotImplementedException();
+        getLibraryData().setManagedCategories(managedCategories);
     }
 
     @Override
     public void setManagedExtensions(Collection<String> extensions) {
-        throw new NotImplementedException();
+        getLibraryData().setManagedExtensions(extensions);
     }
 
     @Override
