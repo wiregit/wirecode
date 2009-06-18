@@ -38,6 +38,7 @@ import org.limewire.friend.impl.feature.ConnectBackRequestFeature;
 import org.limewire.friend.impl.feature.FileOfferFeature;
 import org.limewire.friend.impl.feature.LibraryChangedNotifierFeature;
 import org.limewire.friend.impl.feature.LimewireFeatureInitializer;
+import org.limewire.listener.AsynchronousBroadcaster;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
@@ -78,7 +79,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
 
     private final FriendConnectionConfiguration configuration;
     private final EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster;
-    private final EventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
+    private final AsynchronousBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final AddressFactory addressFactory;
     private final EventMulticaster<FeatureEvent> featureSupport;
     private final ListeningExecutorService executorService;
@@ -108,9 +109,9 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     @AssistedInject
     public XMPPFriendConnectionImpl(@Assisted FriendConnectionConfiguration configuration,
                                     @Assisted ListeningExecutorService executorService,
-                                    EventBroadcaster<RosterEvent> rosterBroadcaster,
+                                    AsynchronousBroadcaster<RosterEvent> rosterBroadcaster,
                                     EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster,
-                                    EventBroadcaster<FriendConnectionEvent> connectionBroadcaster,
+                                    AsynchronousBroadcaster<FriendConnectionEvent> connectionBroadcaster,
                                     AddressFactory addressFactory,
                                     EventMulticaster<FeatureEvent> featureSupport,
                                     List<ConnectionConfigurationFactory> connectionConfigurationFactories,

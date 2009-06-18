@@ -5,14 +5,7 @@ import java.util.concurrent.Executor;
 import org.limewire.listener.EventListenerList.EventListenerListContext;
 import org.limewire.logging.Log;
 
-/**
- * An EventMulticaster that broadcasts all its events within an executor.
- * This is useful if you want to asynchronously notify listeners about events
- * (especially handy if the events are generated while holding a lock).
- * If the executor is single-threaded, this can guarantee that all events
- * are dispatched in the same order they were broadcast.
- */
-public class AsynchronousMulticaster<E> implements EventMulticaster<E> {
+public class AsynchronousMulticaster<E> implements EventMulticaster<E>, AsynchronousBroadcaster<E> {
     
     private final EventListenerList<E> listeners;
     private final Executor executor;

@@ -6,7 +6,7 @@ import java.nio.channels.Pipe;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
-import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.AsynchronousBroadcaster;
 import org.limewire.rudp.messages.SynMessage.Role;
 
 import com.google.inject.Inject;
@@ -19,11 +19,11 @@ import com.google.inject.Singleton;
 @Singleton
 public class UDPSelectorProvider extends SelectorProvider {    
     private final RUDPContext context;
-    private final EventBroadcaster<UDPSocketChannelConnectionEvent> connectionStateEventBroadcaster;
+    private final AsynchronousBroadcaster<UDPSocketChannelConnectionEvent> connectionStateEventBroadcaster;
 
     @Inject
     public UDPSelectorProvider(RUDPContext context,
-                               EventBroadcaster<UDPSocketChannelConnectionEvent> connectionStateEventBroadcaster) {
+                               AsynchronousBroadcaster<UDPSocketChannelConnectionEvent> connectionStateEventBroadcaster) {
 		this.context = context;
         this.connectionStateEventBroadcaster = connectionStateEventBroadcaster;
     }

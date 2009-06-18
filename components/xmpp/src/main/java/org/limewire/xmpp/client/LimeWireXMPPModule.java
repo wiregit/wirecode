@@ -16,6 +16,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.AsynchronousBroadcaster;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.client.impl.ConnectionConfigurationFactory;
@@ -57,8 +58,8 @@ public class LimeWireXMPPModule extends AbstractModule {
         
         Executor executor = ExecutorsHelper.newProcessingQueue("XMPPEventThread");
         
-        EventMulticaster<RosterEvent> rosterMulticaster = new AsynchronousMulticaster<RosterEvent>(executor); 
-        bind(new TypeLiteral<EventBroadcaster<RosterEvent>>(){}).toInstance(rosterMulticaster);
+        AsynchronousMulticaster<RosterEvent> rosterMulticaster = new AsynchronousMulticaster<RosterEvent>(executor); 
+        bind(new TypeLiteral<AsynchronousBroadcaster<RosterEvent>>(){}).toInstance(rosterMulticaster);
         bind(new TypeLiteral<ListenerSupport<RosterEvent>>(){}).toInstance(rosterMulticaster);
 
         EventMulticaster<FileOfferEvent> fileOfferMulticaster = new EventMulticasterImpl<FileOfferEvent>(); 

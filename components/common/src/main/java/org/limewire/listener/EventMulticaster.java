@@ -5,4 +5,5 @@ package org.limewire.listener;
  */
 public interface EventMulticaster<E> extends ListenerSupport<E>, EventListener<E>, EventBroadcaster<E> {
 
+    EventListenerList.EventListenerListContext getListenerContext();
 }

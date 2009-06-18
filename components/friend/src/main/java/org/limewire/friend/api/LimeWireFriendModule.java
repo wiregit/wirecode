@@ -2,14 +2,6 @@ package org.limewire.friend.api;
 
 import java.util.concurrent.Executor;
 
-import org.limewire.listener.EventMulticaster;
-import org.limewire.listener.EventMulticasterImpl;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.AsynchronousMulticaster;
-import org.limewire.listener.CachingEventMulticasterImpl;
-import org.limewire.listener.BroadcastPolicy;
-import org.limewire.listener.EventBean;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.friend.impl.LimeWireFriendImplModule;
@@ -17,6 +9,14 @@ import org.limewire.friend.impl.address.FriendAddressRegistry;
 import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.friend.impl.address.FriendAddressSerializer;
 import org.limewire.friend.impl.feature.LimeWireFriendFeatureModule;
+import org.limewire.listener.AsynchronousBroadcaster;
+import org.limewire.listener.AsynchronousCachingEventMulticasterImpl;
+import org.limewire.listener.BroadcastPolicy;
+import org.limewire.listener.EventBean;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventMulticasterImpl;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.LogFactory;
 
 import com.google.inject.AbstractModule;
@@ -50,14 +50,12 @@ public class LimeWireFriendModule extends AbstractModule {
 
         Executor executor = ExecutorsHelper.newProcessingQueue("FriendConnectionEventThread");
 
-        AsynchronousMulticaster<FriendConnectionEvent> asyncConnectionMulticaster =
-            new AsynchronousMulticaster<FriendConnectionEvent>(executor, LogFactory.getLog(FriendConnectionEvent.class));
-        CachingEventMulticasterImpl<FriendConnectionEvent> connectionMulticaster =
-            new CachingEventMulticasterImpl<FriendConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS, asyncConnectionMulticaster, asyncConnectionMulticaster.getListenerContext());
-        bind(new TypeLiteral<EventBean<FriendConnectionEvent>>(){}).toInstance(connectionMulticaster);
-        bind(new TypeLiteral<EventMulticaster<FriendConnectionEvent>>(){}).toInstance(connectionMulticaster);
-        bind(new TypeLiteral<EventBroadcaster<FriendConnectionEvent>>(){}).toInstance(connectionMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FriendConnectionEvent>>(){}).toInstance(connectionMulticaster);
+        AsynchronousCachingEventMulticasterImpl<FriendConnectionEvent> asyncConnectionMulticaster =
+            new AsynchronousCachingEventMulticasterImpl<FriendConnectionEvent>(executor, BroadcastPolicy.IF_NOT_EQUALS, LogFactory.getLog(FriendConnectionEvent.class));
+        bind(new TypeLiteral<EventBean<FriendConnectionEvent>>(){}).toInstance(asyncConnectionMulticaster);
+        bind(new TypeLiteral<EventMulticaster<FriendConnectionEvent>>(){}).toInstance(asyncConnectionMulticaster);
+        bind(new TypeLiteral<AsynchronousBroadcaster<FriendConnectionEvent>>(){}).toInstance(asyncConnectionMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FriendConnectionEvent>>(){}).toInstance(asyncConnectionMulticaster);
 
         EventMulticaster<LibraryChangedEvent> libraryChangedMulticaster = new EventMulticasterImpl<LibraryChangedEvent>();
         bind(new TypeLiteral<EventBroadcaster<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);

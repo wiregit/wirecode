@@ -49,15 +49,11 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
      * @param multicaster The {@link EventMulticaster} this delegates to when broadcasting events.
      * @param listenerContext The {@link EventListenerListContext} to use when broadcasting events directly.
      */
-    public CachingEventMulticasterImpl(BroadcastPolicy broadcastPolicy, EventMulticaster<E> multicaster, EventListenerListContext listenerContext) {
+    public CachingEventMulticasterImpl(BroadcastPolicy broadcastPolicy, EventMulticaster<E> multicaster) {
         this.broadcastPolicy = broadcastPolicy;
         this.multicaster = multicaster;
-        this.listenerContext = listenerContext;
-    }
-    
-    private CachingEventMulticasterImpl(BroadcastPolicy broadcastPolicy, EventMulticasterImpl<E> multicasterImpl) {
-        this(broadcastPolicy, multicasterImpl, multicasterImpl.getListenerContext());
-    }    
+        this.listenerContext = multicaster.getListenerContext();
+    }   
 
     /**
      * Adds a listener and calls its handleEvent() method with the
@@ -109,5 +105,10 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
     @Override
     public E getLastEvent() {
         return cachedEvent;
+    }
+
+    @Override
+    public EventListenerListContext getListenerContext() {
+        return listenerContext;
     }
 }

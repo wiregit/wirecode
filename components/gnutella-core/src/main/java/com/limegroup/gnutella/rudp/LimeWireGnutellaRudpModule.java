@@ -6,8 +6,8 @@ import java.nio.channels.SelectableChannel;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.listener.AsynchronousBroadcaster;
 import org.limewire.listener.AsynchronousMulticaster;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.RUDPContext;
@@ -35,7 +35,7 @@ public class LimeWireGnutellaRudpModule extends AbstractModule {
 
         ListeningExecutorService executorService = ExecutorsHelper.newProcessingQueue(UDPSocketChannelConnectionEvent.class.getSimpleName());
         AsynchronousMulticaster<UDPSocketChannelConnectionEvent> connectionEventMulticaster = new AsynchronousMulticaster<UDPSocketChannelConnectionEvent>(executorService); 
-        bind(new TypeLiteral<EventBroadcaster<UDPSocketChannelConnectionEvent>>(){}).toInstance(connectionEventMulticaster);
+        bind(new TypeLiteral<AsynchronousBroadcaster<UDPSocketChannelConnectionEvent>>(){}).toInstance(connectionEventMulticaster);
         bind(new TypeLiteral<ListenerSupport<UDPSocketChannelConnectionEvent>>(){}).toInstance(connectionEventMulticaster);
         bind(RUDPContext.class).to(LimeRUDPContext.class);
         bind(UDPMultiplexor.class).toProvider(UDPMultiplexorProvider.class);
