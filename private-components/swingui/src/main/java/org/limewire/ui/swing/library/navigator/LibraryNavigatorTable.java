@@ -13,18 +13,22 @@ import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.dnd.LibraryNavTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
+import org.limewire.ui.swing.table.SingleColumnTableFormat;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
@@ -32,48 +36,57 @@ import com.google.inject.Inject;
 @LazySingleton
 public class LibraryNavigatorTable extends JXTable {
 
-    @Resource private Color backgroundColor;
-    
+    @Resource private Color backgroundColor;    
     private TablePopupHandler popupHandler;
-    private final EventList<LibraryNavItem> eventList;
     
     @Inject
-    public LibraryNavigatorTable(LibraryNavTransferHandler libraryNavTransferHandler) {        
+    public LibraryNavigatorTable(LibraryNavTransferHandler libraryNavTransferHandler,
+            LibraryManager libraryManager, SharedFileListManager sharedFileListManager) {
         GuiUtils.assignResources(this);
-        
+
         initialize();
+
+        EventList<SharedFileList> privateLists = sharedFileListManager.getModel();
+        FunctionList<SharedFileList, LibraryNavItem> shareToNav = GlazedListsFactory.functionList(privateLists, new FunctionList.AdvancedFunction<SharedFileList, LibraryNavItem>() {
+            @Override
+            public void dispose(SharedFileList sourceValue, LibraryNavItem transformedValue) {
+                // TODO: sourceValue.dispose necessary?
+            }
+            
+            @Override
+            public LibraryNavItem evaluate(SharedFileList sourceValue) {
+                return new LibraryNavItem(sourceValue);
+            }
+            @Override
+            public LibraryNavItem reevaluate(SharedFileList sourceValue, LibraryNavItem transformedValue) {
+                return transformedValue;
+            }            
+        });
         
-        eventList = new BasicEventList<LibraryNavItem>();
-        SortedList<LibraryNavItem> sortedList = new SortedList<LibraryNavItem>(eventList, new LibraryNavItemComparator());
+        CompositeList<LibraryNavItem> compositeList = new CompositeList<LibraryNavItem>(privateLists.getPublisher(), privateLists.getReadWriteLock());
+        compositeList.getReadWriteLock().writeLock().lock();
+        try {
+            // Create a fake EventList to hold the library list & add it to the composite list.
+            EventList<LibraryNavItem> libraryList = compositeList.createMemberList();
+            libraryList.add(new LibraryNavItem(libraryManager.getLibraryManagedList()));
+            compositeList.addMemberList(libraryList);
+            compositeList.addMemberList(shareToNav);
+        } finally {
+            compositeList.getReadWriteLock().writeLock().unlock();
+        }
         
-        setModel(new EventTableModel<LibraryNavItem>(sortedList, new NavTableFormat()));
+        SortedList<LibraryNavItem> sortedList = GlazedListsFactory.sortedList(compositeList, new LibraryNavItemComparator());        
+        setModel(new EventTableModel<LibraryNavItem>(sortedList, new SingleColumnTableFormat<LibraryNavItem>("")));
         setDropMode(DropMode.ON);
         setTransferHandler(libraryNavTransferHandler);
         setEditable(false);
     }
     
-    public void addLibraryNavItem(String name, String id, LocalFileList localFileList, NavType type) {
-        eventList.add(new LibraryNavItem(name, id, localFileList, type));
-    }
-    
-    public void removeLibraryNavItem(SharedFileList fileList) {
-        eventList.getReadWriteLock().writeLock().lock();
-        try {
-            for(LibraryNavItem item : eventList) {
-                if(item.getLocalFileList() == fileList) {
-                    eventList.remove(item);
-                }
-            }
-        } finally {
-            eventList.getReadWriteLock().writeLock().unlock();
-        }
-    }
-    
-    public void selectLibraryNavItem(String id) {
+    public void selectLibraryNavItem(int id) {
         for(int i = 0; i < getModel().getRowCount(); i++) {
             Object value = getModel().getValueAt(i, 0);
             if(value instanceof LibraryNavItem) {
-                if( ((LibraryNavItem) value).getTabID() == id) {
+                if( ((LibraryNavItem) value).getId() == id) {
                     getSelectionModel().setSelectionInterval(i,i);
                     break;
                 }
@@ -82,13 +95,12 @@ public class LibraryNavigatorTable extends JXTable {
     }
     
     public LibraryNavItem getSelectedItem() {
-        if(getSelectedRow() >= 0)
-            return eventList.get(getSelectedRow());
-        else if(getRowCount() > 0) {
+        int selected = getSelectedRow();
+        if(selected < 0) {
             getSelectionModel().setSelectionInterval(0, 0);
-            return eventList.get(0);
-        } else            
-            return null;
+            selected = 0;
+        }
+        return (LibraryNavItem)getModel().getValueAt(selected, 0);
     }
     
     private void initialize() {
@@ -210,23 +222,6 @@ public class LibraryNavigatorTable extends JXTable {
             return false;
         }
         return true;
-    }
-    
-    private class NavTableFormat implements TableFormat<LibraryNavItem> {
-        @Override
-        public int getColumnCount() {
-            return 1;
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            return "";
-        }
-
-        @Override
-        public Object getColumnValue(LibraryNavItem baseObject, int column) {
-            return baseObject;
-        }
     }
     
     /**

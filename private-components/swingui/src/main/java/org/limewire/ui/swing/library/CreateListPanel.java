@@ -13,7 +13,6 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -21,8 +20,8 @@ import com.google.inject.Provider;
 
 public class CreateListPanel extends JXPanel {
 
-    private JTextField nameTextField;
-    private JXButton createButton;
+    private final JTextField nameTextField;
+    private final JXButton createButton;
     
     @Inject
     public CreateListPanel(final Provider<SharedFileListManager> shareManager, final Provider<LibraryNavigatorTable> navTable) {
@@ -33,18 +32,13 @@ public class CreateListPanel extends JXPanel {
         createButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(nameTextField != null && nameTextField.getText().trim().length() > 0) {
-                    final String text = nameTextField.getText().trim();
-                    BackgroundExecutorService.execute(new Runnable() {
-                        @Override
+                if (nameTextField != null && nameTextField.getText().trim().length() > 0) {
+                    String text = nameTextField.getText().trim();
+                    final int id = shareManager.get().createNewSharedFileList(text);
+                    // select our newly created NavItem
+                    SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
-                          shareManager.get().createNewSharedFileList(text);
-                          // select our newly created NavItem
-                          SwingUtilities.invokeLater(new Runnable(){
-                              public void run() {
-                                  navTable.get().selectLibraryNavItem(text);                                  
-                              }
-                          });
+                            navTable.get().selectLibraryNavItem(id);
                         }
                     });
                     hideDialog();

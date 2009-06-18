@@ -71,7 +71,7 @@ public class LibraryNavTableEditor extends JPanel implements TableCellEditor {
         
         if(value instanceof LibraryNavItem) {
             LibraryNavItem item = (LibraryNavItem) value;
-            textField.setText(item.getDisplayedText());
+            textField.setText(item.getDisplayText());
             textField.selectAll();
             setIconType(item);
         } else {

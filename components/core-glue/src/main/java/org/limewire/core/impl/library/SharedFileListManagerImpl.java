@@ -164,8 +164,8 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     }
 
     @Override
-    public void createNewSharedFileList(String name) {
-        collectionManager.createNewCollection(name);        
+    public int createNewSharedFileList(String name) {
+        return collectionManager.createNewCollection(name).getId();        
     }
 
     @Override

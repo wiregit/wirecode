@@ -202,7 +202,8 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     }
 
     @Override
-    public void createNewSharedFileList(String name) {
+    public int createNewSharedFileList(String name) {
+        return -1;
     }
 
     @Override

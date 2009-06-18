@@ -54,7 +54,7 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
         
         if(value instanceof LibraryNavItem) {
             LibraryNavItem item = (LibraryNavItem) value;
-            setText(item.getDisplayedText());
+            setText(item.getDisplayText());
             setIconType(item);
         } else {
             setText("");

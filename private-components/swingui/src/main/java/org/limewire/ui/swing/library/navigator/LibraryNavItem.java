@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.library.navigator;
 
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.ui.swing.util.I18n;
 
 
 public class LibraryNavItem {
@@ -9,37 +11,44 @@ public class LibraryNavItem {
         LIBRARY, PUBLIC_SHARED, LIST
     }
     
-    private String tabId;
-    private String displayedText;
     private final NavType navType;
     private final LocalFileList localFileList;
+    private final SharedFileList sharedFileList; // null if it can't be typed to this.
     
-    public LibraryNavItem(String id, String text, LocalFileList localFileList, NavType type) {
-        this.tabId = id;
-        this.displayedText = text;
-        this.navType = type;
+    public LibraryNavItem(LocalFileList localFileList) {
         this.localFileList = localFileList;
+        if(localFileList instanceof SharedFileList) {
+            this.sharedFileList = (SharedFileList)localFileList;
+            this.navType = sharedFileList.isPublic() ? NavType.PUBLIC_SHARED : NavType.LIST;
+        } else {
+            this.sharedFileList = null;
+            this.navType = NavType.LIBRARY;
+        }
     }
     
     public LocalFileList getLocalFileList() {
         return localFileList;
     }
     
-    public String getTabID() {
-        return tabId;
+    int getId() {
+        return sharedFileList != null ? sharedFileList.getId() : -1;
     }
     
-    public String getDisplayedText() {
-        return displayedText;
-    }
-    
-    public void setText(String text) {
-        this.tabId = text;
-        this.displayedText = text;
+    public String getDisplayText() {
+        switch(navType) {
+        case LIST:
+            return sharedFileList.getCollectionName();
+        case LIBRARY:
+            return I18n.tr("Library");
+        case PUBLIC_SHARED:
+            return I18n.tr("Public Shared");
+        default:
+            throw new IllegalStateException("unknown type: " + navType);
+        }
     }
     
     public boolean canRemove() {
-        return navType != NavType.LIBRARY && navType != NavType.PUBLIC_SHARED;
+        return navType == NavType.LIST;
     }
     
     public NavType getType() {

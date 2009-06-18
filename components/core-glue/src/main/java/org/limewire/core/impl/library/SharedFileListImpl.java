@@ -34,6 +34,11 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     public String toString() {
         return StringUtils.toString(this);
     }
+    
+    @Override
+    public int getId() {
+        return coreCollection.getId();
+    }
 
     @Override
     protected SharedFileCollection getCoreCollection() {
@@ -100,7 +105,7 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
 
     @Override
     public boolean isPublic() {
-        return getCoreCollection().isPublic();
+        return coreCollection.isPublic();
     }
 
 }

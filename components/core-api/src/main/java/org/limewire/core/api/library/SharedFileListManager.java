@@ -37,8 +37,9 @@ public interface SharedFileListManager {
     /**
      * Creates a new {@link SharedFileList} of the appropriate name. The new
      * list will be reflected in {@link #getModel()} once the core processes it.
+     * Returns the id of the new list
      */
-    void createNewSharedFileList(String name);
+    int createNewSharedFileList(String name);
 
     /**
      * Returns the SharedFileList with this name or null if no SharedFileList
