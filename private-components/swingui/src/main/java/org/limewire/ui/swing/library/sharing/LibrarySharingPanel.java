@@ -147,13 +147,15 @@ public class LibrarySharingPanel {
     }
     
     private void sharesChanged() {
-        switch(currentView) {
-        case FRIEND_LIST:
-            friendListPanel.setSharedFriendIds(currentList.getFriendIds());
-            break;
-        case LOGIN:
-            loginPanel.setSharedFriendIds(currentList.getFriendIds());
-            break;
+        if(currentList != null) {
+            switch(currentView) {
+            case FRIEND_LIST:
+                friendListPanel.setSharedFriendIds(currentList.getFriendIds());
+                break;
+            case LOGIN:
+                loginPanel.setSharedFriendIds(currentList.getFriendIds());
+                break;
+            }
         }
     }
     
