@@ -228,12 +228,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     @Override
     public SearchNavItem addSearch(String title, final JComponent searchPanel, final BrowseSearch search, SearchResultsModel model) {
-        return addSearch(title, searchPanel, search, model, createBrowseActions(search, model), browseIcon);
+        return addSearch(title, searchPanel, search, model, createBrowseActions(search, model), browseIcon, false);
     }
 
     @Override
     public SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model) {
-        return addSearch(title, searchPanel, search, model, createSearchActions(search, model), null);
+        return addSearch(title, searchPanel, search, model, createSearchActions(search, model), null, true);
     }
     
     @Override
@@ -262,7 +262,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 }
             });
             
-        final SearchNavItem searchNavItem =  new SearchNavItemImpl(item, action);
+        final SearchNavItem searchNavItem =  new SearchNavItemImpl(item, action, true);
         
         advancedPanel.addSearchListener(new UiSearchListener() {
             @Override
@@ -274,7 +274,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         return searchNavItem;
     }
     
-    private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, List<Action> contextActions, Icon icon) {
+    private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, 
+            List<Action> contextActions, Icon icon, boolean stopSpinnerAfter50Results) {
         final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
         final SearchAction action = new SearchAction(item);
         action.putValue(Action.LARGE_ICON_KEY, icon);
@@ -295,7 +296,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             } 
         });
         
-        return new SearchNavItemImpl(item, action);
+        return new SearchNavItemImpl(item, action, stopSpinnerAfter50Results);
     }
 
     public void goHome() {
@@ -361,9 +362,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
         private final SearchAction action;
 
-        private SearchNavItemImpl(NavItem item, SearchAction action) {
+        private final boolean stopSpinnerAfter50Results;
+
+        private SearchNavItemImpl(NavItem item, SearchAction action, boolean stopSpinnerAfter50Results) {
             this.item = item;
             this.action = action;
+            this.stopSpinnerAfter50Results = stopSpinnerAfter50Results;
         }
 
         @Override
@@ -372,7 +376,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 action.putValue(TabActionMap.NEW_HINT, true);
             }
 
-            if (newSourceCount >= 50) {
+            if (stopSpinnerAfter50Results && newSourceCount >= 50) {
                 action.killBusy();
             }
         }
