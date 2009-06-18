@@ -12,10 +12,10 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileItemFilter;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.filter.Filter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
@@ -61,9 +61,9 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         	BackgroundExecutorService.execute(new Runnable() {
         	   @Override
         	    public void run() {
-        	       libraryManager.getLibraryManagedList().removeFiles(new LocalFileItemFilter() {
+        	       libraryManager.getLibraryManagedList().removeFiles(new Filter<LocalFileItem>() {
                        @Override
-                        public boolean accept(LocalFileItem localFileItem) {
+                        public boolean allow(LocalFileItem localFileItem) {
                             return localFileItem.getCategory() == Category.PROGRAM;
                         } 
                     });
@@ -80,9 +80,9 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
                    try {
                        for(SharedFileList sharedFileList : shareLists) {
                            if(sharedFileList.isPublic()) {
-                               sharedFileList.removeFiles(new LocalFileItemFilter() {
+                               sharedFileList.removeFiles(new Filter<LocalFileItem>() {
                                    @Override
-                                   public boolean accept(LocalFileItem localFileItem) {
+                                   public boolean allow(LocalFileItem localFileItem) {
                                        return localFileItem.getCategory() == Category.DOCUMENT;
                                    } 
                                });
