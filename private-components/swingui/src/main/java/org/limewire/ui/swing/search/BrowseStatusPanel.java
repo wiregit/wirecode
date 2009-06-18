@@ -1,18 +1,14 @@
 package org.limewire.ui.swing.search;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -25,6 +21,7 @@ import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.LimePopupDialog;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
@@ -51,9 +48,10 @@ public class BrowseStatusPanel extends JXPanel {
     @Resource private Color bevelRight;
     @Resource private Color bevelBottom;
     @Resource private Font font;
-    @Resource private Color foreground;
+    @Resource private Color foreground;    
     @Resource private Color headerForeground;
     @Resource private Font headerFont;
+
 
     private SearchResultsModel searchResultsModel;
     
@@ -117,25 +115,6 @@ public class BrowseStatusPanel extends JXPanel {
             }            
         }
         
-        final JPopupMenu popup = new JPopupMenu();
-        popup.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        
-        JXPanel titlePanel = new JXPanel(); 
-        titlePanel.setBackground(Color.BLACK);
-        JLabel title = new JLabel(I18n.tr("Failed Browses"));
-        title.setForeground(Color.WHITE);
-        //TODO: close icon
-        JButton closeButton = new JButton("X");
-        closeButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                popup.setVisible(false);
-            }            
-        });      
-        
-        titlePanel.add(title);
-        titlePanel.add(closeButton);
-        
         JXPanel centerPanel = new JXPanel(new MigLayout("insets 0 5 5 5, gap 0, novisualpadding, fill"));
         if(friends.size() > 0){
             centerPanel.add(createHeaderLabel(I18n.tr("Friends")), "gaptop 5, wrap");
@@ -151,13 +130,8 @@ public class BrowseStatusPanel extends JXPanel {
             centerPanel.add(createItemLabel(name), "wrap");
         }
         
-        JXPanel mainPanel = new JXPanel(new BorderLayout());
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
-        
-        popup.setLayout(new BorderLayout());
-        popup.add(mainPanel);
-        popup.show(warningButton, 0, 0);
+        LimePopupDialog popup = new LimePopupDialog(I18n.tr("Failed Browses"), centerPanel);
+        popup.showPopup(warningButton, 0, 0);
     }
     
     private JLabel createHeaderLabel(String text){
