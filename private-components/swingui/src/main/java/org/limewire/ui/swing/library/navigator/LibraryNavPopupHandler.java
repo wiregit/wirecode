@@ -10,7 +10,7 @@ import org.limewire.ui.swing.table.TablePopupHandler;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class LibraryNavPopupHandler implements TablePopupHandler {
+class LibraryNavPopupHandler implements TablePopupHandler {
 
     private final Provider<LibraryNavPopupMenu> popupMenu;
     private final Provider<LibraryNavigatorTable> table;

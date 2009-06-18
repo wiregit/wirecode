@@ -19,7 +19,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 
-public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer {
+class LibraryNavTableRenderer extends JLabel implements TableCellRenderer {
     
     private Border border;
     private Border dropBorder;

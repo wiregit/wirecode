@@ -23,10 +23,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.SharedFileList;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.util.GuiUtils;
 
-public class LibraryNavTableEditor extends JPanel implements TableCellEditor {
+class LibraryNavTableEditor extends JPanel implements TableCellEditor {
 
     private @Resource Color selectedColor;
     private @Resource Font font;
@@ -49,6 +50,7 @@ public class LibraryNavTableEditor extends JPanel implements TableCellEditor {
         
         iconHolder = new JLabel();
         textField = new JTextField();
+        TextFieldClipboardControl.install(textField);
         textField.setPreferredSize(new Dimension(120, 22));
         textField.setFont(font);
         textField.setForeground(fontColor);
@@ -63,6 +65,12 @@ public class LibraryNavTableEditor extends JPanel implements TableCellEditor {
         
         add(iconHolder, "aligny 50%, gapright " + iconGap);
         add(textField, "growx");
+    }
+    
+    
+    void prepareForEditing() {
+        textField.requestFocusInWindow();
+        textField.selectAll();
     }
     
     @Override

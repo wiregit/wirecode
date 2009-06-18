@@ -223,6 +223,17 @@ public class LibraryNavigatorTable extends GlazedJXTable {
         return true;
     }
     
+    @Override
+    public boolean editCellAt(int row, int column) {
+        if(super.editCellAt(row, column)) {
+            LibraryNavTableEditor editor = (LibraryNavTableEditor)getCellEditor();
+            editor.prepareForEditing();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     /**
      * Technically shouldn't be necessary but ensures that Library and Public Shared
      * always appear first and second in the table. The other items appear as they are
