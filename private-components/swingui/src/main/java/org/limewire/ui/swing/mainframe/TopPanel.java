@@ -40,6 +40,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.actions.FriendButtonPopupListener;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
@@ -108,7 +109,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final LibraryMediator myLibraryMediator,
                     KeywordAssistedSearchBuilder keywordAssistedSearchBuilder,
                     FriendButtonPopupListener friendListener,
-                    Provider<AdvancedSearchPanel> advancedSearchPanel) {        
+                    Provider<AdvancedSearchPanel> advancedSearchPanel,
+                    ComboBoxDecorator comboBoxDecorator) {        
         GuiUtils.assignResources(this);
         this.searchHandler = searchHandler;
         this.searchBar = searchBar;
@@ -132,7 +134,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         libraryButton.setIconTextGap(1);
         
         LimeComboBox friendBox = new LimeComboBox();
-        IconButton.setIconButtonProperties(friendBox);
+        comboBoxDecorator.decorateIconComboBox(friendBox);
         friendBox.setName("WireframeTop.friendButton");
         friendBox.setToolTipText(I18n.tr("Friend Login"));
         friendBox.setText(null);

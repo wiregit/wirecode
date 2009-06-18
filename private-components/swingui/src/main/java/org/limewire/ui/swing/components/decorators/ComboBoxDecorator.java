@@ -7,6 +7,7 @@ import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -104,9 +105,7 @@ public class ComboBoxDecorator {
      * border elements so that only its icons are displayed.
      */
     public void decorateIconComboBox(JXButton box) {
-        box.setContentAreaFilled(false);
-        box.setBorder(BorderFactory.createEmptyBorder());
-
+        IconButton.setIconButtonProperties(box);
         tryInstallHandCursor(box);
     }
 

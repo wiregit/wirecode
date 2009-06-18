@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library.table;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
+import javax.swing.DropMode;
 import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
@@ -29,6 +30,7 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
@@ -107,6 +109,7 @@ public class LibraryTable extends MouseableTable {
         setFillsViewportHeight(true);
         setDragEnabled(true);
         setRowHeight(rowHeight);
+        setDropMode(DropMode.ON);
     }
     
     private void uninstallListeners() {
@@ -154,6 +157,7 @@ public class LibraryTable extends MouseableTable {
         
         setModel(newLibraryTableModel);
         setSelectionModel(newEventSelectionModel);
+        newEventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         newLibraryTableModel.setTableFormat(tableFormat);
         
         if(cachedLibraryTableModel != null) {
