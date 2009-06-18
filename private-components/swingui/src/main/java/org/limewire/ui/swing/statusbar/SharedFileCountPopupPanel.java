@@ -283,7 +283,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                
         for ( SharedFileList item : shareListManager.getModel() ) {
             item.getSwingModel().addListEventListener(repaintListener);
-            item.getFriendIds().addListEventListener(repaintListener);
         }
         
         shareListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>() {
