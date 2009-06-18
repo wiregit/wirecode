@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.FriendManager;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
@@ -23,6 +24,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+/**
+ * Default implementation of {@link FriendManager} and {@link MutableFriendManager}.
+ * <p>
+ * When friends are added and removed, it fires events in the respective broadcasters,
+ * @Named("known") FriendEvent and @Named("available") FriendEvent.
+ * <p>
+ * Also listens to {@link FriendConnectionEvent} and removes all available and known
+ * friends, if it's a disconnect event. This will be have to be revisited when we
+ * start supporting concurrent friend connections to different networks.
+ * <p>
+ * The class is threadsafe.
+ */
 @Singleton
 class MutableFriendManagerImpl implements MutableFriendManager {
 
