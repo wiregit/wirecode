@@ -3,10 +3,10 @@ package org.limewire.xmpp.client.impl;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.impl.AbstractFriend;
-import org.limewire.core.api.friend.impl.AbstractFriendPresence;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.FeatureEvent;
+import org.limewire.friend.impl.AbstractFriend;
+import org.limewire.friend.impl.AbstractFriendPresence;
 import org.limewire.listener.EventBroadcaster;
 
 class PresenceImpl extends AbstractFriendPresence implements FriendPresence {

@@ -2,10 +2,10 @@ package org.limewire.ui.swing.friends.chat;
 
 import java.beans.PropertyChangeListener;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.

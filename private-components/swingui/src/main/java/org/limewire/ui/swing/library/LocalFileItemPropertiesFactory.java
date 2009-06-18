@@ -29,11 +29,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MetaDataException;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.AbstractAction;

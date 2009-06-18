@@ -45,7 +45,7 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
-import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

@@ -2,11 +2,11 @@ package org.limewire.xmpp.client.impl;
 
 import junit.framework.Test;
 
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddressRegistry;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.util.BaseTestCase;
-import org.limewire.core.api.friend.address.FriendAddress;
-import org.limewire.core.api.friend.address.FriendAddressRegistry;
 
 public class XMPPAddressRegistryTest extends BaseTestCase {
 

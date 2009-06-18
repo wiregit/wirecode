@@ -2,10 +2,10 @@ package org.limewire.core.impl.friend;
 
 import java.util.Set;
 
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.core.api.friend.address.FriendAddress;
-import org.limewire.core.api.friend.address.FriendAddressResolver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

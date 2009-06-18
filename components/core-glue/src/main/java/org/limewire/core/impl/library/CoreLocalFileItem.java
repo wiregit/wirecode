@@ -10,11 +10,11 @@ import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.client.FileMetaDataImpl;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.impl.FileMetaDataImpl;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.assistedinject.Assisted;

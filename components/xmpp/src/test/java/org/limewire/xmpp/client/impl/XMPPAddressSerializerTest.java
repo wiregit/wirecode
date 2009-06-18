@@ -1,9 +1,9 @@
 package org.limewire.xmpp.client.impl;
 
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddressSerializer;
 import org.limewire.io.GGEP;
 import org.limewire.util.BaseTestCase;
-import org.limewire.core.api.friend.address.FriendAddress;
-import org.limewire.core.api.friend.address.FriendAddressSerializer;
 
 public class XMPPAddressSerializerTest extends BaseTestCase {
 

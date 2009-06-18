@@ -1,9 +1,9 @@
 package org.limewire.ui.swing.friends.chat;
 
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.api.friend.client.ChatState;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.MessageWriter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 

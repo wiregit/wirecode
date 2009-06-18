@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.feature.features.AuthToken;
-import org.limewire.core.api.friend.impl.AuthTokenImpl;
 import org.limewire.util.StringUtils;
 import org.limewire.facebook.service.FacebookFriendConnection;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.AuthToken;
+import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.friend.impl.feature.AuthTokenImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;

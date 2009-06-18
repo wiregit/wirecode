@@ -1,10 +1,10 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
-import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.FeatureEvent;
+import org.limewire.friend.impl.feature.AddressFeature;
+import org.limewire.friend.impl.feature.AuthTokenFeature;
 import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;

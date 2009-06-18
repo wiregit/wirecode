@@ -21,7 +21,7 @@ import net.miginfocom.swing.MigLayout;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;

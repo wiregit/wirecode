@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.limewire.util.BaseTestCase;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
 import org.jmock.Mockery;
 import org.jmock.Expectations;
 

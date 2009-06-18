@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.core.api.friend.client.FileOfferEvent;
-import org.limewire.core.api.friend.client.FriendRequestEvent;
-import org.limewire.core.api.friend.client.RosterEvent;
+import org.limewire.friend.api.FileOfferEvent;
+import org.limewire.friend.api.FriendRequestEvent;
+import org.limewire.friend.api.RosterEvent;
 import org.limewire.friend.impl.LimeWireFriendXmppModule;
 import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.BroadcastPolicy;

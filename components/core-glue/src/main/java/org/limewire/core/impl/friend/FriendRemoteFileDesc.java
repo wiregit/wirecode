@@ -8,10 +8,10 @@ import java.util.Set;
 
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.address.FriendAddress;
-import org.limewire.core.api.friend.address.FriendAddressResolver;
-import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddressResolver;
+import org.limewire.friend.impl.feature.AuthTokenFeature;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.net.address.AddressFactory;

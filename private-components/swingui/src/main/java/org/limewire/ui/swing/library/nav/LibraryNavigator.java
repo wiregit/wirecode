@@ -5,7 +5,7 @@ import java.io.File;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.library.Catalog;
 
 /** Controls navigation of you & your friends libraries. */

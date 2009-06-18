@@ -1,7 +1,7 @@
 package org.limewire.facebook.service.livemessage;
 
 import org.json.JSONObject;
-import org.limewire.core.api.friend.client.FileMetaDataImpl;
+import org.limewire.friend.impl.FileMetaDataImpl;
 
 class FacebookFileMetaData extends FileMetaDataImpl {
     FacebookFileMetaData(JSONObject fileMetaData) {

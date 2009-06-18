@@ -3,8 +3,8 @@ package org.limewire.ui.swing.search;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFrame;

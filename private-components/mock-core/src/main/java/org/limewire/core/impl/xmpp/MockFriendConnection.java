@@ -5,10 +5,10 @@ import java.util.Collection;
 
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FriendConnection;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendPresence;
 
 public class MockFriendConnection implements FriendConnection {
     private FriendConnectionConfiguration config;

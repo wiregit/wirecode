@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.impl.PresenceEvent;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
 import org.limewire.listener.EventListener;
 
 public class GnutellaFriend implements Friend {

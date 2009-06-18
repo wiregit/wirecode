@@ -1,6 +1,6 @@
 package org.limewire.core.impl.friend;
 
-import org.limewire.core.api.friend.FriendManager;
+import org.limewire.friend.api.FriendManager;
 
 import com.google.inject.AbstractModule;
 

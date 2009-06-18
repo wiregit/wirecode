@@ -2,8 +2,6 @@ package org.limewire.core.impl.library;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
@@ -11,6 +9,8 @@ import org.limewire.core.api.library.GnutellaFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendEvent;
 import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;

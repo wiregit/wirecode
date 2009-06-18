@@ -5,10 +5,10 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.core.api.friend.client.ChatState;
-import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.facebook.service.livemessage.LiveMessageHandler;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
+import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.MessageReader;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 

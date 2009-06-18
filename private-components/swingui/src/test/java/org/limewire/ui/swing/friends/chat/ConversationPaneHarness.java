@@ -6,14 +6,14 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.friend.client.ChatState;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.IconManagerStub;
-import org.limewire.core.api.friend.FriendPresence.Mode;
+import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.FriendPresence.Mode;
 
 /**
  *

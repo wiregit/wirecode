@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.library;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 /**
  * Allows an EventList to be filtered based on user. The main EventList

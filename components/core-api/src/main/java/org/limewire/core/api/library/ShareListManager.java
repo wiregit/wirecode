@@ -1,6 +1,6 @@
 package org.limewire.core.api.library;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 /**
  * Manager for all share lists.

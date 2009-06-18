@@ -1,11 +1,11 @@
 package org.limewire.friend.impl;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.MutableFriendManager;
-import org.limewire.core.api.friend.client.RosterEvent;
-import org.limewire.core.api.friend.impl.PresenceEvent;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.FriendPresenceEvent;
+import org.limewire.friend.api.MutableFriendManager;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.api.RosterEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;

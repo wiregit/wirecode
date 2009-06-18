@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.GnutellaFileList;
@@ -20,6 +19,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.friend.api.Friend;
 
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;

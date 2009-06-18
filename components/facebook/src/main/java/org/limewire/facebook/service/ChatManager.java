@@ -3,14 +3,14 @@ package org.limewire.facebook.service;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.client.ChatState;
+import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
 
 /**
- * Manages message readers ({@link org.limewire.core.api.friend.client.MessageReader}) that ChatListener
+ * Manages message readers ({@link org.limewire.friend.api.MessageReader}) that ChatListener
  * uses to handle incoming instant messages and changing chat states.
  *
  * MessageReaders get added to ChatManager either by directly being

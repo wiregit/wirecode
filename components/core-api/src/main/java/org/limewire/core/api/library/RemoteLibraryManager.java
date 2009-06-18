@@ -1,7 +1,7 @@
 package org.limewire.core.api.library;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
 
 import ca.odell.glazedlists.EventList;
 

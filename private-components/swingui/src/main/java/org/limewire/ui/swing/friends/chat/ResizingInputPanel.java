@@ -29,9 +29,9 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.action.SelectAllAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.collection.Periodic;
-import org.limewire.core.api.friend.client.ChatState;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.MessageWriter;
 
 class ResizingInputPanel extends JPanel implements Displayable {
     private static final Log LOG = LogFactory.getLog(ResizingInputPanel.class);

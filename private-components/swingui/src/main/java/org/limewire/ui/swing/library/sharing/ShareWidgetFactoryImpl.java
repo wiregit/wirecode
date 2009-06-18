@@ -5,9 +5,9 @@ import java.io.File;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.friend.api.FriendEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.ShapeDialog;

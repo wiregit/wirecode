@@ -3,7 +3,7 @@ package org.limewire.core.impl.xmpp;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventBean;

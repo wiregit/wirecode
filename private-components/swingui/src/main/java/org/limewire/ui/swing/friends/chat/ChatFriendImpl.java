@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.jdesktop.beans.AbstractBean;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.impl.feature.LimewireFeature;
 import org.limewire.ui.swing.util.SwingUtils;
 
 /**

@@ -1,7 +1,7 @@
 package org.limewire.facebook.service;
 
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.impl.AbstractFriendPresence;
+import org.limewire.friend.api.feature.FeatureEvent;
+import org.limewire.friend.impl.AbstractFriendPresence;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.StringUtils;
 

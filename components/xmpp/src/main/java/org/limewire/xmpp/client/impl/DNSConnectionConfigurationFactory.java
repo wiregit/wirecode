@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SRVRecord;

@@ -10,15 +10,15 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.core.api.friend.client.RosterEvent;
-import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.feature.FeatureRegistry;
 
 /**
  * sends disco info messages (http://jabber.org/protocol/disco#info) to newly available

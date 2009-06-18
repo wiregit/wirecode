@@ -2,11 +2,11 @@ package org.limewire.core.impl.friend;
 
 import java.net.InetAddress;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
-import org.limewire.core.api.friend.impl.AbstractFriendPresence;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.impl.AbstractFriendPresence;
+import org.limewire.friend.impl.feature.AddressFeature;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;

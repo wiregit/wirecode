@@ -9,12 +9,12 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.PlaylistManager;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;

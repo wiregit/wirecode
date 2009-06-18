@@ -10,12 +10,12 @@ import javax.swing.JPopupMenu;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.Catalog;

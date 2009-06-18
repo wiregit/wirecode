@@ -1,7 +1,7 @@
 package org.limewire.xmpp.client.impl;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionConfiguration;
 
 /**
  * Creates ConnectionConfigurations for XMPPConnectionConfigurations.  Typically backed by a collection

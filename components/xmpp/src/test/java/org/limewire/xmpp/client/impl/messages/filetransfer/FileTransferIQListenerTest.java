@@ -7,12 +7,12 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
-import org.limewire.core.api.friend.client.FileOffer;
-import org.limewire.core.api.friend.client.FileOfferEvent;
-import org.limewire.core.api.friend.client.FileMetaDataImpl;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.BaseTestCase;
-import org.limewire.core.api.friend.client.FileMetaDataImpl.Element;
+import org.limewire.friend.api.FileOffer;
+import org.limewire.friend.api.FileOfferEvent;
+import org.limewire.friend.impl.FileMetaDataImpl;
+import org.limewire.friend.impl.FileMetaDataImpl.Element;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ.TransferType;
 
 public class FileTransferIQListenerTest extends BaseTestCase {

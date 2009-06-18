@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.jivesoftware.smack.util.StringUtils;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.RosterEvent;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.impl.PresenceEvent;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.listener.EventListener;
 
 public class RosterListenerMock implements EventListener<RosterEvent> {

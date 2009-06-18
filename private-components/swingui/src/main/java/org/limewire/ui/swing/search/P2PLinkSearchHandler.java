@@ -6,16 +6,16 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
-import org.limewire.core.api.friend.impl.AbstractFriendPresence;
-import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.impl.AbstractFriendPresence;
+import org.limewire.friend.impl.feature.AddressFeature;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.listener.EventListener;

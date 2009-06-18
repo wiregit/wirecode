@@ -1,7 +1,8 @@
 package org.limewire.ui.swing.friends.settings;
 
 import javax.swing.Icon;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+
+import org.limewire.friend.api.FriendConnectionConfiguration;
 
 /**
  * Extends the XMPPConnectionConfiguration interface with methods for

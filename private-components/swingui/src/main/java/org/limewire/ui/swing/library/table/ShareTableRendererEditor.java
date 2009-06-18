@@ -14,9 +14,9 @@ import javax.swing.SwingConstants;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.TableRendererEditor;

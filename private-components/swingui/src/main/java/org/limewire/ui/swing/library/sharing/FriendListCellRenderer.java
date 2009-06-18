@@ -5,7 +5,7 @@ import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 class FriendListCellRenderer extends DefaultListCellRenderer {
     

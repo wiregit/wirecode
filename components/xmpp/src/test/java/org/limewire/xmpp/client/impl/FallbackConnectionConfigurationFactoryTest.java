@@ -6,10 +6,10 @@ import java.util.List;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.util.BaseTestCase;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 
 public class FallbackConnectionConfigurationFactoryTest extends BaseTestCase {
     public FallbackConnectionConfigurationFactoryTest(String name) {

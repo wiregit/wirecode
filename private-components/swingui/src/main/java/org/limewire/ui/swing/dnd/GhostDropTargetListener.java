@@ -9,7 +9,7 @@ import java.awt.dnd.DropTargetListener;
 
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.library.ListSourceChanger;
 
 /**

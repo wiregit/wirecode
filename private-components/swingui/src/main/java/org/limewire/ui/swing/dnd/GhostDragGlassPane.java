@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.painter.GreenMessagePainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;

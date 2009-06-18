@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;

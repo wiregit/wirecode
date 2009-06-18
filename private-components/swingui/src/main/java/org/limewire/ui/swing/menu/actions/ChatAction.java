@@ -2,7 +2,7 @@ package org.limewire.ui.swing.menu.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.util.I18n;

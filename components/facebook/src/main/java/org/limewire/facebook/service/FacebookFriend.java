@@ -7,14 +7,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONObject;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.core.api.friend.impl.AbstractFriend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.feature.Feature;
+import org.limewire.friend.api.feature.FeatureRegistry;
+import org.limewire.friend.impl.AbstractFriend;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.assistedinject.Assisted;

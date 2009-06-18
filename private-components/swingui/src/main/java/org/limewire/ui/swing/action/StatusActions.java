@@ -9,9 +9,9 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.settings.XMPPSettings;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;

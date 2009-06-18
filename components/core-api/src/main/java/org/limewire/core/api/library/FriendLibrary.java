@@ -2,7 +2,7 @@ package org.limewire.core.api.library;
 
 import java.beans.PropertyChangeListener;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 import ca.odell.glazedlists.EventList;
 

@@ -21,7 +21,7 @@ import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.util.FontUtils;

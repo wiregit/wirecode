@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.swing.Icon;
 
 import org.jdesktop.swingx.icon.EmptyIcon;
-import org.limewire.core.api.friend.client.RosterEvent;
+import org.limewire.friend.api.RosterEvent;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
 import org.limewire.util.StringUtils;

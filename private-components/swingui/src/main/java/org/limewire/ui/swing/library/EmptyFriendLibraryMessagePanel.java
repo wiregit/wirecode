@@ -12,9 +12,9 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.friends.chat.ChatFrame;

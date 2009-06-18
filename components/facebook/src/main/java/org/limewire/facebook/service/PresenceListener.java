@@ -10,7 +10,7 @@ import java.util.Set;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
-import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.friend.api.FriendException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 

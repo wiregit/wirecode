@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.core.api.friend.client.FileMetaData;
+import org.limewire.friend.api.FileMetaData;
 
 
 public class MockFileMetadata implements FileMetaData {

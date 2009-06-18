@@ -2,7 +2,7 @@ package org.limewire.xmpp.client.impl.messages.filetransfer;
 
 import java.io.IOException;
 
-import org.limewire.core.api.friend.client.FileMetaDataImpl;
+import org.limewire.friend.impl.FileMetaDataImpl;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

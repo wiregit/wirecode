@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.util.BaseTestCase;
 
 public class GnutellaFriendTest extends BaseTestCase {

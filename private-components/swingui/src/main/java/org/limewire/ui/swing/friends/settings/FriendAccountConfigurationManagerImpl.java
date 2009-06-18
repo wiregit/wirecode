@@ -11,10 +11,10 @@ import java.util.Map;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.core.settings.FacebookSettings;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PasswordManager;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.ui.swing.settings.SwingUiSettings;

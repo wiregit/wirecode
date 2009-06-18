@@ -10,8 +10,8 @@ import org.limewire.listener.BroadcastPolicy;
 import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.activity.XmppActivityEvent;
-import org.limewire.core.api.friend.client.FriendConnection;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionEvent;
 
 public class IdleStatusMonitorTest extends TestCase {
     
@@ -75,7 +75,7 @@ public class IdleStatusMonitorTest extends TestCase {
         assertNull("XmppActivityEvent fired, but there is no xmpp connection", listener.event);
     }
 
-    private void sendConnectionEvent(org.limewire.core.api.friend.client.FriendConnectionEvent.Type connectionState) {
+    private void sendConnectionEvent(org.limewire.friend.api.FriendConnectionEvent.Type connectionState) {
         
         Mockery context = new Mockery();
         FriendConnection connection = context.mock(FriendConnection.class);

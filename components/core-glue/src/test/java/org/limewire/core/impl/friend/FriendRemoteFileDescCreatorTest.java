@@ -6,13 +6,13 @@ import java.util.Set;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.BaseTestCase;
-import org.limewire.core.api.friend.address.FriendAddress;
-import org.limewire.core.api.friend.address.FriendAddressResolver;
 import org.limewire.core.impl.friend.FriendRemoteFileDescCreator;
 
 import com.limegroup.gnutella.Constants;

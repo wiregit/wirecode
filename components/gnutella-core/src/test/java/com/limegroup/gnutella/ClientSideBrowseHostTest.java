@@ -20,8 +20,8 @@ import junit.framework.Test;
 
 import org.apache.http.protocol.HTTP;
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.friend.impl.feature.AddressFeature;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;

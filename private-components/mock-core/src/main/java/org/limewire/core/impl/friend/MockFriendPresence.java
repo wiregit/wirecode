@@ -1,9 +1,9 @@
 package org.limewire.core.impl.friend;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.impl.AbstractFriendPresence;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.Feature;
+import org.limewire.friend.impl.AbstractFriendPresence;
 
 public class MockFriendPresence extends AbstractFriendPresence implements FriendPresence{
     

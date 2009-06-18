@@ -3,11 +3,11 @@ package org.limewire.facebook.service.livemessage;
 import java.util.HashMap;
 
 import org.json.JSONObject;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.facebook.service.FacebookFriendConnection;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.friend.api.feature.LibraryChangedNotifier;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;

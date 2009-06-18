@@ -2,11 +2,11 @@ package org.limewire.core.impl.xmpp;
 
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendConnectionFactory;
-import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
-import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionFactory;
+import org.limewire.friend.api.FriendConnectionFactoryRegistry;
+import org.limewire.friend.api.Network;
 
 class MockXmppConnectionFactory implements FriendConnectionFactory {
 

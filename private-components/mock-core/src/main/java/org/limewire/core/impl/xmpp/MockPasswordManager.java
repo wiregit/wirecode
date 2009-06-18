@@ -1,6 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.core.api.friend.client.PasswordManager;
+import org.limewire.friend.api.PasswordManager;
 
 class MockPasswordManager implements PasswordManager {
     

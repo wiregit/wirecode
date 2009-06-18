@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import org.limewire.ui.swing.friends.chat.ChatFriend;
 import org.limewire.ui.swing.friends.chat.FriendAvailabilityComparator;
-import org.limewire.core.api.friend.FriendPresence.Mode;
+import org.limewire.friend.api.FriendPresence.Mode;
 
 import junit.framework.TestCase;
 

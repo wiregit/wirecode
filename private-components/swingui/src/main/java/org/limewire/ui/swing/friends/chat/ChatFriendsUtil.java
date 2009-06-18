@@ -4,7 +4,7 @@ import java.net.URL;
 
 import javax.swing.Icon;
 
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.friend.api.FriendPresence;
 
 class ChatFriendsUtil {
 

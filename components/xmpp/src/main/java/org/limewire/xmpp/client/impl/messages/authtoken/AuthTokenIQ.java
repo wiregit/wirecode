@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.packet.IQ;
-import org.limewire.core.api.friend.feature.features.AuthToken;
-import org.limewire.core.api.friend.impl.AuthTokenImpl;
+import org.limewire.friend.api.feature.AuthToken;
+import org.limewire.friend.impl.feature.AuthTokenImpl;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;

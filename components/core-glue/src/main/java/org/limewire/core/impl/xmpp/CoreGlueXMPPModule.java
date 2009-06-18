@@ -1,8 +1,8 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.core.impl.friend.CoreGlueFriendService;
+import org.limewire.friend.api.PasswordManager;
 import org.limewire.inject.AbstractModule;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
 import org.limewire.xmpp.client.impl.PasswordManagerImpl;

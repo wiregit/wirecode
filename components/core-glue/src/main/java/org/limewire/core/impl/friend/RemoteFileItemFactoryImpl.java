@@ -5,14 +5,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.address.FriendAddress;
-import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.feature.AddressFeature;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 

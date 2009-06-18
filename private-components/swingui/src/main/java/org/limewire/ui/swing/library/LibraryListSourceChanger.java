@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.collection.glazedlists.PluggableList;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.friend.api.Friend;
 
 /**
  * Allows My Library to be filtered based on a friend. When a friend

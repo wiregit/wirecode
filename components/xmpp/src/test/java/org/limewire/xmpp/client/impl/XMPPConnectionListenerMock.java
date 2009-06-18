@@ -1,6 +1,6 @@
 package org.limewire.xmpp.client.impl;
 
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 

@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.collection.glazedlists.PluggableList;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.friend.api.Friend;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;

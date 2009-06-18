@@ -4,15 +4,15 @@
 package org.limewire.xmpp.client.impl;
 
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
-import org.limewire.core.api.friend.client.FriendConnection;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
-import org.limewire.core.api.friend.Network;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.Network;
 
 /**
  * Different implementation from {@link org.jivesoftware.smack.ReconnectionManager}

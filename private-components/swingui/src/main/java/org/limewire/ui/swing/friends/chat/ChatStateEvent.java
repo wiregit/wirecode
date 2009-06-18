@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.friends.chat;
 
-import org.limewire.core.api.friend.client.ChatState;
+import org.limewire.friend.api.ChatState;
 import org.limewire.ui.swing.event.AbstractEDTEvent;
 
 public class ChatStateEvent extends AbstractEDTEvent {

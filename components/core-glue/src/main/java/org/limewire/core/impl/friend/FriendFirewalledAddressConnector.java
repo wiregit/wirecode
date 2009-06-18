@@ -10,12 +10,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.address.FriendAddressResolver;
-import org.limewire.core.api.friend.address.FriendFirewalledAddress;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.friend.impl.address.FriendAddressResolver;
+import org.limewire.friend.impl.address.FriendFirewalledAddress;
+import org.limewire.friend.impl.feature.ConnectBackRequestFeature;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
@@ -42,7 +42,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 
 /**
- * Connects an {@link org.limewire.core.api.friend.address.FriendFirewalledAddress} and tries to get a socket for it.
+ * Connects an {@link org.limewire.friend.impl.address.FriendFirewalledAddress} and tries to get a socket for it.
  */
 @Singleton
 class FriendFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {

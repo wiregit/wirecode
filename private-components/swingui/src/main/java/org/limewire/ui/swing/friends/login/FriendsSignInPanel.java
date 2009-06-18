@@ -8,8 +8,8 @@ import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventBean;

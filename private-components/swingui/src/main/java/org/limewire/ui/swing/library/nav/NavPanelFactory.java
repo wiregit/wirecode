@@ -2,7 +2,7 @@ package org.limewire.ui.swing.library.nav;
 
 import javax.swing.Action;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 /**
  * Creates a NavPanel for a given Friend.

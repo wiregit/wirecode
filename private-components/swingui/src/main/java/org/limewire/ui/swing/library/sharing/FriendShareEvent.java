@@ -2,7 +2,7 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.util.EventObject;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 public class FriendShareEvent extends EventObject {
     

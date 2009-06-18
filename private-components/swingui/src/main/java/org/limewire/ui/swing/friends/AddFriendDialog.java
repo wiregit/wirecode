@@ -16,7 +16,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.util.Objects;
-import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.friend.api.FriendConnection;
 
 import net.miginfocom.swing.MigLayout;
 

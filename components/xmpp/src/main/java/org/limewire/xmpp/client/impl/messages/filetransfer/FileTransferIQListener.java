@@ -8,10 +8,10 @@ import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 import org.xmlpull.v1.XmlPullParserException;
 

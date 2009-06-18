@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.PlaylistManager;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.LibraryTable;

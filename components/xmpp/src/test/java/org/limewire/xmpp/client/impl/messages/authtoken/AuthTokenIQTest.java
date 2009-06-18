@@ -2,7 +2,7 @@ package org.limewire.xmpp.client.impl.messages.authtoken;
 
 import java.util.Random;
 
-import org.limewire.core.api.friend.impl.AuthTokenImpl;
+import org.limewire.friend.impl.feature.AuthTokenImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.client.impl.messages.IQTestUtils;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
