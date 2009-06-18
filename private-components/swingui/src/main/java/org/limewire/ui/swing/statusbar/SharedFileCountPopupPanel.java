@@ -15,6 +15,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -22,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.Timer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
@@ -30,6 +32,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
@@ -41,6 +44,10 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -89,11 +96,12 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private final Provider<LoginPopupPanel> loginPanelProvider;
     private final XMPPService xmppService;
     private final ListenerSupport<XMPPConnectionEvent> connectionSupport;
+    private final Navigator navigator;
 
     private Timer repaintTimer = null; 
     
     private JXPanel frame = null;
-    private JTable table = null;
+    private MouseableTable table = null;
     private VisiblityMatcher matcher = null;
     private FilterList<SharedFileList> filteredSharedFileLists;
     
@@ -111,7 +119,8 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             SharedFileListManager shareListManager,
             Provider<LoginPopupPanel> loginPanelProvider,
             XMPPService xmppService,
-            ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+            ListenerSupport<XMPPConnectionEvent> connectionSupport,
+            Navigator navigator) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
@@ -119,6 +128,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         this.loginPanelProvider = loginPanelProvider;
         this.xmppService = xmppService;
         this.connectionSupport = connectionSupport;
+        this.navigator = navigator;
         
         GuiUtils.assignResources(this);
         
@@ -184,7 +194,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         matcher = new VisiblityMatcher();
         filteredSharedFileLists.setMatcher(matcher);
         
-        table = new JTable(new EventTableModel<SharedFileList>(filteredSharedFileLists,
+        table = new MouseableTable(new EventTableModel<SharedFileList>(filteredSharedFileLists,
                 new TableFormat<SharedFileList>() {
                     @Override
                     public int getColumnCount() {
@@ -237,7 +247,11 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         LinkRenderer linkRenderer = new LinkRenderer();
         linkRenderer.setFont(listTextFont);
-        table.getColumn(NAME_COLUMN_ID).setCellRenderer(linkRenderer);
+        LinkEditor linkEditor = new LinkEditor();
+        linkEditor.setFont(listTextFont);
+        TableColumn nameColumn = table.getColumn(NAME_COLUMN_ID);
+        nameColumn.setCellRenderer(linkRenderer);
+        nameColumn.setCellEditor(linkEditor);
         
         TableColumn blankColumn = table.getColumn(BLANK_COLUMN_ID);
         blankColumn.setPreferredWidth(20);
@@ -253,6 +267,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         table.setFocusable(false);
         table.setCellSelectionEnabled(false);
         table.setRowHeight(ROW_HEIGHT);
+        table.setHighlighters(new ColorHighlighter());
      
         repaintTimer = new Timer(50, new ActionListener() {
             @Override
@@ -429,7 +444,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     }
     
     private static class IconRenderer extends JLabel implements TableCellRenderer {
-
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
@@ -444,7 +458,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     }
     
     private static class LinkRenderer extends HyperlinkButton implements TableCellRenderer {
-
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
@@ -454,8 +467,42 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             }
             
             setText(value.toString());
-            
+
             return this;         
+        }
+    }
+    
+    private class LinkEditor extends AbstractCellEditor implements TableCellEditor {
+
+        private final HyperlinkButton button = new HyperlinkButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO: navigate to the specific list?  (talk to everrrettt) 
+                NavItem item = navigator.getNavItem(NavCategory.LIBRARY, I18n.tr("My Library"));
+                item.select();
+            }
+        });
+        
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            
+            if (value == null) {
+                return null;
+            }
+            
+            button.setText(value.toString());
+
+            return button;         
+        }
+        
+        @Override
+        public Object getCellEditorValue() {
+            return button;
+        }
+        
+        public void setFont(Font f) {
+            button.setFont(f);
         }
     }
     
