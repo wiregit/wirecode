@@ -5,6 +5,9 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -30,15 +33,14 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
-import org.limewire.ui.swing.dnd.LibraryTransferHandler;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
-import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.library.sharing.LibrarySharingPanel;
 import org.limewire.ui.swing.library.sharing.PublicSharedFeedbackPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
+import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -64,8 +66,8 @@ class LibraryPanel extends JPanel {
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
     private final ButtonDecorator buttonDecorator;
     private final LocalFileListTransferHandler transferHandler;
-    private final Provider<LibraryImagePanel> libraryImagePanelProvider;
-    private LibraryImagePanel libraryImagePanel;
+    private final Provider<LibraryImageTable> libraryImagePanelProvider;
+    private LibraryImageTable libraryImagePanel;
     
     private JPanel tableListPanel;
     private CardLayout tableListLayout;
@@ -82,7 +84,7 @@ class LibraryPanel extends JPanel {
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler,
-            Provider<LibraryImagePanel> libraryImagePanelProvider) {
+            Provider<LibraryImageTable> libraryImagePanelProvider) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -143,8 +145,7 @@ class LibraryPanel extends JPanel {
     }
     
     @Inject
-    void register(LibraryManager libraryManager) {
-        
+    void register(LibraryManager libraryManager) {        
         //Loads the Library after Component has been realized.
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         SwingUtilities.invokeLater(new Runnable(){
@@ -185,8 +186,23 @@ class LibraryPanel extends JPanel {
     
     private void createImageList() {
         libraryImagePanel = libraryImagePanelProvider.get();
-
+        libraryImagePanel.setTransferHandler(transferHandler);
         tableListPanel.add(libraryImagePanel, LIST); 
+    }
+    
+    List<File> getSelectedFiles() {
+        List<LocalFileItem> selected;
+        if(categoryMatcher.getCategory() == Category.IMAGE) {
+            selected = libraryImagePanel.getSelection();
+        } else {
+            selected = libraryTable.getSelection();
+        }
+        
+        List<File> files = new ArrayList<File>(selected.size());
+        for(LocalFileItem item : selected) {
+            files.add(item.getFile());
+        }
+        return files;
     }
     
     private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {       
@@ -198,8 +214,9 @@ class LibraryPanel extends JPanel {
             libraryTable.setupCellRenderers(category, libraryTableFormat);
             libraryTable.applySavedColumnSettings();
         } else {
-            if(libraryImagePanel == null) 
+            if(libraryImagePanel == null) {
                 createImageList();
+            }
             tableListLayout.show(tableListPanel, LIST);
             setEventListImage(eventList);
         }

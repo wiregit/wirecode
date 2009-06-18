@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import javax.swing.DropMode;
 import javax.swing.JPopupMenu;
@@ -14,8 +15,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
-import org.limewire.ui.swing.library.popup.LibraryPopupHandler;
-import org.limewire.ui.swing.library.popup.LibraryPopupMenu;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.FileSizeRenderer;
@@ -268,5 +267,10 @@ public class LibraryTable extends MouseableTable {
     
     private void setCellEditor(int column, TableCellEditor editor) {
         getColumnModel().getColumn(column).setCellEditor(editor);
+    }
+
+    /** Returns all currently selected LocalFileItems. */
+    public List<LocalFileItem> getSelection() {
+        return cachedEventSelectionModel.getSelected();
     }
 }

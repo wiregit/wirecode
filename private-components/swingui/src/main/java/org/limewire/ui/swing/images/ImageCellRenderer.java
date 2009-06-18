@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.image;
+package org.limewire.ui.swing.images;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -16,7 +16,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -24,33 +23,23 @@ import com.google.inject.Inject;
 /**
  * Renderers an image with a border.
  */
-public class ImageCellRenderer extends JPanel implements ListCellRenderer {
+class ImageCellRenderer extends JPanel implements ListCellRenderer {
     
     protected Border border;
     
     private final ThumbnailManager thumbnailManager;
     private final ImageRenderer imageRenderer;
     
-    @Resource
-    protected Color cellBackgroundColor;
-    @Resource
-    protected Color cellBorderColor;
-    @Resource
-    protected Color cellSelectedBackground;
-    @Resource
-    protected Icon errorIcon;
-    @Resource
-    private int height;
-    @Resource
-    private int width;
-    @Resource
-    private int insetTop;
-    @Resource
-    private int insetBottom;
-    @Resource
-    private int insetLeft;
-    @Resource
-    private int insetRight;
+    @Resource protected Color cellBackgroundColor;
+    @Resource protected Color cellBorderColor;
+    @Resource protected Color cellSelectedBackground;
+    @Resource protected Icon errorIcon;
+    @Resource private int height;
+    @Resource private int width;
+    @Resource private int insetTop;
+    @Resource private int insetBottom;
+    @Resource private int insetLeft;
+    @Resource private int insetRight;
     
     @Inject
     public ImageCellRenderer(ThumbnailManager thumbnailManager, ImageRenderer imageRenderer) {

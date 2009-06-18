@@ -1,14 +1,13 @@
-package org.limewire.ui.swing.library.popup;
+package org.limewire.ui.swing.library.table;
 
 import java.awt.Component;
 import java.awt.Point;
 
-import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
 import com.google.inject.Provider;
 
-public class LibraryPopupHandler implements TablePopupHandler {
+class LibraryPopupHandler implements TablePopupHandler {
     private final LibraryTable libraryTable;
     private final Provider<LibraryPopupMenu> popupMenu;
     

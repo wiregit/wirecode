@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.ui.swing.library.table.menu.actions;
+package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
 
@@ -10,7 +10,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-public class LocateFileAction extends AbstractAction {
+class LocateFileAction extends AbstractAction {
     
 //    private final LocalFileItem localFile;
     

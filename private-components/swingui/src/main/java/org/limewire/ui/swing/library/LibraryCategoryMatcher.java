@@ -20,6 +20,10 @@ class LibraryCategoryMatcher implements Matcher<LocalFileItem> {
     public LibraryCategoryMatcher(){
     }
     
+    Category getCategory() {
+        return categoryFilteredOn;
+    }
+    
     /**
      * Category to filter this list on. Only Items within this
      * category will be displayed. If all categories are to be 

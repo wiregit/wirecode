@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.table.menu.actions;
+package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
 
@@ -14,7 +14,7 @@ import com.google.inject.Inject;
  * Removes given list of files from the library then tries to move them to the
  * trash or delete them.
  */
-public class DeleteAction extends AbstractAction {
+class DeleteAction extends AbstractAction {
 
 //    private final LocalFileItem[] fileItemArray;
 //

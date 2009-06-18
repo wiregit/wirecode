@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.table.menu.actions;
+package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
 
@@ -12,7 +12,7 @@ import com.google.inject.Inject;
  * If it is an allowed file type it will be launched, 
  * otherwise explorer will be opened to the files location
  */
-public class LaunchFileAction extends AbstractAction {
+class LaunchFileAction extends AbstractAction {
     
 //    private final LocalFileItem localFile;
     

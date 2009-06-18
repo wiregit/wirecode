@@ -1,9 +1,8 @@
-package org.limewire.ui.swing.library.table.menu.actions;
+package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
 
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.util.I18n;
@@ -14,7 +13,7 @@ import com.google.inject.Provider;
 /**
  * Opens the file info view for the given file. 
  */
-public class ViewFileInfoAction extends AbstractAction {
+class ViewFileInfoAction extends AbstractAction {
 
     private final Provider<LibraryTable> libraryTable;
     private final FileInfoDialogFactory fileInfoFactory;

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.image;
+package org.limewire.ui.swing.library.table;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,13 +7,16 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -21,6 +24,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.table.TableRendererEditor;
@@ -30,25 +34,25 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 
-public class LibraryImagePanel extends JPanel implements Scrollable {
+@LazySingleton
+public class LibraryImageTable extends JPanel implements Scrollable {
 
-    @Resource
-    private Color backgroundColor;
+    @Resource private Color backgroundColor;
     
-    private final ImageList imageList;
-    
-    private  JXLayer<JComponent> layer;
-
-    private EventList<LocalFileItem> model;
+    private final ImageList imageList;    
+    private final JXLayer<JComponent> layer;
     
     @Inject
-    public LibraryImagePanel(ImageList imageList) {
+    public LibraryImageTable(ImageList imageList) {
         super(new MigLayout("insets 0 0 0 0, fill"));
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundColor);
         
         this.imageList = imageList;
+        imageList.setDragEnabled(true);
+        imageList.setDropMode(DropMode.ON);
+        
         imageList.setBorder(BorderFactory.createEmptyBorder(0,7,0,7));
         JScrollPane imageScrollPane = new JScrollPane(imageList);
         imageScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
@@ -58,6 +62,13 @@ public class LibraryImagePanel extends JPanel implements Scrollable {
         
         add(layer, "grow");
     }
+    
+    @Override
+    public void setTransferHandler(TransferHandler newHandler) {
+        imageList.setTransferHandler(newHandler);
+    }
+    
+    
     
     public void setEventList(EventList<LocalFileItem> localFileList) {
         imageList.setModel(localFileList);
@@ -196,5 +207,10 @@ public class LibraryImagePanel extends JPanel implements Scrollable {
 //                }
 //            }
         }
+    }
+
+    /** Returns all currently selected LocalFileItems. */
+    public List<LocalFileItem> getSelection() {
+        return imageList.getSelection();
     }
 }

@@ -1,11 +1,10 @@
-package org.limewire.ui.swing.library.popup;
+package org.limewire.ui.swing.library.navigator;
 
 import java.awt.Component;
 import java.awt.Point;
 
 import javax.swing.JTable;
 
-import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
 import com.google.inject.Inject;

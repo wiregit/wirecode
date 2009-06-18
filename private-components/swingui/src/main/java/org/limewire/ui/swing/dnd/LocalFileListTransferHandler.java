@@ -2,7 +2,6 @@ package org.limewire.ui.swing.dnd;
 
 import java.awt.datatransfer.Transferable;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,9 +14,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.util.DNDUtils;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.swing.EventSelectionModel;
-
+/** An abstract class for transferring {@link LocalFileItem} through a {@link TransferHandler}. */
 public abstract class LocalFileListTransferHandler extends TransferHandler {
     private final LibrarySupport librarySupport;
 
@@ -27,22 +24,19 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
 
     @Override
     protected Transferable createTransferable(JComponent c) {
-        LocalFileTransferable transferable = null;
-        EventSelectionModel<LocalFileItem> selectionModel = getSelectionModel();
-        if (selectionModel != null) {
-            List<File> files = new ArrayList<File>();
-            EventList<LocalFileItem> selected = selectionModel.getSelected();
-            for (LocalFileItem fileItem : selected) {
-                files.add(fileItem.getFile());
-            }
-            transferable = new LocalFileTransferable(files.toArray(new File[files.size()]));
+        List<File> files = getSelectedFiles();
+        if(!files.isEmpty()) {
+            return new LocalFileTransferable(files.toArray(new File[files.size()]));
+        } else {
+            return null;
         }
-        return transferable;
     }
 
-    public abstract EventSelectionModel<LocalFileItem> getSelectionModel();
+    /** Returns all files that want to be transferred. */
+    protected abstract List<File> getSelectedFiles();
 
-    public abstract LocalFileList getLocalFileList();
+    /** Returns the LocalFileList that items should be transfered to or from. */
+    protected abstract LocalFileList getLocalFileList();
 
     @Override
     public int getSourceActions(JComponent c) {

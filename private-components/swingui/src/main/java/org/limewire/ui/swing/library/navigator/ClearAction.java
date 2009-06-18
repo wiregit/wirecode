@@ -1,24 +1,23 @@
-package org.limewire.ui.swing.library.navigator.actions;
+package org.limewire.ui.swing.library.navigator;
 
 import java.awt.event.ActionEvent;
 
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class ClearAction extends AbstractAction {
+class ClearAction extends AbstractAction {
 
-    private final Provider<LibraryNavigatorPanel> libraryNavigatorPanel;
+//    private final Provider<LibraryNavigatorPanel> libraryNavigatorPanel;
     
     @Inject
     public ClearAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel) {
         super(I18n.tr("Clear"));
         
-        this.libraryNavigatorPanel = libraryNavigatorPanel;
+//        this.libraryNavigatorPanel = libraryNavigatorPanel;
     }
     
     @Override

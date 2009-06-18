@@ -1,18 +1,12 @@
-package org.limewire.ui.swing.library.popup;
+package org.limewire.ui.swing.library.table;
 
 import javax.swing.JPopupMenu;
 
-import org.limewire.ui.swing.library.table.menu.actions.DeleteAction;
-import org.limewire.ui.swing.library.table.menu.actions.LaunchFileAction;
-import org.limewire.ui.swing.library.table.menu.actions.LocateFileAction;
-import org.limewire.ui.swing.library.table.menu.actions.PlayAction;
-import org.limewire.ui.swing.library.table.menu.actions.RemoveAction;
-import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class LibraryPopupMenu extends JPopupMenu {
+class LibraryPopupMenu extends JPopupMenu {
 
     //TODO: a lot of these actions are not correct anymore
     private final Provider<PlayAction> playAction;

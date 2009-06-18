@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.image;
+package org.limewire.ui.swing.images;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,7 +9,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
-import org.limewire.ui.swing.images.ThumbnailManager;
 
 import com.google.inject.Inject;
 
@@ -17,10 +16,10 @@ import com.google.inject.Inject;
  * Renderers a thumbnail based on the specs of ThumbnailManager.WIDTH and
  * ThumbnailManager.HEIGHT.
  */
-public class ImageRenderer extends JComponent {
+class ImageRenderer extends JComponent {
 
+    private final JLabel label;
     private Icon icon;
-    private JLabel label;
     
     @Inject
     public ImageRenderer() {

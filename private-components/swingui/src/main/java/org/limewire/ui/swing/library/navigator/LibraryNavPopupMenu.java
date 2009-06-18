@@ -1,16 +1,9 @@
-package org.limewire.ui.swing.library.popup;
+package org.limewire.ui.swing.library.navigator;
 
 import javax.swing.JPopupMenu;
 
 import org.limewire.ui.swing.library.AddFileAction;
-import org.limewire.ui.swing.library.navigator.LibraryNavItem;
-import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
-import org.limewire.ui.swing.library.navigator.actions.ClearAction;
-import org.limewire.ui.swing.library.navigator.actions.DeleteListAction;
-import org.limewire.ui.swing.library.navigator.actions.ExportListAction;
-import org.limewire.ui.swing.library.navigator.actions.ImportListAction;
-import org.limewire.ui.swing.library.navigator.actions.RenameAction;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
