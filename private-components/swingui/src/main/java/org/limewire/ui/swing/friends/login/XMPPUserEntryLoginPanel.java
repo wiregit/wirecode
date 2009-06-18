@@ -29,7 +29,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
@@ -100,6 +99,8 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     private JLabel serviceLabel;
     private JComponent serviceRecenter;
     
+    private boolean connectionHasBeenInitiated = false;
+    
     @Inject
     public XMPPUserEntryLoginPanel(@Assisted XMPPAccountConfiguration accountConfig, LoginPopupPanel parent,
             XMPPService xmppService, XMPPAccountConfigurationManager accountManager,
@@ -149,8 +150,14 @@ public class XMPPUserEntryLoginPanel extends JPanel {
                 case CONNECTED:
                     connected(event.getSource().getConfiguration());
                     break;
-                case DISCONNECTED:
                 case CONNECT_FAILED:
+                    
+                    // Do not show connect failed messages from before a
+                    //  connection has been attempted
+                    if (!connectionHasBeenInitiated) {
+                        break;
+                    }
+                    
                     // Ignore duplicate events caused by authentication
                     // errors and events caused by deliberately signing
                     // out or switching user
@@ -173,7 +180,7 @@ public class XMPPUserEntryLoginPanel extends JPanel {
    
     private void initComponents(ButtonDecorator buttonDecorator,
             TextFieldDecorator textFieldDecorator) {
-
+        
         serviceRecenter = new JPanel();
         ResizeUtils.forceSize(serviceRecenter, new Dimension(30,30));
         
@@ -230,7 +237,7 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         signInButton.setBorder(BorderFactory.createEmptyBorder(0,15,2,15));
         ResizeUtils.looseForceHeight(signInButton, 32);
         
-        authFailedLabel = new MultiLineLabel();
+        authFailedLabel = new JLabel();
         authFailedLabel.setVisible(false);
         authFailedLabel.setForeground(warningForeground);
         authFailedLabel.setFont(warningFont);
@@ -247,7 +254,9 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         
         JPanel contentPanel = new JPanel(new MigLayout("gap 0, insets 10, align center"));
         
+        //TODO: should this shift the layout when is made visible?
         contentPanel.add(authFailedLabel, "gapleft 2, hidemode 3, gapbottom 3, wrap");
+        
         contentPanel.add(serviceLabel, "hidemode 3, wrap");
         contentPanel.add(serviceField, "gapbottom 10, hidemode 3, grow, wrap");
         contentPanel.add(usernameLabel, "wrap");
@@ -300,7 +309,6 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     }
     
     private void login(final XMPPAccountConfiguration config) {
-        setSignInComponentsEnabled(false);
         authFailedLabel.setVisible(false);
         validate();
         repaint();
@@ -327,7 +335,18 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     }
     
     public void connecting(XMPPConnectionConfiguration config) {
+        connectionHasBeenInitiated = true;
         setSignInComponentsEnabled(false);
+    }
+    
+    @Override
+    public boolean requestFocusInWindow() {
+        if (serviceField.isVisible()) {
+            return serviceField.requestFocusInWindow();
+        } 
+        else {
+            return usernameField.requestFocusInWindow();
+        }
     }
     
     class SignInAction extends AbstractAction {

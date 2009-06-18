@@ -148,7 +148,9 @@ public class LoginPopupPanel extends Panel implements Resizable {
      */
     public void setSelectedService(XMPPAccountConfiguration config) {
         contentPanel.removeAll();
-        contentPanel.add(xmppUserEntryLoginPanelFactory.create(config), BorderLayout.CENTER);
+        XMPPUserEntryLoginPanel loginPanel = xmppUserEntryLoginPanelFactory.create(config);
+        contentPanel.add(loginPanel, BorderLayout.CENTER);
+        loginPanel.requestFocusInWindow();
         contentPanel.repaint();
         contentPanel.validate();
     }
