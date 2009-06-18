@@ -241,17 +241,11 @@ public class ChatFramePanel extends Panel implements ChatFrame {
         }
         visibilityListenerList.broadcast(VisibilityType.valueOf(visible));
     }
-    
+        
     public void createChatPanel() {
         if(chatPanel == null) {
             // create the chat panel if its the first time being visible
             chatPanel = chatPanelProvider.get();
-            chatPanel.setMinimizeAction(new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    setVisibility(false);
-                }
-            });
             add(chatPanel, BorderLayout.CENTER);
         }
     }

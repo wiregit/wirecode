@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
@@ -43,7 +42,6 @@ public class ChatPanel extends JXPanel implements Displayable {
     private final JPanel conversationPanel;
     private final ChatFriendListPane friendsPanel;
     private final Map<String, ConversationPane> chats;
-    private final ChatTopPanel chatTopPanel;
     
     @Resource private Color border;
     
@@ -55,7 +53,6 @@ public class ChatPanel extends JXPanel implements Displayable {
         setLayout(new MigLayout("gap 0, insets 0 0 0 2, fill"));
         setBorder(BorderFactory.createMatteBorder(1,1,0,1, border));
         
-        this.chatTopPanel = chatTopPanel;
         this.conversationFactory = conversationFactory;
         this.friendsPanel = friendsPanel;
         this.chats = new HashMap<String, ConversationPane>();
@@ -69,10 +66,6 @@ public class ChatPanel extends JXPanel implements Displayable {
         add(conversationPanel, "dock center");
         
         EventAnnotationProcessor.subscribe(this);
-    }
-    
-    void setMinimizeAction(Action minimizeAction) {
-        chatTopPanel.setMinimizeAction(minimizeAction);
     }
     
     @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
