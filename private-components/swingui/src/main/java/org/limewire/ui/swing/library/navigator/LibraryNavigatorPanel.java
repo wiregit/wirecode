@@ -105,7 +105,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     }
     
     private void createCreateListButton() {
-        createListButton = new HyperlinkButton("Create List", createAction);
+        createListButton = new HyperlinkButton(I18n.tr("Create List"), createAction);
         createListButton.setFont(createListFont);
     }
     

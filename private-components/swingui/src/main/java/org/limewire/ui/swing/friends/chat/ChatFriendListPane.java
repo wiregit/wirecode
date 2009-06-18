@@ -63,6 +63,7 @@ import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.table.AbstractTableFormat;
+import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -513,7 +514,7 @@ public class ChatFriendListPane extends JPanel {
         }
     }
     
-    private class CustomTooltipLocationTable extends JXTable {
+    private class CustomTooltipLocationTable extends GlazedJXTable {
         private final Color GRAY_BACKGROUND = new Color(172, 172, 172);
 
         public CustomTooltipLocationTable(TableModel dm) {

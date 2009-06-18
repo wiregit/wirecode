@@ -12,7 +12,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXTable;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileList;
@@ -21,6 +20,7 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.dnd.LibraryNavTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
+import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.table.SingleColumnTableFormat;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -34,7 +34,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 import com.google.inject.Inject;
 
 @LazySingleton
-public class LibraryNavigatorTable extends JXTable {
+public class LibraryNavigatorTable extends GlazedJXTable {
 
     @Resource private Color backgroundColor;    
     private TablePopupHandler popupHandler;

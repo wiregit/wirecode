@@ -213,11 +213,6 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     }
 
     @Override
-    public SharedFileList getSharedFileList(String name) {
-        return null;
-    }
-
-    @Override
     public void deleteSharedFileList(SharedFileList list) {
 
     }

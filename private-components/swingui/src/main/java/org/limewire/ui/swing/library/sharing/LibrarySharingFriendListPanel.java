@@ -29,6 +29,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -59,7 +60,7 @@ class LibrarySharingFriendListPanel {
         GuiUtils.assignResources(this);
         this.knownFriends = knownFriends;        
         this.friendModel = new Model();
-        this.friendList = new JXTable(friendModel);
+        this.friendList = new GlazedJXTable(friendModel);
         this.sharedIds = new ArrayList<String>();
         
         component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "134!", ""));        

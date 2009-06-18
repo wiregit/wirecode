@@ -97,6 +97,14 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     // make the list trigger an event to signify that something changed,
     // so we get the index of where it used to be & reset it.
     private void nameChanged(SharedFileCollection collection) {
+        setListInPlace(collection);
+    }
+    
+    /**
+     * Sets the SharedFileListImpl that holds this collection in place, allowing
+     * the model to trigger an update event.
+     */
+    private void setListInPlace(SharedFileCollection collection) {
         sharedLists.getReadWriteLock().writeLock().lock();
         try {
             for (int i = 0; i < sharedLists.size(); i++) {
@@ -112,15 +120,34 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     }
 
     private void friendRemoved(SharedFileCollection collection, String friendId) {
-        getListForCollection(collection).friendRemoved(friendId);
+        SharedFileListImpl list = getListForCollection(collection);
+        int oldSize = list.getFriendIds().size();
+        boolean removed = list.friendRemoved(friendId);
+        // If we removed the last friend, reset the list to trigger an update event.
+        if(oldSize == 1 && removed) {
+            setListInPlace(collection);
+        }
     }
 
     private void friendsSetInCollection(SharedFileCollection collection, Collection<String> newFriendIds) {
-        getListForCollection(collection).friendsSet(newFriendIds);
+        SharedFileListImpl list = getListForCollection(collection);
+        boolean wasEmpty = list.getFriendIds().isEmpty();
+        list.friendsSet(newFriendIds);
+        boolean isEmpty = newFriendIds.isEmpty();
+        // if it changed from empty => not empty, or not empty => empty, trigger an update.
+        if(wasEmpty != isEmpty) {
+            setListInPlace(collection);
+        }
     }
 
     private void friendAddedToCollection(SharedFileCollection collection, String friendId) {
-        getListForCollection(collection).friendAdded(friendId);
+        SharedFileListImpl list = getListForCollection(collection);
+        boolean wasEmpty = list.getFriendIds().isEmpty();
+        list.friendAdded(friendId);
+        // if it used to be, trigger an update
+        if(wasEmpty) {
+            setListInPlace(collection);
+        }
     }    
     
     private void collectionAdded(SharedFileCollection collection) {
@@ -172,21 +199,6 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     public EventList<SharedFileList> getModel() {
         return readOnlySharedLists;
     }
-
-    @Override
-    public SharedFileList getSharedFileList(String name) {
-        sharedLists.getReadWriteLock().readLock().lock();
-        try {
-            for(SharedFileList fileList : sharedLists) {
-                if(fileList.getCollectionName().equals(name))
-                    return fileList;
-            }
-        } finally {
-            sharedLists.getReadWriteLock().readLock().unlock();
-        }
-        return null;
-    }
-
 
     @Override
     public void deleteSharedFileList(SharedFileList fileList) {

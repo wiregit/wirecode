@@ -8,7 +8,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.CompoundHighlighter;
 
@@ -23,7 +22,7 @@ import org.jdesktop.swingx.decorator.CompoundHighlighter;
  * used. It also assumes that the row highlighter is either off, or is only using an
  * simple alternating color to paint with.
  */
-public class StripedJXTable extends JXTable {
+public class StripedJXTable extends GlazedJXTable {
 
     public StripedJXTable() {
         super();

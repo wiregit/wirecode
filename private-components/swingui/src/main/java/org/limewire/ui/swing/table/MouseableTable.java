@@ -6,13 +6,11 @@ import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
 
-import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -20,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JViewport;
-import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -134,11 +131,6 @@ public class MouseableTable extends StripedJXTable {
         setTableHeaderRenderer();
         setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         setFont(colors.getTableFont());
-        getActionMap().remove("find");
-        // See http://sites.google.com/site/glazedlists/documentation/swingx		
-        getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
-        //Default java behavior for the enter key is the same as the down arrow.  We don't want this.
-        setEnterKeyAction(null);
 
         //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
         setHighlighters(colors.getEvenHighlighter(), 
@@ -443,15 +435,6 @@ public class MouseableTable extends StripedJXTable {
         }
     }
     
-    /**
-     * @param action the action that occurs when the user presses the enter key on the table
-     */
-    public void setEnterKeyAction(Action action){
-        getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), "launchAction");
-        getActionMap().put("launchAction", action);
-    }
-
-
     //clears mouseover color
     private void maybeCancelEditing() {
         Point mousePosition = getMousePosition();

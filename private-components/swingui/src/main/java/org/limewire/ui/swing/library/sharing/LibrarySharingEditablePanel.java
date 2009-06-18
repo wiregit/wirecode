@@ -31,6 +31,7 @@ import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -112,7 +113,7 @@ class LibrarySharingEditablePanel {
         baseEventList = new BasicEventList<EditableSharingData>();
         MatcherEditor<EditableSharingData> matcher = new TextComponentMatcherEditor<EditableSharingData>(filterTextField, new FriendFilterator());
         filteredList = new FilterList<EditableSharingData>(baseEventList, matcher);
-        friendTable = new JXTable(new EventTableModel<EditableSharingData>(baseEventList, new EditTableFormat())) {
+        friendTable = new GlazedJXTable(new EventTableModel<EditableSharingData>(baseEventList, new EditTableFormat())) {
             @Override
             public void editingStopped(ChangeEvent e) {
                 TableCellEditor editor = getCellEditor();

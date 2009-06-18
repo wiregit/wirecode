@@ -40,13 +40,6 @@ public interface SharedFileListManager {
      * Returns the id of the new list
      */
     int createNewSharedFileList(String name);
-
-    /**
-     * Returns the SharedFileList with this name or null if no SharedFileList
-     * exists with that name.
-     */
-    SharedFileList getSharedFileList(String name);
-    // TODO: getSharedFileList(String name), or (int id) ?
     
     /** Deletes the SharedFileList with this name. */
     void deleteSharedFileList(SharedFileList fileList);

@@ -85,8 +85,8 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
         coreCollection.setName(name);
     }
 
-    void friendRemoved(String friendId) {
-        friendList.remove(friendId);
+    boolean friendRemoved(String friendId) {
+        return friendList.remove(friendId);
     }
 
     void friendsSet(Collection<String> newFriendIds) {
