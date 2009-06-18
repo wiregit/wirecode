@@ -90,6 +90,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final KeywordAssistedSearchBuilder keywordAssistedSearchBuilder;
     private final Provider<AdvancedSearchPanel> advancedSearchPanel;
     private final SearchHandler searchHandler;
+    private final HomeMediator homeMediator;
         
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -111,6 +112,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
         this.advancedSearchPanel = advancedSearchPanel;
+        this.homeMediator = homeMediator;
         
         setName("WireframeTop");
         
@@ -294,6 +296,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     public void goHome() {
         homeNav.select();
+        homeMediator.getComponent().loadDefaultUrl();
     }
     
     /**

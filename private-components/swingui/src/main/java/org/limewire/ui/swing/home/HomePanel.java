@@ -78,7 +78,6 @@ public class HomePanel extends JXPanel {
             browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT);
             fallbackBrowser = null;
             add(browser, gbc);
-            loadDefaultUrl();
         } else {
             browser = null;
             fallbackBrowser = new HTMLPane();
@@ -90,7 +89,6 @@ public class HomePanel extends JXPanel {
                     }
                 }
             });
-            loadDefaultUrl();
             JScrollPane scroller = new JScrollPane(fallbackBrowser,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
