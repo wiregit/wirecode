@@ -449,7 +449,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         JPanel sortPanel = new JPanel();
         sortPanel.setOpaque(false);
         sortAndFilterPanel.layoutComponents(sortPanel);
-        header.add(sortPanel);
+        header.add(sortPanel, "wmin 300");
         
         add(header                    , "spanx 2, growx, wrap");
         add(classicSearchReminderPanel, "spanx 2, growx, wrap");
