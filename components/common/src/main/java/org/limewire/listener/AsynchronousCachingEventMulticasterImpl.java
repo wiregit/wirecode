@@ -4,6 +4,10 @@ import java.util.concurrent.Executor;
 
 import org.limewire.logging.Log;
 
+/**
+ * A <code>CachingEventMulticasterImpl</code> that dispatches events to listeners asynchronously.
+ * @param <E>
+ */
 public class AsynchronousCachingEventMulticasterImpl<E> extends CachingEventMulticasterImpl<E> implements AsynchronousBroadcaster<E> {
 
     public AsynchronousCachingEventMulticasterImpl(Executor executor) {
