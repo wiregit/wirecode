@@ -32,7 +32,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
@@ -267,7 +266,8 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         table.setFocusable(false);
         table.setCellSelectionEnabled(false);
         table.setRowHeight(ROW_HEIGHT);
-        table.setHighlighters(new ColorHighlighter());
+        table.setStripeHighlighterEnabled(false);
+        table.setStripesPainted(false);
      
         repaintTimer = new Timer(50, new ActionListener() {
             @Override
@@ -469,6 +469,13 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             setText(value.toString());
 
             return this;         
+        }
+        
+        /**
+         * Used to filter out evil foreground calls from the default JXTable Highlighter
+         */
+        @Override
+        public void setForeground(Color c) {
         }
     }
     
