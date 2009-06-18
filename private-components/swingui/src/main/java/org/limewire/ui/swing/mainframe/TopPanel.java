@@ -60,6 +60,7 @@ import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
+import org.limewire.ui.swing.search.SearchRepeater;
 import org.limewire.ui.swing.search.SearchResultMediator;
 import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
@@ -91,6 +92,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final Provider<AdvancedSearchPanel> advancedSearchPanel;
     private final SearchHandler searchHandler;
     private final HomeMediator homeMediator;
+
+    private final String repeatSearchTitle = I18n.tr("Repeat Search");
+    private final String refreshBrowseTitle = I18n.tr("Refresh");
         
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -222,12 +226,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     @Override
     public SearchNavItem addSearch(String title, final JComponent searchPanel, final BrowseSearch search, SearchResultsModel model) {
-        return addSearch(title, searchPanel, search, model, browseIcon);
+        return addSearch(title, searchPanel, search, model, createBrowseActions(search, model), browseIcon);
     }
 
     @Override
     public SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model) {
-        return addSearch(title, searchPanel, search, model, null);
+        return addSearch(title, searchPanel, search, model, createSearchActions(search, model), null);
     }
     
     @Override
@@ -268,19 +272,17 @@ class TopPanel extends JXPanel implements SearchNavigator {
         return searchNavItem;
     }
     
-    private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, Icon icon) {
+    private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, List<Action> contextActions, Icon icon) {
         final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
         final SearchAction action = new SearchAction(item);
         action.putValue(Action.LARGE_ICON_KEY, icon);
         search.addSearchListener(action);
 
         final Action moreTextAction = new NoOpAction();
-        final Action moreResults = new MoreResultsAction(search).register();
-        final Action repeatSearch = new RepeatSearchAction(search, model).register();
-        final Action stopSearch = new StopSearchAction(search).register();
+      
 
         final TabActionMap actionMap = new TabActionMap(
-            action, action, moreTextAction, Arrays.asList(stopSearch, repeatSearch, TabActionMap.SEPARATOR, moreResults));
+            action, action, moreTextAction, contextActions);
         
         searchList.addTabActionMapAt(actionMap, 0);
         
@@ -297,6 +299,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
     public void goHome() {
         homeNav.select();
         homeMediator.getComponent().loadDefaultUrl();
+    }
+
+    private List<Action> createSearchActions(Search search, SearchResultsModel model){
+        final Action moreResults = new MoreResultsAction(search).register();
+        final Action repeatSearch = new RepeatSearchAction(repeatSearchTitle, search, model).register();
+        final Action stopSearch = new StopSearchAction(search).register();
+        return Arrays.asList(stopSearch, repeatSearch, TabActionMap.SEPARATOR, moreResults);
+    }
+    
+    private List<Action> createBrowseActions(Search search, SearchResultsModel model){
+        final Action refresh = new RepeatSearchAction(refreshBrowseTitle, search, model).register();
+        return Arrays.asList(refresh);
+        
     }
     
     /**
@@ -573,16 +588,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private static class RepeatSearchAction extends SearchListenerAction {
         private SearchResultsModel model;
 
-        RepeatSearchAction(Search search, SearchResultsModel model) {
-            super(I18n.tr("Repeat Search"), search);
+        RepeatSearchAction(String title, Search search, SearchResultsModel model) {
+            super(title, search);
             this.model = model;
             setEnabled(false);
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            model.clear();
-            search.repeat();
+            new SearchRepeater(search, model).refresh();
         }
         
         @Override
@@ -617,4 +631,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
             setEnabled(false);
         } 
     }
+    
+    
 }
