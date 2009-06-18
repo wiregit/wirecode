@@ -247,43 +247,80 @@ public class FacebookFriendConnection implements FriendConnection {
         });
     }
     
-    void logoutImpl() {
-        synchronized (this) {
-            LOG.debug("logging out from facebook...");
-            loggedIn.set(false);
+    synchronized void logoutImpl() {
+        closeConnection(true);
+        connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));
+    }
 
-            // over-the-network logout activities
+    /**
+     * Close the connection by logging out of facebook and cleaning up objects
+     * associated with this connection.
+     *
+     * @param shouldCleanUpFacebookClient true if we need to or should
+     * attempt to expire our facebook JSON client. This should be
+     * false when we know for sure the facebook session is invalid.
+     */
+    private void closeConnection(boolean shouldCleanUpFacebookClient) {
+        LOG.debug("logging out from facebook...");
+        loggedIn.set(false);
+
+        // over-the-network logout activities
+        endChatSession(shouldCleanUpFacebookClient);
+
+        // clean up data structures associated with this connection
+        cleanUpConnection();
+
+        LOG.debug("logged out from facebook.");
+    }
+
+    /**
+     * Performs all network related steps to ending the chat, such as
+     * signing out of facebook website, sending messages to other
+     * presences to let them know we are going offline, etc.
+     *
+     * @param shouldCleanUpFacebookClient same as in {@link #closeConnection}
+     */
+    private void endChatSession(boolean shouldCleanUpFacebookClient) {
+
+        if (shouldCleanUpFacebookClient) {
+            sendOfflinePresences();
             try {
-                sendOfflinePresences();
-                logoutFromFacebook();
                 expireSession();
             } catch (FacebookException e) {
-                LOG.debug("logout failed", e);
-            } catch (IOException e) {
-                LOG.debug("logout failed", e);
+                LOG.debug("error expiring facebook session", e);
             }
+        }
 
-            // remove all friends
-            synchronized (friends) {
-                for (FacebookFriend friend : friends.values()) {
-                    removeAllPresences(friend);
-                }
-                friends.clear();
+        // todo: what to do in case of error?  what are the repercussions of not logging out of fb
+        try {
+            logoutFromFacebook();
+        } catch (IOException e) {
+            LOG.debug("logout from facebook failed", e);
+        }
+    }
+
+    /**
+     * Performs all necessary steps to clean up this connection's dependent objects
+     * which were created and started during login.  Examples include the chat listener
+     * thread which listens for incoming messages, and any record of available friends
+     */
+    private void cleanUpConnection() {
+        // remove all friends
+        synchronized (friends) {
+            for (FacebookFriend friend : friends.values()) {
+                removeAllPresences(friend);
             }
+            friends.clear();
+        }
 
-            // stop and remove essential listeners/handlers
-            if(chatListener != null) {
-                chatListener.setDone();
-                chatListener = null;
-            }
-            if(presenceListenerFuture != null) {
-                presenceListenerFuture.cancel(false);
-                presenceListenerFuture = null;
-            }
-
-            LOG.debug("logged out from facebook.");
-
-            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));  
+        // stop and remove essential listeners/handlers
+        if (chatListener != null) {
+            chatListener.setDone();
+            chatListener = null;
+        }
+        if (presenceListenerFuture != null) {
+            presenceListenerFuture.cancel(false);
+            presenceListenerFuture = null;
         }
     }
     
@@ -293,7 +330,13 @@ public class FacebookFriendConnection implements FriendConnection {
                 if (presence.hasFeatures(LimewireFeature.ID)) {
                     Map<String, Object> message = new HashMap<String, Object>();
                     message.put("type", "unavailable");
-                    sendLiveMessage(presence, "presence", message);
+                    Long presenceId = Long.parseLong(presence.getFriend().getId());
+
+                    try {
+                        sendLiveMessageDirect(presenceId, "presence", message);
+                    } catch (FacebookException e) {
+                        LOG.debug("error sending offline presence notification");
+                    }
                 }
             }
         }
@@ -343,17 +386,17 @@ public class FacebookFriendConnection implements FriendConnection {
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
             } catch (IOException e) {
                 LOG.debug("login error", e);
-                logoutImpl();
+                closeConnection(true);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw new FriendException(e);
             } catch (JSONException e) {
                 LOG.debug("login error", e);
-                logoutImpl();
+                closeConnection(true);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw new FriendException(e);
             } catch (RuntimeException e) {
                 LOG.debug("unexpected login error; probable bug", e);
-                logoutImpl();
+                closeConnection(true);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw e;
             } finally {
@@ -645,22 +688,35 @@ public class FacebookFriendConnection implements FriendConnection {
         sendLiveMessage(Long.parseLong(presence.getFriend().getId()), type, messageMap);
     }
     
-    private void sendLiveMessage(final Long userId, final String type, Map<String, Object> messageMap) {
+    private void sendLiveMessage(final Long userId, final String type, final Map<String, Object> messageMap) {
         messageMap.put("from", getPresenceId());
-        final JSONObject message = new JSONObject(messageMap);
         executorService.submit(new Runnable() {
             public void run() {
-                synchronized (this) {
+                synchronized (FacebookFriendConnection.this) {
                     try {
-                        LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
-                        facebookClient.liveMessage_send(userId, type, message);
+                        sendLiveMessageDirect(userId, type, messageMap);
                     }
                     catch (FacebookException e) {
-                        throw new RuntimeException(e);
+                        LOG.debug("Error sending live message: {0}", e);
+                        
+                        if (loggedIn.get()) {
+                            closeConnection(false);
+                            // ok to broadcast. connectionBroadcaster must be async broadcaster
+                            FriendException fe = new FriendException("chat session expired", e);
+                            connectionBroadcaster.broadcast(new FriendConnectionEvent(
+                                    FacebookFriendConnection.this, FriendConnectionEvent.Type.DISCONNECTED, fe));
+                        }
                     }
                 }
             }
         });
+    }
+    
+    private void sendLiveMessageDirect(Long userId, String type,
+                                                    Map<String, Object> messageMap) throws FacebookException {
+        JSONObject message = new JSONObject(messageMap);
+        LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
+        facebookClient.liveMessage_send(userId, type, message);
     }
 
     void sendChatMessage(String friendId, String message) throws FriendException {
@@ -772,7 +828,6 @@ public class FacebookFriendConnection implements FriendConnection {
      * a presence yet. If that's the case also notifies friend manager that the
      * friend is available now.
      * 
-     * @return the old or new presence
      */
     public void addPresence(String presenceId) {
         FacebookFriendPresence newPresence = null;
