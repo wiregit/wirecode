@@ -32,57 +32,14 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
 //        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager);
     }
     
-//    public Friend getCurrentFriend() {
-//        return currentFriendFilterChanger.getCurrentFriend();
-//    }
-    
-    public void showSharingState(Friend friend) {
-        throw new NotImplementedException("not implemented");
-//        getComponent().showSharingState(friend);
-    }
-    
-    public void showAllFiles() {
-        throw new NotImplementedException("not implemented");
-//        getComponent().showAllFiles();
-    }
-    
-    public void selectItem(URN urn, Object catalog) {
-        throw new NotImplementedException("not implemented");
-//        getComponent().selectItem(urn, catalog);
-    }
-    
-    public void selectItem(File file, Category category) {
-        throw new NotImplementedException("not implemented");
-//        getComponent().selectItem(file, new Catalog(category));
-    }
-    
-    public File getPreviousItem(File file, Object catalog) {
-        throw new NotImplementedException("not implemented");
-//        return null;//getComponent().getPreviousItem(file, catalog);
-    }
-    
-    public File getNextItem(File file, Object catalog) {
-        throw new NotImplementedException("not implemented");
-//        return null;//getComponent().getNextItem(file, catalog);
-    }
-    
     @Override
     public LibraryPanel getComponent() {
         if(libraryPanel == null) {
             libraryPanel = libraryProvider.get();
-//            libraryPanel.registerListeners();
         }
-//        if(panel == null)
-//            panel = myLibraryFactory.createMyLibraryPanel(baseLibraryList, currentFriendFilterChanger);
         
         return libraryPanel;
-//        return panel;
     }
-//    
-//    public void addFriendListener(ListSourceChanger.ListChangedListener listener) {
-////        currentFriendFilterChanger.addListener(listener);
-//        throw new NotImplementedException("not implemented");
-//    }
 
     public void selectInLibrary(File file, Category category) {
         // TODO Auto-generated method stub
@@ -94,31 +51,8 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         // TODO Auto-generated method stub
         throw new NotImplementedException("not implemented");
     }
-
-    public void selectLibrary() {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("not implemented");
-    }
-
-    // TODO: catalog???
-    public void setActiveCatalog(Object catalog) {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("not implemented");
-    }
-
-    public File getPreviousInLibrary(File file) {
-        // TODO Auto-generated method stub
-//        return null;
-        throw new NotImplementedException("not implemented");
-    }
-
-    public File getNextInLibrary(File file) {
-        // TODO Auto-generated method stub
-//        return null;
-        throw new NotImplementedException("not implemented");
-    }
     
     public void showSharedFileList(SharedFileList list) {
-        throw new NotImplementedException("not implemented (navigate to " + list.getCollectionName() + ")");
+        getComponent().selectSharedFileList(list);
     }
 }

@@ -107,6 +107,10 @@ public class LibraryNavigatorPanel extends JXPanel {
         createListButton.setFont(createListFont);
     }
     
+    public void selectSharedFileList(SharedFileList sharedFileList) {
+        table.selectLibraryNavItem(sharedFileList);
+    }
+    
     public void addTableSelectionListener(ListSelectionListener listener) {
         table.getSelectionModel().addListSelectionListener(listener);
     }

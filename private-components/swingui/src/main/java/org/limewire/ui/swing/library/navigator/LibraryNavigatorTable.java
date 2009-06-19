@@ -93,6 +93,18 @@ public class LibraryNavigatorTable extends GlazedJXTable {
         }
     }
     
+    public void selectLibraryNavItem(SharedFileList sharedFileList) {
+        for(int i = 0; i < getModel().getRowCount(); i++) {
+            Object value = getModel().getValueAt(i, 0);
+            if(value instanceof LibraryNavItem) {
+                if( ((LibraryNavItem) value).getLocalFileList() == sharedFileList) {
+                    getSelectionModel().setSelectionInterval(i,i);
+                    break;
+                }
+            }
+        }
+    }
+    
     public LibraryNavItem getSelectedItem() {
         int selected = getSelectedRow();
         if(selected < 0) {

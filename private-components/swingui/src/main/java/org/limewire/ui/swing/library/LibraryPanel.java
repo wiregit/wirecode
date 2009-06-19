@@ -61,7 +61,7 @@ class LibraryPanel extends JPanel {
     
     private final HeaderBar headerBar = new HeaderBar();
     private final LibraryTable libraryTable;
-    private final LibraryNavigatorPanel navigatorComponent;
+    private final LibraryNavigatorPanel libraryNavigatorPanel;
     private final LibrarySharingPanel librarySharingPanel;
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
     private final ButtonDecorator buttonDecorator;
@@ -87,7 +87,7 @@ class LibraryPanel extends JPanel {
             Provider<LibraryImageTable> libraryImagePanelProvider) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
-        this.navigatorComponent = navPanel;
+        this.libraryNavigatorPanel = navPanel;
         this.libraryTable = libraryTable;
         this.librarySharingPanel = sharingPanel;
         this.tableSelectionComboBox = selectionComobBox;
@@ -123,7 +123,7 @@ class LibraryPanel extends JPanel {
         
         setupStoreHighlighter();
         
-        add(navigatorComponent, "dock west, growy");
+        add(libraryNavigatorPanel, "dock west, growy");
         add(headerBar, "dock north, growx");
         add(publicSharedFeedbackPanel.getComponent(), "dock north, growx, hidemode 3");
         add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
@@ -164,10 +164,10 @@ class LibraryPanel extends JPanel {
             }
         });
         
-        navigatorComponent.addTableSelectionListener(new ListSelectionListener(){
+        libraryNavigatorPanel.addTableSelectionListener(new ListSelectionListener(){
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
+                LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
 
                 setPublicSharedComponentVisible(navItem);
                 eventList = navItem.getLocalFileList().getSwingModel();
@@ -175,6 +175,10 @@ class LibraryPanel extends JPanel {
                 selectTable(tableSelectionComboBox.getSelectedTableFormat(), tableSelectionComboBox.getSelectedCategory());
             }
         });
+    }
+    
+    public void selectSharedFileList(SharedFileList sharedFileList) {
+        libraryNavigatorPanel.selectSharedFileList(sharedFileList);
     }
     
     private void selectSharing(LibraryNavItem navItem) {
@@ -250,7 +254,7 @@ class LibraryPanel extends JPanel {
         publicSharedFeedbackPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.PUBLIC_SHARED);
     }
     
-    public void setupStoreHighlighter() {
+    private void setupStoreHighlighter() {
         TableColors tableColors = new TableColors();
         ColorHighlighter highlighter = new ColorHighlighter(new StoreHighlightPredicate(), 
                 null, tableColors.getDisabledForegroundColor(), 
@@ -261,7 +265,7 @@ class LibraryPanel extends JPanel {
     private class StoreHighlightPredicate implements HighlightPredicate {
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-            LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
+            LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
             if(navItem == null || navItem.getType() != NavType.LIST ||
                     (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() == 0))
                 return false;
