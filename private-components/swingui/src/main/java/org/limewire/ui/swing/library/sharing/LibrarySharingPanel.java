@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +79,7 @@ public class LibrarySharingPanel {
         GuiUtils.assignResources(this);
         
         component = new JPanel();
+        component.setMaximumSize(new Dimension(134, Integer.MAX_VALUE));
         component.setBackground(backgroundColor);
         component.setVisible(false);        
         component.setBorder(BorderFactory.createMatteBorder(0,0,0,1, borderColor));               

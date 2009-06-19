@@ -129,6 +129,7 @@ class LibrarySharingEditablePanel {
         friendTable.getColumnExt(0).setCellEditor(new LibrarySharingEditableRendererEditor());
         friendTable.setTableHeader(null);
         friendTable.setShowGrid(false, false);
+        friendTable.setRowHeight(20);
                 
         component.add(scrollPane, "growx, gaptop 5, wrap");
         

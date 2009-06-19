@@ -39,7 +39,7 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
     private EditableSharingData data;
     
     public LibrarySharingEditableRendererEditor() {
-        super(new MigLayout("filly, insets 0, gap 0"));
+        super(new MigLayout("fill, insets 0, gap 0"));
 
         GuiUtils.assignResources(this);
        
