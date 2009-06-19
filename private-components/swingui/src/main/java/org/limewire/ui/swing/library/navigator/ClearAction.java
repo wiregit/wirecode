@@ -10,6 +10,7 @@ import org.limewire.filter.Filter;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -28,10 +29,15 @@ class ClearAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
+        final LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
         int confirmation = FocusJOptionPane.showConfirmDialog(null, getMessage(item), I18n.tr("Clear Files"), JOptionPane.OK_CANCEL_OPTION); 
         if (confirmation == JOptionPane.OK_OPTION) {
-            item.getLocalFileList().removeFiles(new ClearFilter());
+            BackgroundExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    item.getLocalFileList().removeFiles(new ClearFilter());
+                }
+            });
         }
     }
     
