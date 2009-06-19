@@ -54,4 +54,16 @@ public class LibraryNavItem {
     public NavType getType() {
         return navType;
     }
+    
+    public boolean isShared() {        
+        if (getType() == NavType.PUBLIC_SHARED){
+            return true;
+        }
+        
+        if(sharedFileList != null){
+            return sharedFileList.getFriendIds().size() > 0;
+        }
+        
+        return false;
+    }
 }

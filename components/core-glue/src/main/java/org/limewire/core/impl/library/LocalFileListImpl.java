@@ -227,17 +227,27 @@ abstract class LocalFileListImpl implements LocalFileList {
     
     @Override
     public void removeFiles(Filter<LocalFileItem> filter) {
+        List<LocalFileItem> files = new ArrayList<LocalFileItem>();
+        
         getModel().getReadWriteLock().readLock().lock();
-        List<LocalFileItem> files = null;
         try {
-            files = new ArrayList<LocalFileItem>(getModel());
+            for (LocalFileItem localFileItem : getModel()) {
+                if (filter.allow(localFileItem)) {
+                    files.add(localFileItem);
+                }
+            }
         } finally {
             getModel().getReadWriteLock().readLock().unlock();
         }
-        for(LocalFileItem localFileItem : files) {
-            if(filter.allow(localFileItem)) {
-                removeFile(localFileItem.getFile());
-            }
+        
+        for (LocalFileItem localFileItem : files) {
+            removeFile(localFileItem.getFile());
         }
+    }
+    
+
+    @Override
+    public void clear() {
+       getCoreCollection().clear();
     }
 }

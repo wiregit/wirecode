@@ -54,4 +54,9 @@ public interface LocalFileList extends FileList<LocalFileItem> {
      */
     public void removeFiles(Filter<LocalFileItem> fileFilter);
 
+    /**
+     * Removes all files from the list
+     */
+    void clear();
+
 }

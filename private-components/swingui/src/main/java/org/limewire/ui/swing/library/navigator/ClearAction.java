@@ -4,13 +4,8 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
 
-import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.SharedFileList;
-import org.limewire.filter.Filter;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -32,12 +27,7 @@ class ClearAction extends AbstractAction {
         final LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
         int confirmation = FocusJOptionPane.showConfirmDialog(null, getMessage(item), I18n.tr("Clear Files"), JOptionPane.OK_CANCEL_OPTION); 
         if (confirmation == JOptionPane.OK_OPTION) {
-            BackgroundExecutorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    item.getLocalFileList().removeFiles(new ClearFilter());
-                }
-            });
+            item.getLocalFileList().clear();               
         }
     }
     
@@ -45,16 +35,16 @@ class ClearAction extends AbstractAction {
     
         switch(nav.getType()) {    
         case LIST:        
-            if (isShared(nav)){            
-                return I18n.tr("Remove all files from {0}?  This will unshare all of these files.", nav.getDisplayText());
+            if (nav.isShared()){            
+                return I18n.tr("Remove all files from {0}?  This will stop sharing all of these files.", nav.getDisplayText());
             } else {
                 return I18n.tr("Remove all files from {0}?", nav.getDisplayText());                
             }
             case LIBRARY:        
-            return I18n.tr("Remove all files from your library?  This will remove all files you've downloaded and unshare every file you are sharing.");
+            return I18n.tr("Remove all files from your library?  This will remove all files you've downloaded and stop sharing every file you are sharing.");
         case PUBLIC_SHARED:  
-            if (isShared(nav)){            
-                return I18n.tr("Remove all files from {0}?  This will unshare all of these files with the world.", nav.getDisplayText());
+            if (nav.isShared()){            
+                return I18n.tr("Remove all files from {0}?  This will stop sharing all of these files with the world.", nav.getDisplayText());
             } else {          
                 return I18n.tr("Remove all files from {0}?", nav.getDisplayText());
             }
@@ -63,23 +53,4 @@ class ClearAction extends AbstractAction {
         }
     }
     
-    private boolean isShared(LibraryNavItem nav){        
-        if (nav.getType() == NavType.PUBLIC_SHARED){
-            return true;
-        }
-        
-        if(nav.getLocalFileList() instanceof SharedFileList){
-            return ((SharedFileList)(nav.getLocalFileList())).getFriendIds().size() > 0;
-        }
-        
-        return false;
-    }
-    
-    private static class ClearFilter implements Filter<LocalFileItem> {
-        @Override
-        public boolean allow(LocalFileItem t) {
-            //always return true to clear all
-            return true;
-        }        
-    }
 }

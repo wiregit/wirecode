@@ -132,4 +132,9 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     public void removeFiles(Filter<LocalFileItem> fileFilter) {
         
     }
+
+    @Override
+    public void clear() {
+        eventList.clear();
+    }
 }
