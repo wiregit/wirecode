@@ -49,8 +49,12 @@ public class FileUtils {
 
     private static final CopyOnWriteArrayList<FileLocker> fileLockers = new CopyOnWriteArrayList<FileLocker>();
     
-    /** Writes an object to a backup file and then renames that file to a proper file. */
-    public static boolean writeWithBackupFile(Object toWrite, File backupFile, File properFile, org.apache.commons.logging.Log log) {
+    /**
+     * Writes an object to a backup file and then renames that file to a proper
+     * file. Returns true if this succeeded, false otherwise.
+     */
+    public static boolean writeWithBackupFile(Object toWrite, File backupFile, File properFile,
+            org.apache.commons.logging.Log log) {
         ObjectOutputStream out = null;
         
         try {
