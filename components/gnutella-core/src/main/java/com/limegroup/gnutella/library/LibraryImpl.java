@@ -381,7 +381,23 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException("cannot clear managed list");
+        List<Future> fileFutures;
+        rwLock.writeLock().lock();
+        try {
+            fileFutures = new ArrayList<Future>(fileToFutures.values());
+            fileToFutures.clear();
+            files.clear();
+            urnMap.clear();
+            fileToFileDescMap.clear();
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        
+        for(Future future : fileFutures) {
+            future.cancel(true);
+        }
+        
+        dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILES_CLEARED));
     }
     
     @Override
@@ -830,24 +846,7 @@ class LibraryImpl implements Library, FileCollection {
     private List<ListeningFuture<FileDesc>> loadSettingsInternal(int rev) {
         LOG.debugf("Loading Library Revision: {0}", rev);
         
-        List<Future> fileFutures;
-        rwLock.writeLock().lock();
-        try {
-            fileFutures = new ArrayList<Future>(fileToFutures.values());
-            fileToFutures.clear();
-            files.clear();
-            urnMap.clear();
-            fileToFileDescMap.clear();
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        
-        for(Future future : fileFutures) {
-            future.cancel(true);
-        }
-        
-        dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILES_CLEARED));
-        
+        clear();
         fireLoading();
         final List<ListeningFuture<FileDesc>> futures = loadManagedFiles(rev);
         addLoadingListener(futures, rev);
