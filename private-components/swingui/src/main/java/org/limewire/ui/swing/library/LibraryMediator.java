@@ -11,7 +11,6 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
@@ -20,6 +19,8 @@ import com.google.inject.Provider;
 @LazySingleton
 public class LibraryMediator implements NavMediator<LibraryPanel> {
 
+    public static final String NAME = "Library";
+    
 //    private final MyLibraryFactory myLibraryFactory;
 //    private final PluggableList<LocalFileItem> baseLibraryList;
 //    private final LibraryListSourceChanger currentFriendFilterChanger;
@@ -59,9 +60,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
     }
     
     public void showSharedFileList(SharedFileList list) {
-        // TODO: should this use navigator?
-        // TODO: translated id with no constant is strange and wont work if language is changed.
-        NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, I18n.tr("My Library"));
+        NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, NAME);
         item.select();
         getComponent().selectSharedFileList(list);
     }
