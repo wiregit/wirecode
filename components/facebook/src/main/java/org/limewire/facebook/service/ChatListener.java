@@ -15,7 +15,11 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class ChatListener implements Runnable {
+/**
+ * This listens for new chat messages and live messages, and dispatches them to the
+ * appropriate handlers.  It does this via http polling, where the requests are long running (COMET style).
+ */
+class ChatListener implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(org.limewire.facebook.service.ChatListener.class);
     

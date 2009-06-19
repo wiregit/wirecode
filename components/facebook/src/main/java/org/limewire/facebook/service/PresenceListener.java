@@ -17,7 +17,7 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class PresenceListener implements Runnable {
+class PresenceListener implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(PresenceListener.class);
     
