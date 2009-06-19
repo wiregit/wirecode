@@ -16,6 +16,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
@@ -39,6 +40,8 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.EventTableModel;
@@ -127,6 +130,22 @@ class LibrarySharingEditablePanel {
                 return new Dimension(super.getPreferredScrollableViewportSize().width, getModel().getRowCount() * getRowHeight());
             }
         };
+        // the table is strictly the size of the number of rows or full screen with a scrollbar
+        // if it surpasses available space. When adding/removing friends or filtering need to
+        // revalidate the size to correctly update the panel and table sizing.
+        filteredList.addListEventListener(new ListEventListener<EditableSharingData>(){
+            @Override
+            public void listChanged(ListEvent<EditableSharingData> listChanges) {
+                if(LibrarySharingEditablePanel.this.getComponent().isShowing()) {
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            component.revalidate();
+                        }
+                    });
+                }
+            }
+        });
+        
         JScrollPane scrollPane = new JScrollPane(friendTable);
         scrollPane.setMinimumSize(new Dimension(0,0));
         scrollPane.setBorder(BorderFactory.createMatteBorder(1,0,1,0, borderColor)); 
