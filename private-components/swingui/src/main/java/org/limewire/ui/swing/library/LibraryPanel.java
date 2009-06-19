@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -31,7 +32,9 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
+import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
@@ -73,7 +76,7 @@ class LibraryPanel extends JPanel {
     private CardLayout tableListLayout;
     
     private JXButton addFilesButton;
-    private LibraryTableSelectionComboBox tableSelectionComboBox;
+    private LibraryTableComboBox libraryTableComboBox;
     
     private LibraryCategoryMatcher categoryMatcher;
     private EventList<LocalFileItem> eventList;
@@ -81,16 +84,16 @@ class LibraryPanel extends JPanel {
     
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
-            LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
+            LibrarySharingPanel sharingPanel, LibraryTableComboBox libraryTableComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler,
-            Provider<LibraryImageTable> libraryImagePanelProvider) {
+            Provider<LibraryImageTable> libraryImagePanelProvider, ComboBoxDecorator comboBoxDecorator) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.libraryNavigatorPanel = navPanel;
         this.libraryTable = libraryTable;
         this.librarySharingPanel = sharingPanel;
-        this.tableSelectionComboBox = selectionComobBox;
+        this.libraryTableComboBox = libraryTableComobBox;
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
         this.buttonDecorator = buttonDecorator;
         this.categoryMatcher = categoryMatcher;
@@ -100,6 +103,8 @@ class LibraryPanel extends JPanel {
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
         setEventList(new BasicEventList<LocalFileItem>());
+        
+        comboBoxDecorator.decorateDarkFullComboBox(libraryTableComobBox);
     }
     
     private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction) {
@@ -110,7 +115,7 @@ class LibraryPanel extends JPanel {
         createAddFilesButton(addFileAction);
         headerBar.add(addFilesButton);
         headerBar.add(playerPanel, "grow, align 50%");
-        headerBar.add(tableSelectionComboBox, "alignx right, gapright 5");
+        headerBar.add(libraryTableComboBox, "alignx right, gapright 5");
         
         tableListLayout = new CardLayout();
         tableListPanel = new JPanel(tableListLayout);
@@ -151,19 +156,18 @@ class LibraryPanel extends JPanel {
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
                 eventList = libraryList.getSwingModel();
-                selectTable(tableSelectionComboBox.getSelectedTableFormat(), tableSelectionComboBox.getSelectedCategory());
+                selectTable(libraryTableComboBox.getSelectedTableFormat(), libraryTableComboBox.getSelectedCategory());
             }
         });
         
         // listen for selection changes in the combo box and filter the table
         // replacing the table header as you do.
-        tableSelectionComboBox.addActionListener(new ActionListener(){
+        libraryTableComboBox.addSelectionListener(new SelectionListener(){
             @Override
-            public void actionPerformed(ActionEvent e) {
-                selectTable(tableSelectionComboBox.getSelectedTableFormat(), tableSelectionComboBox.getSelectedCategory());
+            public void selectionChanged(Action item) {
+                selectTable(libraryTableComboBox.getSelectedTableFormat(), libraryTableComboBox.getSelectedCategory());
             }
         });
-        
         libraryNavigatorPanel.addTableSelectionListener(new ListSelectionListener(){
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -172,7 +176,7 @@ class LibraryPanel extends JPanel {
                 setPublicSharedComponentVisible(navItem);
                 eventList = navItem.getLocalFileList().getSwingModel();
                 selectSharing(navItem);
-                selectTable(tableSelectionComboBox.getSelectedTableFormat(), tableSelectionComboBox.getSelectedCategory());
+                selectTable(libraryTableComboBox.getSelectedTableFormat(), libraryTableComboBox.getSelectedCategory());
             }
         });
     }
@@ -241,7 +245,7 @@ class LibraryPanel extends JPanel {
     private void setEventList(EventList<LocalFileItem> eventList) {
         disposeOldLists();
         filteredList = GlazedListsFactory.filterList(eventList, categoryMatcher);
-        libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTableFormat());
+        libraryTable.setEventList(filteredList, libraryTableComboBox.getSelectedTableFormat());
     }
     
     private void setEventListImage(EventList<LocalFileItem> eventList) {
