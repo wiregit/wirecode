@@ -40,11 +40,11 @@ class LibraryNavPopupMenu extends JPopupMenu {
         add(exportAction);
         addSeparator();
         if(item.getType() == NavType.LIBRARY || item.getType() == NavType.PUBLIC_SHARED) {
-            add(clearAction);
+            add(clearAction).setEnabled(item.getLocalFileList().size() > 0);
         } else {
             add(renameAction.get());
             addSeparator();
-            add(clearAction);
+            add(clearAction).setEnabled(item.getLocalFileList().size() > 0);
             add(deleteAction.get()).setEnabled(item.canRemove());
         }
     }
