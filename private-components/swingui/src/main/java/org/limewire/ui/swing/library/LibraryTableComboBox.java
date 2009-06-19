@@ -2,8 +2,6 @@ package org.limewire.ui.swing.library;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Icon;
-
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
