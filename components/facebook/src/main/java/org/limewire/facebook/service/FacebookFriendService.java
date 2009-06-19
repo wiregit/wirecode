@@ -36,6 +36,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+/**
+ * A <code>FriendConnectionFactory</code> for facebook.  Facebook communication is done via their API + chat protocol.
+ * The entry point for logging into facebook.  Also logs out the <code>FacebookFriendConnection</code>
+ * on limewire shutdown.
+ */
 @Singleton
 class FacebookFriendService implements FriendConnectionFactory, Service {
     

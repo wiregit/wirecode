@@ -22,6 +22,9 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 
+/**
+ * Used to (de)serialize "address" live messages.
+ */
 public class AddressHandler implements LiveMessageHandler, FeatureTransport<Address> {
     
     private static final String TYPE = "address";
@@ -67,12 +70,12 @@ public class AddressHandler implements LiveMessageHandler, FeatureTransport<Addr
     @Override
     public void sendFeature(FriendPresence presence, Address localFeature) throws FriendException {
         Map<String, Object> message = new HashMap<String, Object>();
+        AddressSerializer serializer = addressFactory.getSerializer(localFeature.getClass());
+        message.put("address-type", serializer.getAddressType());
         try {
-            AddressSerializer serializer = addressFactory.getSerializer(localFeature.getClass());
-            message.put("address-type", serializer.getAddressType());
             message.put("address", StringUtils.toUTF8String(Base64.encodeBase64(serializer.serialize(localFeature))));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FriendException(e);
         }
         LOG.debugf("sending address: {0}", message);
         connection.sendLiveMessage(presence, TYPE, message);

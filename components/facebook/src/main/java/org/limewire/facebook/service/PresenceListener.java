@@ -2,7 +2,6 @@ package org.limewire.facebook.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +9,7 @@ import java.util.Set;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
+import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -48,7 +48,7 @@ public class PresenceListener implements Runnable {
             LOG.debugf("buddy list response: {0}", responseStr);
 
             Set<String> onlineFriendIds = deserializer.parseOnlineFriendIds(responseStr);
-            for (FacebookFriend friend : connection.getFriends()) {
+            for (Friend friend : connection.getFriends()) {
                 if (onlineFriendIds.contains(friend.getId())) {
                     connection.addPresence(friend.getId());
                 } else if (lastOnlineFriends.contains(friend.getId())) {

@@ -51,15 +51,16 @@ import org.limewire.facebook.service.livemessage.AuthTokenHandler;
 import org.limewire.facebook.service.livemessage.AuthTokenHandlerFactory;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandler;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandlerFactory;
+import org.limewire.facebook.service.livemessage.DiscoInfoHandler;
+import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 import org.limewire.facebook.service.livemessage.FileOfferHandler;
 import org.limewire.facebook.service.livemessage.FileOfferHandlerFactory;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
-import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
-import org.limewire.facebook.service.livemessage.DiscoInfoHandler;
 import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.facebook.service.settings.FacebookAPIKey;
 import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -677,9 +678,9 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     @Override
-    public Collection<FacebookFriend> getFriends() {
+    public Collection<Friend> getFriends() {
         synchronized (friends) {
-            return new ArrayList<FacebookFriend>(friends.values());
+            return new ArrayList<Friend>(friends.values());
         }
     }
 

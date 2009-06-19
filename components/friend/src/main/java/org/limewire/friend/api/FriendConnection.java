@@ -13,20 +13,20 @@ public interface FriendConnection {
     public FriendConnectionConfiguration getConfiguration();
 
     /**
-     * logs a user into the xmpp server.
+     * logs a user into the server.
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
-     * The ExecutionException will be to an XMPPException if an error occurs
+     * The ExecutionException will be to an FriendException if an error occurs
      */
     public ListeningFuture<Void> login();
     
     /**
-     * logs a user out of the xmpp server.
+     * logs a user out of the server.
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
-     * The ExecutionException will be to an XMPPException if an error occurs
+     * The ExecutionException will be to an FriendException if an error occurs
      */
     public ListeningFuture<Void> logout();
 
@@ -51,8 +51,8 @@ public interface FriendConnection {
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
-     * The ExecutionException will be to an XMPPException
-     * if there is an error sending the xmpp message
+     * The ExecutionException will be to an FriendException
+     * if there is an error sending the mode message
      * @throws UnsupportedOperationException if <code>#supportsMode()</code> is false
      */
     public ListeningFuture<Void> setMode(FriendPresence.Mode mode);
@@ -70,8 +70,8 @@ public interface FriendConnection {
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
-     * @throws The ExecutionException will be to an XMPPException
-     * if there is an error sending the xmpp message
+     * @throws The ExecutionException will be to an FriendException
+     * if there is an error sending the add friend message
      * @throws UnsupportedOperationException if <code>#supportsAddRemoveFriend()</code> returns false
      */
     public ListeningFuture<Void> addNewFriend(String id, String name);
@@ -82,8 +82,8 @@ public interface FriendConnection {
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
-     * @throws The ExecutionException will be to an XMPPException
-     * if there is an error sending the xmpp message
+     * @throws The ExecutionException will be to an FriendException
+     * if there is an error sending the removeFriend message
      * @throws UnsupportedOperationException if <code>#supportsAddRemoveFriend()</code> returns false
      */
     public ListeningFuture<Void> removeFriend(String id);
@@ -100,5 +100,5 @@ public interface FriendConnection {
      * @return a copy of the current Collection of Users. Does NOT stay up to
      * date with changes.
      */
-    public Collection<? extends Friend> getFriends();
+    public Collection<Friend> getFriends();
 }

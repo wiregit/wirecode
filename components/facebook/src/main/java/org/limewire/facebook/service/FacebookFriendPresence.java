@@ -5,6 +5,10 @@ import org.limewire.friend.impl.AbstractFriendPresence;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.StringUtils;
 
+/**
+ * A <code>FriendPresence</code> that represents a facebook friend that is online and visible
+ * for chatting.
+ */
 public class FacebookFriendPresence extends AbstractFriendPresence {
 
     private final String presenceId;
