@@ -9,7 +9,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.core.settings.XMPPSettings;
+import org.limewire.core.settings.FriendSettings;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.listener.EventBean;
@@ -55,7 +55,7 @@ public class StatusActions {
                         @Override
                         public void handleEvent(FutureEvent<Void> event) {
                             if(event.getType() == FutureEvent.Type.SUCCESS) {
-                                XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);
+                                FriendSettings.DO_NOT_DISTURB.setValue(false);
                             }
                         }
                     });
@@ -77,7 +77,7 @@ public class StatusActions {
                         @Override
                         public void handleEvent(FutureEvent<Void> event) {
                             if(event.getType() == FutureEvent.Type.SUCCESS) {
-                                XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);
+                                FriendSettings.DO_NOT_DISTURB.setValue(true);
                             }
                         }
                     });
@@ -87,7 +87,7 @@ public class StatusActions {
         
         updateSelections();
         
-        XMPPSettings.XMPP_DO_NOT_DISTURB.addSettingListener(new SettingListener() {
+        FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtils.invokeLater(new Runnable() {
@@ -104,7 +104,7 @@ public class StatusActions {
         FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
             if(connection.getSource().isLoggedIn()) {
-                boolean dndBool = XMPPSettings.XMPP_DO_NOT_DISTURB.getValue();
+                boolean dndBool = FriendSettings.DO_NOT_DISTURB.getValue();
                 for ( JCheckBoxMenuItem item : availableItems ) {
                     item.setSelected(!dndBool);
                 }

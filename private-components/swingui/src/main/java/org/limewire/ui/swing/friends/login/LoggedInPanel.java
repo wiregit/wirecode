@@ -16,7 +16,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
-import org.limewire.core.settings.XMPPSettings;
+import org.limewire.core.settings.FriendSettings;
 import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
@@ -176,7 +176,7 @@ class LoggedInPanel extends JXPanel {
     }
     
     /**
-     * Registers this panel with xmpp connection events as well as changes to the XMPP_DO_NO_DISTURB setting.
+     * Registers this panel with friend connection events as well as changes to the DO_NO_DISTURB setting.
      * It uses these events to keep the status icon for the user up to date. 
      */
     @Inject
@@ -188,7 +188,7 @@ class LoggedInPanel extends JXPanel {
                 switch (event.getType()) {
                 case CONNECTED:
                 case CONNECTING:
-                    currentUser.setIcon(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
+                    currentUser.setIcon(FriendSettings.DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
                     if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
                         addFriendAction.setEnabled(event.getSource().supportsAddRemoveFriend());
                     }
@@ -203,15 +203,15 @@ class LoggedInPanel extends JXPanel {
         
         /**
          * TODO - Using a setting listener is really not the correct approach here. We need to build up the capability to get status
-         * changes as events coming from the core xmpp code.
+         * changes as events coming from the core friends code.
          */
-        XMPPSettings.XMPP_DO_NOT_DISTURB.addSettingListener(new SettingListener() {
+        FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
            @Override
             public void settingChanged(SettingEvent evt) {
                SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        currentUser.setIcon(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
+                        currentUser.setIcon(FriendSettings.DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
                     } 
                });
             } 
@@ -234,7 +234,7 @@ class LoggedInPanel extends JXPanel {
                     currentUser.setIcon(iconLibrary.getAway());
                     break;
                 case Active:
-                    currentUser.setIcon(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
+                    currentUser.setIcon(FriendSettings.DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
                 }
             }
         });
