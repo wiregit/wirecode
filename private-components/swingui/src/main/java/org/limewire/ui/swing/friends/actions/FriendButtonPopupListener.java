@@ -43,7 +43,7 @@ public class FriendButtonPopupListener implements PopupMenuListener {
             
             menu.removeAll();
             
-            boolean isLoggedIn = xmppService.get().isLoggedIn();
+            boolean isLoggedIn = xmppService.get().isLoggedIn() || xmppService.get().isLoggingIn();
             
             menu.add(browseFriendAction.get()).setEnabled(isLoggedIn);
             menu.addSeparator();

@@ -99,6 +99,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         throw new NotImplementedException("not implemented");
     }
 
+    // TODO: catalog???
     public void setActiveCatalog(Object catalog) {
         // TODO Auto-generated method stub
         throw new NotImplementedException("not implemented");
@@ -114,5 +115,10 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         // TODO Auto-generated method stub
 //        return null;
         throw new NotImplementedException("not implemented");
+    }
+    
+    // TODO: keyed on string id or SharedFileList instance?
+    public void showSharedFileList(String id) {
+        throw new NotImplementedException("not implemented (navigate to " + id + ")");
     }
 }

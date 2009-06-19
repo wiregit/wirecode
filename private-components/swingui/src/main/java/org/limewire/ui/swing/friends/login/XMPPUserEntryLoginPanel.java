@@ -254,8 +254,7 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         
         JPanel contentPanel = new JPanel(new MigLayout("gap 0, insets 10, align center"));
         
-        //TODO: should this shift the layout when is made visible?
-        contentPanel.add(authFailedLabel, "gapleft 2, hidemode 3, gapbottom 3, wrap");
+        contentPanel.add(authFailedLabel, "dock north, gapleft 2, hidemode 3, gapbottom 3, wrap");
         
         contentPanel.add(serviceLabel, "hidemode 3, wrap");
         contentPanel.add(serviceField, "gapbottom 10, hidemode 3, grow, wrap");

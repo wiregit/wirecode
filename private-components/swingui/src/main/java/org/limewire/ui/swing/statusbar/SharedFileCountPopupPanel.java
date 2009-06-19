@@ -43,9 +43,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -95,7 +93,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private final Provider<LoginPopupPanel> loginPanelProvider;
     private final XMPPService xmppService;
     private final ListenerSupport<XMPPConnectionEvent> connectionSupport;
-    private final Navigator navigator;
+    private final LibraryMediator libraryMediator;
 
     private Timer repaintTimer = null; 
     
@@ -119,7 +117,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             Provider<LoginPopupPanel> loginPanelProvider,
             XMPPService xmppService,
             ListenerSupport<XMPPConnectionEvent> connectionSupport,
-            Navigator navigator) {
+            LibraryMediator libraryMediator) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
@@ -127,7 +125,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         this.loginPanelProvider = loginPanelProvider;
         this.xmppService = xmppService;
         this.connectionSupport = connectionSupport;
-        this.navigator = navigator;
+        this.libraryMediator = libraryMediator;
         
         GuiUtils.assignResources(this);
         
@@ -488,9 +486,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         private final HyperlinkButton button = new HyperlinkButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO: navigate to the specific list?  (talk to everrrettt) 
-                NavItem item = navigator.getNavItem(NavCategory.LIBRARY, I18n.tr("My Library"));
-                item.select();
+                libraryMediator.showSharedFileList(button.getText());
             }
         }) {
             
