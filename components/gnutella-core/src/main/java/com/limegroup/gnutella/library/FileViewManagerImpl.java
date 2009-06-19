@@ -365,7 +365,7 @@ class FileViewManagerImpl implements FileViewManager {
             
             // Remove any ids that were removed.
             List<String> removedFriends = new ArrayList<String>(oldIds);
-            oldIds.removeAll(newIds);
+            removedFriends.removeAll(newIds);
             for(String id : removedFriends) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
