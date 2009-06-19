@@ -107,10 +107,8 @@ public class SearchOptionPanel extends OptionPanel {
                     defaultSearchSpinner));
 
             suggestFriendFiles = new JCheckBox(I18n.tr("Suggest files from friends"));
-            suggestFriendFiles.setContentAreaFilled(false);
 
             searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
-            searchTabNumberCheckBox.setContentAreaFilled(false);
             
             clearNowButton = new JButton(I18n.tr("Clear Now"));
             clearNowButton.addActionListener(new ActionListener() {
@@ -119,7 +117,6 @@ public class SearchOptionPanel extends OptionPanel {
                     searchHistory.clear();
                 }
             });
-            clearNowButton.setBorderPainted(false);
         }
 
         @Override
