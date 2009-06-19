@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-class PresenceHandler implements LiveMessageHandler {
+public class PresenceHandler implements LiveMessageHandler {
 
     private static final String TYPE = "presence";
 
