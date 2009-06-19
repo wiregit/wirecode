@@ -6,6 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Default implementation of {@link LiveMessageHandlerRegistry}.
+ * <p>
+ * Threadsafe.
+ */
 @Singleton
 class LiveMessageHandlerRegistryImpl implements LiveMessageHandlerRegistry {
     
