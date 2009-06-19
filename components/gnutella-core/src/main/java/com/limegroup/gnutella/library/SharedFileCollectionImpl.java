@@ -102,8 +102,10 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     
     @Override
     public void setFriendList(List<String> ids) {
-        data.get().setFriendsForCollection(collectionId, ids);
-        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_IDS_CHANGED, this, ids));
+        List<String> oldIds = data.get().setFriendsForCollection(collectionId, ids);
+        if(oldIds != null) { // if it changed, broadcast the change.
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_IDS_CHANGED, this, oldIds, ids));
+        }
     }
     
     @Override

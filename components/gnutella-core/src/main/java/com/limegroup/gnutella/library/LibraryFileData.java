@@ -656,18 +656,33 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
-    /** Sets a new share id list for the given collection id. */
-    void setFriendsForCollection(int collectionId, List<String> newIds) {
+    /**
+     * Sets a new share id list for the given collection id. Returns null if no
+     * change was performed because the lists were the same, otherwise returns
+     * the list this replaced.
+     */
+    List<String> setFriendsForCollection(int collectionId, List<String> newIds) {
         lock.writeLock().lock();
         try {
-            List<String> ids = collectionShareData.get(collectionId);
-            if(ids == null) {
-                ids = new ArrayList<String>();
-                collectionShareData.put(collectionId, ids);
+            List<String> oldIds = collectionShareData.get(collectionId);
+            if(oldIds == null) {
+                oldIds = Collections.emptyList();
             }
-            ids.clear();
-            ids.addAll(newIds);
-            dirty = true;
+            
+            // See if old & new are the same -- if so, don't bother.
+            // (use a HashSet so that equality isn't order based)
+            if(new HashSet<String>(oldIds).equals(newIds)) {
+                return null;
+            } else {            
+                newIds = Collections.unmodifiableList(new ArrayList<String>(newIds));            
+                if(newIds.isEmpty()) {
+                    collectionShareData.remove(collectionId);
+                } else {
+                    collectionShareData.put(collectionId, newIds);
+                }
+                dirty = true;
+                return oldIds;
+            }
         } finally {
             lock.writeLock().unlock();
         }

@@ -16,6 +16,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
     private final SharedFileCollection list;
     private final String shareId;
     private final Collection<String> newIds;
+    private final Collection<String> oldIds;
     private final String newName;
     
     public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list) {
@@ -24,6 +25,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         this.list = list;
         this.shareId = null;
         this.newIds = null;
+        this.oldIds = null;
         this.newName = null;
     }
     
@@ -33,15 +35,17 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         this.list = list;
         this.shareId = type == Type.NAME_CHANGED ? null : idOrName;
         this.newIds = null;
+        this.oldIds = null;
         this.newName = type == Type.NAME_CHANGED ? idOrName : null;
     }
     
-    public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, Collection<String> newIds) {
+    public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, Collection<String> oldIds, Collection<String> newIds) {
         assert type == Type.FRIEND_IDS_CHANGED;
         this.type = type;
         this.list = list;
         this.shareId = null;
         this.newIds = newIds;
+        this.oldIds = oldIds;
         this.newName = null;
     }
 
@@ -60,6 +64,10 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
     
     public Collection<String> getNewFriendIds() {
         return newIds;
+    }
+    
+    public Collection<String> getOldFriendIds() {
+        return oldIds;
     }
 
     public String getNewName() {
