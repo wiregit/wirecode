@@ -107,27 +107,23 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private static final Log LOG = LogFactory.getLog(FacebookFriendConnection.class);
 
-    private final FriendConnectionConfiguration configuration;
-    private final Provider<String> apiKey;
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
     private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
-    private static final String INVALID_LOGIN_HTTP_RESPONSE = "Invalid HTTP login response";
-    private String session;
-    private String uid;
-    private String secret;
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
+
+    private final FriendConnectionConfiguration configuration;
+    private final Provider<String> apiKey;
     private final ChatListenerFactory chatListenerFactory;
-    private ScheduledListeningExecutorService executorService;
+    private final ScheduledListeningExecutorService executorService;
     private final MutableProvider<String> chatChannel;
     private final AtomicBoolean loggedIn = new AtomicBoolean(false);
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final AsynchronousBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final Map<String, FacebookFriend> friends = Collections.synchronizedMap(new TreeMap<String, FacebookFriend>(String.CASE_INSENSITIVE_ORDER));
-    private FacebookJsonRestClient facebookClient;
     private final CookieStore cookieStore = new BasicCookieStore();
-    private AtomicReference<String> postFormID = new AtomicReference<String>();
+    private final AtomicReference<String> postFormID = new AtomicReference<String>();
 
     /**
      * Lock being held for adding and removing presences from friends.
@@ -135,12 +131,11 @@ public class FacebookFriendConnection implements FriendConnection {
     private final Object presenceLock = new Object();
 
     private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
-    private AddressHandler addressHandler;
-    private AuthTokenHandler authTokenHandler;
+    private final AddressHandler addressHandler;
+    private final AuthTokenHandler authTokenHandler;
     private final LibraryRefreshHandler libraryRefreshHandler;
     private final ConnectBackRequestHandler connectBackRequestHandler;
     private final FileOfferHandler fileOfferHandler;
-
     private final EventBroadcaster<FeatureEvent> featureEventBroadcaster;
 
 
@@ -162,18 +157,11 @@ public class FacebookFriendConnection implements FriendConnection {
             return Type.FACEBOOK;
         }
     };
-
     private final MutableFriendManager friendManager;
     private final PresenceListenerFactory presenceListenerFactory;
     private final FacebookFriendFactory friendFactory;
     private final DiscoInfoHandlerFactory discoInfoHandlerFactory;
-
-    private ChatListener chatListener;
-    private ScheduledFuture presenceListenerFuture;
-    private String logoutURL;
     private final ChatManager chatManager;
-    private DiscoInfoHandler discoInfoHandler;
-
     /**
      * Session id as part of the full presence id. Follows the lifetime of
      * the connection object. A new connection object should have a new
@@ -181,6 +169,15 @@ public class FacebookFriendConnection implements FriendConnection {
      */
     private final String sessionId;
 
+    private FacebookJsonRestClient facebookClient;
+    private ChatListener chatListener;
+    private ScheduledFuture presenceListenerFuture;
+    private String logoutURL;
+    private DiscoInfoHandler discoInfoHandler;
+    private String session;
+    private String uid;
+    private String secret;
+    
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
                                     @FacebookAPIKey Provider<String> apiKey,
