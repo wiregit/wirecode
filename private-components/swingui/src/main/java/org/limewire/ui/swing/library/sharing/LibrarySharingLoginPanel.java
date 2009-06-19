@@ -9,6 +9,7 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.HTMLLabel;
+import org.limewire.ui.swing.friends.actions.LoginAction;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -18,18 +19,21 @@ import com.google.inject.Provider;
 
 /** Creates Login Panel for inner sharing Nav. */
 class LibrarySharingLoginPanel {
-    
+   
     private static final String SIGN_IN = "#signin";
     private static final String STOP_SHARING = "#stopsharing";
     
     private final HTMLLabel htmlLabel;    
-    private final JPanel component;    
+    private final JPanel component;   
+    
+    private boolean hasShared;
+    private boolean loggedOut;
     
     @Inject
-    public LibrarySharingLoginPanel(final Provider<ShowLoginAction> loginAction,
+    public LibrarySharingLoginPanel(final Provider<LoginAction> loginAction,
             final Provider<StopSharingAction> stopSharing) {
         component = new JPanel(new MigLayout("", "134!", ""));
-        
+                
         component.setOpaque(false);
         
         htmlLabel = new HTMLLabel("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list.", SIGN_IN) + "</html>");
@@ -56,10 +60,22 @@ class LibrarySharingLoginPanel {
 
     /** Sets the new set of people that this list is shared with. */
     void setSharedFriendIds(EventList<String> friendIds) {
-        if(friendIds.isEmpty()) {
+        hasShared = !friendIds.isEmpty();
+        setMessage();
+    }
+    
+    private void setMessage() {
+        if(!loggedOut) {
+            htmlLabel.setText("<html>" + I18n.tr("Logging in...") + "</html>");
+        } else if(hasShared) {
             htmlLabel.setText("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list.", SIGN_IN) + "</html>");
         } else {
             htmlLabel.setText("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list and edit sharing.  Or <a href={1}>stop it</a> from being shared now.", SIGN_IN, STOP_SHARING) + "</html>");
         }
+    }
+
+    void setLoggingIn(boolean loggingIn) {
+        loggedOut = !loggingIn;
+        setMessage();
     }
 }

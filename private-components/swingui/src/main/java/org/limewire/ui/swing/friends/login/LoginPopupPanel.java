@@ -54,7 +54,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         
         this.serviceSelectionLoginPanelProvider = serviceSelectionLoginPanelProvider;
         this.xmppUserEntryLoginPanelFactory = generalUserEntryLoginPanelFactory;
-        
+       
         GuiUtils.assignResources(this);
         
         setLayout(new BorderLayout());

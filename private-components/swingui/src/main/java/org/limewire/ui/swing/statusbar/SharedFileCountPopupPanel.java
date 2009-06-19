@@ -43,6 +43,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -95,6 +96,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private final XMPPService xmppService;
     private final ListenerSupport<XMPPConnectionEvent> connectionSupport;
     private final LibraryMediator libraryMediator;
+    private final Provider<AutoLoginService> autoLoginServiceProvider;
 
     private Timer repaintTimer = null; 
     
@@ -118,7 +120,8 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             Provider<LoginPopupPanel> loginPanelProvider,
             XMPPService xmppService,
             ListenerSupport<XMPPConnectionEvent> connectionSupport,
-            LibraryMediator libraryMediator) {
+            LibraryMediator libraryMediator,
+            Provider<AutoLoginService> autoLoginServiceProvider) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
@@ -127,6 +130,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         this.xmppService = xmppService;
         this.connectionSupport = connectionSupport;
         this.libraryMediator = libraryMediator;
+        this.autoLoginServiceProvider = autoLoginServiceProvider;
         
         GuiUtils.assignResources(this);
         
@@ -349,7 +353,8 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     }
     
     private boolean shouldShowSignInButton() {
-        if (xmppService.isLoggedIn()) {
+        if (xmppService.isLoggedIn() || xmppService.isLoggingIn()
+                || autoLoginServiceProvider.get().isAttemptingLogin()) {
             return false;
         }
         if (shareListManager.getModel().size() == 1) {

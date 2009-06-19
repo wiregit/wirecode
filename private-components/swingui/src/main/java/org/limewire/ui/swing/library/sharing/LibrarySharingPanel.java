@@ -20,6 +20,7 @@ import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent.Type;
@@ -47,6 +48,7 @@ public class LibrarySharingPanel {
     private final Provider<LibrarySharingLoginPanel> loginPanelProvider;
     private final Provider<LibrarySharingFriendListPanel> friendListPanelProvider;
     private final Provider<LibrarySharingEditablePanel> editablePanelProvider;
+    private final Provider<AutoLoginService> autoLoginServiceProvider;
     
     // these are all lazily created.
     private LibrarySharingLoginPanel loginPanel;
@@ -69,12 +71,14 @@ public class LibrarySharingPanel {
     public LibrarySharingPanel(Provider<LibrarySharingLoginPanel> loginPanel,
             Provider<LibrarySharingFriendListPanel> nonEditablePanel,
             Provider<LibrarySharingEditablePanel> editablePanel,
-            EventBean<XMPPConnectionEvent> connectionEvent) {
+            EventBean<XMPPConnectionEvent> connectionEvent,
+            Provider<AutoLoginService> autoLoginServiceProvider) {
         this.loginPanelProvider = loginPanel;
         this.friendListPanelProvider = nonEditablePanel;
         this.editablePanelProvider = editablePanel;
         this.connectionEvent = connectionEvent;
         this.friendsListener = new FriendsListener();
+        this.autoLoginServiceProvider = autoLoginServiceProvider;
                 
         GuiUtils.assignResources(this);
         
@@ -108,6 +112,7 @@ public class LibrarySharingPanel {
             layoutMap.put(LOGIN_VIEW, newComponent);
         }         
         currentView = View.LOGIN;
+        loginPanel.setLoggingIn(isLoggingIn());
         sharesChanged();
         layout.show(component, LOGIN_VIEW);
     }
@@ -186,6 +191,18 @@ public class LibrarySharingPanel {
             return false;
         } else {
             return connectionEvent.getLastEvent().getType() == Type.CONNECTED;
+        }
+    }
+    
+    private boolean isLoggingIn() {
+        if (autoLoginServiceProvider.get().isAttemptingLogin()) {
+            return true;
+        }
+        
+        if(connectionEvent.getLastEvent() == null) {
+            return false;
+        } else {
+            return connectionEvent.getLastEvent().getType() == Type.CONNECTING;
         }
     }
     

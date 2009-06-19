@@ -4,7 +4,6 @@ import javax.swing.SwingUtilities;
 
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.xmpp.api.client.XMPPService;
 
@@ -16,11 +15,33 @@ public class AutoLoginService implements Service {
     
     private final XMPPAccountConfigurationManager accountManager;
     private final XMPPService service;
+    private boolean hasAttemptedLogin = false;
     
     @Inject
     public AutoLoginService(XMPPAccountConfigurationManager accountManager, XMPPService service) {
         this.accountManager = accountManager;
         this.service = service;
+    }
+    
+    /**
+     * Used to identify whether or not this service will attempt to automatically login.
+     */
+    public boolean hasLoginConfig() {
+        return accountManager.getAutoLoginConfig() != null;
+    }
+    
+    /**
+     * Whether or not the service has attempted a login yet.
+     */
+    public boolean hasAttemptedLogin() {
+        return hasAttemptedLogin;
+    }
+    
+    /**
+     * If an auto login is in process.
+     */
+    public boolean isAttemptingLogin() {
+        return !hasAttemptedLogin() && hasLoginConfig(); 
     }
     
     @Inject
@@ -42,11 +63,10 @@ public class AutoLoginService implements Service {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                XMPPAccountConfiguration autoConf =
-                    accountManager.getAutoLoginConfig();
-                if(autoConf != null) {
-                    service.login(autoConf);
+                if(hasLoginConfig()) {
+                    service.login(accountManager.getAutoLoginConfig());
                 }
+                hasAttemptedLogin = true;
             }
         });
     }
