@@ -52,11 +52,11 @@ public class SearchOptionPanel extends OptionPanel {
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
         
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
-        add(getSearchBarPanel(), "pushx, growx");
-        add(getFilteringPanel(), "pushx, growx");
+        setLayout(new MigLayout("insets 15 15 15 15, fillx"));
+        add(getSearchBarPanel(), "growx, wrap");
+        add(getFilteringPanel(), "growx, wrap");
         
-        add(groupSimilarResults, "gaptop 10, gapleft 15");
+        add(groupSimilarResults, "gaptop 5, growx, wrap");
     }
 
     private OptionPanel getSearchBarPanel() {
@@ -102,7 +102,7 @@ public class SearchOptionPanel extends OptionPanel {
         private JButton clearNowButton;
 
         public SearchBarPanel() {
-            super(I18n.tr("Search bar"));
+            super(I18n.tr("Search Bar"));
             setLayout(new MigLayout("nogrid, insets 4, fill"));
             createComponents();
 
@@ -197,7 +197,7 @@ public class SearchOptionPanel extends OptionPanel {
         private JButton filterFileExtensionsButton;
         
         public FilteringPanel() {
-            super(I18n.tr("Filtering"));
+            super(I18n.tr("Search Filtering"));
             
             filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
@@ -213,19 +213,23 @@ public class SearchOptionPanel extends OptionPanel {
             
             filterKeywordsButton = new JButton(new DialogDisplayAction(SearchOptionPanel.this,
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
-                    I18n.tr("Filter Keywords..."),I18n.tr("Restrict files with certain words from being displayed in search results")));
+                    I18n.tr("Filter Keywords"),
+                    I18n.tr("Restrict files with certain words from being displayed in search results")));
             
             filterFileExtensionsButton = new JButton(new DialogDisplayAction( SearchOptionPanel.this,
                     filterFileExtensionPanel, I18n.tr("Filter File Extensions"),
-                    I18n.tr("Filter File Extensions..."), I18n.tr("Restrict files with certain extensions from being displayed in search results")));
+                    I18n.tr("Filter File Extensions"),
+                    I18n.tr("Restrict files with certain extensions from being displayed in search results")));
             
-            add(new JLabel(I18n.tr("In search results...")), "wrap");
+            setLayout(new MigLayout("nogrid, insets 4, fill"));
             
-            add(copyrightContentCheckBox, "split, gapleft 20, wrap");
-            add(adultContentCheckBox, "split, gapleft 20, wrap");
+            add(new JLabel(I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results")), "wrap");
             
-            add(filterKeywordsButton, "split, gapright 10");
-            add(filterFileExtensionsButton);
+            add(copyrightContentCheckBox, "wrap");
+            add(adultContentCheckBox, "wrap");
+            
+            add(filterKeywordsButton, "gapright 10, alignx left");
+            add(filterFileExtensionsButton, "alignx left, wrap");
         }
         
         @Override
