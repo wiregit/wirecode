@@ -417,7 +417,10 @@ public class FacebookFriendConnection implements FriendConnection {
             }
         }
     }
-
+    
+    /**
+     * Sets this facebook user visible for chat.
+     */ 
     private void setVisible() throws IOException {
         HttpPost httpPost = new HttpPost(FACEBOOK_CHAT_SETTINGS_URL);
         httpPost.addHeader("User-Agent", USER_AGENT_HEADER);

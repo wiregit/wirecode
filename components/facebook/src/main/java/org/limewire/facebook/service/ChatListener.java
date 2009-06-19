@@ -19,7 +19,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * This listens for new chat messages and live messages, and dispatches them to the
  * appropriate handlers.  It does this via http polling, where the requests are long running (COMET style).
  */
-class ChatListener implements Runnable {
+public class ChatListener implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(org.limewire.facebook.service.ChatListener.class);
     
@@ -56,6 +56,7 @@ class ChatListener implements Runnable {
             seq = getSeq();
         } catch(IOException e1){
             LOG.debug("error getting initial sequence number", e1);
+            connection.logout();
         } catch(JSONException e1){
             LOG.debug("error parsing initial sequence number", e1);
         }
@@ -89,6 +90,7 @@ class ChatListener implements Runnable {
                 }
             } catch (IOException e) {
                 LOG.debug("error getting chat message", e);
+                connection.logout();
             } catch (JSONException e) {
                 LOG.debug("error parsing chat message", e);
             }
@@ -181,16 +183,15 @@ class ChatListener implements Runnable {
     }
 
     private int getSeq() throws IOException, JSONException {
-        int tempSeq = -1;
-        while (tempSeq == -1) {
+        for (int i = 0; i < 3; i++) {
             String seqResponseBody = connection.httpGET(getMessageRequestingUrl(-1));
             if (seqResponseBody == null) {
                 LOG.debug("null response for seq");
                 continue;
             }
-            tempSeq = parseSeq(seqResponseBody);
-            if(tempSeq >= 0){
-                return tempSeq;
+            int sequenceNumber = parseSeq(seqResponseBody);
+            if(sequenceNumber >= 0){
+                return sequenceNumber;
             }
             try {
                 LOG.debug("retrying to retrieve the seq code after 1 second...");
@@ -199,7 +200,7 @@ class ChatListener implements Runnable {
                 LOG.debug(e.getMessage(), e);
             }
         }
-        return tempSeq;
+        throw new IOException("could not parse sequence number"); 
     }
     
     private String getMessageRequestingUrl(long seq) {
