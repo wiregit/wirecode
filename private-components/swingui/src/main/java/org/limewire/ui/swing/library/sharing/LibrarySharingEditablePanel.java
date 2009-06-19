@@ -113,13 +113,18 @@ class LibrarySharingEditablePanel {
         baseEventList = new BasicEventList<EditableSharingData>();
         MatcherEditor<EditableSharingData> matcher = new TextComponentMatcherEditor<EditableSharingData>(filterTextField, new FriendFilterator());
         filteredList = new FilterList<EditableSharingData>(baseEventList, matcher);
-        friendTable = new GlazedJXTable(new EventTableModel<EditableSharingData>(baseEventList, new EditTableFormat())) {
+        friendTable = new GlazedJXTable(new EventTableModel<EditableSharingData>(filteredList, new EditTableFormat())) {
             @Override
             public void editingStopped(ChangeEvent e) {
                 TableCellEditor editor = getCellEditor();
                 if(editor != null) {
                     removeEditor();
                 }
+            }
+            
+            @Override
+            public Dimension getPreferredScrollableViewportSize() {
+                return new Dimension(super.getPreferredScrollableViewportSize().width, getModel().getRowCount() * getRowHeight());
             }
         };
         JScrollPane scrollPane = new JScrollPane(friendTable);
@@ -161,6 +166,7 @@ class LibrarySharingEditablePanel {
         if(!setOfIds.isEmpty()) {
             baseEventList.add(new EditableSharingData(new ArrayList<String>(setOfIds), true));
         }
+        component.revalidate();
     }
     
     /**
