@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -15,7 +15,13 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.spam.SpamManager;
+import org.limewire.core.settings.ContentSettings;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.options.actions.DialogDisplayAction;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
@@ -30,11 +36,17 @@ import com.google.inject.name.Named;
 public class SearchOptionPanel extends OptionPanel {
 
     private final AutoCompleteDictionary searchHistory;
+    private final SpamManager spamManager;
+    
     private SearchBarPanel searchBarPanel;
+    private FilteringPanel filteringPanel;
     private JCheckBox groupSimilarResults;
 
     @Inject
-    public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory) {
+    public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
+            SpamManager spamManager) {
+        
+        this.spamManager = spamManager;
         this.searchHistory = searchHistory;
         
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
@@ -42,6 +54,7 @@ public class SearchOptionPanel extends OptionPanel {
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         add(getSearchBarPanel(), "pushx, growx");
+        add(getFilteringPanel(), "pushx, growx");
         
         add(groupSimilarResults, "gaptop 10, gapleft 15");
     }
@@ -56,18 +69,24 @@ public class SearchOptionPanel extends OptionPanel {
     @Override
     boolean applyOptions() {
         SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
-        return getSearchBarPanel().applyOptions();
+        
+        boolean restart = getSearchBarPanel().applyOptions();
+        restart |= getFilteringPanel().applyOptions();
+        
+        return restart;
     }
 
     @Override
     boolean hasChanged() {
-        return getSearchBarPanel().hasChanged() 
+        return getSearchBarPanel().hasChanged()
+        || getFilteringPanel().hasChanged()
         || groupSimilarResults.isSelected() != SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue();
     }
 
     @Override
     public void initOptions() {
         getSearchBarPanel().initOptions();
+        getFilteringPanel().initOptions();
         
         groupSimilarResults.setSelected(SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
     }
@@ -84,17 +103,17 @@ public class SearchOptionPanel extends OptionPanel {
 
         public SearchBarPanel() {
             super(I18n.tr("Search bar"));
-            setLayout(new MigLayout("", "", "[][][]"));
+            setLayout(new MigLayout("nogrid, insets 4, fill"));
             createComponents();
 
-            add(new JLabel(I18n.tr("By default, search for")), "split");
+            add(new JLabel(I18n.tr("By default, search for")));
             add(defaultSearchSpinner, "wrap");
 
-            add(suggestFriendFiles, "split 4, wrap");
+            add(suggestFriendFiles, "wrap");
 
-            add(searchTabNumberCheckBox, "split 4, push");
+            add(searchTabNumberCheckBox, "gapright push");
 
-            add(clearNowButton, "wrap, alignx right");
+            add(clearNowButton, "alignx right, wrap");
         }
 
         private void createComponents() {
@@ -107,11 +126,12 @@ public class SearchOptionPanel extends OptionPanel {
                     defaultSearchSpinner));
 
             suggestFriendFiles = new JCheckBox(I18n.tr("Suggest files from friends"));
+            suggestFriendFiles.setOpaque(false);
 
             searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
+            searchTabNumberCheckBox.setOpaque(false);
             
-            clearNowButton = new JButton(I18n.tr("Clear Now"));
-            clearNowButton.addActionListener(new ActionListener() {
+            clearNowButton = new JButton(new AbstractAction(I18n.tr("Clear Now")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     searchHistory.clear();
@@ -155,6 +175,81 @@ public class SearchOptionPanel extends OptionPanel {
             setText(SearchCategoryUtils.getOptionsName(category));
            
             return this;
+        }
+    }
+
+    private OptionPanel getFilteringPanel() {
+        if(filteringPanel == null) {
+            filteringPanel = new FilteringPanel();
+        }
+        return filteringPanel;
+    }
+
+    
+    private class FilteringPanel extends OptionPanel {
+
+        private FilterKeywordOptionPanel filterKeywordPanel;
+        private FilterFileExtensionsOptionPanel filterFileExtensionPanel;
+        
+        private JCheckBox copyrightContentCheckBox;
+        private JCheckBox adultContentCheckBox;
+        private JButton filterKeywordsButton;
+        private JButton filterFileExtensionsButton;
+        
+        public FilteringPanel() {
+            super(I18n.tr("Filtering"));
+            
+            filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
+            filterKeywordPanel.setPreferredSize(new Dimension(300,400));
+            
+            filterFileExtensionPanel = new FilterFileExtensionsOptionPanel(spamManager, new OKDialogAction());
+            filterFileExtensionPanel.setPreferredSize(new Dimension(300,400));
+            
+            copyrightContentCheckBox = new JCheckBox(I18n.tr("Don't let me download or upload files copyright owners request not be shared."));
+            copyrightContentCheckBox.setContentAreaFilled(false);
+            
+            adultContentCheckBox = new JCheckBox(I18n.tr("Don't show adult content in search results"));
+            adultContentCheckBox.setContentAreaFilled(false);
+            
+            filterKeywordsButton = new JButton(new DialogDisplayAction(SearchOptionPanel.this,
+                    filterKeywordPanel, I18n.tr("Filter Keywords"),
+                    I18n.tr("Filter Keywords..."),I18n.tr("Restrict files with certain words from being displayed in search results")));
+            
+            filterFileExtensionsButton = new JButton(new DialogDisplayAction( SearchOptionPanel.this,
+                    filterFileExtensionPanel, I18n.tr("Filter File Extensions"),
+                    I18n.tr("Filter File Extensions..."), I18n.tr("Restrict files with certain extensions from being displayed in search results")));
+            
+            add(new JLabel(I18n.tr("In search results...")), "wrap");
+            
+            add(copyrightContentCheckBox, "split, gapleft 20, wrap");
+            add(adultContentCheckBox, "split, gapleft 20, wrap");
+            
+            add(filterKeywordsButton, "split, gapright 10");
+            add(filterFileExtensionsButton);
+        }
+        
+        @Override
+        boolean applyOptions() {
+            ContentSettings.USER_WANTS_MANAGEMENTS.setValue(copyrightContentCheckBox.isSelected());
+            
+            FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
+            return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions();
+        }
+
+        @Override
+        boolean hasChanged() {
+            return  ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != copyrightContentCheckBox.isSelected()
+                    ||FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
+                    || filterKeywordPanel.hasChanged()
+                    || filterFileExtensionPanel.hasChanged();
+        }
+
+        @Override
+        public void initOptions() {
+            copyrightContentCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue());
+            adultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
+            filterKeywordPanel.initOptions();
+            filterFileExtensionPanel.initOptions();
         }
     }
 

@@ -1,18 +1,12 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.Dimension;
-
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.SharedFileListManager;
-import org.limewire.core.api.spam.SpamManager;
-import org.limewire.core.settings.ContentSettings;
-import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
@@ -27,21 +21,17 @@ public class SecurityOptionPanel extends OptionPanel {
     
     private WarningMessagesPanel warningMessagesPanel;
     private UnsafeTypesPanel unsafeTypesPanel;
-    private FilteringPanel filteringPanel;
-    private final SpamManager spamManager;
     private final LibraryManager libraryManager;
     private final SharedFileListManager shareListManager;
     
     @Inject
-    public SecurityOptionPanel(SpamManager spamManager, LibraryManager libraryManager, SharedFileListManager shareListManager) {
-        this.spamManager = spamManager;
+    public SecurityOptionPanel(LibraryManager libraryManager, SharedFileListManager shareListManager) {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getWarningMessagesPanel(), "pushx, growx");
         add(getUnsafeTypesPanel(), "pushx, growx");
-        add(getFilteringPanel(), "pushx, growx");
     }
     
     private OptionPanel getWarningMessagesPanel() {
@@ -58,32 +48,24 @@ public class SecurityOptionPanel extends OptionPanel {
         return unsafeTypesPanel;
     }
     
-    private OptionPanel getFilteringPanel() {
-        if(filteringPanel == null) {
-            filteringPanel = new FilteringPanel();
-        }
-        return filteringPanel;
-    }
 
     @Override
     boolean applyOptions() {
         boolean restart = getWarningMessagesPanel().applyOptions();
         restart |= getUnsafeTypesPanel().applyOptions();
-        restart |= getFilteringPanel().applyOptions();
 
         return restart;
     }
 
     @Override
     boolean hasChanged() {
-        return getWarningMessagesPanel().hasChanged() || getUnsafeTypesPanel().hasChanged() || getFilteringPanel().hasChanged();
+        return getWarningMessagesPanel().hasChanged() || getUnsafeTypesPanel().hasChanged();
     }
 
     @Override
     public void initOptions() {
         getWarningMessagesPanel().initOptions();
         getUnsafeTypesPanel().initOptions();
-        getFilteringPanel().initOptions();
     }
     
     private class WarningMessagesPanel extends OptionPanel {
@@ -159,70 +141,4 @@ public class SecurityOptionPanel extends OptionPanel {
         }
     }
     
-    private class FilteringPanel extends OptionPanel {
-
-        private FilterKeywordOptionPanel filterKeywordPanel;
-        private FilterFileExtensionsOptionPanel filterFileExtensionPanel;
-        
-        private JCheckBox copyrightContentCheckBox;
-        private JCheckBox adultContentCheckBox;
-        private JButton filterKeywordsButton;
-        private JButton filterFileExtensionsButton;
-        
-        public FilteringPanel() {
-            super(I18n.tr("Filtering"));
-            
-            filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
-            filterKeywordPanel.setPreferredSize(new Dimension(300,400));
-            
-            filterFileExtensionPanel = new FilterFileExtensionsOptionPanel(spamManager, new OKDialogAction());
-            filterFileExtensionPanel.setPreferredSize(new Dimension(300,400));
-            
-            copyrightContentCheckBox = new JCheckBox(I18n.tr("Don't let me download or upload files copyright owners request not be shared."));
-            copyrightContentCheckBox.setContentAreaFilled(false);
-            
-            adultContentCheckBox = new JCheckBox(I18n.tr("Don't show adult content in search results"));
-            adultContentCheckBox.setContentAreaFilled(false);
-            
-            filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
-                    filterKeywordPanel, I18n.tr("Filter Keywords"),
-                    I18n.tr("Filter Keywords..."),I18n.tr("Restrict files with certain words from being displayed in search results")));
-            
-            filterFileExtensionsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
-                    filterFileExtensionPanel, I18n.tr("Filter File Extensions"),
-                    I18n.tr("Filter File Extensions..."), I18n.tr("Restrict files with certain extensions from being displayed in search results")));
-            
-            add(new JLabel(I18n.tr("In search results...")), "wrap");
-            
-            add(copyrightContentCheckBox, "split, gapleft 20, wrap");
-            add(adultContentCheckBox, "split, gapleft 20, wrap");
-            
-            add(filterKeywordsButton, "split, gapright 10");
-            add(filterFileExtensionsButton);
-        }
-        
-        @Override
-        boolean applyOptions() {
-            ContentSettings.USER_WANTS_MANAGEMENTS.setValue(copyrightContentCheckBox.isSelected());
-            
-            FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
-            return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions();
-        }
-
-        @Override
-        boolean hasChanged() {
-            return  ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != copyrightContentCheckBox.isSelected()
-                    ||FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
-                    || filterKeywordPanel.hasChanged()
-                    || filterFileExtensionPanel.hasChanged();
-        }
-
-        @Override
-        public void initOptions() {
-            copyrightContentCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue());
-            adultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
-            filterKeywordPanel.initOptions();
-            filterFileExtensionPanel.initOptions();
-        }
-    }
 }
