@@ -72,7 +72,7 @@ import org.limewire.friend.api.MessageReader;
 import org.limewire.friend.api.MessageWriter;
 import org.limewire.friend.api.MutableFriendManager;
 import org.limewire.friend.api.Network;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.feature.AddressFeature;

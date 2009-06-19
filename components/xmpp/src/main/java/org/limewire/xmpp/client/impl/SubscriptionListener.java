@@ -12,7 +12,7 @@ import org.jivesoftware.smack.packet.Presence.Type;
 import org.limewire.friend.api.FriendRequest;
 import org.limewire.friend.api.FriendRequestDecisionHandler;
 import org.limewire.friend.api.FriendRequestEvent;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;

@@ -8,7 +8,7 @@ import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.PresenceEvent;
 import org.limewire.friend.api.RosterEvent;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.listener.EventListener;
 

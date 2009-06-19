@@ -16,7 +16,7 @@ import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.api.feature.FeatureTransport;

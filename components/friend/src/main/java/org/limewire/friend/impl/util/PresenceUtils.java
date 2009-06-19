@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package org.limewire.friend.api;
+package org.limewire.friend.impl.util;
 
 
 /**

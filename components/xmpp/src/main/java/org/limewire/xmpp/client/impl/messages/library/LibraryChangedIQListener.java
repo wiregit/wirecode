@@ -9,7 +9,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.friend.api.feature.LibraryChangedNotifier;
 import org.limewire.logging.Log;

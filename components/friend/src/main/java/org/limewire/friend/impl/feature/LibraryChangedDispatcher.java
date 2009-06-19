@@ -8,7 +8,7 @@ import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.LibraryChanged;
 import org.limewire.friend.api.LibraryChangedEvent;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.friend.api.feature.LibraryChangedNotifier;

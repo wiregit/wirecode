@@ -7,7 +7,7 @@ import java.util.Map;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
 import org.limewire.friend.api.FileMetaData;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;

@@ -15,7 +15,7 @@ import org.limewire.facebook.service.FacebookFriendConnection;
 import org.limewire.facebook.service.FacebookFriendPresence;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.FriendPresenceEvent;
-import org.limewire.friend.api.PresenceUtils;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
