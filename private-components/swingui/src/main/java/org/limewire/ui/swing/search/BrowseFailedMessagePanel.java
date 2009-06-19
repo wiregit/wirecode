@@ -1,10 +1,12 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,7 +30,9 @@ import org.limewire.ui.swing.util.I18n;
  */
 public class BrowseFailedMessagePanel extends JPanel {
 
-    @Resource private Color backgroundColor;
+    @Resource private Icon arrow;
+    @Resource private Font chatFont;
+    @Resource private Color chatForeground;
 
     private final SearchResultsModel searchResultsModel;
 
@@ -57,7 +61,6 @@ public class BrowseFailedMessagePanel extends JPanel {
     }
 
     private void initialize() {
-        setBackground(backgroundColor);
         setLayout(new MigLayout("insets 0, gap 0, fill"));
     }
     
@@ -76,16 +79,10 @@ public class BrowseFailedMessagePanel extends JPanel {
 
         JLabel message = new JLabel(text);
         messageComponent.decorateHeaderLabel(message);
-        messageComponent.addComponent(message, "wrap");
-        
-        if (state == BrowseState.NO_FRIENDS_SHARING){
-            JLabel subMessage = new JLabel(I18n.tr("When they sign on LimeWire and share with you, their files will appear here."));
-            messageComponent.decorateSubLabel(subMessage);            
-            messageComponent.addComponent(subMessage, "");
-        }
-        
+        messageComponent.addComponent(message, hasRefresh() ? "" : "wrap");
+       
 
-        if (state != BrowseState.OFFLINE && state != BrowseState.NO_FRIENDS_SHARING) {
+        if (hasRefresh()) {
             HyperlinkButton refresh = new HyperlinkButton(I18n.tr("Retry"));
             refresh.addActionListener(new ActionListener() {
                 @Override
@@ -95,14 +92,37 @@ public class BrowseFailedMessagePanel extends JPanel {
                 }
             });
             messageComponent.decorateHeaderLink(refresh);
-            messageComponent.addComponent(refresh, "gapleft 5");
+            messageComponent.addComponent(refresh, "gapleft 5, wrap");
         }
+        
+        
+        if (state == BrowseState.NO_FRIENDS_SHARING){
+            JLabel subMessage = new JLabel(I18n.tr("When they sign on LimeWire and share with you, their files will appear here."));
+            messageComponent.decorateSubLabel(subMessage);            
+            messageComponent.addComponent(subMessage, "");
+        }
+        
         
         return messageComponent;
     }
+    
+    private boolean hasRefresh(){
+        return state != BrowseState.OFFLINE && state != BrowseState.NO_FRIENDS_SHARING;
+    }
+    
     private JComponent createBottomComponent(){
         if(state == BrowseState.NO_FRIENDS_SHARING){
-            return new JLabel("Chat and tell them to sign on");
+            JLabel message = new JLabel("Chat and tell them to sign on");
+            message.setFont(chatFont);
+            message.setForeground(chatForeground);
+            message.setVerticalTextPosition(JLabel.TOP);
+            
+            JLabel arrowLabel = new JLabel(arrow);
+            
+            JPanel panel = new JPanel(new MigLayout("insets 0, gap 0, novisualpadding"));
+            panel.add(message, "aligny bottom, gapbottom " + (10 + arrowLabel.getPreferredSize().height/2));
+            panel.add(arrowLabel, "aligny bottom, gapleft 10, gapright 16, gapbottom 10");
+            return panel;
         }
         return new JLabel();
     }
