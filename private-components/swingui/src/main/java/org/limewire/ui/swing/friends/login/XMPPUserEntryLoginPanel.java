@@ -216,7 +216,6 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         autoLoginCheckBox.setFont(autoLoginCheckBoxFont);
         autoLoginCheckBox.setIcon(autoLoginCheckBoxIcon);
         autoLoginCheckBox.setSelectedIcon(autoLoginCheckBoxSelectedIcon);
-        autoLoginCheckBox.setSelected(SwingUiSettings.REMEMBER_ME_CHECKED.getValue());
         autoLoginCheckBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -297,7 +296,6 @@ public class XMPPUserEntryLoginPanel extends JPanel {
             serviceField.setText(accountConfig.getServiceName());
             usernameField.setText(accountConfig.getUserInputLocalID());
             passwordField.setText(accountConfig.getPassword());
-            autoLoginCheckBox.setSelected(true);
         } else {
             serviceField.setText("");
             usernameField.setText("");
