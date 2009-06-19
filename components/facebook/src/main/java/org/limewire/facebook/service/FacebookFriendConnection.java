@@ -381,7 +381,7 @@ public class FacebookFriendConnection implements FriendConnection {
         return loggingIn.get();
     }
 
-    synchronized void loginImpl() throws FriendException {
+    void loginImpl() throws FriendException {
         synchronized (this) {
             try {
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
@@ -512,28 +512,17 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private void parseSessionResponse(HttpResponse response) throws IOException, JSONException {
         String responseBody = EntityUtils.toString(response.getEntity());
-		if (responseBody.matches( "[\\{\\[].*[\\}\\]]")) {
-            JSONObject json = null;
-            if (responseBody.matches( "\\{.*\\}")) {
-                json = new JSONObject(responseBody);
-            } else {
-                LOG.debugf("body doesn't match inner regex: {0}", responseBody);
-                throw new IOException(INVALID_LOGIN_HTTP_RESPONSE);
+		JSONObject json = new JSONObject(responseBody);
+        session = json.getString("session_key");
+        secret = json.getString("secret");
+        uid = json.getString("uid");
+        LOG.debugf("received session {0}, secret {1}, uid: {2}", session, secret, uid);
+        facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
+        if(LOG.isDebugEnabled()) {
+            for(Cookie cookie : cookieStore.getCookies()) {
+                LOG.debugf(cookie.getName() + " = " + cookie.getValue());
             }
-            session = json.getString("session_key");
-            secret = json.getString("secret");
-            uid = json.getString("uid");
-            LOG.debugf("received session {0}, secret {1}, uid: {2}", session, secret, uid);
-            facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
-            if(LOG.isDebugEnabled()) {
-                for(Cookie cookie : cookieStore.getCookies()) {
-                    LOG.debugf(cookie.getName() + " = " + cookie.getValue());
-                }
-            }
-		} else {
-		    LOG.debugf("body doesn't match regex: {0}", responseBody);
-            throw new IOException(INVALID_LOGIN_HTTP_RESPONSE);
-		}
+        }
     }
 
     public void readMetadataFromHomePage() throws IOException {
@@ -553,6 +542,8 @@ public class FacebookFriendConnection implements FriendConnection {
         readPOSTFormID(presencePopoutPage);
     }
 
+    // the logout url is dynamic - it contains a few query params that seem to change across sessions.
+    // read the logout url here
     private void readLogoutURL(String homePage) throws IOException {
         String logoutURLPrefix = "<a href=\"http://www.facebook.com/logout.php?";
         int logoutURLBeginPos = homePage.indexOf(logoutURLPrefix);
@@ -567,6 +558,9 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
+    // the post_form_id is a hidden input to the form used for posting chat messages.
+    // Its value is dynamic and changes across sessions, sometimes during a session.
+    // We read the value here.
     private void readPOSTFormID(String homePage) throws IOException {
         String post_form_id;
         String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
@@ -583,6 +577,9 @@ public class FacebookFriendConnection implements FriendConnection {
         setPostFormID(post_form_id);
     }
 
+    // There is a pool of chat servers.  Each user is assigned a single chat server forever (it appears).
+    // That server is identified by a number called a "channel".
+    // We read its value here.
     private void readChannel(String homePage) throws IOException {
         String channel;
         String channelPrefix = " \"channel";

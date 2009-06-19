@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-public class BuddyListResponseDeserializer {
+class BuddyListResponseDeserializer {
     
     private static final Log LOG = LogFactory.getLog(BuddyListResponseDeserializer.class);
     
