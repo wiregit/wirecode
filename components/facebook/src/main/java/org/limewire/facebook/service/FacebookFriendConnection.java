@@ -58,6 +58,7 @@ import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
 import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 import org.limewire.facebook.service.livemessage.DiscoInfoHandler;
 import org.limewire.facebook.service.settings.ChatChannel;
+import org.limewire.facebook.service.settings.FacebookAPIKey;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
@@ -181,7 +182,7 @@ public class FacebookFriendConnection implements FriendConnection {
 
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
-                                    @Named("facebookApiKey") Provider<String> apiKey,
+                                    @FacebookAPIKey Provider<String> apiKey,
                                     AsynchronousBroadcaster<FriendConnectionEvent> connectionBroadcaster,
                                     EventBroadcaster<FeatureEvent> featureEventBroadcaster,
                                     EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster,
