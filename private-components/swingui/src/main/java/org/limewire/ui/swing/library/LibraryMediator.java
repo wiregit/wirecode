@@ -6,6 +6,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.util.NotImplementedException;
@@ -117,8 +118,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         throw new NotImplementedException("not implemented");
     }
     
-    // TODO: keyed on string id or SharedFileList instance?
-    public void showSharedFileList(String id) {
-        throw new NotImplementedException("not implemented (navigate to " + id + ")");
+    public void showSharedFileList(SharedFileList list) {
+        throw new NotImplementedException("not implemented (navigate to " + list.getCollectionName() + ")");
     }
 }

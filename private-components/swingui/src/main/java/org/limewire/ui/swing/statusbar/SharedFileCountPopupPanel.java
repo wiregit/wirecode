@@ -16,6 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -483,20 +484,12 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     
     private class LinkEditor extends AbstractCellEditor implements TableCellEditor {
 
-        private final HyperlinkButton button = new HyperlinkButton(new AbstractAction() {
+        private final SharedFileListHyperLinkButton button = new SharedFileListHyperLinkButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                libraryMediator.showSharedFileList(button.getText());
+                libraryMediator.showSharedFileList(filteredSharedFileLists.get(button.getFilteredListIndex()));
             }
-        }) {
-            
-            /**
-             * Used to filter out evil foreground calls from the default JXTable Highlighter
-             */
-            @Override
-            public void setForeground(Color c) {
-            }
-        };
+        });
         
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
@@ -507,7 +500,8 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             }
             
             button.setText(value.toString());
-
+            button.setFilteredListIndex(row);
+            
             return button;         
         }
         
@@ -518,6 +512,31 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         public void setFont(Font f) {
             button.setFont(f);
+        }
+        
+    }
+    
+    private static class SharedFileListHyperLinkButton extends HyperlinkButton {
+        
+        private int filteredListIndex = -1;
+        
+        public SharedFileListHyperLinkButton(Action a) {
+            super(a);
+        }
+        
+        public void setFilteredListIndex(int i) {
+            filteredListIndex = i;
+        }
+        
+        public int getFilteredListIndex() {
+            return filteredListIndex;
+        }
+        
+        /**
+         * Used to filter out evil foreground calls from the default JXTable Highlighter
+         */
+        @Override
+        public void setForeground(Color c) {
         }
     }
     
