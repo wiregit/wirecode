@@ -166,11 +166,21 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             public void listChanged(ListEvent<SourceItem> listChanges) {
                 updateAnonymousFound();
                 updateAnyFriendFound();
+                updateMoreVisibility();
+            }
+        });
+        
+        // Add listener to display "more" button when needed.
+        uniqueFriendList.addListEventListener(new ListEventListener<SourceItem>() {
+            @Override
+            public void listChanged(ListEvent<SourceItem> listChanges) {
+                updateMoreVisibility();
             }
         });
         
         // Set unique list for filter.
         currentUniqueList = uniqueFriendList;
+        updateMoreVisibility();
         updateFilterList();
     }
     
@@ -367,6 +377,21 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         // Notify listeners about state change.
         for (int i = 0, size = friendListenerList.size(); i < size; i++) {
             friendListenerList.get(i).friendFound(found);
+        }
+    }
+    
+    /**
+     * Updates the visibility of the more button.  For the P2P Network/Any 
+     * Friends list, the button is always displayed; for the Friends-only list,
+     * the button is displayed when there are more than three friends.  
+     */
+    private void updateMoreVisibility() {
+        boolean visible = (currentUniqueList == uniqueSourceList) || (uniqueFriendList.size() > 3);
+        
+        if (!moreButton.isVisible() && visible) {
+            moreButton.setVisible(true);
+        } else if (moreButton.isVisible() && !visible) {
+            moreButton.setVisible(false);
         }
     }
     
