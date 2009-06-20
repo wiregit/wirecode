@@ -101,7 +101,11 @@ class FileViewManagerImpl implements FileViewManager {
                         fileRemovedFromCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
                         break;
                     case FILES_CLEARED:
-                        collectionCleared((SharedFileCollection)event.getFileView());
+                        if(event.isLibraryClear()) {
+                            clearAllViews();
+                        } else {
+                            collectionCleared((SharedFileCollection)event.getFileView());
+                        }
                         break;
                     case FILE_CHANGED:
                         fileChangedInCollection(event.getFileDesc(), event.getOldValue(), (SharedFileCollection)event.getFileView());
@@ -395,6 +399,33 @@ class FileViewManagerImpl implements FileViewManager {
         }
     }
     
+    /** Notification that the library was cleared, and we need to clean all our views. */
+    private void clearAllViews() {
+        List<FileView> clearedViews = new ArrayList<FileView>();
+        
+        rwLock.writeLock().lock();
+        try {
+            if(allSharedFilesView.size() > 0) {
+                allSharedFilesView.clear();
+                clearedViews.add(allSharedFilesView);
+            }
+            
+            for(MultiFileView view : fileViewsPerFriend.values()) {
+                if(view.size() > 0) {
+                    view.clear();
+                    clearedViews.add(view);
+                }
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        
+        for(FileView view : clearedViews) {
+            multicaster.broadcast(new FileViewChangeEvent(view, Type.FILES_CLEARED, true));
+        }
+        
+    }
+    
     /**
      * Notification that a particular collection was cleared.
      * @param collection
@@ -406,6 +437,7 @@ class FileViewManagerImpl implements FileViewManager {
         try {
             List<FileDesc> removed = allSharedFilesView.fileViewCleared(collection);
             removedFiles = addToOrCreateMapOfList(removedFiles, allSharedFilesView, removed);
+            LOG.debugf("Collection cleared {0}, changing all view, removed {1}", collection, removed);
             
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
@@ -679,6 +711,16 @@ class FileViewManagerImpl implements FileViewManager {
         @Override
         public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
             return multicaster.removeListener(this, listener);
+        }
+        
+        /**
+         * Instructs the view to clear all its items.
+         * This is typically because the library was cleared.
+         * All collections are still backing collections.
+         */
+        void clear() {
+            getInternalIndexes().clear();
+            totalFileSize = 0;
         }
         
         /**

@@ -69,7 +69,7 @@ public abstract class AbstractFileCollectionStub implements FileCollection {
     @Override
     public void clear() {
         fileDescList.clear();
-        listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED));
+        listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED, false));
     }
     
     @Override

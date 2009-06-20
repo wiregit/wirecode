@@ -289,6 +289,19 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
     
+    /** Clears all file data. */
+    void clearFileData() {
+        lock.writeLock().lock();
+        try {
+            if(!fileData.isEmpty()) {
+                fileData.clear();
+                dirty = true;
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+    
     /**
      * Adds a managed file.
      */

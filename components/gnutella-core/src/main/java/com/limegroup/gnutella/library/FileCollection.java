@@ -67,7 +67,7 @@ public interface FileCollection extends FileView {
     boolean remove(FileDesc fileDesc);
 
     /**
-     * Resets all values within this list.
+     * Removes all items from the list.
      */
     void clear();
 

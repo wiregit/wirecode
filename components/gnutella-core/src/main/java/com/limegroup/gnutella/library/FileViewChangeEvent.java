@@ -21,8 +21,9 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     private final File oldFile;
     private final File newFile;
     private boolean isShared = false;
+    private boolean libraryCleared = false;
     
-    public FileViewChangeEvent(FileView list, Type type) {
+    public FileViewChangeEvent(FileView list, Type type, boolean libraryCleared) {
         assert type == Type.FILES_CLEARED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -30,6 +31,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         this.newFile = null;
         this.oldFile = null;
         this.newValue = null;
+        this.libraryCleared = libraryCleared;
     }
     
     public FileViewChangeEvent(FileView list, Type type, File file) {
@@ -108,6 +110,10 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+    
+    public boolean isLibraryClear() {
+        return libraryCleared;
     }
 
 }

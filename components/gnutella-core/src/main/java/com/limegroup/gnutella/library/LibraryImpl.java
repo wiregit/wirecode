@@ -381,6 +381,12 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public void clear() {
+        clearImpl();
+        getLibraryData().clearFileData();
+    }
+    
+    /** Actually performs the clear & dispatches an event. Does not save the clear to LibraryFileData. */
+    private void clearImpl() {
         List<Future> fileFutures;
         rwLock.writeLock().lock();
         try {
@@ -397,7 +403,7 @@ class LibraryImpl implements Library, FileCollection {
             future.cancel(true);
         }
         
-        dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILES_CLEARED));
+        dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILES_CLEARED, true));
     }
     
     @Override
@@ -846,7 +852,7 @@ class LibraryImpl implements Library, FileCollection {
     private List<ListeningFuture<FileDesc>> loadSettingsInternal(int rev) {
         LOG.debugf("Loading Library Revision: {0}", rev);
         
-        clear();
+        clearImpl();
         fireLoading();
         final List<ListeningFuture<FileDesc>> futures = loadManagedFiles(rev);
         addLoadingListener(futures, rev);

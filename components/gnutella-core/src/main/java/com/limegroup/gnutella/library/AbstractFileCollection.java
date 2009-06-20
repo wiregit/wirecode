@@ -223,6 +223,11 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
 
     @Override
     public void clear() {
+        clear(false);
+    }
+    
+    /** Clears the list of files.  If fromLibrary is true, the event is slightly different. */
+    private void clear(boolean fromLibrary) {
         boolean needsClearing;
         rwLock.writeLock().lock();
         try {
@@ -232,7 +237,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         }
         
         if(needsClearing) {
-            fireClearEvent();
+            fireClearEvent(fromLibrary);
         }
     }
     
@@ -298,8 +303,8 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     }
     
     /** Fires a clear event to all listeners. */
-    protected void fireClearEvent() {
-        multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED));
+    protected void fireClearEvent(boolean fromLibrary) {
+        multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED, fromLibrary));
     }
     
     /**
@@ -446,7 +451,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
                 remove(event.getFileDesc());
                 break;
             case FILES_CLEARED:
-                clear();
+                clear(true);
                 break;
             case FILE_CHANGE_FAILED:
             case FILE_ADD_FAILED:
