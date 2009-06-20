@@ -63,9 +63,16 @@ public class FileUtils {
             out.flush();
             out.close();
             out = null;
-            // Rename backup to save, now that it saved.
-            properFile.delete();
-            backupFile.renameTo(properFile);                
+            // If the files were the same, don't bother renaming.
+            if(!properFile.equals(backupFile)) {
+                // Rename backup to save, now that it saved.
+                properFile.delete();
+                backupFile.renameTo(properFile);
+            } else {
+                if(log != null) {
+                    log.warn("backup file is same as proper file! -- " + backupFile);
+                }
+            }
             return true;
         } catch(IOException iox) {
             if(log != null) {
