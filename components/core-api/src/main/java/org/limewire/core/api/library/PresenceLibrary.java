@@ -9,7 +9,7 @@ import org.limewire.core.api.friend.FriendPresence;
  * {@link PresenceLibrary PresenceLibraries} are coalesced into a single
  * {@link FriendLibrary}.
  */
-public interface PresenceLibrary extends RemoteFileList {
+public interface PresenceLibrary extends SearchResultList {
     /** The {@link FriendPresence} associated with this library. */
     FriendPresence getPresence();
 

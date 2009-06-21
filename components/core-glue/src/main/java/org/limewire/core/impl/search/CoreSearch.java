@@ -10,7 +10,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -19,7 +18,6 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
-import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.core.settings.PromotionSettings;
@@ -269,11 +267,10 @@ public class CoreSearch implements Search {
     }
 
     private class FriendSearchListenerImpl implements FriendSearchListener {
-        public void handleFriendResults(Collection<RemoteFileItem> results) {
-            for(RemoteFileItem remoteFileItem : results) {
-                SearchResult searchResult = ((CoreRemoteFileItem)remoteFileItem).getSearchResult();
+        public void handleFriendResults(Collection<SearchResult> results) {
+            for(SearchResult result : results) {
                 for (SearchListener listener : searchListeners) {
-                    listener.handleSearchResult(CoreSearch.this, searchResult);
+                    listener.handleSearchResult(CoreSearch.this, result);
                 }
             }            
         }

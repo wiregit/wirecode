@@ -50,7 +50,6 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.MetaDataException;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.PropertiableFile;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchResult;
@@ -268,9 +267,8 @@ public class FileInfoPanel extends JPanel {
                         blockingMenu.show(table, e.getX(), e.getY());
                     }
                 });
-            } else if(propertiableFile instanceof RemoteFileItem) {
-                RemoteFileItem item = (RemoteFileItem) propertiableFile;
-                String friend = item.getSources().get(0).getFriendPresence().getFriend().getRenderName();
+            } else if(propertiableFile instanceof SearchResult) {
+                String friend = ((SearchResult)propertiableFile).getSources().get(0).getFriendPresence().getFriend().getRenderName();
                 locationPanel.add(createLabelField(friend), "span, growx, wrap");
             }
             break;

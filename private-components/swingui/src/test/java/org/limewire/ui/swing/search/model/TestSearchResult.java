@@ -122,6 +122,11 @@ public class TestSearchResult implements SearchResult {
     }
     
     @Override
+    public String getFileNameWithoutExtension() {
+        return FileUtils.getFilenameNoExtension(getFileName());
+    }
+    
+    @Override
     public String getMagnetURL() {
         return null;
     }

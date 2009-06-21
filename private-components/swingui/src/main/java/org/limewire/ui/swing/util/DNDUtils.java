@@ -13,8 +13,8 @@ import java.util.StringTokenizer;
 
 import javax.swing.TransferHandler.TransferSupport;
 
-import org.limewire.ui.swing.dnd.DownloadTransferable;
 import org.limewire.ui.swing.dnd.LocalFileTransferable;
+import org.limewire.ui.swing.downloads.table.DownloadTransferable;
 import org.limewire.util.OSUtils;
 import org.limewire.util.URIUtils;
 

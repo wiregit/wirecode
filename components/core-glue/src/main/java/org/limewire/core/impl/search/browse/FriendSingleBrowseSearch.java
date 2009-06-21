@@ -9,13 +9,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
-import org.limewire.core.impl.library.CoreRemoteFileItem;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -82,12 +81,12 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     /**Loads a snapshot of the available files, alerts BrowseStatusListeners that we have loaded, 
      * and SearchListeners that the search has stopped.*/
     private void loadLibrary(){
-        List<RemoteFileItem> remoteFileItems = new ArrayList<RemoteFileItem>(remoteLibraryManager.getFriendLibrary(friend).getModel());
+        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>(remoteLibraryManager.getFriendLibrary(friend).getModel());
         
         // add all files
-        for (RemoteFileItem item : remoteFileItems) {
+        for (SearchResult item : remoteFileItems) {
             for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(this, ((CoreRemoteFileItem)item).getSearchResult());
+                listener.handleSearchResult(this, item);
             }
         }
         

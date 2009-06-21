@@ -55,6 +55,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final Map<FilePropertyKey, Object> properties;    
     private final String extension;
     private final String fileName;
+    private final String fileNameNoExtension;
     
     /**
      * Cached lists of sources from {@link #getSources()}
@@ -88,6 +89,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         properties = new HashMap<FilePropertyKey, Object>();
         fileName = rfd.getFileName();
         extension = FileUtils.getFileExtension(rfd.getFileName());
+        fileNameNoExtension = FileUtils.getFilenameNoExtension(fileName);
         
         LimeXMLDocument doc = rfd.getXMLDocument();
         long fileSize = rfd.getSize();
@@ -139,6 +141,11 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public String getFileExtension() {
         return extension;
+    }
+    
+    @Override
+    public String getFileNameWithoutExtension() {
+        return fileNameNoExtension;
     }
 
     /**

@@ -6,11 +6,12 @@ import java.util.Set;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
-import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.net.address.AddressFactory;
@@ -23,11 +24,11 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * Tests the implementation of RemoteFileItemFactory under various conditions. 
+ * Tests the implementation of FileMetaDataConverterImpl under various conditions. 
  */
-public class RemoteFileItemFactoryImplTest extends BaseTestCase {
+public class FileMetaDataConverterImplTest extends BaseTestCase {
 
-    public RemoteFileItemFactoryImplTest(String name) {
+    public FileMetaDataConverterImplTest(String name) {
         super(name);
     }
    
@@ -50,8 +51,8 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         final FileMetaData fileMetaData = context.mock(FileMetaData.class);
         final RemoteFileDesc initialRFD = context.mock(RemoteFileDesc.class);
         
-        final RemoteFileItemFactoryImpl factory
-            = new RemoteFileItemFactoryImpl(
+        final FileMetaDataConverterImpl factory
+            = new FileMetaDataConverterImpl(
                     new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
@@ -85,11 +86,11 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
             
         }});
         
-        RemoteFileItem item = factory.create(presence, fileMetaData);
+        SearchResult item = factory.create(presence, fileMetaData);
         assertNotNull(item);
         
         // Ensure the the creation time persisted into the RemoteFileItem.
-        assertEquals(creationTime, item.getCreationTime());
+        assertEquals(creationTime, item.getProperty(FilePropertyKey.DATE_CREATED));
         
         // Ensure the correct presence was swapped into the RemoteFileItem
         assertEquals(presence, item.getSources().get(0).getFriendPresence());
@@ -117,8 +118,8 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         final RemoteFileDesc initialRFD = context.mock(RemoteFileDesc.class);
         final XMPPAddress swapAddress = context.mock(XMPPAddress.class);
         
-        final RemoteFileItemFactoryImpl factory
-            = new RemoteFileItemFactoryImpl(
+        final FileMetaDataConverterImpl factory
+            = new FileMetaDataConverterImpl(
                     new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
@@ -155,11 +156,11 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
             
         }});
         
-        RemoteFileItem item = factory.create(presence, fileMetaData);
+        SearchResult item = factory.create(presence, fileMetaData);
         assertNotNull(item);
         
         // Ensure the the creation time persisted into the RemoteFileItem.
-        assertEquals(creationTime, item.getCreationTime());
+        assertEquals(creationTime, item.getProperty(FilePropertyKey.DATE_CREATED));
         
         // Ensure, in a round-about fashion, the correct presence was swapped into the RemoteFileItem
         //  and that it has the matching address
@@ -189,8 +190,8 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         final FileMetaData fileMetaData = context.mock(FileMetaData.class);
         final RemoteFileDesc initialRFD = context.mock(RemoteFileDesc.class);
         
-        final RemoteFileItemFactoryImpl factory
-            = new RemoteFileItemFactoryImpl(
+        final FileMetaDataConverterImpl factory
+            = new FileMetaDataConverterImpl(
                     new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         

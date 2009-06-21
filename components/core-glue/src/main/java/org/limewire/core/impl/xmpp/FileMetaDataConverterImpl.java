@@ -8,9 +8,8 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
-import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.xmpp.RemoteFileItemFactory;
-import org.limewire.core.impl.library.CoreRemoteFileItem;
+import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.xmpp.FileMetaDataConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -24,23 +23,23 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.util.DataUtils;
 
 @Singleton
-public class RemoteFileItemFactoryImpl implements RemoteFileItemFactory {
+public class FileMetaDataConverterImpl implements FileMetaDataConverter {
     private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
     private final RemoteFileDescFactory remoteFileDescFactory;
 
     @Inject
-    public RemoteFileItemFactoryImpl(XMPPRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
+    public FileMetaDataConverterImpl(XMPPRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
         this.remoteFileDescDeserializer = remoteFileDescDeserializer;
         this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
-    public RemoteFileItem create(FriendPresence presence, FileMetaData fileMetaData) throws InvalidDataException, SaveLocationException {
+    public SearchResult create(FriendPresence presence, FileMetaData fileMetaData) throws InvalidDataException, SaveLocationException {
         XMPPAddress presenceAddress = getAddressFromPresence(presence);
 
         RemoteFileDesc remoteFileDesc = createRfdFromChatResult(presenceAddress, fileMetaData);
         RemoteFileDescAdapter remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.promoteRemoteFileDescAndExchangeAddress(remoteFileDesc,
                 presenceAddress), IpPort.EMPTY_SET, presence);
-        return new CoreRemoteFileItem(remoteFileDescAdapter);
+        return remoteFileDescAdapter;
     }
     
     private RemoteFileDesc createRfdFromChatResult(XMPPAddress address, FileMetaData fileMeta)

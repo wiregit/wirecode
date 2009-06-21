@@ -3,13 +3,12 @@ package org.limewire.core.impl.search.browse;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
-import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.settings.FriendBrowseSettings;
 
 import ca.odell.glazedlists.event.ListEvent;
@@ -18,7 +17,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 class AllFriendsBrowseSearch extends AbstractBrowseSearch {
     
     private final RemoteLibraryManager remoteLibraryManager;
-    private final ListEventListener<RemoteFileItem> listEventListener = new AllFriendsListEventListener<RemoteFileItem>();
+    private final ListEventListener<SearchResult> listEventListener = new AllFriendsListEventListener<SearchResult>();
 
   
     public AllFriendsBrowseSearch(RemoteLibraryManager remoteLibraryManager) {
@@ -47,14 +46,12 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
 
 
     private void loadSnapshot() {
-        // TODO: RemoteFileItems are going away. Need a new way to access a
-        // snapshot of what is currently shared.
-        List<RemoteFileItem> remoteFileItems = new ArrayList<RemoteFileItem>(remoteLibraryManager.getAllFriendsFileList().getModel());
+        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>(remoteLibraryManager.getAllFriendsFileList().getModel());
         
         //add all files
-        for (RemoteFileItem item : remoteFileItems) {
+        for (SearchResult item : remoteFileItems) {
             for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(this, ((CoreRemoteFileItem)item).getSearchResult());
+                listener.handleSearchResult(this, item);
             }
         }
         

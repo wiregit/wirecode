@@ -13,12 +13,12 @@ import java.util.Map;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.SearchResultList;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -61,7 +61,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     private volatile EventList<FriendLibrary> swingFriendLibraries;
     private final ReadWriteLock lock;
     
-    private static final RemoteFileComparator COMPARATOR = new RemoteFileComparator();
+    private static final SearchResultComparator COMPARATOR = new SearchResultComparator();
 
     @SuppressWarnings("unused")
     @InspectableContainer
@@ -96,7 +96,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
     
     @Override
-    public FileList<RemoteFileItem> getAllFriendsFileList() {
+    public SearchResultList getAllFriendsFileList() {
         return allFriendsList;
     }
     
@@ -217,31 +217,31 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         friendLibrary.dispose();
     }
     
-    private static class AllFriendsLibraryImpl implements FileList<RemoteFileItem> {
-        private final CompositeList<RemoteFileItem> compositeList;
-        private final ReadOnlyList<RemoteFileItem> readOnlyList;
-        private final UniqueList<RemoteFileItem> threadSafeUniqueList;
-        private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
+    private static class AllFriendsLibraryImpl implements SearchResultList {
+        private final CompositeList<SearchResult> compositeList;
+        private final ReadOnlyList<SearchResult> readOnlyList;
+        private final UniqueList<SearchResult> threadSafeUniqueList;
+        private volatile TransformedList<SearchResult, SearchResult> swingList;
         
         public AllFriendsLibraryImpl(ReadWriteLock lock) {
-            compositeList = new CompositeList<RemoteFileItem>(ListEventAssembler.createListEventPublisher(), lock);
+            compositeList = new CompositeList<SearchResult>(ListEventAssembler.createListEventPublisher(), lock);
             readOnlyList = GlazedListsFactory.readOnlyList(compositeList);
             threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(readOnlyList),
-                    new Comparator<RemoteFileItem>() {
+                    new Comparator<SearchResult>() {
                 @Override
-                public int compare(RemoteFileItem o1, RemoteFileItem o2) {
+                public int compare(SearchResult o1, SearchResult o2) {
                     return o1.getUrn().compareTo(o2.getUrn());
                 }
             });
         }
         
         @Override
-        public EventList<RemoteFileItem> getModel() {
+        public EventList<SearchResult> getModel() {
             return threadSafeUniqueList;
         }
 
         @Override
-        public EventList<RemoteFileItem> getSwingModel() {
+        public EventList<SearchResult> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
                 swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
@@ -264,6 +264,21 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
         void addMemberList(FriendLibrary friendLibrary) {
             compositeList.addMemberList(friendLibrary.getModel());
+        }
+
+        @Override
+        public void addNewResult(SearchResult file) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void removeResult(SearchResult file) {
+            throw new UnsupportedOperationException();   
+        }
+
+        @Override
+        public void setNewResults(Collection<SearchResult> files) {
+            throw new UnsupportedOperationException();   
         }        
     }
 
@@ -273,10 +288,10 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         private final ObservableElementList<PresenceLibrary> allPresenceLibraries;
         private final ReadOnlyList<PresenceLibrary> readOnlyPresenceLibraries;
         
-        private final CompositeList<RemoteFileItem> compositeList;
-        private final ReadOnlyList<RemoteFileItem> readOnlyList;
-        private final UniqueList<RemoteFileItem> threadSafeUniqueList;
-        private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
+        private final CompositeList<SearchResult> compositeList;
+        private final ReadOnlyList<SearchResult> readOnlyList;
+        private final UniqueList<SearchResult> threadSafeUniqueList;
+        private volatile TransformedList<SearchResult, SearchResult> swingList;
         
         private final ReadWriteLock lock;
         
@@ -286,7 +301,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public FriendLibraryImpl(AllFriendsLibraryImpl allFriendsList, Friend friend, ReadWriteLock lock) {
             this.friend = friend;
             this.lock = lock;
-            compositeList = new CompositeList<RemoteFileItem>(allFriendsList.getPublisher(), lock);
+            compositeList = new CompositeList<SearchResult>(allFriendsList.getPublisher(), lock);
             readOnlyList = GlazedListsFactory.readOnlyList(compositeList);
             threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(readOnlyList),
                     COMPARATOR);
@@ -381,7 +396,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             compositeList.removeMemberList(presenceLibrary.getModel());
         }
 
-        private EventList<RemoteFileItem> createMemberList() {
+        private EventList<SearchResult> createMemberList() {
             return compositeList.createMemberList();
         }
 
@@ -390,12 +405,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
 
         @Override
-        public EventList<RemoteFileItem> getModel() {
+        public EventList<SearchResult> getModel() {
             return threadSafeUniqueList;
         }
 
         @Override
-        public EventList<RemoteFileItem> getSwingModel() {
+        public EventList<SearchResult> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
                 swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
@@ -408,17 +423,18 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             return threadSafeUniqueList.size();
         }
 
-
-        public void addFile(RemoteFileItem file) {
-            throw new UnsupportedOperationException();
-        }
-
-        public void removeFile(RemoteFileItem file) {
+        @Override
+        public void addNewResult(SearchResult file) {
             throw new UnsupportedOperationException();
         }
         
         @Override
-        public void setNewFiles(Collection<RemoteFileItem> file) {
+        public void removeResult(SearchResult file) {
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public void setNewResults(Collection<SearchResult> file) {
             throw new UnsupportedOperationException();
         }
 
@@ -455,14 +471,14 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
 
     private static class PresenceLibraryImpl implements PresenceLibrary {
-        protected final TransformedList<RemoteFileItem, RemoteFileItem> eventList;
-        protected volatile TransformedList<RemoteFileItem, RemoteFileItem> swingEventList;
+        protected final TransformedList<SearchResult, SearchResult> eventList;
+        protected volatile TransformedList<SearchResult, SearchResult> swingEventList;
         private final FriendPresence presence;
         private volatile LibraryState state = LibraryState.LOADING;
         
         private final PropertyChangeSupport changeSupport;
 
-        PresenceLibraryImpl(FriendPresence presence, EventList<RemoteFileItem> list) {
+        PresenceLibraryImpl(FriendPresence presence, EventList<SearchResult> list) {
             this.presence = presence;
             eventList = GlazedListsFactory.threadSafeList(list);
             changeSupport = new PropertyChangeSupport(this);
@@ -478,12 +494,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
 
         @Override
-        public EventList<RemoteFileItem> getModel() {
+        public EventList<SearchResult> getModel() {
             return eventList;
         }
 
         @Override
-        public EventList<RemoteFileItem> getSwingModel() {
+        public EventList<SearchResult> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingEventList == null) {
                 swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList);
@@ -499,16 +515,18 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             eventList.dispose();
         }
 
-        public void addFile(RemoteFileItem file) {
+        @Override
+        public void addNewResult(SearchResult file) {
             eventList.add(file);
         }
 
-        public void removeFile(RemoteFileItem file) {
+        @Override
+        public void removeResult(SearchResult file) {
             eventList.remove(file);
         }
         
         @Override
-        public void setNewFiles(Collection<RemoteFileItem> files) {
+        public void setNewResults(Collection<SearchResult> files) {
             eventList.getReadWriteLock().writeLock().lock();
             try {
                 eventList.clear();
@@ -525,9 +543,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
         void commit() {
             // Add things here after we guarantee we want to use this list.
-        }
-
-        public void clear() {
         }
         
         @Override
@@ -551,9 +566,9 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
     }
     
-    private static class RemoteFileComparator implements Comparator<RemoteFileItem> {
+    private static class SearchResultComparator implements Comparator<SearchResult> {
         @Override
-            public int compare(RemoteFileItem o1, RemoteFileItem o2) {
+            public int compare(SearchResult o1, SearchResult o2) {
             return o1.getUrn().compareTo(o2.getUrn());
         }
     }

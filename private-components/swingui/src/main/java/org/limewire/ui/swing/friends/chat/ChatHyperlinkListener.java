@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -17,8 +18,8 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.xmpp.RemoteFileItemFactory;
+import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.xmpp.FileMetaDataConverter;
 import org.limewire.io.InvalidDataException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -41,13 +42,13 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     private Conversation conversation;
 
     private final ResultDownloader downloader;
-    private final RemoteFileItemFactory remoteFileItemFactory;
+    private final FileMetaDataConverter remoteFileItemFactory;
     private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
 //    private final LibraryNavigator libraryNavigator;
 
     @Inject
     public ChatHyperlinkListener(@Assisted Conversation conversation, ResultDownloader downloader,
-                                 RemoteFileItemFactory remoteFileItemFactory,
+                                 FileMetaDataConverter remoteFileItemFactory,
                                  Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
 //                                 LibraryNavigator libraryNavigator) {
 
@@ -90,23 +91,23 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     void downloadFileOffer(String fileId) {
         Map<String, MessageFileOffer> fileOffers = conversation.getFileOfferMessages();
         MessageFileOffer msgWithfileOffer = fileOffers.get(fileId);
-        RemoteFileItem file = null;
+        SearchResult file = null;
 
         try {
             file = remoteFileItemFactory.create(msgWithfileOffer.getPresence(), msgWithfileOffer.getFileOffer());
-            DownloadItem dl = downloader.addDownload(file);
+            DownloadItem dl = downloader.addDownload(null, Collections.singletonList(file));
 
             // Track download states by adding listeners to dl item
             addPropertyListener(dl, msgWithfileOffer);
 
         } catch (SaveLocationException sle) {
-            final RemoteFileItem remoteFileItem = file;
+            final SearchResult remoteFileItem = file;
             final MessageFileOffer messageFileOffer = msgWithfileOffer;
             saveLocationExceptionHandler.get().handleSaveLocationException(new DownloadAction() {
                 @Override
                 public void download(File saveFile, boolean overwrite)
                         throws SaveLocationException {
-                    DownloadItem dl = downloader.addDownload(remoteFileItem, saveFile, overwrite);
+                    DownloadItem dl = downloader.addDownload(null, Collections.singletonList(remoteFileItem), saveFile, overwrite);
                     addPropertyListener(dl, messageFileOffer);
                 }
 

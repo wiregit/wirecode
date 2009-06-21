@@ -7,10 +7,10 @@ import org.limewire.core.api.friend.Friend;
 import ca.odell.glazedlists.EventList;
 
 /**
- * A {@link RemoteFileList} specifically for a friend. This is the coalesced
+ * A {@link SearchResultList} specifically for a friend. This is the coalesced
  * version of multiple {@link PresenceLibrary PresenceLibraries}.
  */
-public interface FriendLibrary extends RemoteFileList {
+public interface FriendLibrary extends SearchResultList {
 
     /** Returns the friend this library is for. */
     Friend getFriend();

@@ -10,7 +10,6 @@ import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
@@ -47,7 +46,6 @@ public class MockXmppModule extends AbstractModule {
         bind(new TypeLiteral<ListenerSupport<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
 
         bind(PasswordManager.class).to(MockPasswordManager.class);
-        bind(RemoteFileItemFactory.class).to(MockRemoteFileItemFactory.class);
         
         EventMulticaster<FriendEvent> knownMulticaster = new EventMulticasterImpl<FriendEvent>();
         EventMulticaster<FriendEvent> availMulticaster = new EventMulticasterImpl<FriendEvent>();

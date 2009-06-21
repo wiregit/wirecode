@@ -131,6 +131,11 @@ public class MockSearchResult implements Cloneable, SearchResult {
         }
         return fileName;
     }
+    
+    @Override
+    public String getFileNameWithoutExtension() {
+        return (String)getProperty(FilePropertyKey.NAME);
+    }
 
     public void setUrn(String string) {
         this.urn = new MockURN(string);

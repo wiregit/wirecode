@@ -15,7 +15,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -120,12 +119,6 @@ public class MockDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws SaveLocationException {
         return null;
     }
@@ -134,11 +127,6 @@ public class MockDownloadListManager implements DownloadListManager {
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults,
             File saveFile, boolean overwrite) throws SaveLocationException {
        return addDownload(search, coreSearchResults);
-    }
-
-    @Override
-    public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) {
-        return null;
     }
 
     @Override

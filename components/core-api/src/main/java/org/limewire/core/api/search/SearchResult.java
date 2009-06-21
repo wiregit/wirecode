@@ -35,6 +35,9 @@ public interface SearchResult {
      */
     String getFileName();
     
+    /** Returns the filename without an extension. */
+    String getFileNameWithoutExtension();
+    
     String getMagnetURL();
 
     public int getRelevance();

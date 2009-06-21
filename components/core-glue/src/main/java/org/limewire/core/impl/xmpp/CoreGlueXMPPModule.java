@@ -1,7 +1,7 @@
 package org.limewire.core.impl.xmpp;
 
 import org.limewire.core.api.friend.client.PasswordManager;
-import org.limewire.core.api.xmpp.RemoteFileItemFactory;
+import org.limewire.core.api.xmpp.FileMetaDataConverter;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.inject.AbstractModule;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
@@ -15,7 +15,7 @@ public class CoreGlueXMPPModule extends AbstractModule {
         binder().install(new LimeWireXMPPModule(SettingsBackedJabberSettings.class));
         bind(XmppPresenceLibraryAdder.class);
         bind(FriendShareListRefresher.class);
-        bind(RemoteFileItemFactory.class).to(RemoteFileItemFactoryImpl.class);
+        bind(FileMetaDataConverter.class).to(FileMetaDataConverterImpl.class);
         bind(CoreGlueXMPPService.class);
         bind(PasswordManager.class).to(PasswordManagerImpl.class);
         bind(XMPPResourceFactory.class).to(XMPPResourceFactoryImpl.class);

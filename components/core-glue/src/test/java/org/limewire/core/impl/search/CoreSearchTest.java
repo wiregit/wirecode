@@ -12,7 +12,6 @@ import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -22,7 +21,6 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
-import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.geocode.GeocodeInformation;
@@ -210,13 +208,10 @@ public class CoreSearchTest extends BaseTestCase {
 
         coreSearch.start();
 
-        final CoreRemoteFileItem coreRemoteFileItem1 = context.mock(CoreRemoteFileItem.class);
         final SearchResult searchResult1 = context.mock(SearchResult.class);
         final String fileName1 = "filename1";
 
         context.checking(new Expectations() {{
-                allowing(coreRemoteFileItem1).getSearchResult();
-                will(returnValue(searchResult1));
                 allowing(searchResult1).getFileName();
                 will(returnValue(fileName1));
                 one(searchListener).handleSearchResult(with(same(coreSearch)),
@@ -224,7 +219,7 @@ public class CoreSearchTest extends BaseTestCase {
         }});
 
         friendSearchListener.get().handleFriendResults(
-                Arrays.asList((RemoteFileItem) coreRemoteFileItem1));
+                Arrays.asList(searchResult1));
 
         context.assertIsSatisfied();
     }

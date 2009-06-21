@@ -2,11 +2,10 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.SearchResultList;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -20,8 +19,8 @@ public class MockRemoteLibraryManager implements RemoteLibraryManager {
     }
     
     @Override
-    public FileList<RemoteFileItem> getAllFriendsFileList() {
-        return new RemoteFileListAdapter();
+    public SearchResultList getAllFriendsFileList() {
+        return new SearchResultListAdapter();
     }
 
     @Override

@@ -1,4 +1,4 @@
- package org.limewire.ui.swing.dnd;
+ package org.limewire.ui.swing.downloads.table;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;

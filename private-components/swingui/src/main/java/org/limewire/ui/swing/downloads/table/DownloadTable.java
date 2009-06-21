@@ -14,7 +14,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
-import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRenderer;
@@ -74,7 +73,7 @@ public class DownloadTable extends MouseableTable {
         getColumnModel().getColumn(DownloadTableFormat.NUM_SOURCES).setCellEditor(new FromTableCellRenderer(remoteHostWidgetFactory.create(RemoteWidgetType.TABLE)));
         getColumnModel().getColumn(DownloadTableFormat.MESSAGE).setCellRenderer(downloadMessageRenderer);
         getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellRenderer(buttonRenderer);
-        setTransferHandler(new DownloadableTransferHandler((EventSelectionModel<DownloadItem>) getSelectionModel()));
+        setTransferHandler(new DownloadableTransferHandler(selectedItems));
         setDragEnabled(true);
         setRowHeight(rowHeight);        
     }

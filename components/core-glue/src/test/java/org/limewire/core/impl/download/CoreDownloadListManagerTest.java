@@ -22,7 +22,6 @@ import org.limewire.core.impl.download.listener.ItunesDownloadListener;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
 import org.limewire.core.impl.download.listener.TorrentDownloadListener;
 import org.limewire.core.impl.download.listener.TorrentDownloadListenerFactory;
-import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.io.Address;
@@ -628,103 +627,6 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         downloadItemResult = coreDownloadListManager.addTorrentDownload(file, true);
-        assertEquals(downloadItem, downloadItemResult);
-
-        context.assertIsSatisfied();
-    }
-    
-    @SuppressWarnings("unchecked")
-    public void testAddRemoteFileItemDownload() throws Exception {
-        Mockery context = new Mockery() {
-            {
-                setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final DownloadManager downloadManager = context.mock(DownloadManager.class);
-        final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
-        final RemoteFileDescFactory remoteFileDescFactory = context
-                .mock(RemoteFileDescFactory.class);
-        final SpamManager spamManager = context.mock(SpamManager.class);
-        final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
-                .mock(ItunesDownloadListenerFactory.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
-        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
-        .mock(TorrentDownloadListenerFactory.class);
-        
-        context.checking(new Expectations() {
-            {
-                one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
-            }
-        });
-
-        CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
-        coreDownloadListManager.registerDownloadListener(listenerList);
-
-        final DownloadItem downloadItem = context.mock(DownloadItem.class);
-        final Downloader downloader = context.mock(Downloader.class);
-
-        final CoreRemoteFileItem remoteFileItem = context.mock(CoreRemoteFileItem.class);
-
-        final RemoteFileDesc remoteFileDesc = context.mock(RemoteFileDesc.class);
-        final RemoteFileDesc[] remoteFileDescs = new RemoteFileDesc[]{remoteFileDesc};
-        final Category category = Category.AUDIO;
-         
-        // overwrite false saveFile null
-        context.checking(new Expectations() {
-            {
-                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, false, null, null);
-                will(returnValue(downloader));
-                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
-                will(returnValue(downloadItem));
-                one(remoteFileItem).getCategory();
-                will(returnValue(category));
-                one(remoteFileItem).getRfd();
-                will(returnValue(remoteFileDesc));
-            }
-        });
-
-        DownloadItem downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem);
-        assertEquals(downloadItem, downloadItemResult);
-        
-        // overwrite true saveFile null
-        context.checking(new Expectations() {
-            {
-                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, true, null, null);
-                will(returnValue(downloader));
-                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
-                will(returnValue(downloadItem));
-                one(remoteFileItem).getCategory();
-                will(returnValue(category));
-                one(remoteFileItem).getRfd();
-                will(returnValue(remoteFileDesc));
-            }
-        });
-
-        downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem, null, true);
-        assertEquals(downloadItem, downloadItemResult);
-        
-        // overwrite true saveFile non null.
-        final String fileName = "somename.txt";
-        final File parentDir = new File("/tmp/somedir/");
-        final File saveFile = new File(parentDir, fileName);
-        
-        context.checking(new Expectations() {
-            {
-                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, true, parentDir, fileName);
-                will(returnValue(downloader));
-                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
-                will(returnValue(downloadItem));
-                one(remoteFileItem).getCategory();
-                will(returnValue(category));
-                one(remoteFileItem).getRfd();
-                will(returnValue(remoteFileDesc));
-            }
-        });
-
-        downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem, saveFile, true);
         assertEquals(downloadItem, downloadItemResult);
 
         context.assertIsSatisfied();

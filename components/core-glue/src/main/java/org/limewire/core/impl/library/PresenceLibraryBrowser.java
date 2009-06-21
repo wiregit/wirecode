@@ -19,7 +19,6 @@ import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -170,8 +169,8 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         browse.start(new BrowseListener() {
             // If the library already has items in it, build up an in-transit
             // list and do a retainAll at the end.
-            private List<RemoteFileItem> transitList = 
-                presenceLibrary.size() != 0 ? new ArrayList<RemoteFileItem>() : null;
+            private List<SearchResult> transitList = 
+                presenceLibrary.size() != 0 ? new ArrayList<SearchResult>() : null;
             
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
@@ -182,18 +181,17 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                     remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.promoteRemoteFileDescAndExchangeAddress(remoteFileDescAdapter.getRfd(), address), 
                     	new IpPortSet(remoteFileDescAdapter.getAlts()), friendPresence);
                 }
-                RemoteFileItem file = new CoreRemoteFileItem(remoteFileDescAdapter);
                 if(transitList != null) {
-                    transitList.add(file);
+                    transitList.add(remoteFileDescAdapter);
                 } else {
-                    presenceLibrary.addFile(file);
+                    presenceLibrary.addNewResult(remoteFileDescAdapter);
                 }
             }
             @Override
             public void browseFinished(boolean success) {
                 if(transitList != null) {
                     LOG.debugf("Finished browse of {0}, setting resulting files into existing list", friendPresence);
-                    presenceLibrary.setNewFiles(transitList);
+                    presenceLibrary.setNewResults(transitList);
                 } else {
                     LOG.debugf("Finished browse of {0}, no in-transit list.", friendPresence);
                 }

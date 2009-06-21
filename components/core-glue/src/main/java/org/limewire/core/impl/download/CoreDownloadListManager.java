@@ -22,7 +22,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendManager;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -30,7 +29,6 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
 import org.limewire.core.impl.download.listener.RecentDownloadListener;
 import org.limewire.core.impl.download.listener.TorrentDownloadListenerFactory;
-import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
@@ -201,17 +199,6 @@ public class CoreDownloadListManager implements DownloadListManager {
         // This should have been funneled through our addDownload callback method, which
         // should have set the CoreDownloadItem.
         return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
-    }
-
-    @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
-        return addDownload(fileItem, null, false);
-    }
-    
-    @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem, File saveFile, boolean overwrite) throws SaveLocationException {
-        return createDownloader(new RemoteFileDesc[] { ((CoreRemoteFileItem) fileItem).getRfd() },
-                RemoteFileDesc.EMPTY_LIST, null, saveFile, overwrite, fileItem.getCategory());    
     }
 
 	private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(

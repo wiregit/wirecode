@@ -3,9 +3,8 @@ package org.limewire.core.impl.support;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.core.api.library.FileList;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.SearchResultList;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
@@ -412,7 +411,6 @@ public class LimeSessionInfoTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
-    @SuppressWarnings("unchecked")
     public void testGetAllFriendsFileListSize() {
         final Mockery context = new Mockery();
         
@@ -422,7 +420,7 @@ public class LimeSessionInfoTest extends BaseTestCase {
                 null, null, null, null, null, null, null, null, null, null, null, null, null, remoteLibraryManager, null);
 
         context.checking(new Expectations() {{
-            FileList<RemoteFileItem> allFriendsList = context.mock(FileList.class);            
+            SearchResultList allFriendsList = context.mock(SearchResultList.class);            
             allowing(remoteLibraryManager).getAllFriendsFileList();
             will(returnValue(allFriendsList));
             allowing(allFriendsList).size();
