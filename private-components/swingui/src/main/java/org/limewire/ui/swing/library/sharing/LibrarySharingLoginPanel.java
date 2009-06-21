@@ -68,9 +68,9 @@ class LibrarySharingLoginPanel {
         if(!loggedOut) {
             htmlLabel.setText("<html>" + I18n.tr("Logging in...") + "</html>");
         } else if(hasShared) {
-            htmlLabel.setText("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list.", SIGN_IN) + "</html>");
-        } else {
             htmlLabel.setText("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list and edit sharing.  Or <a href={1}>stop it</a> from being shared now.", SIGN_IN, STOP_SHARING) + "</html>");
+        } else {
+            htmlLabel.setText("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list.", SIGN_IN) + "</html>");
         }
     }
 

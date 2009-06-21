@@ -52,10 +52,10 @@ public class FriendButtonPopupListener implements PopupMenuListener {
             boolean canLogout = xmppService.isLoggedIn() || xmppService.isLoggingIn();
             boolean shouldAllowLogin = !canLogout && !autoLoginServiceProvider.get().isAttemptingLogin();
 
-            menu.add(browseFriendAction.get()).setEnabled(shouldAllowLogin);
+            menu.add(browseFriendAction.get()).setEnabled(!shouldAllowLogin);
             menu.addSeparator();
-            menu.add(addFriendAction.get()).setEnabled(shouldAllowLogin);
-            menu.add(removeFriendAction.get()).setEnabled(shouldAllowLogin);
+            menu.add(addFriendAction.get()).setEnabled(!shouldAllowLogin);
+            menu.add(removeFriendAction.get()).setEnabled(!shouldAllowLogin);
             menu.addSeparator();
             if(shouldAllowLogin)
                 menu.add(loginAction.get());
