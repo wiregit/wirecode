@@ -73,6 +73,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     private static final String FILE_DATA_KEY = "FILE_DATA";
     private static final String COLLECTION_NAME_KEY = "COLLECTION_NAMES";
     private static final String COLLECTION_SHARE_DATA_KEY = "COLLECTION_SHARE_DATA";
+    private static final String SAFE_URNS = "SAFE_URNS";
     
     static final Integer DEFAULT_SHARED_COLLECTION_ID = 0;
     private static final Integer MIN_COLLECTION_ID = 1;
@@ -85,6 +86,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final Map<File, List<Integer>> fileData = new HashMap<File, List<Integer>>();
     private final SortedMap<Integer, String> collectionNames = new TreeMap<Integer, String>();
     private final Map<Integer, List<String>> collectionShareData = new HashMap<Integer, List<String>>();
+    private final Set<String> safeUrns = new HashSet<String>();
     private volatile boolean dirty = false;
     
     private final File saveFile = new File(CommonUtils.getUserSettingsDir(), "library5.dat"); 
@@ -143,7 +145,8 @@ class LibraryFileData extends AbstractSettingsGroup {
             save.put(USER_REMOVED_KEY, userRemoved);
             save.put(FILE_DATA_KEY, fileData);
             save.put(COLLECTION_NAME_KEY, collectionNames);
-            save.put(COLLECTION_SHARE_DATA_KEY, collectionShareData);          
+            save.put(COLLECTION_SHARE_DATA_KEY, collectionShareData);
+            save.put(SAFE_URNS, safeUrns);
             if(FileUtils.writeWithBackupFile(save, backupFile, saveFile, LOG)) {
                 dirty = false;
             }
@@ -199,6 +202,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         Map<File, List<Integer>> fileData;
         Map<Integer, String> collectionNames;
         Map<Integer, List<String>> collectionShareData;
+        Set<String> safeUrns;
         
         switch(version) {
         case ONE:
@@ -209,6 +213,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             collectionNames = new HashMap<Integer, String>();
             collectionShareData = new HashMap<Integer, List<String>>();
             convertShareData(oldShareData, fileData, collectionNames, collectionShareData);
+            safeUrns = new HashSet<String>();
             break;
         case TWO:
             userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
@@ -216,11 +221,12 @@ class LibraryFileData extends AbstractSettingsGroup {
             fileData = GenericsUtils.scanForMapOfList(readMap.get(FILE_DATA_KEY), File.class, List.class, Integer.class, ScanMode.REMOVE);
             collectionNames = GenericsUtils.scanForMap(readMap.get(COLLECTION_NAME_KEY), Integer.class, String.class, ScanMode.REMOVE);
             collectionShareData = GenericsUtils.scanForMapOfList(readMap.get(COLLECTION_SHARE_DATA_KEY), Integer.class, List.class, String.class, ScanMode.REMOVE);
+            safeUrns = GenericsUtils.scanForSet(readMap.get(SAFE_URNS), String.class, ScanMode.REMOVE);
             break;
             
         default:
             throw new IllegalStateException("Invalid version: " + version);
-    }
+        }
     
         validateCollectionData(fileData, collectionNames, collectionShareData);
                 
@@ -233,6 +239,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             this.fileData.putAll(fileData);
             this.collectionNames.putAll(collectionNames);
             this.collectionShareData.putAll(collectionShareData);
+            this.safeUrns.addAll(safeUrns);
             updateManagedExtensions();
         } finally {
             lock.writeLock().unlock();
@@ -251,41 +258,70 @@ class LibraryFileData extends AbstractSettingsGroup {
         for(Map.Entry<File, FileProperties> data : oldShareData.entrySet()) {
             File file = data.getKey();
             FileProperties shareData = data.getValue();
-            if(shareData == null || ((shareData.friends == null || shareData.friends.isEmpty()) && !shareData.gnutella)) {
-                fileData.put(file, Collections.<Integer>emptyList());
+            if (shareData == null
+                    || ((shareData.friends == null || shareData.friends.isEmpty()) && !shareData.gnutella)) {
+                fileData.put(file, Collections.<Integer> emptyList());
             } else {
-                if(shareData.friends != null) {
-                    for(String friend : shareData.friends) {
+                if (shareData.friends != null) {
+                    for (String friend : shareData.friends) {
                         Integer collectionId = friendToCollectionMap.get(friend);
-                        if(collectionId == null) {
+                        if (collectionId == null) {
                             collectionId = currentId;
                             friendToCollectionMap.put(friend, collectionId);
                             collectionNames.put(collectionId, friend);
                             List<String> shareList = new ArrayList<String>(1);
                             shareList.add(friend);
                             collectionShareData.put(collectionId, shareList);
-                            
+
                             currentId++;
-    }
-    
+                        }
+
                         List<Integer> collections = fileData.get(file);
-                        if(collections == null || collections == Collections.<Integer>emptyList()) {
+                        if (collections == null || collections == Collections.<Integer> emptyList()) {
                             collections = new ArrayList<Integer>(1);
                             fileData.put(file, collections);
                         }
                         collections.add(collectionId);
-        }
-    }    
-    
-                if(shareData.gnutella) {
+                    }
+                }
+
+                if (shareData.gnutella) {
                     List<Integer> collections = fileData.get(file);
-                    if(collections == null || collections == Collections.<Integer>emptyList()) {
+                    if (collections == null || collections == Collections.<Integer> emptyList()) {
                         collections = new ArrayList<Integer>(1);
                         fileData.put(file, collections);
-            }
+                    }
                     collections.add(DEFAULT_SHARED_COLLECTION_ID);
+                }
+            }
         }
-    }   
+    }
+    
+    /** Returns true if this URN was marked as safe. */
+    boolean isFileSafe(String urn) {
+        lock.readLock().lock();
+        try {
+            return safeUrns.contains(urn);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+	/** Caches the URN as being safe or not. */
+    void setFileSafe(String urn, boolean safe) {
+        lock.writeLock().lock();
+        try {
+            if(!safe) {
+                if(safeUrns.remove(urn)) {
+                    dirty = true;
+                }
+            } else {
+                if(safeUrns.add(urn)) {
+                    dirty = true;
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
     

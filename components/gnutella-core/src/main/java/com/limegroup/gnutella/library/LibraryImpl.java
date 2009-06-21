@@ -636,10 +636,18 @@ class LibraryImpl implements Library, FileCollection {
         boolean revchange = false;
         boolean failed = false;
         
-        // Don't add dangerous files to the library (this call may block)
-        boolean dangerous = dangerousFileChecker.isDangerous(file);
-        
         Set<URN> urns = urnEvent.getResult();
+        
+        // Don't add dangerous files to the library (this call may block)
+   	    boolean dangerous = false;
+        if(urns != null) {
+	        URN sha1 = UrnSet.getSha1(urns);
+	        if(sha1 != null && !getLibraryData().isFileSafe(sha1.toString())) {
+        	    dangerous = dangerousFileChecker.isDangerous(file);
+            	getLibraryData().setFileSafe(sha1.toString(), !dangerous);
+	        }
+		}
+        
         rwLock.writeLock().lock();
         try {
             if(rev != revision.get()) {
