@@ -1,11 +1,23 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.library.LibraryPanel;
+import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -15,13 +27,14 @@ import com.google.inject.Inject;
  * trash or delete them.
  */
 class DeleteAction extends AbstractAction {
-
-//    private final LocalFileItem[] fileItemArray;
-//
-//    private final LibraryManager libraryManager;
+    private final LibraryPanel libraryPanel;
+    private final LibraryManager libraryManager;
 
     @Inject
-    public DeleteAction() {//final LocalFileItem[] fileItemArray, LibraryManager libraryManager) {
+    public DeleteAction(LibraryPanel libraryPanel, LibraryManager libraryManager) {
+        this.libraryPanel = libraryPanel;
+        this.libraryManager = libraryManager;
+        
         String deleteName = I18n.tr("Delete Files");
         if(OSUtils.isMacOSX()) {
             deleteName = I18n.tr("Move to Trash");
@@ -29,39 +42,43 @@ class DeleteAction extends AbstractAction {
             deleteName = I18n.tr("Move to Recycle Bin");
         }
         putValue(Action.NAME, deleteName);
-//        this.fileItemArray = fileItemArray;
-//        this.libraryManager = libraryManager;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-//        //PlayerUtils.getCurrentSongFile isn't threadsafe
-//        final File currentSong = PlayerUtils.getCurrentSongFile();
-//        BackgroundExecutorService.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                for (LocalFileItem fileItem : fileItemArray) {
-//                    if(fileItem.getFile().equals(currentSong)){
-//                        stopAudio();
-//                    }
-//                    
-//                    if (!fileItem.isIncomplete()) {
-//                        FileUtils.unlockFile(fileItem.getFile());
-//                        libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
-//                        FileUtils.delete(fileItem.getFile(), OSUtils.supportsTrash());
-//                    }
-//                }
-//            }
-//        });
+        final List<LocalFileItem> selectedItems = Collections.unmodifiableList(libraryPanel.getSelectedItems());
+        
+        int confirmation = FocusJOptionPane.showConfirmDialog(null, getMessage(selectedItems.size()), I18n.tr("Delete File", "Delete Files", selectedItems.size()), JOptionPane.OK_CANCEL_OPTION); 
+        if (confirmation == JOptionPane.OK_OPTION) {
+            BackgroundExecutorService.execute(new Runnable(){
+                public void run() {                  
+                    File currentSong = PlayerUtils.getCurrentSongFile();
+                    for(LocalFileItem item : selectedItems) {
+                        if(item.getFile().equals(currentSong)){
+                            stopAudio();
+                        }
+                        if(!item.isIncomplete()) {
+                            FileUtils.unlockFile(item.getFile());
+                            libraryManager.getLibraryManagedList().removeFile(item.getFile());
+                            FileUtils.delete(item.getFile(), OSUtils.supportsTrash());
+                        }
+                    }                    
+                }
+            });
+        }
     }
     
-//    private void stopAudio() {
-//        SwingUtils.invokeLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                PlayerUtils.stop();
-//            }
-//        });
-//    }
+    private void stopAudio() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                PlayerUtils.stop();
+            }
+        });
+    }
+    
+    private String getMessage(int listSize) {
+        return I18n.tr("Delete this file from disk?", "Delete these files from disk?", listSize);
+    }
   
 }

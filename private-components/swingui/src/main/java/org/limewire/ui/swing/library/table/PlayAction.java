@@ -1,8 +1,12 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
+import java.util.List;
 
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.LibraryPanel;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -12,25 +16,20 @@ import com.google.inject.Inject;
  * or launches it depending on if it is supported.
  */
 class PlayAction extends AbstractAction {
-    
-//    private final LibraryMediator libraryMediator;
-////    private final Catalog catalog;
-//    private final LocalFileItem localFile;
+    private final LibraryPanel libraryPanel;
     
     @Inject
-    public PlayAction() {//LibraryMediator libraryMediator, //Catalog catalog, 
-//            LocalFileItem localFile) {
+    public PlayAction(LibraryPanel libraryPanel) {
         super(I18n.tr("Play"));
-//        this.libraryMediator = libraryMediator;
-//        this.catalog = catalog;
-//        this.localFile = localFile;
+
+        this.libraryPanel = libraryPanel;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Set active catalog.
-//        libraryMediator.setActiveCatalog(catalog);
-        // Play file.
-//        PlayerUtils.playOrLaunch(localFile.getFile());
+        List<LocalFileItem> localFileItems = libraryPanel.getSelectedItems();
+        if(localFileItems.size() > 0)
+            PlayerUtils.playOrLaunch(localFileItems.get(0).getFile());
+        //TODO: this should load the selected list as the current playlist
     }
 }

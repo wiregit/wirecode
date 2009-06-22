@@ -55,7 +55,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-class LibraryPanel extends JPanel {
+public class LibraryPanel extends JPanel {
 
     private static final String TABLE = "TABLE";
     private static final String LIST = "LIST";
@@ -209,6 +209,16 @@ class LibraryPanel extends JPanel {
             files.add(item.getFile());
         }
         return files;
+    }
+    
+    public List<LocalFileItem> getSelectedItems() {
+        List<LocalFileItem> selected;
+        if(categoryMatcher.getCategory() == Category.IMAGE) {
+            selected = libraryImagePanel.getSelection();
+        } else {
+            selected = libraryTable.getSelection();
+        }
+        return selected;
     }
     
     private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {       
