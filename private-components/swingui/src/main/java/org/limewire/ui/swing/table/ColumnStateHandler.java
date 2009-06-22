@@ -178,10 +178,10 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
      * Because table.getColumnModel.move is not stable. Meaning moving an item to index 2 might 
      * move the item already there to the left, or maybe to the right. We have to jump through a few
      * hoops to make it stable.
-     * First we make a list ordering all columns in the reverse preffered order, then move each item
+     * First we make a list ordering all columns in the reverse preferred order, then move each item
      * from where it currently is in the column model to the zero index. Since items cannot be moved to
      * the left of the zero index this makes the move stable, and places the items in the proper
-     * preffered index order.
+     * preferred index order.
      */
     public void setupColumnOrder() {
         stopListening();
