@@ -20,7 +20,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class DownloadMediator {
     
-    public static enum SortOrder {ORDER_ADDED, NAME, PROGRESS, TIME_REMAINING, SPEED, STATUS, FILE_TYPE, EXTENSION};
+    public static enum SortOrder {ORDER_ADDED_DOWN, ORDER_ADDED_UP, NAME_DOWN, NAME_UP, PROGRESS_DOWN, PROGRESS_UP, 
+        TIME_REMAINING_DOWN, TIME_REMAINING_UP, SPEED_DOWN, SPEED_UP, STATUS_DOWN, STATUS_UP, FILE_TYPE_DOWN, FILE_TYPE_UP, EXTENSION_DOWN, EXTENSION_UP};
 
 	/**
 	 * unfiltered - common to all tables
@@ -32,35 +33,59 @@ public class DownloadMediator {
 	public DownloadMediator(DownloadListManager downloadManager) {
 	    this.downloadListManager = downloadManager;
 	    EventList<DownloadItem> baseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
-	    commonBaseList = GlazedListsFactory.sortedList(baseList, new OrderAddedComparator());
+	    commonBaseList = GlazedListsFactory.sortedList(baseList, new DescendingOrderAddedComparator());
 	    
 	}
 	
 	public void setSortOrder(SortOrder order){
 	    switch(order){
-        case ORDER_ADDED:
-            commonBaseList.setComparator(new OrderAddedComparator());
+        case ORDER_ADDED_DOWN:
+            commonBaseList.setComparator(new DescendingOrderAddedComparator());
             break;
-        case NAME:
-            commonBaseList.setComparator(new NameComparator());
+        case ORDER_ADDED_UP:
+            commonBaseList.setComparator(new AscendingOrderAddedComparator());
             break;
-        case PROGRESS:
-            commonBaseList.setComparator(new ProgressComparator());
+        case NAME_DOWN:
+            commonBaseList.setComparator(new DescendingNameComparator());
             break;
-        case TIME_REMAINING:
-            commonBaseList.setComparator(new TimeRemainingComparator());
+        case NAME_UP:
+            commonBaseList.setComparator(new AscendingNameComparator());
             break;
-        case SPEED:
-            commonBaseList.setComparator(new SpeedComparator());
+        case PROGRESS_DOWN:
+            commonBaseList.setComparator(new DescendingProgressComparator());
             break;
-        case STATUS:
+        case PROGRESS_UP:
+            commonBaseList.setComparator(new AscendingProgressComparator());
+            break;
+        case TIME_REMAINING_DOWN:
+            commonBaseList.setComparator(new DescendingTimeRemainingComparator());
+            break;
+        case TIME_REMAINING_UP:
+            commonBaseList.setComparator(new AscendingTimeRemainingComparator());
+            break;
+        case SPEED_DOWN:
+            commonBaseList.setComparator(new DescendingSpeedComparator());
+            break;
+        case SPEED_UP:
+            commonBaseList.setComparator(new AscendingSpeedComparator());
+            break;
+        case STATUS_DOWN:
             commonBaseList.setComparator(new StateComparator());
             break;
-        case FILE_TYPE:
-            commonBaseList.setComparator(new FileTypeComparator());
+        case STATUS_UP:
+            commonBaseList.setComparator(new AscendingStateComparator());
             break;
-        case EXTENSION:
-            commonBaseList.setComparator(new FileExtensionComparator());
+        case FILE_TYPE_DOWN:
+            commonBaseList.setComparator(new DescendingFileTypeComparator());
+            break;
+        case FILE_TYPE_UP:
+            commonBaseList.setComparator(new AscendingFileTypeComparator());
+            break;
+        case EXTENSION_DOWN:
+            commonBaseList.setComparator(new DescendingFileExtensionComparator());
+            break;
+        case EXTENSION_UP:
+            commonBaseList.setComparator(new AscendingFileExtensionComparator());
             break;
 	    }
 	}
@@ -148,7 +173,7 @@ public class DownloadMediator {
         
         return matchingItems;
     }
-    
+
     private static class StateComparator implements Comparator<DownloadItem>{
         
         @Override
@@ -158,40 +183,64 @@ public class DownloadMediator {
             }
 
             return getSortPriority(o1.getState()) - getSortPriority(o2.getState());
-        }   
-        
-        private int getSortPriority(DownloadState state){
-            
-            switch(state){
-            case DONE: return 1;
-            case FINISHING: return 2;
-            case DOWNLOADING: return 3;
-            case RESUMING: return 4;
-            case CONNECTING: return 5;
-            case PAUSED: return 6;
-            case REMOTE_QUEUED: return 7;
-            case LOCAL_QUEUED: return 8;
-            case TRYING_AGAIN: return 9;
-            case STALLED: return 10;
-            case ERROR: return 11;       
-            case CANCELLED: return 12;
-            }
-            
-           throw new IllegalArgumentException("Unknown DownloadState: " + state);
-        }
+        }  
     }
     
-    private static class OrderAddedComparator implements Comparator<DownloadItem>{
+    private static class AscendingStateComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) {
+            if (o1 == o2){
+                return 0;
+            }
+
+            return getSortPriority(o1.getState()) - getSortPriority(o2.getState());
+        }  
+    }
+    
+    private static int getSortPriority(DownloadState state){
+        
+        switch(state){
+        case DONE: return 1;
+        case FINISHING: return 2;
+        case DOWNLOADING: return 3;
+        case RESUMING: return 4;
+        case CONNECTING: return 5;
+        case PAUSED: return 6;
+        case REMOTE_QUEUED: return 7;
+        case LOCAL_QUEUED: return 8;
+        case TRYING_AGAIN: return 9;
+        case STALLED: return 10;
+        case ERROR: return 11;       
+        case CANCELLED: return 12;
+        }
+        
+       throw new IllegalArgumentException("Unknown DownloadState: " + state);
+    }
+    
+    private static class DescendingOrderAddedComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) { 
-            //The source list contains items in the order added.  Always returning 0
-            //returns the sorted list to this original order.
-            return 0;
+            if (o1 == o2){
+                return 0;
+            }
+            return o1.getStartDate().compareTo(o2.getStartDate());
         }      
     }
     
-    private static class NameComparator implements Comparator<DownloadItem>{
+    private static class AscendingOrderAddedComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) { 
+            if (o1 == o2){
+                return 0;
+            }
+            return o2.getStartDate().compareTo(o1.getStartDate());
+        }      
+    }
+    
+    private static class DescendingNameComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -203,7 +252,21 @@ public class DownloadMediator {
         }   
      
     } 
-    private static class ProgressComparator implements Comparator<DownloadItem>{
+    
+    private static class AscendingNameComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) {
+            if (o1 == o2){
+                return 0;
+            }
+
+            return o2.getTitle().compareTo(o1.getTitle());
+        }   
+     
+    } 
+    
+    private static class DescendingProgressComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -215,7 +278,21 @@ public class DownloadMediator {
         }   
      
     } 
-    private static class TimeRemainingComparator implements Comparator<DownloadItem>{
+    
+    private static class AscendingProgressComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) {
+            if (o1 == o2){
+                return 0;
+            }
+
+            return o1.getPercentComplete() - o2.getPercentComplete();
+        }   
+     
+    } 
+    
+    private static class DescendingTimeRemainingComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -228,8 +305,21 @@ public class DownloadMediator {
      
     }
     
+    private static class AscendingTimeRemainingComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) {
+            if (o1 == o2){
+                return 0;
+            }
+
+            return (int)(o2.getRemainingDownloadTime() - o1.getRemainingDownloadTime());
+        }   
+     
+    }
     
-    private static class SpeedComparator implements Comparator<DownloadItem>{
+    
+    private static class DescendingSpeedComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -243,7 +333,21 @@ public class DownloadMediator {
     }
     
     
-    private static class FileTypeComparator implements Comparator<DownloadItem>{
+    private static class AscendingSpeedComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) {
+            if (o1 == o2){
+                return 0;
+            }
+
+            return (int)o1.getDownloadSpeed() - (int)o2.getDownloadSpeed();
+        }   
+     
+    }
+    
+    
+    private static class DescendingFileTypeComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -257,7 +361,21 @@ public class DownloadMediator {
     }
     
     
-    private static class FileExtensionComparator implements Comparator<DownloadItem>{
+    private static class AscendingFileTypeComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) {
+            if (o1 == o2){
+                return 0;
+            }
+
+            return o2.getCategory().compareTo(o1.getCategory());
+        }   
+     
+    }
+    
+    
+    private static class DescendingFileExtensionComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -266,6 +384,19 @@ public class DownloadMediator {
             }
 
             return FileUtils.getFileExtension(o1.getDownloadingFile()).compareTo(FileUtils.getFileExtension(o2.getDownloadingFile()));
+        }   
+     
+    }
+    
+    private static class AscendingFileExtensionComparator implements Comparator<DownloadItem>{
+        
+        @Override
+        public int compare(DownloadItem o1, DownloadItem o2) {
+            if (o1 == o2){
+                return 0;
+            }
+
+            return FileUtils.getFileExtension(o2.getDownloadingFile()).compareTo(FileUtils.getFileExtension(o1.getDownloadingFile()));
         }   
      
     }

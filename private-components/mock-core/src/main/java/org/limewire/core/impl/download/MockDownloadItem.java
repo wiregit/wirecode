@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.event.SwingPropertyChangeSupport;
@@ -257,5 +258,10 @@ public class MockDownloadItem implements DownloadItem {
     @Override
     public Collection<RemoteHost> getRemoteHosts() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public Date getStartDate() {
+        return new Date();
     }
 }

@@ -7,6 +7,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -276,6 +277,10 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadAdded(Downloader downloader) {
+            //Save the starting time if it hasn't been set
+            if(downloader.getAttribute(DownloadItem.DOWNLOAD_START_DATE)== null){
+                downloader.setAttribute(DownloadItem.DOWNLOAD_START_DATE, new Date(), true);
+            }
             DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager);
             downloader.setAttribute(DownloadItem.DOWNLOAD_ITEM, item, false);
             downloader.addListener(torrentDownloadListenerFactory.createListener(downloader, list));

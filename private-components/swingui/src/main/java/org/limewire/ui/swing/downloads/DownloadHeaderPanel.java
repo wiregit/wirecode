@@ -7,9 +7,11 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
@@ -17,6 +19,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
@@ -76,6 +79,11 @@ public class DownloadHeaderPanel extends JXPanel {
     @Resource
     private Icon moreIconPressed;
 
+    @Resource
+    private Icon upArrow;
+    @Resource
+    private Icon downArrow;
+
     private final DownloadMediator downloadMediator;    
 
     private final DockIcon dock;
@@ -91,6 +99,7 @@ public class DownloadHeaderPanel extends JXPanel {
     private JCheckBoxMenuItem clearFinishedCheckBox;
 
     private JXLabel titleTextLabel;
+    private AbstractButton isDescending;
     
     
     private final AbstractDownloadsAction pauseAction = new AbstractDownloadsAction(I18n.tr("Pause All")) {
@@ -156,54 +165,14 @@ public class DownloadHeaderPanel extends JXPanel {
         }
     };
     
-    private final Action statusSortAction = new AbstractAction(I18n.tr("Status")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.STATUS);
-        }
-    };  
-    private final Action orderSortAction = new AbstractAction(I18n.tr("Order Added")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.ORDER_ADDED);
-        }
-    };  
-    private final Action nameSortAction = new AbstractAction(I18n.tr("Name")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.NAME);
-        }
-    };  
-    private final Action progressSortAction = new AbstractAction(I18n.tr("Progress")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.PROGRESS);
-        }
-    };  
-    private final Action timeRemainingSortAction = new AbstractAction(I18n.tr("Time Left")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.TIME_REMAINING);
-        }
-    };  
-    private final Action speedSortAction = new AbstractAction(I18n.tr("Speed")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.SPEED);;
-        }
-    };  
-    private final Action fileTypeSortAction = new AbstractAction(I18n.tr("File Type")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.FILE_TYPE);
-        }
-    };  
-    private final Action extensionSortAction = new AbstractAction(I18n.tr("File Extension")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            downloadMediator.setSortOrder(SortOrder.EXTENSION);
-        }
-    };
+    private final Action statusSortAction = new SortAction(I18n.tr("Status"), SortOrder.STATUS_UP, SortOrder.STATUS_DOWN);  
+    private final Action orderSortAction = new SortAction(I18n.tr("Order Added"), SortOrder.ORDER_ADDED_UP, SortOrder.ORDER_ADDED_DOWN);  
+    private final Action nameSortAction = new SortAction(I18n.tr("Name"), SortOrder.NAME_UP, SortOrder.NAME_DOWN);
+    private final Action progressSortAction = new SortAction(I18n.tr("Progress"), SortOrder.PROGRESS_UP, SortOrder.PROGRESS_DOWN);  
+    private final Action timeRemainingSortAction = new SortAction(I18n.tr("Time Left"), SortOrder.TIME_REMAINING_UP, SortOrder.TIME_REMAINING_DOWN);
+    private final Action speedSortAction = new SortAction(I18n.tr("Speed"), SortOrder.SPEED_UP, SortOrder.SPEED_DOWN);
+    private final Action fileTypeSortAction = new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE_UP, SortOrder.FILE_TYPE_DOWN);
+    private final Action extensionSortAction = new SortAction(I18n.tr("File Extension"), SortOrder.EXTENSION_UP, SortOrder.EXTENSION_DOWN);
     
     private final Action downloadSettingsAction = new AbstractAction(I18n.tr("Download Options...")) {
         @Override
@@ -370,18 +339,17 @@ public class DownloadHeaderPanel extends JXPanel {
     private JMenu createSortSubMenu(){
         JMenu sortSubMenu = new JMenu(I18n.tr("Sort by"));
         
-        JMenuItem order = new JCheckBoxMenuItem(orderSortAction);
-        JMenuItem name = new JCheckBoxMenuItem(nameSortAction);
-        JMenuItem progress = new JCheckBoxMenuItem(progressSortAction);
-        JMenuItem timeRemaining = new JCheckBoxMenuItem(timeRemainingSortAction);
-        JMenuItem speed = new JCheckBoxMenuItem(speedSortAction);
-        JMenuItem status = new JCheckBoxMenuItem(statusSortAction);
-        JMenuItem fileType = new JCheckBoxMenuItem(fileTypeSortAction);
-        JMenuItem extension = new JCheckBoxMenuItem(extensionSortAction);
-        
+        JCheckBoxMenuItem orderAdded = new JCheckBoxMenuItem(orderSortAction);
+        JCheckBoxMenuItem name = new JCheckBoxMenuItem(nameSortAction);
+        JCheckBoxMenuItem progress = new JCheckBoxMenuItem(progressSortAction);
+        JCheckBoxMenuItem timeRemaining = new JCheckBoxMenuItem(timeRemainingSortAction);
+        JCheckBoxMenuItem speed = new JCheckBoxMenuItem(speedSortAction);
+        JCheckBoxMenuItem status = new JCheckBoxMenuItem(statusSortAction);
+        JCheckBoxMenuItem fileType = new JCheckBoxMenuItem(fileTypeSortAction);
+        JCheckBoxMenuItem extension = new JCheckBoxMenuItem(extensionSortAction);        
 
-        ButtonGroup sortButtonGroup = new ButtonGroup();
-        sortButtonGroup.add(order);
+        final UsefulButtonGroup sortButtonGroup = new UsefulButtonGroup();
+        sortButtonGroup.add(orderAdded);
         sortButtonGroup.add(name);
         sortButtonGroup.add(progress);
         sortButtonGroup.add(timeRemaining);
@@ -390,7 +358,27 @@ public class DownloadHeaderPanel extends JXPanel {
         sortButtonGroup.add(fileType);
         sortButtonGroup.add(extension);
         
-        sortSubMenu.add(order);
+        isDescending = new JMenuItem(new AbstractAction(I18n.tr("Descending")){
+            {
+                putValue(Action.SELECTED_KEY, true);
+                putValue(Action.SMALL_ICON, downArrow);
+            }
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                putValue(Action.NAME, isDescending.isSelected()? I18n.tr("Descending") : I18n.tr("Ascending"));
+                putValue(Action.SMALL_ICON, isDescending.isSelected()? downArrow : upArrow);
+                sortButtonGroup.getSelectedButton().getAction().actionPerformed(null);
+            }            
+        });
+        isDescending.setModel(new JToggleButton.ToggleButtonModel());
+        isDescending.setBorderPainted(false);
+        isDescending.setContentAreaFilled(false);
+        isDescending.setOpaque(false);
+       // isDescending.setSelected(true);
+        
+        orderAdded.setSelected(true);
+        
+        sortSubMenu.add(orderAdded);
         sortSubMenu.add(name);
         sortSubMenu.add(progress);
         sortSubMenu.add(timeRemaining);
@@ -398,6 +386,8 @@ public class DownloadHeaderPanel extends JXPanel {
         sortSubMenu.add(status);
         sortSubMenu.add(fileType);
         sortSubMenu.add(extension);
+        sortSubMenu.addSeparator();
+        sortSubMenu.add(isDescending);
         
         return sortSubMenu;
     }
@@ -483,6 +473,28 @@ public class DownloadHeaderPanel extends JXPanel {
         }
     }
     
+    private class SortAction extends AbstractAction{
+        
+        private final SortOrder ascending;
+        private final SortOrder descending;
+
+        public SortAction(String title, SortOrder ascending, SortOrder descending){
+            super(title);
+            this.ascending = ascending;
+            this.descending = descending;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (isDescending.isSelected()) {
+                downloadMediator.setSortOrder(descending);
+            } else {
+                downloadMediator.setSortOrder(ascending);
+                
+            }
+        }
+    }; 
+    
     private static class ActionEnablementListListener implements ListEventListener<DownloadItem> {
         private AbstractDownloadsAction action;
         public ActionEnablementListListener(AbstractDownloadsAction action){
@@ -492,5 +504,19 @@ public class DownloadHeaderPanel extends JXPanel {
         public void listChanged(ListEvent<DownloadItem> listChanges) {
             action.setEnablementFromDownloadSize(listChanges.getSourceList().size());
         }                
+    }
+    
+    private static class UsefulButtonGroup extends ButtonGroup {
+        
+        public AbstractButton getSelectedButton(){
+            ButtonModel selectedModel = getSelection();
+            for (AbstractButton button : buttons){
+                if(button.getModel() == selectedModel){
+                    return button;
+                }
+            }
+            //nothing found
+            return null;
+        }
     }
 }

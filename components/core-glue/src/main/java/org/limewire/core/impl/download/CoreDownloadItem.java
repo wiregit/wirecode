@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -467,5 +468,11 @@ class CoreDownloadItem implements DownloadItem {
             FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(), creationTime, reloadedMap, doc);
             propertiesMap = reloadedMap;
         }
+    }
+
+
+    @Override
+    public Date getStartDate() {
+        return (Date)downloader.getAttribute(DownloadItem.DOWNLOAD_START_DATE);
     }
 }

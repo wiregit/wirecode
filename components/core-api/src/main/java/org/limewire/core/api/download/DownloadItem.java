@@ -3,6 +3,7 @@ package org.limewire.core.api.download;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.limewire.core.api.Category;
@@ -17,6 +18,7 @@ import org.limewire.io.Address;
 public interface DownloadItem extends PropertiableFile {	
 
     public static final String DOWNLOAD_ITEM = "limewire.download.glueItem";
+    public static final String DOWNLOAD_START_DATE = "limewire.download.startDate";
 
     /**
      * Amalgamates the various specific error messages that a downloader could encounter
@@ -163,4 +165,7 @@ public interface DownloadItem extends PropertiableFile {
 
     /** Returns true if {@link #resume()} will search for more sources. */
     boolean isSearchAgainEnabled(); 
+    
+    /**@return The date the download started*/
+    Date getStartDate();
 }
