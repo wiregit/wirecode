@@ -91,7 +91,6 @@ public class SetupPage2 extends WizardPage {
 
     /**
      * Adds header for Auto-Sharing, checkbox and associated text
-     * @param newInstall 
      */
     private void addAutoSharing(boolean newInstall) {
         add(createAndDecorateHeader(I18n
@@ -102,12 +101,15 @@ public class SetupPage2 extends WizardPage {
             add(createAndDecorateMultiLine(I18n
                 .tr("Add files I download from P2P Users to my Public Shared list."),
                 shareDownloadedFilesCheckBox), "gapleft 5, gaptop 5");
-        } else {
+            add(
+                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharing"),
+                    "gapleft 10, wrap");
+        } else if(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             add(new JLabel(I18n.tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
+            add(
+                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharing"),
+                    "gapleft 10, wrap");
         }
-        add(
-                createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharing"),
-                "gapleft 10, wrap");
     }
 
     private void addModifyInfo() {
