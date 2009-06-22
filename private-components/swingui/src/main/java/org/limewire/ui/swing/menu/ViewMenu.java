@@ -37,8 +37,9 @@ class ViewMenu extends MnemonicMenu {
                 if(!component.isVisible() && !xmppService.isLoggedIn() && !xmppService.isLoggingIn()) {
                     friendsSignInPanel.get().setVisible(true);
                 } else {
+                    component.toggleVisibility();
                 }
-                component.toggleVisibility();
+                
             }
         };
 
