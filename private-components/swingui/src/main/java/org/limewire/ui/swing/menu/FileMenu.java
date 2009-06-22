@@ -2,7 +2,6 @@ package org.limewire.ui.swing.menu;
 
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.menu.actions.AddFileAction;
-import org.limewire.ui.swing.menu.actions.AddFolderAction;
 import org.limewire.ui.swing.menu.actions.ExitAction;
 import org.limewire.ui.swing.menu.actions.ExitAfterTransferAction;
 import org.limewire.ui.swing.menu.actions.OpenFileAction;
@@ -17,7 +16,7 @@ public class FileMenu extends MnemonicMenu {
     @Inject
     public FileMenu(OpenFileAction openFileAction, OpenLinkAction openLinkAction,
             RecentDownloadsMenu recentDownloadsMenu, AddFileAction addFileAction,
-            AddFolderAction addFolderAction, ExitAfterTransferAction exitAfterTransferAction,
+            ExitAfterTransferAction exitAfterTransferAction,
             ExitAction exitAction) {
         super(I18n.tr("&File"));
         
@@ -26,7 +25,6 @@ public class FileMenu extends MnemonicMenu {
         add(recentDownloadsMenu);
         addSeparator();
         add(addFileAction);
-        add(addFolderAction);
 
         // Add exit actions.
         if (!OSUtils.isMacOSX()) {
