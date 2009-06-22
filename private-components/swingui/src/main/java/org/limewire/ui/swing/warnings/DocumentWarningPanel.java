@@ -8,11 +8,11 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
@@ -22,6 +22,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.mainframe.LimeWireLayeredPane;
 import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -42,8 +43,9 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
 
     @Inject
     public DocumentWarningPanel(final SharedFileListManager shareListManager,
-            @LimeWireLayeredPane JLayeredPane layeredPane) {
+            @LimeWireLayeredPane JLayeredPane layeredPane, ButtonDecorator buttonDecorator) {
         this.layeredPane = layeredPane;
+
         setLayout(new MigLayout("insets 10"));
         setSize(320, 190);
         setPreferredSize(new Dimension(320, 190));
@@ -58,26 +60,32 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                                 learnMoreUrl));
         htmlLabel.setEditable(false);
         htmlLabel.setOpaque(false);
-        
+
         add(htmlLabel, "span 2, wrap");
         add(new MultiLineLabel(I18n.tr("Do you want to keep sharing Documents with the world?")),
                 "span 2, gaptop 20, wrap");
-        add(new JButton(new AbstractAction(I18n.tr("Continue Sharing")) {
+        JXButton continueSharingButton = new JXButton(new AbstractAction(I18n
+                .tr("Continue Sharing")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cleanup();
                 SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(false);
             }
-        }), "gaptop 15");
+        });
+        buttonDecorator.decorateLightFullButton(continueSharingButton);
+        add(continueSharingButton, "alignx right, gaptop 15");
 
-        add(new JButton(new AbstractAction(I18n.tr("Unshare All")) {
+        JXButton unshareAllButton = new JXButton(new AbstractAction(I18n.tr("Unshare All")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cleanup();
                 SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(true);
                 shareListManager.disableSharingDocumentsWithGnutella();
             }
-        }));
+        });
+        buttonDecorator.decorateLightFullButton(unshareAllButton);
+        add(unshareAllButton, "alignx right");
+
     }
 
     private void cleanup() {
@@ -85,6 +93,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
         layeredPane.remove(this);
         showing.set(false);
     }
+
     @Inject
     public void register(SharedFileListManager sharedFileListManager) {
         sharedFileListManager.getModel().getReadWriteLock().readLock().lock();
