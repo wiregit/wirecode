@@ -19,12 +19,13 @@ public class FriendButtonPopupListener implements PopupMenuListener {
     private final Provider<RemoveFriendAction> removeFriendAction;
     private final Provider<BrowseFriendsAction> browseFriendAction;
     private final Provider<AutoLoginService> autoLoginServiceProvider;
+    private final Provider<StatusActions> statusActions;
     
     @Inject
     public FriendButtonPopupListener(Provider<XMPPService> xmppServiceProvider, Provider<LoginAction> loginAction,
         Provider<LogoutAction> logoutAction, Provider<AddFriendAction> addFriendAction,
         Provider<RemoveFriendAction> removeFriendAction, Provider<BrowseFriendsAction> browseFriendAction,
-        Provider<AutoLoginService> autoLoginServiceProvider) {
+        Provider<AutoLoginService> autoLoginServiceProvider, Provider<StatusActions> statusActions) {
         this.xmppServiceProvider = xmppServiceProvider;
         this.loginAction = loginAction;
         this.logoutAction = logoutAction;
@@ -32,6 +33,7 @@ public class FriendButtonPopupListener implements PopupMenuListener {
         this.removeFriendAction = removeFriendAction;
         this.browseFriendAction = browseFriendAction;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
+        this.statusActions = statusActions;
     }
     
     @Override
@@ -56,6 +58,9 @@ public class FriendButtonPopupListener implements PopupMenuListener {
             menu.addSeparator();
             menu.add(addFriendAction.get()).setEnabled(!shouldAllowLogin);
             menu.add(removeFriendAction.get()).setEnabled(!shouldAllowLogin);
+            menu.addSeparator();
+            menu.add(statusActions.get().getAvailableMenuItem());
+            menu.add(statusActions.get().getDnDMenuItem());
             menu.addSeparator();
             if(shouldAllowLogin)
                 menu.add(loginAction.get());
