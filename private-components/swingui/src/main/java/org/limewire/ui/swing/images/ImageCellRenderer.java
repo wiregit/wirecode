@@ -42,7 +42,7 @@ class ImageCellRenderer extends JPanel implements ListCellRenderer {
     @Resource private int insetRight;
     
     @Inject
-    public ImageCellRenderer(ThumbnailManager thumbnailManager, ImageRenderer imageRenderer) {
+    public ImageCellRenderer(ThumbnailManager thumbnailManager, ImageRenderer imageRenderer, ImageButtons imageButtons) {
         this.thumbnailManager = thumbnailManager;
         this.imageRenderer = imageRenderer;
         
@@ -53,8 +53,9 @@ class ImageCellRenderer extends JPanel implements ListCellRenderer {
         setPreferredSize(new Dimension(width, height));
         setSize(getPreferredSize());
         setBackground(cellBackgroundColor);
-        setLayout(new MigLayout("insets 0, gap 0, fill"));
-        add(imageRenderer, "align 50%");
+        setLayout(new MigLayout("debug, insets 0, gap 0, fill"));
+        add(imageButtons, "growx, aligny top, wrap");
+        add(imageRenderer, "grow, alignx 50%");
         
         border = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(insetTop, insetLeft, insetBottom, insetRight),
                 BorderFactory.createMatteBorder(1, 1, 1, 1, cellBorderColor));
