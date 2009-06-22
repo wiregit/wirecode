@@ -8,7 +8,7 @@ import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 
-public class RemoveFriendAction extends AbstractAction {
+class RemoveFriendAction extends AbstractAction {
 
     @Inject
     public RemoveFriendAction() {

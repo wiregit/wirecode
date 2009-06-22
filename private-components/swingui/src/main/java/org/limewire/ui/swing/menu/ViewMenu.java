@@ -17,7 +17,7 @@ import org.limewire.xmpp.api.client.XMPPService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class ViewMenu extends MnemonicMenu {
+class ViewMenu extends MnemonicMenu {
     private final Provider<LoginPopupPanel> friendsSignInPanel;
     private final XMPPService xmppService;
     

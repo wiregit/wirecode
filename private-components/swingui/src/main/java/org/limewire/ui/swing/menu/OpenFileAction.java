@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -25,7 +25,7 @@ import org.limewire.util.FileUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class OpenFileAction extends AbstractAction {
+class OpenFileAction extends AbstractAction {
 
     private final DownloadListManager downloadListManager;
 

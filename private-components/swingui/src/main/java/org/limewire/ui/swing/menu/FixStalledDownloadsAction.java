@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 
@@ -16,7 +16,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 
-public class FixStalledDownloadsAction extends AbstractAction {
+class FixStalledDownloadsAction extends AbstractAction {
 
     private final DownloadMediator downloadMediator;
     

@@ -9,7 +9,7 @@ import org.limewire.xmpp.api.client.XMPPService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class LogoutAction extends AbstractAction {
+class LogoutAction extends AbstractAction {
 
     private final Provider<XMPPService> xmppService;
     

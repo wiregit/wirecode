@@ -31,7 +31,7 @@ import com.google.inject.Inject;
  * the users. These items are backed by a button group and JCheckBoxMenuItems
  */
 @LazySingleton
-public class StatusActions {
+class StatusActions {
     @Resource
     private Icon available;
 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -19,7 +19,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-public class AddFileAction extends AbstractAction {
+class AddFileAction extends AbstractAction {
     private final LibraryManager libraryManager;
 
     private final LibrarySupport librarySupport;

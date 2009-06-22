@@ -9,7 +9,7 @@ import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 
-public class AddFriendAction extends AbstractAction {
+class AddFriendAction extends AbstractAction {
 
     private final XMPPService xmppService;
 

@@ -15,7 +15,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-public class PlayerMenu extends MnemonicMenu {
+class PlayerMenu extends MnemonicMenu {
     @Inject
     public PlayerMenu(AudioPlayer audioPlayer,
             LibraryManager libraryManager) {

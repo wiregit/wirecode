@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +26,7 @@ import com.google.inject.Provider;
  * An action to prompt the user to open and download a link. Two link types are
  * supported: magnet links and torrent links.
  */
-public class OpenLinkAction extends AbstractAction {
+class OpenLinkAction extends AbstractAction {
 
     private final DownloadListManager downloadListManager;
 

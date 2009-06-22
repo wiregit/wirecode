@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 
@@ -13,7 +13,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-public class ExitAfterTransferAction extends AbstractAction {
+class ExitAfterTransferAction extends AbstractAction {
     
     @Inject
     public ExitAfterTransferAction() {

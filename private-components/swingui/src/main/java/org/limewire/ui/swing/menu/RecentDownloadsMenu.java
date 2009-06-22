@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -30,7 +30,7 @@ import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 
-public class RecentDownloadsMenu extends MnemonicMenu {
+class RecentDownloadsMenu extends MnemonicMenu {
     private final JMenuItem emptyItem;
 
     private final Action clearMenu;

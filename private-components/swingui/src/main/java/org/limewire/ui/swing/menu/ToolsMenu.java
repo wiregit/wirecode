@@ -32,7 +32,7 @@ import com.google.inject.Provider;
 /**
  * The Tools menu in the main menubar.
  */
-public class ToolsMenu extends MnemonicMenu {
+class ToolsMenu extends MnemonicMenu {
 
     /** Currently displayed Advanced Tools content panel. */
     private AdvancedToolsPanel advancedTools;

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.menu;
 
 import java.awt.Color;
 import java.awt.Frame;
