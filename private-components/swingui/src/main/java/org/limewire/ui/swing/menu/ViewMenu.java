@@ -8,19 +8,24 @@ import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
-import org.limewire.ui.swing.util.EnabledType;
+import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityType;
 import org.limewire.ui.swing.util.VisibleComponent;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class ViewMenu extends MnemonicMenu {
-
+    private final Provider<LoginPopupPanel> friendsSignInPanel;
+    private final XMPPService xmppService;
+    
     @Inject
-    public ViewMenu(final ChatFrame chatFrame) {
+    public ViewMenu(final ChatFrame chatFrame, Provider<LoginPopupPanel> friendsSignInPanel, XMPPService xmppService) {
         super(I18n.tr("&View"));
-//        add(buildShowHideAction(leftPanel, I18n.tr("Hide &Sidebar"), I18n.tr("Show &Sidebar")));
+        this.friendsSignInPanel = friendsSignInPanel;
+        this.xmppService = xmppService;
         add(buildShowHideAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
     }
 
@@ -29,29 +34,18 @@ public class ViewMenu extends MnemonicMenu {
         final Action action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(!component.isVisible() && !xmppService.isLoggedIn() && !xmppService.isLoggingIn()) {
+                    friendsSignInPanel.get().setVisible(true);
+                } else {
+                }
                 component.toggleVisibility();
             }
         };
 
         addVisibilityListener(component, action, visibleName, notVisibleName);
         setInitialText(component, action, visibleName, notVisibleName);
-        addEnabledListener(component, action);
 
         return action;
-    }
-
-    /**
-     * Adds a listener to the specified component to update the enabled state
-     * of the specified action, and initializes its enabled state. 
-     */
-    private void addEnabledListener(VisibleComponent component, final Action action) {
-        component.addEnabledListener(new EventListener<EnabledType>() {
-            @Override
-            public void handleEvent(EnabledType enabledType) {
-                action.setEnabled(enabledType.isEnabled());
-            }
-        });
-        action.setEnabled(component.isActionEnabled());
     }
 
     private void addVisibilityListener(VisibleComponent component, final Action action,
