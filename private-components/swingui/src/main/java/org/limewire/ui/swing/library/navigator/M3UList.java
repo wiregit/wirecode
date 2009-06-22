@@ -1,4 +1,4 @@
-package org.limewire.core.impl.playlist;
+package org.limewire.ui.swing.library.navigator;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,7 +14,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.playlist.M3UList;
 import org.limewire.io.IOUtils;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.util.FileUtils;
@@ -22,7 +21,7 @@ import org.limewire.util.FileUtils;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.matchers.Matcher;
 
-public class M3UListImpl implements M3UList {
+class M3UList {
 
     private static final String M3U_HEADER = "#EXTM3U";
     private static final String SONG_DELIM = "#EXTINF";
@@ -31,12 +30,11 @@ public class M3UListImpl implements M3UList {
     private final File file;
     private final LocalFileList localFileList;
     
-    public M3UListImpl(File file, LocalFileList localFileList) {
+    public M3UList(File file, LocalFileList localFileList) {
         this.file = file;
         this.localFileList = localFileList;
     }
     
-    @Override
     public void load() {
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {
@@ -51,7 +49,6 @@ public class M3UListImpl implements M3UList {
         });
     }
 
-    @Override
     public void save() {
         FilterList<LocalFileItem> filterList = new FilterList<LocalFileItem>(localFileList.getModel(), new AudioMatcher());
         final List<LocalFileItem> writeableList;

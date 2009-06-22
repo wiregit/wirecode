@@ -5,8 +5,6 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
-import org.limewire.core.api.playlist.M3UList;
-import org.limewire.core.impl.playlist.M3UListImpl;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
@@ -41,7 +39,7 @@ class ExportListAction  extends AbstractAction {
         if (file == null) {
             return;
         }
-        M3UList m3uList = new M3UListImpl(file, item.getLocalFileList());
+        M3UList m3uList = new M3UList(file, item.getLocalFileList());
         m3uList.save();
     }
     
