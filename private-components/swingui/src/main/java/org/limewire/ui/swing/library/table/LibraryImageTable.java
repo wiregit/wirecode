@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -16,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import net.miginfocom.swing.MigLayout;
@@ -28,6 +31,8 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.images.ImageCellEditor;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -41,18 +46,17 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     @Resource private Color backgroundColor;
     
     private final ImageList imageList;    
-//    private final ImageCellRenderer imageEditor;
     private final JXLayer<JComponent> layer;
     
     @Inject
-    public LibraryImageTable(ImageList imageList, ImageCellEditor imageEditor) {
+    public LibraryImageTable(final ImageList imageList, final ImageCellEditor imageEditor, 
+            final LibraryNavigatorPanel navigatorPanel) {
         super(new MigLayout("insets 0 0 0 0, fill"));
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundColor);
         
         this.imageList = imageList;
-//        this.imageEditor = imageEditor;
         imageList.setDragEnabled(true);
         imageList.setDropMode(DropMode.ON);
         
@@ -63,8 +67,28 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         layer = new JXLayer<JComponent>(imageScrollPane, new AbstractLayerUI<JComponent>());
         layer.getGlassPane().setLayout(null);       
 
-        new MouseReaction(imageList, imageEditor);
+        new MouseReaction(imageList, imageEditor, imageScrollPane);
         layer.getGlassPane().add(imageEditor);
+        
+        // this should really be an actionlistener but point conversion from
+        // editor to list index isn't working for some reason
+        imageEditor.getRemoveButton().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Point p2 = SwingUtilities.convertPoint((Component) e.getSource(), e.getPoint(),
+                        imageList);
+                int popupRow = imageList.locationToIndex(p2);
+                if (popupRow < 0)
+                    return;
+                imageList.setSelectedIndex(popupRow);
+
+                List<LocalFileItem> items = imageList.getSelectedItems();
+                if (items.size() > 0) {
+                    LibraryNavItem item = navigatorPanel.getSelectedNavItem();
+                    item.getLocalFileList().removeFile(items.get(0).getFile());
+                }
+            }
+        });
         
         add(layer, "grow");
     }
@@ -152,12 +176,14 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     
     public class MouseReaction implements MouseListener, MouseMotionListener {
 
-        private ImageList imageList;
-        private JComponent editor;
+        private final ImageList imageList;
+        private final JComponent editor;
+        private final JScrollPane scrollPane;
         
-        public MouseReaction(ImageList imageList, JComponent editor) {
+        public MouseReaction(ImageList imageList, JComponent editor, JScrollPane scrollPane) {
             this.imageList = imageList;      
             this.editor = editor;
+            this.scrollPane = scrollPane;
 
             imageList.addMouseListener(this);
             imageList.addMouseMotionListener(this);
@@ -198,12 +224,10 @@ public class LibraryImageTable extends JPanel implements Scrollable {
                 int index = imageList.locationToIndex(point);
                 if (index > -1) { 
                     editor.setVisible(true);
-//                    ((Configurable)hoverComponent).configure((LocalFileItem) imageList.getModel().getElementAt(index), true);
                     Rectangle bounds = imageList.getCellBounds(index, index);
                     ImageCellRenderer renderer = imageList.getImageCellRenderer();
-//                    hoverComponent.setLocation(bounds.x + renderer.getSubComponentLocation().x,
-//                            bounds.y + renderer.getSubComponentLocation().y);
-                    editor.setLocation(bounds.x + renderer.getPaddingInsets().left, bounds.y + renderer.getPaddingInsets().top);
+                    Point convertedPoint = SwingUtilities.convertPoint(imageList, new Point(bounds.x, bounds.y), scrollPane);
+                    editor.setLocation(convertedPoint.x + renderer.getPaddingInsets().left, convertedPoint.y + renderer.getPaddingInsets().top);
                 }
             }
         }

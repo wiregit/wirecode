@@ -17,6 +17,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.library.table.RemoveButton;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -43,7 +44,7 @@ public class ImageCellRenderer extends JPanel implements ListCellRenderer {
     @Resource private int insetRight;
     
     @Inject
-    public ImageCellRenderer(ThumbnailManager thumbnailManager, ImageRenderer imageRenderer, ImageButtons imageButtons) {
+    public ImageCellRenderer(ThumbnailManager thumbnailManager, ImageRenderer imageRenderer, RemoveButton removeButton) {
         this.thumbnailManager = thumbnailManager;
         this.imageRenderer = imageRenderer;
         
@@ -55,7 +56,7 @@ public class ImageCellRenderer extends JPanel implements ListCellRenderer {
         setSize(getPreferredSize());
         setBackground(cellBackgroundColor);
         setLayout(new MigLayout("debug, insets 0, gap 0, fill"));
-        add(imageButtons, "growx, aligny top, wrap");
+        add(removeButton, "gaptop 5, gapright 5, alignx right, aligny top, wrap");
         add(imageRenderer, "grow, alignx 50%");
         
         border = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(insetTop, insetLeft, insetBottom, insetRight),

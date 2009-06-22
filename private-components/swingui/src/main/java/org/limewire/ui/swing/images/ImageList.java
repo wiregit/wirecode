@@ -35,7 +35,7 @@ import com.google.inject.Provider;
  *  to right space before wrapping to a new line. Spaces between the
  *  images are injected with the inset values list below.
  */
-public class ImageList extends JXList implements Disposable { //, SelectAllable<LocalFileItem> {
+public class ImageList extends JXList implements Disposable {
 
     @Resource
     private Color backgroundListcolor;
