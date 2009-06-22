@@ -44,13 +44,13 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
     public DocumentWarningPanel(final SharedFileListManager shareListManager,
             @LimeWireLayeredPane JLayeredPane layeredPane) {
         this.layeredPane = layeredPane;
-        setLayout(new MigLayout());
-        setSize(350, 200);
-        setPreferredSize(new Dimension(350, 200));
-        setMaximumSize(new Dimension(350, 200));
-        setMinimumSize(new Dimension(350, 200));
+        setLayout(new MigLayout("insets 10"));
+        setSize(320, 190);
+        setPreferredSize(new Dimension(320, 190));
+        setMaximumSize(new Dimension(320, 190));
+        setMinimumSize(new Dimension(320, 190));
 
-        final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=publicSharing";
+        final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
         HTMLLabel htmlLabel = new HTMLLabel(
                 I18n
                         .tr(
@@ -58,10 +58,10 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                                 learnMoreUrl));
         htmlLabel.setEditable(false);
         htmlLabel.setOpaque(false);
-
-        add(htmlLabel, "wrap");
+        
+        add(htmlLabel, "span 2, wrap");
         add(new MultiLineLabel(I18n.tr("Do you want to keep sharing Documents with the world?")),
-                "gaptop 20, wrap");
+                "span 2, gaptop 20, wrap");
         add(new JButton(new AbstractAction(I18n.tr("Continue Sharing")) {
             @Override
             public void actionPerformed(ActionEvent e) {

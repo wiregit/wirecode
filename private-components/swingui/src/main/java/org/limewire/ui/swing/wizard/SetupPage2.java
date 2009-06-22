@@ -102,12 +102,12 @@ public class SetupPage2 extends WizardPage {
                 .tr("Add files I download from P2P Users to my Public Shared list."),
                 shareDownloadedFilesCheckBox), "gapleft 5, gaptop 5");
             add(
-                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharing"),
+                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
                     "gapleft 10, wrap");
         } else if(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             add(new JLabel(I18n.tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
             add(
-                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharing"),
+                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
                     "gapleft 10, wrap");
         }
     }
