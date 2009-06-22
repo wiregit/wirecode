@@ -31,7 +31,7 @@ class LibraryPopupHandler implements TablePopupHandler {
             return;
         
         LocalFileItem selectedItem = (LocalFileItem) libraryTable.getModel().getValueAt(popupRow, 0);
-        List<LocalFileItem> selectedItems = Collections.unmodifiableList(libraryTable.getSelection()); System.out.println("size " + selectedItems.size());
+        List<LocalFileItem> selectedItems = Collections.unmodifiableList(libraryTable.getSelection());
         
         if(selectedItems.size() <= 1 || !selectedItems.contains(selectedItem)) {
             libraryTable.setRowSelectionInterval(popupRow, popupRow);
