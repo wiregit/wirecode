@@ -121,7 +121,7 @@ public class SecurityOptionPanel extends OptionPanel {
             configureButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     unsafeOptionPanel, I18n.tr("Unsafe Categories"),
                     I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
-            final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=publicSharing";
+            final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
             HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
                 {
                     putValue(Action.SHORT_DESCRIPTION, learnMoreUrl);
