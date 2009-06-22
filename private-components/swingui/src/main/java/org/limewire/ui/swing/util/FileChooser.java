@@ -155,6 +155,36 @@ public final class FileChooser {
     }
     
     /**
+     * Same as <tt>getInputFile</tt> that takes no arguments, except this
+     * allows the caller to specify the parent component of the chooser.
+     * 
+     * @param parent the <tt>Component</tt> that should be the dialog's parent
+     * @param titleKey the key for the locale-specific string to use for the
+     *        file dialog title
+     * @param directory the directory to open the dialog to
+     * @param filter the <tt>FileFilter</tt> instance for customizing the
+     *        files that are displayed -- if this is null, no filter is used
+     * 
+     * @return the selected <tt>File</tt> instance, or <tt>null</tt> if a
+     *         file was not selected correctly
+     */
+    public static File getInputFile(Component parent, String titleKey, String approveKey,
+                                    File directory, FileFilter filter) {
+        List<File> files = getInput(parent, titleKey, approveKey, directory,
+                JFileChooser.FILES_ONLY, JFileChooser.APPROVE_OPTION, false,
+                filter);
+        
+        assert (files == null || files.size() <= 1) 
+        : "selected more than one directory: " + files;
+
+        if (files != null && files.size() == 1) {
+            return files.get(0);
+        } else {
+            return null;
+        }
+    }
+    
+    /**
      * The implementation that the other methods delegate to. This provides the
      * caller with all available options for customizing the
      * <tt>JFileChooser</tt> instance. If a <tt>FileDialog</tt> is displayed
