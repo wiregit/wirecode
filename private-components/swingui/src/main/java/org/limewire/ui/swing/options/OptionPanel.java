@@ -17,7 +17,7 @@ public abstract class OptionPanel extends JPanel {
 
     public OptionPanel(String title) {
         setBorder(BorderFactory.createTitledBorder(title));
-        setLayout(new MigLayout("gapy 10"));
+        setLayout(new MigLayout("nogrid, insets 4, fill"));
         setOpaque(false);
     }
 

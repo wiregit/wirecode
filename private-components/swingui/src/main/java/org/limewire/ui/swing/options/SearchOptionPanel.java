@@ -103,7 +103,7 @@ public class SearchOptionPanel extends OptionPanel {
 
         public SearchBarPanel() {
             super(I18n.tr("Search Bar"));
-            setLayout(new MigLayout("nogrid, insets 4, fill"));
+
             createComponents();
 
             add(new JLabel(I18n.tr("By default, search for")));
@@ -220,9 +220,7 @@ public class SearchOptionPanel extends OptionPanel {
                     filterFileExtensionPanel, I18n.tr("Filter File Extensions"),
                     I18n.tr("Filter File Extensions"),
                     I18n.tr("Restrict files with certain extensions from being displayed in search results")));
-            
-            setLayout(new MigLayout("nogrid, insets 4, fill"));
-            
+           
             add(new JLabel(I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results")), "wrap");
             
             add(copyrightContentCheckBox, "wrap");

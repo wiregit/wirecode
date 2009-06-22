@@ -13,8 +13,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.iTunesSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 
@@ -26,6 +29,9 @@ public class LibraryOptionPanel extends OptionPanel {
     private final LibraryPanel libraryPanel;
     
     private final LibraryManager libraryManager;
+    
+    private final JCheckBox shareCompletedDownloadsCheckBox;
+    private final JCheckBox addToITunesCheckBox;
 
     @Inject
     public LibraryOptionPanel(LibraryManager libraryManager) {
@@ -38,20 +44,48 @@ public class LibraryOptionPanel extends OptionPanel {
         add(new JLabel("add some library options"), "wrap");
         add(libraryPanel, "wrap");
         add(playerPanel, "wrap");
+        
+        shareCompletedDownloadsCheckBox = new JCheckBox(I18n.tr("Share files downloaded from the P2P Network with the P2P Network"));
+        shareCompletedDownloadsCheckBox.setContentAreaFilled(false);
+        
+        addToITunesCheckBox = new JCheckBox(I18n.tr("Add audio files I downloaded from LimeWire to iTunes"));
+        addToITunesCheckBox.setContentAreaFilled(false);
+        
+        add(shareCompletedDownloadsCheckBox, "split 3, wrap");
+        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
+            add(addToITunesCheckBox, "split 3, wrap");
+        }
+
     }
 
     @Override
     boolean applyOptions() {
+        
+        SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareCompletedDownloadsCheckBox.isSelected());
+        SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareCompletedDownloadsCheckBox.isSelected());
+        
+        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
+            iTunesSettings.ITUNES_SUPPORT_ENABLED.setValue(addToITunesCheckBox.isSelected());
+        }
+                
         return playerPanel.applyOptions() || libraryPanel.applyOptions();
     }
 
     @Override
     boolean hasChanged() {
-        return playerPanel.hasChanged() || libraryPanel.hasChanged();
+        return playerPanel.hasChanged() || libraryPanel.hasChanged()
+                    || SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() != shareCompletedDownloadsCheckBox.isSelected()
+                    || (OSUtils.isMacOSX() || OSUtils.isWindows()) ? iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue() != addToITunesCheckBox.isSelected() : false;
     }
 
     @Override
     public void initOptions() {
+        shareCompletedDownloadsCheckBox.setSelected(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
+        
+        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
+            addToITunesCheckBox.setSelected(iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue());
+        }
+
         libraryPanel.initOptions();
         playerPanel.initOptions();
     }

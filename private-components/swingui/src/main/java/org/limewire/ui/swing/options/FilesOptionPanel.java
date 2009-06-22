@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -35,22 +34,18 @@ import com.google.inject.Provider;
  */
 public class FilesOptionPanel extends OptionPanel {
     
-    private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
     private final ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel;
     private final DaapManager daapManager;
     private final Provider<IconManager> iconManager;
     
     private ManageExtensionsPanel manageExtensionsPanel;
-    private SaveFoldersPanel saveFoldersPanel;
     private LimeWireStorePanel limeWireStorePanel;
     private ITunesPanel iTunesPanel;
     
     @Inject
-    FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory, 
-            ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel, DaapManager daapManager,
+    FilesOptionPanel(ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel, DaapManager daapManager,
             Provider<IconManager> iconManager) { 
         
-        this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
         this.manageFileExtensionsOptionPanel = manageFileExtensionsOptionPanel;
         this.daapManager = daapManager;
         this.iconManager = iconManager;
@@ -60,7 +55,6 @@ public class FilesOptionPanel extends OptionPanel {
         setOpaque(false);
         
         add(getManageExtensionsPanel(), "pushx, growx");
-        add(getSaveOptionPanel(), "pushx, growx");
         add(getLimeWireStorePanel(), "pushx, growx");
         add(getITunesPanel(), "pushx, growx");
     }
@@ -70,13 +64,6 @@ public class FilesOptionPanel extends OptionPanel {
             manageExtensionsPanel = new ManageExtensionsPanel();
         }
         return manageExtensionsPanel;
-    }
-    
-    private OptionPanel getSaveOptionPanel() {
-        if(saveFoldersPanel == null) {
-            saveFoldersPanel = new SaveFoldersPanel();
-        }
-        return saveFoldersPanel;
     }
     
     private OptionPanel getLimeWireStorePanel() {
@@ -96,7 +83,6 @@ public class FilesOptionPanel extends OptionPanel {
     @Override
     boolean applyOptions() {
         boolean restart = getManageExtensionsPanel().applyOptions();
-        restart |= getSaveOptionPanel().applyOptions();
         restart |= getLimeWireStorePanel().applyOptions();
         restart |= getITunesPanel().applyOptions();
 
@@ -106,7 +92,6 @@ public class FilesOptionPanel extends OptionPanel {
     @Override
     boolean hasChanged() {
         return getManageExtensionsPanel().hasChanged() || 
-                getSaveOptionPanel().hasChanged() ||
                 getLimeWireStorePanel().hasChanged() ||
                 getITunesPanel().hasChanged();
     }
@@ -114,7 +99,6 @@ public class FilesOptionPanel extends OptionPanel {
     @Override
     public void initOptions() {
         getManageExtensionsPanel().initOptions();
-        getSaveOptionPanel().initOptions();
         getLimeWireStorePanel().initOptions();
         getITunesPanel().initOptions();
     }
@@ -150,40 +134,6 @@ public class FilesOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             extensionsPanel.initOptions();
-        }
-    }
-    
-    private class SaveFoldersPanel extends OptionPanel {
-
-        private ManageSaveFoldersOptionPanel saveFolderPanel;
-        private JButton configureButton;
-        
-        public SaveFoldersPanel() {
-            super(I18n.tr("Download Folders"));
-            
-            saveFolderPanel = manageFoldersOptionPanelFactory.create(new OKDialogAction(), new CancelDialogAction());
-            saveFolderPanel.setSize(new Dimension(400,500));
-            
-            configureButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this, saveFolderPanel, 
-                    I18n.tr("Download Folders"),I18n.tr("Configure..."),I18n.tr("Configure where different categories are downloaded")));
-            
-            add(new JLabel(I18n.tr("Choose where specific categories are downloaded")), "push");
-            add(configureButton);
-        }
-        
-        @Override
-        boolean applyOptions() {
-            return saveFolderPanel.applyOptions();
-        }
-
-        @Override
-        boolean hasChanged() {
-            return saveFolderPanel.hasChanged();
-        }
-
-        @Override
-        public void initOptions() {
-            saveFolderPanel.initOptions();
         }
     }
     
