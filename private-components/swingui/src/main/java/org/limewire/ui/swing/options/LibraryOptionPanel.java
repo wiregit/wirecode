@@ -1,11 +1,14 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
@@ -15,8 +18,12 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.iTunesSettings;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -28,14 +35,19 @@ public class LibraryOptionPanel extends OptionPanel {
 
     private final LibraryPanel libraryPanel;
     
+    private OptionPanel sharingPanel;
+    private final UnsafeTypeOptionPanel unsafeOptionPanel;
+    
     private final LibraryManager libraryManager;
     
     private final JCheckBox shareCompletedDownloadsCheckBox;
     private final JCheckBox addToITunesCheckBox;
 
     @Inject
-    public LibraryOptionPanel(LibraryManager libraryManager) {
+    public LibraryOptionPanel(LibraryManager libraryManager, UnsafeTypeOptionPanel unsafeTypeOptionPanel) {
         this.libraryManager = libraryManager;
+        this.unsafeOptionPanel = unsafeTypeOptionPanel;
+        
         this.playerPanel = new UsePlayerPanel();
         this.libraryPanel = new LibraryPanel();
 
@@ -44,6 +56,8 @@ public class LibraryOptionPanel extends OptionPanel {
         add(new JLabel("add some library options"), "wrap");
         add(libraryPanel, "wrap");
         add(playerPanel, "wrap");
+        add(getSharingPanel(), "wrap");
+        
         
         shareCompletedDownloadsCheckBox = new JCheckBox(I18n.tr("Share files downloaded from the P2P Network with the P2P Network"));
         shareCompletedDownloadsCheckBox.setContentAreaFilled(false);
@@ -163,17 +177,71 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         boolean applyOptions() {
             SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWirePlayer.isSelected());
-            return false;
+            return getSharingPanel().applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return useLimeWirePlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue();
+            return useLimeWirePlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue()
+                || getSharingPanel().hasChanged();
         }
 
         @Override
         public void initOptions() {
             useLimeWirePlayer.setSelected(SwingUiSettings.PLAYER_ENABLED.getValue());
+            getSharingPanel().initOptions();
+        }
+    }
+    
+    private OptionPanel getSharingPanel() {
+        if(sharingPanel == null) {
+            sharingPanel = new SharingPanel();
+        }
+        return sharingPanel;
+    }
+    
+    private class SharingPanel extends OptionPanel {
+        
+        private JButton configureButton;
+        
+        public SharingPanel() {
+            super(I18n.tr("Sharing"));
+            
+            
+            configureButton = new JButton(new DialogDisplayAction( LibraryOptionPanel.this,
+                    unsafeOptionPanel, I18n.tr("Unsafe Categories"),
+                    I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
+            final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
+            HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
+                {
+                    putValue(Action.SHORT_DESCRIPTION, learnMoreUrl);
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    NativeLaunchUtils.openURL(learnMoreUrl);
+                }
+            });
+            
+            setLayout(new MigLayout());
+            add(new JLabel(I18n.tr("LimeWire is preventing you from dangerous searching and sharing:")));
+            add(learnMoreButton, "gapleft 15");
+            add(configureButton, "gapleft 15");
+        }
+        
+        @Override
+        boolean applyOptions() {
+            return unsafeOptionPanel.applyOptions();
+        }
+
+        @Override
+        boolean hasChanged() {
+            return unsafeOptionPanel.hasChanged();
+        }
+
+        @Override
+        public void initOptions() {
+            unsafeOptionPanel.initOptions();
         }
     }
 

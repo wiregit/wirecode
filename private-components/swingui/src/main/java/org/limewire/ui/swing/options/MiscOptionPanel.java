@@ -11,6 +11,7 @@ import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -27,6 +28,8 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.search.resultpanel.LicenseWarningDownloadPreprocessor;
+import org.limewire.ui.swing.settings.QuestionsHandler;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -42,6 +45,10 @@ import com.google.inject.Provider;
  */
 public class MiscOptionPanel extends OptionPanel {
 
+    // backwards compatibility
+    private static final int SKIP_WARNING_VALUE = LicenseWarningDownloadPreprocessor.SKIP_WARNING_VALUE;
+    private static final int SHOW_WARNING_VALUE = LicenseWarningDownloadPreprocessor.SHOW_WARNING_VALUE;
+    
     private static final String TRANSLATE_URL = "http://wiki.limewire.org/index.php?title=Translate";
     
     private final Provider<XMPPAccountConfigurationManager> accountManager;
@@ -145,17 +152,26 @@ public class MiscOptionPanel extends OptionPanel {
 
         private JCheckBox showNotificationsCheckBox;
         private JCheckBox playNotificationsCheckBox;
+        private JButton resetWarningsButton;
 
         public NotificationsPanel() {
-            super(tr("Notifications"));
+            super(tr("Notifications and Warnings"));
 
             showNotificationsCheckBox = new JCheckBox(tr("Show popup system notifications"));
             showNotificationsCheckBox.setContentAreaFilled(false);
             playNotificationsCheckBox = new JCheckBox(tr("Play notification sounds"));
             playNotificationsCheckBox.setContentAreaFilled(false);
-
+            resetWarningsButton = new JButton(new AbstractAction(I18n.tr("Reset")){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    resetWarnings();
+                }
+            });
+            
             add(showNotificationsCheckBox, "wrap");
             add(playNotificationsCheckBox, "wrap");
+            add(new JLabel(I18n.tr("Reset warning messages")));
+            add(resetWarningsButton, "wrap");
         }
 
         @Override
@@ -357,5 +373,17 @@ public class MiscOptionPanel extends OptionPanel {
             }
             return this;
         }
+    }
+    
+    
+    
+    private static void resetWarnings() {
+        int skipWarningSettingValue = getLicenseSettingValueFromCheckboxValue(true);
+        QuestionsHandler.SKIP_FIRST_DOWNLOAD_WARNING.setValue(skipWarningSettingValue);
+        QuestionsHandler.WARN_TORRENT_SEED_MORE.setValue(true);
+    }
+    
+    private static int getLicenseSettingValueFromCheckboxValue(boolean isSelected) {
+        return isSelected ? SHOW_WARNING_VALUE : SKIP_WARNING_VALUE;
     }
 }

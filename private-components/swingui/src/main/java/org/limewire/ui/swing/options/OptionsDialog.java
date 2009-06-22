@@ -45,8 +45,6 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     @Resource
     private Color backgroundColor;
     @Resource
-    private Icon securityIcon;
-    @Resource
     private Icon advancedIcon;
     @Resource
     private Icon downloadsIcon;
@@ -68,7 +66,6 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     private Provider<LibraryOptionPanel> libraryOptionPanel;
     private Provider<SearchOptionPanel> searchOptionPanel;
     private Provider<DownloadOptionPanel> downloadOptionPanel;
-    private Provider<SecurityOptionPanel> securityOptionPanel;
     private Provider<MiscOptionPanel> miscOptionPanel;
     private Provider<AdvancedOptionPanel> advancedOptionPanel;
     
@@ -89,7 +86,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
     @Inject
     public OptionsDialog(Provider<LibraryOptionPanel> libraryOptionPanel, Provider<SearchOptionPanel> searchOptionPanel,
-            Provider<DownloadOptionPanel> downloadOptionPanel, Provider<SecurityOptionPanel> securityOptionPanel,
+            Provider<DownloadOptionPanel> downloadOptionPanel,
             Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel,
             AppFrame appFrame, BarPainterFactory barPainterFactory) {
         super(appFrame.getMainFrame(), I18n.tr("Options"), true);
@@ -99,7 +96,6 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         this.libraryOptionPanel = libraryOptionPanel;
         this.searchOptionPanel = searchOptionPanel;
         this.downloadOptionPanel = downloadOptionPanel;
-        this.securityOptionPanel = securityOptionPanel;
         this.miscOptionPanel = miscOptionPanel;
         this.advancedOptionPanel = advancedOptionPanel;
 
@@ -173,7 +169,6 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         createButton(LIBRARY, libraryIcon, libraryOptionPanel, down, up);
         createButton(SEARCH, searchIcon, searchOptionPanel, down, up);
         createButton(DOWNLOADS, downloadsIcon, downloadOptionPanel, down, up);
-        createButton(SECURITY, securityIcon, securityOptionPanel, down, up);
         createButton(MISC, miscIcon, miscOptionPanel, down, up);
         createButton(ADVANCED, advancedIcon, advancedOptionPanel, down, up);
     }

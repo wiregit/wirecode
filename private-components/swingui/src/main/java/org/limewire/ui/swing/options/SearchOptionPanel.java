@@ -38,16 +38,20 @@ public class SearchOptionPanel extends OptionPanel {
     private final AutoCompleteDictionary searchHistory;
     private final SpamManager spamManager;
     
+    private final UnsafeTypeOptionPanel unsafeOptionPanel;
+    
     private SearchBarPanel searchBarPanel;
     private FilteringPanel filteringPanel;
     private JCheckBox groupSimilarResults;
 
     @Inject
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
-            SpamManager spamManager) {
+            SpamManager spamManager,
+            UnsafeTypeOptionPanel unsafeOptionPanel) {
         
         this.spamManager = spamManager;
         this.searchHistory = searchHistory;
+        this.unsafeOptionPanel = unsafeOptionPanel;
         
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
@@ -196,8 +200,14 @@ public class SearchOptionPanel extends OptionPanel {
         private JButton filterKeywordsButton;
         private JButton filterFileExtensionsButton;
         
+        private final JButton configureButton;
+        
         public FilteringPanel() {
             super(I18n.tr("Search Filtering"));
+           
+            configureButton = new JButton(new DialogDisplayAction( SearchOptionPanel.this,
+                    unsafeOptionPanel, I18n.tr("Unsafe Categories"),
+                    I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
             
             filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
@@ -221,7 +231,8 @@ public class SearchOptionPanel extends OptionPanel {
                     I18n.tr("Filter File Extensions"),
                     I18n.tr("Restrict files with certain extensions from being displayed in search results")));
            
-            add(new JLabel(I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results")), "wrap");
+            add(new JLabel(I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results")));
+            add(configureButton, "wrap");
             
             add(copyrightContentCheckBox, "wrap");
             add(adultContentCheckBox, "wrap");

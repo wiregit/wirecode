@@ -2,7 +2,6 @@ package org.limewire.ui.swing.options;
 
 import java.util.Collection;
 
-import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -15,8 +14,13 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
+import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+
+@LazySingleton
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
     private JCheckBox programCheckBox;
@@ -25,7 +29,8 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     private final LibraryManager libraryManager;
     private final SharedFileListManager shareListManager;
    
-    public UnsafeTypeOptionPanel(Action okButtonAction, LibraryManager libraryManager,
+    @Inject
+    public UnsafeTypeOptionPanel(LibraryManager libraryManager,
             SharedFileListManager shareListManager) {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -34,7 +39,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         
         programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share programs with the P2P Network and my friends"));
         documentCheckBox = new JCheckBox(I18n.tr("Allow me to share documents with the P2P Network"));
-        okButton = new JButton(okButtonAction);
+        okButton = new JButton(new OKDialogAction());
         
         add(new JLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents:")), "span 2, wrap");
         
