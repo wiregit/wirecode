@@ -62,7 +62,7 @@ public class StatusPanel extends JXPanel {
         leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 2, gapbottom 2");
         leftPanel.add(sharedFileCountPanel, "growy, gaptop 0, gapbottom 0");
         leftPanel.add(downloadCountPanel, "growy, gaptop 2, gapbottom 2");
-        leftPanel.add(fileProcessingPanel, "growy, gaptop 0, gapbottom 0");
+        //leftPanel.add(fileProcessingPanel, "growy, gaptop 0, gapbottom 0"); TODO add back in, turning off for the beta.
         
         centerPanel.add(proStatusPanel, "growy, gaptop 2");
         rightPanel.add(miniPlayerPanel, "gapafter 4");
