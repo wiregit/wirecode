@@ -159,7 +159,7 @@ public class IntentDialog extends LimeJDialog {
         panel.add(copyrightLabel, "gapleft " + indent + ", gaptop 10, wrap");
         panel.add(bodyLabel, "gapleft " + (indent + indent) + ", gaptop 10, wrap");
         panel.add(policiesLabel, "gapleft " + indent + ", gaptop 20, wrap");
-        panel.add(licenseButton, "gapleft " + (indent + indent) +  ", wrap");
+        panel.add(licenseButton, "gaptop 10, gapleft " + (indent + indent) +  ", wrap");
         panel.add(privacyButton, "gapleft " + (indent + indent) +  ", wrap");
         panel.add(agreeLabel, "gapleft " + indent +  ", gaptop 30, wrap");
 
