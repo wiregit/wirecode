@@ -7,6 +7,9 @@ import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.event.AboutDisplayEvent;
+import org.limewire.ui.swing.home.HomeMediator;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.I18n;
@@ -18,7 +21,7 @@ import com.google.inject.Inject;
 class HelpMenu extends MnemonicMenu {
 
     @Inject
-    public HelpMenu(Application application, final TrayNotifier trayNotifier) {
+    public HelpMenu(Application application, final TrayNotifier trayNotifier, final Navigator navigator, final HomeMediator homeMediator) {
         super(I18n.tr("&Help"));
 
         add(new AbstractAction(I18n.tr("&Using LimeWire")) {
@@ -28,7 +31,15 @@ class HelpMenu extends MnemonicMenu {
             }
         });
 
-         add(new AbstractAction(I18n.tr("&FAQ")) {
+        add(new AbstractAction(I18n.tr("&Home")) {
+            @Override
+           public void actionPerformed(ActionEvent e) {
+                navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
+                homeMediator.getComponent().loadDefaultUrl();
+           }
+        });
+        
+        add(new AbstractAction(I18n.tr("&FAQ")) {
              @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils
