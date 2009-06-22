@@ -8,6 +8,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
+import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityType;
@@ -19,13 +20,16 @@ import com.google.inject.Provider;
 
 class ViewMenu extends MnemonicMenu {
     private final Provider<LoginPopupPanel> friendsSignInPanel;
+    private final Provider<AutoLoginService> autoLoginServiceProvider;
     private final XMPPService xmppService;
     
     @Inject
-    public ViewMenu(final ChatFrame chatFrame, Provider<LoginPopupPanel> friendsSignInPanel, XMPPService xmppService) {
+    public ViewMenu(final ChatFrame chatFrame, Provider<LoginPopupPanel> friendsSignInPanel, XMPPService xmppService, 
+            Provider<AutoLoginService> autoLoginServiceProvider) {
         super(I18n.tr("&View"));
         this.friendsSignInPanel = friendsSignInPanel;
         this.xmppService = xmppService;
+        this.autoLoginServiceProvider = autoLoginServiceProvider;
         add(buildShowHideAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
     }
 
@@ -34,10 +38,14 @@ class ViewMenu extends MnemonicMenu {
         final Action action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!component.isVisible() && !xmppService.isLoggedIn() && !xmppService.isLoggingIn()) {
-                    friendsSignInPanel.get().setVisible(true);
+                if(!component.isVisible() && !xmppService.isLoggedIn() && !xmppService.isLoggingIn()
+                        && !autoLoginServiceProvider.get().isAttemptingLogin()) {
+                        friendsSignInPanel.get().setVisible(true);
                 } else {
-                    component.toggleVisibility();
+                    // TODO: nothing happens if we are logging in, seems strange.
+                    if (!autoLoginServiceProvider.get().isAttemptingLogin() && !xmppService.isLoggingIn()) {
+                        component.toggleVisibility();
+                    }
                 }
                 
             }
