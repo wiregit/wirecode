@@ -57,16 +57,15 @@ public class LimeWireSwingUI extends JPanel {
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel chatFrame,
             AudioPlayer player,
-//            ShapeDialog shapeDialog, 
             ProNagController proNagController, 
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
-            MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider) {
+            MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider, @LimeWireLayeredPane JLayeredPane limeWireLayeredPane) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
     	this.mainPanel = mainPanel;
-    	this.layeredPane = new JLayeredPane();
+    	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
     	
     	JPanel centerPanel = new JPanel(new GridBagLayout());
@@ -125,10 +124,12 @@ public class LimeWireSwingUI extends JPanel {
 	}
 	
 	void hideMainPanel() {
-	    mainPanel.setVisible(false);
+	   layeredPane.setVisible(false);
+	   mainPanel.setVisible(false);
 	}
 	
 	void showMainPanel() {
+	    layeredPane.setVisible(true);
 	    mainPanel.setVisible(true);
 	}
 	

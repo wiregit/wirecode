@@ -2,6 +2,7 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.Frame;
 
+import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.settings.InstallSettings;
@@ -11,43 +12,60 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class SetupWizard {
-    
+
     private Wizard wizard;
-    
+
+    private final Application application;
+
     @Inject
-    public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory, 
-            Provider<LibraryManager> libraryManager){
-        
+    public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory,
+            Provider<LibraryManager> libraryManager, Application application) {
+        this.application = application;
+
         if (shouldShowWizard()) {
             createWizard(decoratorFactory.get(), libraryManager.get().getLibraryData());
         }
     }
-    
+
     public boolean shouldShowWizard() {
-        return needsPage1();
+        if (showPage1()) {
+            return true;
+        }
+
+        String lastRunVersion = InstallSettings.LAST_VERSION_RUN.get();
+        if (lastRunVersion != null && !lastRunVersion.equals(application.getVersion())) {
+            return true;
+        }
+
+        return false;
     }
-    
+
     public void showDialogIfNeeded(Frame owner) {
-        wizard.showDialogIfNeeded(owner);
-        
-        // Sets the upgraded flag after the setup wizard
-        //  completes
+        if (shouldShowWizard()) {
+            wizard.showDialogIfNeeded(owner);
+        }
+
+        // Sets the upgraded flag after the setup wizard completes
         InstallSettings.UPGRADED_TO_5.setValue(true);
+        InstallSettings.LAST_VERSION_RUN.set(application.getVersion());
+        InstallSettings.PREVIOUS_RAN_VERSIONS.add(application.getVersion());
     }
-        
-    private void createWizard(SetupComponentDecoratorFactory decoratorFactory, 
+
+    private void createWizard(SetupComponentDecoratorFactory decoratorFactory,
             LibraryData libraryData) {
-        
+
         SetupComponentDecorator decorator = decoratorFactory.create();
-        
+
         wizard = new Wizard(decorator);
-        
-        if(needsPage1()){
+
+        if (showPage1()) {
             wizard.addPage(new SetupPage1(decorator));
-        }        
+        }
+        
+        wizard.addPage(new SetupPage2(decorator));
     }
-    
-    private boolean needsPage1() {
+
+    private boolean showPage1() {
         if (!InstallSettings.AUTO_SHARING_OPTION.getValue()) {
             return true;
         }
@@ -60,7 +78,8 @@ public class SetupWizard {
         if (!InstallSettings.START_STARTUP.getValue()) {
             return GuiUtils.shouldShowStartOnStartupWindow();
         }
+
         return false;
     }
-    
+
 }

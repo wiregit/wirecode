@@ -12,14 +12,10 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.EventList;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
@@ -58,41 +54,16 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         	Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
         	managedCategories.remove(Category.PROGRAM);
         	libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(managedCategories);
-        	BackgroundExecutorService.execute(new Runnable() {
-        	   @Override
-        	    public void run() {
-        	       libraryManager.getLibraryManagedList().removeFiles(new Filter<LocalFileItem>() {
-                       @Override
-                        public boolean allow(LocalFileItem localFileItem) {
-                            return localFileItem.getCategory() == Category.PROGRAM;
-                        } 
-                    });
-        	    } 
-        	});
+            libraryManager.getLibraryManagedList().removeFiles(new Filter<LocalFileItem>() {
+               @Override
+                public boolean allow(LocalFileItem localFileItem) {
+                    return localFileItem.getCategory() == Category.PROGRAM;
+                } 
+            });
         }
         
         if (!documentCheckBox.isSelected()) {
-            BackgroundExecutorService.execute(new Runnable() {
-               @Override
-                public void run() {
-                   EventList<SharedFileList> shareLists = shareListManager.getModel();
-                   shareLists.getReadWriteLock().readLock().lock();
-                   try {
-                       for(SharedFileList sharedFileList : shareLists) {
-                           if(sharedFileList.isPublic()) {
-                               sharedFileList.removeFiles(new Filter<LocalFileItem>() {
-                                   @Override
-                                   public boolean allow(LocalFileItem localFileItem) {
-                                       return localFileItem.getCategory() == Category.DOCUMENT;
-                                   } 
-                               });
-                           }
-                       }
-                   } finally {
-                       shareLists.getReadWriteLock().readLock().unlock();
-                   }
-                } 
-            });
+            shareListManager.disableSharingDocumentsWithGnutella();
         }
         return false;
     }

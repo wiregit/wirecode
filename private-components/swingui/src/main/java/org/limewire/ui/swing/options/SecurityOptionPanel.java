@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.event.ActionEvent;
+
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
@@ -7,10 +10,13 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 
@@ -115,13 +121,24 @@ public class SecurityOptionPanel extends OptionPanel {
             configureButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     unsafeOptionPanel, I18n.tr("Unsafe Categories"),
                     I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
+            final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=publicSharing";
+            HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
+                {
+                    putValue(Action.SHORT_DESCRIPTION, learnMoreUrl);
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    NativeLaunchUtils.openURL(learnMoreUrl);
+                }
+            });
             
             setLayout(new MigLayout());
-            add(new JLabel(I18n.tr("For your safety, LimeWire disables you from:")),"wrap, gaptop 10");
-            add(new JLabel(I18n.tr("- Searching for and sharing programs with anyone")), "gapleft 25, wrap");
-            add(new JLabel(I18n.tr("- Sharing documents with the P2P Network")), "gapleft 25, wrap");
-            
-            add(new JLabel("We strongly recommend you do not enable these settings"), "gaptop 10, push");
+            add(new JLabel(I18n.tr("For your safety, LimeWire 5 disables you from:")),"wrap, gaptop 10");
+            add(new JLabel(I18n.tr("- Searching for and sharing Programs with anyone")), "gapleft 25, wrap");
+            add(new JLabel(I18n.tr("- Adding Documents to your Public Shared List")), "gapleft 25, wrap");
+            add(new JLabel(I18n.tr("We strongly recommend you do not enable these settings")), "gaptop 10");
+            add(learnMoreButton, "gapleft 5, push");
             add(configureButton, "gaptop 10");
         }
         

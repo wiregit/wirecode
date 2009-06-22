@@ -4,6 +4,8 @@ import org.limewire.core.settings.LimeWireSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.SettingsFactory;
+import org.limewire.setting.StringSetSetting;
+import org.limewire.setting.StringSetting;
 
 /**
  * Handles installation preferences.
@@ -69,4 +71,17 @@ public final class InstallSettings extends LimeWireSettings {
     /** Whether the setup wizard has been completed on 5. */
     public static final BooleanSetting UPGRADED_TO_5 =
         FACTORY.createBooleanSetting("UPGRADED_TO_5", false);
+    
+    /**
+     * Stores the value of the last known version of limewire that has been run. Will be null on a clean install until the program is run and a value is set for it.
+     * This setting starts with versions > 5.2.2 
+     */
+    public static final StringSetting LAST_VERSION_RUN = FACTORY.createStringSetting("LAST_VERSION_RUN", "");
+    
+    /**
+     * Stores an array of all the known versions of limewire that have been run.
+     * This setting starts with versions > 5.2.2
+     */
+    public static final StringSetSetting PREVIOUS_RAN_VERSIONS = FACTORY.createStringSetSetting("PREVIOUS_RAN_VERSIONS", "");
+    
 }

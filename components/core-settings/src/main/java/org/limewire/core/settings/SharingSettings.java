@@ -129,6 +129,12 @@ public class SharingSettings extends LimeProps {
             "WARN_SHARING_FOLDER", true);
     
     /**
+     * Specifies whether or not to warn the user when they are sharing documents with the world.
+     */
+    public static final BooleanSetting WARN_SHARING_DOCUMENTS_WITH_WORLD = FACTORY.createBooleanSetting(
+            "WARN_SHARING_DOCUMENTS_WITH_WORLD", true);
+    
+    /**
      * Helper method left from SettingsManager.
      * <p>
      * Sets the directory for saving files.

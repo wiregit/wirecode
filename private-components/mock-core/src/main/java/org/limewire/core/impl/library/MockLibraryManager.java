@@ -223,4 +223,9 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     public void removePropertyChangeListener(PropertyChangeListener listener) {
 
     }
+
+    @Override
+    public void disableSharingDocumentsWithGnutella() {
+        
+    }
 }

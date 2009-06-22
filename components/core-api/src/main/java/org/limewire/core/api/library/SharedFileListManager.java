@@ -43,4 +43,10 @@ public interface SharedFileListManager {
     
     /** Deletes the SharedFileList with this name. */
     void deleteSharedFileList(SharedFileList fileList);
+
+    
+    /**
+     * Removes all documents from all public share lists, and turns off sharing documents with gnutella. 
+     */
+    void disableSharingDocumentsWithGnutella();
 }

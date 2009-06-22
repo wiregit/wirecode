@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.net.FirewallService;
 import org.limewire.nio.NIODispatcher;
@@ -36,6 +37,7 @@ import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.event.ExceptionPublishingSwingEventService;
 import org.limewire.ui.swing.mainframe.AppFrame;
+import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -48,6 +50,8 @@ import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
 import org.mozilla.browser.MozillaPanel;
 
 import com.google.inject.AbstractModule;
@@ -222,6 +226,8 @@ public final class Initializer {
             IOUtils.close(inputStream);
         }
 
+		updateVersionsUsed(properties);
+		
         String exists = properties.getProperty(LimeWireUtils.getLimeWireVersion());
         if (exists == null || !exists.equals("true")) {
             SwingUtils.invokeAndWait(new Runnable() {
@@ -230,7 +236,8 @@ public final class Initializer {
                     if (awtSplash != null) {
                         awtSplash.setVisible(false);
                     }
-                    
+                    //must warn users about sharing documents again after an upgrade
+                    SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(true);
                     boolean confirmed = new IntentDialog(LimeWireUtils.getLimeWireVersion()).confirmLegal();
                     if (!confirmed) {
                         System.exit(0);
@@ -252,6 +259,21 @@ public final class Initializer {
                 IOUtils.close(outputStream);
             }
         }
+    }
+
+    /**
+     * Fills in any previously run versions from the versions.props file. 
+     */
+    private void updateVersionsUsed(Properties properties) {
+        for(Object key : properties.keySet()) {
+		    String versionString = key.toString();
+		    try {
+                Version version = new Version(versionString);
+                InstallSettings.PREVIOUS_RAN_VERSIONS.add(version.getVersion());
+            } catch (VersionFormatException e) {
+               //do nothing
+            }
+		}
     }
   
 

@@ -5,9 +5,13 @@ import java.beans.PropertyChangeSupport;
 import java.util.Collection;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.filter.Filter;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
@@ -206,6 +210,27 @@ class SharedFileListManagerImpl implements SharedFileListManager {
             collectionManager.removeCollectionById(((SharedFileListImpl)fileList).getCoreCollection().getId());
         } else {
             throw new IllegalStateException("invalid FileList: " + fileList);
+        }
+    }
+    
+    @Override
+    public void disableSharingDocumentsWithGnutella() {
+        LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(false);
+        EventList<SharedFileList> shareLists = getModel();
+        shareLists.getReadWriteLock().readLock().lock();
+        try {
+            for (SharedFileList sharedFileList : shareLists) {
+                if (sharedFileList.isPublic()) {
+                    sharedFileList.removeFiles(new Filter<LocalFileItem>() {
+                        @Override
+                        public boolean allow(LocalFileItem localFileItem) {
+                            return localFileItem.getCategory() == Category.DOCUMENT;
+                        }
+                    });
+                }
+            }
+        } finally {
+            shareLists.getReadWriteLock().readLock().unlock();
         }
     }
 }
