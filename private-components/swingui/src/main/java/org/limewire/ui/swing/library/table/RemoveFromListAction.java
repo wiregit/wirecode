@@ -5,32 +5,37 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibraryPanel;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
 /**
- * Removes the selected file(s) from the library. 
+ * Removes the selected items from the selected SharedList
  */
-class RemoveFromLibraryAction extends AbstractAction {
+public class RemoveFromListAction extends AbstractAction {
     private final LibraryPanel libraryPanel;
-    private final LibraryManager libraryManager;
+    private final LibraryNavigatorPanel libraryNavigatorPanel;
     
     @Inject
-    public RemoveFromLibraryAction(LibraryPanel libraryPanel, LibraryManager libraryManager) {
-        super(I18n.tr("Remove from Library"));
+    public RemoveFromListAction(LibraryPanel libraryPanel, LibraryNavigatorPanel libraryNavigatorPanel) {
+        super(I18n.tr("Remove from List"));
         
         this.libraryPanel = libraryPanel;
-        this.libraryManager = libraryManager;
+        this.libraryNavigatorPanel = libraryNavigatorPanel;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {       
+    public void actionPerformed(ActionEvent e) {
+        LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
+        LocalFileList localFileList = navItem.getLocalFileList();
+        
         File currentSong = PlayerUtils.getCurrentSongFile();
         List<LocalFileItem> items = Collections.unmodifiableList(libraryPanel.getSelectedItems());
         for(LocalFileItem item : items) {
@@ -38,7 +43,7 @@ class RemoveFromLibraryAction extends AbstractAction {
                 PlayerUtils.stop();
             }
             if(!item.isIncomplete()) {
-                libraryManager.getLibraryManagedList().removeFile(item.getFile());
+                localFileList.removeFile(item.getFile());
             }
         }
     }

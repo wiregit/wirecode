@@ -6,6 +6,8 @@ import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.LibraryPanel;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.player.PlayerUtils;
 
 import com.google.inject.Inject;
@@ -13,24 +15,27 @@ import com.google.inject.Provider;
 
 public class LibraryPopupMenu extends JPopupMenu {
 
-    //TODO: a lot of these actions are not correct anymore
-    //TODO: a lot of thse don't need to be providers
     private final LibraryPanel libraryPanel;
+    private final LibraryNavigatorPanel libraryNavigatorPanel;
     private final Provider<PlayAction> playAction;
     private final Provider<LaunchFileAction> launchAction;
     private final Provider<LocateFileAction> locateAction;
-    private final Provider<RemoveFromLibraryAction> removeAction;
-    private final Provider<DeleteAction> deleteAction;
+    private final Provider<RemoveFromListAction> removeListAction;
+    private final RemoveFromLibraryAction removeAction;
+    private final DeleteAction deleteAction;
     private final Provider<ViewFileInfoAction> fileInfoAction;
     
     @Inject
-    public LibraryPopupMenu(LibraryPanel libraryPanel, 
+    public LibraryPopupMenu(LibraryPanel libraryPanel, LibraryNavigatorPanel libraryNavigatorPanel,
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
-            Provider<PlayAction> playAction, Provider<RemoveFromLibraryAction> removeAction, 
-            Provider<DeleteAction> deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
+            Provider<PlayAction> playAction, RemoveFromLibraryAction removeAction, 
+            Provider<RemoveFromListAction> removeListAction,
+            DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
         this.libraryPanel = libraryPanel;
+        this.libraryNavigatorPanel = libraryNavigatorPanel;
         this.launchAction = launchAction;
         this.locateAction = locateAction;
+        this.removeListAction = removeListAction;
         this.playAction = playAction;
         this.removeAction = removeAction;
         this.deleteAction = deleteAction;
@@ -40,21 +45,28 @@ public class LibraryPopupMenu extends JPopupMenu {
     }
     
     private void init() {
-        //TODO: check for multi-file select
         List<LocalFileItem> localFileItem = libraryPanel.getSelectedItems();
         // if single selection
         if(localFileItem.size() == 1) {
             add(launchAction.get());
             add(playAction.get()).setEnabled(PlayerUtils.isPlayableFile(localFileItem.get(0).getFile()));
             addSeparator();
+            if(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY) {
+                add(removeListAction.get());
+                addSeparator();
+            }
             add(locateAction.get());
-            add(removeAction.get());
-            add(deleteAction.get());
+            add(removeAction);
+            add(deleteAction);
             addSeparator();
             add(fileInfoAction.get());
         } else {
-            add(removeAction.get());
-            add(deleteAction.get());
+            if(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY) {
+                add(removeListAction.get());
+                addSeparator();
+            }
+            add(removeAction);
+            add(deleteAction);
         }
     }
 }
