@@ -29,8 +29,9 @@ public class StorePanel extends JPanel {
 
     /**
      * Used to ignore the first component hidden event coming through to the
-     * ComponentListener. The load and hidden events are coming out of order
-     * there does not appear to be any reason why the first hidden is coming in.
+     * ComponentListener. The load and hidden events are coming out of order because
+     * of the usage of card layout, and loading StorePanel lazily. When adding a component
+     * to CardLayout, card layout calls setVisible false on it.
      */
     private final AtomicBoolean firstHiddenIgnored = new AtomicBoolean(false);
 
@@ -85,5 +86,12 @@ public class StorePanel extends JPanel {
             MozillaAutomation.blockingLoad(browser, "about:blank");
             browser.load(url + "&isClient=true");
         }
+    }
+    
+    @Override
+    public void setVisible(boolean flag) {
+        super.setVisible(flag);
+        System.err.println("setVisible: " + flag);
+        Thread.dumpStack();
     }
 }
