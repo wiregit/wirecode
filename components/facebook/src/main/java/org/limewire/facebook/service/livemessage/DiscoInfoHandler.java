@@ -44,8 +44,7 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     DiscoInfoHandler(@Assisted FacebookFriendConnection connection,
             FeatureRegistry featureRegistry) {
         this.connection = connection;
-        this.featureRegistry = featureRegistry; // TODO FeatureRegistry is a global
-        // TODO singleton, needs ot be per FriendConnection
+        this.featureRegistry = featureRegistry;
     }
 
     @Override
@@ -125,7 +124,7 @@ public class DiscoInfoHandler implements LiveMessageHandler {
             response.put("features", supported);
             connection.sendLiveMessage(presence, RESPONSE_TYPE, response);   
         } else {
-            // TODO ?
+            LOG.debugf("disc info from non-friend-presence: {0}", from);
         }
     }
     
