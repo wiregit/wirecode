@@ -45,7 +45,7 @@ import com.google.inject.Provider;
 
 public class LimeWireSwingUI extends JPanel {
     
-    private final MainPanel mainPanel;
+    private final JPanel centerPanel;
     private final TopPanel topPanel;
     private final JLayeredPane layeredPane;
     private final ProNagController proNagController;
@@ -63,12 +63,10 @@ public class LimeWireSwingUI extends JPanel {
             MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider, @LimeWireLayeredPane JLayeredPane limeWireLayeredPane) {
     	GuiUtils.assignResources(this);
     	        
-    	this.topPanel = topPanel;
-    	this.mainPanel = mainPanel;
+    	this.topPanel = topPanel;  	
     	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
-    	
-    	JPanel centerPanel = new JPanel(new GridBagLayout());
+        this.centerPanel = new JPanel(new GridBagLayout());    	
     	
     	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanelProvider.get());
     	mainDownloadPanel.setVisible(false);
@@ -124,14 +122,14 @@ public class LimeWireSwingUI extends JPanel {
 	}
 	
 	void hideMainPanel() {
-	   layeredPane.setVisible(false);
-	   mainPanel.setVisible(false);
-	}
+	    layeredPane.setVisible(false);
+        centerPanel.setVisible(false);
+    }
 	
 	void showMainPanel() {
-	    layeredPane.setVisible(true);
-	    mainPanel.setVisible(true);
-	}
+        layeredPane.setVisible(true);
+        centerPanel.setVisible(true);
+    }
 	
 	void loadProNag() {
 	    proNagController.allowProNag(layeredPane);
@@ -145,14 +143,26 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-   private LimeSplitPane createSplitPane(JComponent top, final JComponent bottom, JComponent divider) {
-        LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
+   private LimeSplitPane createSplitPane(final JComponent top, final JComponent bottom, JComponent divider) {
+        final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
         splitPane.getDivider().setVisible(false);
         bottom.setVisible(false);
         splitPane.setBorder(BorderFactory.createEmptyBorder());
 
-        top.setMinimumSize(new Dimension(0, 0));
+        //Allow bottom panel to be minimized
         bottom.setMinimumSize(new Dimension(0, 0));
+        
+        //The bottom panel remains the same size when the splitpane is resized
+        splitPane.setResizeWeight(1);  
+        
+        //set top panel's minimum height to half of split pane height 
+        //(this fires when the app is initialized)
+        splitPane.addComponentListener(new ComponentAdapter(){            
+            @Override
+            public void componentResized(ComponentEvent e) {
+                top.setMinimumSize(new Dimension(0, splitPane.getHeight()/2));
+            }
+        });
 
         return splitPane;
     }
