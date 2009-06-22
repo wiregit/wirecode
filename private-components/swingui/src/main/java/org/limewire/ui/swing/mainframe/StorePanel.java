@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JPanel;
 
@@ -23,7 +24,15 @@ import com.google.inject.Inject;
 
 public class StorePanel extends JPanel {
     private final Browser browser;
+
     private final Application application;
+
+    /**
+     * Used to ignore the first component hidden event coming through to the
+     * ComponentListener. The load and hidden events are coming out of order
+     * there does not appear to be any reason why the first hidden is coming in.
+     */
+    private final AtomicBoolean firstHiddenIgnored = new AtomicBoolean(false);
 
     @Inject
     public StorePanel(Application application, final Navigator navigator) {
@@ -42,7 +51,7 @@ public class StorePanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentHidden(ComponentEvent e) {
-                if(MozillaInitialization.isInitialized()) {
+                if (firstHiddenIgnored.getAndSet(true) && MozillaInitialization.isInitialized()) {
                     browser.load("about:blank");
                 }
             }
@@ -68,10 +77,11 @@ public class StorePanel extends JPanel {
 
     public void load(String url) {
         url = application.getUniqueUrl(url);
-        if(!MozillaInitialization.isInitialized()) {
+        if (!MozillaInitialization.isInitialized()) {
             NativeLaunchUtils.openURL(url);
         } else {
-            // Reset the page to blank before continuing -- blocking is OK because this is fast.
+            // Reset the page to blank before continuing -- blocking is OK
+            // because this is fast.
             MozillaAutomation.blockingLoad(browser, "about:blank");
             browser.load(url + "&isClient=true");
         }
