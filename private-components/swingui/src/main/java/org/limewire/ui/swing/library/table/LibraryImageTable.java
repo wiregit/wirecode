@@ -25,9 +25,10 @@ import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.images.ImageCellEditor;
+import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -40,16 +41,18 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     @Resource private Color backgroundColor;
     
     private final ImageList imageList;    
+//    private final ImageCellRenderer imageEditor;
     private final JXLayer<JComponent> layer;
     
     @Inject
-    public LibraryImageTable(ImageList imageList) {
+    public LibraryImageTable(ImageList imageList, ImageCellEditor imageEditor) {
         super(new MigLayout("insets 0 0 0 0, fill"));
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundColor);
         
         this.imageList = imageList;
+//        this.imageEditor = imageEditor;
         imageList.setDragEnabled(true);
         imageList.setDropMode(DropMode.ON);
         
@@ -57,8 +60,11 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         JScrollPane imageScrollPane = new JScrollPane(imageList);
         imageScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         
-        layer = new JXLayer<JComponent>(imageScrollPane, new  AbstractLayerUI<JComponent>());
-        layer.getGlassPane().setLayout(null);
+        layer = new JXLayer<JComponent>(imageScrollPane, new AbstractLayerUI<JComponent>());
+        layer.getGlassPane().setLayout(null);       
+
+        new MouseReaction(imageList, imageEditor);
+        layer.getGlassPane().add(imageEditor);
         
         add(layer, "grow");
     }
@@ -68,22 +74,16 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         imageList.setTransferHandler(newHandler);
     }
     
-    
+    public ImageList getImageList() {
+        return imageList;
+    }
     
     public void setEventList(EventList<LocalFileItem> localFileList) {
         imageList.setModel(localFileList);
     }
-//    public void setEventList(LocalFileList localFileList) {
-//        imageList.setModel(localFileList);
-//    }
     
     public void setPopupHandler(TablePopupHandler popupHandler) {
         imageList.setPopupHandler(popupHandler);
-    }
-    
-    public void setImageEditor(TableRendererEditor editor) {
-//        new MouseReaction(imageList, editor);
-        layer.getGlassPane().add(editor);
     }
     
     /**
@@ -140,8 +140,7 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         else
             currentPosition = visibleRect.y;
     
-        //TODO: read this from ImageList again
-        int height = 134;//imageList.getList().getFixedCellHeight();
+        int height = imageList.getFixedCellHeight();
         
         if (direction < 0) {
             int newPosition = currentPosition - (currentPosition / height) * height;
@@ -154,11 +153,11 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     public class MouseReaction implements MouseListener, MouseMotionListener {
 
         private ImageList imageList;
-        private TableRendererEditor hoverComponent;
+        private JComponent editor;
         
-        public MouseReaction(ImageList imageList, TableRendererEditor hoverComponent) {
-            this.imageList = imageList;          
-            this.hoverComponent = hoverComponent;
+        public MouseReaction(ImageList imageList, JComponent editor) {
+            this.imageList = imageList;      
+            this.editor = editor;
 
             imageList.addMouseListener(this);
             imageList.addMouseMotionListener(this);
@@ -170,9 +169,9 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         }
 
         @Override
-        public void mouseExited(MouseEvent e) { 
-            if(!hoverComponent.getBounds().contains(e.getPoint())) {
-                hoverComponent.setVisible(false);
+        public void mouseExited(MouseEvent e) {
+            if(!editor.getBounds().contains(e.getPoint())) {
+                editor.setVisible(false);
             }
         }
 
@@ -195,22 +194,23 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         }
         
         private void update(Point point){
-//            if (imageList.getModel().getSize() > 0) {
-//                int index = imageList.locationToIndex(point);
-//                if (index > -1) {
-//                    hoverComponent.setVisible(true);
+            if (imageList.getModel().getSize() > 0) {
+                int index = imageList.locationToIndex(point);
+                if (index > -1) { 
+                    editor.setVisible(true);
 //                    ((Configurable)hoverComponent).configure((LocalFileItem) imageList.getModel().getElementAt(index), true);
-//                    Rectangle bounds = imageList.getCellBounds(index, index);
-//                    ImageCellRenderer renderer = imageList.getImageCellRenderer();
+                    Rectangle bounds = imageList.getCellBounds(index, index);
+                    ImageCellRenderer renderer = imageList.getImageCellRenderer();
 //                    hoverComponent.setLocation(bounds.x + renderer.getSubComponentLocation().x,
 //                            bounds.y + renderer.getSubComponentLocation().y);
-//                }
-//            }
+                    editor.setLocation(bounds.x + renderer.getPaddingInsets().left, bounds.y + renderer.getPaddingInsets().top);
+                }
+            }
         }
     }
 
     /** Returns all currently selected LocalFileItems. */
     public List<LocalFileItem> getSelection() {
-        return imageList.getSelection();
+        return imageList.getSelectedItems();
     }
 }

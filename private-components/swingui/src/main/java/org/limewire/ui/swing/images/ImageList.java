@@ -16,6 +16,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.library.table.LibraryPopupMenu;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -27,6 +28,7 @@ import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  *  Draws a list of images. Images are displayed in a horizontal left
@@ -38,12 +40,15 @@ public class ImageList extends JXList implements Disposable { //, SelectAllable<
     @Resource
     private Color backgroundListcolor;
     
+    private final ImageCellRenderer imageCellRenderer;
+    
     private EventListModel cachedEventListModel;
     private EventSelectionModel<LocalFileItem> cachedEventSelectionModel;
     
     @Inject
-    public ImageList(final ImageCellRenderer imageCellRenderer) {
-
+    public ImageList(final ImageCellRenderer imageCellRenderer, Provider<LibraryPopupMenu> libraryPopupMenu) {
+        this.imageCellRenderer = imageCellRenderer;
+        
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundListcolor);
@@ -63,6 +68,7 @@ public class ImageList extends JXList implements Disposable { //, SelectAllable<
         
         //enable double click launching of image files.
         addMouseListener(new ImageDoubleClickMouseListener());
+        setPopupHandler(new ImagePopupHandler(this, libraryPopupMenu));
     }
     
     public void setModel(EventList<LocalFileItem> eventList) {
@@ -83,7 +89,7 @@ public class ImageList extends JXList implements Disposable { //, SelectAllable<
     }
     
     /** Returns all currently selected LocalFileItems. */
-    public List<LocalFileItem> getSelection() {
+    public List<LocalFileItem> getSelectedItems() {
         return cachedEventSelectionModel.getSelected();
     }
 
@@ -119,23 +125,12 @@ public class ImageList extends JXList implements Disposable { //, SelectAllable<
         });
     }
     
-//    /**
-//     * Sets the renderer on this List. The renderer is wrapped in an empty
-//     * border to create white space between the cells.
-//     */
-//    public void setImageCellRenderer(ImageCellRenderer renderer) {
-//        this.renderer = renderer;
-////        renderer.setBorder(BorderFactory.createEmptyBorder(insetTop,insetLeft,insetBottom,insetRight));
-//        
-//        super.setCellRenderer(renderer);
-//    }
-    
-//    /**
-//     * Returns the CellRenderer for this list.
-//     */
-//    public ImageCellRenderer getImageCellRenderer() {
-//        return renderer;
-//    }
+    /**
+     * Returns the CellRenderer for this list.
+     */
+    public ImageCellRenderer getImageCellRenderer() {
+        return imageCellRenderer;
+    }
     
     /**
      * This class listens for double clicks inside of the ImageList.

@@ -6,7 +6,7 @@ import javax.swing.JPopupMenu;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-class LibraryPopupMenu extends JPopupMenu {
+public class LibraryPopupMenu extends JPopupMenu {
 
     //TODO: a lot of these actions are not correct anymore
     private final Provider<PlayAction> playAction;

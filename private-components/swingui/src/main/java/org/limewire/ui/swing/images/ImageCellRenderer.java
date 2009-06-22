@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -23,7 +24,7 @@ import com.google.inject.Inject;
 /**
  * Renderers an image with a border.
  */
-class ImageCellRenderer extends JPanel implements ListCellRenderer {
+public class ImageCellRenderer extends JPanel implements ListCellRenderer {
     
     protected Border border;
     
@@ -59,6 +60,10 @@ class ImageCellRenderer extends JPanel implements ListCellRenderer {
         
         border = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(insetTop, insetLeft, insetBottom, insetRight),
                 BorderFactory.createMatteBorder(1, 1, 1, 1, cellBorderColor));
+    }
+    
+    public Insets getPaddingInsets() {
+        return new Insets(insetTop, insetLeft, insetBottom, insetRight);
     }
     
     @Override
