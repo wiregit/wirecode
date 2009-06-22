@@ -56,6 +56,20 @@ public abstract class BaseTestCase extends AssertComparisons implements Uncaught
         INTERRUPT_FIXER.start();
         DeadlockMonitor.startDeadlockMonitoring();
     }
+    
+
+    /**
+     * The base constructor. Nothing should ever be initialized in the
+     * constructor. This is because of the way JUnit sets up tests -- It first
+     * builds a new instance of the class for every possible test, then it runs
+     * through those instances, calling the appropriate test. All pre & post
+     * initializations that are necessary for every test should be in the new
+     * 'preSetUp' and 'postTearDown' methods.
+     */
+    public BaseTestCase() {
+        super();
+        _testClass = getClass();
+    }
 
     /**
      * The base constructor. Nothing should ever be initialized in the

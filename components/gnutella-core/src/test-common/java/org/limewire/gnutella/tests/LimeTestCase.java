@@ -49,6 +49,10 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      */
     private static boolean[] shutdownBackend = new boolean[]{false, false};
     
+    public LimeTestCase() {
+        super();
+    }
+    
     /**
      * The base constructor.
      * Nothing should ever be initialized in the constructor.

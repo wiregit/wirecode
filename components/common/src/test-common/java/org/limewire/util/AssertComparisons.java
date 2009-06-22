@@ -28,6 +28,10 @@ public abstract class AssertComparisons extends TestCase {
     private static final int NOT_CONTAINS = 9;
     private static final int COMPARE_EQUALS = 10;
     
+    public AssertComparisons() {
+        super();
+    }
+    
     /**
      * Named constructor.
      */
