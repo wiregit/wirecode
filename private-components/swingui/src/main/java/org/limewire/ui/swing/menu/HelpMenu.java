@@ -31,7 +31,7 @@ class HelpMenu extends MnemonicMenu {
             }
         });
 
-        add(new AbstractAction(I18n.tr("&Home")) {
+        add(new AbstractAction(I18n.tr("&Home Screen")) {
             @Override
            public void actionPerformed(ActionEvent e) {
                 navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
