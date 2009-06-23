@@ -120,7 +120,7 @@ public class SetupPage2 extends WizardPage {
             autoSharingPanel.add(panel, "alignx center, wrap");
         }
 
-        add(autoSharingPanel, "growx, span, sg rowSize, wrap");
+        add(autoSharingPanel, "growx, span, sg sameRowSize, wrap");
     }
 
     private void addModifyInfo() {
@@ -140,7 +140,7 @@ public class SetupPage2 extends WizardPage {
                 .add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT));
 
         modifyInfoPanel.add(modifyInfo, "alignx center, wrap");
-        add(modifyInfoPanel, "growx, span, sg rowSize, wrap");
+        add(modifyInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
 
     private void addOldVersionInfo() {
@@ -148,6 +148,6 @@ public class SetupPage2 extends WizardPage {
         oldVersionInfoPanel.add(createAndDecorateHeader(I18n
                 .tr("Shared files from your old version will be in your Public Shared list.")),
                 "alignx center, wrap");
-        add(oldVersionInfoPanel, "growx, span, sg rowSize, wrap");
+        add(oldVersionInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
 }
