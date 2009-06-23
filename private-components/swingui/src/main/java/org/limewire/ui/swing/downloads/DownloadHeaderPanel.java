@@ -165,14 +165,14 @@ public class DownloadHeaderPanel extends JXPanel {
         }
     };
     
-    private final Action statusSortAction = new SortAction(I18n.tr("Status"), SortOrder.STATUS_UP, SortOrder.STATUS_DOWN);  
-    private final Action orderSortAction = new SortAction(I18n.tr("Order Added"), SortOrder.ORDER_ADDED_UP, SortOrder.ORDER_ADDED_DOWN);  
-    private final Action nameSortAction = new SortAction(I18n.tr("Name"), SortOrder.NAME_UP, SortOrder.NAME_DOWN);
-    private final Action progressSortAction = new SortAction(I18n.tr("Progress"), SortOrder.PROGRESS_UP, SortOrder.PROGRESS_DOWN);  
-    private final Action timeRemainingSortAction = new SortAction(I18n.tr("Time Left"), SortOrder.TIME_REMAINING_UP, SortOrder.TIME_REMAINING_DOWN);
-    private final Action speedSortAction = new SortAction(I18n.tr("Speed"), SortOrder.SPEED_UP, SortOrder.SPEED_DOWN);
-    private final Action fileTypeSortAction = new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE_UP, SortOrder.FILE_TYPE_DOWN);
-    private final Action extensionSortAction = new SortAction(I18n.tr("File Extension"), SortOrder.EXTENSION_UP, SortOrder.EXTENSION_DOWN);
+    private final Action statusSortAction = new SortAction(I18n.tr("Status"), SortOrder.STATUS);  
+    private final Action orderSortAction = new SortAction(I18n.tr("Order Added"), SortOrder.ORDER_ADDED);  
+    private final Action nameSortAction = new SortAction(I18n.tr("Name"), SortOrder.NAME);
+    private final Action progressSortAction = new SortAction(I18n.tr("Progress"), SortOrder.PROGRESS);  
+    private final Action timeRemainingSortAction = new SortAction(I18n.tr("Time Left"), SortOrder.TIME_REMAINING);
+    private final Action speedSortAction = new SortAction(I18n.tr("Speed"), SortOrder.SPEED);
+    private final Action fileTypeSortAction = new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE);
+    private final Action extensionSortAction = new SortAction(I18n.tr("File Extension"), SortOrder.EXTENSION);
     
     private final Action downloadSettingsAction = new AbstractAction(I18n.tr("Download Options...")) {
         @Override
@@ -475,23 +475,16 @@ public class DownloadHeaderPanel extends JXPanel {
     
     private class SortAction extends AbstractAction{
         
-        private final SortOrder ascending;
-        private final SortOrder descending;
+        private final SortOrder order;
 
-        public SortAction(String title, SortOrder ascending, SortOrder descending){
+        public SortAction(String title, SortOrder order){
             super(title);
-            this.ascending = ascending;
-            this.descending = descending;
+            this.order = order;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (isDescending.isSelected()) {
-                downloadMediator.setSortOrder(descending);
-            } else {
-                downloadMediator.setSortOrder(ascending);
-                
-            }
+            downloadMediator.setSortOrder(order, !isDescending.isSelected());
         }
     }; 
     
