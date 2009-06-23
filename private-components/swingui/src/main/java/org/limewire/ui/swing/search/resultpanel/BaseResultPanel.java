@@ -66,6 +66,7 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -123,6 +124,8 @@ public class BaseResultPanel extends JXPanel {
     
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
+    
+    private EventSelectionModel<VisualSearchResult> listSelectionModel;
     
     private EventListJXTableSorting resultsTableSorting; 
     private EventSelectionModel<VisualSearchResult> selectionModel;
@@ -228,6 +231,15 @@ public class BaseResultPanel extends JXPanel {
         ListViewTableFormat tableFormat = new ListViewTableFormat();
         resultsList.setEventListFormat(maxSizedList, tableFormat, false);
         
+        // Create selection model, and set Enter key action.        
+        if (listSelectionModel != null) {
+            listSelectionModel.dispose();
+        }
+        listSelectionModel = new EventSelectionModel<VisualSearchResult>(maxSizedList, false);
+        listSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        resultsList.setSelectionModel(listSelectionModel);
+        resultsList.setEnterKeyAction(new ResultEnterAction(listSelectionModel.getSelected(), downloadHandler));
+        
         // Represents display limits for displaying search results in list view.
         // The limits are introduced to avoid a performance penalty caused by
         // very large (> 1k) search results. Variable row-height in the list
@@ -329,7 +341,7 @@ public class BaseResultPanel extends JXPanel {
             }
         };
         maxSizedList.addListEventListener(maxSizedListener);
-        resultsList.setRowHeight(ROW_HEIGHT);        
+        resultsList.setRowHeight(ROW_HEIGHT);
     }
 
     /**
@@ -514,6 +526,9 @@ public class BaseResultPanel extends JXPanel {
     private class ResultModelDisposalListener implements DisposalListener {
         @Override
         public void objectDisposed(Disposable source) {
+            if (listSelectionModel != null){
+                listSelectionModel.dispose();
+            }
             if(selectionModel != null){
                 selectionModel.dispose();
             }
@@ -548,11 +563,13 @@ public class BaseResultPanel extends JXPanel {
             GuiUtils.assignResources(this);
             
             setGridColor(Color.decode("#EBEBEB"));
-            setHighlighters(new ColorHighlighter(new HighlightPredicate() {
-                public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-                    VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
-                    return vsr != null && vsr.isChildrenVisible();
-                }}, similarResultParentBackgroundColor, null, similarResultParentBackgroundColor, null));
+            setHighlighters(
+                    new ColorHighlighter(getBackground(), null, getTableColors().selectionColor, null),                    
+                    new ColorHighlighter(new HighlightPredicate() {
+                        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+                            VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
+                            return vsr != null && vsr.isChildrenVisible();
+                        }}, similarResultParentBackgroundColor, null, similarResultParentBackgroundColor, null));
         }
         
         @Override
