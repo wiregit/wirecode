@@ -22,22 +22,26 @@ public class LibraryPopupMenu extends JPopupMenu {
     private final Provider<LaunchFileAction> launchAction;
     private final Provider<LocateFileAction> locateAction;
     private final Provider<RemoveFromListAction> removeListAction;
+    private final Provider<RemoveFromAllListAction> removeFromAllListAction;
+    private final Provider<AddToListMenu> addToListMenu;
     private final RemoveFromLibraryAction removeAction;
     private final DeleteAction deleteAction;
     private final Provider<ViewFileInfoAction> fileInfoAction;
     
     @Inject
     public LibraryPopupMenu(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
-            LibraryNavigatorPanel libraryNavigatorPanel,
+            LibraryNavigatorPanel libraryNavigatorPanel, Provider<RemoveFromAllListAction> removeFromAllListAction,
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
-            Provider<PlayAction> playAction, RemoveFromLibraryAction removeAction, 
-            Provider<RemoveFromListAction> removeListAction,
+            Provider<PlayAction> playAction, RemoveFromLibraryAction removeAction,
+            Provider<RemoveFromListAction> removeListAction, Provider<AddToListMenu> addToListMenu,
             DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryNavigatorPanel = libraryNavigatorPanel;
         this.launchAction = launchAction;
         this.locateAction = locateAction;
         this.removeListAction = removeListAction;
+        this.removeFromAllListAction = removeFromAllListAction;
+        this.addToListMenu = addToListMenu;
         this.playAction = playAction;
         this.removeAction = removeAction;
         this.deleteAction = deleteAction;
@@ -53,20 +57,28 @@ public class LibraryPopupMenu extends JPopupMenu {
             add(launchAction.get());
             add(playAction.get()).setEnabled(PlayerUtils.isPlayableFile(localFileItem.get(0).getFile()));
             addSeparator();
+            
+            add(addToListMenu.get());
             if(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY) {
                 add(removeListAction.get());
-                addSeparator();
+            } else {
+                add(removeFromAllListAction.get());
             }
+            addSeparator();
+            
             add(locateAction.get());
             add(removeAction);
             add(deleteAction);
             addSeparator();
             add(fileInfoAction.get());
         } else {
+            add(addToListMenu.get());
             if(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY) {
                 add(removeListAction.get());
-                addSeparator();
+            } else {
+                add(removeFromAllListAction.get());
             }
+            addSeparator();
             add(removeAction);
             add(deleteAction);
         }
