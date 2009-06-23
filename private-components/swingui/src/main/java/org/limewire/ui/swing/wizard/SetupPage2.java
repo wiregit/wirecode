@@ -101,20 +101,22 @@ public class SetupPage2 extends WizardPage {
                 .tr("Files in your Public Shared list are shared with the world.")),
                 "gaptop 20, span 3, alignx center, wrap");
         if (newInstall) {
-            add(shareDownloadedFilesCheckBox, "gaptop 5, gapleft 26, alignx right");
-            add(createAndDecorateMultiLine(I18n
+            JPanel panel = new JPanel(new FlowLayout());
+            panel.add(shareDownloadedFilesCheckBox);
+            panel.add(createAndDecorateMultiLine(I18n
                     .tr("Add files I download from P2P Users to my Public Shared list."),
-                    shareDownloadedFilesCheckBox), "gapleft 5, gaptop 5");
-            add(
-                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
-                    "alignx left, wrap");
+                    shareDownloadedFilesCheckBox));
+            panel
+                    .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));
+            add(panel, "alignx center, wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-            add(new JLabel(
-                    I18n
+            JPanel panel = new JPanel(new FlowLayout());
+            panel
+                    .add(createAndDecorateMultiLine(I18n
                             .tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
-            add(
-                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
-                    "gapleft 10, wrap");
+            panel
+                    .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));
+            add(panel, "alignx center, wrap");
         }
     }
 
@@ -128,7 +130,7 @@ public class SetupPage2 extends WizardPage {
         JLabel myFiles = new JLabel(I18n.tr("My Files"), sharing_my_files, JLabel.CENTER);
         myFiles.setVerticalTextPosition(JLabel.BOTTOM);
         myFiles.setHorizontalTextPosition(JLabel.CENTER);
-        
+
         modifyInfo.add(myFiles);
         modifyInfo.add(new JLabel(sharing_arrow));
         modifyInfo.add(new JLabel(file_sharedlist_p2p_large));

@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.wizard;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
@@ -38,6 +39,12 @@ public abstract class WizardPage extends JPanel {
         return label;
     }
     
+    protected Component createAndDecorateMultiLine(String text) {
+        JLabel label = new MultiLineLabel(text, 500);
+        decorator.decorateNormalText(label);
+        return label;
+    }
+
     protected JCheckBox createAndDecorateCheckBox(boolean isSelected) {
         JCheckBox checkBox = new JCheckBox();
         checkBox.setSelected(isSelected);
