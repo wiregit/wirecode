@@ -260,7 +260,8 @@ public class SearchOptionPanel extends OptionPanel {
             ContentSettings.USER_WANTS_MANAGEMENTS.setValue(copyrightContentCheckBox.isSelected());
             
             FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
-            return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions();
+            return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions() ||
+                    unsafeOptionPanel.applyOptions();
         }
 
         @Override
@@ -268,7 +269,8 @@ public class SearchOptionPanel extends OptionPanel {
             return  ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != copyrightContentCheckBox.isSelected()
                     ||FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
                     || filterKeywordPanel.hasChanged()
-                    || filterFileExtensionPanel.hasChanged();
+                    || filterFileExtensionPanel.hasChanged()
+                    || unsafeOptionPanel.hasChanged();
         }
 
         @Override
@@ -277,6 +279,7 @@ public class SearchOptionPanel extends OptionPanel {
             adultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
             filterKeywordPanel.initOptions();
             filterFileExtensionPanel.initOptions();
+            unsafeOptionPanel.initOptions();
         }
     }
 
