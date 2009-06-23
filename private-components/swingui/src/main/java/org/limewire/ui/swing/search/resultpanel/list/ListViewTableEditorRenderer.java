@@ -16,8 +16,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
@@ -32,8 +33,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -61,6 +60,7 @@ import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
+import org.limewire.ui.swing.search.resultpanel.ResultsTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
@@ -72,6 +72,8 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDi
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -520,33 +522,48 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         MousePopupListener popupListener = new MousePopupListener() {
             @Override
             public void handlePopupMouseEvent(MouseEvent e) {
-                final VisualSearchResult result = vsr; 
-                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, Collections.singletonList(vsr), 
+                // Update selection if mouse is not in selected row.
+                if (table.isEditing()) {
+                    int editRow = table.getEditingRow();
+                    if (!table.isRowSelected(editRow)) {
+                        updateSelection(e);
+                    }
+                }
+                
+                // Create list of selected results.
+                List<VisualSearchResult> selectedResults = new ArrayList<VisualSearchResult>();
+                EventTableModel model = ((ResultsTable) table).getEventTableModel();
+                int[] selectedRows = table.getSelectedRows();
+                for (int row : selectedRows) {
+                    Object element = model.getElementAt(row);
+                    if (element instanceof VisualSearchResult) {
+                        selectedResults.add((VisualSearchResult) element);
+                    }
+                }
+                
+                // If nothing selected, use current result.
+                if (selectedResults.size() == 0) {
+                    selectedResults.add(vsr);
+                }
+                
+                // Display context menu.
+                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, selectedResults, 
                         fileInfoFactory, remoteHostActions, spamManager, libraryMediator, SearchResultMenu.ViewType.List);
-                searchResultMenu.addPopupMenuListener(new PopupMenuListener() {
-                    @Override
-                    public void popupMenuCanceled(PopupMenuEvent e) {
-                        result.setShowingContextOptions(false);
-                    }
-
-                    @Override
-                    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                        result.setShowingContextOptions(false);
-                        table.editingStopped(new ChangeEvent(this));
-                    }
-
-                    @Override
-                    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                        result.setShowingContextOptions(true);
-                    }
-                });
                 searchResultMenu.show(e.getComponent(), e.getX()+3, e.getY()+3);
             }
         };
     
         addMouseListener(popupListener, listenerComponents);   
         
-        MouseListener downloaderAdaptor = new MouseAdapter() {
+        // Add listener to update table selection and start downloads.
+        MouseListener selectionDownloadAdapter = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    updateSelection(e);
+                }
+            }
+            
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (vsr != null && e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {  
@@ -554,9 +571,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 }
             }
         };
-        addMouseListener(downloaderAdaptor, listenerComponents);   
-        
-    //    editorComponent.addMouseListener(downloaderAdaptor);
+        addMouseListener(selectionDownloadAdapter, listenerComponents);   
     }
     
     private void addMouseListener(MouseListener listener, Component... components) {    
@@ -574,6 +589,27 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     public Object getCellEditorValue() {
         return vsr;
     }    
+    
+    /**
+     * Updates the table row selection based on the specified mouse event.
+     */
+    private void updateSelection(MouseEvent e) {
+        if (table.isEditing()) {
+            // Get cell being edited by this editor.
+            int editRow = table.getEditingRow();
+            int editCol = table.getEditingColumn();
+            
+            // Update the selection.  We also prepare the editor to apply
+            // the selection colors to the current editor component.
+            if (editRow > -1) {
+                table.changeSelection(editRow, editCol, e.isControlDown(), e.isShiftDown());
+                table.prepareEditor(ListViewTableEditorRenderer.this, editRow, editCol);
+            }
+        }
+        
+        // Request focus so Enter key can be handled.
+        e.getComponent().requestFocusInWindow();
+    }
     
     private class HeadingFontWidthResolver implements FontWidthResolver {
         private static final String EMPTY_STRING = "";
