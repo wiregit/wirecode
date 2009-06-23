@@ -113,7 +113,7 @@ public class SetupPage2 extends WizardPage {
             autoSharingPanel
                     .add(
                             createAndDecorateSubHeading(I18n
-                                    .tr("LimeWire will add files you download from P2P Users into your Public Shared List.")),
+                                    .tr("LimeWire will add files you download from P2P Users into your Public Shared list.")),
                             "alignx center");
             autoSharingPanel
                     .add(
