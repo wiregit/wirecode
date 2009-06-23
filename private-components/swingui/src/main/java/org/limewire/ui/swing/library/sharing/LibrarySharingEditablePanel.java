@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -39,6 +41,7 @@ import org.limewire.ui.swing.util.I18n;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -114,8 +117,9 @@ class LibrarySharingEditablePanel {
         component.add(noneButton, "gapleft 15, gaptop 5, wrap");
                 
         baseEventList = new BasicEventList<EditableSharingData>();
+        SortedList<EditableSharingData> sortedList = GlazedListsFactory.sortedList(baseEventList, new FriendComparator());        
         MatcherEditor<EditableSharingData> matcher = new TextComponentMatcherEditor<EditableSharingData>(filterTextField, new FriendFilterator());
-        filteredList = new FilterList<EditableSharingData>(baseEventList, matcher);
+        filteredList = new FilterList<EditableSharingData>(sortedList, matcher);
         friendTable = new GlazedJXTable(new EventTableModel<EditableSharingData>(filteredList, new EditTableFormat())) {
             @Override
             public void editingStopped(ChangeEvent e) {
@@ -220,6 +224,33 @@ class LibrarySharingEditablePanel {
                     baseList.add(friend.getName());
                 }
                 baseList.add(friend.getId());
+            }
+        }
+    }
+    
+    /**
+     * Technically shouldn't be necessary but ensures that Library and Public Shared
+     * always appear first and second in the table. The other items appear as they are
+     * loaded.
+     */
+    private class FriendComparator implements Comparator<EditableSharingData> {
+
+        @Override
+        public int compare(EditableSharingData data1, EditableSharingData data2) {
+            Friend friend1 = data1.getFriend();
+            Friend friend2 = data2.getFriend();
+            if(friend1 == friend2)
+                return 0;
+            if(friend1.getFirstName().compareToIgnoreCase(friend2.getFirstName()) == 0) {
+                String[] names1 = friend1.getRenderName().split(" ");
+                String[] names2 = friend2.getRenderName().split(" ");
+                if(names1.length >= 2 && names2.length >= 2) {
+                    return names1[1].compareToIgnoreCase(names2[1]);
+                } else {
+                    return 0;
+                }
+            } else {
+                return friend1.getFirstName().compareToIgnoreCase(friend2.getFirstName());
             }
         }
     }
