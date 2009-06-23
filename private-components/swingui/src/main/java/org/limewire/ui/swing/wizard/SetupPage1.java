@@ -100,7 +100,7 @@ public class SetupPage1 extends WizardPage {
     
     @Override
     public String getLine2() {
-        return null;
+        return "";
     }
     
     @Override
