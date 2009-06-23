@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TooManyListenersException;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -34,6 +35,8 @@ import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
+import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
@@ -69,6 +72,7 @@ public class LibraryPanel extends JPanel {
     private final LocalFileListTransferHandler transferHandler;
     private final Provider<LibraryImageTable> libraryImagePanelProvider;
     private LibraryImageTable libraryImagePanel;
+    private final GhostDragGlassPane ghostGlassPane;
     
     private JPanel tableListPanel;
     private CardLayout tableListLayout;
@@ -85,7 +89,8 @@ public class LibraryPanel extends JPanel {
             LibrarySharingPanel sharingPanel, LibraryTableComboBox libraryTableComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler,
-            Provider<LibraryImageTable> libraryImagePanelProvider, ComboBoxDecorator comboBoxDecorator) {
+            Provider<LibraryImageTable> libraryImagePanelProvider, ComboBoxDecorator comboBoxDecorator,
+            GhostDragGlassPane ghostGlassPane) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.libraryNavigatorPanel = navPanel;
@@ -97,6 +102,7 @@ public class LibraryPanel extends JPanel {
         this.categoryMatcher = categoryMatcher;
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
+        this.ghostGlassPane = ghostGlassPane;
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
@@ -131,6 +137,11 @@ public class LibraryPanel extends JPanel {
         add(publicSharedFeedbackPanel.getComponent(), "dock north, growx, hidemode 3");
         add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
         add(tableListPanel, "grow");
+        
+        try {
+            libraryTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryTable, ghostGlassPane));
+        } catch (TooManyListenersException e) {
+        }
     }
     
     /**
@@ -193,6 +204,10 @@ public class LibraryPanel extends JPanel {
     private void createImageList() {
         libraryImagePanel = libraryImagePanelProvider.get();
         libraryImagePanel.setTransferHandler(transferHandler);
+        try {
+            libraryImagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryImagePanel, ghostGlassPane));
+        } catch (TooManyListenersException e) {
+        }
         tableListPanel.add(libraryImagePanel, LIST); 
     }
     

@@ -1,10 +1,6 @@
 package org.limewire.ui.swing.dnd;
 
 import java.awt.AlphaComposite;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -12,21 +8,15 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.painter.MessagePainterFactory;
+import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.OSUtils;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Panel which gets installed as the glass pane of a Window. 
@@ -36,13 +26,11 @@ import com.google.inject.Singleton;
  * It is the responsibility of drag listeners to update the positioning,
  * image and visibility of this glass pane.
  */
-@Singleton
+@LazySingleton
 public class GhostDragGlassPane extends JPanel {
 
-	/** Friend that is currently being displayed */
-    private Friend currentFriend = null;
-    
-    private DragPanel dragPanel;
+    @Resource
+    private Icon dragIcon;
     private float alpha = 0.85f;
     
     private BufferedImage dragged = null;
@@ -56,49 +44,15 @@ public class GhostDragGlassPane extends JPanel {
     @Inject
     public GhostDragGlassPane() {
         setOpaque(false);
-        if(OSUtils.isMacOSX()) {
-            alpha = 1.0f;
-        }
         
-        dragPanel = new DragPanel();
-        dragPanel.setSize(new Dimension(200,60));
-    }
-    
-    /**
-     * Updates the image properly based on the type of Friend.
-	 * If friend is null, a default adding to My Library message
-     * is displayed, otherwise the friend's name is included in
-     * the shared message.
-     */
-    public void setText(Friend friend) {
-        currentFriend = friend;
+        GuiUtils.assignResources(this);
         
-        dragPanel.setText(friend);
-        dragPanel.revalidate();
+        dragged =  new BufferedImage(dragIcon.getIconWidth(), dragIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics g = dragged.getGraphics();
+        g.drawImage(((ImageIcon)dragIcon).getImage(), 0, 0, null);
 
-        Dimension size = dragPanel.getSize();
-        BufferedImage myImage = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2 = myImage.createGraphics();
-        dragPanel.paint(g2);
-        g2.dispose();
-        setImage(myImage);
-    }
-    
-    /**
-     * Returns the friend in the ghost pane, null if no friend is selected.
-     */
-    public Friend getCurrentFriend() {
-        return currentFriend;
-    }
-    
-    private void setImage(BufferedImage image) {
-        if (dragged != null) {
-            float ratio = (float) dragged.getWidth() / (float) dragged.getHeight();
-            this.width = image.getWidth();
-            height = (int) (width / ratio);
-        }
-
-        this.dragged = image;
+        width = dragIcon.getIconWidth();
+        height = dragIcon.getIconHeight();
     }
     
     /**
@@ -146,51 +100,5 @@ public class GhostDragGlassPane extends JPanel {
         
         g2.drawImage(dragged, x, y, width, height, null);
         g2.dispose();
-    }
-    
-    /**
-     * Actual panel that gets painted on the glass pane. This
-     * panel is never displayed directly on the glass pane.
-     * Its used to update text, then its graphics are painted 
-     * to a BufferedImage. This BufferedImage is in turn
-     * painted on the glass pane. This is much more efficient
-     * way of displaying this component while it is being 
-     * moved.
-     */
-    private class DragPanel extends JXPanel {
-        @Resource
-        private Font dragLabelFont;
-        @Resource
-        private Color dragLabelColor;
-        
-        private JLabel label;
-        
-        public DragPanel() {
-            GuiUtils.assignResources(this);
-            
-            setBackgroundPainter(new MessagePainterFactory<JXPanel>().createGreenMessagePainter());
-            
-            setLayout(new BorderLayout());
-            label = new JLabel("");
-            label.setFont(dragLabelFont);
-            label.setForeground(dragLabelColor);
-            label.setSize(new Dimension(200,40));
-            label.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-            
-            add(label, BorderLayout.CENTER);
-        }
-        
-        public void setText(Friend friend) {
-            if(friend == null) {
-                label.setText(I18n.tr("Add to My Library"));
-            } else {
-                String renderName = friend.getRenderName();
-                if(!StringUtils.isEmpty(renderName)) {
-                    label.setText(I18n.tr("Share files with {0}", renderName));
-                } else {
-                    label.setText(I18n.tr("Share files"));
-                }
-            }
-        }
     }
 }

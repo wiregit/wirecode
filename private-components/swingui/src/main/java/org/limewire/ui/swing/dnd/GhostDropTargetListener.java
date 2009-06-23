@@ -9,8 +9,6 @@ import java.awt.dnd.DropTargetListener;
 
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.friend.Friend;
-
 /**
  * Listens to drag and drop events. When files are dragged onto a
  * component implementing this listener, a semi-transparent image
@@ -25,33 +23,17 @@ public class GhostDropTargetListener implements DropTargetListener {
 
     private final GhostDragGlassPane ghostDragGlassPane;
     private final Component parent;
-    private final Friend friend;
-//    private final ListSourceChanger listChanger;
+    private Point offset = new Point(8,15);
     
     public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane) {
         this.parent = parent;
         this.ghostDragGlassPane = ghostDragGlassPane;
-        this.friend = null;
-//        this.listChanger = null;
     }
-    
-    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, Friend friend) {
-        this.parent = parent;
-        this.ghostDragGlassPane = ghostDragGlassPane;
-        this.friend = friend;
-//        this.listChanger = null;
-    }
-//    
-//    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, ListSourceChanger listChanger) {
-//        this.parent = parent;
-//        this.ghostDragGlassPane = ghostDragGlassPane;
-//        this.friend = null;
-//        this.listChanger = listChanger;
-//    }
     
     @Override
     public void dragEnter(DropTargetDragEvent dtde) {
         Component component = getGlassPane();
+
         // something is already currently occupying the glass pane and its visible
         if(!(component instanceof GhostDragGlassPane) && component.isVisible()) 
             return;
@@ -75,20 +57,7 @@ public class GhostDropTargetListener implements DropTargetListener {
         SwingUtilities.convertPointToScreen(p, parent);
         SwingUtilities.convertPointFromScreen(p, ghostPane); 
 
-        ghostPane.setPoint(p);
-        
-        Friend currentFriend;
-        //if filtering, set drop target name to friend filtering on
-//        if(listChanger != null)
-//            currentFriend = listChanger.getCurrentFriend();
-//        else
-            currentFriend = friend;
-        
-        // if friend is already set in ghost pane, don't update image
-        if(currentFriend != null && ghostPane.getCurrentFriend() != null &&
-                currentFriend.getId().equals(ghostPane.getCurrentFriend().getId()))
-            return;
-        ghostPane.setText(currentFriend);
+        ghostPane.setPoint(new Point(p.x + offset.x, p.y + offset.y));
     }
 
     /**
@@ -115,7 +84,7 @@ public class GhostDropTargetListener implements DropTargetListener {
         Point p = (Point) dtde.getLocation().clone();
         SwingUtilities.convertPointToScreen(p, parent);
         SwingUtilities.convertPointFromScreen(p, glassPane); 
-        glassPane.setPoint(p);
+        glassPane.setPoint(new Point(p.x + offset.x, p.y + offset.y));
 
         glassPane.repaint(glassPane.getRepaintRect());
     }

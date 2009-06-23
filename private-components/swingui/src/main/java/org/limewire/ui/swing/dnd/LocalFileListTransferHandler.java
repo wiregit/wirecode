@@ -48,25 +48,26 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
         if (getLocalFileList() == null || !DNDUtils.containsFileFlavors(info)) {
             return false;
         }
-
-        List<File> files = Collections.emptyList();
-        if (DNDUtils.containsFileFlavors(info)) {
-            Transferable t = info.getTransferable();
-            try {
-                files = Arrays.asList(DNDUtils.getFiles(t));
-            } catch (Throwable failed) {
+//
+//        //TODO: can't do this here
+//        List<File> files = Collections.emptyList();
+//        if (DNDUtils.containsFileFlavors(info)) {
+//            Transferable t = info.getTransferable();
+//            try {
+//                files = Arrays.asList(DNDUtils.getFiles(t));
+//            } catch (Throwable failed) {
+//                return true;
+//            }
+//        }
+//
+//        LocalFileList localFileList = getLocalFileList();
+//        for (File file : files) {
+//            if (localFileList.isFileAddable(file)) {
                 return true;
-            }
-        }
-
-        LocalFileList localFileList = getLocalFileList();
-        for (File file : files) {
-            if (localFileList.isFileAddable(file)) {
-                return true;
-            }
-        }
-
-        return false;
+//            }
+//        }
+//
+//        return false;
     }
 
     @Override
