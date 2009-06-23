@@ -1,10 +1,12 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
+import java.awt.FlowLayout;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
@@ -19,13 +21,14 @@ import org.limewire.util.OSUtils;
 public class SetupPage2 extends WizardPage {
     private final JCheckBox shareDownloadedFilesCheckBox;
 
-    private @Resource(key = "WireframeTop.libraryButton.icon")
-    Icon myFilesIcon;
+    private @Resource
+    Icon file_sharedlist_p2p_large;
 
-    private @Resource(key = "SharedFileCountPopupPanel.publicIcon")
-    Icon publicShared;
-    
-    private @Resource Icon setup_arrow;
+    private @Resource
+    Icon sharing_my_files;
+
+    private @Resource
+    Icon sharing_arrow;
 
     public SetupPage2(SetupComponentDecorator decorator) {
         super(decorator);
@@ -33,16 +36,16 @@ public class SetupPage2 extends WizardPage {
         GuiUtils.assignResources(this);
 
         setOpaque(false);
-        setLayout(new MigLayout("insets 0 14 0 0, gap 0"));
+        setLayout(new MigLayout("insets 0 0 0 0, gap 0, fillx"));
 
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
-        
+
         boolean newInstall = InstallSettings.PREVIOUS_RAN_VERSIONS.get().size() == 0;
 
         addAutoSharing(newInstall);
         addSeperator();
         addModifyInfo();
-        if(!newInstall) {
+        if (!newInstall) {
             addSeperator();
             addOldVersionInfo();
         }
@@ -93,19 +96,22 @@ public class SetupPage2 extends WizardPage {
      * Adds header for Auto-Sharing, checkbox and associated text
      */
     private void addAutoSharing(boolean newInstall) {
+
         add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
-                "gaptop 20, span, wrap");
-        if(newInstall) {
-            add(shareDownloadedFilesCheckBox, "gaptop 5, gapleft 26");
+                "gaptop 20, span 3, alignx center, wrap");
+        if (newInstall) {
+            add(shareDownloadedFilesCheckBox, "gaptop 5, gapleft 26, alignx right");
             add(createAndDecorateMultiLine(I18n
-                .tr("Add files I download from P2P Users to my Public Shared list."),
-                shareDownloadedFilesCheckBox), "gapleft 5, gaptop 5");
+                    .tr("Add files I download from P2P Users to my Public Shared list."),
+                    shareDownloadedFilesCheckBox), "gapleft 5, gaptop 5");
             add(
                     createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
-                    "gapleft 10, wrap");
-        } else if(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-            add(new JLabel(I18n.tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
+                    "alignx left, wrap");
+        } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
+            add(new JLabel(
+                    I18n
+                            .tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
             add(
                     createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
                     "gapleft 10, wrap");
@@ -113,18 +119,27 @@ public class SetupPage2 extends WizardPage {
     }
 
     private void addModifyInfo() {
+
         add(createAndDecorateHeader(I18n
                 .tr("To see or modify files in your Public Shared list, go to")),
-                "gaptop 20, span, wrap");
-        add(new JLabel("My Files", myFilesIcon, JLabel.RIGHT));
-        add(new JLabel(setup_arrow));
-        add(new JLabel(publicShared), "wrap");
+                "gaptop 20, span 3, alignx center, wrap");
+
+        JPanel modifyInfo = new JPanel(new FlowLayout());
+        JLabel myFiles = new JLabel(I18n.tr("My Files"), sharing_my_files, JLabel.CENTER);
+        myFiles.setVerticalTextPosition(JLabel.BOTTOM);
+        myFiles.setHorizontalTextPosition(JLabel.CENTER);
+        
+        modifyInfo.add(myFiles);
+        modifyInfo.add(new JLabel(sharing_arrow));
+        modifyInfo.add(new JLabel(file_sharedlist_p2p_large));
+
+        add(modifyInfo, "span 3, alignx center, wrap");
     }
 
     private void addOldVersionInfo() {
         add(createAndDecorateHeader(I18n
                 .tr("Shared files from your old version will be in your Public Shared list.")),
-                "gaptop 20, span, wrap");
+                "gaptop 20, span 3, alignx center, wrap");
 
     }
 }
