@@ -84,8 +84,21 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
                 return true;
             }
         }
-
+       
         LocalFileList localFileList = getLocalFileList();
+        
+        boolean containsAll = true;
+        for (File file : files) {
+            if (!localFileList.contains(file)) {
+                containsAll = false;
+                break;
+            }
+        }
+        
+        if(containsAll) {
+            return false;
+        }
+        
         for (File file : files) {
             if (localFileList.isFileAddable(file)) {
                 return true;
