@@ -1,27 +1,27 @@
-# Sinhalese translation for limewire
-# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# Gujarati translation for limewire
+# Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
 # This file is distributed under the same license as the limewire package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-06-22 11:30-0400\n"
-"PO-Revision-Date: 2008-10-19 16:39+0000\n"
-"Last-Translator: Heshan J Peiris <j.heshan@gmail.com>\n"
-"Language-Team: Sinhalese <si@li.org>\n"
+"PO-Revision-Date: 2009-06-20 15:54+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Gujarati <gu@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-06-23 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-06-23 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
 msgid "All Types"
-msgstr "සියල්ල"
+msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
@@ -29,7 +29,7 @@ msgstr "සියල්ල"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:66
 msgid "Documents"
-msgstr "ලේඛන"
+msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:42
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
@@ -38,7 +38,7 @@ msgstr "ලේඛන"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:67
 msgid "Programs"
-msgstr "වැඩසටහන්"
+msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:43
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -48,7 +48,7 @@ msgstr "වැඩසටහන්"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:63
 msgid "Audio"
-msgstr "ශ්‍රව්‍ය"
+msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:44
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
@@ -57,7 +57,7 @@ msgstr "ශ්‍රව්‍ය"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryTableComboBox.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:118
 msgid "Video"
-msgstr "ද්‍රෘශ්‍ය"
+msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:45
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
@@ -65,7 +65,7 @@ msgstr "ද්‍රෘශ්‍ය"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:65
 msgid "Images"
-msgstr "සේයාරූ"
+msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:46
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:19
@@ -76,34 +76,7 @@ msgstr "සේයාරූ"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:67
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:68
 msgid "Other"
-msgstr "වෙනත්"
-
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
-msgid "The file is corrupted"
-msgstr "ගොනුව විකෘතිවී ඇත"
-
-#. *
-#. * The DownloadItem is not in an error state.
-#. 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
-msgid "No problems."
-msgstr "ගැටලු නොමැත"
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
-msgid ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"ඔබගේ දෘඩ තැටිය පිරී ඇති බැවින් අතවශ්‍ය ගොනුවක් පිටපත් කිරීමට ලයිම්වයර් "
-"අපොහොසත්ව ඇත.  තවදුරටත් ලයිම්වයර් භාවිතය සඳහා දෘඩ තැටියේ ඉඩ සාදා ගන්න"
-
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/XMPPPresence.java:23
-msgid "Away"
-msgstr "පිටතට ගොස්"
-
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/XMPPPresence.java:25
-msgid "Do not disturb"
-msgstr "බාධා නොකරන්න"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:34
@@ -131,12 +104,23 @@ msgstr ""
 msgid "There is a disk problem"
 msgstr ""
 
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
+msgid "The file is corrupted"
+msgstr ""
+
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
 msgid "This file is not shareable"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
 msgid "Trouble connecting to people"
+msgstr ""
+
+#. *
+#. * The DownloadItem is not in an error state.
+#. 
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
+msgid "No problems."
 msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:162
@@ -593,6 +577,12 @@ msgstr ""
 msgid "Metadata Loader"
 msgstr ""
 
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
+msgid ""
+"LimeWire was unable to write a necessary file because your hard drive is "
+"full. To continue using LimeWire you must free up space on your hard drive."
+msgstr ""
+
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
@@ -658,9 +648,17 @@ msgstr ""
 msgid "Available"
 msgstr ""
 
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/XMPPPresence.java:23
+msgid "Away"
+msgstr ""
+
 #. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/XMPPPresence.java:24
 msgid "Away for a while"
+msgstr ""
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/XMPPPresence.java:25
+msgid "Do not disturb"
 msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
