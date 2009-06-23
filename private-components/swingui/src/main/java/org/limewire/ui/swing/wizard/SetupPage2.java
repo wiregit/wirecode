@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
-import java.awt.FlowLayout;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
@@ -96,50 +95,51 @@ public class SetupPage2 extends WizardPage {
      * Adds header for Auto-Sharing, checkbox and associated text
      */
     private void addAutoSharing(boolean newInstall) {
-        JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
+        JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
 
         autoSharingPanel.add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
                 "alignx center, wrap");
         if (newInstall) {
-            JPanel panel = new JPanel(new MigLayout("insets 0, gap 0"));
-            panel.add(shareDownloadedFilesCheckBox);
-            panel.add(createAndDecorateMultiLine(I18n
+            autoSharingPanel.add(shareDownloadedFilesCheckBox, "alignx center");
+            autoSharingPanel.add(createAndDecorateMultiLine(I18n
                     .tr("Add files I download from P2P Users to my Public Shared list."),
                     shareDownloadedFilesCheckBox));
-            panel
-                    .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));
-            autoSharingPanel.add(panel, "gap 0,alignx center, wrap");
+            autoSharingPanel
+                    .add(
+                            createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+                            "wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-            JPanel panel = new JPanel(new FlowLayout());
-            panel
-                    .add(createAndDecorateSubHeading(I18n
-                            .tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
-            panel
-                    .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));
-            autoSharingPanel.add(panel, "alignx center, wrap");
+            autoSharingPanel
+                    .add(
+                            createAndDecorateSubHeading(I18n
+                                    .tr("LimeWire will add files you download from P2P Users into your Public Shared List.")),
+                            "alignx center");
+            autoSharingPanel
+                    .add(
+                            createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+                            "wrap");
         }
 
         add(autoSharingPanel, "growx, span, sg sameRowSize, wrap");
     }
 
     private void addModifyInfo() {
-        JPanel modifyInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
+        JPanel modifyInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
         modifyInfoPanel.add(createAndDecorateHeader(I18n
                 .tr("To see or modify files in your Public Shared list, go to")),
                 "alignx center, wrap");
 
-        JPanel modifyInfo = new JPanel(new MigLayout("insets 0, gap 0"));
         JLabel myFiles = new JLabel(I18n.tr("My Files"), sharing_my_files, JLabel.CENTER);
         myFiles.setVerticalTextPosition(JLabel.BOTTOM);
         myFiles.setHorizontalTextPosition(JLabel.CENTER);
 
-        modifyInfo.add(myFiles);
-        modifyInfo.add(new JLabel(sharing_arrow), "aligny top, gaptop 17");
-        modifyInfo
-                .add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT), "aligny top, gaptop 15");
+        modifyInfoPanel.add(myFiles, "alignx center");
+        modifyInfoPanel.add(new JLabel(sharing_arrow), "aligny top, gaptop 17");
+        modifyInfoPanel.add(
+                new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT),
+                "aligny top, gaptop 15");
 
-        modifyInfoPanel.add(modifyInfo, "alignx center, wrap");
         add(modifyInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
 
