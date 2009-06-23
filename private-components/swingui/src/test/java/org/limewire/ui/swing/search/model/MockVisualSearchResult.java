@@ -251,16 +251,4 @@ public class MockVisualSearchResult implements VisualSearchResult {
         // TODO Auto-generated method stub
         
     }
-
-    @Override
-    public boolean isShowingContextOptions() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void setShowingContextOptions(boolean showing) {
-        // TODO Auto-generated method stub
-        
-    }
 }

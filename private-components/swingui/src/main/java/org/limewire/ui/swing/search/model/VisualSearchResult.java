@@ -163,18 +163,6 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
     double getRelevance();
     
     /**
-     * Returns an indicator that determines if the context options are 
-     * displayed for the search result.
-     */
-    boolean isShowingContextOptions();
-    
-    /**
-     * Sets an indicator that determines if the context options are 
-     * displayed for the search result.
-     */
-    void setShowingContextOptions(boolean showing);
-    
-    /**
      * Returns an indicator that determines if the result is an existing 
      * download.
      */
