@@ -222,7 +222,7 @@ public class DownloadMediator {
                 return 0;
             }
 
-            return o2.getPercentComplete() - o1.getPercentComplete();
+            return o1.getPercentComplete() - o2.getPercentComplete();
         }   
      
     } 
