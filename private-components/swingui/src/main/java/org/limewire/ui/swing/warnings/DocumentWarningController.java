@@ -22,7 +22,19 @@ import com.google.inject.Singleton;
  * Has logic one whether or not to display a warning to the user that they are
  * sharing documents with a public shared list. If the user shares a document
  * with a public shared list, then a DocumentWarningPanel will be constructed
- * and attached to the GlobalLayeredPanel. 
+ * and attached to the GlobalLayeredPanel.
+ * 
+ * If the user is setup to show this warning the warning will show up. If not
+ * nothing will happen and this class will not register listeners to find out
+ * about this event either.
+ * 
+ * The user is presented with two options, to continue sharing, in which case
+ * the user will no longer receive a warning message until the next time they
+ * upgrade, or they can use to remove all the documents shared with gnutella.
+ * 
+ * Choosing the remove option will also disable the capability to share
+ * documents with gnutella. If they re-enable sharing documents, then share a
+ * document they will see the warning again, in this instance.
  */
 @Singleton
 public class DocumentWarningController implements ComponentListener {
