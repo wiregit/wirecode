@@ -14,5 +14,5 @@ import com.google.inject.BindingAnnotation;
 @BindingAnnotation
 @Target( { FIELD, PARAMETER, METHOD })
 @Retention(RUNTIME)
-@interface LibrarySelected {
+public @interface LibrarySelected {
 }

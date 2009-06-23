@@ -2,7 +2,7 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Action;
@@ -13,7 +13,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.library.LibraryPanel;
+import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
@@ -21,18 +21,20 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Removes given list of files from the library then tries to move them to the
  * trash or delete them.
  */
 class DeleteAction extends AbstractAction {
-    private final LibraryPanel libraryPanel;
+    private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     private final LibraryManager libraryManager;
 
     @Inject
-    public DeleteAction(LibraryPanel libraryPanel, LibraryManager libraryManager) {
-        this.libraryPanel = libraryPanel;
+    public DeleteAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
+            LibraryManager libraryManager) {
+        this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryManager = libraryManager;
         
         String deleteName = I18n.tr("Delete Files");
@@ -46,7 +48,7 @@ class DeleteAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final List<LocalFileItem> selectedItems = Collections.unmodifiableList(libraryPanel.getSelectedItems());
+        final List<LocalFileItem> selectedItems = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
         
         int confirmation = FocusJOptionPane.showConfirmDialog(null, getMessage(selectedItems.size()), I18n.tr("Delete File", "Delete Files", selectedItems.size()), JOptionPane.OK_CANCEL_OPTION); 
         if (confirmation == JOptionPane.OK_OPTION) {

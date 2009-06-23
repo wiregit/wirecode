@@ -21,10 +21,6 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
 
     public static final String NAME = "Library";
     
-//    private final MyLibraryFactory myLibraryFactory;
-//    private final PluggableList<LocalFileItem> baseLibraryList;
-//    private final LibraryListSourceChanger currentFriendFilterChanger;
-//    private MyLibraryPanel panel;
     private Provider<LibraryPanel> libraryProvider;
     private LibraryPanel libraryPanel;
     private final Provider<Navigator> navigatorProvider;
@@ -34,9 +30,6 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
             Provider<Navigator> navigatorProvider) {
         this.libraryProvider = libraryProvider;
         this.navigatorProvider = navigatorProvider;
-        
-//        baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-//        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager);
     }
     
     @Override
