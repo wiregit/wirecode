@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -153,6 +154,24 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
                 allowing(finishedItem2).setAttribute(with(equal(DownloadItem.DOWNLOAD_ITEM)),
                         with(any(DownloadItem.class)), with(equal(false)));
                 will(new AssignParameterAction<DownloadItem>(downloadItem4, 1));
+                
+                allowing(unfinishedItem1).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));
+                allowing(unfinishedItem2).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));
+                allowing(finishedItem1).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));
+                allowing(finishedItem2).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));                
+
+                allowing(unfinishedItem1).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
+                allowing(unfinishedItem2).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
+                allowing(finishedItem1).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
+                allowing(finishedItem2).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
 
                 allowing(unfinishedItem1).getSha1Urn();
                 will(returnValue(urn1));
@@ -297,7 +316,26 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
                 allowing(finishedItem1).getState();
                 will(returnValue(Downloader.DownloadState.COMPLETE));
                 allowing(finishedItem2).getState();
-                will(returnValue(Downloader.DownloadState.COMPLETE));
+                will(returnValue(Downloader.DownloadState.COMPLETE));                
+
+                allowing(unfinishedItem1).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));
+                allowing(unfinishedItem2).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));
+                allowing(finishedItem1).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));
+                allowing(finishedItem2).getAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)));
+                will(returnValue(null));
+                
+
+                allowing(unfinishedItem1).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
+                allowing(unfinishedItem2).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
+                allowing(finishedItem1).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
+                allowing(finishedItem2).setAttribute(with(equal(DownloadItem.DOWNLOAD_START_DATE)), 
+                        with(any(Date.class)), with(equal(true)));
 
                 allowing(unfinishedItem1).addListener(with(any(EventListener.class)));
                 allowing(unfinishedItem2).addListener(with(any(EventListener.class)));
