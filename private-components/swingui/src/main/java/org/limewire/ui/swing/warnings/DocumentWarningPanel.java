@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.warnings;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -9,9 +12,11 @@ import java.awt.event.ComponentListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
@@ -25,6 +30,7 @@ import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.mainframe.LimeWireLayeredPane;
 import org.limewire.ui.swing.util.CategoryUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.event.ListEvent;
@@ -41,16 +47,30 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
 
     private final AtomicBoolean showing = new AtomicBoolean(false);
 
+    @Resource
+    private Color backgroundColor;
+
+    @Resource
+    private Font font;
+
+    @Resource
+    private Color fontColor;
+
+    @Resource
+    private Color linkFontColor;
+
     @Inject
     public DocumentWarningPanel(final SharedFileListManager shareListManager,
             @LimeWireLayeredPane JLayeredPane layeredPane, ButtonDecorator buttonDecorator) {
         this.layeredPane = layeredPane;
+        GuiUtils.assignResources(this);
 
         setLayout(new MigLayout("insets 10"));
         setSize(320, 190);
         setPreferredSize(new Dimension(320, 190));
         setMaximumSize(new Dimension(320, 190));
         setMinimumSize(new Dimension(320, 190));
+        setBackground(backgroundColor);
 
         final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
         HTMLLabel htmlLabel = new HTMLLabel(
@@ -60,10 +80,17 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                                 learnMoreUrl));
         htmlLabel.setEditable(false);
         htmlLabel.setOpaque(false);
+        htmlLabel.setHtmlFont(font);
+        htmlLabel.setHtmlForeground(fontColor);
+        htmlLabel.setHtmlLinkForeground(linkFontColor);
 
         add(htmlLabel, "span 2, wrap");
-        add(new MultiLineLabel(I18n.tr("Do you want to keep sharing Documents with the world?")),
-                "span 2, gaptop 20, wrap");
+        MultiLineLabel sharingLabel = new MultiLineLabel(I18n
+                .tr("Do you want to keep sharing Documents with the world?"));
+        sharingLabel.setForeground(fontColor);
+        sharingLabel.setFont(font);
+
+        add(sharingLabel, "span 2, gaptop 20, wrap");
         JXButton continueSharingButton = new JXButton(new AbstractAction(I18n
                 .tr("Continue Sharing")) {
             @Override
@@ -72,9 +99,8 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                 SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(false);
             }
         });
-        buttonDecorator.decorateLightFullButton(continueSharingButton);
-        add(continueSharingButton, "alignx right, gaptop 15");
-
+        buttonDecorator.decorateDarkFullButton(continueSharingButton);
+        
         JXButton unshareAllButton = new JXButton(new AbstractAction(I18n.tr("Unshare All")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -83,9 +109,14 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                 shareListManager.disableSharingDocumentsWithGnutella();
             }
         });
-        buttonDecorator.decorateLightFullButton(unshareAllButton);
-        add(unshareAllButton, "alignx right");
-
+        buttonDecorator.decorateDarkFullButton(unshareAllButton);
+        
+        JPanel buttons = new JPanel(new FlowLayout());
+        buttons.add(continueSharingButton);
+        buttons.add(unshareAllButton);
+        buttons.setBackground(backgroundColor);
+        
+        add(buttons, "alignx center, gaptop 15");
     }
 
     private void cleanup() {
