@@ -96,7 +96,7 @@ public class SetupPage2 extends WizardPage {
      * Adds header for Auto-Sharing, checkbox and associated text
      */
     private void addAutoSharing(boolean newInstall) {
-        JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, debug"));
+        JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
 
         autoSharingPanel.add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
