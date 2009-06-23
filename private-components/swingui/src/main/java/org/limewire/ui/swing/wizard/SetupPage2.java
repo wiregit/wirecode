@@ -113,7 +113,7 @@ public class SetupPage2 extends WizardPage {
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             JPanel panel = new JPanel(new FlowLayout());
             panel
-                    .add(createAndDecorateMultiLine(I18n
+                    .add(createAndDecorateSubHeading(I18n
                             .tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
             panel
                     .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));

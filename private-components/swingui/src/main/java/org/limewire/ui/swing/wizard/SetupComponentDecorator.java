@@ -35,7 +35,13 @@ public class SetupComponentDecorator {
     private final ButtonDecorator plainButtonDecorator;
     
     @Resource private Font headingFont;
+    @Resource private Color headingFontColor;
     @Resource private Font normalFont;
+    @Resource private Color normalFontColor;
+    @Resource private Font  subHeadingFont;
+    @Resource private Color subHeadingFontColor;
+    @Resource private Font  linkFont;
+    @Resource private Color linkFontColor;
 
     @Resource private Color greenButtonForeground;
     @Resource private Font greenButtonFont;
@@ -100,6 +106,9 @@ public class SetupComponentDecorator {
     }
     
     public void decorateLink(JComponent link) {
+        link.setOpaque(false);
+        link.setFont(linkFont);
+        link.setForeground(linkFontColor);
     }
     
     public void decoratePlainButton(JXButton button) {
@@ -113,13 +122,20 @@ public class SetupComponentDecorator {
     
     public void decorateHeadingText(JComponent component) {
         component.setFont(headingFont);
+        component.setForeground(headingFontColor);
         component.setOpaque(false);
     }
     
     public void decorateNormalText(JComponent component) {
         component.setFont(normalFont);
+        component.setForeground(normalFontColor);
         component.setOpaque(false);
-
+    }
+    
+    public void decorateSubHeading(JComponent component) {
+        component.setFont(subHeadingFont);
+        component.setForeground(subHeadingFontColor);
+        component.setOpaque(false);
     }
 
     /**

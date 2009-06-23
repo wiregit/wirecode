@@ -44,6 +44,12 @@ public abstract class WizardPage extends JPanel {
         decorator.decorateNormalText(label);
         return label;
     }
+    
+    protected Component createAndDecorateSubHeading(String text) {
+        JLabel label = new MultiLineLabel(text, 500);
+        decorator.decorateSubHeading(label);
+        return label;
+    }
 
     protected JCheckBox createAndDecorateCheckBox(boolean isSelected) {
         JCheckBox checkBox = new JCheckBox();
@@ -63,7 +69,6 @@ public abstract class WizardPage extends JPanel {
                 NativeLaunchUtils.openURL(url);
             }
         });
-        decorator.decorateNormalText(learnMoreButton);
         decorator.decorateLink(learnMoreButton);
         return learnMoreButton;
     }

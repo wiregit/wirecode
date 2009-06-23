@@ -42,6 +42,8 @@ public class Wizard extends JPanel {
     @Resource private Color titleBarForeground;
     @Resource private Color titleBarBorder;
     @Resource private Font titleBarFont;
+    @Resource private Font footerFont;
+    @Resource private Color footerFontColor;
     
     private JDialog dialog;    
  
@@ -119,7 +121,9 @@ public class Wizard extends JPanel {
         decorator.decorateNormalText(headerLine2);
         
         footer = new JLabel();
-        decorator.decorateNormalText(footer);
+        footer.setOpaque(false);
+        footer.setForeground(footerFontColor);
+        footer.setFont(footerFont);
         footer.setBorder(BorderFactory.createEmptyBorder(0,14,0,0));
         
         JXPanel headerBar = new JXPanel(new MigLayout("insets 14, gap 0, fill"));
