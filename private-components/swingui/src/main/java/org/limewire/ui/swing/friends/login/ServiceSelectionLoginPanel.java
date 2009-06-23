@@ -94,6 +94,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         bottomPanel.setOpaque(false);
         
         JXButton facebookButton = new JXButton("Facebook", facebookIcon);
+        facebookButton.setVisible(false);
         JXButton gmailButton = new JXButton(new ServiceAction(accountManager.getConfig("Gmail")));
         JXButton liveJournalButton = new JXButton(new ServiceAction(accountManager.getConfig("LiveJournal")));
         JXButton otherButton = new JXButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber")));
@@ -108,7 +109,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         buttonDecorator.decorateFlatButton(liveJournalButton);
         buttonDecorator.decorateFlatButton(otherButton);
         
-        JPanel selectionPanel = new JPanel(new MigLayout("gap 0, insets 0 0 40 0, alignx center, filly"));
+        JPanel selectionPanel = new JPanel(new MigLayout("gap 0, insets 0 0 30 0, alignx center, filly"));
         selectionPanel.setOpaque(false);
         selectionPanel.add(facebookButton, "gaptop 10, gapright 30");
         selectionPanel.add(gmailButton, "wrap");
