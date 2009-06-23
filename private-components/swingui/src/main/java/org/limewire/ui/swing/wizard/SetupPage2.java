@@ -36,7 +36,7 @@ public class SetupPage2 extends WizardPage {
         GuiUtils.assignResources(this);
 
         setOpaque(false);
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0, fillx"));
+        setLayout(new MigLayout("insets 0 0 0 0, gap 0, fillx, aligny center"));
 
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
 
@@ -56,7 +56,7 @@ public class SetupPage2 extends WizardPage {
     private void addSeperator() {
         JSeparator separator = new JSeparator();
         separator.setForeground(Color.BLACK);
-        add(separator, "growx, span, gaptop 40, wrap");
+        add(separator, "growx, span, gaptop 25, wrap");
 
     }
 
