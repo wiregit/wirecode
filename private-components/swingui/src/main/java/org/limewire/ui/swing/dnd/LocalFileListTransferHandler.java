@@ -25,9 +25,11 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
     private final WeakHashMap<Transferable, Map<LocalFileList, Boolean>> canImportCache = new WeakHashMap<Transferable, Map<LocalFileList, Boolean>>();
 
     private final LibrarySupport librarySupport;
+    private final GhostDragGlassPane ghostPane;
 
-    public LocalFileListTransferHandler(LibrarySupport librarySupport) {
+    public LocalFileListTransferHandler(LibrarySupport librarySupport, GhostDragGlassPane glassPane) {
         this.librarySupport = librarySupport;
+        this.ghostPane = glassPane;
     }
 
     @Override
@@ -66,6 +68,7 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
             canImport = canImportInternal(info);
             canImportMap.put(localFileList, canImport);
         }
+        ghostPane.setVisible(canImport);
         
         return canImport;
     }

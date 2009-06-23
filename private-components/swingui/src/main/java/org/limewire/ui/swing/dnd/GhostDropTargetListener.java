@@ -7,6 +7,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 
+import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 /**
@@ -22,10 +23,10 @@ import javax.swing.SwingUtilities;
 public class GhostDropTargetListener implements DropTargetListener {
 
     private final GhostDragGlassPane ghostDragGlassPane;
-    private final Component parent;
+    private final JComponent parent;
     private Point offset = new Point(8,15);
     
-    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane) {
+    public GhostDropTargetListener(JComponent parent, GhostDragGlassPane ghostDragGlassPane) {
         this.parent = parent;
         this.ghostDragGlassPane = ghostDragGlassPane;
     }
@@ -42,7 +43,6 @@ public class GhostDropTargetListener implements DropTargetListener {
         if(!(component instanceof GhostDragGlassPane)) {
             SwingUtilities.getRootPane(parent).setGlassPane(ghostDragGlassPane);
         } 
-        ghostDragGlassPane.setVisible(true); 
         updateText(dtde, ghostDragGlassPane);
         ghostDragGlassPane.repaint();
     }

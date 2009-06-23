@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 
 import com.google.inject.Inject;
@@ -15,8 +16,9 @@ class LibraryTransferHandler extends LocalFileListTransferHandler {
 
     @Inject
     public LibraryTransferHandler(@LibrarySelected Provider<LocalFileList> selectedLocalFileList,
-            @LibrarySelected Provider<List<File>> selectedLibraryFiles, LibrarySupport librarySupport) {
-        super(librarySupport);
+            @LibrarySelected Provider<List<File>> selectedLibraryFiles, LibrarySupport librarySupport,
+            GhostDragGlassPane ghostPane) {
+        super(librarySupport, ghostPane);
         this.selectedLocalFileList = selectedLocalFileList;
         this.selectedLibraryFiles = selectedLibraryFiles;
     }
