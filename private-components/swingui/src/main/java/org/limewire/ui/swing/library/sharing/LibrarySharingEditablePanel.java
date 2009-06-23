@@ -241,17 +241,7 @@ class LibrarySharingEditablePanel {
             Friend friend2 = data2.getFriend();
             if(friend1 == friend2)
                 return 0;
-            if(friend1.getFirstName().compareToIgnoreCase(friend2.getFirstName()) == 0) {
-                String[] names1 = friend1.getRenderName().split(" ");
-                String[] names2 = friend2.getRenderName().split(" ");
-                if(names1.length >= 2 && names2.length >= 2) {
-                    return names1[1].compareToIgnoreCase(names2[1]);
-                } else {
-                    return 0;
-                }
-            } else {
-                return friend1.getFirstName().compareToIgnoreCase(friend2.getFirstName());
-            }
+            return friend1.getRenderName().compareToIgnoreCase(friend2.getRenderName());
         }
     }
     
