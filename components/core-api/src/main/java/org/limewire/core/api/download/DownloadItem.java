@@ -146,7 +146,7 @@ public interface DownloadItem extends PropertiableFile {
     public boolean isLaunchable();
     
     /**
-     * Returns the File that is being downloaded to.
+     * @return the File that is being downloaded to.
      * This call never blocks, but may return a file
      * that is locked and cannot be used by other programs.
      */
@@ -163,9 +163,12 @@ public interface DownloadItem extends PropertiableFile {
      */
     void setSaveFile(File saveFile, boolean overwrite) throws SaveLocationException;
 
-    /** Returns true if {@link #resume()} will search for more sources. */
+    /** @return true if {@link #resume()} will search for more sources. */
     boolean isSearchAgainEnabled(); 
     
     /**@return The date the download started*/
     Date getStartDate();
+    
+    /** @return true if this is a download from the LimeWire Store. */
+    boolean isStoreDownload();
 }

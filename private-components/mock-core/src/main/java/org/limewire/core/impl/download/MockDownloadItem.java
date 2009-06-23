@@ -264,4 +264,10 @@ public class MockDownloadItem implements DownloadItem {
     public Date getStartDate() {
         return new Date();
     }
+
+    @Override
+    public boolean isStoreDownload() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

@@ -36,6 +36,7 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
+import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem {
@@ -474,5 +475,11 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public Date getStartDate() {
         return (Date)downloader.getAttribute(DownloadItem.DOWNLOAD_START_DATE);
+    }
+
+
+    @Override
+    public boolean isStoreDownload() {
+        return downloader instanceof StoreDownloader;
     }
 }
