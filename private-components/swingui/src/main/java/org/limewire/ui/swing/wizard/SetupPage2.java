@@ -36,7 +36,7 @@ public class SetupPage2 extends WizardPage {
         GuiUtils.assignResources(this);
 
         setOpaque(false);
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0, fill, align center"));
+        setLayout(new MigLayout("insets 0, gap 0, fill, align center"));
 
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
 
@@ -96,20 +96,20 @@ public class SetupPage2 extends WizardPage {
      * Adds header for Auto-Sharing, checkbox and associated text
      */
     private void addAutoSharing(boolean newInstall) {
-        JPanel autoSharingPanel = new JPanel(new MigLayout("fill"));
+        JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, debug"));
 
         autoSharingPanel.add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
                 "alignx center, wrap");
         if (newInstall) {
-            JPanel panel = new JPanel(new FlowLayout());
+            JPanel panel = new JPanel(new MigLayout("insets 0, gap 0"));
             panel.add(shareDownloadedFilesCheckBox);
             panel.add(createAndDecorateMultiLine(I18n
                     .tr("Add files I download from P2P Users to my Public Shared list."),
                     shareDownloadedFilesCheckBox));
             panel
                     .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));
-            autoSharingPanel.add(panel, "alignx center, wrap");
+            autoSharingPanel.add(panel, "gap 0,alignx center, wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             JPanel panel = new JPanel(new FlowLayout());
             panel
@@ -124,27 +124,27 @@ public class SetupPage2 extends WizardPage {
     }
 
     private void addModifyInfo() {
-        JPanel modifyInfoPanel = new JPanel(new MigLayout("fill"));
+        JPanel modifyInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
         modifyInfoPanel.add(createAndDecorateHeader(I18n
                 .tr("To see or modify files in your Public Shared list, go to")),
                 "alignx center, wrap");
 
-        JPanel modifyInfo = new JPanel(new FlowLayout());
+        JPanel modifyInfo = new JPanel(new MigLayout("insets 0, gap 0"));
         JLabel myFiles = new JLabel(I18n.tr("My Files"), sharing_my_files, JLabel.CENTER);
         myFiles.setVerticalTextPosition(JLabel.BOTTOM);
         myFiles.setHorizontalTextPosition(JLabel.CENTER);
 
         modifyInfo.add(myFiles);
-        modifyInfo.add(new JLabel(sharing_arrow));
+        modifyInfo.add(new JLabel(sharing_arrow), "aligny top, gaptop 17");
         modifyInfo
-                .add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT));
+                .add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT), "aligny top, gaptop 15");
 
         modifyInfoPanel.add(modifyInfo, "alignx center, wrap");
         add(modifyInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
 
     private void addOldVersionInfo() {
-        JPanel oldVersionInfoPanel = new JPanel(new MigLayout("fill"));
+        JPanel oldVersionInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
         oldVersionInfoPanel.add(createAndDecorateHeader(I18n
                 .tr("Shared files from your old version will be in your Public Shared list.")),
                 "alignx center, wrap");
