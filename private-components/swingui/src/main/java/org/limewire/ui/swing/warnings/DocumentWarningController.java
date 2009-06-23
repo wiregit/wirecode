@@ -18,6 +18,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+/**
+ * Has logic one whether or not to display a warning to the user that they are
+ * sharing documents with a public shared list. If the user shares a document
+ * with a public shared list, then a DocumentWarningPanel will be constructed
+ * and attached to the GlobalLayeredPanel. 
+ */
 @Singleton
 public class DocumentWarningController implements ComponentListener {
     private final AtomicBoolean showing = new AtomicBoolean(false);
@@ -66,8 +72,9 @@ public class DocumentWarningController implements ComponentListener {
 
     private void showDocumentSharingWarning() {
         if (!showing.getAndSet(true)) {
-            DocumentWarningPanel panel  = documentWarningPanel.get();
-            //component hidden event comes in to tell us we can show more warnings.
+            DocumentWarningPanel panel = documentWarningPanel.get();
+            // component hidden event comes in to tell us we can show more
+            // warnings.
             panel.addComponentListener(this);
         }
     }
