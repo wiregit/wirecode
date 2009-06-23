@@ -68,9 +68,9 @@ public class IntentDialog extends LimeJDialog {
     private final JLabel copyrightLabel;
     private final JLabel policiesLabel;
     
-    private final String copyrightURL = "http://www.limewire.com/learnmore/copyright";
-    private final String licenseURL = "http://www.limewire.com/learnmore/agreement";
-    private final String privacyURL = "http://www.limewire.com/learnmore/privacy";
+    private final String copyrightURL = "http://www.limewire.com/client_redirect/?page=copyright";
+    private final String licenseURL = "http://www.limewire.com/client_redirect/?page=agreement";
+    private final String privacyURL = "http://www.limewire.com/client_redirect/?page=privacy";
     
     private boolean agreed = false;
     
