@@ -80,6 +80,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                                 learnMoreUrl));
         htmlLabel.setEditable(false);
         htmlLabel.setOpaque(false);
+        htmlLabel.setFocusable(false);
         htmlLabel.setHtmlFont(font);
         htmlLabel.setHtmlForeground(fontColor);
         htmlLabel.setHtmlLinkForeground(linkFontColor);
