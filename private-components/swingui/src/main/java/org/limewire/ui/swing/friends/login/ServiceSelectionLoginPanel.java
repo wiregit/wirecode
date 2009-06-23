@@ -34,6 +34,10 @@ public class ServiceSelectionLoginPanel extends JPanel {
     
     @Resource Icon facebookIcon;
     
+    @Resource private Icon shareIcon;
+    @Resource private Icon browseIcon;
+    @Resource private Icon chatIcon;
+    
     private final LoginPopupPanel parent;
     
     @Inject
@@ -54,30 +58,27 @@ public class ServiceSelectionLoginPanel extends JPanel {
         shareLabel.setForeground(labelTextForeground);
         topPanel.add(shareLabel, "gaptop 8");
         
-        JPanel shareIcon = new JPanel();
-        shareIcon.setBackground(Color.blue);
-        ResizeUtils.forceSize(shareIcon, new Dimension(153,90));
-        topPanel.add(shareIcon, "gapright 14, wrap");
+        JLabel shareIconLabel = new JLabel(shareIcon);
+        //ResizeUtils.forceSize(shareIcon, new Dimension(153,90));
+        topPanel.add(shareIconLabel, "gapright 14, wrap");
         
         JLabel browseLabel = new JLabel(I18n.tr("Browse"));
         browseLabel.setFont(labelTextFont);
         browseLabel.setForeground(labelTextForeground);
         topPanel.add(browseLabel);
         
-        JPanel browseIcon = new JPanel();
-        browseIcon.setBackground(Color.blue);
-        ResizeUtils.forceSize(browseIcon, new Dimension(153,90));
-        topPanel.add(browseIcon, "gapright 14, wrap");
+        JLabel browseIconLabel = new JLabel(browseIcon);
+        //ResizeUtils.forceSize(browseIcon, new Dimension(153,90));
+        topPanel.add(browseIconLabel, "gapright 14, wrap");
         
         JLabel chatLabel = new JLabel(I18n.tr("Chat"));
         chatLabel.setFont(labelTextFont);
         chatLabel.setForeground(labelTextForeground);
         topPanel.add(chatLabel);
         
-        JPanel chatIcon = new JPanel();
-        chatIcon.setBackground(Color.blue);
-        ResizeUtils.forceSize(chatIcon, new Dimension(153,90));
-        topPanel.add(chatIcon);
+        JLabel chatIconLabel = new JLabel(chatIcon);
+        //ResizeUtils.forceSize(chatIcon, new Dimension(153,90));
+        topPanel.add(chatIconLabel);
         
         
         JPanel centerPanel = new JPanel(new MigLayout("gap 0, insets 15 0 0 0, align center"));
