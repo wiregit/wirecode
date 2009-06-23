@@ -3,6 +3,10 @@ package org.limewire.ui.swing.library;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.dnd.DragSource;
+import java.awt.dnd.DragSourceAdapter;
+import java.awt.dnd.DragSourceContext;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,6 +146,16 @@ public class LibraryPanel extends JPanel {
             libraryTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryTable, ghostGlassPane));
         } catch (TooManyListenersException e) {
         }
+        
+        //hides system drag cursor when drag starts from within the app
+        DragSource source = DragSource.getDefaultDragSource();
+        source.addDragSourceListener(new DragSourceAdapter(){
+            @Override
+            public void dragEnter(java.awt.dnd.DragSourceDragEvent e) { 
+                DragSourceContext context = e.getDragSourceContext();
+                context.setCursor(Cursor.getDefaultCursor());
+            }
+        });
     }
     
     /**

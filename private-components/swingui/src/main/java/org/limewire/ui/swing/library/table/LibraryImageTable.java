@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.dnd.DropTarget;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -91,6 +92,11 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         });
         
         add(layer, "grow");
+    }
+    
+    @Override
+    public DropTarget getDropTarget() {
+        return imageList.getDropTarget();
     }
     
     @Override
