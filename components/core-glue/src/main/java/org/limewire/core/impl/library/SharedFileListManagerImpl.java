@@ -214,7 +214,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     }
     
     @Override
-    public void disableSharingDocumentsWithGnutella() {
+    public void removeDocumentsFromPublicLists() {
         LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(false);
         EventList<SharedFileList> shareLists = getModel();
         shareLists.getReadWriteLock().readLock().lock();

@@ -21,23 +21,22 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.SystemUtils;
@@ -117,14 +116,7 @@ public class IntentDialog extends LimeJDialog {
         bodyLabel.setHtmlLinkForeground(new Color(0x2152a6));
         bodyLabel.setEditable(false);
         bodyLabel.setOpaque(false);
-        bodyLabel.addHyperlinkListener(new HyperlinkListener() {
-           @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-               if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                   NativeLaunchUtils.openURL(e.getURL().toString());
-               }
-            } 
-        });
+        bodyLabel.addHyperlinkListener(GuiUtils.getHyperlinkListener());
         
         languageLabel = new JLabel();
         languageLabel.setFont(smallFont);
@@ -305,19 +297,5 @@ public class IntentDialog extends LimeJDialog {
         languageLabel.setText(languageText);
         exitButton.setAction(exitAction);
         agreeButton.setAction(agreeAction);
-    }
-    
-    private static class UrlAction extends AbstractAction {
-        private final String url;
-        
-        public UrlAction(String url) {
-            this.url = url;
-            putValue(Action.SHORT_DESCRIPTION, url);
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            NativeLaunchUtils.openURL(url);
-        }
     }
 }

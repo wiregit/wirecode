@@ -25,6 +25,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
@@ -35,7 +36,6 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
@@ -77,7 +77,7 @@ public class MiscOptionPanel extends OptionPanel {
         comboLabel = new JLabel(I18n.tr("Language:"));
         languageDropDown = new LanguageComboBox();
         
-        translateButton = new HyperlinkButton(new TranslateLinkAction());
+        translateButton = new HyperlinkButton(new UrlAction(I18n.tr("Help translate LimeWire!"), TRANSLATE_URL));
         translateButton.setFont(linkFont);
         
         add(comboLabel);
@@ -144,21 +144,6 @@ public class MiscOptionPanel extends OptionPanel {
         languageDropDown.setSelectedItem(currentLanguage);
     }
 
-    /**
-     * Action to open Translate link in default browser.
-     */
-    private class TranslateLinkAction extends AbstractAction {
-        
-        public TranslateLinkAction() {
-            super(I18n.tr("Help translate LimeWire!"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            NativeLaunchUtils.openURL(TRANSLATE_URL);
-        }
-    }
-    
     private class NotificationsPanel extends OptionPanel {
 
         private JCheckBox showNotificationsCheckBox;

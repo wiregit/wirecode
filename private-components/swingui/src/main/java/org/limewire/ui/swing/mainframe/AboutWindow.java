@@ -23,12 +23,12 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import org.limewire.core.api.Application;
+import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.ScrollingTextPane;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.VersionUtils;
 
@@ -79,12 +79,7 @@ class AboutWindow {
         
         //  set up limewire.com label
         HyperlinkButton url = new HyperlinkButton("http://www.limewire.com");
-        url.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                NativeLaunchUtils.openURL("http://www.limewire.com");
-            }
-        });
+        url.addActionListener(new UrlAction("http://www.limewire.com"));
         url.setHorizontalAlignment(SwingConstants.CENTER);
 
         //  set up scroll check box

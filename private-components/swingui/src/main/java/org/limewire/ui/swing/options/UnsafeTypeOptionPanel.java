@@ -68,7 +68,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         }
         
         if (!documentCheckBox.isSelected()) {
-            shareListManager.disableSharingDocumentsWithGnutella();
+            shareListManager.removeDocumentsFromPublicLists();
         }
         return false;
     }

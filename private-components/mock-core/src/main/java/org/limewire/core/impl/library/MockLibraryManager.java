@@ -225,7 +225,7 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     }
 
     @Override
-    public void disableSharingDocumentsWithGnutella() {
+    public void removeDocumentsFromPublicLists() {
         
     }
 }

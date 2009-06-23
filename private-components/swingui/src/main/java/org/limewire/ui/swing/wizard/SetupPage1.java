@@ -82,7 +82,7 @@ public class SetupPage1 extends WizardPage {
     private void addContentFilters() {
         add(createAndDecorateHeader(I18n.tr("Content Filters")), "gaptop 20, span, wrap");
         add(contentFilterCheckBox, "gaptop 5, gapleft 26");
-        add(createAndDecorateMultiLine(I18n.tr("Don't let me download files copyright owners request not be shared"), contentFilterCheckBox), "gapleft 5, gaptop 5");
+        add(createAndDecorateMultiLine(I18n.tr("Don't let me download or upload files copyright owners request not be shared"), contentFilterCheckBox), "gapleft 5, gaptop 5");
         add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=contentFiltering"), "gapleft 10, wrap");
     }
     

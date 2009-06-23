@@ -107,7 +107,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
             public void actionPerformed(ActionEvent e) {
                 cleanup();
                 SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(true);
-                shareListManager.disableSharingDocumentsWithGnutella();
+                shareListManager.removeDocumentsFromPublicLists();
             }
         });
         buttonDecorator.decorateDarkFullButton(unshareAllButton);

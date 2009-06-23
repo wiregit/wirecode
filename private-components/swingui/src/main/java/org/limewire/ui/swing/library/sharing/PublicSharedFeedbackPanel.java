@@ -2,9 +2,7 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -15,11 +13,10 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.options.LearnMoreButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 
@@ -55,15 +52,7 @@ public class PublicSharedFeedbackPanel {
         component.add(label);
         
         final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=publicSharing";
-        HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
-            {
-                putValue(Action.SHORT_DESCRIPTION, learnMoreUrl);
-            }
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                NativeLaunchUtils.openURL(learnMoreUrl);
-            }
-        });
+        HyperlinkButton learnMoreButton = new LearnMoreButton(learnMoreUrl);
         component.add(learnMoreButton);
     }
     

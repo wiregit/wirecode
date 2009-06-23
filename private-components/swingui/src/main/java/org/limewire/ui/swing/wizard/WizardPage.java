@@ -1,18 +1,14 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.options.LearnMoreButton;
 
 public abstract class WizardPage extends JPanel {
     
@@ -59,16 +55,7 @@ public abstract class WizardPage extends JPanel {
     }
     
     protected HyperlinkButton createAndDecorateHyperlink(final String url) {
-        HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
-            {
-                putValue(Action.SHORT_DESCRIPTION, url);
-            }
-            
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                NativeLaunchUtils.openURL(url);
-            }
-        });
+        HyperlinkButton learnMoreButton = new LearnMoreButton(url);
         decorator.decorateLink(learnMoreButton);
         return learnMoreButton;
     }
