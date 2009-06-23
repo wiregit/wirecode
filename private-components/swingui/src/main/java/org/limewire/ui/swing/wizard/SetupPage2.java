@@ -36,7 +36,7 @@ public class SetupPage2 extends WizardPage {
         GuiUtils.assignResources(this);
 
         setOpaque(false);
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0, fillx, aligny center"));
+        setLayout(new MigLayout("insets 0 0 0 0, gap 0, fill, align center"));
 
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
 
@@ -56,7 +56,7 @@ public class SetupPage2 extends WizardPage {
     private void addSeperator() {
         JSeparator separator = new JSeparator();
         separator.setForeground(Color.BLACK);
-        add(separator, "growx, span, gaptop 25, wrap");
+        add(separator, "growx, span, wrap");
 
     }
 
@@ -96,10 +96,11 @@ public class SetupPage2 extends WizardPage {
      * Adds header for Auto-Sharing, checkbox and associated text
      */
     private void addAutoSharing(boolean newInstall) {
+        JPanel autoSharingPanel = new JPanel(new MigLayout("fill"));
 
-        add(createAndDecorateHeader(I18n
+        autoSharingPanel.add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
-                "gaptop 20, span 3, alignx center, wrap");
+                "alignx center, wrap");
         if (newInstall) {
             JPanel panel = new JPanel(new FlowLayout());
             panel.add(shareDownloadedFilesCheckBox);
@@ -108,7 +109,7 @@ public class SetupPage2 extends WizardPage {
                     shareDownloadedFilesCheckBox));
             panel
                     .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));
-            add(panel, "alignx center, wrap");
+            autoSharingPanel.add(panel, "alignx center, wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             JPanel panel = new JPanel(new FlowLayout());
             panel
@@ -116,15 +117,17 @@ public class SetupPage2 extends WizardPage {
                             .tr("LimeWire will add files you download from P2P Users into your Public Shared List.")));
             panel
                     .add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"));
-            add(panel, "alignx center, wrap");
+            autoSharingPanel.add(panel, "alignx center, wrap");
         }
+
+        add(autoSharingPanel, "growx, span, sg rowSize, wrap");
     }
 
     private void addModifyInfo() {
-
-        add(createAndDecorateHeader(I18n
+        JPanel modifyInfoPanel = new JPanel(new MigLayout("fill"));
+        modifyInfoPanel.add(createAndDecorateHeader(I18n
                 .tr("To see or modify files in your Public Shared list, go to")),
-                "gaptop 20, span 3, alignx center, wrap");
+                "alignx center, wrap");
 
         JPanel modifyInfo = new JPanel(new FlowLayout());
         JLabel myFiles = new JLabel(I18n.tr("My Files"), sharing_my_files, JLabel.CENTER);
@@ -133,15 +136,18 @@ public class SetupPage2 extends WizardPage {
 
         modifyInfo.add(myFiles);
         modifyInfo.add(new JLabel(sharing_arrow));
-        modifyInfo.add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT));
+        modifyInfo
+                .add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT));
 
-        add(modifyInfo, "span 3, alignx center, wrap");
+        modifyInfoPanel.add(modifyInfo, "alignx center, wrap");
+        add(modifyInfoPanel, "growx, span, sg rowSize, wrap");
     }
 
     private void addOldVersionInfo() {
-        add(createAndDecorateHeader(I18n
+        JPanel oldVersionInfoPanel = new JPanel(new MigLayout("fill"));
+        oldVersionInfoPanel.add(createAndDecorateHeader(I18n
                 .tr("Shared files from your old version will be in your Public Shared list.")),
-                "gaptop 20, span 3, alignx center, wrap");
-
+                "alignx center, wrap");
+        add(oldVersionInfoPanel, "growx, span, sg rowSize, wrap");
     }
 }
