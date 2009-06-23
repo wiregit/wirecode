@@ -60,7 +60,7 @@ public class LimeWireSwingUI extends JPanel {
             ProNagController proNagController, 
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
-            MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider, @LimeWireLayeredPane JLayeredPane limeWireLayeredPane) {
+            MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider, @GlobalLayeredPane JLayeredPane limeWireLayeredPane) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;  	

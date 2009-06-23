@@ -11,11 +11,13 @@ import static java.lang.annotation.ElementType.METHOD;
 import com.google.inject.BindingAnnotation;
 
 /**
- * Annotation allowing injection of a the limewire layered pane.
+ * Annotation allowing injection of the global layered pane for limewire. This
+ * panel can be injected into classes so that they can add themselves to the
+ * layered panel.
  */
 @BindingAnnotation
 @Target( { FIELD, PARAMETER, METHOD })
 @Retention(RUNTIME)
-public @interface LimeWireLayeredPane {
+public @interface GlobalLayeredPane {
 
 }

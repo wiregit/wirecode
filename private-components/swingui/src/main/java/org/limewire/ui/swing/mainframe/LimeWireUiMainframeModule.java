@@ -13,7 +13,7 @@ public class LimeWireUiMainframeModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(SearchNavigator.class).to(TopPanel.class);
-        bind(JLayeredPane.class).annotatedWith(LimeWireLayeredPane.class).toInstance(new JLayeredPane());
+        bind(JLayeredPane.class).annotatedWith(GlobalLayeredPane.class).toInstance(new JLayeredPane());
         bind(DocumentWarningPanel.class);
     }
 }

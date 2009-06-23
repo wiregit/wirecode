@@ -28,7 +28,7 @@ import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
-import org.limewire.ui.swing.mainframe.LimeWireLayeredPane;
+import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
 import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -61,7 +61,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
 
     @Inject
     public DocumentWarningPanel(final SharedFileListManager shareListManager,
-            @LimeWireLayeredPane JLayeredPane layeredPane, ButtonDecorator buttonDecorator) {
+            @GlobalLayeredPane JLayeredPane layeredPane, ButtonDecorator buttonDecorator) {
         this.layeredPane = layeredPane;
         GuiUtils.assignResources(this);
 
