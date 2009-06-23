@@ -166,6 +166,44 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
         textField.setText(SharingSettings.getSaveDirectory().getAbsolutePath());
     }
 
+    void revertToDefault() {
+        revertToDefault(audioTextField);
+        revertToDefault(videoTextField);
+        revertToDefault(imageTextField);
+        revertToDefault(documentTextField);
+        revertToDefault(programTextField);
+        revertToDefault(otherTextField);
+    }
+    
+    boolean isConfigCustom() {
+        File defaultLocation = SharingSettings.getSaveDirectory();
+        if (!SharingSettings.getFileSettingForMediaType(MediaType.getAudioMediaType()).get()
+                .equals(defaultLocation)) {
+            return true;
+        }
+        if (!SharingSettings.getFileSettingForMediaType(MediaType.getVideoMediaType()).get()
+                .equals(defaultLocation)) {
+            return true;
+        }
+        if (!SharingSettings.getFileSettingForMediaType(MediaType.getImageMediaType()).get()
+                .equals(defaultLocation)) {
+            return true;
+        }
+        if (!SharingSettings.getFileSettingForMediaType(MediaType.getDocumentMediaType()).get()
+                .equals(defaultLocation)) {
+            return true;
+        }
+        if (!SharingSettings.getFileSettingForMediaType(MediaType.getProgramMediaType()).get()
+                .equals(defaultLocation)) {
+            return true;
+        }
+        if (!SharingSettings.getFileSettingForMediaType(MediaType.getOtherMediaType()).get()
+                .equals(defaultLocation)) {
+            return true;
+        }
+        return false;
+    }
+    
     private void applyOption(MediaType mediaType, LabelTextField textField) {
         if (hasChanged(mediaType, textField)) {
             FileSetting saveDirSetting = SharingSettings.getFileSettingForMediaType(mediaType);
@@ -233,12 +271,7 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            revertToDefault(audioTextField);
-            revertToDefault(videoTextField);
-            revertToDefault(imageTextField);
-            revertToDefault(documentTextField);
-            revertToDefault(programTextField);
-            revertToDefault(otherTextField);
+            revertToDefault();
         }
     }
 }

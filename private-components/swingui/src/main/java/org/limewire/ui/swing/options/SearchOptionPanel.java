@@ -20,6 +20,7 @@ import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
@@ -29,6 +30,7 @@ import org.limewire.ui.swing.util.SearchSettingListener;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.jacob.com.NotImplementedException;
 
 /**
  * Search Option View.
@@ -56,11 +58,17 @@ public class SearchOptionPanel extends OptionPanel {
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
         
-        setLayout(new MigLayout("insets 15 15 15 15, fillx"));
+        setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx"));
         add(getSearchBarPanel(), "growx, wrap");
         add(getFilteringPanel(), "growx, wrap");
         
-        add(groupSimilarResults, "gaptop 5, growx, wrap");
+        add(groupSimilarResults);
+        add(new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new NotImplementedException("group learn more");
+            }
+        }), "wrap");
     }
 
     private OptionPanel getSearchBarPanel() {
@@ -223,18 +231,24 @@ public class SearchOptionPanel extends OptionPanel {
             
             filterKeywordsButton = new JButton(new DialogDisplayAction(SearchOptionPanel.this,
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
-                    I18n.tr("Filter Keywords"),
+                    I18n.tr("Filter Keywords..."),
                     I18n.tr("Restrict files with certain words from being displayed in search results")));
             
             filterFileExtensionsButton = new JButton(new DialogDisplayAction( SearchOptionPanel.this,
                     filterFileExtensionPanel, I18n.tr("Filter File Extensions"),
-                    I18n.tr("Filter File Extensions"),
+                    I18n.tr("Filter File Extensions..."),
                     I18n.tr("Restrict files with certain extensions from being displayed in search results")));
            
             add(new JLabel(I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results")));
             add(configureButton, "wrap");
             
-            add(copyrightContentCheckBox, "wrap");
+            add(copyrightContentCheckBox);
+            add(new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    throw new NotImplementedException("copyright learn more");
+                }
+            }), "wrap");
             add(adultContentCheckBox, "wrap");
             
             add(filterKeywordsButton, "gapright 10, alignx left");

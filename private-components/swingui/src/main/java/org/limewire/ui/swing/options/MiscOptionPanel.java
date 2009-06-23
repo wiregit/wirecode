@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -61,8 +62,9 @@ public class MiscOptionPanel extends OptionPanel {
     
     private Locale currentLanguage;
     private JLabel comboLabel;
-    private JComboBox languageDropDown;
-    private HyperlinkButton translateButton;
+    private final JComboBox languageDropDown;
+    private final HyperlinkButton translateButton;
+    private final JCheckBox shareUsageDataCheckBox;
 
     @Inject
     public MiscOptionPanel(Provider<XMPPAccountConfigurationManager> accountManager) {
@@ -70,7 +72,7 @@ public class MiscOptionPanel extends OptionPanel {
         
         GuiUtils.assignResources(this);
 
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx"));
 
         comboLabel = new JLabel(I18n.tr("Language:"));
         languageDropDown = new LanguageComboBox();
@@ -78,12 +80,17 @@ public class MiscOptionPanel extends OptionPanel {
         translateButton = new HyperlinkButton(new TranslateLinkAction());
         translateButton.setFont(linkFont);
         
-        add(comboLabel, "split, gapbottom 5");
-        add(languageDropDown, "gapbottom 5");
-        add(translateButton, "gapbottom 5, wrap");
+        add(comboLabel);
+        add(languageDropDown);
+        add(translateButton, "wrap");
         
-        add(getNotificationsPanel(), "pushx, growx");
-        add(getFriendChatPanel(), "pushx, growx");
+        add(getNotificationsPanel(), "growx, wrap");
+        add(getFriendChatPanel(), "growx, wrap");
+
+        shareUsageDataCheckBox = new JCheckBox((I18n.tr("Help improve LimeWire by sending us anonymous usage data")));
+        shareUsageDataCheckBox.setOpaque(false);
+        add(shareUsageDataCheckBox);
+        add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=anonymousDataCollection"), "wrap");
     }
 
     private OptionPanel getNotificationsPanel() {
@@ -102,6 +109,8 @@ public class MiscOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
+        ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.setValue(shareUsageDataCheckBox.isSelected());
+        
         Locale selectedLocale = (Locale) languageDropDown.getSelectedItem();
         
         boolean restart = getNotificationsPanel().applyOptions();
@@ -121,14 +130,16 @@ public class MiscOptionPanel extends OptionPanel {
         Locale selectedLocale = (Locale) languageDropDown.getSelectedItem();
         
         return getNotificationsPanel().hasChanged() || getFriendChatPanel().hasChanged() ||
-                selectedLocale != currentLanguage;
+                selectedLocale != currentLanguage ||
+                ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.getValue() 
+                    != shareUsageDataCheckBox.isSelected();
     }
 
     @Override
     public void initOptions() {
+        shareUsageDataCheckBox.setSelected(ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.getValue());
         getNotificationsPanel().initOptions();
         getFriendChatPanel().initOptions();
-        
         currentLanguage = LanguageUtils.getCurrentLocale();
         languageDropDown.setSelectedItem(currentLanguage);
     }

@@ -108,13 +108,17 @@ public class DownloadOptionPanel extends OptionPanel {
         
         private ManageSaveFoldersOptionPanel saveFolderPanel;
         private JButton multiLocationConfigureButton;
+
+        private JRadioButton singleLocationButton;
+
+        private JRadioButton multiLocationButton;
         
         public SavingPanel() {
             super(I18n.tr("Saving Files"));
             
             ButtonGroup downloadOptions = new ButtonGroup();
-            final JRadioButton singleLocationButton = new JRadioButton(I18n.tr("Save all downloads to one folder:"));
-            final JRadioButton multiLocationButton = new JRadioButton(I18n.tr("Save different categories to different folders"));
+            singleLocationButton = new JRadioButton(I18n.tr("Save all downloads to one folder:"));
+            multiLocationButton = new JRadioButton(I18n.tr("Save different categories to different folders"));
             singleLocationButton.setOpaque(false);
             multiLocationButton.setOpaque(false);
             downloadOptions.add(singleLocationButton);
@@ -161,11 +165,15 @@ public class DownloadOptionPanel extends OptionPanel {
             };
             singleLocationButton.addActionListener(downloadSwitchAction);
             multiLocationButton.addActionListener(downloadSwitchAction);
-            singleLocationButton.doClick();
         }
         
         @Override
         boolean applyOptions() {
+            
+            if (singleLocationButton.isSelected() && saveFolderPanel.isConfigCustom()) {
+                saveFolderPanel.revertToDefault();
+            }
+            
             SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.setValue(autoRenameDuplicateFilesCheckBox.isSelected());
             final String save = downloadSaveTextField.getText();
             if(!save.equals(currentSaveDirectory)) {
@@ -222,6 +230,7 @@ public class DownloadOptionPanel extends OptionPanel {
         boolean hasChanged() { 
             return  !currentSaveDirectory.equals(downloadSaveTextField.getText()) 
                     || saveFolderPanel.hasChanged()
+                    || singleLocationButton.isSelected() && saveFolderPanel.isConfigCustom()
                     || SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox.isSelected();
         }
 
@@ -229,6 +238,13 @@ public class DownloadOptionPanel extends OptionPanel {
         public void initOptions() { 
             autoRenameDuplicateFilesCheckBox.setSelected(SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue());
             saveFolderPanel.initOptions();
+            
+            if (saveFolderPanel.isConfigCustom()) {
+                multiLocationButton.doClick();
+            }
+            else {
+                singleLocationButton.doClick();
+            }
             
             try {
                 File file = SharingSettings.getSaveDirectory();
