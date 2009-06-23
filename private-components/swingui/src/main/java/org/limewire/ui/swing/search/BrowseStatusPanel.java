@@ -130,7 +130,7 @@ public class BrowseStatusPanel extends JXPanel {
             centerPanel.add(createItemLabel(name), "wrap");
         }
         
-        LimePopupDialog popup = new LimePopupDialog(I18n.tr("Failed Browses"), centerPanel);
+        LimePopupDialog popup = new LimePopupDialog(I18n.tr("Unable to Browse"), centerPanel);
         popup.showPopup(warningButton, 0, 0);
     }
     
