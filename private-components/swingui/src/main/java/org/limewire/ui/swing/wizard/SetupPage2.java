@@ -92,7 +92,7 @@ public class SetupPage2 extends WizardPage {
     }
 
     /**
-     * Adds header for Auto-Sharing, checkbox and associated text
+     * Adds header for Auto-Sharing, checkbox and associated text.
      */
     private void addAutoSharing(boolean newInstall) {
         JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
