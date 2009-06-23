@@ -133,7 +133,7 @@ public class SetupPage2 extends WizardPage {
 
         modifyInfo.add(myFiles);
         modifyInfo.add(new JLabel(sharing_arrow));
-        modifyInfo.add(new JLabel(file_sharedlist_p2p_large));
+        modifyInfo.add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT));
 
         add(modifyInfo, "span 3, alignx center, wrap");
     }
