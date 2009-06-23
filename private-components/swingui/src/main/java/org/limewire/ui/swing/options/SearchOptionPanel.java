@@ -27,10 +27,10 @@ import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SearchSettingListener;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.jacob.com.NotImplementedException;
 
 /**
  * Search Option View.

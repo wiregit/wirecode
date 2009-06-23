@@ -24,10 +24,10 @@ import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.NotImplementedException;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
-import com.jacob.com.NotImplementedException;
 
 /** Library Option View */
 public class LibraryOptionPanel extends OptionPanel {
