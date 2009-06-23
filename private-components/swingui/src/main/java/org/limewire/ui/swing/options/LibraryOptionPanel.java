@@ -16,7 +16,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.core.settings.iTunesSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HorizonalCheckBoxListPanel;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -28,6 +27,7 @@ import org.limewire.util.NotImplementedException;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /** Library Option View */
 public class LibraryOptionPanel extends OptionPanel {
@@ -37,20 +37,23 @@ public class LibraryOptionPanel extends OptionPanel {
     private @Resource Icon sharing_arrow;
     
     private final UsePlayerPanel playerPanel;
-
     private final CategoriesPanel categoryPanel;
-    
+    private final OptionPanel iTunesPanel;
     private OptionPanel sharingPanel;
-    private final UnsafeTypeOptionPanel unsafeOptionPanel;
+    
+    private final Provider<UnsafeTypeOptionPanel> unsafeOptionPanelProvider;
+    private final Provider<ITunesOptionPanel> iTunesOptionPanelProvider;
     
     private final LibraryManager libraryManager;
     
-    private final JCheckBox addToITunesCheckBox;
-
     @Inject
-    public LibraryOptionPanel(LibraryManager libraryManager, UnsafeTypeOptionPanel unsafeTypeOptionPanel) {
+    public LibraryOptionPanel(LibraryManager libraryManager,
+            Provider<UnsafeTypeOptionPanel> unsafeTypeOptionPanelProvider,
+            Provider<ITunesOptionPanel> iTunesOptionPanelProvider) {
+        
         this.libraryManager = libraryManager;
-        this.unsafeOptionPanel = unsafeTypeOptionPanel;
+        this.unsafeOptionPanelProvider = unsafeTypeOptionPanelProvider;
+        this.iTunesOptionPanelProvider = iTunesOptionPanelProvider;
         
         GuiUtils.assignResources(this);
         
@@ -59,44 +62,41 @@ public class LibraryOptionPanel extends OptionPanel {
 
         setLayout(new MigLayout("insets 15, fillx"));
 
+        // TODO: three different ways to add a panel!?
         add(categoryPanel, "growx, wrap");
         add(getSharingPanel(), "growx, wrap");
-        add(playerPanel, "wrap");
-        
-        
-        addToITunesCheckBox = new JCheckBox(I18n.tr("Add audio files I downloaded from LimeWire to iTunes"));
-        addToITunesCheckBox.setContentAreaFilled(false);
-                
-        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
-            add(addToITunesCheckBox, "split 3, wrap");
-        }
 
+        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
+            iTunesPanel = new ITunesPanel();
+            add(iTunesPanel, "growx, wrap");
+        }
+        else {
+            iTunesPanel = null;
+        }
+        
+        add(playerPanel, "wrap");
     }
 
     @Override
     boolean applyOptions() {
-        
-        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
-            iTunesSettings.ITUNES_SUPPORT_ENABLED.setValue(addToITunesCheckBox.isSelected());
-        }
-                
-        return playerPanel.applyOptions() || categoryPanel.applyOptions();
+        return playerPanel.applyOptions() || categoryPanel.applyOptions() || getSharingPanel().applyOptions() 
+            || iTunesPanel != null ? iTunesPanel.applyOptions() : false;
     }
 
     @Override
     boolean hasChanged() {
-        return playerPanel.hasChanged() || categoryPanel.hasChanged()
-                    || (OSUtils.isMacOSX() || OSUtils.isWindows()) ? iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue() != addToITunesCheckBox.isSelected() : false;
+        return playerPanel.hasChanged() || categoryPanel.hasChanged() || getSharingPanel().hasChanged()
+            || iTunesPanel != null ? iTunesPanel.hasChanged() : false;
     }
 
     @Override
     public void initOptions() {
-        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
-            addToITunesCheckBox.setSelected(iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue());
-        }
-
+        getSharingPanel().initOptions();
         categoryPanel.initOptions();
         playerPanel.initOptions();
+        if (iTunesPanel != null) {
+            iTunesPanel.initOptions();
+        }
     }
 
     private class CategoriesPanel extends OptionPanel {
@@ -141,6 +141,40 @@ public class LibraryOptionPanel extends OptionPanel {
         }
 
     }
+
+    private class ITunesPanel extends OptionPanel {
+
+        private ITunesOptionPanel iTunesOptionPanel; 
+        
+        public ITunesPanel() {
+            super("iTunes");
+
+            iTunesOptionPanel = iTunesOptionPanelProvider.get();
+            
+            JButton configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
+                    iTunesOptionPanel, I18n.tr("iTunes Configuration"),
+                    I18n.tr("Configure..."), I18n.tr("Configure iTunes")));
+            
+            add(new JLabel(I18n.tr("Configure how files in your LimeWire interact with iTunes")));
+            add(configureButton, "gapleft push");
+        }
+
+        @Override
+        boolean applyOptions() {
+            return iTunesOptionPanel.applyOptions();
+        }
+
+        @Override
+        boolean hasChanged() {
+            return iTunesOptionPanel.hasChanged();
+        }
+
+        @Override
+        public void initOptions() {
+            iTunesOptionPanel.initOptions();
+        }
+    }
+
     
     /** Do you want to use the LW player? */
     private class UsePlayerPanel extends OptionPanel {
@@ -162,19 +196,17 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         boolean applyOptions() {
             SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWirePlayer.isSelected());
-            return getSharingPanel().applyOptions();
+            return false;
         }
 
         @Override
         boolean hasChanged() {
-            return useLimeWirePlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue()
-                || getSharingPanel().hasChanged();
+            return useLimeWirePlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue();
         }
 
         @Override
         public void initOptions() {
             useLimeWirePlayer.setSelected(SwingUiSettings.PLAYER_ENABLED.getValue());
-            getSharingPanel().initOptions();
         }
     }
     
@@ -187,17 +219,20 @@ public class LibraryOptionPanel extends OptionPanel {
     
     private class SharingPanel extends OptionPanel {
         
-        private JButton configureButton; 
-        private JCheckBox shareP2PdownloadedFilesCheckBox;
+        private final JButton configureButton; 
+        private final JCheckBox shareP2PdownloadedFilesCheckBox;
+        private final UnsafeTypeOptionPanel unsafeTypeOptionPanel;
         
         public SharingPanel() {
             super(I18n.tr("Sharing"));
             
+            unsafeTypeOptionPanel = unsafeOptionPanelProvider.get();
+            
             shareP2PdownloadedFilesCheckBox = new JCheckBox(I18n.tr("Add files I download from P2P users to my Public Shared List"));
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
             
-            configureButton = new JButton(new DialogDisplayAction( LibraryOptionPanel.this,
-                    unsafeOptionPanel, I18n.tr("Unsafe Categories"),
+            configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
+                    unsafeTypeOptionPanel, I18n.tr("Unsafe Categories"),
                     I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
             final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
             HyperlinkButton learnMoreButton = new LearnMoreButton(learnMoreUrl);
@@ -241,7 +276,7 @@ public class LibraryOptionPanel extends OptionPanel {
                 .setValue(shareP2PdownloadedFilesCheckBox.isSelected());
             SharingSettings.ALLOW_PARTIAL_SHARING
                 .setValue(shareP2PdownloadedFilesCheckBox.isSelected());
-            return unsafeOptionPanel.applyOptions();
+            return unsafeTypeOptionPanel.applyOptions();
         }
 
         @Override
@@ -249,16 +284,16 @@ public class LibraryOptionPanel extends OptionPanel {
             return SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES
                     .getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
                 || SharingSettings.ALLOW_PARTIAL_SHARING
-                    .getValue() != shareP2PdownloadedFilesCheckBox.isSelected() 
-                || unsafeOptionPanel.hasChanged();
+                    .getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
+                || unsafeTypeOptionPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
+            unsafeTypeOptionPanel.initOptions();
             
             shareP2PdownloadedFilesCheckBox.setSelected(
                     SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
-            unsafeOptionPanel.initOptions();
         }
     }
 

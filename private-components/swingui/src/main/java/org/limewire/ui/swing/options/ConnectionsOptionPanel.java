@@ -106,9 +106,8 @@ public class ConnectionsOptionPanel extends OptionPanel {
             buttonGroup.add(dialupButton);
             
             add(new JLabel(I18n.tr("Set your connection speed")), "push");
-            add(broadBandButton, "wrap");
-
-            add(dialupButton, "skip 1");
+            add(broadBandButton);
+            add(dialupButton);
         }
         
         @Override
