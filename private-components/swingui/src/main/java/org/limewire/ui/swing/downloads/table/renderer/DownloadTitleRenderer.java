@@ -5,12 +5,10 @@ import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -18,31 +16,28 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 
-public class DownloadTitleRenderer extends JXPanel implements TableCellRenderer {
+public class DownloadTitleRenderer extends JLabel implements TableCellRenderer {
     @Resource
     private Icon warningIcon;
     @Resource
     private Icon downloadingIcon;
     
-    private JLabel iconLabel;
-    private JLabel titleLabel;
     
     private CategoryIconManager categoryIconManager;
     
     @Inject
     public DownloadTitleRenderer(CategoryIconManager categoryIconManager){
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0 0 0 0, novisualpadding, nogrid, aligny center"));
+        
         GuiUtils.assignResources(this);
         
-        this.categoryIconManager = categoryIconManager;        
-              
-        iconLabel = new JLabel();
-        titleLabel = new JLabel();
+        //row highlighters only work on opaque renderers
+        setOpaque(true);
         
-        new DownloadRendererProperties().decorateComponent(titleLabel);
+        this.categoryIconManager = categoryIconManager;
         
-        add(iconLabel, "gapleft 4");
-        add(titleLabel, "gapleft 6");
+        new DownloadRendererProperties().decorateComponent(this);
+        setIconTextGap(6);
+        setBorder(new EmptyBorder(0,4,0,0));
     }
     
 
@@ -54,8 +49,8 @@ public class DownloadTitleRenderer extends JXPanel implements TableCellRenderer 
             updateIcon(item.getState(), item);
             updateTitle(item);
         } else {
-            iconLabel.setIcon(null);
-            titleLabel.setText("");
+            setIcon(null);
+            setText("");
         }
         return this;
     }
@@ -63,20 +58,20 @@ public class DownloadTitleRenderer extends JXPanel implements TableCellRenderer 
     private void updateIcon(DownloadState state, DownloadItem item) {
         switch (state) {
         case ERROR:
-            iconLabel.setIcon(warningIcon);
+            setIcon(warningIcon);
             break;
 
         case FINISHING:
         case DONE:
-            iconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
+            setIcon(categoryIconManager.getIcon(item.getCategory()));
             break;
             
         default:
-            iconLabel.setIcon(downloadingIcon);
+            setIcon(downloadingIcon);
         }
     }
     
     private void updateTitle(DownloadItem item){
-        titleLabel.setText(item.getTitle());
+        setText(item.getTitle());
     }
 }

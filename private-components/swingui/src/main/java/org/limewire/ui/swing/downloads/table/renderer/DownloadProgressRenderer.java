@@ -24,20 +24,21 @@ import com.google.inject.Inject;
 public class DownloadProgressRenderer extends JXPanel implements TableCellRenderer {
     @Resource private int progressBarWidth;
     @Resource private int progressBarHeight;
+    /**the progress bar disappears when the column width is less than this value*/
+    @Resource private int progressBarCutoffWidth;
 
     private LimeProgressBar progressBar;
     private JLabel timeLabel;
     
     @Inject
     public DownloadProgressRenderer(ProgressBarDecorator progressBarDecorator){
-        super(new MigLayout("insets 0 0 0 0, gap 0 0 0 0, novisualpadding, nogrid, aligny center"));
+        super(new MigLayout("insets 0, gap 0, novisualpadding, nogrid, aligny center"));
         GuiUtils.assignResources(this);
         
         progressBar = new LimeProgressBar(0, 100);
         progressBarDecorator.decoratePlain(progressBar);        
         Dimension size = new Dimension(progressBarWidth, progressBarHeight);
         progressBar.setMaximumSize(size);
-        progressBar.setMinimumSize(size);
         progressBar.setPreferredSize(size);
         
         timeLabel = new JLabel();
@@ -53,18 +54,18 @@ public class DownloadProgressRenderer extends JXPanel implements TableCellRender
             boolean hasFocus, int row, int column) {
         if(value instanceof DownloadItem) {
             DownloadItem item = (DownloadItem)value;
-            updateProgress(item.getState(), item.getPercentComplete());
+            updateProgress(item.getState(), item.getPercentComplete(), table.getColumnModel().getColumn(column).getWidth());
             updateTime(item.getState(), item);
         } else {
-            updateProgress(DownloadState.ERROR, 0);
+            updateProgress(DownloadState.ERROR, 0, 0);
             timeLabel.setVisible(false);
         }
         return this;
     }
     
-    private void updateProgress(DownloadState state, int percentComplete) {
+    private void updateProgress(DownloadState state, int percentComplete, int columnWidth) {
         progressBar.setValue(percentComplete);
-        progressBar.setVisible(state == DownloadState.DOWNLOADING || state == DownloadState.PAUSED);
+        progressBar.setVisible(columnWidth > progressBarCutoffWidth && (state == DownloadState.DOWNLOADING || state == DownloadState.PAUSED));
         progressBar.setEnabled(state != DownloadState.PAUSED);
     }
     
@@ -74,6 +75,7 @@ public class DownloadProgressRenderer extends JXPanel implements TableCellRender
         } else {
             timeLabel.setText(I18n.tr("{0} left", CommonUtils.seconds2time(item
                     .getRemainingDownloadTime())));
+            timeLabel.setMinimumSize(timeLabel.getPreferredSize());
             timeLabel.setVisible(true);
         }
     }
