@@ -30,7 +30,12 @@ import com.google.inject.Inject;
 public class GhostDragGlassPane extends JPanel {
 
     @Resource
+    private Icon dragIconAccept;
+    @Resource
+    private Icon dragIconReject;
+    
     private Icon dragIcon;
+    
     private float alpha = 0.85f;
     
     private BufferedImage dragged = null;
@@ -46,7 +51,11 @@ public class GhostDragGlassPane extends JPanel {
         setOpaque(false);
         
         GuiUtils.assignResources(this);
-        
+        this.dragIcon = dragIconAccept;
+        updateDragImage();
+    }
+
+    private void updateDragImage() {
         dragged =  new BufferedImage(dragIcon.getIconWidth(), dragIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics g = dragged.getGraphics();
         g.drawImage(((ImageIcon)dragIcon).getImage(), 0, 0, null);
@@ -100,5 +109,14 @@ public class GhostDragGlassPane extends JPanel {
         
         g2.drawImage(dragged, x, y, width, height, null);
         g2.dispose();
+    }
+    
+    public void setAccept(boolean accept) {
+        Icon oldIcon = dragIcon;
+        dragIcon = accept ? dragIconAccept : dragIconReject;
+        if(dragIcon != oldIcon) {
+            updateDragImage();
+            repaint();
+        }
     }
 }
