@@ -17,6 +17,9 @@ import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.settings.DownloadSettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
@@ -27,7 +30,9 @@ import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.SwingUtils;
 
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -86,6 +91,24 @@ public class MainDownloadPanel extends JPanel {
     @Inject
     public void register() {              
         downloadMediator.getDownloadList().addListEventListener(new VisibilityListListener());
+        DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
+           @Override
+            public void settingChanged(SettingEvent evt) {
+               SwingUtils.invokeLater(new Runnable() {
+                   @Override
+                    public void run() {
+                       updateVisibility(downloadMediator.getDownloadList());
+                    }
+               });
+            } 
+        });
+        
+        //we have to eagerly initialize the table when the ALWAYS_SHOW_DOWNLOAD_TRAY setting
+        //is set to true on startup, otherwise the table space will be empty and the lines will
+        //be put in the first time a download comes in, which looks a little weird
+        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+            initialize();
+        }
     }
 
     //Lazily initialized - initialize() is called when the first downloadItem is added to the list.  
@@ -169,25 +192,32 @@ public class MainDownloadPanel extends JPanel {
         }
     }
 
-/**
- * Initializes the download panel contents the first time the list changes (when the first DownloadItem is added).  
- * Adjusts visibility of the panel depending on whether or not the list is empty.
- */
+    /**
+     * Initializes the download panel contents the first time the list changes (when the first DownloadItem is added).  
+     * Adjusts visibility of the panel depending on whether or not the list is empty.
+     */
     private class VisibilityListListener implements ListEventListener<DownloadItem> {
       
         @Override
         public void listChanged(ListEvent<DownloadItem> listChanges) {
-            if(!isInitialized){
-                initialize();
-            }
-            
-            int downloadCount = listChanges.getSourceList().size();
-            if (downloadCount == 0 && isVisible()) {
-                new DownloadVisibilityEvent(false).publish();
-            } else if (downloadCount > 0 && !isVisible()) {
-                new DownloadVisibilityEvent(true).publish();
-            }
+            EventList sourceList = listChanges.getSourceList(); 
+            updateVisibility(sourceList);
         }
     }
- 
+    
+    private void updateVisibility(EventList sourceList) {
+        if(!isInitialized){
+            initialize();
+        }
+        
+        int downloadCount = sourceList.size();
+        
+        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+            new DownloadVisibilityEvent(true).publish();
+        } else if (downloadCount == 0 && isVisible()) {
+            new DownloadVisibilityEvent(false).publish();
+        } else if (downloadCount > 0 && !isVisible()) {
+            new DownloadVisibilityEvent(true).publish();
+        }
+    }
 }

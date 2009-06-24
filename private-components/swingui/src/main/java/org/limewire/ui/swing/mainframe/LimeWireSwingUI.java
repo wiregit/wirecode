@@ -18,6 +18,7 @@ import javax.swing.JSplitPane;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -114,6 +115,8 @@ public class LimeWireSwingUI extends JPanel {
 //        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
+        
+        setDownloadPanelVisibility(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue());
     }
 	
 	@Inject
