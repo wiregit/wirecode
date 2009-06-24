@@ -283,6 +283,12 @@ public final class FileUtilsTest extends BaseTestCase {
         assertTrue(FileUtils.deleteRecursive(dir));
         assertFalse(dir.exists());
     }
+    
+    public void testForceDeleteRecursive() throws IOException {
+        File dir = createHierarchy();
+        assertTrue(FileUtils.forceDeleteRecursive(dir));
+        assertFalse(dir.exists());
+    }
 
     public void testGetJarFromClasspath() throws Exception {
         assertNull(FileUtils.getJarFromClasspath("does/not/exist"));

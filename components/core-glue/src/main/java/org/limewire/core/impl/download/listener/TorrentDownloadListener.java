@@ -136,7 +136,7 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
                     if (!torrentManager.isDownloadingTorrent(torrentFileCopy)) {
                         // need to delete to clean up the torrent file in the
                         // incomplete directory
-                        FileUtils.delete(torrentFileCopy, false);
+                        FileUtils.forceDelete(torrentFileCopy);
                     }
                 }
 

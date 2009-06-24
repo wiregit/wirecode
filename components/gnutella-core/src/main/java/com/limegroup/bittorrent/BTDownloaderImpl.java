@@ -101,7 +101,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void handleEvent(TorrentEvent event) {
         if (TorrentEvent.COMPLETED == event && !complete.get()) {
             finishing.set(true);
-            FileUtils.deleteRecursive(torrent.getCompleteFile());
+            FileUtils.forceDeleteRecursive(torrent.getCompleteFile());
             File completeDir = getSaveFile().getParentFile();
             torrent.moveTorrent(completeDir);
             File completeFile = getSaveFile();
@@ -601,7 +601,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         File torrentDir = oldIncompleteFile.getParentFile();
         if (torrentDir.getName().length() == 32) {
             // looks like the old torrent dir
-            FileUtils.deleteRecursive(torrentDir);
+            FileUtils.forceDeleteRecursive(torrentDir);
         }
 
         try {
@@ -643,18 +643,18 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         if(!complete.get()) {
             File incompleteFile = getIncompleteFile();
             if(incompleteFile != null) {
-                FileUtils.deleteRecursive(incompleteFile);
+                FileUtils.forceDeleteRecursive(incompleteFile);
             }
         }
         
         File torrentFile = torrent.getTorrentFile();
         if (torrentFile != null) {
-            FileUtils.delete(torrentFile, false);
+            FileUtils.forceDelete(torrentFile);
         }
 
         File fastResumeFile = torrent.getFastResumeFile();
         if (fastResumeFile != null) {
-            FileUtils.delete(fastResumeFile, false);
+            FileUtils.forceDelete(fastResumeFile);
         }
     }
 
