@@ -36,7 +36,7 @@ public class AdvancedOptionPanel extends OptionPanel {
         list[0] = filesOptionPanel.get();
         list[0].initOptions();
         
-        setLayout(new MigLayout("insets 12 12 8 12, fillx", "", ""));
+        setLayout(new MigLayout("insets 12 12 8 12, fill"));
         
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(Color.WHITE);
