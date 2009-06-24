@@ -32,7 +32,7 @@ class SourceItem {
     public String getName() {
         switch (type) {
         case ANONYMOUS:
-            return I18n.tr("P2P Network");
+            return I18n.tr("P2P Users");
             
         case ANY_FRIEND:
             return I18n.tr("Any Friend");
