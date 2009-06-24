@@ -1,6 +1,10 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -14,32 +18,43 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
-import org.limewire.inject.LazySingleton;
+import org.limewire.setting.Setting;
+import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-@LazySingleton
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
     private JCheckBox programCheckBox;
     private JCheckBox documentCheckBox;
     private JButton okButton;
+
     private final LibraryManager libraryManager;
     private final SharedFileListManager shareListManager;
+    private final OptionPanelStateManager manager;
    
+    private final Map<Setting, JCheckBox> settingMap;
+    
     @Inject
     public UnsafeTypeOptionPanel(LibraryManager libraryManager,
-            SharedFileListManager shareListManager) {
+            SharedFileListManager shareListManager,
+            UnsafeTypeOptionPanelStateManager manager) {
+        
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
+        this.manager = manager;
 
         setLayout(new MigLayout("gapy 10"));
-        
+
         programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share programs with the P2P Network and my friends"));
         documentCheckBox = new JCheckBox(I18n.tr("Allow me to share documents with the P2P Network"));
         okButton = new JButton(new OKDialogAction());
+    
+        settingMap = new HashMap<Setting, JCheckBox>();
+        settingMap.put(LibrarySettings.ALLOW_PROGRAMS, programCheckBox);
+        settingMap.put(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, documentCheckBox);
         
         add(new JLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents:")), "span 2, wrap");
         
@@ -48,12 +63,18 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         
         add(new JLabel(I18n.tr("By default, LimeWire allows you to share documents with your friends")), "push");
         add(okButton);
+        
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                savePendingSettings();
+            }
+        });
     }
-    
+        
     @Override
     boolean applyOptions() {
-        LibrarySettings.ALLOW_PROGRAMS.setValue(programCheckBox.isSelected());
-        LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(documentCheckBox.isSelected());
+        manager.saveSettings();
 
         if(!programCheckBox.isSelected()) {
         	Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
@@ -75,13 +96,27 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
 
     @Override
     boolean hasChanged() {
-        return LibrarySettings.ALLOW_PROGRAMS.getValue() != programCheckBox.isSelected() 
-                || LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue() != documentCheckBox.isSelected();
+        return manager.hasPendingChanges();
     }
 
     @Override
     public void initOptions() {
-        programCheckBox.setSelected(LibrarySettings.ALLOW_PROGRAMS.getValue());
-        documentCheckBox.setSelected(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue());
+        for ( Setting setting : settingMap.keySet() ) {
+            settingMap.get(setting).setSelected((Boolean)manager.getValue(setting));
+        }
+        
+        manager.addSettingChangedListener(new SettingChangedListener() {
+            @Override
+            public void settingChanged(Setting setting) {
+                settingMap.get(setting).setSelected((Boolean)manager.getValue(setting));
+            }
+        });
     }
+    
+    private void savePendingSettings() {
+        for ( Setting setting : settingMap.keySet() ) {
+            manager.setValue(setting, settingMap.get(setting).isSelected());
+        }
+    }
+    
 }

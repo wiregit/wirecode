@@ -19,8 +19,10 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.setting.Setting;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
@@ -30,6 +32,7 @@ import org.limewire.ui.swing.util.SearchSettingListener;
 import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 /**
@@ -41,6 +44,7 @@ public class SearchOptionPanel extends OptionPanel {
     private final SpamManager spamManager;
     
     private final UnsafeTypeOptionPanel unsafeOptionPanel;
+    private final Provider<UnsafeTypeOptionPanelStateManager> unsafeTypeOptionPanelStateManagerProvider;
     
     private SearchBarPanel searchBarPanel;
     private FilteringPanel filteringPanel;
@@ -49,11 +53,13 @@ public class SearchOptionPanel extends OptionPanel {
     @Inject
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
             SpamManager spamManager,
-            UnsafeTypeOptionPanel unsafeOptionPanel) {
+            UnsafeTypeOptionPanel unsafeOptionPanel,
+            Provider<UnsafeTypeOptionPanelStateManager> stateManager) {
         
         this.spamManager = spamManager;
         this.searchHistory = searchHistory;
         this.unsafeOptionPanel = unsafeOptionPanel;
+        this.unsafeTypeOptionPanelStateManagerProvider = stateManager;
         
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
@@ -209,6 +215,7 @@ public class SearchOptionPanel extends OptionPanel {
         private JButton filterFileExtensionsButton;
         
         private final JButton configureButton;
+        private JLabel programSharingLabel;
         
         public FilteringPanel() {
             super(I18n.tr("Search Filtering"));
@@ -239,7 +246,8 @@ public class SearchOptionPanel extends OptionPanel {
                     I18n.tr("Filter File Extensions..."),
                     I18n.tr("Restrict files with certain extensions from being displayed in search results")));
            
-            add(new JLabel(I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results")));
+            programSharingLabel = new JLabel();
+            add(programSharingLabel);
             add(configureButton, "wrap");
             
             add(copyrightContentCheckBox);
@@ -280,6 +288,27 @@ public class SearchOptionPanel extends OptionPanel {
             filterKeywordPanel.initOptions();
             filterFileExtensionPanel.initOptions();
             unsafeOptionPanel.initOptions();
+            
+            updateProgramsMessage();
+            
+            unsafeTypeOptionPanelStateManagerProvider.get().addSettingChangedListener(new SettingChangedListener() {
+                @Override
+                public void settingChanged(Setting setting) {
+                    if (setting.equals(LibrarySettings.ALLOW_PROGRAMS)) {
+                        updateProgramsMessage();
+                    }
+                }
+            });
+        }
+        
+        private void updateProgramsMessage() {
+            if (((Boolean)unsafeTypeOptionPanelStateManagerProvider.get()
+                    .getValue(LibrarySettings.ALLOW_PROGRAMS)).booleanValue()) {
+                programSharingLabel.setText(I18n.tr("You enabled showing Programs in search results. This can lead to viruses."));
+            } 
+            else {
+                programSharingLabel.setText(I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results."));
+            }
         }
     }
 
