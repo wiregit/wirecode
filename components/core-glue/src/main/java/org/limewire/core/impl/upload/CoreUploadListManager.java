@@ -10,13 +10,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.friend.FriendManager;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.friend.api.FriendManager;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 

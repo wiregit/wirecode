@@ -9,7 +9,7 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
 import org.limewire.util.Objects;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
-import org.limewire.core.api.friend.feature.features.NoSave;
+import org.limewire.friend.impl.feature.NoSave;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 

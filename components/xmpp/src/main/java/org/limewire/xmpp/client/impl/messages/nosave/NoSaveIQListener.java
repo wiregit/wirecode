@@ -1,22 +1,21 @@
 package org.limewire.xmpp.client.impl.messages.nosave;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Packet;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
-import org.limewire.core.api.friend.feature.features.NoSave;
-import org.limewire.core.api.friend.feature.features.NoSaveFeature;
-import org.limewire.core.api.friend.feature.features.NoSaveStatus;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.listener.ListenerSupport;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.FriendPresenceEvent;
+import org.limewire.friend.impl.feature.NoSave;
+import org.limewire.friend.impl.feature.NoSaveFeature;
+import org.limewire.friend.impl.feature.NoSaveStatus;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 
 /**
  * This class is responsible for:
@@ -41,13 +40,13 @@ import org.limewire.listener.EventListener;
  */
 public class NoSaveIQListener implements PacketListener {
 
-    private final XMPPConnectionImpl connection;
+    private final XMPPFriendConnectionImpl connection;
     private Map<String, NoSave> noSaveMap = new HashMap<String, NoSave>();
 
     private ListenerSupport<FriendPresenceEvent> friendPresenceSupport;
     private EventListener<FriendPresenceEvent> friendPresenceListener;
 
-    private NoSaveIQListener(XMPPConnectionImpl connection) {
+    private NoSaveIQListener(XMPPFriendConnectionImpl connection) {
         this.connection = connection;
     }
 
@@ -59,7 +58,7 @@ public class NoSaveIQListener implements PacketListener {
      * @param friendPresenceSupport FriendPresenceEvent listener manager
      * @return NoSaveIQListener object
      */
-    public static NoSaveIQListener createNoSaveIQListener(XMPPConnectionImpl connection,
+    public static NoSaveIQListener createNoSaveIQListener(XMPPFriendConnectionImpl connection,
                                                           ListenerSupport<FriendPresenceEvent> friendPresenceSupport) {
         NoSaveIQListener noSaveIQListener = new NoSaveIQListener(connection);
         noSaveIQListener.register(friendPresenceSupport);
@@ -82,7 +81,7 @@ public class NoSaveIQListener implements PacketListener {
         updateNoSaveStatusMap(friends);
 
         for (String friendName : friends.keySet()) {
-            XMPPFriend noSaveFriend = connection.getFriend(friendName);
+            Friend noSaveFriend = connection.getFriend(friendName);
 
             // If friend is not yet known to the connection, skip it.
             // This can occur upon login if the nosave IQ packet is processed before the roster packet is processed.
@@ -90,7 +89,7 @@ public class NoSaveIQListener implements PacketListener {
             // trigger the adding of the nosave feature if applicable.
             if (noSaveFriend != null) {
                 // add feature (if necessary) to all of this friend's presences
-                for (XMPPPresence presence : noSaveFriend.getPresences().values()) {
+                for (FriendPresence presence : noSaveFriend.getPresences().values()) {
                     addNoSaveFeatureIfNecessary(presence, friends.get(friendName));
                 }
             }

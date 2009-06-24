@@ -22,8 +22,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendEvent;
 import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;

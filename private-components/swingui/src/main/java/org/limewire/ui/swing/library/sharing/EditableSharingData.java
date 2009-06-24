@@ -3,7 +3,7 @@ package org.limewire.ui.swing.library.sharing;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 class EditableSharingData {
 

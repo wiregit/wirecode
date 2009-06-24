@@ -12,8 +12,8 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.friend.api.Friend;
 
 public class MockVisualSearchResult implements VisualSearchResult {
     private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();

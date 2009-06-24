@@ -1,20 +1,22 @@
 package org.limewire.ui.swing.search;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.api.feature.AddressFeature;
+import org.limewire.friend.impl.AbstractFriendPresence;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.listener.EventListener;
 import org.limewire.net.address.AddressFactory;
 
 import com.google.inject.Inject;
@@ -54,10 +56,9 @@ class P2PLinkSearchHandler implements SearchHandler {
         return new SimpleFriendPresence(info, addressFactory);
     }
     
-    private static class SimpleFriendPresence implements FriendPresence {
+    private static class SimpleFriendPresence extends AbstractFriendPresence implements FriendPresence {
         private final String id;
         private final String name;
-        private final Map<URI, Feature> features;
         
         public SimpleFriendPresence(String info, AddressFactory addressFactory) {
             Address address;
@@ -67,27 +68,11 @@ class P2PLinkSearchHandler implements SearchHandler {
                 address = ConnectableImpl.INVALID_CONNECTABLE;
             }
             
-            Map<URI, Feature> map = new HashMap<URI, Feature>();
-            map.put(AddressFeature.ID, new AddressFeature(address));
-            this.features = Collections.unmodifiableMap(map);
+            addFeature(new AddressFeature(address));
             this.id = info;
             this.name = address.getAddressDescription();
         }
         
-        @Override
-        public void addFeature(Feature feature) {
-        }
-
-        @Override
-        public Feature getFeature(URI id) {
-            return features.get(id);
-        }
-
-        @Override
-        public Collection<Feature> getFeatures() {
-            return features.values();
-        }
-
         @Override
         public Friend getFriend() {
             return new SimpleFriend(this, name);
@@ -99,17 +84,23 @@ class P2PLinkSearchHandler implements SearchHandler {
         }
 
         @Override
-        public boolean hasFeatures(URI... id) {
-            for(URI uri : id) {
-                if(!features.containsKey(uri)) {
-                    return false;
+        public Type getType() {
+            return Type.available;
                 }
+
+        @Override
+        public String getStatus() {
+            return "";
             }
-            return true;
+
+        @Override
+        public int getPriority() {
+            return 0;
         }
 
         @Override
-        public void removeFeature(URI id) {
+        public Mode getMode() {
+            return Mode.available;
         }
     }
     
@@ -123,7 +114,7 @@ class P2PLinkSearchHandler implements SearchHandler {
         }
 
         @Override
-        public Map<String, FriendPresence> getFriendPresences() {
+        public Map<String, FriendPresence> getPresences() {
             Map<String, FriendPresence> map = new HashMap<String, FriendPresence>();
             map.put(presence.getPresenceId(), presence);
             return map;
@@ -161,6 +152,43 @@ class P2PLinkSearchHandler implements SearchHandler {
 
         @Override
         public void setName(String name) {
+        }
+
+        @Override
+        public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
+        }
+
+        @Override
+        public MessageWriter createChat(MessageReader reader) {
+            return null;
+        }
+
+        @Override
+        public void setChatListenerIfNecessary(IncomingChatListener listener) {
+        }
+
+        @Override
+        public void removeChatListener() {
+        }
+
+        @Override
+        public FriendPresence getActivePresence() {
+            return null;
+        }
+
+        @Override
+        public boolean hasActivePresence() {
+            return false;
+        }
+
+        @Override
+        public boolean isSignedIn() {
+            return false;
+        }
+
+        @Override
+        public boolean isSubscribed() {
+            return false;
         }
     }
 

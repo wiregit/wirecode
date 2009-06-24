@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseSearchFactory;
+import org.limewire.friend.api.Friend;
 import org.limewire.inject.LazySingleton;
 
 import com.google.inject.Inject;

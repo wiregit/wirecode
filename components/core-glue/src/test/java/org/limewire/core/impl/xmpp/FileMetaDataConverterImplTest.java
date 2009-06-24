@@ -8,16 +8,17 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.AddressFeature;
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -42,7 +43,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         }};
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
         
         final long creationTime = 199400120012L;
@@ -53,7 +54,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         
         final FileMetaDataConverterImpl factory
             = new FileMetaDataConverterImpl(
-                    new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
+                    new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
         context.checking(new Expectations() {{
@@ -108,7 +109,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         }};
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
         
         final long creationTime = 199400120012L;
@@ -116,11 +117,11 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         final FriendPresence presence = context.mock(FriendPresence.class);
         final FileMetaData fileMetaData = context.mock(FileMetaData.class);
         final RemoteFileDesc initialRFD = context.mock(RemoteFileDesc.class);
-        final XMPPAddress swapAddress = context.mock(XMPPAddress.class);
+        final FriendAddress swapAddress = context.mock(FriendAddress.class);
         
         final FileMetaDataConverterImpl factory
             = new FileMetaDataConverterImpl(
-                    new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
+                    new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
         context.checking(new Expectations() {{
@@ -181,7 +182,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         }};
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
         
         final long creationTime = 199400120012L;
@@ -192,7 +193,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         
         final FileMetaDataConverterImpl factory
             = new FileMetaDataConverterImpl(
-                    new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
+                    new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
         context.checking(new Expectations() {{

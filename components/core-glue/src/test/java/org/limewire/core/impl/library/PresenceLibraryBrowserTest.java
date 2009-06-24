@@ -8,16 +8,16 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.LibraryChanged;
-import org.limewire.core.api.friend.client.LibraryChangedEvent;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.LibraryChanged;
+import org.limewire.friend.api.LibraryChangedEvent;
+import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -26,7 +26,6 @@ import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
-import org.limewire.xmpp.api.client.XMPPPresence;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -362,7 +361,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             
             allowing(presenceLibrary).setState(with(any(LibraryState.class)));
                         
-            XMPPPresence presence = context.mock(XMPPPresence.class);
+            FriendPresence presence = context.mock(FriendPresence.class);
             allowing(presenceLibrary).getPresence();
             will(returnValue(presence));
             AddressFeature addressFeature = context.mock(AddressFeature.class);

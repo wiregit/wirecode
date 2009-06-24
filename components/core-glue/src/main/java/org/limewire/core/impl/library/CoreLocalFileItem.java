@@ -7,14 +7,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.impl.FileMetaDataImpl;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -144,93 +144,12 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         fileMetaData.setIndex(fileDesc.getIndex());
         fileMetaData.setName(fileDesc.getFileName());
         fileMetaData.setSize(fileDesc.getFileSize());
-        fileMetaData.setURNs(fileDesc.getUrns());
+        Set<String> urns = new HashSet<String>();
+        for(URN urn : fileDesc.getUrns()) {
+            urns.add(urn.toString());
+        }
+        fileMetaData.setURNs(urns);
         return fileMetaData;
-    }
-
-    private static class FileMetaDataImpl implements FileMetaData {
-        private enum Element {
-            id, name, size, description, index, metadata, urns, createTime
-        }
-
-        private final Map<Element, String> data = new HashMap<Element, String>();
-
-        public String getId() {
-            return data.get(Element.id);
-        }
-
-        public void setId(String id) {
-            data.put(Element.id, id);
-        }
-
-        public String getName() {
-            return data.get(Element.name);
-        }
-
-        public void setName(String name) {
-            data.put(Element.name, name);
-        }
-
-        public long getSize() {
-            return Long.valueOf(data.get(Element.size));
-        }
-
-        public void setSize(long size) {
-            data.put(Element.size, Long.toString(size));
-        }
-
-        public String getDescription() {
-            return data.get(Element.description);
-        }
-
-        public void setDescription(String description) {
-            data.put(Element.description, description);
-        }
-
-        public long getIndex() {
-            return Long.valueOf(data.get(Element.index));
-        }
-
-        public void setIndex(long index) {
-            data.put(Element.index, Long.toString(index));
-        }
-
-        public Set<String> getUrns() {
-            StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
-            Set<String> set = new HashSet<String>();
-            while (st.hasMoreElements()) {
-                set.add(st.nextToken());
-            }
-            return set;
-        }
-
-        public void setURNs(Set<URN> urns) {
-            String urnsString = "";
-            for (URN urn : urns) {
-                urnsString += urn + " ";
-            }
-            data.put(Element.urns, urnsString);
-        }
-
-        public Date getCreateTime() {
-            return new Date(Long.valueOf(data.get(Element.createTime)));
-        }
-
-        public void setCreateTime(Date date) {
-            data.put(Element.createTime, Long.toString(date.getTime()));
-        }
-
-        public String toXML() {
-            // TODO StringBuilder instead of concats
-            String fileMetadata = "<file>";
-            for (Element element : data.keySet()) {
-                fileMetadata += "<" + element.toString() + ">";
-                fileMetadata += data.get(element);
-                fileMetadata += "</" + element.toString() + ">";
-            }
-            fileMetadata += "</file>";
-            return fileMetadata;
-        }
     }
 
     public FileDetails getFileDetails() {

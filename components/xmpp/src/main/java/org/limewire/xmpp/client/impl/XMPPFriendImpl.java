@@ -15,27 +15,25 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.ChatState;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
+import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.api.feature.Feature;
+import org.limewire.friend.api.feature.FeatureRegistry;
+import org.limewire.friend.impl.AbstractFriend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
 
-public class XMPPFriendImpl implements XMPPFriend {
+public class XMPPFriendImpl extends AbstractFriend {
+   
     private static final Log LOG = LogFactory.getLog(XMPPFriendImpl.class);
 
     private final String id;
@@ -43,7 +41,6 @@ public class XMPPFriendImpl implements XMPPFriend {
     private final String idNoService;
     private AtomicReference<RosterEntry> rosterEntry;
     private final org.jivesoftware.smack.XMPPConnection connection;
-    private final EventListenerList<PresenceEvent> presenceListeners;
     private final Network network;
 
     // -----------------------------------------------------------------
@@ -53,7 +50,7 @@ public class XMPPFriendImpl implements XMPPFriend {
     private final Object presenceLock;
     
     @GuardedBy("presenceLock")
-    private final Map<String, XMPPPresence> presences;
+    private final Map<String, FriendPresence> presences;
 
     @GuardedBy("presenceLock")
     private String activePresenceJid;
@@ -76,8 +73,7 @@ public class XMPPFriendImpl implements XMPPFriend {
         this.idNoService = stripService(id, network.getNetworkName());
         this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
-        this.presences = new HashMap<String, XMPPPresence>();
-        this.presenceListeners = new EventListenerList<PresenceEvent>();
+        this.presences = new HashMap<String, FriendPresence>();
         this.activePresenceJid = null;
         this.connection = connection;
         this.presenceLock = new Object();
@@ -159,19 +155,12 @@ public class XMPPFriendImpl implements XMPPFriend {
     }
 
     @Override
-    public Map<String, FriendPresence> getFriendPresences() {
+    public Map<String, FriendPresence> getPresences() {
         synchronized (presenceLock) {
             return Collections.unmodifiableMap(new HashMap<String, FriendPresence>(presences));
         }
     }
     
-    @Override
-    public Map<String, XMPPPresence> getPresences() {
-        synchronized (presenceLock) {
-            return Collections.unmodifiableMap(new HashMap<String, XMPPPresence>(presences));
-        }
-    }
-
     @Override
     public boolean isSubscribed() {
         switch(rosterEntry.get().getType()) {
@@ -183,19 +172,19 @@ public class XMPPFriendImpl implements XMPPFriend {
         }
     }
 
-    void addPresense(XMPPPresence presence) {
+    void addPresense(FriendPresence presence) {
         if(LOG.isDebugEnabled()) {
-            LOG.debugf("adding presence {0}", presence.getJID());
+            LOG.debugf("adding presence {0}", presence.getPresenceId());
         }
         synchronized (presenceLock) {
-            presences.put(presence.getJID(), presence);
+            presences.put(presence.getPresenceId(), presence);
         }
-        presenceListeners.broadcast(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
+        firePresenceEvent(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
     }
 
-    void removePresense(XMPPPresence presence) {
+    void removePresense(FriendPresence presence) {
         if(LOG.isDebugEnabled()) {
-            LOG.debugf("removing presence {0}", presence.getJID());
+            LOG.debugf("removing presence {0}", presence.getPresenceId());
         }
         Collection<Feature> features = presence.getFeatures();
         for(Feature feature : features) {
@@ -204,11 +193,11 @@ public class XMPPFriendImpl implements XMPPFriend {
         }
 
         synchronized (presenceLock) {
-            presences.remove(presence.getJID());
+            presences.remove(presence.getPresenceId());
 
             // if the presence being removed is the same presence as the active presence, set the
             // active presence to null so the next outgoing message goes to all of this user's presences
-            if (presence.getJID().equals(activePresenceJid)) {
+            if (presence.getPresenceId().equals(activePresenceJid)) {
                 activePresenceJid = null;
             }
 
@@ -217,15 +206,7 @@ public class XMPPFriendImpl implements XMPPFriend {
             }
         }
 
-        presenceListeners.broadcast(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_UPDATE));
-    }
-
-    @Override
-    public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
-        presenceListeners.addListener(presenceListener);
-        for(XMPPPresence presence : getPresences().values()) {
-            presenceListener.handleEvent(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
-        }
+        firePresenceEvent(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_UPDATE));
     }
 
     @Override
@@ -233,17 +214,17 @@ public class XMPPFriendImpl implements XMPPFriend {
         return StringUtils.toString(this, id, getName());
     }
 
-    void updatePresence(XMPPPresence updatedPresence) {
+    void updatePresence(FriendPresence updatedPresence) {
         if(LOG.isDebugEnabled()) {
-            LOG.debugf("updating presence {0}", updatedPresence.getJID());
+            LOG.debugf("updating presence {0}", updatedPresence.getPresenceId());
         }
         synchronized (presenceLock) {
-            presences.put(updatedPresence.getJID(), updatedPresence);
+            presences.put(updatedPresence.getPresenceId(), updatedPresence);
         }
-        presenceListeners.broadcast(new PresenceEvent(updatedPresence, PresenceEvent.Type.PRESENCE_UPDATE));
+        firePresenceEvent(new PresenceEvent(updatedPresence, PresenceEvent.Type.PRESENCE_UPDATE));
     }
 
-    XMPPPresence getPresence(String jid) {
+    FriendPresence getPresence(String jid) {
         synchronized (presenceLock) {
             return presences.get(jid);
         }
@@ -267,7 +248,7 @@ public class XMPPFriendImpl implements XMPPFriend {
     }
 
     @Override
-    public XMPPPresence getActivePresence() {
+    public FriendPresence getActivePresence() {
         synchronized (presenceLock) {
             return presences.get(activePresenceJid);
         }

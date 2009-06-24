@@ -2,7 +2,7 @@ package org.limewire.ui.swing.filter;
 
 import java.util.Collection;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.matchers.Matcher;

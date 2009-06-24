@@ -1,22 +1,22 @@
 package org.limewire.xmpp.client.impl.features;
 
 
-import org.limewire.core.api.friend.feature.FeatureInitializer;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.core.api.friend.feature.features.NoSaveFeature;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.FriendPresence;
+import org.jivesoftware.smack.XMPPConnection;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.FriendPresenceEvent;
+import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.feature.FeatureInitializer;
+import org.limewire.friend.api.feature.FeatureRegistry;
+import org.limewire.friend.impl.feature.NoSaveFeature;
+import org.limewire.listener.BlockingEvent;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
-import org.limewire.xmpp.client.impl.messages.nosave.NoSaveIQListener;
+import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 import org.limewire.xmpp.client.impl.messages.nosave.NoSaveIQ;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.BlockingEvent;
-import org.jivesoftware.smack.XMPPConnection;
+import org.limewire.xmpp.client.impl.messages.nosave.NoSaveIQListener;
 
 /**
  * Initializer for {@link NoSaveFeature}.
@@ -25,7 +25,7 @@ public class NoSaveFeatureInitializer implements FeatureInitializer {
 
     private static final Log LOG = LogFactory.getLog(NoSaveFeatureInitializer.class);
 
-    private final XMPPConnectionImpl connection;
+    private final XMPPFriendConnectionImpl connection;
     private final XMPPConnection jabberConnection;
     private final ListenerSupport<RosterEvent> rosterSupport;
     private final ListenerSupport<FriendPresenceEvent> friendPresenceSupport;
@@ -42,7 +42,7 @@ public class NoSaveFeatureInitializer implements FeatureInitializer {
     private boolean isRosterReceived;
     private boolean isFeatureSupported;
 
-    public NoSaveFeatureInitializer(XMPPConnection jabberConnection, XMPPConnectionImpl limeConnection,
+    public NoSaveFeatureInitializer(XMPPConnection jabberConnection, XMPPFriendConnectionImpl limeConnection,
                                     ListenerSupport<RosterEvent> rosterSupport,
                                     ListenerSupport<FriendPresenceEvent> friendPresenceSupport) {
         this.connection = limeConnection;
@@ -56,7 +56,7 @@ public class NoSaveFeatureInitializer implements FeatureInitializer {
     @Override
     public void register(FeatureRegistry registry) {
         rosterSupport.addListener(rosterListener);
-        registry.add(NoSaveFeature.ID, this, false);
+        registry.registerPrivateInitializer(NoSaveFeature.ID, this);
     }
 
     @Override
@@ -70,7 +70,6 @@ public class NoSaveFeatureInitializer implements FeatureInitializer {
         friendPresence.removeFeature(NoSaveFeature.ID);
     }
 
-    @Override
     public void cleanup() {
         rosterSupport.removeListener(rosterListener);
 

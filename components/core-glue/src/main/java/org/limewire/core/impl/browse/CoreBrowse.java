@@ -5,11 +5,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.util.Objects;

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.friend.api.Friend;
 
 /**
  * Defines an item that can be filtered.  Known implementations include

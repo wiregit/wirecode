@@ -28,8 +28,8 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.search.resultpanel.LicenseWarningDownloadPreprocessor;
 import org.limewire.ui.swing.settings.QuestionsHandler;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -52,7 +52,7 @@ public class MiscOptionPanel extends OptionPanel {
     
     private static final String TRANSLATE_URL = "http://wiki.limewire.org/index.php?title=Translate";
     
-    private final Provider<XMPPAccountConfigurationManager> accountManager;
+    private final Provider<FriendAccountConfigurationManager> accountManager;
 
     private NotificationsPanel notificationsPanel;
     private FriendsChatPanel friendsChatPanel;
@@ -67,7 +67,8 @@ public class MiscOptionPanel extends OptionPanel {
     private final JCheckBox shareUsageDataCheckBox;
 
     @Inject
-    public MiscOptionPanel(Provider<XMPPAccountConfigurationManager> accountManager) {
+
+    public MiscOptionPanel(Provider<FriendAccountConfigurationManager> accountManager) {
         this.accountManager = accountManager;
         
         GuiUtils.assignResources(this);
@@ -252,7 +253,7 @@ public class MiscOptionPanel extends OptionPanel {
                 serviceLabel.setVisible(false);
                 serviceField.setVisible(false);
             }
-            XMPPAccountConfiguration config = accountManager.get().getConfig(label);
+            FriendAccountConfiguration config = accountManager.get().getConfig(label);
             if(config == accountManager.get().getAutoLoginConfig()) {
                 serviceField.setText(config.getServiceName());
                 usernameField.setText(config.getUserInputLocalID());
@@ -288,7 +289,7 @@ public class MiscOptionPanel extends OptionPanel {
                         return false;
                     }            
                     String label = (String)serviceComboBox.getSelectedItem();
-                    XMPPAccountConfiguration config = accountManager.get().getConfig(label);
+                    FriendAccountConfiguration config = accountManager.get().getConfig(label);
                     if(label.equals("Jabber")) {
                         String service = serviceField.getText().trim();
                         if(service.equals(""))
@@ -307,7 +308,8 @@ public class MiscOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            XMPPAccountConfiguration auto = accountManager.get().getAutoLoginConfig();
+            FriendAccountConfiguration auto = accountManager.get().getAutoLoginConfig();
+
             if(auto == null) {
                 return autoLoginCheckBox.isSelected();
             } else {
@@ -331,7 +333,7 @@ public class MiscOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            XMPPAccountConfiguration auto = accountManager.get().getAutoLoginConfig();
+            FriendAccountConfiguration auto = accountManager.get().getAutoLoginConfig();
             if(auto == null) {
                 serviceComboBox.setSelectedItem("Gmail");
                 setComponentsEnabled(false);
@@ -361,7 +363,7 @@ public class MiscOptionPanel extends OptionPanel {
                 int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-            XMPPAccountConfiguration config = accountManager.get().getConfig(value.toString());
+            FriendAccountConfiguration config = accountManager.get().getConfig(value.toString());
             if(config != null) {
                 setIcon(config.getIcon());
             } else {

@@ -29,6 +29,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -69,7 +70,6 @@ import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
@@ -200,18 +200,18 @@ class TopPanel extends JXPanel implements SearchNavigator {
       });
     };
     
-    @Inject void register(EventBean<XMPPConnectionEvent> connectBean, ListenerSupport<XMPPConnectionEvent> connectionSupport) {
-        if(connectBean.getLastEvent() != null && connectBean.getLastEvent().getType() == XMPPConnectionEvent.Type.CONNECTED) {
+    @Inject void register(EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        if(connectBean.getLastEvent() != null && connectBean.getLastEvent().getType() == FriendConnectionEvent.Type.CONNECTED) {
             friendButton.setIcon(friendOnlineIcon);
         } else {
             friendButton.setIcon(friendOfflineIcon);
         }
         
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
-                if(event.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+            public void handleEvent(FriendConnectionEvent event) {
+                if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     friendButton.setIcon(friendOnlineIcon);
                 } else {
                     friendButton.setIcon(friendOfflineIcon);

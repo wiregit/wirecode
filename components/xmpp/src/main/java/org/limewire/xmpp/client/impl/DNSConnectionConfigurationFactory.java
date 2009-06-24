@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SRVRecord;
@@ -27,7 +27,7 @@ public class DNSConnectionConfigurationFactory implements ConnectionConfiguratio
     private static final int MAX_XMPP_HOST_LOOKUPS = 3;
 
     @Override
-    public boolean hasMore(XMPPConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
+    public boolean hasMore(FriendConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
         return requestContext.getNumRequests() < MAX_XMPP_HOST_LOOKUPS;
     }
 
@@ -37,11 +37,11 @@ public class DNSConnectionConfigurationFactory implements ConnectionConfiguratio
      * as per RFC 3920 and falling back to the service name and default port
      * if the SRV lookup fails. This method blocks during the DNS lookup.
      */
-    public ConnectionConfiguration getConnectionConfiguration(XMPPConnectionConfiguration configuration, RequestContext requestContext) {
+    public ConnectionConfiguration getConnectionConfiguration(FriendConnectionConfiguration configuration, RequestContext requestContext) {
         return getConnectionConfig(configuration, requestContext);
     }
 
-    private ConnectionConfiguration getConnectionConfig(XMPPConnectionConfiguration configuration, RequestContext requestContext) {
+    private ConnectionConfiguration getConnectionConfig(FriendConnectionConfiguration configuration, RequestContext requestContext) {
         checkHasMore(configuration, requestContext);
         HostAndPort hostAndPort = new HostAndPort(configuration.getServiceName(), 5222); // fallback
         String serviceName = configuration.getServiceName();
@@ -136,7 +136,7 @@ public class DNSConnectionConfigurationFactory implements ConnectionConfiguratio
         }
     }
     
-    private void checkHasMore(XMPPConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
+    private void checkHasMore(FriendConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
         if(!hasMore(connectionConfiguration, requestContext)) {
             throw new IllegalArgumentException("no more ConnectionConfigurations");
         }

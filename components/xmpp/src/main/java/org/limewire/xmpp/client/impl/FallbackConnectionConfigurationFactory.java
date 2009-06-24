@@ -3,8 +3,8 @@ package org.limewire.xmpp.client.impl;
 import java.util.List;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.io.UnresolvedIpPort;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 /**
  * Uses the list of default servers in the XMPPConnectionConfiguration to return
@@ -13,12 +13,12 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 public class FallbackConnectionConfigurationFactory implements ConnectionConfigurationFactory {
 
     @Override
-    public boolean hasMore(XMPPConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
+    public boolean hasMore(FriendConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
         return requestContext.getNumRequests() < connectionConfiguration.getDefaultServers().size();
     }
 
     @Override
-    public ConnectionConfiguration getConnectionConfiguration(XMPPConnectionConfiguration connectionConfiguration,
+    public ConnectionConfiguration getConnectionConfiguration(FriendConnectionConfiguration connectionConfiguration,
                                                               RequestContext requestContext) {
         checkHasMore(connectionConfiguration, requestContext);
         List<UnresolvedIpPort> defaultServers = connectionConfiguration.getDefaultServers();
@@ -27,7 +27,7 @@ public class FallbackConnectionConfigurationFactory implements ConnectionConfigu
                 defaultServer.getPort(), connectionConfiguration.getServiceName());
     }
 
-    private void checkHasMore(XMPPConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
+    private void checkHasMore(FriendConnectionConfiguration connectionConfiguration, RequestContext requestContext) {
         if(!hasMore(connectionConfiguration, requestContext)) {
             throw new IllegalStateException("no more ConnectionConfigurations");
         }

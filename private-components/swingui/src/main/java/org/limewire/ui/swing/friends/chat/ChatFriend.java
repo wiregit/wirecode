@@ -2,17 +2,17 @@ package org.limewire.ui.swing.friends.chat;
 
 import java.beans.PropertyChangeListener;
 
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
 
 public interface ChatFriend {
 
     /**
      * @return User object used by this chat friend
      */
-    XMPPFriend getFriend();
+    Friend getFriend();
 
     /**
      * @return the user id corresponding to this chat friend.  This is typically the id
@@ -33,7 +33,7 @@ public interface ChatFriend {
     /**
      * @return the presence status ("available", "away", etc)
      */
-    Mode getMode();
+    FriendPresence.Mode getMode();
 
     /**
      * @return true if this chat has been marked as started, but has

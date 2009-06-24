@@ -16,7 +16,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.util.Objects;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.friend.api.FriendConnection;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -25,7 +25,7 @@ import net.miginfocom.swing.MigLayout;
  */
 public class AddFriendDialog extends LimeJDialog {
 
-    public AddFriendDialog(final XMPPConnection connection) {
+    public AddFriendDialog(final FriendConnection connection) {
         super(GuiUtils.getMainFrame(), tr("Add Friend"));
         setLocationRelativeTo(GuiUtils.getMainFrame());
         // The dialog can only be popped up when the user is signed in, so
@@ -59,7 +59,7 @@ public class AddFriendDialog extends LimeJDialog {
                 final String nickname = nick;
                 setVisible(false);
                 dispose();
-                connection.addFriend(username, nickname);
+                connection.addNewFriend(username, nickname);
             }
         };
 

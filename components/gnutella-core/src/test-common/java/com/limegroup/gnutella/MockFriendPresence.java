@@ -1,18 +1,12 @@
 package com.limegroup.gnutella;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.feature.Feature;
+import org.limewire.friend.impl.AbstractFriendPresence;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.Feature;
-
-public class MockFriendPresence implements FriendPresence {
+public class MockFriendPresence extends AbstractFriendPresence {
     
     private MockFriend friend;
-    private Map<URI, Feature> features;
     private String presenceId;
     
     public MockFriendPresence() {
@@ -21,7 +15,6 @@ public class MockFriendPresence implements FriendPresence {
     
     public MockFriendPresence(MockFriend friend, String presenceId, Feature...features) {
         this.presenceId = presenceId;
-        this.features = new ConcurrentHashMap<URI, Feature>();
         this.friend = friend;
         for(Feature feature : features) {
             addFeature(feature);
@@ -39,32 +32,22 @@ public class MockFriendPresence implements FriendPresence {
     }
 
     @Override
-    public Collection<Feature> getFeatures() {
-        return features.values();
+    public Mode getMode() {
+        return null;
     }
 
     @Override
-    public Feature getFeature(URI id) {
-        return features.get(id);
+    public int getPriority() {
+        return 0;
     }
 
     @Override
-    public boolean hasFeatures(URI... id) {
-        for(URI uri : id) {
-            if(getFeature(uri) == null) {
-                return false;
-            }
-        }
-        return true;
+    public String getStatus() {
+        return null;
     }
 
     @Override
-    public void addFeature(Feature feature) {
-        features.put(feature.getID(), feature);
-    }
-
-    @Override
-    public void removeFeature(URI id) {
-        features.remove(id);
+    public Type getType() {
+        return null;
     }
 }

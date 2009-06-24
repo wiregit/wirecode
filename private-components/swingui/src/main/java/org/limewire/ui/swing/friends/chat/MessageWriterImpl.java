@@ -1,11 +1,15 @@
 package org.limewire.ui.swing.friends.chat;
 
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.api.friend.client.ChatState;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.friend.api.ChatState;
+import org.limewire.friend.api.FriendException;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 class MessageWriterImpl implements MessageWriter {
+    private static final Log LOG = LogFactory.getLog(MessageWriterImpl.class);
+    
     private final String localID;
     private final ChatFriend chatFriend;
     private final MessageWriter writer;
@@ -24,7 +28,7 @@ class MessageWriterImpl implements MessageWriter {
                 try {
                     writer.writeMessage(message);
                 } catch (FriendException e) {
-                    e.printStackTrace();
+                    LOG.error("send message failed", e);
                 }
             }
         }, "send-message");
@@ -36,7 +40,16 @@ class MessageWriterImpl implements MessageWriter {
     }
 
     @Override
-    public void setChatState(ChatState chatState) throws FriendException {
+    public void setChatState(final ChatState chatState) throws FriendException {
+        ThreadExecutor.startThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
         writer.setChatState(chatState);
+                } catch (FriendException e) {
+                    LOG.error("set chat state failed", e);
+                }
+            }
+        }, "set-chat-state");
     }
 }

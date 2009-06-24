@@ -20,7 +20,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -144,9 +144,9 @@ public class LoginPopupPanel extends Panel implements Resizable {
     }
     
     /**
-     * Reports back an XMMP service selection
+     * Reports back an friend service selection
      */
-    public void setSelectedService(XMPPAccountConfiguration config) {
+    public void setSelectedService(FriendAccountConfiguration config) {
         contentPanel.removeAll();
         XMPPUserEntryLoginPanel loginPanel = xmppUserEntryLoginPanelFactory.create(config);
         contentPanel.add(loginPanel, BorderLayout.CENTER);

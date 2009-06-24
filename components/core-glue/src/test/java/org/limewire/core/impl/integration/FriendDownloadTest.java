@@ -5,9 +5,44 @@ import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.limewire.core.impl.friend.FriendRemoteFileDesc;
+import org.limewire.core.impl.tests.CoreGlueTestUtils;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.feature.AuthTokenFeature;
+import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.address.FriendAddressResolver;
+import org.limewire.friend.impl.feature.AuthTokenImpl;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.io.Address;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventListener;
+import org.limewire.net.ConnectivityChangeEvent;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.address.AddressFactory;
+import org.limewire.net.address.AddressResolutionObserver;
+import org.limewire.util.StringUtils;
+import org.limewire.util.TestUtils;
+import org.mortbay.http.HttpContext;
+import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpMessage;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.http.HttpServer;
+import org.mortbay.http.SocketListener;
+import org.mortbay.http.handler.NotFoundHandler;
+import org.mortbay.http.handler.ResourceHandler;
+import org.mortbay.util.B64Code;
+import org.mortbay.util.Resource;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -18,39 +53,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
-import org.limewire.core.impl.tests.CoreGlueTestUtils;
-import org.limewire.core.impl.xmpp.XMPPRemoteFileDesc;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
-import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.io.Address;
-import org.limewire.io.ConnectableImpl;
-import org.limewire.io.GUID;
-import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.EventBroadcaster;
-import org.limewire.net.SocketsManager;
-import org.limewire.net.ConnectivityChangeEvent;
-import org.limewire.net.address.AddressFactory;
-import org.limewire.net.address.AddressResolutionObserver;
-import org.limewire.util.StringUtils;
-import org.limewire.util.TestUtils;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
-import org.mortbay.http.HttpContext;
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpMessage;
-import org.mortbay.http.HttpServer;
-import org.mortbay.http.SocketListener;
-import org.mortbay.http.HttpResponse;
-import org.mortbay.http.handler.NotFoundHandler;
-import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.util.B64Code;
-import org.mortbay.util.Resource;
-import org.jmock.Mockery;
-import org.jmock.Expectations;
 
 
 /**
@@ -113,16 +115,16 @@ public class FriendDownloadTest extends LimeTestCase {
 
     private RemoteFileDesc getRemoteFileDesc() throws IOException {
         AddressFactory factory = injector.getInstance(AddressFactory.class);
-        LocalhostXmppAddressResolver resolver = new LocalhostXmppAddressResolver();
+        LocalhostFriendAddressResolver resolver = new LocalhostFriendAddressResolver();
         resolver.initialize();
 
-        XMPPAddress xmppAddress = new XMPPAddress(PRESENCE_ID);
+        FriendAddress xmppAddress = new FriendAddress(PRESENCE_ID);
 
         URN sha1Urn = URN.createSHA1Urn(FILE_TO_DOWNLOAD_URN);
         Set<URN> sha1UrnSet = new HashSet<URN>();
         sha1UrnSet.add(sha1Urn);
 
-        return new XMPPRemoteFileDesc(xmppAddress, 1, FILE_NAME, SIZE_OF_DOWNLOAD,
+        return new FriendRemoteFileDesc(xmppAddress, 1, FILE_NAME, SIZE_OF_DOWNLOAD,
                 GUID.makeGuid(), 1, 1, null, sha1UrnSet, "vendor", -1, false, factory, resolver);
     }
 
@@ -313,12 +315,12 @@ public class FriendDownloadTest extends LimeTestCase {
      * associated with the xmpp address is deemed to be signed in. Otherwise, it
      * does not resolve.
      */
-    private class LocalhostXmppAddressResolver extends XMPPAddressResolver {
+    private class LocalhostFriendAddressResolver extends FriendAddressResolver {
 
         private FriendPresence mockFriendPresence;
-        private final AuthTokenFeature authTokenFeature = new AuthTokenFeature(AUTH_TOKEN.getBytes());
+        private final AuthTokenFeature authTokenFeature = new AuthTokenFeature(new AuthTokenImpl(StringUtils.toAsciiBytes(AUTH_TOKEN)));
 
-        public LocalhostXmppAddressResolver() {
+        public LocalhostFriendAddressResolver() {
             super(null, null, null, null);
             initFriendPresence();
         }
@@ -330,7 +332,7 @@ public class FriendDownloadTest extends LimeTestCase {
 
         @Override
         public boolean canResolve(Address address) {
-            return (address instanceof XMPPAddress) && isSharingFriendLoggedIn.get();
+            return (address instanceof FriendAddress) && isSharingFriendLoggedIn.get();
         }
 
         @Override
@@ -346,7 +348,7 @@ public class FriendDownloadTest extends LimeTestCase {
         }
 
         @Override
-        public FriendPresence getPresence(XMPPAddress address) {
+        public FriendPresence getPresence(FriendAddress address) {
             return mockFriendPresence;
         }
 

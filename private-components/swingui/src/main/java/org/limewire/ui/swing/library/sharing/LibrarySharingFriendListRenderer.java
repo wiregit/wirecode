@@ -11,7 +11,7 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.util.GuiUtils;
 
 class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {

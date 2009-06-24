@@ -393,7 +393,7 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
      * key and default value.
      *
      * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @param defaultValue the default value for the setting, cannot be null
      */
     public synchronized StringSetting createStringSetting(String key, 
                                                           String defaultValue) {

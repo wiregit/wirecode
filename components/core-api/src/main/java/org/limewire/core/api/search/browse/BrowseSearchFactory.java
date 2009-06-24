@@ -3,7 +3,7 @@ package org.limewire.core.api.search.browse;
 import java.util.Collection;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 public interface BrowseSearchFactory {
     

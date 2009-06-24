@@ -17,6 +17,8 @@ import net.miginfocom.swing.MigLayout;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -26,8 +28,6 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.Objects;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 import com.google.inject.Inject;
 
@@ -89,12 +89,12 @@ public class ChatTopPanel extends JXPanel {
     }
 
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
-                if (event.getType() == XMPPConnectionEvent.Type.DISCONNECTED) {
+            public void handleEvent(FriendConnectionEvent event) {
+                if (event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
                     // when signed off, erase info about who LW was chatting with
                     clearFriendInfo();
                 }
@@ -102,7 +102,7 @@ public class ChatTopPanel extends JXPanel {
         });
     }
     
-    private String getAvailabilityHTML(Mode mode) {
+    private String getAvailabilityHTML(FriendPresence.Mode mode) {
         return "<html><img src=\"" + ChatFriendsUtil.getIconURL(mode) + "\" /></html>";
     }
     

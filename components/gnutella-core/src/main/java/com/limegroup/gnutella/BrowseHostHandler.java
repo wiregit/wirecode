@@ -30,10 +30,10 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
-import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.AddressFeature;
+import org.limewire.friend.api.feature.AuthTokenFeature;
+import org.limewire.friend.api.feature.Feature;
 import org.limewire.http.httpclient.SocketWrapperProtocolSocketFactory;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
@@ -222,7 +222,7 @@ public class BrowseHostHandler {
             Feature feature = friendPresence.getFeature(AuthTokenFeature.ID);
             if(feature != null) {
                 AuthTokenFeature authTokenFeature = (AuthTokenFeature)feature;
-                String password = StringUtils.getUTF8String(authTokenFeature.getFeature());
+                String password = StringUtils.toUTF8String(authTokenFeature.getFeature().getToken());
                 client.setCredentials(new UsernamePasswordCredentials(username, password));
             } else {
                 LOG.infof("no auth token for: {0}", friendPresence);

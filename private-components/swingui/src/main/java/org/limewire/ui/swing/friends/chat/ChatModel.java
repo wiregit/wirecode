@@ -3,21 +3,20 @@ package org.limewire.ui.swing.friends.chat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.client.FileOffer;
-import org.limewire.core.api.friend.client.FileOfferEvent;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.api.FileOffer;
+import org.limewire.friend.api.FileOfferEvent;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.FriendPresenceEvent;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -78,15 +77,15 @@ public class ChatModel {
     }
     
     @Inject 
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport,
+    void register(ListenerSupport<FriendConnectionEvent> connectionSupport,
             ListenerSupport<FriendPresenceEvent> presenceSupport,
             ListenerSupport<FileOfferEvent> fileOfferEventListenerSupport) {
         
         // listen for user login changes
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECTED:
                     myId = formatLoggedInName(event.getSource().getConfiguration().getCanonicalizedLocalID());
@@ -136,7 +135,7 @@ public class ChatModel {
         ChatFriend chatFriend = idToFriendMap.get(fromFriendId);
 
         if (chatFriend != null) {
-            Map<String, FriendPresence> presences = chatFriend.getFriend().getFriendPresences();
+            Map<String, FriendPresence> presences = chatFriend.getFriend().getPresences();
             FriendPresence fileOfferPresence = presences.get(fromJID);
             if (fileOfferPresence != null) {
                 new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendId, fromFriendId,
@@ -149,9 +148,9 @@ public class ChatModel {
      * Updates the list of ChatFriends as presences sign on and off.
      */
     private void handlePresenceEvent(FriendPresenceEvent event) {
-        final XMPPPresence presence = (XMPPPresence)event.getData();
-        final XMPPFriend user = presence.getXMPPFriend();
-        ChatFriend chatFriend = idToFriendMap.get(user.getId());
+        final FriendPresence presence = event.getData();
+        final Friend friend = presence.getFriend();
+        ChatFriend chatFriend = idToFriendMap.get(friend.getId());
         switch(event.getType()) {
         case ADDED:
             addFriend(chatFriend, presence);
@@ -164,7 +163,7 @@ public class ChatModel {
         case REMOVED:
             if (chatFriend != null) {
                 if (shouldRemoveFromFriendsList(chatFriend)) {
-                    chatFriends.remove(idToFriendMap.remove(user.getId()));
+                    chatFriends.remove(idToFriendMap.remove(friend.getId()));
                 }
                 chatFriend.update();
             }
@@ -193,11 +192,11 @@ public class ChatModel {
      * This listener ensures that the ChatPanel has been created prior to 
      * firing a ConversationEvent.
      */
-    private void addFriend(ChatFriend chatFriend, final XMPPPresence presence) {
+    private void addFriend(ChatFriend chatFriend, final FriendPresence presence) {
         if(chatFriend == null) {
             chatFriend = new ChatFriendImpl(presence);
             chatFriends.add(chatFriend);
-            idToFriendMap.put(presence.getXMPPFriend().getId(), chatFriend);
+            idToFriendMap.put(presence.getFriend().getId(), chatFriend);
         }
 
         final ChatFriend chatFriendForIncomingChat = chatFriend;
@@ -213,7 +212,7 @@ public class ChatModel {
                 return new MessageReaderImpl(chatFriendForIncomingChat);
             }
         };
-        presence.getXMPPFriend().setChatListenerIfNecessary(incomingChatListener);
+        presence.getFriend().setChatListenerIfNecessary(incomingChatListener);
         chatFriend.update();
     }
 }

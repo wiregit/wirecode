@@ -24,6 +24,9 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.friend.api.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -33,17 +36,14 @@ import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -89,31 +89,32 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     private JXButton signInButton;
     private final SignInAction signinAction = new SignInAction();
     
-    private ListenerSupport<XMPPConnectionEvent> connectionSupport = null;
+    private ListenerSupport<FriendConnectionEvent> connectionSupport = null;
     
-    private final XMPPAccountConfiguration accountConfig;
+    private final FriendAccountConfiguration accountConfig;
     private final LoginPopupPanel parent;
-    private final XMPPService xmppService;
-    private final XMPPAccountConfigurationManager accountManager;
-    private EventListener<XMPPConnectionEvent> connectionListener;
+    private final FriendAccountConfigurationManager accountManager;
+    private EventListener<FriendConnectionEvent> connectionListener;
     private JLabel serviceLabel;
     private JComponent serviceRecenter;
     
     private boolean connectionHasBeenInitiated = false;
+    private final FriendConnectionFactory friendConnectionFactory;
     
     @Inject
-    public XMPPUserEntryLoginPanel(@Assisted XMPPAccountConfiguration accountConfig, LoginPopupPanel parent,
-            XMPPService xmppService, XMPPAccountConfigurationManager accountManager,
+    public XMPPUserEntryLoginPanel(@Assisted FriendAccountConfiguration accountConfig, LoginPopupPanel parent,
+            FriendAccountConfigurationManager accountManager,
             ButtonDecorator buttonDecorator,
             TextFieldDecorator textFieldDecorator,
-            BarPainterFactory barPainterFactory) {
+            BarPainterFactory barPainterFactory,
+            FriendConnectionFactory friendConnectionFactory) {
     
         super(new BorderLayout());
     
         this.accountConfig = accountConfig;
         this.parent = parent;
-        this.xmppService = xmppService;
         this.accountManager = accountManager;
+        this.friendConnectionFactory = friendConnectionFactory;
         
         GuiUtils.assignResources(this);
         
@@ -135,14 +136,14 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     }
     
     @Inject
-    void registerListener(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+    void registerListener(ListenerSupport<FriendConnectionEvent> connectionSupport) {
         
         this.connectionSupport = connectionSupport;
         
-        connectionListener = new EventListener<XMPPConnectionEvent>() {
+        connectionListener = new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECTING:
                     connecting(event.getSource().getConfiguration());
@@ -305,14 +306,14 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         repaint();
     }
     
-    private void login(final XMPPAccountConfiguration config) {
+    private void login(final FriendAccountConfiguration config) {
         authFailedLabel.setVisible(false);
         validate();
         repaint();
-        xmppService.login(config);         
+        friendConnectionFactory.login(config);         
     }
 
-    void connected(XMPPConnectionConfiguration config) {
+    void connected(FriendConnectionConfiguration config) {
         unregisterListener();
         parent.finished();
     }
@@ -331,7 +332,7 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         repaint();
     }
     
-    public void connecting(XMPPConnectionConfiguration config) {
+    public void connecting(FriendConnectionConfiguration config) {
         connectionHasBeenInitiated = true;
         setSignInComponentsEnabled(false);
     }

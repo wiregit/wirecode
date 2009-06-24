@@ -31,7 +31,7 @@ import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.util.I18n;

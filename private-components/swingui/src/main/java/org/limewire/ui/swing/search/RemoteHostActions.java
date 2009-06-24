@@ -3,7 +3,7 @@ package org.limewire.ui.swing.search;
 import java.util.Collection;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 /**
  * This interface describes methods that can be invoked from the FromWidget.

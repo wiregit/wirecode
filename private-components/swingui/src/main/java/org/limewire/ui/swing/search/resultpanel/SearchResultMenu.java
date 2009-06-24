@@ -11,8 +11,8 @@ import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;

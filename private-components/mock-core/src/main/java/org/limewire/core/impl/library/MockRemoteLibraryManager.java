@@ -1,11 +1,11 @@
 package org.limewire.core.impl.library;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.SearchResultList;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;

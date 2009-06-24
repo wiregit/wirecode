@@ -21,13 +21,21 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
+import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionConfiguration;
+import org.limewire.friend.api.FriendConnectionFactory;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.feature.AddressFeature;
+import org.limewire.friend.api.feature.FeatureEvent;
+import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.IpPort;
 import org.limewire.io.UnresolvedIpPort;
@@ -36,13 +44,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -69,9 +70,9 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
     private static final String PASSWORD_1 = "limebuddy123";
     private static final String SERVICE = "gmail.com";
 
-    private XMPPConnection conn;
+    private FriendConnection conn;
     private ServiceRegistry registry;
-    protected XMPPService service;
+    protected FriendConnectionFactory friendConnectionFactory;
     protected Injector injector;
 
     public FriendBrowseDownloadRUDPTest(String name) {
@@ -85,16 +86,15 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         registry = injector.getInstance(ServiceRegistry.class);
         registry.initialize();                                                                                
         registry.start();
-        service = injector.getInstance(XMPPService.class);
-        XMPPConnectionConfiguration config = getDefaultXmppConnectionConfig(USERNAME_1, PASSWORD_1, SERVICE);
+        FriendConnectionConfiguration config = getDefaultXmppConnectionConfig(USERNAME_1, PASSWORD_1, SERVICE);
 
-        ListeningFuture<XMPPConnection> loginTask = service.login(config);
+        ListeningFuture<FriendConnection> loginTask = friendConnectionFactory.login(config);
         conn = loginTask.get(SECONDS_TO_WAIT, TimeUnit.SECONDS);
     }
 
     @Override
     public void tearDown() throws Exception {
-        service.logout();
+        conn.logout();
         registry.stop();
     }
 
@@ -102,9 +102,9 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         return Guice.createInjector(Stage.PRODUCTION, modules);
     }
 
-    private XMPPConnectionConfiguration getDefaultXmppConnectionConfig(final String userName, final String passwd,
+    private FriendConnectionConfiguration getDefaultXmppConnectionConfig(final String userName, final String passwd,
                                                                        final String serviceName) {
-        return new XMPPConnectionConfiguration() {
+        return new FriendConnectionConfiguration() {
             @Override public boolean isDebugEnabled() { return true; }
             @Override public String getUserInputLocalID() { return userName; }
             @Override public String getPassword() { return passwd; }
@@ -115,6 +115,14 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
             @Override public String getCanonicalizedLocalID() { return getUserInputLocalID(); }
             @Override public String getNetworkName() { return getServiceName(); }
             @Override public List<UnresolvedIpPort> getDefaultServers() { return UnresolvedIpPort.EMPTY_LIST;}
+            @Override public Type getType() { return Network.Type.XMPP;}
+            @Override
+            public Object getAttribute(String key) {
+                return null;
+            }
+            @Override
+            public void setAttribute(String key, Object property) {
+            }
         };
     }
 
@@ -132,9 +140,9 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
     public void testBrowseDownloadFromFriendBehindFirewall() throws Exception {
         waitForFeature(AddressFeature.ID, FRIEND);
         
-        Collection<XMPPPresence> presences = conn.getFriend(FRIEND).getPresences().values();
+        Collection<FriendPresence> presences = conn.getFriend(FRIEND).getPresences().values();
         assertEquals(1, presences.size());
-        XMPPPresence presence = presences.iterator().next();
+        FriendPresence presence = presences.iterator().next();
 
 
         SearchServices searchServices = injector.getInstance(SearchServices.class);
@@ -232,10 +240,11 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
 
         // check for the feature in case it already came in prior to listener being added
-        XMPPFriend user = conn.getFriend(friendId);
-        if (user != null && !user.getPresences().isEmpty()) {
+        Friend friend = conn.getFriend(friendId);
+
+        if (friend != null && !friend.getPresences().isEmpty()) {
             // friend already signed in
-            XMPPPresence presence = conn.getFriend(friendId).getPresences().values().iterator().next();
+            FriendPresence presence = conn.getFriend(friendId).getPresences().values().iterator().next();
             if (presence.getFeature(featureUri) != null) {
                 return;
             }
@@ -250,12 +259,12 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
         private final Map<String, SearchResult> searchResults;
         private final CountDownLatch latch;
-        private final XMPPRemoteFileDescDeserializer searchResultToXmppAdapter;
-        private final XMPPPresence presence;
+        private final FriendRemoteFileDescDeserializer searchResultToXmppAdapter;
+        private final FriendPresence presence;
 
-        BrowseStatistics(XMPPPresence presence) {
+        BrowseStatistics(FriendPresence presence) {
             this.presence = presence;
-            this.searchResultToXmppAdapter = injector.getInstance(XMPPRemoteFileDescDeserializer.class);
+            this.searchResultToXmppAdapter = injector.getInstance(FriendRemoteFileDescDeserializer.class);
             this.searchResults = new ConcurrentHashMap<String, SearchResult>();
             this.latch = new CountDownLatch(1);
         }
@@ -277,8 +286,8 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         private SearchResult convertToXmppCompatibleSearchResult(SearchResult gnutellaOnlySearchResult) {
             RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter)gnutellaOnlySearchResult;
             RemoteFileDesc oldRfd = rfdAdapter.getRfd();
-            XMPPAddress xmppAddress = new XMPPAddress(presence.getJID());
-            RemoteFileDesc newRfd = searchResultToXmppAdapter.promoteRemoteFileDescAndExchangeAddress(oldRfd, xmppAddress);
+            FriendAddress friendAddress = new FriendAddress(presence.getPresenceId());
+            RemoteFileDesc newRfd = searchResultToXmppAdapter.promoteRemoteFileDescAndExchangeAddress(oldRfd, friendAddress);
             Set<IpPort> ipPort = new HashSet<IpPort>();
             ipPort.addAll(rfdAdapter.getAlts());
 

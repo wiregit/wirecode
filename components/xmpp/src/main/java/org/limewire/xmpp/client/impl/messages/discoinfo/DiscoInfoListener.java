@@ -1,8 +1,6 @@
 package org.limewire.xmpp.client.impl.messages.discoinfo;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
@@ -12,49 +10,49 @@ import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.feature.FeatureInitializer;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.FriendPresenceEvent;
+import org.limewire.friend.api.feature.FeatureRegistry;
+import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.BlockingEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
+
 
 /**
  * sends disco info messages (http://jabber.org/protocol/disco#info) to newly available
  * presences and then calls the appropriate FeatureInitializer for each of the
  * features that come back in the response.
  */
-public class DiscoInfoListener implements PacketListener, FeatureRegistry {
+public class DiscoInfoListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(DiscoInfoListener.class);
 
-    private final Map<URI, FeatureInitializer> featureInitializerMap;
-    private final XMPPConnection connection;
+    private final FriendConnection connection;
     private final org.jivesoftware.smack.XMPPConnection smackConnection;
 
-    private final XMPPConnectionListener connectionListener;
-    private ListenerSupport<XMPPConnectionEvent> connectionSupport;
+    private final XMPPConnectionListener connectionListener = new XMPPConnectionListener();
+    private ListenerSupport<FriendConnectionEvent> connectionSupport;
     private ListenerSupport<FriendPresenceEvent> friendPresenceSupport;
-    private final FriendPresenceListener friendPresenceListener;
-    private final PacketFilter packetFilter;
+    private final FriendPresenceListener friendPresenceListener = new FriendPresenceListener();
+    private final PacketFilter packetFilter = new DiscoPacketFilter();
 
-    public DiscoInfoListener(XMPPConnection connection,
-                             org.jivesoftware.smack.XMPPConnection smackConnection) {
+    private final FeatureRegistry featureRegistry;
+    
+    public DiscoInfoListener(FriendConnection connection,
+                             org.jivesoftware.smack.XMPPConnection smackConnection,
+                             FeatureRegistry featureRegistry) {
         this.connection = connection;
         this.smackConnection = smackConnection;
-        this.featureInitializerMap = new ConcurrentHashMap<URI, FeatureInitializer>();
-        this.friendPresenceListener = new FriendPresenceListener();
-        this.connectionListener = new XMPPConnectionListener();
-        this.packetFilter = new DiscoPacketFilter();
+        this.featureRegistry = featureRegistry;
     }
 
-    public void addListeners(ListenerSupport<XMPPConnectionEvent> connectionSupport,
+    public void addListeners(ListenerSupport<FriendConnectionEvent> connectionSupport,
                              ListenerSupport<FriendPresenceEvent> friendPresenceSupport) {
         this.connectionSupport = connectionSupport;
         this.friendPresenceSupport = friendPresenceSupport;
@@ -65,35 +63,28 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
     }
 
     @Override
-    public void add(URI uri, FeatureInitializer featureInitializer, boolean external) {
-        featureInitializerMap.put(uri, featureInitializer);
-
-        if (external) {
-            ServiceDiscoveryManager.getInstanceFor(smackConnection).addFeature(uri.toASCIIString());
-        }
-    }
-
-    @Override
-    public FeatureInitializer get(URI uri) {
-        return featureInitializerMap.get(uri);
-    }
-
-    @Override
     public void processPacket(Packet packet) {
         DiscoverInfo discoverInfo = (DiscoverInfo) packet;
-        String discoFromField = discoverInfo.getFrom();
-        FriendPresence friendPresence = null;
+        String from = discoverInfo.getFrom();
 
-        if ((discoFromField != null) &&
-                isForThisConnection(discoFromField) ||
-                ((friendPresence = matchValidPresence(discoFromField)) != null)) {
+        if (from == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debugf("null from field: {0}", discoverInfo.getChildElementXML());
+        }
+            return;
+    }
 
-            String featureInitializer = friendPresence != null ? friendPresence.getPresenceId() : discoFromField;
-            for (URI uri : featureInitializerMap.keySet()) {
+        FriendPresence friendPresence = matchValidPresence(from);
+        if (friendPresence == null && !isForThisConnection(from)) {
+            LOG.debugf("no presence found for and not for this connection: {0}", from);
+            return;
+    }
+
+        String featureInitializer = friendPresence != null ? friendPresence.getPresenceId() : from;
+        for (URI uri : featureRegistry.getPublicFeatureUris()) {
                 if (discoverInfo.containsFeature(uri.toASCIIString())) {
                     LOG.debugf("initializing feature {0} for {1}", uri.toASCIIString(), featureInitializer);
-                    featureInitializerMap.get(uri).initializeFeature(friendPresence);
-                }
+                featureRegistry.get(uri).initializeFeature(friendPresence);
             }
         }
     }
@@ -105,14 +96,11 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
         if (friendPresenceSupport != null) {
             friendPresenceSupport.removeListener(friendPresenceListener);
         }
-        for (URI uri : featureInitializerMap.keySet()) {
-            featureInitializerMap.get(uri).cleanup();
-        }
         smackConnection.removePacketListener(this);
     }
 
     /**
-     * Asynchronously discovers features of an xmpp entity.  Does not wait for reply packets.
+     * Blockingly discovers features of an xmpp entity.
      *
      * @param entityName name of entity (can be anything, such as a
      *                   presence id, an xmpp server name, etc)
@@ -124,13 +112,16 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
             // check for null due to race condition between whoever is doing feature discovery
             // and smack connection shutting down.  if shut down, no features worth discovering.
             if (serviceDiscoveryManager != null) {
+                LOG.debugf("discovering presence: {0}", entityName);
                 serviceDiscoveryManager.discoverInfo(entityName);
+            } else {
+                LOG.debug("no service discovery manager");
             }
         } catch (org.jivesoftware.smack.XMPPException exception) {
+            LOG.info(exception.getMessage(), exception);
             if (exception.getXMPPError() != null &&
                     !exception.getXMPPError().getCondition().
                             equals(XMPPError.Condition.feature_not_implemented.toString())) {
-                LOG.info(exception.getMessage(), exception);
             }
         }
     }
@@ -150,10 +141,10 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
     private FriendPresence matchValidPresence(String from) {
 
         // does the from string match a presence
-        XMPPFriend user = connection.getFriend(StringUtils.parseBareAddress(from));
+        Friend friend = connection.getFriend(StringUtils.parseBareAddress(from));
 
-        if (user != null) {
-            FriendPresence presence = user.getFriendPresences().get(from);
+        if (friend != null) {
+            FriendPresence presence = friend.getPresences().get(from);
             if (presence != null) {
                 return presence;
             }
@@ -167,7 +158,7 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
 
     // listen for new presences in order to discover presence features
     private class FriendPresenceListener implements EventListener<FriendPresenceEvent> {
-        @BlockingEvent(queueName = "presence feature discovery")
+        @BlockingEvent(queueName = "feature discovery")
         @Override
         public void handleEvent(final FriendPresenceEvent event) {
             if (event.getType() == FriendPresenceEvent.Type.ADDED) {
@@ -177,11 +168,14 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
     }
 
     // listen for new connections in order to discover server features
-    private class XMPPConnectionListener implements EventListener<XMPPConnectionEvent> {
-        @BlockingEvent
+    private class XMPPConnectionListener implements EventListener<FriendConnectionEvent> {
+        @BlockingEvent(queueName = "feature discovery")
         @Override
-        public void handleEvent(XMPPConnectionEvent event) {
-            if (event.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+        public void handleEvent(FriendConnectionEvent event) {
+            if (!(event.getSource() instanceof XMPPFriendConnectionImpl)) {
+                return;
+            }
+            if (event.getType() == FriendConnectionEvent.Type.CONNECTED) {
                 discoverFeatures(connection.getConfiguration().getServiceName());
             }
         }

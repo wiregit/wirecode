@@ -15,6 +15,7 @@ import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.LimeWireCoreSettingsModule;
+import org.limewire.facebook.service.LimeWireFacebookModule;
 import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
@@ -22,12 +23,10 @@ import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.listener.AsynchronousMulticaster;
+import org.limewire.listener.AsynchronousEventBroadcaster;
+import org.limewire.listener.AsynchronousCachingEventMulticasterImpl;
 import org.limewire.listener.BroadcastPolicy;
-import org.limewire.listener.CachingEventMulticaster;
-import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventBean;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
@@ -204,6 +203,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireDownloadModule());
         binder().install(new LimeWireHashTreeModule());        
         binder().install(new LimeWireDHTModule());
+        binder().install(new LimeWireFacebookModule());
         binder().install(new LimeWireHttpModule());
         binder().install(new LimeWireSearchModule());
         binder().install(new LimeWireStatisticsModule());
@@ -337,21 +337,17 @@ public class LimeWireCoreModule extends AbstractModule {
         
         Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");
         
-        AsynchronousMulticaster<FirewallTransferStatusEvent> asyncTransferMulticaster 
-            = new AsynchronousMulticaster<FirewallTransferStatusEvent>(fwtEventExecutor);
-        CachingEventMulticaster<FirewallTransferStatusEvent> fwtStatusMulticaster =
-            new CachingEventMulticasterImpl<FirewallTransferStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS, asyncTransferMulticaster, asyncTransferMulticaster.getListenerContext());
-        bind(new TypeLiteral<EventBean<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
-        bind(new TypeLiteral<EventBroadcaster<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
+        AsynchronousCachingEventMulticasterImpl<FirewallTransferStatusEvent> asyncTransferMulticaster 
+            = new AsynchronousCachingEventMulticasterImpl<FirewallTransferStatusEvent>(fwtEventExecutor, BroadcastPolicy.IF_NOT_EQUALS);
+        bind(new TypeLiteral<EventBean<FirewallTransferStatusEvent>>(){}).toInstance(asyncTransferMulticaster);
+        bind(new TypeLiteral<AsynchronousEventBroadcaster<FirewallTransferStatusEvent>>(){}).toInstance(asyncTransferMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FirewallTransferStatusEvent>>(){}).toInstance(asyncTransferMulticaster);
         
-        AsynchronousMulticaster<FirewallStatusEvent> asyncStatusMulticaster =
-            new AsynchronousMulticaster<FirewallStatusEvent>(fwtEventExecutor);
-        CachingEventMulticaster<FirewallStatusEvent> firewalledStatusMulticaster =
-            new CachingEventMulticasterImpl<FirewallStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS, asyncStatusMulticaster, asyncStatusMulticaster.getListenerContext());
-        bind(new TypeLiteral<EventBean<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
-        bind(new TypeLiteral<EventBroadcaster<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
+        AsynchronousCachingEventMulticasterImpl<FirewallStatusEvent> asyncStatusMulticaster =
+            new AsynchronousCachingEventMulticasterImpl<FirewallStatusEvent>(fwtEventExecutor, BroadcastPolicy.IF_NOT_EQUALS);
+        bind(new TypeLiteral<EventBean<FirewallStatusEvent>>(){}).toInstance(asyncStatusMulticaster);
+        bind(new TypeLiteral<AsynchronousEventBroadcaster<FirewallStatusEvent>>(){}).toInstance(asyncStatusMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FirewallStatusEvent>>(){}).toInstance(asyncStatusMulticaster);
         
         // These are bound because they are Singletons & Services, and must be started.
         bind(Statistics.class);

@@ -2,25 +2,33 @@ package org.limewire.ui.swing.friends.actions;
 
 import java.awt.event.ActionEvent;
 
+import org.limewire.friend.api.FriendConnection;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.AddFriendDialog;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
-
-import com.google.inject.Inject;
 
 class AddFriendAction extends AbstractAction {
 
-    private final XMPPService xmppService;
+    private final FriendConnection friendConnection;
 
-    @Inject
-    public AddFriendAction(XMPPService xmppService) {
+    /**
+     * Creates add friend action.
+     * <p>
+     * Action is disabled if <code>friendConnection</code> is null or does
+     * not support adding friends, see {@link FriendConnection#supportsAddRemoveFriend()}.
+     * 
+     * @param friendConnection can be null, action will be constructed in a
+     * disabled state then
+     */
+    public AddFriendAction(FriendConnection friendConnection) {
         super(I18n.tr("Add Friend..."));
-        this.xmppService = xmppService;
+        this.friendConnection = friendConnection;
+        setEnabled(friendConnection != null && friendConnection.supportsAddRemoveFriend());
     }
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        new AddFriendDialog(xmppService.getActiveConnection());
+        assert friendConnection != null;
+        new AddFriendDialog(friendConnection);
     }
 }

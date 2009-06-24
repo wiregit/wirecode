@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.friends.chat;
 
-import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.friend.api.MessageWriter;
 
 
 /**

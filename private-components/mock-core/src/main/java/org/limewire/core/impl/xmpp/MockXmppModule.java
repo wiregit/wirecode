@@ -3,21 +3,21 @@ package org.limewire.core.impl.xmpp;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.client.FileOfferEvent;
-import org.limewire.core.api.friend.client.FriendRequestEvent;
-import org.limewire.core.api.friend.client.PasswordManager;
-import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
+import org.limewire.friend.api.FileOfferEvent;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionFactory;
+import org.limewire.friend.api.FriendEvent;
+import org.limewire.friend.api.FriendPresenceEvent;
+import org.limewire.friend.api.FriendRequestEvent;
+import org.limewire.friend.api.PasswordManager;
+import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -27,7 +27,7 @@ public class MockXmppModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(XMPPService.class).to(MockXmppService.class);
+        bind(FriendConnectionFactory.class).to(MockXmppConnectionFactory.class);
         
         EventMulticaster<RosterEvent> rosterMulticaster = new EventMulticasterImpl<RosterEvent>(); 
         bind(new TypeLiteral<EventBroadcaster<RosterEvent>>(){}).toInstance(rosterMulticaster);
@@ -41,9 +41,9 @@ public class MockXmppModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<FriendRequestEvent>>(){}).toInstance(friendRequestMulticaster);
         bind(new TypeLiteral<ListenerSupport<FriendRequestEvent>>(){}).toInstance(friendRequestMulticaster);
 
-        EventMulticaster<XMPPConnectionEvent> connectionMulticaster = new EventMulticasterImpl<XMPPConnectionEvent>();
-        bind(new TypeLiteral<EventBroadcaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
-        bind(new TypeLiteral<ListenerSupport<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
+        EventMulticaster<FriendConnectionEvent> connectionMulticaster = new EventMulticasterImpl<FriendConnectionEvent>();
+        bind(new TypeLiteral<EventBroadcaster<FriendConnectionEvent>>(){}).toInstance(connectionMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FriendConnectionEvent>>(){}).toInstance(connectionMulticaster);
 
         bind(PasswordManager.class).to(MockPasswordManager.class);
         

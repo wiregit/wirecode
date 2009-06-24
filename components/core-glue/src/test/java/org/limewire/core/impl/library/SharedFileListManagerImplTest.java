@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.Test;
 
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.impl.tests.CoreGlueTestUtils;
+import org.limewire.friend.api.Friend;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 

@@ -15,8 +15,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
@@ -41,7 +41,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
     private final LoginPopupPanel parent;
     
     @Inject
-    public ServiceSelectionLoginPanel(LoginPopupPanel parent, XMPPAccountConfigurationManager accountManager,
+    public ServiceSelectionLoginPanel(LoginPopupPanel parent, FriendAccountConfigurationManager accountManager,
             ButtonDecorator buttonDecorator) {
         
         super(new BorderLayout());
@@ -125,12 +125,12 @@ public class ServiceSelectionLoginPanel extends JPanel {
     
     private class ServiceAction extends org.limewire.ui.swing.action.AbstractAction {
 
-        public ServiceAction(XMPPAccountConfiguration config) {
+        public ServiceAction(FriendAccountConfiguration config) {
             super(config.getLabel(), config.getLargeIcon());
             putValue(CONFIG, config);
         }
         
-        public ServiceAction(String nameOverride, XMPPAccountConfiguration config) {
+        public ServiceAction(String nameOverride, FriendAccountConfiguration config) {
             super(nameOverride, config.getLargeIcon());
             this.
             putValue(CONFIG, config);
@@ -138,7 +138,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         
         @Override
         public void actionPerformed(ActionEvent arg0) {
-            parent.setSelectedService((XMPPAccountConfiguration)getValue(CONFIG));
+            parent.setSelectedService((FriendAccountConfiguration)getValue(CONFIG));
         }
         
     }

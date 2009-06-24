@@ -8,7 +8,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.connection.ConnectionItem.Status;
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.connection.ConnectionBandwidthStatistics;

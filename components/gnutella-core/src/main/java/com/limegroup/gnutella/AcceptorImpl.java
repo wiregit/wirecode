@@ -28,7 +28,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.AsyncConnectionDispatcher;
@@ -140,7 +140,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     private final Provider<MulticastService> multicastService;
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final ScheduledExecutorService backgroundExecutor;
-    private final EventBroadcaster<FirewallStatusEvent> firewallBroadcaster;
+    private final AsynchronousEventBroadcaster<FirewallStatusEvent> firewallBroadcaster;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionServices connectionServices;
@@ -155,7 +155,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             Provider<MulticastService> multicastService,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            EventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
+            AsynchronousEventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
             Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter, 
             ConnectionServices connectionServices,

@@ -1,7 +1,7 @@
 package org.limewire.core.impl.friend;
 
-import org.limewire.core.api.friend.FriendManager;
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.friend.api.FriendManager;
+import org.limewire.friend.api.FriendPresence;
 
 public class MockFriendManager implements FriendManager {
 

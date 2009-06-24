@@ -21,7 +21,7 @@ import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.IOUtils;
-import org.limewire.listener.AsynchronousMulticaster;
+import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.util.FileUtils;
@@ -76,7 +76,7 @@ public class TorrentImpl implements Torrent {
     public TorrentImpl(TorrentManager torrentManager,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
         this.torrentManager = torrentManager;
-        listeners = new AsynchronousMulticaster<TorrentEvent>(fastExecutor);
+        listeners = new AsynchronousMulticasterImpl<TorrentEvent>(fastExecutor);
         status = new AtomicReference<TorrentStatus>();
         paths = new ArrayList<String>();
     }

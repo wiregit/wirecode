@@ -4,33 +4,30 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.listener.EventBean;
+import org.limewire.listener.EventUtils;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class FriendButtonPopupListener implements PopupMenuListener {
 
-    private final Provider<XMPPService> xmppServiceProvider;
     private final Provider<LoginAction> loginAction;
-    private final Provider<LogoutAction> logoutAction;
-    private final Provider<AddFriendAction> addFriendAction;
-    private final Provider<RemoveFriendAction> removeFriendAction;
     private final Provider<BrowseFriendsAction> browseFriendAction;
     private final Provider<AutoLoginService> autoLoginServiceProvider;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final Provider<StatusActions> statusActions;
     
     @Inject
-    public FriendButtonPopupListener(Provider<XMPPService> xmppServiceProvider, Provider<LoginAction> loginAction,
-        Provider<LogoutAction> logoutAction, Provider<AddFriendAction> addFriendAction,
-        Provider<RemoveFriendAction> removeFriendAction, Provider<BrowseFriendsAction> browseFriendAction,
-        Provider<AutoLoginService> autoLoginServiceProvider, Provider<StatusActions> statusActions) {
-        this.xmppServiceProvider = xmppServiceProvider;
+    public FriendButtonPopupListener(EventBean<FriendConnectionEvent> connectionEventBean, Provider<LoginAction> loginAction,
+        Provider<BrowseFriendsAction> browseFriendAction,
+        Provider<AutoLoginService> autoLoginServiceProvider,
+        Provider<StatusActions> statusActions) {
+        this.connectionEventBean = connectionEventBean;
         this.loginAction = loginAction;
-        this.logoutAction = logoutAction;
-        this.addFriendAction = addFriendAction;
-        this.removeFriendAction = removeFriendAction;
         this.browseFriendAction = browseFriendAction;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
         this.statusActions = statusActions;
@@ -49,15 +46,15 @@ public class FriendButtonPopupListener implements PopupMenuListener {
             
             menu.removeAll();
             
-            XMPPService xmppService = xmppServiceProvider.get();
+            FriendConnection friendConnection = EventUtils.getSource(connectionEventBean);
             
-            boolean canLogout = xmppService.isLoggedIn() || xmppService.isLoggingIn();
+            boolean canLogout = friendConnection != null && (friendConnection.isLoggedIn() || friendConnection.isLoggingIn());
             boolean shouldAllowLogin = !canLogout && !autoLoginServiceProvider.get().isAttemptingLogin();
 
             menu.add(browseFriendAction.get()).setEnabled(!shouldAllowLogin);
             menu.addSeparator();
-            menu.add(addFriendAction.get()).setEnabled(!shouldAllowLogin);
-            menu.add(removeFriendAction.get()).setEnabled(!shouldAllowLogin);
+            menu.add(new AddFriendAction(friendConnection));
+            menu.add(new RemoveFriendAction(friendConnection));
             menu.addSeparator();
             menu.add(statusActions.get().getAvailableMenuItem());
             menu.add(statusActions.get().getDnDMenuItem());
@@ -65,7 +62,7 @@ public class FriendButtonPopupListener implements PopupMenuListener {
             if(shouldAllowLogin)
                 menu.add(loginAction.get());
             else if (canLogout)
-                menu.add(logoutAction.get());
+                menu.add(new LogoutAction(friendConnection));
         }
     }
 }

@@ -9,6 +9,7 @@ import org.limewire.core.impl.connection.CoreGlueConnectionModule;
 import org.limewire.core.impl.daap.CoreGlueDaapModule;
 import org.limewire.core.impl.download.CoreGlueDownloadModule;
 import org.limewire.core.impl.download.DownloadListenerList;
+import org.limewire.core.impl.friend.CoreGlueFriendModule;
 import org.limewire.core.impl.itunes.ItunesMediator;
 import org.limewire.core.impl.itunes.ItunesMediatorImpl;
 import org.limewire.core.impl.library.CoreGlueLibraryModule;
@@ -56,6 +57,7 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueSearchModule());
         install(new CoreGlueBrowseSearchModule());
         install(new CoreGlueNetworkModule());
+        install(new CoreGlueFriendModule());
         install(new CoreGlueDownloadModule());
         install(new CoreGlueLibraryModule());
         install(new CoreGlueMojitoModule());

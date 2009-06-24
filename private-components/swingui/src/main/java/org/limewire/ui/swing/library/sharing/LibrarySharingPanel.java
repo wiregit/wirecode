@@ -15,6 +15,8 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.SharedFileList;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionEvent.Type;
 import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
@@ -22,8 +24,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent.Type;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -59,7 +59,7 @@ public class LibrarySharingPanel {
     private final CardLayout layout = new CardLayout();    
     private final Map<String, JComponent> layoutMap = new HashMap<String, JComponent>();
     
-    private final EventBean<XMPPConnectionEvent> connectionEvent;
+    private final EventBean<FriendConnectionEvent> connectionEvent;
     private final ListEventListener<String> friendsListener;
     
     private enum View { NONE, LOGIN, FRIEND_LIST, EDIT_LIST }
@@ -71,7 +71,7 @@ public class LibrarySharingPanel {
     public LibrarySharingPanel(Provider<LibrarySharingLoginPanel> loginPanel,
             Provider<LibrarySharingFriendListPanel> nonEditablePanel,
             Provider<LibrarySharingEditablePanel> editablePanel,
-            EventBean<XMPPConnectionEvent> connectionEvent,
+            EventBean<FriendConnectionEvent> connectionEvent,
             Provider<AutoLoginService> autoLoginServiceProvider) {
         this.loginPanelProvider = loginPanel;
         this.friendListPanelProvider = nonEditablePanel;
@@ -90,11 +90,11 @@ public class LibrarySharingPanel {
         component.setLayout(layout);
     }
     
-    @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionEvent) {
-        connectionEvent.addListener(new EventListener<XMPPConnectionEvent>() {
+    @Inject void register(ListenerSupport<FriendConnectionEvent> connectionEvent) {
+        connectionEvent.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 if(!isLoggedIn()) {
                     showLoginView();
                 } else if(currentView == View.LOGIN) {

@@ -4,15 +4,14 @@ import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.Map;
 
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.api.FriendPresence.Mode;
 import org.limewire.listener.EventListener;
 
 class MockChatFriend implements ChatFriend {
@@ -28,8 +27,9 @@ class MockChatFriend implements ChatFriend {
     }
     
     @Override
-    public XMPPFriend getFriend() {
-        return new XMPPFriend() {
+    public Friend getFriend() {
+        return new Friend() {
+
             @Override
             public String getId() {
                 return name;
@@ -63,11 +63,6 @@ class MockChatFriend implements ChatFriend {
             }
 
             @Override
-            public Map<String, FriendPresence> getFriendPresences() {
-                return Collections.emptyMap();
-            }
-
-            @Override
             public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {}
 
             @Override
@@ -82,7 +77,7 @@ class MockChatFriend implements ChatFriend {
             public void removeChatListener() {}
 
             @Override
-            public XMPPPresence getActivePresence() {
+            public FriendPresence getActivePresence() {
                 return null;
             }
 
@@ -97,7 +92,7 @@ class MockChatFriend implements ChatFriend {
             }
 
             @Override
-            public Map<String, XMPPPresence> getPresences() {
+            public Map<String, FriendPresence> getPresences() {
                 return Collections.emptyMap();
             }
 

@@ -6,9 +6,9 @@ import java.util.Collection;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.feature.AddressFeature;
+import org.limewire.friend.api.feature.Feature;
 import org.limewire.io.Address;
 import org.limewire.util.BaseTestCase;
 

@@ -3,9 +3,9 @@ package org.limewire.ui.swing.search;
 import java.util.Collection;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseSearchFactory;
+import org.limewire.friend.api.Friend;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;

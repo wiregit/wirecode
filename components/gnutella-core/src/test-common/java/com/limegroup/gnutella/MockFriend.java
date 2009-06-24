@@ -3,9 +3,15 @@ package com.limegroup.gnutella;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.listener.EventListener;
+
 
 public class MockFriend implements Friend {
     
@@ -63,12 +69,12 @@ public class MockFriend implements Friend {
             public String getNetworkName() {
                 return "";
             }
-        };
-    }
 
     @Override
-    public Map<String, FriendPresence> getFriendPresences() {
-        return friendPresences;
+            public Type getType() {
+                return Type.XMPP;
+            }
+        };
     }
     
     public void setFriendPresences(Map<String, FriendPresence> presences) {
@@ -83,8 +89,49 @@ public class MockFriend implements Friend {
         friendPresences.put(presence.getPresenceId(), presence);
     }
 
-    @Override
     public String getFirstName() {
         return null;
+    }
+
+    @Override
+    public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
+    }
+
+    @Override
+    public MessageWriter createChat(MessageReader reader) {
+        return null;
+    }
+
+    @Override
+    public void setChatListenerIfNecessary(IncomingChatListener listener) {
+    }
+
+    @Override
+    public void removeChatListener() {
+    }
+
+    @Override
+    public FriendPresence getActivePresence() {
+        return null;
+    }
+
+    @Override
+    public boolean hasActivePresence() {
+        return false;
+    }
+
+    @Override
+    public boolean isSignedIn() {
+        return false;
+    }
+
+    @Override
+    public Map<String, FriendPresence> getPresences() {
+        return friendPresences;
+    }
+
+    @Override
+    public boolean isSubscribed() {
+        return false;
     }
 }

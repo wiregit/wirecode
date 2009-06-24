@@ -13,16 +13,17 @@ import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.LibraryChangedEvent;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.LibraryChangedEvent;
+import org.limewire.friend.api.feature.AddressFeature;
+import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.Address;
 import org.limewire.io.IpPortSet;
 import org.limewire.listener.EventListener;
@@ -32,7 +33,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
-import org.limewire.xmpp.api.client.XMPPAddress;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -57,7 +57,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      */
     final Set<PresenceLibrary> librariesToBrowse = Collections.synchronizedSet(new HashSet<PresenceLibrary>());
 
-    private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
+    private final FriendRemoteFileDescDeserializer remoteFileDescDeserializer;
     
     /**
      * Is incremented when a new connectivity change event is received, should
@@ -74,7 +74,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     @Inject
     public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager,
-            SocketsManager socketsManager, XMPPRemoteFileDescDeserializer remoteFileDescDeserializer) {
+            SocketsManager socketsManager, FriendRemoteFileDescDeserializer remoteFileDescDeserializer) {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
         this.socketsManager = socketsManager;
@@ -157,9 +157,9 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
         final Browse browse = browseFactory.createBrowse(friendPresence);
         
-        final XMPPAddress address;
+        final FriendAddress address;
         if(!friendPresence.getFriend().isAnonymous()) {
-            address = (XMPPAddress) addressFeature.getFeature();    
+            address = (FriendAddress) addressFeature.getFeature();    
         } else {
             address = null;
         }
@@ -308,9 +308,10 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             synchronized (librariesToBrowse) {
                 currentRevision = ++latestConnectivityEventRevision;
                 copy = new ArrayList<PresenceLibrary>(librariesToBrowse);
-                LOG.debugf("revision: {0}, libraries to browse again: {1}", currentRevision, copy);
                 librariesToBrowse.clear();
             }
+            // outside of synchronized to avoid dead lock
+            LOG.debugf("revision: {0}, libraries to browse again: {1}", currentRevision, copy);
             for (PresenceLibrary library : copy) {
                 tryToResolveAndBrowse(library, currentRevision);
             }

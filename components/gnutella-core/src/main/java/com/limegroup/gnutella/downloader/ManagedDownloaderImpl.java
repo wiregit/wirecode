@@ -38,14 +38,14 @@ import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.PermanentAddress;
-import org.limewire.listener.AsynchronousMulticaster;
+import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
-import org.limewire.xmpp.api.client.XMPPAddress;
+import org.limewire.friend.impl.address.FriendAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -507,7 +507,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                                                  DangerousFileChecker dangerousFileChecker,
                                                  SpamManager spamManager, Library library) {
         super(saveLocationManager);
-        this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(downloadStateProcessingQueue);
+        this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
         this.gnutellaFileCollection = gnutellaFileCollection;
         this.incompleteFileManager = incompleteFileManager;
@@ -566,8 +566,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     private boolean isFriendDownload(Collection<RemoteFileDesc> rfds) {
         for (RemoteFileDesc rfd : rfds) {
-            if (!(rfd.getAddress() instanceof XMPPAddress)) {
-                // TODO Address.isAnonymous() instead?
+            if(!(rfd.getAddress() instanceof FriendAddress)) {
                 return false;
             }
         }

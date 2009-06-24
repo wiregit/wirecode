@@ -24,7 +24,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPortImpl;
-import org.limewire.listener.AsynchronousMulticaster;
+import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.util.FileUtils;
@@ -85,7 +85,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
         this.library = library;
-        this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(fastExecutor);
+        this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(fastExecutor);
     }
 
     /**

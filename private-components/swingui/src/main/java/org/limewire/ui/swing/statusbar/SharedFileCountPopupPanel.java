@@ -36,6 +36,9 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -51,8 +54,6 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -93,8 +94,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private final SharedFileCountPanel sharedFileCountPanel;
     private final SharedFileListManager shareListManager;
     private final Provider<LoginPopupPanel> loginPanelProvider;
-    private final XMPPService xmppService;
-    private final ListenerSupport<XMPPConnectionEvent> connectionSupport;
+    private final ListenerSupport<FriendConnectionEvent> connectionSupport;
     private final LibraryMediator libraryMediator;
     private final Provider<AutoLoginService> autoLoginServiceProvider;
 
@@ -113,24 +113,25 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         }
     };
     private HyperlinkButton signIntoFriendsButton = null;
+    private final EventBean<FriendConnectionEvent> friendConnectionBean;
         
     @Inject
     public SharedFileCountPopupPanel(SharedFileCountPanel sharedFileCountPanel,
             SharedFileListManager shareListManager,
             Provider<LoginPopupPanel> loginPanelProvider,
-            XMPPService xmppService,
-            ListenerSupport<XMPPConnectionEvent> connectionSupport,
+            ListenerSupport<FriendConnectionEvent> connectionSupport,
             LibraryMediator libraryMediator,
-            Provider<AutoLoginService> autoLoginServiceProvider) {
+            Provider<AutoLoginService> autoLoginServiceProvider,
+            EventBean<FriendConnectionEvent> friendConnectionBean) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
         this.shareListManager = shareListManager;
         this.loginPanelProvider = loginPanelProvider;
-        this.xmppService = xmppService;
         this.connectionSupport = connectionSupport;
         this.libraryMediator = libraryMediator;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
+        this.friendConnectionBean = friendConnectionBean;
         
         GuiUtils.assignResources(this);
         
@@ -335,10 +336,10 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
 
             panel.add(signIntoFriendsButton);
             
-            connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+            connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
                 @SwingEDTEvent
                 @Override
-                public void handleEvent(XMPPConnectionEvent event) {
+                public void handleEvent(FriendConnectionEvent event) {
                     if (!shouldShowSignInButton()) {
                         connectionSupport.removeListener(this);
                         panel.remove(signIntoFriendsButton);
@@ -353,7 +354,9 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     }
     
     private boolean shouldShowSignInButton() {
-        if (xmppService.isLoggedIn() || xmppService.isLoggingIn()
+        FriendConnectionEvent lastEvent = friendConnectionBean.getLastEvent();
+        FriendConnection friendConnection = lastEvent != null ? lastEvent.getSource() : null;
+        if ((friendConnection != null && (friendConnection.isLoggedIn() || friendConnection.isLoggingIn()))
                 || autoLoginServiceProvider.get().isAttemptingLogin()) {
             return false;
         }

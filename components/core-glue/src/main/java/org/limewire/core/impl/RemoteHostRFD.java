@@ -1,8 +1,8 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.LimewireFeature;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 

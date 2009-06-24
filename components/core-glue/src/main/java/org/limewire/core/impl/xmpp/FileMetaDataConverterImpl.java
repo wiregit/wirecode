@@ -5,15 +5,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.xmpp.FileMetaDataConverter;
+import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.AddressFeature;
+import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,17 +25,17 @@ import com.limegroup.gnutella.util.DataUtils;
 
 @Singleton
 public class FileMetaDataConverterImpl implements FileMetaDataConverter {
-    private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
+    private final FriendRemoteFileDescDeserializer remoteFileDescDeserializer;
     private final RemoteFileDescFactory remoteFileDescFactory;
 
     @Inject
-    public FileMetaDataConverterImpl(XMPPRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
+    public FileMetaDataConverterImpl(FriendRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
         this.remoteFileDescDeserializer = remoteFileDescDeserializer;
         this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     public SearchResult create(FriendPresence presence, FileMetaData fileMetaData) throws InvalidDataException, SaveLocationException {
-        XMPPAddress presenceAddress = getAddressFromPresence(presence);
+        FriendAddress presenceAddress = getAddressFromPresence(presence);
 
         RemoteFileDesc remoteFileDesc = createRfdFromChatResult(presenceAddress, fileMetaData);
         RemoteFileDescAdapter remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.promoteRemoteFileDescAndExchangeAddress(remoteFileDesc,
@@ -42,7 +43,7 @@ public class FileMetaDataConverterImpl implements FileMetaDataConverter {
         return remoteFileDescAdapter;
     }
     
-    private RemoteFileDesc createRfdFromChatResult(XMPPAddress address, FileMetaData fileMeta)
+    private RemoteFileDesc createRfdFromChatResult(FriendAddress address, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
         byte[] clientGuid = DataUtils.EMPTY_GUID;
         
@@ -67,11 +68,11 @@ public class FileMetaDataConverterImpl implements FileMetaDataConverter {
      * Get the address if the presence has an address feature at the present moment.
      * Else construct an XMPPAddress with the friendPresence id.
      */
-    private XMPPAddress getAddressFromPresence(FriendPresence presence) {
+    private FriendAddress getAddressFromPresence(FriendPresence presence) {
         if (presence.hasFeatures(AddressFeature.ID)) {
-            return (XMPPAddress)((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature();
+            return (FriendAddress)((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature();
         }
-        return new XMPPAddress(presence.getPresenceId());
+        return new FriendAddress(presence.getPresenceId());
     }
     
 }

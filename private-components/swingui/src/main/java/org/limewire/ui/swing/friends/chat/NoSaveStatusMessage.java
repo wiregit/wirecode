@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends.chat;
 
-import org.limewire.core.api.friend.feature.features.NoSave;
+import org.limewire.friend.impl.feature.NoSave;
+
 import static org.limewire.ui.swing.util.I18n.tr;
 
 /**

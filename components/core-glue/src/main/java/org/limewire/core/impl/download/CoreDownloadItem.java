@@ -19,17 +19,17 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.FriendManager;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.impl.RemoteHostRFD;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
+import org.limewire.friend.api.FriendManager;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
-import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
@@ -162,8 +162,8 @@ class CoreDownloadItem implements DownloadItem {
     private FriendPresence getFriendPresence(RemoteFileDesc rfd) {
         FriendPresence friendPresence = null;
         
-        if(rfd.getAddress() instanceof XMPPAddress) {
-            friendPresence = friendManager.getMostRelevantFriendPresence(((XMPPAddress)rfd.getAddress()).getId());
+        if(rfd.getAddress() instanceof FriendAddress) {
+            friendPresence = friendManager.getMostRelevantFriendPresence(((FriendAddress)rfd.getAddress()).getId());
         } 
         if(friendPresence == null) {
             friendPresence = new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID()));

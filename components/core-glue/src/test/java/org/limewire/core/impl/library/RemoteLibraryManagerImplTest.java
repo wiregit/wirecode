@@ -6,12 +6,12 @@ import java.util.List;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.SearchResultList;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.util.BaseTestCase;
 
 public class RemoteLibraryManagerImplTest extends BaseTestCase {

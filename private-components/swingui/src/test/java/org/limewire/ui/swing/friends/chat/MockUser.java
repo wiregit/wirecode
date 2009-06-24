@@ -3,17 +3,16 @@ package org.limewire.ui.swing.friends.chat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
-public class MockUser implements XMPPFriend {
+public class MockUser implements Friend {
     private String id;
     private String name;
     
@@ -54,15 +53,10 @@ public class MockUser implements XMPPFriend {
     }
 
     @Override
-    public Map<String, FriendPresence> getFriendPresences() {
+    public Map<String, FriendPresence> getPresences() {
         return new HashMap<String, FriendPresence>();
     }
     
-    @Override
-    public Map<String, XMPPPresence> getPresences() {
-        return new HashMap<String, XMPPPresence>();
-    }
-
     @Override
     public boolean isSubscribed() {
         return true;
@@ -84,7 +78,7 @@ public class MockUser implements XMPPFriend {
     }
 
     @Override
-    public XMPPPresence getActivePresence() {
+    public FriendPresence getActivePresence() {
         return null;
     }
 
@@ -112,6 +106,11 @@ public class MockUser implements XMPPFriend {
 
             public String getNetworkName() {
                 return "mock-network";
+            }
+
+            @Override
+            public Type getType() {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
         };
     }

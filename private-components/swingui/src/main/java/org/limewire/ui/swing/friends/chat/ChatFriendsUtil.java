@@ -2,11 +2,12 @@ package org.limewire.ui.swing.friends.chat;
 
 import java.net.URL;
 
-import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.friend.api.FriendPresence;
+
 
 class ChatFriendsUtil {
     
-    public static String getIconURL(XMPPPresence.Mode mode) {
+    public static String getIconURL(FriendPresence.Mode mode) {
         switch(mode) {
         case available:
             return getURL("/org/limewire/ui/swing/mainframe/resources/icons/friends/available.png");

@@ -3,9 +3,14 @@ package org.limewire.ui.swing.filter;
 import java.util.Collections;
 import java.util.Map;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
 
 /**
@@ -99,11 +104,6 @@ public class SourceMatcherTest extends BaseTestCase {
         }
 
         @Override
-        public Map<String, FriendPresence> getFriendPresences() {
-            return Collections.emptyMap();
-        }
-
-        @Override
         public String getId() {
             return name;
         }
@@ -125,6 +125,11 @@ public class SourceMatcherTest extends BaseTestCase {
                 public String getNetworkName() {
                     return "";
                 }
+
+                @Override
+                public Type getType() {
+                    return null;
+                }
             };
         }
 
@@ -141,6 +146,48 @@ public class SourceMatcherTest extends BaseTestCase {
         @Override
         public void setName(String name) {
             this.name = name;
+        }
+
+        @Override
+        public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
+        }
+
+        @Override
+        public MessageWriter createChat(MessageReader reader) {
+            return null;
+        }
+
+        @Override
+        public FriendPresence getActivePresence() {
+            return null;
+        }
+
+        @Override
+        public Map<String, FriendPresence> getPresences() {
+            return Collections.emptyMap();
+        }
+
+        @Override
+        public boolean hasActivePresence() {
+            return false;
+        }
+
+        @Override
+        public boolean isSignedIn() {
+            return false;
+        }
+
+        @Override
+        public boolean isSubscribed() {
+            return false;
+        }
+
+        @Override
+        public void removeChatListener() {
+        }
+
+        @Override
+        public void setChatListenerIfNecessary(IncomingChatListener listener) {
         }
     }
 }

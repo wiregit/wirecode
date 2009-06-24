@@ -3,7 +3,7 @@ package org.limewire.core.api.search.browse;
 import java.util.Arrays;
 import java.util.List;
 
-import org.limewire.core.api.friend.Friend;
+import org.limewire.friend.api.Friend;
 
 public class BrowseStatus {
     

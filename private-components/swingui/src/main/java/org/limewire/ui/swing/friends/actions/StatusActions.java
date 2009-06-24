@@ -9,9 +9,14 @@ import javax.swing.JMenuItem;
 
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.core.settings.XMPPSettings;
+import org.limewire.core.settings.FriendSettings;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.inject.LazySingleton;
+import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
@@ -20,9 +25,6 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 import com.google.inject.Inject;
 
@@ -46,12 +48,12 @@ class StatusActions {
 
     private final JCheckBoxMenuItem doNotDisturbItem;
 
-    private final XMPPService xmppService;
+    private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
 
     @Inject
-    public StatusActions(final XMPPService xmppService) {
-        this.xmppService = xmppService;
+    public StatusActions(EventBean<FriendConnectionEvent> friendConnectionEventBean) {
 
+        this.friendConnectionEventBean = friendConnectionEventBean;
         GuiUtils.assignResources(this);
 
         availableAction = new AbstractAction(I18n.tr("&Available")) {
@@ -62,15 +64,18 @@ class StatusActions {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                xmppService.setMode(Mode.available).addFutureListener(
+                FriendConnection friendConnection = EventUtils.getSource(StatusActions.this.friendConnectionEventBean);
+                if (friendConnection != null && friendConnection.supportsMode()) {
+                    friendConnection.setMode(FriendPresence.Mode.available).addFutureListener(
                         new EventListener<FutureEvent<Void>>() {
                             @Override
                             public void handleEvent(FutureEvent<Void> event) {
                                 if (event.getType() == FutureEvent.Type.SUCCESS) {
-                                    XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);
+                                        FriendSettings.DO_NOT_DISTURB.setValue(false);
                                 }
                             }
                         });
+            }
             }
         };
 
@@ -82,15 +87,18 @@ class StatusActions {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                xmppService.setMode(Mode.dnd).addFutureListener(
+                FriendConnection friendConnection = EventUtils.getSource(StatusActions.this.friendConnectionEventBean);
+                if (friendConnection != null && friendConnection.supportsMode()) {
+                    friendConnection.setMode(FriendPresence.Mode.dnd).addFutureListener(
                         new EventListener<FutureEvent<Void>>() {
                             @Override
                             public void handleEvent(FutureEvent<Void> event) {
                                 if (event.getType() == FutureEvent.Type.SUCCESS) {
-                                    XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);
+                                        FriendSettings.DO_NOT_DISTURB.setValue(true);
                                 }
                             }
                         });
+            }
             }
         };
 
@@ -100,7 +108,7 @@ class StatusActions {
 
         updateSelections();
 
-        XMPPSettings.XMPP_DO_NOT_DISTURB.addSettingListener(new SettingListener() {
+        FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtils.invokeLater(new Runnable() {
@@ -114,8 +122,9 @@ class StatusActions {
     }
 
     private void updateSelections() {
-        if (xmppService.isLoggedIn()) {
-            boolean dndBool = XMPPSettings.XMPP_DO_NOT_DISTURB.getValue();
+        FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
+        if (friendConnection != null && friendConnection.isLoggedIn()) {
+            boolean dndBool = FriendSettings.DO_NOT_DISTURB.getValue();
             availableItem.setSelected(!dndBool);
             doNotDisturbItem.setSelected(dndBool);
         } else {
@@ -126,11 +135,11 @@ class StatusActions {
     }
 
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> event) {
-        event.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(ListenerSupport<FriendConnectionEvent> event) {
+        event.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch (event.getType()) {
                 case CONNECTED:
                 case CONNECTING:
