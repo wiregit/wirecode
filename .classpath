@@ -151,4 +151,5 @@
 	<classpathentry kind="lib" path="lib/jars/guice-2.0-snapshot-20090610.jar" sourcepath="lib/sources/guice-2.0-snapshot-20090610-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/inspTool-0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
+
 </classpath>
