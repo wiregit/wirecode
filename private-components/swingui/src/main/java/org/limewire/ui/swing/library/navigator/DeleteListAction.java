@@ -40,13 +40,13 @@ class DeleteListAction extends AbstractAction {
         switch(nav.getType()) {    
         case LIST:        
             if (nav.isShared()){            
-                return I18n.tr("Delete list {0}?  This will stop sharing all of these files.", nav.getDisplayText());
+                return I18n.tr("Delete list {0}?  This will stop sharing all of these files, but won't delete them from disk.", nav.getDisplayText());
             } else {
                 return I18n.tr("Delete list {0}?", nav.getDisplayText());                
             }
         case PUBLIC_SHARED:  
             if (nav.isShared()){            
-                return I18n.tr("Delete list {0}?  This will stop sharing all of these files with the world.", nav.getDisplayText());
+                return I18n.tr("Delete list {0}?  This will stop sharing all of these files with the world, but won't delete them from disk.", nav.getDisplayText());
             } else {          
                 return I18n.tr("Delete list {0}?", nav.getDisplayText());
             }
