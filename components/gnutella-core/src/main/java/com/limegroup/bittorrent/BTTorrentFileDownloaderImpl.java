@@ -148,11 +148,11 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                 LOG.error("Error downloading torrent: " + torrentURI, iox);
             }
         } finally {
-            deleteIncompleteFiles();
             IOUtils.close(torrentInputStream);
             IOUtils.close(torrentDownloadStream);
             IOUtils.close(torrentOutputStream);
             httpExecutor.releaseResources(response);
+            deleteIncompleteFiles();
         }
 
         eventListenerList.broadcast(new DownloadStateEvent(this, downloadStatus));
