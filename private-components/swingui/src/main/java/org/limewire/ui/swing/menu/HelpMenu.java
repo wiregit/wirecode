@@ -24,8 +24,6 @@ class HelpMenu extends MnemonicMenu {
     public HelpMenu(Application application, final TrayNotifier trayNotifier, final Navigator navigator, final HomeMediator homeMediator) {
         super(I18n.tr("&Help"));
 
-        add(new UrlAction(I18n.tr("&Using LimeWire"), "http://www.limewire.com/client_redirect/?page=support"));
-        
         add(new AbstractAction(I18n.tr("&Home Screen")) {
             @Override
            public void actionPerformed(ActionEvent e) {
@@ -33,6 +31,8 @@ class HelpMenu extends MnemonicMenu {
                 homeMediator.getComponent().loadDefaultUrl();
            }
         });
+        
+        add(new UrlAction(I18n.tr("&Using LimeWire"), "http://www.limewire.com/client_redirect/?page=support"));
         
         add(new UrlAction(I18n.tr("&FAQ"), "http://www.limewire.com/client_redirect/?page=faq"));
         
