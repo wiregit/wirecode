@@ -26,7 +26,7 @@ class AddFileAction extends AbstractAction {
 
     @Inject
     public AddFileAction(LibraryManager libraryManager, LibrarySupport librarySupport) {
-        super(I18n.tr("Add F&ile to Library..."));
+        super(I18n.tr("&Add to Library..."));
         this.libraryManager = libraryManager;
         this.librarySupport = librarySupport;
     }
@@ -34,7 +34,7 @@ class AddFileAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         List<File> files = FileChooser.getInput(GuiUtils.getMainFrame(), I18n.tr("Add to Library"),
-                I18n.tr("Add Files"), FileChooser.getLastInputDirectory(),
+                I18n.tr("Add to Library"), FileChooser.getLastInputDirectory(),
                 JFileChooser.FILES_AND_DIRECTORIES, JFileChooser.APPROVE_OPTION, true,
                 new FileFilter() {
                     @Override
