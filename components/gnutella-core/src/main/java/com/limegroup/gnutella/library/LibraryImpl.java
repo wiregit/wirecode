@@ -32,6 +32,7 @@ import org.limewire.concurrent.ListeningFutureTask;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileProcessingEvent;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
@@ -46,6 +47,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -1151,8 +1153,18 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public boolean isFileAddable(File file) {
-        //additional checks happen in the add method already.
-        //TODO but for the ui to show properly, should probably at least check if the file is a program and return false if programs are turned off
+        if(file == null) {
+            return false;
+        }
+        
+        if(file.isDirectory()) {
+            return true;
+        }
+        
+        MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
+        if(MediaType.getProgramMediaType().equals(mediaType) && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+            return false;
+        }
         return true;
     }
 
