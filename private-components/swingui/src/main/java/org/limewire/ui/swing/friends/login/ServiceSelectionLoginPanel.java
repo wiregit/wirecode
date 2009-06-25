@@ -14,6 +14,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.limewire.core.settings.FacebookSettings;
+import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
@@ -39,10 +41,10 @@ public class ServiceSelectionLoginPanel extends JPanel {
     @Resource private Icon chatIcon;
     
     private final LoginPopupPanel parent;
-    
+
     @Inject
     public ServiceSelectionLoginPanel(LoginPopupPanel parent, FriendAccountConfigurationManager accountManager,
-            ButtonDecorator buttonDecorator) {
+            ButtonDecorator buttonDecorator, FriendConnectionFactory friendConnectionFactory) {
         
         super(new BorderLayout());
         setOpaque(false);
@@ -93,8 +95,8 @@ public class ServiceSelectionLoginPanel extends JPanel {
         JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
         bottomPanel.setOpaque(false);
         
-        JXButton facebookButton = new JXButton("Facebook", facebookIcon);
-        facebookButton.setVisible(false);
+        JXButton facebookButton = new JXButton(new FacebookLoginAction(accountManager.getConfig("Facebook"), friendConnectionFactory, parent));
+        facebookButton.setVisible(FacebookSettings.FACEBOOK_ENABLED.get());
         JXButton gmailButton = new JXButton(new ServiceAction(accountManager.getConfig("Gmail")));
         JXButton liveJournalButton = new JXButton(new ServiceAction(accountManager.getConfig("LiveJournal")));
         JXButton otherButton = new JXButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber")));
