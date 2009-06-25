@@ -39,6 +39,7 @@ import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
+import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
@@ -141,7 +142,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
             HeaderBarDecorator headerBarDecorator,
-            CategoryIconManager categoryIconManager) {
+            CategoryIconManager categoryIconManager, 
+            ChatFrame chatFrame) {
 
         GuiUtils.assignResources(this);
         
@@ -151,7 +153,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
-        this.browseFailedPanel = new BrowseFailedMessagePanel(searchResultsModel);
+        this.browseFailedPanel = new BrowseFailedMessagePanel(chatFrame, searchResultsModel);
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);

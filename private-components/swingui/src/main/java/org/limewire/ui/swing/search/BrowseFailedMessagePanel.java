@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,6 +20,7 @@ import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.MessageComponent.MessageBackground;
+import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -29,11 +30,11 @@ import org.limewire.ui.swing.util.I18n;
  */
 public class BrowseFailedMessagePanel extends JPanel {
 
-    @Resource private Icon arrow;
     @Resource private Font chatFont;
     @Resource private Color chatForeground;
 
     private final SearchResultsModel searchResultsModel;
+    private final ChatFrame chatFrame;
 
     private BrowseSearch browseSearch;
     
@@ -43,8 +44,9 @@ public class BrowseFailedMessagePanel extends JPanel {
 
     private List<Friend> friends;
 
-    public BrowseFailedMessagePanel(SearchResultsModel searchResultsModel) {
+    public BrowseFailedMessagePanel(ChatFrame chatFrame, SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
+        this.chatFrame = chatFrame;
         this.searchResultsModel = searchResultsModel;
     }
     
@@ -111,16 +113,23 @@ public class BrowseFailedMessagePanel extends JPanel {
     
     private JComponent createBottomComponent(){
         if(state == BrowseState.NO_FRIENDS_SHARING){
-            JLabel message = new JLabel("Chat and tell them to sign on");
+            JLabel message = new JLabel("Chat and tell them to sign on.");
             message.setFont(chatFont);
             message.setForeground(chatForeground);
             message.setVerticalTextPosition(JLabel.TOP);
             
-            JLabel arrowLabel = new JLabel(arrow);
+            JButton chat = new HyperlinkButton(I18n.tr("Chat"));
+            chat.setFont(chatFont);
+            chat.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    chatFrame.setVisibility(true);
+                }                
+            });
             
             JPanel panel = new JPanel(new MigLayout("insets 0, gap 0, novisualpadding"));
-            panel.add(message, "aligny bottom, gapbottom " + (10 + arrowLabel.getPreferredSize().height/2));
-            panel.add(arrowLabel, "aligny bottom, gapleft 10, gapright 16, gapbottom 10");
+            panel.add(message);
+            panel.add(chat, "gapleft 10, gapright 10");
             return panel;
         }
         return new JLabel();
