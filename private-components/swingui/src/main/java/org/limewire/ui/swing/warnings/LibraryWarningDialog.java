@@ -141,7 +141,7 @@ class LibraryWarningDialog extends LimeJDialog {
                                 folder.getName());
             } else {
                 return I18n
-                        .tr("What kind of files do you want to share with selected friends from these fodlers and their subfolders?");
+                        .tr("What kind of files do you want to share with selected friends from these folders and their subfolders?");
             }
         }
     }
