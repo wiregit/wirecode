@@ -71,7 +71,7 @@ public class DownloadTable extends MouseableTable {
 	public DownloadTable(DownloadTitleRenderer downloadTitleRenderer, DownloadProgressRenderer downloadProgressRenderer, 
 	        DownloadMessageRenderer downloadMessageRenderer, DownloadCancelRendererEditor cancelEditor,
 	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, DownloadPopupHandlerFactory downloadPopupHandlerFactory,
-	        @Assisted EventList<DownloadItem> downloadItems) {
+	        @Assisted EventList<DownloadItem> downloadItems, DownloadableTransferHandler downloadableTransferHandler) {
         
         GuiUtils.assignResources(this);
                 
@@ -100,7 +100,7 @@ public class DownloadTable extends MouseableTable {
         setUpColumn(DownloadTableFormat.ACTION_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
         setUpColumn(DownloadTableFormat.CANCEL, new DownloadCancelRendererEditor(), cancelMinWidth, cancelPrefWidth, cancelMaxWidth);
         
-        setTransferHandler(new DownloadableTransferHandler(selectedItems));
+        setTransferHandler(downloadableTransferHandler);
         setDragEnabled(true);
         setRowHeight(rowHeight);        
     }
