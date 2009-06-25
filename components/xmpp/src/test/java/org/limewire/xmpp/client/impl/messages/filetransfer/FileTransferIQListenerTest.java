@@ -5,34 +5,32 @@ import java.util.Map;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.api.Invocation;
-import org.jmock.lib.action.CustomAction;
-import org.limewire.listener.EventBroadcaster;
-import org.limewire.util.BaseTestCase;
-import org.limewire.friend.api.FileOffer;
-import org.limewire.friend.api.FileOfferEvent;
+import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.friend.api.feature.FeatureTransport.Handler;
 import org.limewire.friend.impl.FileMetaDataImpl;
 import org.limewire.friend.impl.FileMetaDataImpl.Element;
+import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ.TransferType;
 
 public class FileTransferIQListenerTest extends BaseTestCase {
 
     private Mockery context;
-    private EventBroadcaster eventBroadcaster;
     private FileTransferIQListener fileTransferIQListener;
+    private Handler<FileMetaData> fileMetaDataHandler;
 
     public FileTransferIQListenerTest(String name) {
         super(name);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
-        eventBroadcaster = context.mock(EventBroadcaster.class);
-        fileTransferIQListener = new FileTransferIQListener(null, null);  // TODO this is broken
+        fileMetaDataHandler = context.mock(FeatureTransport.Handler.class);
+        fileTransferIQListener = new FileTransferIQListener(null, fileMetaDataHandler);
     }
 
-    @SuppressWarnings("unchecked")
     public void testProcessPacketFiresEvent() {
         Map<Element, String> data = new EnumMap<Element, String>(Element.class);
         data.put(Element.index, "2");
@@ -45,18 +43,7 @@ public class FileTransferIQListenerTest extends BaseTestCase {
         fileTransferIQ.setFrom("me@you.com");
         
         context.checking(new Expectations() {{
-            one(eventBroadcaster).broadcast(with(any(FileOfferEvent.class)));
-            will(new CustomAction("assert") {
-                @Override
-                public Object invoke(Invocation invocation) throws Throwable {
-                    FileOfferEvent event = (FileOfferEvent)invocation.getParameter(0);
-                    assertEquals(FileOfferEvent.Type.OFFER, event.getType());
-                    FileOffer fileOffer = event.getData();
-                    assertEquals("me@you.com", fileOffer.getFromJID());
-                    assertSame(fileMetaData, fileOffer.getFile());
-                    return null;
-                }
-            });
+            one(fileMetaDataHandler).featureReceived("me@you.com", fileMetaData);
         }});
         
         fileTransferIQListener.processPacket(fileTransferIQ);
