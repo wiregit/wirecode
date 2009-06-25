@@ -3,35 +3,39 @@ package org.limewire.ui.swing.library.navigator;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.FocusManager;
-import javax.swing.JDialog;
+import javax.swing.SwingUtilities;
 
-import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.library.CreateListPanel;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-
+/**
+ * Creates a new PlayList with the name "Untitled", selects
+ * that PlayList and then enables editing on it.
+ */
 class CreateListAction extends AbstractAction {
-    
-    private final Provider<CreateListPanel> createListPanel;
-    private JDialog dialog;
+
+    private final Provider<SharedFileListManager> shareManager;
+    private final Provider<LibraryNavigatorTable> navTable;
     
     @Inject
-    public CreateListAction(Provider<CreateListPanel> createListPanel) {
-        this.createListPanel = createListPanel;
+    public CreateListAction(Provider<SharedFileListManager> shareManager,
+            Provider<LibraryNavigatorTable> navTable) {
+        this.shareManager = shareManager;
+        this.navTable = navTable;
     }
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(dialog == null) {
-            dialog = FocusJOptionPane.createDialog(I18n.tr("Create List"), null, createListPanel.get());
-        }
-        if(!dialog.isVisible()) {
-            dialog.setLocationRelativeTo(FocusManager.getCurrentManager().getFocusOwner());
-            dialog.setVisible(true);
-        }
+        final int id = shareManager.get().createNewSharedFileList(I18n.tr("Untitled"));
+        navTable.get().selectLibraryNavItem(id);
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                navTable.get().setEditable(true);
+                navTable.get().editCellAt(navTable.get().getSelectedRow(), 0);                
+            }
+        });
     }
 }
