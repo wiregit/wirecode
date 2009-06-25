@@ -18,6 +18,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.listener.MousePopupListener;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
@@ -26,6 +27,7 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.NameRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TableColumnSelector;
+import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
@@ -105,6 +107,8 @@ public class LibraryTable extends MouseableTable {
         setDragEnabled(true);
         setRowHeight(rowHeight);
         setDropMode(DropMode.ON);
+        
+        setDoubleClickHandler(new DoubleClickHandler());
     }
     
     private void uninstallListeners() {
@@ -249,7 +253,6 @@ public class LibraryTable extends MouseableTable {
                 setCellEditor(VideoTableFormat.ACTION_INDEX, removeEditor);
                 break;
             case IMAGE:
-//                setCellRenderer(ImageTableFormat.NAME_INDEX, nameRenderer.get());
                 setCellRenderer(ImageTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(ImageTableFormat.ACTION_INDEX, removeRenderer.get());
                 setCellEditor(ImageTableFormat.ACTION_INDEX, removeEditor);
@@ -294,5 +297,16 @@ public class LibraryTable extends MouseableTable {
     /** Returns all currently selected LocalFileItems. */
     public List<LocalFileItem> getSelection() {
         return cachedEventSelectionModel.getSelected();
+    }
+    
+    /**
+     * Handles double clicking a row in the library table.
+     */
+    private class DoubleClickHandler implements TableDoubleClickHandler{
+        @Override
+        public void handleDoubleClick(int row) {
+            File file = getSelectedItem().getFile();
+            PlayerUtils.playOrLaunch(file);
+        }
     }
 }
