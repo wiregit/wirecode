@@ -108,10 +108,12 @@ public class DownloadTableMenu extends JPopupMenu{
                 add(createChangeLocactionMenuItem());
             }
             addSeparator();
-            boolean hasBrowse = maybeAddBrowseMenu(downloadItem.getRemoteHosts());
-            boolean hasBlock = maybeAddBlockMenu(downloadItem.getRemoteHosts());
-            if(hasBrowse || hasBlock){
-                addSeparator();
+            if (!downloadItem.isStoreDownload()) {
+                boolean hasBrowse = maybeAddBrowseMenu(downloadItem.getRemoteHosts());
+                boolean hasBlock = maybeAddBlockMenu(downloadItem.getRemoteHosts());
+                if (hasBrowse || hasBlock) {
+                    addSeparator();
+                }
             }
             if(state == DownloadState.ERROR){
                 add(createCancelWithRemoveNameMenuItem());
@@ -130,6 +132,7 @@ public class DownloadTableMenu extends JPopupMenu{
         boolean hasResume = false;
         boolean allDone = true;
 
+        //hosts to browse or block
         List<RemoteHost> hosts = new ArrayList<RemoteHost>();
         
         //Check which menu items to include.  Items are included if they are valid
@@ -156,6 +159,7 @@ public class DownloadTableMenu extends JPopupMenu{
             } 
             
             if(!item.isStoreDownload()){
+                //no browsing or blocking the store
                 hosts.addAll(item.getRemoteHosts());
             }
         }
