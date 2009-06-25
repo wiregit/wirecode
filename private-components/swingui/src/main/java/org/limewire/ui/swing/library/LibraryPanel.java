@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -293,6 +294,7 @@ public class LibraryPanel extends JPanel {
         addFilesButton.setIcon(plusIcon);
         addFilesButton.setRolloverIcon(plusIcon);
         addFilesButton.setPressedIcon(plusIcon);
+        addFilesButton.setPreferredSize(new Dimension(getPreferredSize().width, 23));
         addFilesButton.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         buttonDecorator.decorateDarkFullImageButton(addFilesButton, AccentType.SHADOW);
     }
