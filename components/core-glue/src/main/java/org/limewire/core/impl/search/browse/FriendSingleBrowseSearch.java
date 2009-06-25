@@ -67,6 +67,9 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
         if (library == null) {
             // Failed!
            fireBrowseStatusChanged(BrowseState.OFFLINE, friend);
+           for (SearchListener listener : searchListeners) {
+               listener.searchStopped(FriendSingleBrowseSearch.this);
+           }  
             
         } else {
             if(library.getState() == LibraryState.LOADING){

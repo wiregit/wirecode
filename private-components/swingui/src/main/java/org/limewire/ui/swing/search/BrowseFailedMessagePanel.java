@@ -16,7 +16,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
-import org.limewire.core.settings.FriendBrowseSettings;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
@@ -130,16 +129,12 @@ public class BrowseFailedMessagePanel extends JPanel {
 
     private String getLabelText() {
         if (state == BrowseState.NO_FRIENDS_SHARING) {
-            if (FriendBrowseSettings.HAS_BROWSED_ALL_FRIENDS.get()) {
-                return I18n.tr("No friends are on LimeWire");
-            } else {
-                return I18n.tr("No friends are sharing with you");
-            }
+            return I18n.tr("No friends are sharing with you");
         } else if (state == BrowseState.OFFLINE){
             if (friends.size() == 1) {
-                return I18n.tr("{0} signed off LimeWire.", friends.get(0).getRenderName());
+                return I18n.tr("{0} is not signed on to LimeWire.", friends.get(0).getRenderName());
             } else {
-                return I18n.tr("These people signed off LimeWire.");
+                return I18n.tr("These people are not signed on to LimeWire.");
             }
             
         } else {
