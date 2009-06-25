@@ -72,6 +72,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.painter.GenericBarPainter;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -104,6 +105,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final ChatFriend chatFriend;
 //    private final ShareListManager shareListManager;
     private final Provider<IconManager> iconManager;
+    private final RemoteHostActions remoteHostActions;
 //    private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
     private HyperlinkButton nosaveLink;
@@ -129,7 +131,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     @Inject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             SharedFileListManager libraryManager, Provider<IconManager> iconManager,
-                            ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
+                            ChatHyperlinkListenerFactory chatHyperlinkListenerFactory, RemoteHostActions remoteHostActions,
                             @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
         this.writer = writer;
         this.chatFriend = chatFriend;
@@ -140,6 +142,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         this.iconManager = iconManager;
 //        this.libraryNavigator = libraryNavigator;
         this.noSaveState = null;
+        this.remoteHostActions = remoteHostActions;
         
         GuiUtils.assignResources(this);
 
@@ -530,8 +533,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            throw new IllegalStateException("action doesn't exist");
-//            libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
+            remoteHostActions.viewLibraryOf(chatFriend.getFriend());
         }
     }
 
