@@ -229,14 +229,21 @@ class LibrarySharingEditablePanel {
     }
     
     private class FriendComparator implements Comparator<EditableSharingData> {
-
         @Override
         public int compare(EditableSharingData data1, EditableSharingData data2) {
             Friend friend1 = data1.getFriend();
             Friend friend2 = data2.getFriend();
             if(friend1 == friend2)
                 return 0;
-            return friend1.getRenderName().compareToIgnoreCase(friend2.getRenderName());
+            if(friend1 == null || friend2 == null) {
+                if(friend1 == null && friend2 == null)
+                    return 0;
+                else if(friend1 == null)
+                    return 1;
+                else
+                    return -1;
+            } else
+                return friend1.getRenderName().compareToIgnoreCase(friend2.getRenderName());
         }
     }
     
