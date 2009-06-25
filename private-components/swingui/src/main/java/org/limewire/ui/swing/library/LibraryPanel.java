@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -18,6 +19,7 @@ import javax.swing.table.JTableHeader;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
@@ -50,6 +52,7 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -61,6 +64,9 @@ import com.google.inject.Provider;
 @LazySingleton
 public class LibraryPanel extends JPanel {
 
+    @Resource
+    private Icon plusIcon;
+    
     private static final String TABLE = "TABLE";
     private static final String LIST = "LIST";
     
@@ -104,6 +110,8 @@ public class LibraryPanel extends JPanel {
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
 //        this.ghostGlassPane = ghostGlassPane;
+        
+        GuiUtils.assignResources(this);
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
@@ -281,6 +289,9 @@ public class LibraryPanel extends JPanel {
     
     private void createAddFilesButton(AddFileAction addFileAction) {
         addFilesButton = new JXButton(addFileAction);
+        addFilesButton.setIcon(plusIcon);
+        addFilesButton.setRolloverIcon(plusIcon);
+        addFilesButton.setPressedIcon(plusIcon);
         addFilesButton.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         buttonDecorator.decorateDarkFullButton(addFilesButton);
     }
