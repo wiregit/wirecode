@@ -12,7 +12,6 @@ import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
-import org.limewire.core.settings.FacebookSettings;
 import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PasswordManager;
 import org.limewire.inject.LazySingleton;
@@ -38,7 +37,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     private boolean loaded = false;
     
     @Resource private Icon gmailIcon;
-    @Resource private Icon ljIcon;
+    @Resource private Icon ljIcon;    
     @Resource private Icon facebookIcon;
     @Resource private Icon gmailIconLarge;
     @Resource private Icon ljIconLarge;
@@ -60,6 +59,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     private void init() {
         loadWellKnownServers();
         loadCustomServer();
+        loaded = true;
     }
     
     /**
@@ -102,12 +102,10 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     }
 
     private void loadWellKnownServers() {
-        if(FacebookSettings.FACEBOOK_ENABLED.getValue()) {
-            FriendAccountConfiguration facebook =
-                new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIcon, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK);
-            facebook.setUsername("Facebook");
-            configs.put(facebook.getLabel(), facebook);
-        }
+        FriendAccountConfiguration facebook =
+            new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIcon, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK);
+        facebook.setUsername("Facebook");
+        configs.put(facebook.getLabel(), facebook);
         FriendAccountConfiguration gmail =
             new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, gmailIconLarge, resource, getGTalkServers(), Network.Type.XMPP);
         configs.put(gmail.getLabel(), gmail);
