@@ -93,13 +93,8 @@ public class ConnectBackRequestIQ extends IQ {
        request = new ConnectBackRequest(connectable, guid, fwtVersion);
     }
     
-    /**
-     * 
-     * @param address needs to be a valid address, otherwise will throw {@link IllegalArgumentException}
-     * @param supportedFWTVersion 0 if fwt is not supported
-     */
     public ConnectBackRequestIQ(ConnectBackRequest request) {
-        this.request = request;
+        this.request = Objects.nonNull(request, "request");
     }
 
     @Override

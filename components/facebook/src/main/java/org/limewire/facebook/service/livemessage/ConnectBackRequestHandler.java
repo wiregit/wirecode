@@ -21,7 +21,6 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.Inject;
 
 /**
  * Handles incoming connect back request through the facebook connection and

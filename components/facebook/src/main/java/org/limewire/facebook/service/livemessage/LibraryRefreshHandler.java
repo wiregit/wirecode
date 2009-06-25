@@ -11,7 +11,6 @@ import org.limewire.friend.api.feature.LibraryChangedNotifier;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.Inject;
 
 public class LibraryRefreshHandler implements FeatureTransport<LibraryChangedNotifier>, LiveMessageHandler {
     

@@ -25,7 +25,6 @@ public class FileTransferIQListenerTest extends BaseTestCase {
         super(name);
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();

@@ -8,7 +8,6 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.Inject;
 
 public class PresenceHandler implements LiveMessageHandler {
 

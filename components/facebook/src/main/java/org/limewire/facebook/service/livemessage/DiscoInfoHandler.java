@@ -15,9 +15,9 @@ import org.limewire.facebook.service.FacebookFriendConnection;
 import org.limewire.facebook.service.FacebookFriendPresence;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.FriendPresenceEvent;
-import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -25,7 +25,6 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.Inject;
 
 public class DiscoInfoHandler implements LiveMessageHandler {
 

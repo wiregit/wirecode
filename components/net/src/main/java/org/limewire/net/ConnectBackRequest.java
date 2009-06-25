@@ -2,6 +2,7 @@ package org.limewire.net;
 
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
+import org.limewire.io.NetworkUtils;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
@@ -16,10 +17,16 @@ public class ConnectBackRequest {
     
     private int hashCode = -1;
 
+    /**
+     * @param address must be public and have a valid port
+     */
     public ConnectBackRequest(Connectable address, GUID clientGuid, int supportedFWTVersion) {
         this.address = Objects.nonNull(address, "address");
         this.clientGuid = Objects.nonNull(clientGuid, "clientGuid");
         this.supportedFWTVersion = supportedFWTVersion;
+        if (!NetworkUtils.isValidIpPort(address)) {
+            throw new IllegalArgumentException("invalid address: " + address);
+        }
     }
     
     public Connectable getAddress() {

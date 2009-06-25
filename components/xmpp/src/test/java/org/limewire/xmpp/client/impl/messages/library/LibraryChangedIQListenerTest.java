@@ -36,7 +36,6 @@ public class LibraryChangedIQListenerTest extends BaseTestCase {
         libraryChangedIQListener = new LibraryChangedIQListener(handler, connection); 
     }
     
-    @SuppressWarnings("unchecked")
     public void testProcessFiresLibraryChangedEvent() {
         LibraryChangedIQ libraryChangedIQ = new LibraryChangedIQ();
         libraryChangedIQ.setType(Type.SET);
