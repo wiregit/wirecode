@@ -2,8 +2,6 @@ package org.limewire.ui.swing.friends.login;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.JFrame;
-
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.listener.EventListener;
@@ -14,6 +12,7 @@ import org.limewire.ui.swing.browser.UriAction;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.mozilla.browser.XPCOMUtils;
+import org.mozilla.browser.MozillaPanel.VisibilityMode;
 import org.mozilla.browser.impl.ChromeAdapter;
 import org.mozilla.interfaces.nsICookieService;
 import org.mozilla.interfaces.nsIDOMEvent;
@@ -40,8 +39,7 @@ class FacebookLoginAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        final JFrame dialog = new JFrame();
-        final Browser browser = new Browser() {
+        final Browser browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT) {
             @Override
             public void onAttachBrowser(ChromeAdapter chromeAdapter,
                     ChromeAdapter parentChromeAdapter) {
@@ -74,7 +72,6 @@ class FacebookLoginAction extends AbstractAction {
                             config.setAttribute("url", "http://facebook.com/");
                             config.setAttribute("cookie", cookie);
                             friendConnectionFactory.login(config);
-                            dialog.setVisible(false);
                             loginPanel.finished();
                         } else if (url.contains("login")) {
                             String script = "(function() {" +
@@ -94,10 +91,7 @@ class FacebookLoginAction extends AbstractAction {
                 }, true);
             }
         };
-        dialog.getContentPane().add(browser);
-        dialog.pack();
-        dialog.setSize(800, 600);
-        dialog.setVisible(true);
+        loginPanel.setLoginComponent(browser);
         friendConnectionFactory.requestLoginUrl(config).addFutureListener(new EventListener<FutureEvent<String>>() {
             @Override
             public void handleEvent(FutureEvent<String> event) {

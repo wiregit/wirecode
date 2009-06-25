@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -24,6 +25,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class ServiceSelectionLoginPanel extends JPanel {
     
@@ -41,17 +43,20 @@ public class ServiceSelectionLoginPanel extends JPanel {
     @Resource private Icon chatIcon;
     
     private final LoginPopupPanel parent;
+    private final Provider<XMPPUserEntryLoginPanelFactory> xmppLoginPanelFactory;
 
     @Inject
     public ServiceSelectionLoginPanel(LoginPopupPanel parent, FriendAccountConfigurationManager accountManager,
-            ButtonDecorator buttonDecorator, FriendConnectionFactory friendConnectionFactory) {
+            ButtonDecorator buttonDecorator, FriendConnectionFactory friendConnectionFactory,
+            Provider<XMPPUserEntryLoginPanelFactory> xmppLoginPanelFactory) {
         
         super(new BorderLayout());
         setOpaque(false);
     
         GuiUtils.assignResources(this);
         
-        this.parent = parent;        
+        this.parent = parent;
+        this.xmppLoginPanelFactory = xmppLoginPanelFactory;
         
         JPanel topPanel = new JPanel(new MigLayout("insets 0, gap 0, alignx center, flowy"));
         
@@ -96,7 +101,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         bottomPanel.setOpaque(false);
         
         JXButton facebookButton = new JXButton(new FacebookLoginAction(accountManager.getConfig("Facebook"), friendConnectionFactory, parent));
-        facebookButton.setVisible(FacebookSettings.FACEBOOK_ENABLED.get());
+        facebookButton.setVisible(FacebookSettings.FACEBOOK_ENABLED.getValue());
         JXButton gmailButton = new JXButton(new ServiceAction(accountManager.getConfig("Gmail")));
         JXButton liveJournalButton = new JXButton(new ServiceAction(accountManager.getConfig("LiveJournal")));
         JXButton otherButton = new JXButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber")));
@@ -140,7 +145,9 @@ public class ServiceSelectionLoginPanel extends JPanel {
         
         @Override
         public void actionPerformed(ActionEvent arg0) {
-            parent.setSelectedService((FriendAccountConfiguration)getValue(CONFIG));
+            FriendAccountConfiguration config = (FriendAccountConfiguration)getValue(CONFIG);
+            JComponent component = xmppLoginPanelFactory.get().create(config);
+            parent.setLoginComponent(component);
         }
         
     }

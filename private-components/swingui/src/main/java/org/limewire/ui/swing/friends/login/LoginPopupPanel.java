@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
@@ -20,7 +21,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
-import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -43,17 +43,13 @@ public class LoginPopupPanel extends Panel implements Resizable {
     @Resource private Icon closeIconPressed;
     
     private final Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider;
-    private final XMPPUserEntryLoginPanelFactory xmppUserEntryLoginPanelFactory;
     
     private JXPanel frame = null;
     private JPanel contentPanel = null;
     
     @Inject
-    public LoginPopupPanel(Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider,
-            XMPPUserEntryLoginPanelFactory generalUserEntryLoginPanelFactory) {
-        
+    public LoginPopupPanel(Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider) {        
         this.serviceSelectionLoginPanelProvider = serviceSelectionLoginPanelProvider;
-        this.xmppUserEntryLoginPanelFactory = generalUserEntryLoginPanelFactory;
        
         GuiUtils.assignResources(this);
         
@@ -137,18 +133,10 @@ public class LoginPopupPanel extends Panel implements Resizable {
     }
     
     /**
-     * Reports back a non xmmp service selection, (ie. facebook)
+     * Sets the login component for a given service.
      */
-    public void setSelectedService() {
-        
-    }
-    
-    /**
-     * Reports back an friend service selection
-     */
-    public void setSelectedService(FriendAccountConfiguration config) {
+    public void setLoginComponent(JComponent loginPanel) {
         contentPanel.removeAll();
-        XMPPUserEntryLoginPanel loginPanel = xmppUserEntryLoginPanelFactory.create(config);
         contentPanel.add(loginPanel, BorderLayout.CENTER);
         loginPanel.requestFocusInWindow();
         contentPanel.repaint();
