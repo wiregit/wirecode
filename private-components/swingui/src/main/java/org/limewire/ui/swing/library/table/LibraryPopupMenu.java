@@ -24,6 +24,7 @@ public class LibraryPopupMenu extends JPopupMenu {
     private final Provider<RemoveFromListAction> removeListAction;
     private final Provider<RemoveFromAllListAction> removeFromAllListAction;
     private final Provider<AddToListMenu> addToListMenu;
+    private final Provider<ShowInListMenu> showInListMenu;
     private final RemoveFromLibraryAction removeAction;
     private final DeleteAction deleteAction;
     private final Provider<ViewFileInfoAction> fileInfoAction;
@@ -34,6 +35,7 @@ public class LibraryPopupMenu extends JPopupMenu {
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
             Provider<PlayAction> playAction, RemoveFromLibraryAction removeAction,
             Provider<RemoveFromListAction> removeListAction, Provider<AddToListMenu> addToListMenu,
+            Provider<ShowInListMenu> showInListMenu,
             DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryNavigatorPanel = libraryNavigatorPanel;
@@ -42,6 +44,7 @@ public class LibraryPopupMenu extends JPopupMenu {
         this.removeListAction = removeListAction;
         this.removeFromAllListAction = removeFromAllListAction;
         this.addToListMenu = addToListMenu;
+        this.showInListMenu = showInListMenu;
         this.playAction = playAction;
         this.removeAction = removeAction;
         this.deleteAction = deleteAction;
@@ -60,8 +63,10 @@ public class LibraryPopupMenu extends JPopupMenu {
             
             add(addToListMenu.get());
             if(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY) {
+                add(showInListMenu.get());
                 add(removeListAction.get());
             } else {
+                add(showInListMenu.get());
                 add(removeFromAllListAction.get());
             }
             addSeparator();

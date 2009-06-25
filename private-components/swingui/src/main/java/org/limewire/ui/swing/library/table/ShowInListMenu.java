@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Icon;
@@ -16,16 +15,16 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.library.LibrarySelected;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class AddToListMenu extends JMenu {
-    
+public class ShowInListMenu extends JMenu {
+
     @Resource
     private Icon publicIcon;
     @Resource
@@ -34,31 +33,39 @@ public class AddToListMenu extends JMenu {
     private Icon sharedIcon;
     
     private final Provider<List<File>> selectedFiles;
+    private final LibraryPanel libraryPanel;
     
     @Inject
-    public AddToListMenu(final SharedFileListManager manager,
+    public ShowInListMenu(final SharedFileListManager manager,
+            @LibrarySelected Provider<List<File>> selectedFiles,
             final @LibrarySelected Provider<LocalFileList> selectedLocalFileList,
-            @LibrarySelected Provider<List<File>> selectedFiles) {
-        super("Add to List");
+            LibraryPanel libraryPanel) {
+        super("Show in List");
         
         GuiUtils.assignResources(this);
         
         this.selectedFiles = selectedFiles;
+        this.libraryPanel = libraryPanel;
         
         addChangeListener(new ChangeListener(){
             @Override
             public void stateChanged(ChangeEvent e) {
-                JMenu menu = AddToListMenu.this;
+                JMenu menu = ShowInListMenu.this;
                 menu.removeAll();
+                
+                File selectedFile = ShowInListMenu.this.selectedFiles.get().get(0);
                 // once this is selected, show all the submenus
                 manager.getModel().getReadWriteLock().readLock().lock();
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
-                        menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled(fileList != selectedLocalFileList.get());
+                        if(fileList.contains(selectedFile))
+                            menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled(fileList != selectedLocalFileList.get());
                     }
                 } finally {
                     manager.getModel().getReadWriteLock().readLock().unlock();
                 }
+                if(menu.getMenuComponentCount() < 1)
+                    menu.add(new JMenuItem(I18n.tr("empty"))).setEnabled(false);
             }
             
         });
@@ -76,24 +83,18 @@ public class AddToListMenu extends JMenu {
     }
     
     private class AddListAction extends AbstractAction {
-        private final LocalFileList localFileList;
+        private final SharedFileList sharedFileList;
         
-        public AddListAction(String text, Icon icon, LocalFileList localFileList) {
+        public AddListAction(String text, Icon icon, SharedFileList sharedFileList) {
             super(text);
             putValue(SMALL_ICON, icon);
-            this.localFileList = localFileList;
+            this.sharedFileList = sharedFileList;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {
-                    List<File> selected = new ArrayList<File>(selectedFiles.get());
-                    for(File file : selected) {
-                        localFileList.addFile(file);
-                    }                    
-                }
-            });
+            libraryPanel.selectLocalFileList(sharedFileList);
+            libraryPanel.selectAndScrollTo(selectedFiles.get().get(0));
         }
     }
 }
