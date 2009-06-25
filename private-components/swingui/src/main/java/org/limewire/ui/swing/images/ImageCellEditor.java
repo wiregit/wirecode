@@ -37,6 +37,10 @@ public class ImageCellEditor extends JPanel {
         add(removeButton, "alignx right, aligny top, wrap, gaptop 6, gapright 6");
     }
     
+    public void setShowButtons(boolean value) {
+        removeButton.setVisible(value);
+    }
+    
     public JButton getRemoveButton() {
         return removeButton;
     }

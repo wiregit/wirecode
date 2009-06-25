@@ -31,6 +31,7 @@ public class ImageCellRenderer extends JPanel implements ListCellRenderer {
     
     private final ThumbnailManager thumbnailManager;
     private final ImageRenderer imageRenderer;
+    private final RemoveButton removeButton;
     
     @Resource protected Color cellBackgroundColor;
     @Resource protected Color cellBorderColor;
@@ -47,6 +48,7 @@ public class ImageCellRenderer extends JPanel implements ListCellRenderer {
     public ImageCellRenderer(ThumbnailManager thumbnailManager, ImageRenderer imageRenderer, RemoveButton removeButton) {
         this.thumbnailManager = thumbnailManager;
         this.imageRenderer = imageRenderer;
+        this.removeButton = removeButton;
         
         GuiUtils.assignResources(this);
         
@@ -55,7 +57,7 @@ public class ImageCellRenderer extends JPanel implements ListCellRenderer {
         setPreferredSize(new Dimension(width, height));
         setSize(getPreferredSize());
         setBackground(cellBackgroundColor);
-        setLayout(new MigLayout("debug, insets 0, gap 0, fill"));
+        setLayout(new MigLayout("insets 0, gap 0, fill"));
         add(removeButton, "gaptop 5, gapright 5, alignx right, aligny top, wrap");
         add(imageRenderer, "grow, alignx 50%");
         
@@ -65,6 +67,10 @@ public class ImageCellRenderer extends JPanel implements ListCellRenderer {
     
     public Insets getPaddingInsets() {
         return new Insets(insetTop, insetLeft, insetBottom, insetRight);
+    }
+    
+    public void setShowButtons(boolean value) {
+        removeButton.setVisible(value);
     }
     
     @Override

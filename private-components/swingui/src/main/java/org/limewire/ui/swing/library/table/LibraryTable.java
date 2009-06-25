@@ -55,10 +55,8 @@ public class LibraryTable extends MouseableTable {
     private Provider<DefaultLibraryRenderer> defaultCellRenderer;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
-//    private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
     private final Provider<NameRenderer> nameRenderer;
-//    private final Provider<IconManager> iconManager;
     private final Provider<RemoveRenderer> removeRenderer;
     private final Provider<IsPlayingRenderer> isPlayingRenderer;
     private final IconLabelRenderer iconLabelRenderer;
@@ -68,10 +66,8 @@ public class LibraryTable extends MouseableTable {
     public LibraryTable(Provider<DefaultLibraryRenderer> defaultCellRenderer,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer,
-//            Provider<CalendarRenderer> calendarRenderer,
             Provider<QualityRenderer> qualityRenderer,
             Provider<NameRenderer> nameRenderer,
-//            Provider<IconManager> iconManager,
             Provider<LibraryPopupMenu> libraryPopupMenu,
             Provider<RemoveRenderer> removeRenderer,
             Provider<IsPlayingRenderer> isPlayingRenderer,
@@ -80,12 +76,10 @@ public class LibraryTable extends MouseableTable {
         this.defaultCellRenderer = defaultCellRenderer;
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
-//        this.calendarRenderer = calendarRenderer;
         this.qualityRenderer = qualityRenderer;
         this.nameRenderer = nameRenderer;
         this.removeRenderer = removeRenderer;
         this.isPlayingRenderer = isPlayingRenderer;
-//        this.iconManager = iconManager;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
         this.removeEditor = removeEditor;
         
@@ -239,7 +233,6 @@ public class LibraryTable extends MouseableTable {
         if(category != null) {
             switch(category) {
             case AUDIO:
-                //TODO: setup play column renderer/editor
                 setCellRenderer(AudioTableFormat.PLAY_INDEX, isPlayingRenderer.get());
                 setCellRenderer(AudioTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(AudioTableFormat.LENGTH_INDEX, timeRenderer.get());

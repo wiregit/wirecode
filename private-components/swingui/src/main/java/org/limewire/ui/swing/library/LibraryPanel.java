@@ -22,6 +22,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
@@ -72,7 +73,7 @@ public class LibraryPanel extends JPanel {
     private final LocalFileListTransferHandler transferHandler;
     private final Provider<LibraryImageTable> libraryImagePanelProvider;
     private LibraryImageTable libraryImagePanel;
-    private final GhostDragGlassPane ghostGlassPane;
+//    private final GhostDragGlassPane ghostGlassPane;
     
     private JPanel tableListPanel;
     private CardLayout tableListLayout;
@@ -102,7 +103,7 @@ public class LibraryPanel extends JPanel {
         this.categoryMatcher = categoryMatcher;
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
-        this.ghostGlassPane = ghostGlassPane;
+//        this.ghostGlassPane = ghostGlassPane;
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
@@ -262,12 +263,19 @@ public class LibraryPanel extends JPanel {
             setEventList(eventList);
             libraryTable.setupCellRenderers(category, libraryTableFormat);
             libraryTable.applySavedColumnSettings();
+            
+            // hide the remove button for Library Tables
+            TableColumnExt column = libraryTable.getColumnExt(libraryTableFormat.getColumnName(libraryTableFormat.getActionColumn()));
+            if(column != null)
+                column.setVisible(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY);
         } else {
             if(libraryImagePanel == null) {
                 createImageList();
             }
             tableListLayout.show(tableListPanel, LIST);
             setEventListImage(eventList);
+            // hide remove button for library
+            libraryImagePanel.setShowButtons(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY);
         }
     }
     

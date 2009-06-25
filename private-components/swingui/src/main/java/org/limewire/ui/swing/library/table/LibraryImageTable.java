@@ -48,11 +48,15 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     
     private final ImageList imageList;    
     private final JXLayer<JComponent> layer;
+    private final ImageCellEditor imageEditor;
     
     @Inject
     public LibraryImageTable(final ImageList imageList, final ImageCellEditor imageEditor, 
             final LibraryNavigatorPanel navigatorPanel) {
         super(new MigLayout("insets 0 0 0 0, fill"));
+        
+        this.imageEditor = imageEditor;
+        
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundColor);
@@ -92,6 +96,12 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         });
         
         add(layer, "grow");
+    }
+    
+    
+    public void setShowButtons(boolean value) {
+        imageList.getImageCellRenderer().setShowButtons(value);
+        imageEditor.setShowButtons(value);
     }
     
     @Override

@@ -40,6 +40,10 @@ public abstract class AbstractLibraryFormat<T extends FileItem> extends Abstract
     public boolean isEditable(T baseObject, int column) {
         return column == actionIndex;
     }
+    
+    public int getActionColumn() {
+        return actionIndex;
+    }
         
     @Override
     public Class getColumnClass(int column) {
