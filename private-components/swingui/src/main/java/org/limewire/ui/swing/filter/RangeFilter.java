@@ -53,6 +53,7 @@ class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
         slider.setMaximum(rangeFormat.getValues().length - 1);
         slider.setOpaque(false);
         slider.setPreferredSize(new Dimension(resources.getFilterWidth(), slider.getPreferredSize().height));
+        slider.setFocusable(false);
         slider.setRequestFocusEnabled(false);
         slider.setUpperThumbEnabled(rangeFormat.isUpperLimitEnabled());
         
