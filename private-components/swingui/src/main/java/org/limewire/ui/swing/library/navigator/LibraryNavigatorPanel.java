@@ -68,7 +68,7 @@ public class LibraryNavigatorPanel extends JXPanel {
         add(scrollPane, "growx, growy, wrap");
 
         createCreateListButton();
-        add(createListButton, "aligny top, gaptop 5, alignx center, wrap");
+        add(createListButton, "aligny top, gaptop 5, gapleft 30, wrap");
 
         
 //        try {
