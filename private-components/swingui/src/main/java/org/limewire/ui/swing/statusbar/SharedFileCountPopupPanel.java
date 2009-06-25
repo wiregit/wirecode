@@ -171,7 +171,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         topBarPanel.setBackground(border);
         ResizeUtils.forceHeight(topBarPanel, 21);
         
-        JLabel titleBarLabel = new JLabel(I18n.tr("Sharing Lists"));
+        JLabel titleBarLabel = new JLabel(I18n.tr("Lists I'm Sharing"));
         titleBarLabel.setOpaque(false);
         titleBarLabel.setForeground(Color.WHITE);
         titleBarLabel.setFont(headerFont);
