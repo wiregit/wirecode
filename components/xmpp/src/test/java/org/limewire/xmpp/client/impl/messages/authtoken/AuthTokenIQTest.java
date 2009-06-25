@@ -2,6 +2,7 @@ package org.limewire.xmpp.client.impl.messages.authtoken;
 
 import java.util.Random;
 
+import org.apache.commons.codec.binary.Base64;
 import org.limewire.friend.impl.feature.AuthTokenImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.client.impl.messages.IQTestUtils;
@@ -20,7 +21,8 @@ public class AuthTokenIQTest extends BaseTestCase {
         AuthTokenIQ authTokenIQ = new AuthTokenIQ(token);
         
         AuthTokenIQ parsedAuthTokenIQ = new AuthTokenIQ(IQTestUtils.createParser(authTokenIQ.getChildElementXML()));
-        assertEquals(token, parsedAuthTokenIQ.getAuthToken());
+        AuthTokenImpl decodedTwiceToken = new AuthTokenImpl(Base64.decodeBase64(parsedAuthTokenIQ.getAuthToken().getToken()));
+        assertEquals(token, decodedTwiceToken);
     }
 
     public void testParsesMissingTokenGracefully() throws Exception {
