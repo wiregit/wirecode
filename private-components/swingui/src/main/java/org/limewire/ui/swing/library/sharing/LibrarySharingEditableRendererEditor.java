@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -44,6 +45,7 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
         GuiUtils.assignResources(this);
        
         checkBox = new JCheckBox();
+        checkBox.setBorder(BorderFactory.createEmptyBorder());
         checkBox.setIcon(uncheckedCheckBox);
         checkBox.setSelectedIcon(checkedCheckBox);
         checkBox.setOpaque(false);
@@ -62,7 +64,7 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
         });
                 
         setBackground(backgroundColor);
-        add(checkBox, "aligny center, growx");
+        add(checkBox, "gapleft 5, aligny 50%, growx");
     }
     
     @Override

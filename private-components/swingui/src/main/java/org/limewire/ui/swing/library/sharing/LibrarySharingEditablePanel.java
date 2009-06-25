@@ -92,12 +92,12 @@ class LibrarySharingEditablePanel {
         
         filterTextField = new PromptTextField(I18n.tr("Filter..."));
         textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
-        component.add(filterTextField, "gapleft 5, gaptop 7, gapright 5, wmax 124, wrap");
+        component.add(filterTextField, "gapleft 5, gaptop 4, gapright 5, wmax 124, wrap");
 
         JLabel selectLabel = new JLabel(I18n.tr("Select"));
         selectLabel.setFont(selectFont);
         selectLabel.setForeground(selectColor);
-        component.add(selectLabel, "gapleft 5, gaptop 5, split 3");
+        component.add(selectLabel, "gapleft 5, gaptop 2, split 3");
         
         allButton = new HyperlinkButton(new AbstractAction(I18n.tr("all")) {
             @Override
@@ -113,8 +113,8 @@ class LibrarySharingEditablePanel {
             }
         });
         noneButton.setFont(selectFont);
-        component.add(allButton, "gapleft 6, gaptop 5");
-        component.add(noneButton, "gapleft 6, gaptop 5, wrap");
+        component.add(allButton, "gapleft 6, gaptop 2");
+        component.add(noneButton, "gapleft 6, gaptop 2, wrap");
                 
         baseEventList = new BasicEventList<EditableSharingData>();
         SortedList<EditableSharingData> sortedList = GlazedListsFactory.sortedList(baseEventList, new FriendComparator());        
@@ -159,7 +159,7 @@ class LibrarySharingEditablePanel {
         friendTable.setShowGrid(false, false);
         friendTable.setRowHeight(20);
                 
-        component.add(scrollPane, "growx, gaptop 5, wrap");
+        component.add(scrollPane, "growx, gaptop 3, wrap");
         
         applyButton = new JXButton(applyAction);
         applyButton.setFont(selectFont);
