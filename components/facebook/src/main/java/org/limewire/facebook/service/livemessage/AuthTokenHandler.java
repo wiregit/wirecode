@@ -10,6 +10,8 @@ import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.friend.impl.feature.AuthTokenImpl;
+import org.limewire.util.StringUtils;
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -47,7 +49,7 @@ public class AuthTokenHandler implements LiveMessageHandler, FeatureTransport<Au
     @Override
     public void sendFeature(FriendPresence presence, AuthToken localFeature) throws FriendException {
         Map<String, Object> message = new HashMap<String, Object>();
-        message.put("auth-token", localFeature.getBase64());
+        message.put("auth-token", StringUtils.getUTF8String(Base64.encodeBase64(StringUtils.toUTF8Bytes(localFeature.getBase64()))));
         connection.sendLiveMessage(presence, TYPE, message);
     }
 }
