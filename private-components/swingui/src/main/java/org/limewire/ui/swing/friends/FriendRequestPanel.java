@@ -7,18 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.friend.api.FriendRequest;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -26,9 +24,7 @@ import com.google.inject.Inject;
 public class FriendRequestPanel extends JXPanel {
     
     private final List<FriendRequest> pendingRequests;
-    
-    private final JXLabel nameLabel;
-    private final JXLabel requestLabel;
+     private final JLabel requestLabel;
     
     @Inject 
     public FriendRequestPanel(BarPainterFactory barPainterFactory) {
@@ -37,9 +33,7 @@ public class FriendRequestPanel extends JXPanel {
         setOpaque(false);
 
         pendingRequests = new ArrayList<FriendRequest>();
-        nameLabel = new JXLabel();
-        FontUtils.bold(nameLabel);
-        requestLabel = new MultiLineLabel(I18n.tr("wants to be your friend.  Do you accept?"));
+        requestLabel = new JLabel();
         
         // workaround for LWC-2465 -- MultiLineLabel seems to require it.
         addComponentListener(new ComponentAdapter() {
@@ -62,7 +56,7 @@ public class FriendRequestPanel extends JXPanel {
                 completeRequest(false);
             }
         });
-        add(nameLabel, "wmin 0, wrap");
+
         add(requestLabel, "growx, wrap");
         add(yes, "gapbefore push, split, alignx right");
         add(no, "alignx right");
@@ -77,8 +71,7 @@ public class FriendRequestPanel extends JXPanel {
     
     private void ensureRequestVisible() {
         if(pendingRequests.size() > 0) {
-            nameLabel.setText(pendingRequests.get(0).getFriendUsername());
-            nameLabel.setToolTipText(pendingRequests.get(0).getFriendUsername());
+            requestLabel.setText(I18n.tr("<html><b>{0}</b> wants to be your friend.  Do you accept?</html>", pendingRequests.get(0).getFriendUsername()));
             setVisible(true);
             
         } else {
