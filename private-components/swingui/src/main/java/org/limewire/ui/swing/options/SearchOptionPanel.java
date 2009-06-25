@@ -21,7 +21,6 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.Setting;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
@@ -29,7 +28,6 @@ import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SearchSettingListener;
-import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -69,12 +67,7 @@ public class SearchOptionPanel extends OptionPanel {
         add(getFilteringPanel(), "growx, wrap");
         
         add(groupSimilarResults);
-        add(new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new NotImplementedException("group learn more");
-            }
-        }), "wrap");
+        add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=groupSimilarResults"), "wrap");
     }
 
     private OptionPanel getSearchBarPanel() {
@@ -251,12 +244,7 @@ public class SearchOptionPanel extends OptionPanel {
             add(configureButton, "wrap");
             
             add(copyrightContentCheckBox);
-            add(new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    throw new NotImplementedException("copyright learn more");
-                }
-            }), "wrap");
+            add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=copyright"), "wrap");
             add(adultContentCheckBox, "wrap");
             
             add(filterKeywordsButton, "gapright 10, alignx left");
