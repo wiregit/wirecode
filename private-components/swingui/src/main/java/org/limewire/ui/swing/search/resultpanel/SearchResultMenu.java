@@ -105,7 +105,7 @@ public class SearchResultMenu extends JPopupMenu {
         }).setEnabled(downloadEnabled);
 
         // Add Mark/Unmark as Spam menu item.
-        add(new AbstractAction(firstItem.isSpam() ? tr("Unmark as spam") : tr("Mark as spam")) {
+        add(new AbstractAction(firstItem.isSpam() ? tr("Unmark as Spam") : tr("Mark as Spam")) {
             public void actionPerformed(ActionEvent e) {
                 boolean spam = !firstItem.isSpam();
                 for (VisualSearchResult visualSearchResult : selectedItems) {
