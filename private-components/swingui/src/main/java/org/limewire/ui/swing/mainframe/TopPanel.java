@@ -14,7 +14,6 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -29,20 +28,12 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.friend.api.FriendConnectionEvent;
-import org.limewire.listener.EventBean;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
-import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
-import org.limewire.ui.swing.friends.actions.FriendButtonPopupListener;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -79,8 +70,6 @@ import com.google.inject.Singleton;
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
     
-    @Resource private Icon friendOnlineIcon;
-    @Resource private Icon friendOfflineIcon;
     @Resource private Icon browseIcon;
     
     private final JXButton friendButton;
@@ -108,9 +97,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryMediator myLibraryMediator,
                     KeywordAssistedSearchBuilder keywordAssistedSearchBuilder,
-                    FriendButtonPopupListener friendListener,
                     Provider<AdvancedSearchPanel> advancedSearchPanel,
-                    ComboBoxDecorator comboBoxDecorator) {        
+                    Provider<FriendsButton> friendsButtonProvider) {        
         GuiUtils.assignResources(this);
         this.searchHandler = searchHandler;
         this.searchBar = searchBar;
@@ -133,16 +121,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         libraryButton.setText(null);
         libraryButton.setIconTextGap(1);
         
-        LimeComboBox friendBox = new LimeComboBox();
-        comboBoxDecorator.decorateIconComboBox(friendBox);
-        friendBox.setName("WireframeTop.friendButton");
-        friendBox.setToolTipText(I18n.tr("Friend Login"));
-        friendBox.setText(null);
-        friendBox.setIconTextGap(1);
-        JPopupMenu menu = new JPopupMenu();
-        friendBox.overrideMenu(menu);
-        menu.addPopupMenuListener(friendListener);
-        friendButton = friendBox;
+        friendButton = friendsButtonProvider.get();
+        friendButton.setName("WireframeTop.friendButton");
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {
@@ -174,7 +154,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
         add(libraryButton, "gapbottom 2, gaptop 0");
-        add(friendBox, "gapbottom 2, gaptop 0");
+        add(friendButton, "gapbottom 2, gaptop 0");
         add(storeButton, "gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
@@ -200,26 +180,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
       });
     };
     
-    @Inject void register(EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport) {
-        if(connectBean.getLastEvent() != null && connectBean.getLastEvent().getType() == FriendConnectionEvent.Type.CONNECTED) {
-            friendButton.setIcon(friendOnlineIcon);
-        } else {
-            friendButton.setIcon(friendOfflineIcon);
-        }
-        
-        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendConnectionEvent event) {
-                if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                    friendButton.setIcon(friendOnlineIcon);
-                } else {
-                    friendButton.setIcon(friendOfflineIcon);
-                }
-            }
-        });
-    }
-
     @Override
     public boolean requestFocusInWindow() {
         return searchBar.requestFocusInWindow();

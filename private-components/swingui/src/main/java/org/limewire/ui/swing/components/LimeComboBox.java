@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
@@ -78,6 +79,9 @@ public class LimeComboBox extends JXButton {
     /** True if clicking will always force visibility. */
     private boolean clickForcesVisible = false;
     
+    /** Position to place the popup from the bottom left corner **/
+    private Point popupPosition = new Point(1,-1);
+    
     /** Constructs an empty unskinned combo box. */
     public LimeComboBox() {
         this(null);
@@ -101,8 +105,16 @@ public class LimeComboBox extends JXButton {
     public void overrideMenu(JPopupMenu menu) {
         this.menu = menu;
         customMenu = true;
-        initMenu();
+        initMenu(true);
     }
+    
+    /** Sets the combobox to always display the given popupmenu. */
+    public void overrideMenuNoRestyle(JPopupMenu menu) {
+        this.menu = menu;
+        customMenu = true;
+        initMenu(false);
+    }
+
     
     /**
      * A helper method for painting elements of overridden menus in the default style.
@@ -155,6 +167,10 @@ public class LimeComboBox extends JXButton {
         if(menu == null)
             createPopupMenu();
         return menu;
+    }
+    
+    public void setPopupPosition(Point p) {
+        popupPosition = p;
     }
     
     /** 
@@ -293,7 +309,7 @@ public class LimeComboBox extends JXButton {
             public boolean isSelected() { return delegate.isSelected(); }
             public boolean isEnabled() { return delegate.isEnabled(); }
             public boolean isPressed() {
-                return delegate.isPressed() || menu != null && menu.isVisible(); 
+                return delegate.isPressed() || (menu != null && menu.isVisible()); 
             }
             public boolean isRollover() { return delegate.isRollover(); }
             public void setArmed(boolean b) { delegate.setArmed(b); }
@@ -385,7 +401,7 @@ public class LimeComboBox extends JXButton {
                         menu.setVisible(false);
                     } else {
                         menu.revalidate();
-                        menu.show((Component) e.getSource(), 1, getHeight()-1);
+                        menu.show((Component) e.getSource(), popupPosition.x, getHeight()+popupPosition.y);
                     }
                 }
             }
@@ -394,7 +410,7 @@ public class LimeComboBox extends JXButton {
 
     private void createPopupMenu() {
         menu = new JPopupMenu();        
-        initMenu();
+        initMenu(true);
     }
        
     private void updateMenu() {
@@ -518,9 +534,11 @@ public class LimeComboBox extends JXButton {
         }
     }
     
-    private void initMenu() {        
-        decorateMenuComponent(menu);
-        menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
+    private void initMenu(boolean style) {    
+        if (style) {
+            decorateMenuComponent(menu);
+            menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
+        }
         
         menu.addPopupMenuListener(new PopupMenuListener() {
             @Override
