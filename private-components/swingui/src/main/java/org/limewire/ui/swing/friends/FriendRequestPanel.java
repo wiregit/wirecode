@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.friends;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,16 +32,7 @@ public class FriendRequestPanel extends JXPanel {
 
         pendingRequests = new ArrayList<FriendRequest>();
         requestLabel = new JLabel();
-        
-        // workaround for LWC-2465 -- MultiLineLabel seems to require it.
-        addComponentListener(new ComponentAdapter() {
-           @Override
-            public void componentShown(ComponentEvent e) {
-               invalidate();
-               validate();
-            } 
-        });
-        
+       
         JComponent yes = new HyperlinkButton(new AbstractAction(I18n.tr("Yes")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -62,6 +51,8 @@ public class FriendRequestPanel extends JXPanel {
         add(no, "alignx right");
         
         ensureRequestVisible();
+        
+        
     }
 
     public void addRequest(FriendRequest request) {
