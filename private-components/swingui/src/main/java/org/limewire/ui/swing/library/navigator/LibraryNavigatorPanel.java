@@ -12,6 +12,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.lifecycle.LifeCycleEvent;
@@ -116,8 +117,8 @@ public class LibraryNavigatorPanel extends JXPanel {
         createListButton.setFont(createListFont);
     }
     
-    public void selectSharedFileList(SharedFileList sharedFileList) {
-        table.selectLibraryNavItem(sharedFileList);
+    public void selectLocalFileList(LocalFileList localFileList) {
+        table.selectLibraryNavItem(localFileList);
     }
     
     public void addTableSelectionListener(ListSelectionListener listener) {

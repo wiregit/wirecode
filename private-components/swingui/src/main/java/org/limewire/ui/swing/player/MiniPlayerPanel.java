@@ -18,7 +18,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.api.Category;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
@@ -118,7 +117,7 @@ public class MiniPlayerPanel extends JPanel {
             AudioSource currentSource = player.getCurrentSong();
             
             if (currentSource != null) { 
-                libraryMediator.selectInLibrary(currentSource.getFile(), Category.AUDIO);
+                libraryMediator.selectInLibrary(currentSource.getFile());
             }
         }
     }

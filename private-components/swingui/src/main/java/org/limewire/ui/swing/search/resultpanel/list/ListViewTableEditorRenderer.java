@@ -506,7 +506,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                     } else if (e.getDescription().equals("#downloading")) {
                         new SelectAndScrollDownloadEvent(vsr.getUrn()).publish();
                     } else if (e.getDescription().equals("#library")) {
-                        libraryMediator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
+                        libraryMediator.selectInLibrary(vsr.getUrn());
                     }
                 }
             }

@@ -62,7 +62,7 @@ class DownloadHandlerImpl implements DownloadHandler {
             new SelectAndScrollDownloadEvent(vsr.getUrn()).publish();
             return true;
         } else if (vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
-            libraryMediator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
+            libraryMediator.selectInLibrary(vsr.getUrn());
             return true;
         }
         return false;

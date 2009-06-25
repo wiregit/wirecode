@@ -45,7 +45,7 @@ public class UploadActionHandler {
         } else if (actionCommmand == REMOVE_COMMAND){
             uploadListManager.remove(item);
         } else if (actionCommmand == LIBRARY_COMMAND){
-            libraryMediator.selectInLibrary(item.getFile(), item.getCategory());
+            libraryMediator.selectInLibrary(item.getFile());
         } else if (actionCommmand == LAUNCH_COMMAND){
             NativeLaunchUtils.safeLaunchFile(item.getFile());
         } else if (actionCommmand == PLAY_COMMAND){

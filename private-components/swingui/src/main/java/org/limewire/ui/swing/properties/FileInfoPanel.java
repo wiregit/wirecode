@@ -222,7 +222,7 @@ public class FileInfoPanel extends JPanel {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             setVisible(false);
-                            libraryMediator.selectInLibrary(((LocalFileItem)propertiableFile).getFile(), propertiableFile.getCategory());
+                            libraryMediator.selectInLibrary(((LocalFileItem)propertiableFile).getFile());
                         }
                     });
                 
@@ -289,7 +289,7 @@ public class FileInfoPanel extends JPanel {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             setVisible(false);
-                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getDownloadingFile(), propertiableFile.getCategory());
+                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getDownloadingFile());
                         }
                     });
                 

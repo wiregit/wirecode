@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.DropMode;
@@ -12,6 +13,7 @@ import javax.swing.table.TableCellRenderer;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
@@ -182,6 +184,33 @@ public class LibraryTable extends MouseableTable {
             return ((LocalFileItem) item).isIncomplete();
         }
         return item == null;
+    }
+    
+    public void selectAndScrollTo(File file) {
+        LibraryTableModel model = getLibraryTableModel();
+        for(int y=0; y < model.getRowCount(); y++) {
+            FileItem fileItem = model.getElementAt(y);
+            if(!(fileItem instanceof LocalFileItem)) {
+                break; // Never going to find it.
+            }
+            if(file.equals(((LocalFileItem)fileItem).getFile())) {
+                getSelectionModel().setSelectionInterval(y, y);
+                break;
+            }
+        }
+        ensureRowVisible(getSelectedRow());
+    }
+    
+    public void selectAndScrollTo(URN urn) {
+        LibraryTableModel model = getLibraryTableModel();
+        for(int y=0; y < model.getRowCount(); y++) {
+            FileItem fileItem = model.getElementAt(y);
+            if(urn.equals(fileItem.getUrn())) {
+                getSelectionModel().setSelectionInterval(y, y);
+                break;
+            }
+        }
+        ensureRowVisible(getSelectedRow());
     }
         
     /**

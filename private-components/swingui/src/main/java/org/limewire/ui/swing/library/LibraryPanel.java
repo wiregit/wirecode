@@ -29,9 +29,11 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
@@ -204,8 +206,16 @@ public class LibraryPanel extends JPanel {
         });
     }
     
-    public void selectSharedFileList(SharedFileList sharedFileList) {
-        libraryNavigatorPanel.selectSharedFileList(sharedFileList);
+    public void selectLocalFileList(LocalFileList localFileList) {
+        libraryNavigatorPanel.selectLocalFileList(localFileList);
+    }
+    
+    public void selectAndScrollTo(File file) {
+        libraryTable.selectAndScrollTo(file);
+    }
+    
+    public void selectAndScrollTo(URN urn) {
+        libraryTable.selectAndScrollTo(urn);
     }
     
     private void selectSharing(LibraryNavItem navItem) {
