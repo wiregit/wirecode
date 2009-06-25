@@ -30,6 +30,7 @@ class LibraryWarningPanel extends LimeJDialog {
 
     @Inject
     public LibraryWarningPanel(LibraryManager libraryManager) {
+        setTitle(I18n.tr("Choose Categories"));
         this.libraryManager = libraryManager;
     }
 

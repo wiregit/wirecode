@@ -19,6 +19,10 @@ import org.limewire.ui.swing.util.I18n;
 
 class SharingWarningPanel extends LimeJDialog {
 
+    public SharingWarningPanel() {
+        setTitle(I18n.tr("Share files?"));
+    }
+
     public void initialize(final SharedFileList fileList, final List<File> files) {
 
         int directoryCount = 0;
