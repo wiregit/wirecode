@@ -14,8 +14,8 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.util.DNDUtils;
+import org.limewire.ui.swing.warnings.LibraryWarningController;
 
 /**
  * An abstract class for transferring {@link LocalFileItem} through a
@@ -24,10 +24,10 @@ import org.limewire.ui.swing.util.DNDUtils;
 public abstract class LocalFileListTransferHandler extends TransferHandler {
     private final WeakHashMap<Transferable, Map<LocalFileList, Boolean>> canImportCache = new WeakHashMap<Transferable, Map<LocalFileList, Boolean>>();
 
-    private final LibrarySupport librarySupport;
+    private final LibraryWarningController librarySupport;
     private final GhostDragGlassPane ghostPane;
 
-    public LocalFileListTransferHandler(LibrarySupport librarySupport, GhostDragGlassPane glassPane) {
+    public LocalFileListTransferHandler(LibraryWarningController librarySupport, GhostDragGlassPane glassPane) {
         this.librarySupport = librarySupport;
         this.ghostPane = glassPane;
     }

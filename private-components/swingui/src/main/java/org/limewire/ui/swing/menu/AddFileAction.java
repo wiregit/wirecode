@@ -12,20 +12,20 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.warnings.LibraryWarningController;
 
 import com.google.inject.Inject;
 
 class AddFileAction extends AbstractAction {
     private final LibraryManager libraryManager;
 
-    private final LibrarySupport librarySupport;
+    private final LibraryWarningController librarySupport;
 
     @Inject
-    public AddFileAction(LibraryManager libraryManager, LibrarySupport librarySupport) {
+    public AddFileAction(LibraryManager libraryManager, LibraryWarningController librarySupport) {
         super(I18n.tr("&Add to Library..."));
         this.libraryManager = libraryManager;
         this.librarySupport = librarySupport;

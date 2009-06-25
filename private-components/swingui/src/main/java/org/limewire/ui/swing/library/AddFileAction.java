@@ -13,6 +13,7 @@ import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.warnings.LibraryWarningController;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -20,10 +21,10 @@ import com.google.inject.Provider;
 public class AddFileAction extends AbstractAction {
 
     private final Provider<LibraryNavigatorPanel> libraryNavigatorPanel;
-    private final LibrarySupport librarySupport;
+    private final LibraryWarningController librarySupport;
     
     @Inject
-    public AddFileAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel, LibrarySupport librarySupport) {
+    public AddFileAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel, LibraryWarningController librarySupport) {
         super(I18n.tr("Add Files"));
         
         this.libraryNavigatorPanel = libraryNavigatorPanel;

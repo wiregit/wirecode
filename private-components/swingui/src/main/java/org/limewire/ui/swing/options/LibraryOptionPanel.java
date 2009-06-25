@@ -1,13 +1,16 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.event.ActionEvent;
 import java.util.Collection;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -17,6 +20,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.Setting;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HorizonalCheckBoxListPanel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
@@ -106,25 +110,55 @@ public class LibraryOptionPanel extends OptionPanel {
 
         private HorizonalCheckBoxListPanel<Category> checkBoxes;
         private JCheckBox warnMeOnAddToSharedFolderCheckBox;
+        private JRadioButton askMeRadioButton;
+        private JRadioButton alwaysAddRadioButton;
         
         public CategoriesPanel() {
             super("Categories");
+
+            askMeRadioButton = new JRadioButton(new AbstractAction(I18n.tr("Ask me what kinds of files to add")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    checkBoxes.setEnabled(false);
+                    warnMeOnAddToSharedFolderCheckBox.setEnabled(false);
+                }
+            });
+            askMeRadioButton.setOpaque(false);
+            alwaysAddRadioButton = new JRadioButton(new AbstractAction(I18n.tr("Always add the following kind of files:")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    checkBoxes.setEnabled(true);
+                    warnMeOnAddToSharedFolderCheckBox.setEnabled(true);
+                }
+            });
+            alwaysAddRadioButton.setOpaque(false);
+            
+            ButtonGroup buttonGroup = new ButtonGroup();
+            buttonGroup.add(alwaysAddRadioButton);
+            buttonGroup.add(askMeRadioButton);
             
             checkBoxes = new HorizonalCheckBoxListPanel<Category>(Category.getCategoriesInOrder());
             warnMeOnAddToSharedFolderCheckBox
                 = new JCheckBox(I18n.tr("Warn me when I add a folder to a list that is shared."));
             warnMeOnAddToSharedFolderCheckBox.setOpaque(false);
-            
+            int indent = 20;
             add(new JLabel(
-                    I18n.tr("When I add a folder to the Library or to a List, only look for the following types of files:")),
+                    I18n.tr("When I add a folder to the Library or to a List:")),
                     "wrap");
-            add(checkBoxes, "wrap");
-            add(warnMeOnAddToSharedFolderCheckBox, "wrap");
+            add(askMeRadioButton, indent(indent) + ",wrap");
+            add(alwaysAddRadioButton,indent(indent) +  ",wrap");
+            add(checkBoxes, indent(indent*2) + ",wrap");
+            add(warnMeOnAddToSharedFolderCheckBox, indent(indent*4) +",wrap");
+        }
+
+        private String indent(int indent) {
+            return "gapleft " + indent;
         }
 
         @Override
         boolean applyOptions() {
             SharingSettings.WARN_SHARING_FOLDER.set(warnMeOnAddToSharedFolderCheckBox.isSelected());
+            LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.setValue(askMeRadioButton.isSelected());
             libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(checkBoxes.getSelected());
             return false;
         }
@@ -134,13 +168,17 @@ public class LibraryOptionPanel extends OptionPanel {
             Collection<Category> selectedCategories = checkBoxes.getSelected();
             Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
             return selectedCategories.size() != managedCategories.size() || !selectedCategories.containsAll(managedCategories)
-                || SharingSettings.WARN_SHARING_FOLDER.get() != warnMeOnAddToSharedFolderCheckBox.isSelected();
+                || SharingSettings.WARN_SHARING_FOLDER.get() != warnMeOnAddToSharedFolderCheckBox.isSelected() || LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.getValue() != askMeRadioButton.isSelected();
         }
 
         @Override
         public void initOptions() {
+            askMeRadioButton.setSelected(LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.getValue());
+            alwaysAddRadioButton.setSelected(!LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.getValue());
             warnMeOnAddToSharedFolderCheckBox.setSelected(SharingSettings.WARN_SHARING_FOLDER.get());
             checkBoxes.setSelected(libraryManager.getLibraryData().getManagedCategories());
+            checkBoxes.setEnabled(!LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.getValue());
+            warnMeOnAddToSharedFolderCheckBox.setEnabled(!LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.getValue());
         }
 
     }

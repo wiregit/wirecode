@@ -77,8 +77,20 @@ public class HorizonalCheckBoxListPanel<K> extends JPanel {
      * Select the check boxes with the following keys, leave the rest.
      */
     public void setSelected(Collection<K> selectedKeys) {
-        for ( K key : selectedKeys ) {
-            optionsMap.get(key).setSelected(true);
+        for ( K key : optionsMap.keySet() ) {
+            if(selectedKeys.contains(key)) {
+                optionsMap.get(key).setSelected(true);
+            } else {
+                optionsMap.get(key).setSelected(false);
+            }
+        }
+    }
+    
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        for(JCheckBox checkBox : optionsMap.values()) {
+            checkBox.setEnabled(enabled);
         }
     }
     

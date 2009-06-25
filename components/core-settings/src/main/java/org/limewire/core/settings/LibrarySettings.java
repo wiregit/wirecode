@@ -65,6 +65,10 @@ public class LibrarySettings extends LimeProps {
     public static final BooleanSetting MANAGE_OTHER =
         FACTORY.createBooleanSetting("MANAGE_OTHER_FILES", true);
     
+    /** True if the user should be prompted about what categories to share during a folder drop. */
+    public static final BooleanSetting ASK_ABOUT_FOLDER_DROP_CATEGORIES =
+        FACTORY.createBooleanSetting("ASK_ABOUT_FOLDER_DROP_CATEGORIES", true);
+
     public static enum LibraryVersion {
         FOUR_X, FIVE_0_0;
     }
