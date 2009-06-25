@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.event.ActionEvent;
 import java.util.Collection;
 
 import javax.swing.BorderFactory;
@@ -18,7 +17,6 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.Setting;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HorizonalCheckBoxListPanel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
@@ -26,7 +24,6 @@ import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.NotImplementedException;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -247,12 +244,7 @@ public class LibraryOptionPanel extends OptionPanel {
             addModifyInfo();                        
             
             add(shareP2PdownloadedFilesCheckBox);
-            add(new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    throw new NotImplementedException("share p2p downloads learn more not implemented");
-                }
-            }), "gapleft 15, wrap");
+            add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"), "gapleft 15, wrap");
             
             unsafeMessageLabel = new JLabel();
             add(unsafeMessageLabel);
