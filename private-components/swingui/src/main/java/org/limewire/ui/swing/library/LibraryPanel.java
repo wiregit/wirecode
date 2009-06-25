@@ -49,6 +49,7 @@ import org.limewire.ui.swing.library.sharing.PublicSharedFeedbackPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -293,7 +294,7 @@ public class LibraryPanel extends JPanel {
         addFilesButton.setRolloverIcon(plusIcon);
         addFilesButton.setPressedIcon(plusIcon);
         addFilesButton.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
-        buttonDecorator.decorateDarkFullButton(addFilesButton);
+        buttonDecorator.decorateDarkFullImageButton(addFilesButton, AccentType.SHADOW);
     }
     
     private void disposeOldLists() {
