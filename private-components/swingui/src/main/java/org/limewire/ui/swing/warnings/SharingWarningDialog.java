@@ -17,9 +17,9 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-class SharingWarningPanel extends LimeJDialog {
+class SharingWarningDialog extends LimeJDialog {
 
-    public SharingWarningPanel() {
+    public SharingWarningDialog() {
         setTitle(I18n.tr("Share files?"));
     }
 
@@ -50,13 +50,13 @@ class SharingWarningPanel extends LimeJDialog {
             public void actionPerformed(ActionEvent e) {
                 SharingSettings.WARN_SHARING_FOLDER.setValue(warnMeCheckbox.isSelected());
                 LibraryWarningController.addFilesInner(fileList, files);
-                SharingWarningPanel.this.dispose();
+                SharingWarningDialog.this.dispose();
             }
         }), "alignx right");
         add(new JButton(new AbstractAction(I18n.tr("Cancel")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SharingWarningPanel.this.dispose();
+                SharingWarningDialog.this.dispose();
             }
         }), "wrap");
         pack();

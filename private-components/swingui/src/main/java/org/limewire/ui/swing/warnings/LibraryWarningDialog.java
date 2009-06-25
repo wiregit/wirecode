@@ -24,12 +24,12 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-class LibraryWarningPanel extends LimeJDialog {
+class LibraryWarningDialog extends LimeJDialog {
 
     private final LibraryManager libraryManager;
 
     @Inject
-    public LibraryWarningPanel(LibraryManager libraryManager) {
+    public LibraryWarningDialog(LibraryManager libraryManager) {
         setTitle(I18n.tr("Choose Categories"));
         this.libraryManager = libraryManager;
     }
@@ -69,13 +69,13 @@ class LibraryWarningPanel extends LimeJDialog {
                 libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(
                         categories.getSelected());
                 LibraryWarningController.addFilesInner(fileList, files);
-                LibraryWarningPanel.this.dispose();
+                LibraryWarningDialog.this.dispose();
             }
         }), "alignx right");
         add(new JButton(new AbstractAction(I18n.tr("Cancel")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                LibraryWarningPanel.this.dispose();
+                LibraryWarningDialog.this.dispose();
             }
         }), "wrap");
         pack();

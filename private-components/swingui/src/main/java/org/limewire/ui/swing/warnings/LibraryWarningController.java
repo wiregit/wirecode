@@ -17,13 +17,13 @@ import com.google.inject.Provider;
  * warned before a folder drop occurs.
  */
 public class LibraryWarningController {
-    private final Provider<LibraryWarningPanel> libraryWarningPanel;
+    private final Provider<LibraryWarningDialog> libraryWarningPanel;
 
-    private final Provider<SharingWarningPanel> sharingWarningPanel;
+    private final Provider<SharingWarningDialog> sharingWarningPanel;
 
     @Inject
-    public LibraryWarningController(Provider<LibraryWarningPanel> libraryCategoryWarning,
-            Provider<SharingWarningPanel> sharingWarningPanel) {
+    public LibraryWarningController(Provider<LibraryWarningDialog> libraryCategoryWarning,
+            Provider<SharingWarningDialog> sharingWarningPanel) {
         this.libraryWarningPanel = libraryCategoryWarning;
         this.sharingWarningPanel = sharingWarningPanel;
     }
@@ -47,12 +47,12 @@ public class LibraryWarningController {
         }
 
         if (directoryCount > 0 && LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.getValue()) {
-            LibraryWarningPanel panel = libraryWarningPanel.get();
+            LibraryWarningDialog panel = libraryWarningPanel.get();
             panel.initialize(fileList, files);
         } else if (directoryCount > 0 && SharingSettings.WARN_SHARING_FOLDER.getValue()
                 && sharedFileList != null
                 && (sharedFileList.isPublic() || sharedFileList.getFriendIds().size() > 0)) {
-            SharingWarningPanel panel = sharingWarningPanel.get();
+            SharingWarningDialog panel = sharingWarningPanel.get();
             panel.initialize(sharedFileList, files);
         } else {
             addFilesInner(fileList, files);
