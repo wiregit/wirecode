@@ -25,7 +25,6 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.spam.SpamManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.Disposable;
@@ -34,8 +33,6 @@ import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.properties.FileInfoDialogFactory;
-import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -115,7 +112,6 @@ public class BaseResultPanel extends JXPanel {
     private final RemoteHostWidgetFactory fromWidgetfactory;
     private final Provider<IconLabelRendererFactory> iconLabelRendererFactory;
     private final DownloadHandler downloadHandler;
-    private final FileInfoDialogFactory fileInfoFactory;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
     private final Provider<CalendarRenderer> calendarRenderer;
@@ -131,9 +127,7 @@ public class BaseResultPanel extends JXPanel {
     private EventSelectionModel<VisualSearchResult> selectionModel;
     private ColorHighlighter resultsColorHighlighter;
     private Scrollable visibleComponent;
-    private final Provider<RemoteHostActions> remoteHostActions;
-    private final SpamManager spamManager;
-    private final LibraryMediator libraryMediator;
+    private final SearchResultMenuFactory menuFactory;
 
     /**
      * Constructs a BaseResultPanel with the specified components.
@@ -146,13 +140,14 @@ public class BaseResultPanel extends JXPanel {
             Navigator navigator,
             ListViewRowHeightRule rowHeightRule,
             RemoteHostWidgetFactory fromWidgetFactory,
-//            DownloadHandlerFactory downloadHandlerFactory,
+            SearchResultMenuFactory menuFactory,
             Provider<IconLabelRendererFactory> iconLabelRendererFactory,
-            FileInfoDialogFactory fileInfoFactory, Provider<TimeRenderer> timeRenderer,
-            Provider<FileSizeRenderer> fileSizeRenderer, Provider<CalendarRenderer> calendarRenderer,
+            Provider<TimeRenderer> timeRenderer,
+            Provider<FileSizeRenderer> fileSizeRenderer, 
+            Provider<CalendarRenderer> calendarRenderer,
             LibraryMediator libraryMediator,
-            Provider<QualityRenderer> qualityRenderer, DefaultTableCellRenderer defaultTableCellRenderer,
-            Provider<RemoteHostActions> remoteHostActions, SpamManager spamManager) {
+            Provider<QualityRenderer> qualityRenderer, 
+            DefaultTableCellRenderer defaultTableCellRenderer) {
         
         this.searchResultsModel = searchResultsModel;
         this.tableFormatFactory = tableFormatFactory;
@@ -161,16 +156,13 @@ public class BaseResultPanel extends JXPanel {
         this.rowHeightRule = rowHeightRule;
         this.fromWidgetfactory = fromWidgetFactory;
         this.iconLabelRendererFactory = iconLabelRendererFactory;
-        this.fileInfoFactory = fileInfoFactory;
         this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryMediator);
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
         this.calendarRenderer = calendarRenderer;
-        this.libraryMediator = libraryMediator;
         this.qualityRenderer = qualityRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
-        this.remoteHostActions = remoteHostActions;
-        this.spamManager = spamManager;
+        this.menuFactory = menuFactory;
 
         // Create tables.
         this.resultsList = createList();
@@ -204,7 +196,7 @@ public class BaseResultPanel extends JXPanel {
         ResultsTable<VisualSearchResult> table = new ResultsTable<VisualSearchResult>();
         
         // Set table fields that do not change with search category.
-        table.setPopupHandler(new SearchPopupHandler(table, downloadHandler, fileInfoFactory, remoteHostActions, spamManager, libraryMediator));
+        table.setPopupHandler(new SearchPopupHandler(downloadHandler, table, menuFactory));
         table.setDoubleClickHandler(new ClassicDoubleClickHandler(table, downloadHandler));
         table.setRowHeight(TABLE_ROW_HEIGHT);
         

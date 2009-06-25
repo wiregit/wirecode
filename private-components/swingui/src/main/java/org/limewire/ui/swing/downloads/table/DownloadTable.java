@@ -17,7 +17,6 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadCancelRendererEditor;
@@ -70,13 +69,13 @@ public class DownloadTable extends MouseableTable {
 
     @Inject
 	public DownloadTable(DownloadTitleRenderer downloadTitleRenderer, DownloadProgressRenderer downloadProgressRenderer, 
-	        DownloadMessageRenderer downloadMessageRenderer, DownloadButtonRendererEditor buttonRenderer,
-	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, 
-	        @Assisted EventList<DownloadItem> downloadItems, RemoteHostWidgetFactory remoteHostWidgetFactory) {
+	        DownloadMessageRenderer downloadMessageRenderer, DownloadCancelRendererEditor cancelEditor,
+	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, DownloadPopupHandlerFactory downloadPopupHandlerFactory,
+	        @Assisted EventList<DownloadItem> downloadItems) {
         
         GuiUtils.assignResources(this);
                 
-        initialize(downloadItems, actionHandler, buttonEditor);
+        initialize(downloadItems, buttonEditor, cancelEditor, downloadPopupHandlerFactory);
         
         TableColors colors = new TableColors();
         setHighlighters(
@@ -97,7 +96,7 @@ public class DownloadTable extends MouseableTable {
         setUpColumn(DownloadTableFormat.PROGRESS_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
         setUpColumn(DownloadTableFormat.MESSAGE, downloadMessageRenderer, messageMinWidth, messagePrefWidth, messageMaxWidth);
         setUpColumn(DownloadTableFormat.MESSAGE_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
-        setUpColumn(DownloadTableFormat.ACTION, buttonRenderer, actionMinWidth, actionPrefWidth, actionMaxWidth);
+        setUpColumn(DownloadTableFormat.ACTION, new DownloadButtonRendererEditor(), actionMinWidth, actionPrefWidth, actionMaxWidth);
         setUpColumn(DownloadTableFormat.ACTION_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
         setUpColumn(DownloadTableFormat.CANCEL, new DownloadCancelRendererEditor(), cancelMinWidth, cancelPrefWidth, cancelMaxWidth);
         
@@ -146,8 +145,8 @@ public class DownloadTable extends MouseableTable {
         column.setMaxWidth(maxWidth);
     }
 
-    private void initialize(EventList<DownloadItem> downloadItems, DownloadActionHandler actionHandler,
-            DownloadButtonRendererEditor buttonEditor) {
+    private void initialize(EventList<DownloadItem> downloadItems, DownloadButtonRendererEditor buttonEditor, 
+            DownloadCancelRendererEditor cancelEditor, DownloadPopupHandlerFactory downloadPopupHandlerFactory) {
         model = new DownloadTableModel(downloadItems);
         setModel(model);
         
@@ -156,7 +155,7 @@ public class DownloadTable extends MouseableTable {
         model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         this.selectedItems = model.getSelected();
 
-        TablePopupHandler popupHandler = new DownloadPopupHandler(actionHandler, this);
+        TablePopupHandler popupHandler = downloadPopupHandlerFactory.create(this);
 
         setPopupHandler(popupHandler);
 
@@ -180,10 +179,9 @@ public class DownloadTable extends MouseableTable {
         };        
 
         setEnterKeyAction(enterAction);
-
-        buttonEditor.setActionHandler(actionHandler);
+        
         getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellEditor(buttonEditor);
-        getColumnModel().getColumn(DownloadTableFormat.CANCEL).setCellEditor(new DownloadCancelRendererEditor());
+        getColumnModel().getColumn(DownloadTableFormat.CANCEL).setCellEditor(cancelEditor);
 
     }
     

@@ -5,7 +5,12 @@ import java.awt.Point;
 import java.util.List;
 
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.ui.swing.search.BlockUserMenuFactory;
+import org.limewire.ui.swing.search.RemoteHostMenuFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
+
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * Popup handler for the download display tables.
@@ -13,15 +18,21 @@ import org.limewire.ui.swing.table.TablePopupHandler;
 public class DownloadPopupHandler implements TablePopupHandler {
    
     
-    private DownloadActionHandler actionHandler;
-    private DownloadTable table;
+    private final RemoteHostMenuFactory remoteHostMenuFactory;
+    private final BlockUserMenuFactory blockUserMenuFactory;
+    private final DownloadActionHandler downloadActionHandler;
+    private final DownloadTable table;
 
     /**
      * Constructs a DownloadPopupHandler using the specified action handler and
      * display table.
      */
-    public DownloadPopupHandler(DownloadActionHandler actionHandler, DownloadTable table) {
-        this.actionHandler = actionHandler;
+    @Inject
+    public DownloadPopupHandler(DownloadActionHandler downloadActionHandler, RemoteHostMenuFactory remoteHostMenuFactory, 
+            BlockUserMenuFactory blockUserMenuFactory, @Assisted DownloadTable table) {
+        this.downloadActionHandler = downloadActionHandler;
+        this.remoteHostMenuFactory = remoteHostMenuFactory;
+        this.blockUserMenuFactory = blockUserMenuFactory;
         this.table = table;
     }
 
@@ -56,7 +67,7 @@ public class DownloadPopupHandler implements TablePopupHandler {
     }
     
     private void showMenu(Component component, int x, int y){
-        new DownloadTableMenu(actionHandler, table).show(component, x, y);
+        new DownloadTableMenu(remoteHostMenuFactory, blockUserMenuFactory, downloadActionHandler, table).show(component, x, y);
     }
 
 

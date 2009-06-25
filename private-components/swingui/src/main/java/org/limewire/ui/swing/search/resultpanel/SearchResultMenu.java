@@ -11,20 +11,19 @@ import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.spam.SpamManager;
-import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
-import org.limewire.ui.swing.search.RemoteHostActions;
+import org.limewire.ui.swing.search.BlockUserMenuFactory;
+import org.limewire.ui.swing.search.RemoteHostMenuFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 
 /**
@@ -43,12 +42,13 @@ public class SearchResultMenu extends JPopupMenu {
      * Constructs a SearchResultMenu using the specified download handler,
      * list of selected results, properties factory, and display type.
      */
-    public SearchResultMenu(final DownloadHandler downloadHandler,
-        final List<VisualSearchResult> selectedItems,
+    @Inject
+    public SearchResultMenu(@Assisted final DownloadHandler downloadHandler,
+        @Assisted final List<VisualSearchResult> selectedItems,
         final FileInfoDialogFactory fileInfoFactory,
-        final Provider<RemoteHostActions> remoteHostActions,
-        final SpamManager spamManager, final LibraryMediator libraryMediator,
-        ViewType viewType) {
+        RemoteHostMenuFactory browseMenuFactory,
+        BlockUserMenuFactory blockUserMenuFactory, final LibraryMediator libraryMediator,
+        @Assisted ViewType viewType) {
 
         final VisualSearchResult firstItem = selectedItems.get(0);
         
@@ -138,76 +138,22 @@ public class SearchResultMenu extends JPopupMenu {
             addSeparator();
         }
 
-
-        final List<Friend> friends = new ArrayList<Friend>();
-        final List<RemoteHost> p2pHosts = new ArrayList<RemoteHost>();
         final List<RemoteHost> allHosts = new ArrayList<RemoteHost>();
-        for (VisualSearchResult result : selectedItems){
-            for (RemoteHost host : result.getSources()) {
-                Friend friend = host.getFriendPresence().getFriend();
-                if (!friend.isAnonymous() && !friends.contains(friend)) {
-                    friends.add(friend);
-                    allHosts.add(host);
-                } else if (friend.isAnonymous() && !p2pHosts.contains(host)) {
-                    p2pHosts.add(host);
-                    allHosts.add(host);
-                }
-            }
+        for (VisualSearchResult result : selectedItems) {
+            allHosts.addAll(result.getSources());
         }
         
-        //TODO: don't show browse menuItem in browse view
-        JMenu browse = new JMenu(I18n.tr("Browse Files"));
-        add(browse);
-        
-        if(allHosts.size() > 1){
-            browse.add(new AbstractAction("All Users") {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    remoteHostActions.get().viewLibrariesOf(allHosts);
-                }
-            });
-            browse.addSeparator();
-        }
-        
-        for(final RemoteHost host : allHosts){
-            browse.add(new AbstractAction(host.getFriendPresence().getFriend().getRenderName()) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    remoteHostActions.get().viewLibraryOf(host);
-                }
-            });
-        }        
-        addSeparator();
-        
-        if (p2pHosts.size() > 0) {
-            JMenu block = new JMenu(I18n.tr("Block User"));
-            add(block);
-
-            if (p2pHosts.size() > 1) {
-                block.add(new AbstractAction(I18n.tr("All P2P Users")) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        for (RemoteHost p2pUser : p2pHosts) {
-                            String ipAddress = p2pUser.getFriendPresence().getFriend().getName();
-                            spamManager.addToBlackList(ipAddress);
-                        }
-                    }
-                });
-                block.addSeparator();
-            }
-
-            for (final RemoteHost p2pUser : p2pHosts) {
-                block.add(new AbstractAction(p2pUser.getFriendPresence().getFriend().getRenderName()) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        String ipAddress = p2pUser.getFriendPresence().getFriend().getName();
-                        spamManager.addToBlackList(ipAddress);
-                    }
-                });
-            }
+        if (allHosts.size() > 0) {
+            // TODO: don't show browse menuItem in browse view
+            add(browseMenuFactory.createBrowseMenu(allHosts));
             addSeparator();
-        }
 
+            JMenu blockUserMenu = blockUserMenuFactory.createSearchBlockMenu(allHosts, selectedItems);
+            if (blockUserMenu != null) {
+                add(blockUserMenu);
+                addSeparator();
+            }
+        }
 
         // Add View File Info menu item.
         add(new AbstractAction(tr("View File Info...")) {
@@ -216,4 +162,6 @@ public class SearchResultMenu extends JPopupMenu {
             }
         }).setEnabled(viewFileInfoEnabled);
     }
+    
+
 }

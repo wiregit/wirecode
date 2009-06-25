@@ -1,12 +1,16 @@
 package org.limewire.ui.swing.downloads.table.renderer;
 
+
 import java.awt.Component;
+import java.util.Collection;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
@@ -48,21 +52,28 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
         case RESUMING:
             return I18n.tr("Resuming");
         case CANCELLED:
-            return I18n.tr("Cancelled");
+            return I18n.tr("Canceled");
         case FINISHING:
             return I18n.tr("Finishing...");
         case DONE:
             return I18n.tr("Done");
         case CONNECTING:
-            return I18n.tr("Connecting...");
-        case DOWNLOADING:
+            Collection<RemoteHost> hosts = item.getRemoteHosts();
+            if(hosts.size() == 0){
+                return I18n.tr("Connecting...");
+            }
+            //{0}: 1 person, 2 people, etc
+            return I18n.tr("Connecting to {0}", getPeopleText(hosts));
+        case DOWNLOADING:            
             // {0}: current size
             // {1}: total size
             // {2}: download speed
-            return I18n.tr("{0} of {1} ({2})",
+            // {3}: download source
+            return I18n.tr("{0} of {1} ({2}) from {3}",
                     GuiUtils.toUnitbytes(item.getCurrentSize()), 
                     GuiUtils.toUnitbytes(item.getTotalSize()),
                     GuiUtils.rate2speed(item.getDownloadSpeed()), 
+                    getPeopleText(item.getRemoteHosts()),
                     item.getDownloadSourceCount());
         case TRYING_AGAIN:
             return getTryAgainMessage(item.getRemainingTimeInState());
@@ -96,6 +107,45 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
             return I18n.tr("Looking for file...");                
         } else {
             return I18n.tr("Looking for file ({0} left)", CommonUtils.seconds2time(tryingAgainTime));
+        }
+    }
+    
+    private String getPeopleText(Collection<RemoteHost> hosts) {
+        if (hosts.size() == 0) {
+            return I18n.tr("nobody");
+        } else if (hosts.size() == 1) {
+
+            Friend friend = hosts.iterator().next().getFriendPresence().getFriend();
+            if (friend.isAnonymous()) {
+                return I18n.tr("1 P2P user");
+            } else {
+                return friend.getRenderName();
+            }
+
+        } else {
+            boolean hasP2P = false;
+            boolean hasFriend = false;
+            
+            for (RemoteHost host : hosts) {                
+                if (host.getFriendPresence().getFriend().isAnonymous()) {
+                    hasP2P = true;
+                } else {
+                    hasFriend = true;
+                }
+                
+                if (hasP2P && hasFriend) {
+                    // We found both.  We're done.
+                    break;
+                }
+            }
+            if (hasP2P && hasFriend ) {
+                return I18n.trn("{0} Person", "{0} People", hosts.size());
+            } else if (hasP2P) {
+                return I18n.trn("{0} P2P User", "{0} P2P Users", hosts.size());
+            } else {
+                //just friends
+                return I18n.trn("{0} Friend", "{0} Friends", hosts.size());
+            }
         }
     }
     

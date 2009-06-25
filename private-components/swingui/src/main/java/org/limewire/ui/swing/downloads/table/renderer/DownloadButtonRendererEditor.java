@@ -26,6 +26,7 @@ public class DownloadButtonRendererEditor extends TableRendererEditor{
         add(buttonPanel);
     }
     
+    @Inject
     public void setActionHandler(final DownloadActionHandler actionHandler) {
         buttonPanel.addActionListener(new ActionListener() {
             @Override

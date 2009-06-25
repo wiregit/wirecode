@@ -43,7 +43,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.spam.SpamManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.IconButton;
@@ -56,7 +55,6 @@ import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
-import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
@@ -64,6 +62,7 @@ import org.limewire.ui.swing.search.resultpanel.ResultsTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
@@ -160,9 +159,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      */
     private int textPanelWidth;
 
-    private final SpamManager spamManager;
-
-    private final Provider<RemoteHostActions> remoteHostActions;
+    private final SearchResultMenuFactory searchResultMenuFactory;
     
     @Inject
     ListViewTableEditorRenderer(
@@ -176,7 +173,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
-        Provider<RemoteHostActions> remoteHostActions, SpamManager spamManager) {
+        SearchResultMenuFactory searchResultMenuFactory) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -187,8 +184,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.truncator = truncator;
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
-        this.remoteHostActions = remoteHostActions;
-        this.spamManager = spamManager;
+        this.searchResultMenuFactory = searchResultMenuFactory;
         
         GuiUtils.assignResources(this);
 
@@ -547,8 +543,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 }
                 
                 // Display context menu.
-                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, selectedResults, 
-                        fileInfoFactory, remoteHostActions, spamManager, libraryMediator, SearchResultMenu.ViewType.List);
+                SearchResultMenu searchResultMenu = searchResultMenuFactory.create(downloadHandler, selectedResults, SearchResultMenu.ViewType.List);
                 searchResultMenu.show(e.getComponent(), e.getX()+3, e.getY()+3);
             }
         };

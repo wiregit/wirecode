@@ -3,16 +3,21 @@ package org.limewire.ui.swing.downloads.table;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
 import javax.swing.table.TableCellEditor;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.ui.swing.search.BlockUserMenuFactory;
+import org.limewire.ui.swing.search.RemoteHostMenuFactory;
 import org.limewire.ui.swing.util.I18n;
 
 public class DownloadTableMenu extends JPopupMenu{
@@ -20,6 +25,8 @@ public class DownloadTableMenu extends JPopupMenu{
     private final MenuListener menuListener;
     private final DownloadActionHandler actionHandler;
     private final DownloadTable table;
+    private final RemoteHostMenuFactory remoteHostMenuFactory;
+    private final BlockUserMenuFactory blockUserMenuFactory;
     
     private List<DownloadItem> downloadItems;
 
@@ -27,7 +34,9 @@ public class DownloadTableMenu extends JPopupMenu{
      * Constructs a DownloadTableMenu using the specified action handler and
      * display table.
      */
-    public DownloadTableMenu(DownloadActionHandler actionHandler, DownloadTable table) {
+    public DownloadTableMenu(RemoteHostMenuFactory remoteHostMenuFactory, BlockUserMenuFactory blockUserMenuFactory, DownloadActionHandler actionHandler, DownloadTable table) {
+        this.remoteHostMenuFactory = remoteHostMenuFactory;
+        this.blockUserMenuFactory = blockUserMenuFactory;
         this.actionHandler = actionHandler;
         this.table = table;
 
@@ -51,120 +60,64 @@ public class DownloadTableMenu extends JPopupMenu{
     private void initializeSingleItemMenu(DownloadItem downloadItem){
         
         DownloadState state = downloadItem.getState();
-
-        // add pause to all pausable states
-        if (state.isPausable()) {
-            add(createPauseMenuItem());
-            addSeparator();
-        }
-
-        switch (state) {
-        case DONE:
-            if (downloadItem.getCategory() != Category.PROGRAM
-                    && downloadItem.getCategory() != Category.OTHER) {
-                
-                switch (downloadItem.getCategory()) {
-                case AUDIO:
-                case VIDEO:
-                    add(createPlayMenuItem()).setEnabled(downloadItem.isLaunchable());
-                    break;
-                case IMAGE:
-                case DOCUMENT:
-                    add(createViewMenuItem()).setEnabled(downloadItem.isLaunchable());
-                    break;
-                default:
-                    add(createLaunchMenuItem()).setEnabled(downloadItem.isLaunchable());
-                    break;
-                }
-                
-            }
-            add(createShareMenuItem());
-            addSeparator();
-            add(createLocateMenuItem());
-            add(createLibraryMenuItem());
-            addSeparator();
-            add(createRemoveMenuItem());
-            break;
-
-        case TRYING_AGAIN:
-        case CONNECTING:
-        case FINISHING:
-        case LOCAL_QUEUED:
-        case REMOTE_QUEUED:
-            if (downloadItem.getCategory() != Category.PROGRAM
-                    && downloadItem.getCategory() != Category.OTHER) {
-                add(createPreviewMenuItem()).setEnabled(downloadItem.isLaunchable());
-            }
-            add(createLibraryMenuItem());
-            add(new JSeparator());
-            add(createCancelMenuItem());
-            
-            if (state == DownloadState.LOCAL_QUEUED){
-                add(new JSeparator());
-                add(createRaisePriorityMenuItem());
-                add(createLowerPriorityMenuItem());
-            }
-            break;
-            
-        case ERROR:
-            add(createCancelWithRemoveNameMenuItem());
-            add(new JSeparator());
-            if (downloadItem.getCategory() != Category.PROGRAM
-                    && downloadItem.getCategory() != Category.OTHER) {
-                add(createPreviewMenuItem()).setEnabled(downloadItem.isLaunchable());
-            }
-            add(createLibraryMenuItem());
-            break;
-            
-        case RESUMING:
-        case DOWNLOADING:
-            if (downloadItem.getCategory() != Category.PROGRAM
-                    && downloadItem.getCategory() != Category.OTHER) {
-                add(createPreviewMenuItem()).setEnabled(downloadItem.isLaunchable());
-            }
-            add(createLibraryMenuItem());
-            add(new JSeparator());
-            add(createCancelMenuItem());
-            break;
-
-        case PAUSED:
-            add(createResumeMenuItem());
-            addSeparator();
-            if (downloadItem.getCategory() != Category.PROGRAM
-                    && downloadItem.getCategory() != Category.OTHER) {
-                add(createPreviewMenuItem()).setEnabled(downloadItem.isLaunchable());
-            }
-            add(createLibraryMenuItem());
-            add(new JSeparator());
-
-            add(createCancelMenuItem());
-            break;
-
-        case STALLED:
-            add(createTryAgainMenuItem());
-            addSeparator();
-            if (downloadItem.getCategory() != Category.PROGRAM
-                    && downloadItem.getCategory() != Category.OTHER) {
-                add(createPreviewMenuItem()).setEnabled(downloadItem.isLaunchable());
-            }
-            add(createLibraryMenuItem());
-            add(new JSeparator());
-            add(createCancelMenuItem());
-            break;
-            
-        default:
-            //do nothing
-        }
         
-        add(new JSeparator());
-        add(createPropertiesMenuItem());
-    }
+        if (state == DownloadState.DONE){
+            
+            add(createLaunchMenuItem());
+            add(createRemoveMenuItem());
+            addSeparator();
+            add(createLocateOnDiskMenuItem());
+            add(createLocateInLibraryMenuItem());
+            //TODO change location
+            addSeparator();
+            //TODO add to list>
+            //TODO Show in List >
+            //TODO addSeparator();
+            add(createPropertiesMenuItem());
+            
+        } else {
+            //not DONE
+            if(isResumable(state)){
+                add(createResumeMenuItem());
+            }
+            if(isPausable(state)){
+                add(createPauseMenuItem());
+            }
+            if(isTryAgainable(state)){
+                add(createTryAgainMenuItem());
+            }            
+            if (downloadItem.getCategory() != Category.PROGRAM
+                    && downloadItem.getCategory() != Category.OTHER) {
+                add(createPreviewMenuItem()).setEnabled(downloadItem.isLaunchable());
+            }
+            addSeparator();
+            
+            add(createLocateOnDiskMenuItem());
+            add(createLocateInLibraryMenuItem());
+            //TODO Change Location...
+            addSeparator();
+            boolean hasBrowse = maybeAddBrowseMenu(downloadItem.getRemoteHosts());
+            boolean hasBlock = maybeAddBlockMenu(downloadItem.getRemoteHosts());
+            if(hasBrowse || hasBlock){
+                addSeparator();
+            }
+            if(state == DownloadState.ERROR){
+                add(createCancelWithRemoveNameMenuItem());
+            } else {
+                add(createCancelMenuItem());
+            }
+            addSeparator();
+            add(createPropertiesMenuItem()); 
+        }        
+    }  
     
     private void initializeMultiItemMenu(List<DownloadItem> downloadItems) {
         boolean hasTryAgain = false;
         boolean hasPause = false;
         boolean hasCancel = false;
         boolean hasResume = false;
+
+        List<RemoteHost> hosts = new ArrayList<RemoteHost>();
         
         //Check which menu items to include.  Items are included if they are valid
         //for any item in the list.
@@ -184,7 +137,11 @@ public class DownloadTableMenu extends JPopupMenu{
             }
             if(isCancelable(item.getState())){
                 hasCancel = true;
-            }   
+            } 
+            
+            if(!item.isStoreDownload()){
+                hosts.addAll(item.getRemoteHosts());
+            }
         }
 
         if (hasPause){
@@ -196,6 +153,10 @@ public class DownloadTableMenu extends JPopupMenu{
         if (hasTryAgain){
             add(createTryAgainMenuItem());
         }
+        
+        maybeAddBrowseMenu(hosts);
+        maybeAddBlockMenu(hosts);
+        
         if (hasCancel){
             add(createCancelMenuItem());
         }
@@ -216,6 +177,23 @@ public class DownloadTableMenu extends JPopupMenu{
 
     private boolean isCancelable(DownloadState state) {
         return state != DownloadState.DONE;
+    }
+    
+    private boolean maybeAddBrowseMenu(Collection<RemoteHost> remoteHosts){
+        if (remoteHosts.size() > 0) {
+            add(remoteHostMenuFactory.createBrowseMenu(remoteHosts));
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean maybeAddBlockMenu(Collection<RemoteHost> remoteHosts){
+        JMenu blockMenu = blockUserMenuFactory.createDownloadBlockMenu(remoteHosts);
+        if(blockMenu!= null){
+            add(blockMenu);
+            return true;
+        }
+        return false;
     }
     
     private void cancelEditing(){
@@ -261,27 +239,27 @@ public class DownloadTableMenu extends JPopupMenu{
     }  
     
     private JMenuItem createRemoveMenuItem(){
-        JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from List"));
+        JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
         removeMenuItem.setActionCommand(DownloadActionHandler.REMOVE_COMMAND);
         removeMenuItem.addActionListener(menuListener);
         return removeMenuItem;
     }   
     
     private JMenuItem createCancelWithRemoveNameMenuItem(){
-        JMenuItem cancelWithRemoveNameMenuItem = new JMenuItem(I18n.tr("Clear from List"));
+        JMenuItem cancelWithRemoveNameMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
         cancelWithRemoveNameMenuItem.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
         cancelWithRemoveNameMenuItem.addActionListener(menuListener);
         return cancelWithRemoveNameMenuItem;
     } 
     
-    private JMenuItem createLocateMenuItem(){
+    private JMenuItem createLocateOnDiskMenuItem(){
         JMenuItem locateMenuItem = new JMenuItem(I18n.tr("Locate on Disk"));
         locateMenuItem.setActionCommand(DownloadActionHandler.LOCATE_COMMAND);
         locateMenuItem.addActionListener(menuListener);
         return locateMenuItem;
     } 
     
-    private JMenuItem createLibraryMenuItem(){
+    private JMenuItem createLocateInLibraryMenuItem(){
         JMenuItem libraryMenuItem = new JMenuItem(I18n.tr("Locate in Library"));
         libraryMenuItem.setActionCommand(DownloadActionHandler.LIBRARY_COMMAND);
         libraryMenuItem.addActionListener(menuListener);
@@ -295,39 +273,20 @@ public class DownloadTableMenu extends JPopupMenu{
         return propertiesMenuItem;
     }  
     
-    private JMenuItem createShareMenuItem(){
-        JMenuItem shareMenuItem = new JMenuItem(I18n.tr("Share File"));
-        shareMenuItem.setActionCommand(DownloadActionHandler.SHARE_COMMAND);
-        shareMenuItem.addActionListener(menuListener);
-        return shareMenuItem;
-    }  
     
-    private JMenuItem createPlayMenuItem(){
-        JMenuItem playMenuItem = new JMenuItem(I18n.tr("Play"));
-        playMenuItem.setActionCommand(DownloadActionHandler.PLAY_COMMAND);
-        playMenuItem.addActionListener(menuListener);
-        return playMenuItem;
-    }  
-    
-    private JMenuItem createViewMenuItem(){
-        JMenuItem viewMenuItem = new JMenuItem(I18n.tr("View"));
-        viewMenuItem.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
-        viewMenuItem.addActionListener(menuListener);  
-        return viewMenuItem;
-    }  
-    
-    private JMenuItem createRaisePriorityMenuItem(){
-        JMenuItem raisePriorityItem = new JMenuItem(I18n.tr("Raise Priority"));
-        raisePriorityItem.addActionListener(menuListener);       
-
-        return raisePriorityItem;
-    }  
-    
-    private JMenuItem createLowerPriorityMenuItem() {
-        JMenuItem lowerPriorityItem = new JMenuItem(I18n.tr("Lower Priority"));
-        lowerPriorityItem.addActionListener(menuListener);
-        return lowerPriorityItem;
-    }
+    //These will be reintroduced later
+//    private JMenuItem createRaisePriorityMenuItem(){
+//        JMenuItem raisePriorityItem = new JMenuItem(I18n.tr("Raise Priority"));
+//        raisePriorityItem.addActionListener(menuListener);       
+//
+//        return raisePriorityItem;
+//    }  
+//    
+//    private JMenuItem createLowerPriorityMenuItem() {
+//        JMenuItem lowerPriorityItem = new JMenuItem(I18n.tr("Lower Priority"));
+//        lowerPriorityItem.addActionListener(menuListener);
+//        return lowerPriorityItem;
+//    }
 
     private JMenuItem createPreviewMenuItem() {
         JMenuItem previewMenuItem = new JMenuItem(I18n.tr("Preview File"));

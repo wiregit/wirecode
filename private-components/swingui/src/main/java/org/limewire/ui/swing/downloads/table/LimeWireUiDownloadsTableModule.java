@@ -7,9 +7,12 @@ public class LimeWireUiDownloadsTableModule extends AbstractModule {
 
     @Override
     protected void configure() {        
-        
+
         bind(DownloadTableFactory.class).toProvider(
                 FactoryProvider.newFactory(
                         DownloadTableFactory.class, DownloadTable.class));
+        bind(DownloadPopupHandlerFactory.class).toProvider(
+                FactoryProvider.newFactory(
+                        DownloadPopupHandlerFactory.class, DownloadPopupHandler.class));
     }
 }
