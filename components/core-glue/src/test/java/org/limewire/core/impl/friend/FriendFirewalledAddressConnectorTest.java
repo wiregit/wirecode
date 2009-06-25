@@ -308,6 +308,21 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                     backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
+            {
+            allowing(publicConnectable).getAddress();
+            will(returnValue("40.1.0.0"));
+            allowing(publicConnectable).getPort();
+            will(returnValue(427));
+            allowing(publicConnectable).getInetAddress();
+            will(returnValue(inetAddr));
+            allowing(publicConnectable).getInetSocketAddress();
+            will(returnValue(inetSocketAddr));     
+        }});
+        
+        final ConnectBackRequest connectBackRequest = new ConnectBackRequest(publicConnectable, guid, 407);
+        context.assertIsSatisfied();
+        
+        context.checking(new Expectations() {
             {   allowing(address).getFirewalledAddress();
                 will(returnValue(fwAddress));
                 
@@ -318,15 +333,6 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 
                 allowing(networkManager).getPublicAddress();
                 will(returnValue(publicConnectable));
-                
-                allowing(publicConnectable).getAddress();
-                will(returnValue("40.1.0.0"));
-                allowing(publicConnectable).getPort();
-                will(returnValue(427));
-                allowing(publicConnectable).getInetAddress();
-                will(returnValue(inetAddr));
-                allowing(publicConnectable).getInetSocketAddress();
-                will(returnValue(inetSocketAddr));
                 
                 allowing(address).getFriendAddress();
                 will(returnValue(friendAddress));
@@ -356,7 +362,7 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 one(friendPresence).getTransport(ConnectBackRequestFeature.class);
                 will(returnValue(connectBackTransport));
                 
-                one(connectBackTransport).sendFeature(friendPresence, new ConnectBackRequest(publicConnectable, guid, 407));
+                one(connectBackTransport).sendFeature(friendPresence, connectBackRequest);
                 
                 exactly(1).of(socket).connect(with(same(inetSocketAddr)),
                         with(any(Integer.class)), with(connectObserverCollector));
@@ -495,6 +501,21 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                     backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
+            {
+            allowing(publicConnectable).getAddress();
+            will(returnValue("40.1.0.0"));
+            allowing(publicConnectable).getPort();
+            will(returnValue(427));
+            allowing(publicConnectable).getInetAddress();
+            will(returnValue(inetAddr));
+            allowing(publicConnectable).getInetSocketAddress();
+            will(returnValue(inetSocketAddr));     
+        }});
+        
+        final ConnectBackRequest connectBackRequest = new ConnectBackRequest(publicConnectable, guid, 0);
+        context.assertIsSatisfied();
+        
+        context.checking(new Expectations() {
             {   allowing(address).getFirewalledAddress();
                 will(returnValue(fwAddress));
                 
@@ -505,15 +526,6 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 
                 allowing(networkManager).getPublicAddress();
                 will(returnValue(publicConnectable));
-                
-                allowing(publicConnectable).getAddress();
-                will(returnValue("40.1.0.0"));
-                allowing(publicConnectable).getPort();
-                will(returnValue(427));
-                allowing(publicConnectable).getInetAddress();
-                will(returnValue(inetAddr));
-                allowing(publicConnectable).getInetSocketAddress();
-                will(returnValue(inetSocketAddr));
                 
                 allowing(address).getFriendAddress();
                 will(returnValue(friendAddress));
@@ -530,10 +542,10 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 allowing(friendPresence).getTransport(ConnectBackRequestFeature.class);
                 will(returnValue(connectBackTransport));
                 
-                one(connectBackTransport).sendFeature(friendPresence, new ConnectBackRequest(publicConnectable, guid, 0));
+                one(connectBackTransport).sendFeature(friendPresence, connectBackRequest);
                 will(throwException(new FriendException("error sending")));
                 
-                one(connectBackTransport).sendFeature(friendPresence, new ConnectBackRequest(publicConnectable, guid, 0));
+                one(connectBackTransport).sendFeature(friendPresence, connectBackRequest);
                 
                 exactly(1).of(pushDownloadManager).connect(fwAddress, observer);
                 
