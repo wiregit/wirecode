@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library.navigator;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.TooManyListenersException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -22,7 +21,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
-import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -73,10 +71,10 @@ public class LibraryNavigatorPanel extends JXPanel {
         add(createListButton, "aligny top, gaptop 5, alignx center, wrap");
 
         
-        try {
-            table.getDropTarget().addDropTargetListener(new GhostDropTargetListener(table, ghostGlassPane));
-        } catch (TooManyListenersException e) {
-        }
+//        try {
+//            table.getDropTarget().addDropTargetListener(new GhostDropTargetListener(table, ghostGlassPane));
+//        } catch (TooManyListenersException e) {
+//        }
 
         initData();
     }

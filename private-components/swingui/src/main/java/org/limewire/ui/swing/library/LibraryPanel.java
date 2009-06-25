@@ -3,14 +3,9 @@ package org.limewire.ui.swing.library;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragSourceAdapter;
-import java.awt.dnd.DragSourceContext;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TooManyListenersException;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -42,7 +37,6 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
-import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
@@ -144,20 +138,20 @@ public class LibraryPanel extends JPanel {
         add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
         add(tableListPanel, "grow");
         
-        try {
-            libraryTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryTable, ghostGlassPane));
-        } catch (TooManyListenersException e) {
-        }
-        
-        //hides system drag cursor when drag starts from within the app
-        DragSource source = DragSource.getDefaultDragSource();
-        source.addDragSourceListener(new DragSourceAdapter(){
-            @Override
-            public void dragEnter(java.awt.dnd.DragSourceDragEvent e) { 
-                DragSourceContext context = e.getDragSourceContext();
-                context.setCursor(Cursor.getDefaultCursor());
-            }
-        });
+//        try {
+//            libraryTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryTable, ghostGlassPane));
+//        } catch (TooManyListenersException e) {
+//        }
+//        
+//        //hides system drag cursor when drag starts from within the app
+//        DragSource source = DragSource.getDefaultDragSource();
+//        source.addDragSourceListener(new DragSourceAdapter(){
+//            @Override
+//            public void dragEnter(java.awt.dnd.DragSourceDragEvent e) { 
+//                DragSourceContext context = e.getDragSourceContext();
+//                context.setCursor(Cursor.getDefaultCursor());
+//            }
+//        });
     }
     
     /**
@@ -228,10 +222,10 @@ public class LibraryPanel extends JPanel {
     private void createImageList() {
         libraryImagePanel = libraryImagePanelProvider.get();
         libraryImagePanel.setTransferHandler(transferHandler);
-        try {
-            libraryImagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryImagePanel, ghostGlassPane));
-        } catch (TooManyListenersException e) {
-        }
+//        try {
+//            libraryImagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryImagePanel, ghostGlassPane));
+//        } catch (TooManyListenersException e) {
+//        }
         tableListPanel.add(libraryImagePanel, LIST); 
     }
     

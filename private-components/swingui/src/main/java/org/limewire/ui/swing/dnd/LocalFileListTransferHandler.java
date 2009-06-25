@@ -68,8 +68,8 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
             canImport = canImportInternal(info);
             canImportMap.put(localFileList, canImport);
         }
-        ghostPane.setAccept(canImport);
-        ghostPane.setVisible(true);
+//        ghostPane.setAccept(canImport);
+//        ghostPane.setVisible(true);
         
         return canImport;
     }
