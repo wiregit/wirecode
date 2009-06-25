@@ -113,8 +113,8 @@ class LibrarySharingEditablePanel {
             }
         });
         noneButton.setFont(selectFont);
-        component.add(allButton, "gapleft 15, gaptop 5");
-        component.add(noneButton, "gapleft 15, gaptop 5, wrap");
+        component.add(allButton, "gapleft 6, gaptop 5");
+        component.add(noneButton, "gapleft 6, gaptop 5, wrap");
                 
         baseEventList = new BasicEventList<EditableSharingData>();
         SortedList<EditableSharingData> sortedList = GlazedListsFactory.sortedList(baseEventList, new FriendComparator());        
