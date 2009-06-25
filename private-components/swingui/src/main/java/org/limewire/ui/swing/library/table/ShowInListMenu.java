@@ -59,7 +59,7 @@ public class ShowInListMenu extends JMenu {
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
                         if(fileList.contains(selectedFile))
-                            menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled(fileList != selectedLocalFileList.get());
+                            menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile)).setEnabled(fileList != selectedLocalFileList.get());
                     }
                 } finally {
                     manager.getModel().getReadWriteLock().readLock().unlock();
@@ -70,7 +70,7 @@ public class ShowInListMenu extends JMenu {
             
         });
         // place holder to get the -> on the parent menu
-        add(new JMenuItem(I18n.tr("Public Shared")));
+        add(new JMenuItem(I18n.tr("empty")));
     }
     
     private Icon getListIcon(SharedFileList sharedFileList) {
@@ -82,19 +82,21 @@ public class ShowInListMenu extends JMenu {
             return sharedIcon;
     }
     
-    private class AddListAction extends AbstractAction {
+    private class ShowAction extends AbstractAction {
         private final SharedFileList sharedFileList;
+        private final File selectedFile;
         
-        public AddListAction(String text, Icon icon, SharedFileList sharedFileList) {
+        public ShowAction(String text, Icon icon, SharedFileList sharedFileList, File selectedFile) {
             super(text);
             putValue(SMALL_ICON, icon);
             this.sharedFileList = sharedFileList;
+            this.selectedFile = selectedFile;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
             libraryPanel.selectLocalFileList(sharedFileList);
-            libraryPanel.selectAndScrollTo(selectedFiles.get().get(0));
+            libraryPanel.selectAndScrollTo(selectedFile);
         }
     }
 }
