@@ -23,8 +23,8 @@ public class LibraryPopupMenu extends JPopupMenu {
     private final Provider<LocateFileAction> locateAction;
     private final Provider<RemoveFromListAction> removeListAction;
     private final Provider<RemoveFromAllListAction> removeFromAllListAction;
-    private final Provider<AddToListMenu> addToListMenu;
-    private final Provider<ShowInListMenu> showInListMenu;
+    private final Provider<LibraryAddToListMenu> addToListMenu;
+    private final Provider<LibraryShowInListMenu> showInListMenu;
     private final RemoveFromLibraryAction removeAction;
     private final DeleteAction deleteAction;
     private final Provider<ViewFileInfoAction> fileInfoAction;
@@ -34,8 +34,9 @@ public class LibraryPopupMenu extends JPopupMenu {
             LibraryNavigatorPanel libraryNavigatorPanel, Provider<RemoveFromAllListAction> removeFromAllListAction,
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
             Provider<PlayAction> playAction, RemoveFromLibraryAction removeAction,
-            Provider<RemoveFromListAction> removeListAction, Provider<AddToListMenu> addToListMenu,
-            Provider<ShowInListMenu> showInListMenu,
+            Provider<RemoveFromListAction> removeListAction, 
+            Provider<LibraryAddToListMenu> addToListMenu,
+            Provider<LibraryShowInListMenu> showInListMenu,
             DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryNavigatorPanel = libraryNavigatorPanel;

@@ -162,6 +162,10 @@ public interface DownloadItem extends PropertiableFile {
      * Sets the destination path and file name for the download.
      */
     void setSaveFile(File saveFile, boolean overwrite) throws SaveLocationException;
+    
+    /** Returns the file under which the download will be saved when complete.  
+     * Counterpart to setSaveFile. */
+    public File getSaveFile();
 
     /** @return true if {@link #resume()} will search for more sources. */
     boolean isSearchAgainEnabled(); 
@@ -171,4 +175,7 @@ public interface DownloadItem extends PropertiableFile {
     
     /** @return true if this is a download from the LimeWire Store. */
     boolean isStoreDownload();
+    
+    /** @return true if this can have its saveLocation changed. */
+    public boolean isRelocatable();
 }

@@ -16,7 +16,6 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -25,26 +24,32 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class AddToListMenu extends JMenu {
-    
-    @Resource
-    private Icon publicIcon;
-    @Resource
-    private Icon unsharedIcon;
-    @Resource
-    private Icon sharedIcon;
+
     
     private final Provider<List<File>> selectedFiles;
+    private final Provider<LocalFileList> selectedLocalFileList; 
+    private final AddToListMenuIcons icons = new AddToListMenuIcons();
     
-    @Inject
-    public AddToListMenu(final SharedFileListManager manager,
-            final @LibrarySelected Provider<LocalFileList> selectedLocalFileList,
-            @LibrarySelected Provider<List<File>> selectedFiles) {
-        super("Add to List");
-        
-        GuiUtils.assignResources(this);
-        
+    /**
+     * Constructs an AddToListMenu with all lists enable..
+     */
+    public AddToListMenu(Provider<List<File>> selectedFiles) {
+        this(null, selectedFiles);
+    }
+    
+    /**
+     * Constructs an AddToListMenu with all but selectedLocalFileList enabled.
+     */
+    public AddToListMenu(final Provider<LocalFileList> selectedLocalFileList,
+            Provider<List<File>> selectedFiles) {
+        super("Add to List");  
+        this.selectedLocalFileList = selectedLocalFileList;
         this.selectedFiles = selectedFiles;
+    }
         
+        
+    @Inject
+    public void initialize(final SharedFileListManager manager){        
         addChangeListener(new ChangeListener(){
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -54,7 +59,7 @@ public class AddToListMenu extends JMenu {
                 manager.getModel().getReadWriteLock().readLock().lock();
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
-                        menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled(fileList != selectedLocalFileList.get());
+                        menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
                     }
                 } finally {
                     manager.getModel().getReadWriteLock().readLock().unlock();
@@ -68,11 +73,11 @@ public class AddToListMenu extends JMenu {
     
     private Icon getListIcon(SharedFileList sharedFileList) {
         if(sharedFileList.isPublic())
-            return publicIcon;
+            return icons.publicIcon;
         else if(sharedFileList.getFriendIds().size() == 0)
-            return unsharedIcon;
+            return icons.unsharedIcon;
         else
-            return sharedIcon;
+            return icons.sharedIcon;
     }
     
     private class AddListAction extends AbstractAction {
@@ -95,5 +100,19 @@ public class AddToListMenu extends JMenu {
                 }
             });
         }
+    }
+    
+    public class AddToListMenuIcons {
+        
+        @Resource
+        private Icon publicIcon;
+        @Resource
+        private Icon unsharedIcon;
+        @Resource
+        private Icon sharedIcon;
+        {
+            GuiUtils.assignResources(this);
+        }
+        
     }
 }

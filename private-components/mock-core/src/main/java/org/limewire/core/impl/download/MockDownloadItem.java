@@ -270,4 +270,15 @@ public class MockDownloadItem implements DownloadItem {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public File getSaveFile() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isRelocatable() {
+        return true;
+    }
 }

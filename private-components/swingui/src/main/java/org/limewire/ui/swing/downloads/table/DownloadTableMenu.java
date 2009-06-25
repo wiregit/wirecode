@@ -20,6 +20,10 @@ import org.limewire.ui.swing.search.BlockUserMenuFactory;
 import org.limewire.ui.swing.search.RemoteHostMenuFactory;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
+
 public class DownloadTableMenu extends JPopupMenu{
     
     private final MenuListener menuListener;
@@ -27,6 +31,8 @@ public class DownloadTableMenu extends JPopupMenu{
     private final DownloadTable table;
     private final RemoteHostMenuFactory remoteHostMenuFactory;
     private final BlockUserMenuFactory blockUserMenuFactory;
+    private final Provider<DownloadAddToListMenu> dowloadAddtoListMenu;
+    private final Provider<DownloadShowInListMenu> showInListMenu;
     
     private List<DownloadItem> downloadItems;
 
@@ -34,11 +40,16 @@ public class DownloadTableMenu extends JPopupMenu{
      * Constructs a DownloadTableMenu using the specified action handler and
      * display table.
      */
-    public DownloadTableMenu(RemoteHostMenuFactory remoteHostMenuFactory, BlockUserMenuFactory blockUserMenuFactory, DownloadActionHandler actionHandler, DownloadTable table) {
+    @Inject
+    public DownloadTableMenu(RemoteHostMenuFactory remoteHostMenuFactory, BlockUserMenuFactory blockUserMenuFactory, 
+            DownloadActionHandler actionHandler, Provider<DownloadAddToListMenu> dowloadAddtoListMenu, 
+            Provider<DownloadShowInListMenu> showInListMenu, @Assisted DownloadTable table) {
         this.remoteHostMenuFactory = remoteHostMenuFactory;
         this.blockUserMenuFactory = blockUserMenuFactory;
         this.actionHandler = actionHandler;
         this.table = table;
+        this.dowloadAddtoListMenu = dowloadAddtoListMenu;
+        this.showInListMenu = showInListMenu;
 
         menuListener = new MenuListener();   
         
@@ -68,11 +79,10 @@ public class DownloadTableMenu extends JPopupMenu{
             addSeparator();
             add(createLocateOnDiskMenuItem());
             add(createLocateInLibraryMenuItem());
-            //TODO change location
             addSeparator();
-            //TODO add to list>
-            //TODO Show in List >
-            //TODO addSeparator();
+            add(dowloadAddtoListMenu.get());
+            add(showInListMenu.get());
+            addSeparator();
             add(createPropertiesMenuItem());
             
         } else {
@@ -94,7 +104,9 @@ public class DownloadTableMenu extends JPopupMenu{
             
             add(createLocateOnDiskMenuItem());
             add(createLocateInLibraryMenuItem());
-            //TODO Change Location...
+            if (downloadItem.isRelocatable()) {
+                add(createChangeLocactionMenuItem());
+            }
             addSeparator();
             boolean hasBrowse = maybeAddBrowseMenu(downloadItem.getRemoteHosts());
             boolean hasBlock = maybeAddBlockMenu(downloadItem.getRemoteHosts());
@@ -116,6 +128,7 @@ public class DownloadTableMenu extends JPopupMenu{
         boolean hasPause = false;
         boolean hasCancel = false;
         boolean hasResume = false;
+        boolean allDone = true;
 
         List<RemoteHost> hosts = new ArrayList<RemoteHost>();
         
@@ -125,6 +138,9 @@ public class DownloadTableMenu extends JPopupMenu{
             if (hasTryAgain && hasPause && hasCancel && hasResume){
                 //if all four booleans are true, we are done checking
                 break;
+            }
+            if(item.getState() != DownloadState.DONE){
+                allDone = false;
             }
             if(isResumable(item.getState())){
                 hasResume = true;
@@ -143,22 +159,27 @@ public class DownloadTableMenu extends JPopupMenu{
                 hosts.addAll(item.getRemoteHosts());
             }
         }
+        
+        if(allDone){
+            add(createCancelWithRemoveNameMenuItem());
+            add(dowloadAddtoListMenu.get());
+        } else {
+            if (hasPause) {
+                add(createPauseMenuItem());
+            }
+            if (hasResume) {
+                add(createResumeMenuItem());
+            }
+            if (hasTryAgain) {
+                add(createTryAgainMenuItem());
+            }
 
-        if (hasPause){
-            add(createPauseMenuItem());
-        }
-        if (hasResume){
-            add(createResumeMenuItem());
-        }
-        if (hasTryAgain){
-            add(createTryAgainMenuItem());
-        }
-        
-        maybeAddBrowseMenu(hosts);
-        maybeAddBlockMenu(hosts);
-        
-        if (hasCancel){
-            add(createCancelMenuItem());
+            maybeAddBrowseMenu(hosts);
+            maybeAddBlockMenu(hosts);
+
+            if (hasCancel) {
+                add(createCancelMenuItem());
+            }
         }
         
     }
@@ -272,6 +293,13 @@ public class DownloadTableMenu extends JPopupMenu{
         propertiesMenuItem.addActionListener(menuListener);
         return propertiesMenuItem;
     }  
+    
+    private JMenuItem createChangeLocactionMenuItem(){
+        JMenuItem changeLocationMenuItem = new JMenuItem(I18n.tr("Change Location..."));
+        changeLocationMenuItem.setActionCommand(DownloadActionHandler.CHANGE_LOCATION_COMMAND);
+        changeLocationMenuItem.addActionListener(menuListener);
+        return changeLocationMenuItem;
+    }
     
     
     //These will be reintroduced later

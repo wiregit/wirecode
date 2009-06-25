@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -29,7 +30,6 @@ import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -51,7 +51,6 @@ public class MainDownloadPanel extends JPanel {
     
     private boolean isInitialized = false;
     private final Provider<DownloadTableFactory> downloadTableFactory;
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
     private final DownloadListManager downloadListManager;
     
     @Resource private int preferredHeight;
@@ -66,13 +65,11 @@ public class MainDownloadPanel extends JPanel {
     public MainDownloadPanel(Provider<DownloadTableFactory> downloadTableFactory, 
             DownloadMediator downloadMediator,
             TrayNotifier notifier, 
-            DownloadListManager downloadListManager,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
+            DownloadListManager downloadListManager) {
         this.downloadMediator = downloadMediator;
         this.downloadTableFactory = downloadTableFactory;
         this.downloadListManager = downloadListManager;
         this.notifier = notifier;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
 
         GuiUtils.assignResources(this);
 
@@ -126,6 +123,10 @@ public class MainDownloadPanel extends JPanel {
         initializeDownloadListeners(downloadListManager);
         
         EventAnnotationProcessor.subscribe(this);
+    }
+    
+    public List<DownloadItem> getSelectedDownloadItems(){
+        return table.getSelectedItems();
     }
 
     

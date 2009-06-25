@@ -15,8 +15,11 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.LibraryPanel;
-import org.limewire.ui.swing.library.LibrarySelected;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -24,28 +27,38 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class ShowInListMenu extends JMenu {
-
-    @Resource
-    private Icon publicIcon;
-    @Resource
-    private Icon unsharedIcon;
-    @Resource
-    private Icon sharedIcon;
     
     private final Provider<List<File>> selectedFiles;
-    private final LibraryPanel libraryPanel;
+    private LibraryPanel libraryPanel;
+    private final ShowInListMenuIcons icons = new ShowInListMenuIcons();
+    private Provider<Navigator> navigatorProvider;
+    private Provider<LocalFileList> selectedLocalFileList;
     
-    @Inject
-    public ShowInListMenu(final SharedFileListManager manager,
-            @LibrarySelected Provider<List<File>> selectedFiles,
-            final @LibrarySelected Provider<LocalFileList> selectedLocalFileList,
-            LibraryPanel libraryPanel) {
-        super("Show in List");
-        
-        GuiUtils.assignResources(this);
+    /**
+     * Constructs a ShowInListMenu with all items enabled.  Initialize must be called after construction (except for injected subclasses).
+     */
+    public ShowInListMenu(Provider<List<File>> selectedFiles) {
+        this(selectedFiles, null);
+    }
+ 
+    /**
+     * Constructs a ShowInListMenu with all items but selectedLocalFileList enabled.  Initialize must be called after construction (except for injected subclasses).
+     */
+    public ShowInListMenu(Provider<List<File>> selectedFiles,
+            final Provider<LocalFileList> selectedLocalFileList) {
+        super(I18n.tr("Show in List"));        
         
         this.selectedFiles = selectedFiles;
+        this.selectedLocalFileList = selectedLocalFileList;
+       
+    }
+    
+    @Inject
+    public void initialize(final SharedFileListManager manager,
+        LibraryPanel libraryPanel, Provider<Navigator> navigatorProvider){
+        
         this.libraryPanel = libraryPanel;
+        this.navigatorProvider = navigatorProvider;
         
         addChangeListener(new ChangeListener(){
             @Override
@@ -59,7 +72,7 @@ public class ShowInListMenu extends JMenu {
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
                         if(fileList.contains(selectedFile))
-                            menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile)).setEnabled(fileList != selectedLocalFileList.get());
+                            menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
                     }
                 } finally {
                     manager.getModel().getReadWriteLock().readLock().unlock();
@@ -75,11 +88,11 @@ public class ShowInListMenu extends JMenu {
     
     private Icon getListIcon(SharedFileList sharedFileList) {
         if(sharedFileList.isPublic())
-            return publicIcon;
+            return icons.publicIcon;
         else if(sharedFileList.getFriendIds().size() == 0)
-            return unsharedIcon;
+            return icons.unsharedIcon;
         else
-            return sharedIcon;
+            return icons.sharedIcon;
     }
     
     private class ShowAction extends AbstractAction {
@@ -95,8 +108,23 @@ public class ShowInListMenu extends JMenu {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, LibraryMediator.NAME);
+            item.select();
             libraryPanel.selectLocalFileList(sharedFileList);
             libraryPanel.selectAndScrollTo(selectedFile);
+        }
+    }
+    
+    private static class ShowInListMenuIcons {
+        @Resource
+        private Icon publicIcon;
+        @Resource
+        private Icon unsharedIcon;
+        @Resource
+        private Icon sharedIcon;
+        
+        {
+            GuiUtils.assignResources(this);
         }
     }
 }

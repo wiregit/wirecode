@@ -63,7 +63,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
                 return I18n.tr("Connecting...");
             }
             //{0}: 1 person, 2 people, etc
-            return I18n.tr("Connecting to {0}", getPeopleText(hosts));
+            return I18n.tr("Connecting to {0}", getPeopleText(item));
         case DOWNLOADING:            
             // {0}: current size
             // {1}: total size
@@ -73,7 +73,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
                     GuiUtils.toUnitbytes(item.getCurrentSize()), 
                     GuiUtils.toUnitbytes(item.getTotalSize()),
                     GuiUtils.rate2speed(item.getDownloadSpeed()), 
-                    getPeopleText(item.getRemoteHosts()),
+                    getPeopleText(item),
                     item.getDownloadSourceCount());
         case TRYING_AGAIN:
             return getTryAgainMessage(item.getRemainingTimeInState());
@@ -110,7 +110,12 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
         }
     }
     
-    private String getPeopleText(Collection<RemoteHost> hosts) {
+    private String getPeopleText(DownloadItem item) {
+        if(item.isStoreDownload()){
+            return I18n.tr("Store");
+        }
+        
+        Collection<RemoteHost> hosts = item.getRemoteHosts();
         if (hosts.size() == 0) {
             return I18n.tr("nobody");
         } else if (hosts.size() == 1) {

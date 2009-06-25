@@ -416,6 +416,11 @@ class CoreDownloadItem implements DownloadItem {
         // Update save directory and file name.
         downloader.setSaveFile(saveDir, fileName, overwrite);
     }
+    
+    @Override
+    public File getSaveFile(){
+        return downloader.getSaveFile();
+    }
 
     @Override
     public Object getProperty(FilePropertyKey key) {
@@ -481,5 +486,11 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public boolean isStoreDownload() {
         return downloader instanceof StoreDownloader;
+    }
+
+
+    @Override
+    public boolean isRelocatable() {
+        return downloader.isRelocatable();
     }
 }
