@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.limewire.common.LimeWireCommonModule;
+import org.limewire.friend.api.LimeWireFriendModule;
+import org.limewire.friend.impl.LimeWireFriendImplModule;
 import org.limewire.http.auth.LimeWireHttpAuthModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -57,6 +59,8 @@ public abstract class XmppBaseTestCase extends BaseTestCase {
         List<Module> modules = new ArrayList<Module>();
         modules.add(new LimeWireCommonModule());
         modules.add(new LimeWireHttpAuthModule());
+        modules.add(new LimeWireFriendModule());
+        modules.add(new LimeWireFriendImplModule());
         modules.addAll(getServiceModules());
         return modules.toArray(new Module[modules.size()]);
     }

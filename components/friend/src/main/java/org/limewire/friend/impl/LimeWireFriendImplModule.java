@@ -10,6 +10,7 @@ import org.limewire.friend.api.FriendConnectionFactoryRegistry;
 import org.limewire.friend.api.FriendManager;
 import org.limewire.friend.api.MutableFriendManager;
 import org.limewire.friend.impl.feature.AuthTokenRegistry;
+import org.limewire.friend.impl.feature.LimeWireFriendFeatureModule;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -19,6 +20,7 @@ public class LimeWireFriendImplModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        install(new LimeWireFriendFeatureModule());
 
         bind(FriendConnectionFactoryRegistry.class).to(FriendConnectionFactoryRegistryImpl.class);
         bind(FriendConnectionFactory.class).to(FriendConnectionFactoryRegistryImpl.class);

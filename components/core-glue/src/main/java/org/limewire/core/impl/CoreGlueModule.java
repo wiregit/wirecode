@@ -32,6 +32,7 @@ import org.limewire.core.impl.updates.CoreGlueUpdatesModule;
 import org.limewire.core.impl.upload.CoreGlueUploadModule;
 import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.core.impl.xmpp.CoreGlueXMPPModule;
+import org.limewire.facebook.service.LimeWireFacebookModule;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.ActivityCallback;
@@ -54,6 +55,7 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueSpamModule());
         install(new CoreGlueConnectionModule());
         install(new CoreGlueDaapModule());
+        install(new LimeWireFacebookModule());
         install(new CoreGlueSearchModule());
         install(new CoreGlueBrowseSearchModule());
         install(new CoreGlueNetworkModule());

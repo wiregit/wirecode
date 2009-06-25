@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FeatureRegistryImpl implements FeatureRegistry {
+class FeatureRegistryImpl implements FeatureRegistry {
     
     private final Object lock = new Object();
     
