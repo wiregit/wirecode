@@ -15,7 +15,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFormat<T> {
 
@@ -30,10 +29,10 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     static final int ACTION_INDEX = 8;
     
     /** Icon manager used to find native file type information. */
-    private Provider<IconManager> iconManager;
+    private IconManager iconManager;
     
     @Inject
-    public AllTableFormat(Provider<IconManager> iconManager) {
+    public AllTableFormat(IconManager iconManager) {
         super(ACTION_INDEX, "LIBRARY_ALL_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", "Name", 493, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 180, true, true),     
@@ -60,7 +59,7 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
         case TYPE_INDEX:
             // Use icon manager to return MIME description.
             return (iconManager != null) ?
-                iconManager.get().getMIMEDescription(baseObject) : 
+                iconManager.getMIMEDescription(baseObject) : 
                 baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         case HIT_INDEX: return baseObject.getNumHits();
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
