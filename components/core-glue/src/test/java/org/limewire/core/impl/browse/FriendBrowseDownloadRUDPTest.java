@@ -84,6 +84,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
     protected void setUp() throws Exception {
         injector = createInjector(getModules());
         registry = injector.getInstance(ServiceRegistry.class);
+        friendConnectionFactory = injector.getInstance(FriendConnectionFactory.class);
         registry.initialize();                                                                                
         registry.start();
         FriendConnectionConfiguration config = getDefaultXmppConnectionConfig(USERNAME_1, PASSWORD_1, SERVICE);
