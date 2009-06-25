@@ -19,15 +19,15 @@ class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {
     private @Resource Font font;
     private @Resource Color fontColor;
     private @Resource Color backgroundColor;
-    private @Resource Color backgroundScrollBarColor;
-    
-    private final Border border = BorderFactory.createEmptyBorder(10,14,10,5);
     
     private final JScrollPane scrollPane;
     
+    private final Border border = BorderFactory.createEmptyBorder(10,14,10,5);
+    
     public LibrarySharingFriendListRenderer(JScrollPane scrollPane) {
-        GuiUtils.assignResources(this);
         this.scrollPane = scrollPane;
+        
+        GuiUtils.assignResources(this);
     }
     
     @Override
@@ -35,9 +35,7 @@ class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {
             boolean hasFocus, int row, int column) {
         if(value instanceof Friend) {
             value = ((Friend)value).getRenderName();
-        } else if(value instanceof String) {
-            value = "<html>" + value + "</html>";
-        }
+        } 
         
         if(value == null) {
             value = "";
@@ -47,9 +45,9 @@ class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {
         setBorder(border);
         setFont(font);
         setForeground(fontColor);
-        setBackground(scrollPane.getVerticalScrollBar().isVisible() ? backgroundScrollBarColor : backgroundColor);
-//        setPreferredSize(null);
-//        setPreferredSize(new Dimension(table.getWidth(), getPreferredSize().height));
+        setOpaque(!scrollPane.getVerticalScrollBar().isVisible());
+        setBackground(backgroundColor);
+
         return this;
     }
 }

@@ -6,22 +6,21 @@ import java.awt.Font;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.table.AbstractTableModel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendEvent;
 import org.limewire.inject.LazySingleton;
@@ -32,6 +31,12 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -51,7 +56,7 @@ class LibrarySharingFriendListPanel {
     private final List<String> sharedIds;
     
     private final LibrarySharingFriendListRenderer renderer;
-    private final Model friendModel;
+    private final EventList<String> eventList;
     private final JXTable friendList;
     private final JScrollPane scrollPane;
 
@@ -59,9 +64,12 @@ class LibrarySharingFriendListPanel {
     public LibrarySharingFriendListPanel(EditSharingAction sharingAction, @Named("known") Map<String, Friend> knownFriends) {
         GuiUtils.assignResources(this);
         this.knownFriends = knownFriends;        
-        this.friendModel = new Model();
-        this.friendList = new GlazedJXTable(friendModel);
+        this.friendList = new GlazedJXTable();
         this.sharedIds = new ArrayList<String>();
+        
+        eventList = new BasicEventList<String>();
+        SortedList<String> sortedList = GlazedListsFactory.sortedList(eventList, new FriendComparator());
+        friendList.setModel(new EventTableModel<String>(sortedList, new FriendTableFormat()));
         
         component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "134!", ""));        
         component.setOpaque(false);
@@ -122,7 +130,7 @@ class LibrarySharingFriendListPanel {
     }
     
     void clear() {
-        friendModel.setData(Collections.emptyList());
+        eventList.clear();
     }
     
     /** Sets the list of IDs this is shared with. */
@@ -139,12 +147,12 @@ class LibrarySharingFriendListPanel {
             sharedIds.addAll(new ArrayList<String>(newFriendIds));
         }
         
-        List<Object> newModel = new Vector<Object>(newFriendIds.size());
+        List<String> newModel = new ArrayList<String>();
         int unknown = 0;
         for(String id : sharedIds) {
             Friend friend = knownFriends.get(id);
             if(friend != null) {
-                newModel.add(friend);
+                newModel.add(friend.getRenderName());
             } else {
                 unknown++;
             }
@@ -156,7 +164,8 @@ class LibrarySharingFriendListPanel {
         } else {
             friendList.setRowHeightEnabled(false);
         }
-        friendModel.setData(newModel);
+        eventList.clear();
+        eventList.addAll(newModel);
         friendList.setVisibleRowCount(newModel.size());
         component.revalidate();
     }
@@ -165,31 +174,27 @@ class LibrarySharingFriendListPanel {
         return component;
     }
     
-    private static class Model extends AbstractTableModel {
-        private List<Object> data;
-        
-        Model() {
-            this.data = Collections.emptyList();
+    private class FriendComparator implements Comparator<String> {
+        @Override
+        public int compare(String name1, String name2) {
+            return name1.compareToIgnoreCase(name2);
         }
-        
-        void setData(List<Object> newData) {
-            this.data = newData;
-            fireTableDataChanged();
-        }
-        
+    }
+    
+    private static class FriendTableFormat implements TableFormat<String> {
         @Override
         public int getColumnCount() {
             return 1;
         }
 
         @Override
-        public int getRowCount() {
-            return data.size();
+        public String getColumnName(int column) {
+            return "";
         }
 
         @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            return data.get(rowIndex);
-        }        
+        public Object getColumnValue(String baseObject, int column) {
+            return baseObject;
+        }       
     }
 }

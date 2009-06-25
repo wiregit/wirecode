@@ -228,11 +228,6 @@ class LibrarySharingEditablePanel {
         }
     }
     
-    /**
-     * Technically shouldn't be necessary but ensures that Library and Public Shared
-     * always appear first and second in the table. The other items appear as they are
-     * loaded.
-     */
     private class FriendComparator implements Comparator<EditableSharingData> {
 
         @Override
