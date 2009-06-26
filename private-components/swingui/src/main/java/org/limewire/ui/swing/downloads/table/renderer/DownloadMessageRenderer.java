@@ -117,7 +117,13 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
         
         Collection<RemoteHost> hosts = item.getRemoteHosts();
         if (hosts.size() == 0) {
-            return I18n.tr("nobody");
+            //checking sources to support showing the number of bit torrent hosts.
+            int downloadSourceCount = item.getDownloadSourceCount();
+            if(downloadSourceCount < 1) {
+                return I18n.tr("nobody");
+            } else {
+                return I18n.trn("{0} P2P User", "{0} P2P Users", downloadSourceCount);
+            }
         } else if (hosts.size() == 1) {
 
             Friend friend = hosts.iterator().next().getFriendPresence().getFriend();
