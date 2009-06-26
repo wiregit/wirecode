@@ -122,7 +122,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
                 URN root = treeCache.getOrScheduleHashTreeRoot(fileDesc);
                 if(root != null) {
                 	for(FileDesc fd : library.getFileDescsMatching(fileDesc.getSHA1Urn())) {
-                	    fd.setTTRoot(root);
+                	    fd.addUrn(root);
                 	}
                 }
             }
@@ -170,11 +170,9 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     protected boolean isFileAddable(FileDesc fileDesc) {
         if (fileDesc instanceof IncompleteFileDesc) {
             return false;
-        } else if( fileDesc.getLimeXMLDocuments().size() != 0 && 
-                isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
-            return false;
-        } 
-        return isFileAddable(fileDesc.getFile());
+        } else {
+	        return isFileAddable(fileDesc.getFile());
+	    }
     }
     
     @Override

@@ -11,7 +11,20 @@ import org.limewire.util.StringUtils;
 public class FileViewChangeEvent implements SourcedEvent<FileView> {
     
     public static enum Type {
-        FILE_ADDED, FILE_REMOVED, FILE_CHANGED, FILE_ADD_FAILED, FILE_CHANGE_FAILED, FILES_CLEARED;
+        /** Notification a new FileDesc was added. */
+        FILE_ADDED, 
+        /** Notification a FileDesc was removed. */
+        FILE_REMOVED, 
+        /** Notification a File has changed from one FileDesc to another. */
+        FILE_CHANGED, 
+        /** Notification a FileDesc's metadata (such as URN, XML) has changed. */
+        FILE_META_CHANGED,
+        /** Notification an add failed. */
+        FILE_ADD_FAILED,
+        /** Notification that a change failed. */
+        FILE_CHANGE_FAILED, 
+        /** Notification that all files in the view were cleared. */
+        FILES_CLEARED;
     }
     
     private final Type type;
@@ -55,7 +68,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     }
     
     public FileViewChangeEvent(FileView list, Type type, FileDesc value) {
-        assert type == Type.FILE_ADDED || type == Type.FILE_REMOVED;
+        assert type == Type.FILE_ADDED || type == Type.FILE_REMOVED || type == Type.FILE_META_CHANGED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
         this.oldValue = null;

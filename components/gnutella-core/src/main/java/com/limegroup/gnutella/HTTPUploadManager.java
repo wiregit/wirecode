@@ -485,11 +485,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         FileDesc fd = session.getUploader().getFileDesc();
-        if (!urnValidator.isValid(fd.getSHA1Urn())) {
-            urnValidator.validate(fd.getSHA1Urn());
+        URN sha1 = fd.getSHA1Urn();
+        if (urnValidator.isValid(sha1)) {
+            urnValidator.validate(sha1);
         }
 
-        URN sha1 = fd.getSHA1Urn();
 
         if (rqc.isDupe(sha1) && UploadSettings.CHECK_DUPES.getValue()) {
             if (LOG.isDebugEnabled())

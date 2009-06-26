@@ -57,21 +57,13 @@ public class FileDescImpl implements FileDesc {
 	 */
     private final long _modTime;
 
-	/**
-	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
-	 * is immutable.
-	 */
-    private volatile Set<URN> URNS; 
+    private volatile UrnSet modifiableUrns;    
+    private volatile Set<URN> unmodifiableUrns;
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
 	 */
 	private final File FILE;
-
-	/**
-	 * The constant SHA1 <tt>URN</tt> instance.
-	 */
-	private final URN SHA1_URN;
 	
 	/**
 	 * The License, if one exists, for this FileDesc.
@@ -152,11 +144,8 @@ public class FileDescImpl implements FileDesc {
         _size = FILE.length();
         assert _size >= 0 && _size <= MAX_FILE_SIZE : "invalid size "+_size+" of file "+FILE;
         _modTime = FILE.lastModified();
-        URNS = Collections.unmodifiableSet(Objects.nonNull(urns, "urns"));
-		SHA1_URN = UrnSet.getSha1(URNS);
-		if(SHA1_URN == null)
-			throw new IllegalArgumentException("no SHA1 URN");
-
+        modifiableUrns = UrnSet.resolve(Objects.nonNull(urns, "urns"));
+        unmodifiableUrns = Collections.unmodifiableSet(modifiableUrns);
         _hits = 0; // Starts off with 0 hits
     }
     
@@ -169,7 +158,7 @@ public class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#hasUrns()
      */
 	public boolean hasUrns() {
-		return !URNS.isEmpty();
+		return !modifiableUrns.isEmpty();
 	}
 
 	/* (non-Javadoc)
@@ -204,13 +193,7 @@ public class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#getTTROOTUrn()
      */
 	public URN getTTROOTUrn() {
-	    for(URN urn : URNS) {
-	        if(urn.isTTRoot())
-	            return urn;
-	    }
-	    
-	    // this can happen.
-	    return null;
+	    return modifiableUrns.getTTRoot();
 	}
 	
 	/* (non-Javadoc)
@@ -224,21 +207,21 @@ public class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#getSHA1Urn()
      */
     public URN getSHA1Urn() {
-        return SHA1_URN;
+        return modifiableUrns.getSHA1();
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#setTTRoot(com.limegroup.gnutella.URN)
      */
-    public void setTTRoot(URN ttroot) {
-        boolean contained = getUrns().contains(ttroot);
+    public void addUrn(URN urn) {
+        boolean contained = modifiableUrns.contains(urn);
         if(!contained) {
-            UrnSet s = new UrnSet();
-            s.add(SHA1_URN);
-            s.add(ttroot);
-            URNS = Collections.unmodifiableSet(s);
-            if(multicaster != null) {
-                multicaster.handleEvent(new FileDescChangeEvent(this, FileDescChangeEvent.Type.URNS_CHANGED, ttroot));
+            UrnSet newUrns = new UrnSet(modifiableUrns);
+            newUrns.add(urn);
+            modifiableUrns = newUrns;
+            unmodifiableUrns = Collections.unmodifiableSet(modifiableUrns);
+            if(multicaster != null && urn.isTTRoot()) {
+                multicaster.handleEvent(new FileDescChangeEvent(this, FileDescChangeEvent.Type.TT_ROOT_ADDED, urn));
             }
         }
     }
@@ -247,7 +230,7 @@ public class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#getUrns()
      */
 	public Set<URN> getUrns() {
-		return URNS;
+		return unmodifiableUrns;
 	}   
 
 	/* (non-Javadoc)
@@ -350,7 +333,7 @@ public class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#containsUrn(com.limegroup.gnutella.URN)
      */
     public boolean containsUrn(URN urn) {
-        return URNS.contains(urn);
+        return modifiableUrns.contains(urn);
     }
     
     /* (non-Javadoc)
@@ -413,7 +396,7 @@ public class FileDescImpl implements FileDesc {
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
-				"urns:     "+URNS+"\r\n"+
+				"urns:     "+modifiableUrns+"\r\n"+
 				"docs:     "+ _limeXMLDocs+"\r\n");
 	}
     

@@ -60,9 +60,9 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
     public URN getSHA1Urn();
 
     /**
-     * updates this FD as carrying a ttroot.
+     * Adds a new URN to this filedesc.
      */
-    public void setTTRoot(URN ttroot);
+    public void addUrn(URN urn);
 
     /**
      * Returns a new <tt>Set</tt> instance containing the <tt>URN</tt>s

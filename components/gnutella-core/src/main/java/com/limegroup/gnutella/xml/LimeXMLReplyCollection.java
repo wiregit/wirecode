@@ -27,6 +27,7 @@ import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.NameValue;
+import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
@@ -276,6 +277,12 @@ public class LimeXMLReplyCollection {
         
         return limeXMLDocumentFactory.createLimeXMLDocument(nameValues, newer.getSchemaURI());
      }
+    
+    /** Returns true if a document can be created for this file. */
+    boolean canCreateDocument(File file) {
+        return LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI) && metaDataFactory.containsAudioReader(file)
+                || LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI) && metaDataFactory.containsVideoReader(file);
+    }
         
     
     /**
@@ -284,8 +291,7 @@ public class LimeXMLReplyCollection {
      *  <tt>LimeXMLDocument</tt> otherwise.
      */
     private LimeXMLDocument constructDocument(File file) { 
-        if(LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI) && metaDataFactory.containsAudioReader(file)
-                || LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI) && metaDataFactory.containsVideoReader(file)) {
+        if(canCreateDocument(file)) {
             try {
                 // Documents with multiple file formats may be the wrong type.
                 LimeXMLDocument document = metaDataReader.readDocument(file);
@@ -953,7 +959,7 @@ public class LimeXMLReplyCollection {
                 return true;
             } else if(obj instanceof FileAndUrn) {
                 FileAndUrn o2 = (FileAndUrn)obj;
-                return o2.urn.equals(urn) &&
+                return Objects.equalOrNull(urn, o2.urn) &&
                        o2.file.equals(file);
             } else {
                 return false;

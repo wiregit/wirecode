@@ -276,7 +276,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void setTTRoot(URN ttroot) {
+    public void addUrn(URN ttroot) {
     }
 
     @Override

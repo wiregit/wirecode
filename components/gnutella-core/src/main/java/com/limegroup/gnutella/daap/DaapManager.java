@@ -1102,6 +1102,7 @@ public class DaapManager {
                     return;
 
                 switch (evt.getType()) {
+                case FILE_META_CHANGED:
                 case FILE_CHANGED:
                     handleChangeEvent(evt);
                     break;

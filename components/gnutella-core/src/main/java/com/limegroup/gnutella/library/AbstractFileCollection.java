@@ -23,7 +23,6 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
-import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -216,7 +215,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
-                return new ThreadSafeFileViewIterator(AbstractFileCollection.this, library);
+                return new ThreadSafeFileViewIterator(AbstractFileCollection.this);
             }
         };
     }
@@ -302,6 +301,11 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGED, oldFileDesc, newFileDesc));
     }
     
+    /** Fires a meta-change event to all listeners */
+    protected void fireMetaChangeEvent(FileDesc fd) {
+        multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_META_CHANGED, fd));
+    }
+    
     /** Fires a clear event to all listeners. */
     protected void fireClearEvent(boolean fromLibrary) {
         multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED, fromLibrary));
@@ -334,20 +338,23 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
             fireRemoveEvent(oldFileDesc);
         }
     }
+    
+    /** Updates the list with new metadata about the file, possibly removing if it cannot be contained anymore. */
+    private void fileMetaChanged(FileDesc fd) {
+        if(contains(fd)) {
+            if(isFileAddable(fd)) {
+                fireMetaChangeEvent(fd);
+            } else {
+                remove(fd);
+            }
+        }
+    }
 
     /**
      * Returns true if this list is allowed to add this FileDesc
      * @param fileDesc - FileDesc to be added
      */
     protected abstract boolean isFileAddable(FileDesc fileDesc);
-
-    /**
-     * Returns true if the XML doc contains information regarding the LWS
-     */
-    protected boolean isStoreXML(LimeXMLDocument doc) {
-       return doc != null && doc.getLicenseString() != null &&
-               doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
-    }
 
     void dispose() {
         clear();
@@ -443,6 +450,9 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
                 if(isPending(event.getFile(), event.getFileDesc())) {
                     add(event.getFileDesc());
                 }
+                break;
+            case FILE_META_CHANGED:
+                fileMetaChanged(event.getFileDesc());
                 break;
             case FILE_CHANGED:
                 updateFileDescs(event.getOldValue(), event.getFileDesc());

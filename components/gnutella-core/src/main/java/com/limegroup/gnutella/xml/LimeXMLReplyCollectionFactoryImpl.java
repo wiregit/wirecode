@@ -8,8 +8,7 @@ import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 
 @Singleton
-public class LimeXMLReplyCollectionFactoryImpl implements
-        LimeXMLReplyCollectionFactory {
+class LimeXMLReplyCollectionFactoryImpl implements LimeXMLReplyCollectionFactory {
 
     private final Provider<LimeXMLProperties> limeXMLProperties;
 

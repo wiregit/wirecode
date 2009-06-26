@@ -168,11 +168,8 @@ import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.version.UpdateHandlerImpl;
 import com.limegroup.gnutella.version.UpdateMessageVerifier;
 import com.limegroup.gnutella.version.UpdateMessageVerifierImpl;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
+import com.limegroup.gnutella.xml.LimeWireXmlModule;
+
 
 /**
  * The module that defines what implementations are used within
@@ -212,8 +209,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireMojitoModule());
         binder().install(new LimeWireSecurityCertificateModule());
         binder().install(new LimewireGeocodeModule());        
-        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
-        
+        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));        
         binder().install(new LimeWireSimppModule());
         binder().install(new LimeWireBittorrentModule());
         binder().install(new LimeWireLibraryModule());
@@ -223,6 +219,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireCoreConnectionModule());
         binder().install(new LimeWireBootstrapModule());
         binder().install(new LimeWireMalwareModule());
+        binder().install(new LimeWireXmlModule());
         
         if(activityCallbackClass != null) {
             bind(ActivityCallback.class).to(activityCallbackClass);
@@ -279,9 +276,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(VendorMessageFactory.class).to(VendorMessageFactoryImpl.class);
         bind(VendorMessageParserBinder.class).to(VendorMessageParserBinderImpl.class);
         bind(UDPCrawlerPongFactory.class).to(UDPCrawlerPongFactoryImpl.class);
-        bind(LimeXMLReplyCollectionFactory.class).to(LimeXMLReplyCollectionFactoryImpl.class);
         bind(LicenseFactory.class).to(LicenseFactoryImpl.class);
-        bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
         bind(MetaDataFactory.class).to(MetaDataFactoryImpl.class);
         bind(SaveLocationManager.class).to(DownloadManager.class);
         bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
@@ -362,7 +357,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LimeCoreGlue.class);
         bind(QRPUpdater.class);
         bind(DaapManager.class);
-        bind(SchemaReplyCollectionMapper.class);
         bind(FirewalledAddressSerializer.class).asEagerSingleton();
         bind(SameNATAddressResolver.class).asEagerSingleton();
         bind(ConnectableConnector.class).asEagerSingleton();

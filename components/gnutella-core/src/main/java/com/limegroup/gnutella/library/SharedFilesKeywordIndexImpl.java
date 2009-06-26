@@ -319,6 +319,8 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         case FILE_ADDED:
             addFileDesc(evt.getFileDesc(), complete);
             break;
+        case FILE_META_CHANGED:
+            // fall-through, it's easiest this way.
         case FILE_CHANGED:
             removeFileDesc(evt.getOldValue(), complete);
             addFileDesc(evt.getFileDesc(), complete);
@@ -343,7 +345,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private void handleFileDescEvent(FileDescChangeEvent evt) {
         FileDesc fd = evt.getSource();
         switch(evt.getType()) {
-        case URNS_CHANGED:
+        case TT_ROOT_ADDED:
               if(fd instanceof IncompleteFileDesc) {
                   IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
                   if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
@@ -604,7 +606,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             Response res = null;
             assert(file != null);
             FileDesc fd = gnutellaFileView.getFileDesc(file);
-            if (fd == null) {
+            if (fd == null || fd.getSHA1Urn() == null) {
                 // fd == null is bad -- would mean MetaFileManager is out of
                 // sync.
                 // fd incomplete should never happen, but apparently is

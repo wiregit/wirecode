@@ -13,7 +13,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 
 @Singleton
-public class LimeXMLDocumentFactoryImpl implements LimeXMLDocumentFactory {
+class LimeXMLDocumentFactoryImpl implements LimeXMLDocumentFactory {
 
     private final LicenseFactory licenseFactory;
     private final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;

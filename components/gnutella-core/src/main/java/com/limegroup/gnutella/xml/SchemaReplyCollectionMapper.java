@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +29,7 @@ import com.limegroup.gnutella.library.LibraryStatusEvent;
  * @author Sumeet Thadani
  */
 @Singleton
-public class SchemaReplyCollectionMapper {
+public class SchemaReplyCollectionMapper implements XmlController {
     
     private final Map<String, LimeXMLReplyCollection> mapper;
     
@@ -84,17 +85,6 @@ public class SchemaReplyCollectionMapper {
             @Override
             public void initialize() {
                 loadSchemas();
-                
-                fileDescSupport.addListener(new EventListener<FileDescChangeEvent>() {
-                    @Override
-                    public void handleEvent(FileDescChangeEvent event) {
-                        switch(event.getType()) {
-                        case LOAD:
-                            load(event);
-                            break;
-                        }                        
-                    }
-                });
                 
                 managedList.addListener(new EventListener<FileViewChangeEvent>() {
                     @Override
@@ -180,19 +170,45 @@ public class SchemaReplyCollectionMapper {
         }
     }
     
+    @Override
+    public boolean canConstructXml(FileDesc fd) {
+        Collection<LimeXMLReplyCollection> replies = getCollections();
+        for (LimeXMLReplyCollection col : replies) {
+            if(col.canCreateDocument(fd.getFile())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public synchronized boolean loadCachedXml(FileDesc fd) {
+        Collection<LimeXMLReplyCollection> replies = getCollections();
+        boolean loaded = false;
+        for (LimeXMLReplyCollection col : replies) {
+            LimeXMLDocument doc = col.initialize(fd, Collections.<LimeXMLDocument>emptyList());
+            if(doc != null) {
+                loaded = true;
+            }
+        }
+        return loaded;
+    }
+    
     /**
      * Loads the map with the LimeXMLDocument for a given FileDesc. If no LimeXMLDocument
      * exists for the FileDesc, one is created for it.
      */
-    private synchronized void load(FileDescChangeEvent event) {
+    @Override
+    public synchronized boolean loadXml(FileDesc fd) {
         Collection<LimeXMLReplyCollection> replies = getCollections();
+        boolean loaded = false;
         for (LimeXMLReplyCollection col : replies) {
-            col.initialize(event.getSource(), event.getXmlDocs());
+            LimeXMLDocument doc = col.createIfNecessary(fd);
+            if(doc != null) {
+                loaded = true;
+            }
         }
-        
-        for (LimeXMLReplyCollection col : replies) {
-            col.createIfNecessary(event.getSource());
-        }
+        return loaded;
     }
     
     /**

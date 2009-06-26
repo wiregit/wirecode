@@ -81,14 +81,22 @@ public final class HashTreeCacheImpl implements HashTreeCache {
             throw new IllegalArgumentException("fd must not inherit from IncompleFileDesc");
         }
         
-        Future<HashTree> futureTree = getOrScheduleHashTreeFuture(fd);
-        return futureTree.get(timeout, TimeUnit.MILLISECONDS);
+        if(fd.getSHA1Urn() != null) {
+            Future<HashTree> futureTree = getOrScheduleHashTreeFuture(fd);
+            return futureTree.get(timeout, TimeUnit.MILLISECONDS);
+        } else {
+            return null;
+        }
     }
     
     @Override
     public synchronized HashTree getHashTree(FileDesc fd) {
-        Future<HashTree> futureTree = getOrScheduleHashTreeFuture(fd);
-        return getTreeFromFuture(fd.getSHA1Urn(), futureTree);
+        if(fd.getSHA1Urn() != null) {
+            Future<HashTree> futureTree = getOrScheduleHashTreeFuture(fd);
+            return getTreeFromFuture(fd.getSHA1Urn(), futureTree);
+        } else {
+            return null;
+        }
     }
     
     private HashTree getTreeFromFuture(URN sha1, Future<HashTree> futureTree) {
@@ -146,24 +154,31 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     @Override
     public synchronized URN getOrScheduleHashTreeRoot(FileDesc fd) {
         URN sha1 = fd.getSHA1Urn();
-        Future<HashTree> futureTree = TTREE_MAP.get(sha1);
-        Future<URN> futureRoot = SHA1_TO_ROOT_MAP.get(sha1);
-        HashTree tree = futureTree == null ? null : getTreeFromFuture(sha1, futureTree);        
-        URN root = futureRoot == null ? null : getRootFromFuture(sha1, futureRoot);
-        if(tree != null) {
-            if(LOG.isDebugEnabled()) 
-                LOG.debug("Returning root from tree");
-            return tree.getTreeRootUrn();
-        } else if(root != null) {
-            if(LOG.isDebugEnabled()) 
-                LOG.debug("Returning root from future");
-            return root;
+        if(sha1 != null) {
+            Future<HashTree> futureTree = TTREE_MAP.get(sha1);
+            Future<URN> futureRoot = SHA1_TO_ROOT_MAP.get(sha1);
+            HashTree tree = futureTree == null ? null : getTreeFromFuture(sha1, futureTree);        
+            URN root = futureRoot == null ? null : getRootFromFuture(sha1, futureRoot);
+            if(tree != null) {
+                if(LOG.isDebugEnabled()) 
+                    LOG.debug("Returning root from tree");
+                return tree.getTreeRootUrn();
+            } else if(root != null) {
+                if(LOG.isDebugEnabled()) 
+                    LOG.debug("Returning root from future");
+                return root;
+            } else {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Scheduling: " + sha1 + " for tree root");
+                }
+                futureRoot = QUEUE.submit(new RootRunner(fd));
+                SHA1_TO_ROOT_MAP.put(sha1, futureRoot);
+                return null;
+            }
         } else {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Scheduling: " + sha1 + " for tree root");
+                LOG.debug("Returning null for root because no sha1 for fd: " + fd);
             }
-            futureRoot = QUEUE.submit(new RootRunner(fd));
-            SHA1_TO_ROOT_MAP.put(sha1, futureRoot);
             return null;
         }
     }
@@ -443,7 +458,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
             URN ttRoot = URN.createTTRootFile(FD.getFile()); // BLOCKING
             List<FileDesc> fds = managedFileList.getFileDescsMatching(FD.getSHA1Urn());
             for(FileDesc fd : fds) {
-                fd.setTTRoot(ttRoot);
+                fd.addUrn(ttRoot);
             }
             dirty = true;
             return ttRoot;

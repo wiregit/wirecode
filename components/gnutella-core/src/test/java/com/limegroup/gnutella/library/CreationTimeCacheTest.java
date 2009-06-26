@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -357,7 +358,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         });
 		List<URN> sha1s = new ArrayList<URN>();
 		for(int i=0; i<files.length; i++) {
-			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], new UrnCache());            
+			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], new UrnCache(ExecutorsHelper.newProcessingQueue("test")));            
 			cache.addTime(UrnSet.getSha1(urns), files[i].lastModified());
 			sha1s.add(UrnSet.getSha1(urns));
 		}				

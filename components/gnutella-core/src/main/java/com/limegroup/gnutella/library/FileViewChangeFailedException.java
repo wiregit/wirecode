@@ -12,7 +12,6 @@ public class FileViewChangeFailedException extends Exception {
         ALREADY_MANAGED,
         NOT_MANAGEABLE,
         PROGRAMS_NOT_MANAGEABLE,
-        REVISIONS_CHANGED,
         CANT_CREATE_FD,
         OLD_WASNT_MANAGED,
         CANT_ADD_TO_LIST,

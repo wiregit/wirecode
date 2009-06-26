@@ -17,6 +17,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.IntSet.IntSetIterator;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.filter.Filter;
 import org.limewire.friend.api.Friend;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -83,7 +84,8 @@ class FileViewManagerImpl implements FileViewManager {
     
     @Inject void register(ListenerSupport<FileViewChangeEvent> viewListeners,
                           ListenerSupport<SharedFileCollectionChangeEvent> collectionListeners,
-                          FileCollectionManager collectionManager) {
+                          FileCollectionManager collectionManager,
+                          ListenerSupport<FileDescChangeEvent> fileDescListeners) {
         for(SharedFileCollection collection : collectionManager.getSharedFileCollections()) {
             collectionAdded(collection);
         }
@@ -95,10 +97,12 @@ class FileViewManagerImpl implements FileViewManager {
                 if(!(event.getSource() instanceof IncompleteFileCollection)) {                
                     switch(event.getType()) {
                     case FILE_ADDED:
-                        fileAddedToCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
+                        if(isFileAddable(event.getFileDesc())) {
+                            fileAddedToCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView(), false);
+                        }
                         break;
                     case FILE_REMOVED:
-                        fileRemovedFromCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
+                        fileRemovedFromCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView(), false);
                         break;
                     case FILES_CLEARED:
                         if(event.isLibraryClear()) {
@@ -109,6 +113,9 @@ class FileViewManagerImpl implements FileViewManager {
                         break;
                     case FILE_CHANGED:
                         fileChangedInCollection(event.getFileDesc(), event.getOldValue(), (SharedFileCollection)event.getFileView());
+                        break;
+                    case FILE_META_CHANGED:
+                        fileMetaChangedInCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
                         break;
                     }
                 }
@@ -461,12 +468,25 @@ class FileViewManagerImpl implements FileViewManager {
         }
     }
 
-    private void fileRemovedFromCollection(FileDesc fileDesc, SharedFileCollection collection) {
+    /** 
+     * Notification that a file was removed from a shared collection.
+     * 
+     * If that collection was shared with any friends and views are created for
+     * those friends, then the file is attempted to be removed from the view.
+     * The file will only be removed from the view if it was only shared
+     * through this collection (if it was also shared through another collection
+     * with the same friend, the file is not removed from the view).
+     * 
+     * If forceRemoval is true, this will remove the file from any views this backed,
+     * regardless of if the view is backed by other collections that may have
+     * the file.
+     */
+    private void fileRemovedFromCollection(FileDesc fileDesc, SharedFileCollection collection, boolean forceRemoval) {
         List<FileView> removedViews = null;
         
         rwLock.writeLock().lock();
         try {
-            if(allSharedFilesView.fileRemovedFromView(fileDesc, collection)) {
+            if(allSharedFilesView.fileRemovedFromView(fileDesc, collection, forceRemoval)) {
                 removedViews = new ArrayList<FileView>();
                 removedViews.add(allSharedFilesView);
             }
@@ -474,7 +494,7 @@ class FileViewManagerImpl implements FileViewManager {
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
-                    if(view.fileRemovedFromView(fileDesc, collection)) {
+                    if(view.fileRemovedFromView(fileDesc, collection, forceRemoval)) {
                         if(removedViews == null) {
                             removedViews = new ArrayList<FileView>();
                         }
@@ -497,15 +517,23 @@ class FileViewManagerImpl implements FileViewManager {
             }
         }
     }
-    
+
+    /**
+     * Essentially does a combination of
+     * {@link #fileRemovedFromCollection(FileDesc, SharedFileCollection)} &
+     * {@link #fileAddedToCollection(FileDesc, SharedFileCollection)}, except it
+     * sends a change event if succesful (and a remove event if the new one
+     * could not be added).
+     */
     private void fileChangedInCollection(FileDesc newFileDesc, FileDesc oldFileDesc, SharedFileCollection collection) {
         List<FileView> changedViews = null;
         List<FileView> removedViews = null;
+        boolean addable = isFileAddable(newFileDesc);
         
         rwLock.writeLock().lock();
         try {
-            if(allSharedFilesView.fileRemovedFromView(oldFileDesc, collection)) {
-                if(allSharedFilesView.fileAddedFromView(newFileDesc, collection)) {
+            if(allSharedFilesView.fileRemovedFromView(oldFileDesc, collection, false)) {
+                if(addable && allSharedFilesView.fileAddedFromView(newFileDesc, collection)) {
                     changedViews = new ArrayList<FileView>();
                     changedViews.add(allSharedFilesView);
                 } else {
@@ -517,8 +545,8 @@ class FileViewManagerImpl implements FileViewManager {
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
-                    if(view.fileRemovedFromView(oldFileDesc, collection)) {
-                        if(view.fileAddedFromView(newFileDesc, collection)) {
+                    if(view.fileRemovedFromView(oldFileDesc, collection, false)) {
+                        if(addable && view.fileAddedFromView(newFileDesc, collection)) {
                             if(changedViews == null) {
                                 changedViews = new ArrayList<FileView>();
                             }
@@ -549,9 +577,37 @@ class FileViewManagerImpl implements FileViewManager {
             }
         }
     }
+    
+    /**
+     * Notification that metadata about a filedesc has changed in a shared collection.
+     * 
+     * This could be because URNs added, or metadata changed.  We have to take different
+     * actions in different situations here.  If a URN was added, we want to add the file
+     * to the views.  If metadata changed, we want to possibly remove the file from the view,
+     * because it may be a store file (which shouldn't be in views!).  If the file already existed
+     * in the collection, we just want to change the metadata about it.
+     */
+    private void fileMetaChangedInCollection(FileDesc fd, SharedFileCollection collection) {
+        if(isFileAddable(fd)) {
+            fileAddedToCollection(fd, collection, true);
+        } else {
+            fileRemovedFromCollection(fd, collection, true);
+        }
+    }
 
-    private void fileAddedToCollection(FileDesc fileDesc, SharedFileCollection collection) {
+    /**
+     * Notification that a file was added to a shared collection.
+     * 
+     * If the collection was shared with any friends that have a view created,
+     * and the file does not already exist in the view, the file will be added
+     * to the view and an event will be sent for that view.
+     * 
+     * If the file already existed in the collection, and change is true,
+     * we send a notification that the meta changed for the file.
+     */
+    private void fileAddedToCollection(FileDesc fileDesc, SharedFileCollection collection, boolean changed) {
         List<FileView> addedViews = null;
+        List<FileView> changedViews = null;
         
         rwLock.writeLock().lock();
         try {
@@ -561,10 +617,14 @@ class FileViewManagerImpl implements FileViewManager {
                 if(allSharedFilesView.fileAddedFromView(fileDesc, collection)) {
                     addedViews = new ArrayList<FileView>();
                     addedViews.add(allSharedFilesView);
+                } else if(changed) {
+                    // it was already in the view, so fire a changed event.
+                    changedViews = new ArrayList<FileView>();
+                    changedViews.add(allSharedFilesView);
                 }
             }
             
-            for(String id : collection.getFriendList()) {
+            for(String id : friendList) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
                     if(view.fileAddedFromView(fileDesc, collection)) {
@@ -573,6 +633,12 @@ class FileViewManagerImpl implements FileViewManager {
                         }
                         addedViews.add(view);
                         LOG.debugf("File {0} added to collection {1}, changing view {2}", fileDesc, collection, view);
+                    } else if(changed) {
+                        LOG.debugf("File {0} changed in collection {1}, changing view {2}", fileDesc, collection, view);
+                        if(changedViews == null) {
+                            changedViews = new ArrayList<FileView>();
+                        }
+                        changedViews.add(view);
                     } else {
                         if(LOG.isDebugEnabled()) {
                             LOG.debugf("File {0} added to collection {1}, but didn't change view {2}, view contains file ? {3}", fileDesc, collection, view, view.contains(fileDesc));
@@ -587,6 +653,12 @@ class FileViewManagerImpl implements FileViewManager {
         if(addedViews != null) {
             for(FileView view : addedViews) {
                 multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_ADDED, fileDesc));
+            }
+        }
+        
+        if(changedViews != null) {
+            for(FileView view : changedViews) {
+                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_META_CHANGED, fileDesc));
             }
         }
     }
@@ -632,6 +704,14 @@ class FileViewManagerImpl implements FileViewManager {
                 view.addNewBackingView(collection);
             }
         }
+    }
+
+    /**
+     * Determines if the FileDesc can be added to a view. FileDescs without URNs
+     * or that are store files cannot be added to a view.
+     */
+    private boolean isFileAddable(FileDesc fd) {
+        return fd.getSHA1Urn() != null && !fd.isStoreFile();
     }
 
     /**
@@ -757,8 +837,8 @@ class FileViewManagerImpl implements FileViewManager {
                     IntSetIterator iter = ((AbstractFileView)view).getInternalIndexes().iterator();
                     while(iter.hasNext()) {
                         int i = iter.next();
-                        if(getInternalIndexes().add(i)) {
-                            FileDesc fd = library.getFileDescForIndex(i);
+                        FileDesc fd = library.getFileDescForIndex(i);
+                        if(isFileAddable(fd) && getInternalIndexes().add(i)) {
                             added.add(fd);
                             totalFileSize += fd.getFileSize();
                         }
@@ -791,14 +871,18 @@ class FileViewManagerImpl implements FileViewManager {
 
         /**
          * Notification that a {@link FileDesc} was removed from a backing {@link FileView}.
+         * If force is true, this will remove the FileDesc even if other backing
+         * views contained it.
          * 
          * @return true if the file used to exist in this view (and is now removed).
          *         false if it did not exist in this view or still exists.
          */
-        boolean fileRemovedFromView(FileDesc fileDesc, FileView fileView) {
-            for(FileView view : backingViews) {
-                if(view.contains(fileDesc)) {
-                    return false;
+        boolean fileRemovedFromView(FileDesc fileDesc, FileView fileView, boolean force) {
+            if(!force) {
+                for(FileView view : backingViews) {
+                    if(view.contains(fileDesc)) {
+                        return false;
+                    }
                 }
             }
             getInternalIndexes().remove(fileDesc.getIndex());
@@ -839,6 +923,13 @@ class FileViewManagerImpl implements FileViewManager {
                     view.getReadLock().unlock();
                 }
             }
+            
+            library.filterIndexes(newItems, new Filter<FileDesc>() {
+                @Override
+                public boolean allow(FileDesc t) {
+                    return isFileAddable(t);
+                }
+            });
             
             // Calculate the FDs that were removed.
             List<FileDesc> removedFds;

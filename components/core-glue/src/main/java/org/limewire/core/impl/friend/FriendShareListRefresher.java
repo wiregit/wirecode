@@ -76,6 +76,7 @@ class FriendShareListRefresher {
                 switch(event.getType()) {
                 case FILE_ADDED:
                 case FILE_REMOVED:
+                case FILE_META_CHANGED:
                 case FILE_CHANGED:
                 case FILES_CLEARED:
                     triggerChangeSender(event.getSource().getName());

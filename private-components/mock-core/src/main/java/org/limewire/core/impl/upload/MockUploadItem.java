@@ -118,7 +118,7 @@ public class MockUploadItem implements UploadItem {
         return new URN() {
             @Override
             public int compareTo(URN o) {
-                return 0;
+                return toString().compareTo(o.toString());
             }
         };
     }

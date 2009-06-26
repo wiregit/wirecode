@@ -26,7 +26,6 @@ import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LocalFileDetailsFactory;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreLocalFileItem implements LocalFileItem , Comparable {
 
@@ -36,8 +35,6 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     private final FileDesc fileDesc;
 
-    private final LimeXMLDocument doc;
-
     private final LocalFileDetailsFactory detailsFactory;
 
     private final CreationTimeCache creationTimeCache;
@@ -46,7 +43,6 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     public CoreLocalFileItem(@Assisted FileDesc fileDesc, LocalFileDetailsFactory detailsFactory,
             CreationTimeCache creationTimeCache) {
         this.fileDesc = fileDesc;
-        this.doc = fileDesc.getXMLDocument();
         this.detailsFactory = detailsFactory;
         this.creationTimeCache = creationTimeCache;
         this.category = CategoryConverter.categoryForFile(fileDesc.getFile());
@@ -76,7 +72,11 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     @Override
     public long getCreationTime() {
-        return creationTimeCache.getCreationTimeAsLong(fileDesc.getSHA1Urn());
+        if(fileDesc.getSHA1Urn() != null) {
+            return creationTimeCache.getCreationTimeAsLong(fileDesc.getSHA1Urn());
+        } else {
+            return -1;
+        }
     }
 
     @Override
@@ -138,7 +138,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     @Override
     public FileMetaData toMetadata() {
         FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
-        fileMetaData.setCreateTime(new Date(creationTimeCache.getCreationTimeAsLong(fileDesc.getSHA1Urn())));
+        fileMetaData.setCreateTime(new Date(getCreationTime()));
         fileMetaData.setDescription(""); // TODO
         fileMetaData.setId(fileDesc.getSHA1Urn().toString());
         fileMetaData.setIndex(fileDesc.getIndex());
@@ -199,7 +199,15 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     @Override
     public org.limewire.core.api.URN getUrn() {
         URN urn = fileDesc.getSHA1Urn();
-        return new URNImpl(urn);
+        if(urn != null) {
+            return new URNImpl(urn);
+        } else {
+            return new org.limewire.core.api.URN() {
+                @Override
+                public int compareTo(org.limewire.core.api.URN o) {
+                    return toString().compareTo(o.toString());
+                }};
+        }
     }
 
     @Override
@@ -232,7 +240,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         synchronized (this) {
             Map<FilePropertyKey, Object> reloadedMap = Collections.synchronizedMap(new HashMap<FilePropertyKey, Object>());
             FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFileSize(), 
-                    getCreationTime(), reloadedMap, doc);
+                    getCreationTime(), reloadedMap, fileDesc.getXMLDocument());
             reloadedMap.put(FilePropertyKey.LOCATION, getFile().getParent());
             propertiesMap = reloadedMap;
         }

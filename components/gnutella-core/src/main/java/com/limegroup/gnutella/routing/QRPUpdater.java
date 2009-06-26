@@ -203,6 +203,8 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 switch(event.getType()) {
                 case FILE_ADDED:
                 case FILE_REMOVED:
+                case FILE_META_CHANGED:
+                case FILE_CHANGED:
                 case FILES_CLEARED:
                     needRebuild = true;
 					break;
@@ -225,7 +227,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             @Override
             public void handleEvent(FileDescChangeEvent event) {
                 switch(event.getType()) {
-                case URNS_CHANGED:
+                case TT_ROOT_ADDED:
                     needRebuild = true;
 					break;
                 }

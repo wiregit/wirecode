@@ -7,26 +7,18 @@ import java.util.NoSuchElementException;
 class ThreadSafeFileViewIterator implements Iterator<FileDesc> {
     
     private final AbstractFileCollection fileList;
-    private final LibraryImpl managedList;
-    private final int startRevision;
     
     /** Points to the index that is to be examined next. */
     private int index = 0;
     private FileDesc preview;
     
-    public ThreadSafeFileViewIterator(AbstractFileCollection fileList, LibraryImpl managedList) {
+    public ThreadSafeFileViewIterator(AbstractFileCollection fileList) {
         this.fileList = fileList;
         this.index = fileList.getMinIndex();
-        this.managedList = managedList;
-        this.startRevision = managedList.revision();
     }
     
     private boolean preview() {
         assert preview == null;
-        
-        if (managedList.revision() != startRevision) {
-            return false;
-        }
 
         fileList.getReadLock().lock();
         try {
@@ -46,10 +38,6 @@ class ThreadSafeFileViewIterator implements Iterator<FileDesc> {
     
     @Override
     public boolean hasNext() {
-        if (managedList.revision() != startRevision) {
-            return false;
-        }
-
         if (preview != null) {
             if (!fileList.contains(preview)) {
                 // file was removed in the meantime

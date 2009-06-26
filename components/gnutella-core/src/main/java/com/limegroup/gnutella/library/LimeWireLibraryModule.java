@@ -1,5 +1,11 @@
 package com.limegroup.gnutella.library;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.inject.AbstractModule;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -9,7 +15,6 @@ import org.limewire.listener.SourcedEventMulticasterImpl;
 import org.limewire.listener.SourcedListenerSupport;
 import org.limewire.listener.EventListenerList.EventListenerListContext;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
@@ -59,6 +64,11 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(new TypeLiteral<SourcedEventMulticaster<FileDescChangeEvent, FileDesc>>(){}).toInstance(fileDescMulticaster);
 
         bind(FileDescFactory.class).to(FileDescFactoryImpl.class);
+        
+        ListeningExecutorService diskE = ExecutorsHelper.newProcessingQueue("Library Disk I/O Thread");
+        bind(ListeningExecutorService.class).annotatedWith(DiskIo.class).toInstance(diskE);
+        bind(ExecutorService.class).annotatedWith(DiskIo.class).toInstance(diskE);
+        bind(Executor.class).annotatedWith(DiskIo.class).toInstance(diskE);
     }
     
     @Provides LibraryFileData libraryFileData(LibraryImpl library) {
@@ -76,7 +86,4 @@ public class LimeWireLibraryModule extends AbstractModule {
     @Provides @SharedFiles FileView allSharedView(FileViewManagerImpl manager) {
         return manager.getAllSharedFilesView();
     }
-    
-    
-
 }

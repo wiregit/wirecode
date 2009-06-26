@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
@@ -66,7 +65,7 @@ public final class UrnCache {
     /**
      * The ProcessingQueue that Files are hashed in.
      */
-    private final ListeningExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("Hasher");
+    private final ListeningExecutorService QUEUE;
 
     /**
      * Whether or not data is dirty since the last time we saved.
@@ -79,7 +78,9 @@ public final class UrnCache {
     /**
      * Create and initialize urn cache.
      */
-    UrnCache() {
+    @Inject
+    UrnCache(@DiskIo ListeningExecutorService diskIoExecutor) {
+        this.QUEUE = diskIoExecutor;
         deserializer = QUEUE.submit(new Callable<Map<UrnSetKey, Set<URN>>>() {
             @SuppressWarnings("unchecked")
             public Map<UrnSetKey, Set<URN>> call() {

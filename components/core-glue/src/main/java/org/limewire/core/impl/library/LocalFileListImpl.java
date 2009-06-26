@@ -15,6 +15,8 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.filter.Filter;
 import org.limewire.listener.EventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
@@ -24,6 +26,8 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 
 abstract class LocalFileListImpl implements LocalFileList {
+    
+    private static final Log LOG = LogFactory.getLog(LocalFileListImpl.class);
     
     protected final EventList<LocalFileItem> baseList;
     protected final TransformedList<LocalFileItem, LocalFileItem> threadSafeList;
@@ -137,6 +141,27 @@ abstract class LocalFileListImpl implements LocalFileList {
         threadSafeList.addAll(fileItems);
     }
     
+    /** Notification that meta information has changed in the filedesc. */
+    protected void updateFileDesc(FileDesc fd) {
+        LocalFileItem item = (LocalFileItem)fd.getClientProperty(FILE_ITEM_PROPERTY);
+        if(item != null) {
+            ((CoreLocalFileItem)item).reloadProperties();
+            threadSafeList.getReadWriteLock().writeLock().lock();
+            try {
+                int idx = threadSafeList.indexOf(item);
+                if(idx > 0) {
+                    threadSafeList.set(idx, item);
+                } else {
+                    LOG.warnf("Attempted to update FD w/ LocalFileItem that is not in list anymore. Item {0}", item);
+                }
+            } finally {
+                threadSafeList.getReadWriteLock().writeLock().unlock();
+            }
+        } else {
+            LOG.warnf("Attempted to update FD without LocalFileItem, FD {0}", fd);
+        }
+    }
+    
     protected void changeFileDesc(FileDesc old, FileDesc now) {
         removeFileDesc(old);
         addFileDesc(now);
@@ -157,6 +182,9 @@ abstract class LocalFileListImpl implements LocalFileList {
             @Override
             public void handleEvent(FileViewChangeEvent event) {              
                 switch(event.getType()) {
+                case FILE_META_CHANGED:
+                    updateFileDesc(event.getFileDesc());
+                    break;
                 case FILE_ADDED:
                     addFileDesc(event.getFileDesc());
                     break;

@@ -11,7 +11,6 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,6 +39,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.MediaTypeAggregator;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -295,7 +295,7 @@ public class CreationTimeCache {
         // populate time to set of urns
         Set<URN> urnSet = getTimeToUrn().get(cTime);
         if (urnSet == null) {
-            urnSet = new HashSet<URN>();
+            urnSet = new UrnSet();
             getTimeToUrn().put(cTime, urnSet);
         }
         urnSet.add(urn);
@@ -449,7 +449,7 @@ public class CreationTimeCache {
             // put the urn in a set of urns that have that creation time....
             Set<URN> urnSet = timeToUrn.get(cTime);
             if (urnSet == null) {
-                urnSet = new HashSet<URN>();
+                urnSet = new UrnSet();
                 // populate the reverse mapping
                 timeToUrn.put(cTime, urnSet);
             }
@@ -551,20 +551,33 @@ public class CreationTimeCache {
 
     private void handleFileListEvent(FileViewChangeEvent evt) {
         switch (evt.getType()) {
+        case FILE_META_CHANGED:
+            // fallthrough & pretend this was an add incase this was the URN
+            // meta notification -- no big if it doesn't exist.
         case FILE_ADDED:
-            // Commit the time in the CreactionTimeCache, but don't share
+            // Commit the time in the CreationTimeCache, but don't share
             // the installer. We populate free LimeWire's with free installers
             // so we have to make sure we don't influence the what is new
             // result set.
-            if (!LibraryUtils.isForcedShare(evt.getFileDesc())) {
+            if (!LibraryUtils.isForcedShare(evt.getFileDesc()) && evt.getFileDesc().getSHA1Urn() != null) {
                 fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
             }
             break;
         case FILE_REMOVED:
-            removeTime(evt.getFileDesc().getSHA1Urn());
+            if(evt.getFileDesc().getSHA1Urn() != null) {
+                removeTime(evt.getFileDesc().getSHA1Urn());
+            }
             break;
         case FILE_CHANGED:
-            fileChanged(evt.getOldValue().getSHA1Urn(), evt.getFileDesc().getSHA1Urn());
+            if(evt.getOldValue().getSHA1Urn() == null) {
+                if (!LibraryUtils.isForcedShare(evt.getFileDesc()) && evt.getFileDesc().getSHA1Urn() != null) {
+                    fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
+                }
+            } else if(evt.getFileDesc().getSHA1Urn() != null) {
+                fileChanged(evt.getOldValue().getSHA1Urn(), evt.getFileDesc().getSHA1Urn());
+            } else {
+                removeTime(evt.getOldValue().getSHA1Urn());
+            }
             break;
         }
     }

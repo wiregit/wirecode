@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.IntSet;
+import org.limewire.collection.IntSet.IntSetIterator;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningExecutorService;
@@ -33,9 +34,9 @@ import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.filter.Filter;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -45,7 +46,6 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.ExceptionUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
@@ -58,6 +58,7 @@ import com.limegroup.gnutella.auth.ValidationEvent;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.XmlController;
 
 @Singleton
 class LibraryImpl implements Library, FileCollection {
@@ -71,12 +72,11 @@ class LibraryImpl implements Library, FileCollection {
     private final UrnCache urnCache;
     private final FileDescFactory fileDescFactory;
     private final ListeningExecutorService folderLoader;
-    private final ListeningExecutorService fileLoader;
+    private final ListeningExecutorService diskIoService;
     private final PropertyChangeSupport changeSupport;
     private final DangerousFileChecker dangerousFileChecker;
     private final EventListenerList<FileProcessingEvent> fileProcessingListeners = new EventListenerList<FileProcessingEvent>();
-    private final AtomicInteger processingIndex = new AtomicInteger(0);
-    private final AtomicInteger processingQueueSize = new AtomicInteger(0);
+    private final XmlController xmlController;
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -113,13 +113,6 @@ class LibraryImpl implements Library, FileCollection {
      */
     private final Map<URN, IntSet> urnMap;
     
-    /**
-     * The revision of the library.  Every time 'loadSettings' is called, the revision
-     * is incremented.
-     */
-    @InspectablePrimitive("filemanager revision")
-    private final AtomicInteger revision = new AtomicInteger();
-    
     /** All the library data for this library -- loaded on-demand. */
     private final LibraryFileData fileData = new LibraryFileData();  
     
@@ -127,10 +120,11 @@ class LibraryImpl implements Library, FileCollection {
     private final UrnValidator urnValidator;
     
     /** The revision this finished loading. */
-    private volatile int loadingFinished = -1;
+    private volatile boolean loadingFinished = false;
     
     /** The number of files that are pending calculation. */
     private final AtomicInteger pendingFiles = new AtomicInteger(0);
+    
     
     @SuppressWarnings("unused")
     @InspectableContainer
@@ -148,18 +142,19 @@ class LibraryImpl implements Library, FileCollection {
 
     @Inject
     LibraryImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
-                        UrnCache urnCache,
-                        FileDescFactory fileDescFactory,
-                        EventMulticaster<LibraryStatusEvent> managedListSupportMulticaster,
-                        UrnValidator urnValidator,
-                        DangerousFileChecker dangerousFileChecker) {
+                UrnCache urnCache,
+                FileDescFactory fileDescFactory,
+                EventMulticaster<LibraryStatusEvent> managedListSupportMulticaster,
+                UrnValidator urnValidator,
+                DangerousFileChecker dangerousFileChecker,
+                XmlController xmlController,
+                @DiskIo ListeningExecutorService diskIoService) {
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
         this.managedListListenerSupport = managedListSupportMulticaster;
         this.fileListListenerSupport = new EventMulticasterImpl<FileViewChangeEvent>();
-        this.folderLoader = ExecutorsHelper.newProcessingQueue("ManagedList Folder Loader");
-        this.fileLoader = ExecutorsHelper.newProcessingQueue("ManagedList File Loader");
+        this.folderLoader = ExecutorsHelper.newProcessingQueue("Library Folder Loader"); 
         this.files = new ArrayList<FileDesc>();
         this.urnMap = new HashMap<URN, IntSet>();
         this.fileToFileDescMap = new HashMap<File, FileDesc>();
@@ -167,6 +162,8 @@ class LibraryImpl implements Library, FileCollection {
         this.urnValidator = urnValidator;
         this.changeSupport = new SwingSafePropertyChangeSupport(this);
         this.dangerousFileChecker = dangerousFileChecker;
+        this.xmlController = xmlController;
+        this.diskIoService = diskIoService;
     }
     
     @Override
@@ -201,43 +198,17 @@ class LibraryImpl implements Library, FileCollection {
         }
         return fileData;
     }
-    
+
     /**
-     * Runs the callable in the managed filelist file thread & returns a Future used
-     * to get its result.
+     * Runs the callable in the managed filelist folder thread & returns a
+     * Future used to get its result.
      */
-    <V> ListeningFuture<V> submit(Callable<V> callable) {
-        return fileLoader.submit(callable);
+    <V> ListeningFuture<V> submitFolder(Callable<V> callable) {
+        return folderLoader.submit(callable);
     }
-    
-    /**
-    * Runs the callable in the managed filelist folder thread & returns a Future used
-    * to get its result.
-    */
-   <V> ListeningFuture<V> submitFolder(Callable<V> callable) {
-       return folderLoader.submit(callable);
-   }
     
     /** Initializes all listeners. */
     void initialize() {
-        fileDescMulticaster.addListener(new EventListener<FileDescChangeEvent>() {
-            @Override
-            public void handleEvent(FileDescChangeEvent event) {
-                switch(event.getType()) {
-                case URNS_CHANGED:
-                    if(event.getUrn() == null || event.getUrn().isSHA1()) {
-                        rwLock.writeLock().lock();
-                        try {
-                            updateUrnIndex(event.getSource());
-                        } finally {
-                            rwLock.writeLock().unlock();
-                        }
-                    }
-                    break;
-                }
-            }
-        });
-        
         urnValidator.addListener(new EventListener<ValidationEvent>() {
             @Override
             public void handleEvent(ValidationEvent event) {
@@ -504,7 +475,7 @@ class LibraryImpl implements Library, FileCollection {
     
     @Override
     public ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> list) {
-        return add(file, list, revision.get(), null);
+        return add(file, list, null);
     }
     
     /**
@@ -518,7 +489,6 @@ class LibraryImpl implements Library, FileCollection {
      */
     private ListeningFuture<FileDesc> add(File file, 
             final List<? extends LimeXMLDocument> metadata,
-            final int rev,
             final FileDesc oldFileDesc) {
         LOG.debugf("Attempting to load file: {0}", file);
         
@@ -558,146 +528,160 @@ class LibraryImpl implements Library, FileCollection {
         
         final File interned = new File(file.getPath().intern());
         getLibraryData().addManagedFile(interned);
-
-        boolean failed = false;
+           
+        PendingFuture task = new PendingFuture();
+        startLoadingFileDesc(interned, urnCache.getUrns(interned), metadata, oldFileDesc, task);
+        return task;
+    }
+    
+    private void setFutureForFile(File file, Future future) {
         rwLock.writeLock().lock();
         try {
-            if (rev != revision.get()) {
-                failed = true;
-            }
+            fileToFutures.put(file, future);
         } finally {
             rwLock.writeLock().unlock();
-        }
-        
-        if(failed) {
-            LOG.debugf("Not adding {0} because revisions changed while loading", interned);
-            FileViewChangeEvent event = dispatchFailure(interned, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.REVISIONS_CHANGED));
-        } else {
-            final PendingFuture task = new PendingFuture();
-            ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(interned);
-            if(!urnFuture.isDone()) {
-                rwLock.writeLock().lock();
-                try {
-                    fileToFutures.put(interned, urnFuture);
-                } finally {
-                    rwLock.writeLock().unlock();
-                }
-            }
-            
-            urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URN>>>() {
-                @Override
-                public void handleEvent(final FutureEvent<Set<URN>> event) {
-                    // Report the exception, if one happened, so we know about it.
-                    if(event.getException() != null) {
-                        ExceptionUtils.reportOrReturn(event.getException());
+        }    
+    }
+    
+    private void removeFutureForFile(File file) {
+        rwLock.writeLock().lock();
+        try {
+            fileToFutures.remove(file);
+        } finally {
+            rwLock.writeLock().unlock();
+        } 
+    }
+    
+    /**
+     * Create the FD with or without URNs or XML.
+     * Step 1 of loading a filedesc.
+     * 
+     * Then proceed to either step 2 (calculate URNs if none exist) or step 3 (check if dangerous & load XML)
+     */
+    private void startLoadingFileDesc(final File file, Set<URN> urns,
+            final List<? extends LimeXMLDocument> metadata, final FileDesc oldFileDesc,
+            final PendingFuture task) {
+        final FileDesc fd = createAndAddFileDesc(file, metadata, urns, oldFileDesc, task);
+        // We were able to succesfully create an FD -- now finish it off!
+        if(fd != null) {
+            if(urns.isEmpty()) {
+                // Create a FileDesc & add it before we have a set of URNs for it.
+                ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(file);
+                setFutureForFile(file, urnFuture);  
+                LOG.debugf("Submitting URN future for {0}", file);
+                urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URN>>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<Set<URN>> event) {
+                        LOG.debugf("Running URN future for {0}", file);
+                        removeFutureForFile(file);
+                        if(contains(fd)) {
+                            addUrnsToFileDesc(fd, metadata, event, task);
+                        }
                     }
+                });
+            } else {
+                // We may be able to exit immediately if all the following is true:
+                // 1) The file is already "safe" checked
+                // 2) Cached XML was loaded, or the file format doesn't allow for XML
+                boolean safe = getLibraryData().isFileSafe(fd.getSHA1Urn().toString());
+                boolean loadedXML = !fd.getLimeXMLDocuments().isEmpty();
+                boolean allowsXML = xmlController.canConstructXml(fd);
+                if(safe && (loadedXML || !allowsXML)) {
+                    // We're done immediately, woohooo!!
+                    LOG.debugf("File loaded immediately! {0}", file);
+                    removeFutureForFile(file);
+                    task.set(fd);
+                } else {
+                    LOG.debugf("URNs precalculated for {0}, but needs safe-check or XML", file);        
                     rwLock.writeLock().lock();
                     try {
-                        if(rev != revision.get()) {
-                            FileViewChangeEvent fileEvent = dispatchFailure(interned, oldFileDesc);
-                            task.setException(new FileViewChangeFailedException(fileEvent, FileViewChangeFailedException.Reason.REVISIONS_CHANGED));
-                        } else {
-                            fileToFutures.remove(interned);
-                            synchronized (processingQueueSize) {
-                                //TODO not really correct urns are already calculated by this point, but will let us create a listener to 
-                                //stub out the listening logic until new code gets merged.
-                                processingQueueSize.addAndGet(1);
-                            }
-                            fileToFutures.put(interned, fileLoader.submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    processingIndex.addAndGet(1);
-                                    fileProcessingListeners.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.FILE_PROCESSED, interned, processingIndex.get(), processingQueueSize.get()));
-                                    finishLoadingFileDesc(interned, event, metadata, rev, oldFileDesc, task);
-                                    synchronized (processingQueueSize) {
-                                        if(processingIndex.get() >= processingQueueSize.get()) {
-                                            //TODO put in properly synchronized stuff
-                                            processingIndex.set(0);
-                                            processingQueueSize.set(0);
-                                            fileProcessingListeners.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.FINISHED, null, 0, 0));
-                                        }
-                                    }
+                        LOG.debugf("Submitting finish loading FD for {0}", fd.getFile());
+                        setFutureForFile(fd.getFile(), diskIoService.submit(new Runnable() {
+                            @Override
+                            public void run() {
+                                LOG.debugf("Running finish loading FD for {0}", fd.getFile());
+                                removeFutureForFile(fd.getFile());
+                                if(contains(fd)) {
+                                    finishLoadingFileDesc(fd, metadata, task, false);
                                 }
-                            }));
-                        }
+                            }
+                        }));
                     } finally {
                         rwLock.writeLock().unlock();
                     }
                 }
-            });
-            return task;
+            }
+        } else {
+            LOG.debugf("Unable to create FileDesc for {0}", file);
         }
     }
     
-    /** Finishes the process of loading the FD, now that URNs are known. */
-    private void finishLoadingFileDesc(File file, FutureEvent<Set<URN>> urnEvent,
-            List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc,
-            PendingFuture task) {
-        FileDesc fd = null;
-        boolean revchange = false;
-        boolean failed = false;
-        
+    /** Step 2 of loading FDs. */
+    private void addUrnsToFileDesc(FileDesc fd, List<? extends LimeXMLDocument> metadata, FutureEvent<Set<URN>> urnEvent, final PendingFuture task) {
         Set<URN> urns = urnEvent.getResult();
-        
-        // Don't add dangerous files to the library (this call may block)
-   	    boolean dangerous = false;
-        if(urns != null) {
-	        URN sha1 = UrnSet.getSha1(urns);
-	        if(sha1 != null && !getLibraryData().isFileSafe(sha1.toString())) {
-        	    dangerous = dangerousFileChecker.isDangerous(file);
-            	getLibraryData().setFileSafe(sha1.toString(), !dangerous);
-	        }
-		}
+        // If the URN couldn't be calculated
+        if(urns == null || urns.isEmpty()) {                
+            remove(fd.getFile());
+            task.setException(new FileViewChangeFailedException(null, FileViewChangeFailedException.Reason.ERROR_LOADING_URNS, urnEvent.getException()));
+        } else {
+            // Add URNs.
+            for(URN urn : urns) {
+                fd.addUrn(urn);
+            }
+            rwLock.writeLock().lock();
+            try {
+                updateUrnIndex(fd);
+            } finally {
+                rwLock.writeLock().unlock();
+            }
+            
+            // Now that we have a URN, preload the cached XML for it.
+            xmlController.loadCachedXml(fd);
+            // Finish loading it immediately, since we're in a blocking thread already
+            finishLoadingFileDesc(fd, metadata, task, true);
+        }
+    }
+    
+    /** Returns the newly created FD & dispatches events about its creation. */
+    private FileDesc createAndAddFileDesc(File file, List<? extends LimeXMLDocument> metadata, Set<URN> urns,
+            FileDesc oldFileDesc, PendingFuture task) {
+        FileDesc fd = null;
+        FileDesc newFD = null;
+        boolean failed = false;
         
         rwLock.writeLock().lock();
         try {
-            if(rev != revision.get()) {
-                revchange = true;
-                LOG.warn("Revisions changed, dropping share.");
-            } else {
-                fileToFutures.remove(file);
-                
-                // Only load the file if we were able to calculate URNs 
-                // assume the fd is being shared
-                if(urns != null && !urns.isEmpty() && !dangerous) {
-                    fd = createFileDesc(file, urns, files.size());
-                    if(fd != null) {
-                        if(contains(file)) {
-                            failed = true;
-                            fd = getFileDesc(file);
-                        } else {
-                            files.add(fd);
-                            fileToFileDescMap.put(file, fd);
-                            updateUrnIndex(fd);
-                        }
-                    }
+            newFD = createFileDesc(file, urns, files.size());
+            fd = newFD;
+            if(fd != null) {
+                if(contains(file)) {
+                    failed = true;
+                    fd = getFileDesc(file);
+                } else {
+                    files.add(fd);
+                    fileToFileDescMap.put(file, fd);
+                    updateUrnIndex(fd);
                 }
             }
         } finally {
             rwLock.writeLock().unlock();
         }
         
-        if(revchange) {
-            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.REVISIONS_CHANGED));
-        } else if(urnEvent.getType() != FutureEvent.Type.SUCCESS) {
-            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.ERROR_LOADING_URNS, urnEvent.getException()));
-        } else if(dangerous) {
-            LOG.debugf("Not adding {0} because the file is dangerous", file);
-            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.DANGEROUS_FILE));
-        } else if(fd == null) {
+        if(fd == null) {
             FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
             task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.CANT_CREATE_FD));
         } else if(failed) {
             LOG.debugf("Couldn't load FD because FD with file {0} exists already.  FD: {1}", file, fd);
             FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
             task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.ALREADY_MANAGED));
-        } else { // SUCCESS!
-            // try loading the XML for this fileDesc
-            fileDescMulticaster.broadcast(new FileDescChangeEvent(fd, FileDescChangeEvent.Type.LOAD, metadata));
+        } else {
+            assert newFD != null; 
+            
+            // If we had a SHA1 urn, attempt to load cached XML so it exists
+            // before the first FILE_ADDED event is sent.
+            if (fd.getSHA1Urn() != null) {
+                xmlController.loadCachedXml(fd);
+            }
             
             // It is very important that the events get dispatched
             // prior to setting the value on the task, so that other FileLists
@@ -711,8 +695,34 @@ class LibraryImpl implements Library, FileCollection {
                 dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGED, oldFileDesc, fd));
             }
             
+            // DO NOT SET THE TASK UNTIL THE FD FINISHES ENTIRELY!
+        }
+        
+        return newFD;
+    }
+
+    /** Finishes the process of loading the FD. */
+    private void finishLoadingFileDesc(FileDesc fd, List<? extends LimeXMLDocument> metadata, PendingFuture task, boolean alwaysSendMetaChange) {
+        // Note: Dangerous file checking may block for a period of time.
+        URN sha1 = fd.getSHA1Urn();
+        boolean dangerous = false;
+        if(!getLibraryData().isFileSafe(sha1.toString())) {
+            dangerous = dangerousFileChecker.isDangerous(fd.getFile());
+            getLibraryData().setFileSafe(sha1.toString(), !dangerous);
+        }
+        
+        if(dangerous) {
+            remove(fd.getFile());
+            task.setException(new FileViewChangeFailedException(null, FileViewChangeFailedException.Reason.DANGEROUS_FILE));
+        } else {
+            boolean loaded = xmlController.loadXml(fd);
+            if(alwaysSendMetaChange || loaded) {
+                dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_META_CHANGED, fd));
+            }
             task.set(fd);
         }
+        
+        LOG.debugf("Finished loading FD for {0}", fd.getFile());
     }
   
     /**
@@ -754,6 +764,10 @@ class LibraryImpl implements Library, FileCollection {
             if(fd != null) {
                 removeFileDesc(file, fd);
             }
+            Future future = fileToFutures.remove(file);
+            if(future != null) {
+                future.cancel(true);
+            }
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -775,31 +789,35 @@ class LibraryImpl implements Library, FileCollection {
 
     /** Generic method for adding a fileDesc's URNS to a map */
     private void updateUrnIndex(FileDesc fileDesc) {
-        URN sha1 = UrnSet.getSha1(fileDesc.getUrns());
-        IntSet indices = urnMap.get(sha1);
-        if (indices == null) {
-            indices = new IntSet();
-            urnMap.put(sha1, indices);
+        URN sha1 = fileDesc.getSHA1Urn();
+        if(sha1 != null) {
+            IntSet indices = urnMap.get(sha1);
+            if (indices == null) {
+                indices = new IntSet();
+                urnMap.put(sha1, indices);
+            }
+            indices.add(fileDesc.getIndex());
         }
-        indices.add(fileDesc.getIndex());
     }
     
     /** 
      * Removes stored indices for a URN associated with a given FileDesc
      */
     private void removeUrnIndex(FileDesc fileDesc) {
-        URN sha1 = UrnSet.getSha1(fileDesc.getUrns());
-        // Lookup each of desc's URN's ind _urnMap.
-        IntSet indices = urnMap.get(sha1);
-        if (indices == null) {
-            assert fileDesc instanceof IncompleteFileDesc;
-            return;
-        }
-
-        // Delete index from set. Remove set if empty.
-        indices.remove(fileDesc.getIndex());
-        if(indices.size() == 0) {
-            urnMap.remove(sha1);
+        URN sha1 = fileDesc.getSHA1Urn();
+        if(sha1 != null) {
+            // Lookup each of desc's URN's ind _urnMap.
+            IntSet indices = urnMap.get(sha1);
+            if (indices == null) {
+                assert fileDesc instanceof IncompleteFileDesc;
+                return;
+            }
+    
+            // Delete index from set. Remove set if empty.
+            indices.remove(fileDesc.getIndex());
+            if(indices.size() == 0) {
+                urnMap.remove(sha1);
+            }
         }
     }
     
@@ -815,7 +833,7 @@ class LibraryImpl implements Library, FileCollection {
             // Prepopulate the cache with new URNs.
             urnCache.addUrns(newName, fd.getUrns());
             List<LimeXMLDocument> xmlDocs = new ArrayList<LimeXMLDocument>(fd.getLimeXMLDocuments());
-            return add(newName, xmlDocs, revision.get(), fd);
+            return add(newName, xmlDocs, fd);
         } else {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGE_FAILED, oldName, null, newName), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
@@ -829,7 +847,7 @@ class LibraryImpl implements Library, FileCollection {
         FileDesc fd = removeInternal(file);
         if (fd != null) {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
-            return add(file, xmlDocs, revision.get(), fd);
+            return add(file, xmlDocs, fd);
         } else {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGE_FAILED, file, null, file), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
@@ -841,13 +859,10 @@ class LibraryImpl implements Library, FileCollection {
      * the list of all Future FileDescs that will be added.
      */  
     ListeningFuture<List<ListeningFuture<FileDesc>>> loadManagedFiles() {
-        final int currentRevision = revision.incrementAndGet();
-        LOG.debugf("Starting new library revision: {0}", currentRevision);
-        
-        ListeningFuture<List<ListeningFuture<FileDesc>>> future = submit(new Callable<List<ListeningFuture<FileDesc>>>() {
+        ListeningFuture<List<ListeningFuture<FileDesc>>> future = diskIoService.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
             public List<ListeningFuture<FileDesc>> call() {
-                return loadSettingsInternal(currentRevision);
+                return loadSettingsInternal();
             }
         });
         return future;
@@ -859,14 +874,13 @@ class LibraryImpl implements Library, FileCollection {
      * If the current revision ever changed from the expected revision, this returns
      * immediately.
      */
-    private List<ListeningFuture<FileDesc>> loadSettingsInternal(int rev) {
-        LOG.debugf("Loading Library Revision: {0}", rev);
+    private List<ListeningFuture<FileDesc>> loadSettingsInternal() {
+        LOG.debugf("Loading Library");
         
         clearImpl();
         fireLoading();
-        final List<ListeningFuture<FileDesc>> futures = loadManagedFiles(rev);
-        addLoadingListener(futures, rev);
-        LOG.debugf("Finished queueing files for revision: {0}", rev);
+        final List<ListeningFuture<FileDesc>> futures = loadManagedFilesInternal();
+        addLoadingListener(futures);
         return futures;
     }
     
@@ -874,9 +888,9 @@ class LibraryImpl implements Library, FileCollection {
         changeSupport.firePropertyChange("hasPending", false, true);
     }
     
-    private void addLoadingListener(final List<ListeningFuture<FileDesc>> futures, final int rev) {
+    private void addLoadingListener(final List<ListeningFuture<FileDesc>> futures) {
         if(futures.isEmpty() && pendingFiles.get() == 0) {
-            loadFinished(rev);
+            loadFinished();
         } else if(!futures.isEmpty()) {
             pendingFiles.addAndGet(futures.size());
             
@@ -884,7 +898,7 @@ class LibraryImpl implements Library, FileCollection {
                 @Override
                 public void handleEvent(FutureEvent<FileDesc> event) {
                     if(pendingFiles.addAndGet(-1) == 0) {
-                        loadFinished(rev); 
+                        loadFinished(); 
                     }
                 }
             };
@@ -896,11 +910,11 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     /** Kicks off necessary stuff for loading being done. */
-    private void loadFinished(int rev) {
+    private void loadFinished() {
         changeSupport.firePropertyChange("hasPending", true, false);
-        if(loadingFinished != rev) {
-            loadingFinished = rev;
-            LOG.debugf("Finished loading revision: {0}", rev);
+        if(!loadingFinished) {
+            loadingFinished = true;
+            LOG.debugf("Finished loading revision");
             dispatch(new LibraryStatusEvent(this, LibraryStatusEvent.Type.LOAD_FINISHING));
             save();
             dispatch(new LibraryStatusEvent(this, LibraryStatusEvent.Type.LOAD_COMPLETE));
@@ -909,10 +923,10 @@ class LibraryImpl implements Library, FileCollection {
     
     @Override
     public boolean isLoadFinished() {
-        return loadingFinished == revision.get();
+        return loadingFinished;
     }
 
-    private List<ListeningFuture<FileDesc>> loadManagedFiles(int rev) {
+    private List<ListeningFuture<FileDesc>> loadManagedFilesInternal() {
         List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
         
         // TODO: We want to always share this stuff, not just approved extensions.
@@ -941,14 +955,16 @@ class LibraryImpl implements Library, FileCollection {
             }
         };
         
+        int i = 0;
         for(File file : getLibraryData().getManagedFiles()) {
-            if(rev != revision.get()) {
-                break;
+            // don't hog CPU...
+            if(i % 2 == 0) {
+                Thread.yield();
             }
-
-            ListeningFuture<FileDesc> future = add(file, LimeXMLDocument.EMPTY_LIST, rev, null);
+            ListeningFuture<FileDesc> future = add(file, LimeXMLDocument.EMPTY_LIST, null);
             future.addFutureListener(indivListeners);
             futures.add(future);
+            i++;
         }
         
         return futures;
@@ -959,11 +975,6 @@ class LibraryImpl implements Library, FileCollection {
         dispatch(new LibraryStatusEvent(this, LibraryStatusEvent.Type.SAVE));
         urnCache.persistCache();
         getLibraryData().save();
-    }
-    
-    /** Returns the current revision.  Revisions are incmemented when loadManagedFiles is called. */
-    int revision() {
-        return revision.get();
     }
 
     /**
@@ -994,15 +1005,11 @@ class LibraryImpl implements Library, FileCollection {
     /** An iterator that works over changes to the list. */
     private class ThreadSafeLibraryIterator implements Iterator<FileDesc> {        
         /** Points to the index that is to be examined next. */
-        private int startRevision = revision.get();
         private int index = 0;
         private FileDesc preview;
         
         private boolean preview() {
-            assert preview == null;            
-            if (revision.get() != startRevision) {
-                return false;
-            }
+            assert preview == null;
 
             rwLock.readLock().lock();
             try {
@@ -1022,10 +1029,6 @@ class LibraryImpl implements Library, FileCollection {
         
         @Override
         public boolean hasNext() {
-            if (revision.get() != startRevision) {
-                return false;
-            }
-
             if (preview != null) {
                 if (!contains(preview)) {
                     // file was removed in the meantime
@@ -1122,6 +1125,33 @@ class LibraryImpl implements Library, FileCollection {
     @Override
     public void setManagedExtensions(Collection<String> extensions) {
         getLibraryData().setManagedExtensions(extensions);
+    }
+
+    /** Removes all items from an IntSet that do not pass the filter. */
+    void filterIndexes(IntSet indexes, Filter<FileDesc> filter) {
+        List<Integer> removeList = null;
+        rwLock.readLock().lock();
+        try {
+            IntSetIterator iter = indexes.iterator();
+            for(; iter.hasNext(); ) {
+                int i = iter.next();
+                FileDesc fd = files.get(i);
+                if(!filter.allow(fd)) {
+                    if(removeList == null) {
+                        removeList = new ArrayList<Integer>();
+                    }
+                    removeList.add(i);
+                }
+            }
+        } finally {
+            rwLock.readLock().unlock();
+        }
+        
+        if(removeList != null) {
+            for(Integer i : removeList) {
+                indexes.remove(i);
+            }
+        }
     }
 
     @Override
