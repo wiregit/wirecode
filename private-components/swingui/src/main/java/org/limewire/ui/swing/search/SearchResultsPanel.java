@@ -558,7 +558,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
     /**
      * Sets an indicator to determine whether the application is fully 
-     * connected to the P2P network, and updates the user message.
+     * connected to the P2P Network, and updates the user message.
      */
     public void setFullyConnected(boolean fullyConnected) {
         this.fullyConnected = fullyConnected;

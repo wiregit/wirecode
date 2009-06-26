@@ -270,7 +270,7 @@ public class LibraryOptionPanel extends OptionPanel {
             
             unsafeTypeOptionPanel = unsafeOptionPanelProvider.get();
             
-            shareP2PdownloadedFilesCheckBox = new JCheckBox(I18n.tr("Add files I download from P2P users to my Public Shared List"));
+            shareP2PdownloadedFilesCheckBox = new JCheckBox(I18n.tr("Add files I download from P2P Users to my Public Shared List"));
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
             
             configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,

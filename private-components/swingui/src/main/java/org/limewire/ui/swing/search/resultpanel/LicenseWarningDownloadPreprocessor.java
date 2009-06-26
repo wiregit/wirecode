@@ -38,7 +38,7 @@ public class LicenseWarningDownloadPreprocessor implements DownloadPreprocessor 
 
             String licenseWarning = I18n.tr("LimeWire is unable to find a license for this file. " +
                     "Download it anyway?\n\nLimeWire cannot monitor or control " +
-                    "the content of the P2P network, so please respect your local copyright laws.");
+                    "the content of the P2P Network, so please respect your local copyright laws.");
 
             JPanel thePanel = new JPanel(new BorderLayout(0, 15));
             thePanel.setOpaque(false);

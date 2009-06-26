@@ -122,7 +122,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
 
             Friend friend = hosts.iterator().next().getFriendPresence().getFriend();
             if (friend.isAnonymous()) {
-                return I18n.tr("1 P2P user");
+                return I18n.tr("1 P2P User");
             } else {
                 return friend.getRenderName();
             }

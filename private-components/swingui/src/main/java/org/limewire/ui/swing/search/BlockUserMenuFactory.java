@@ -112,14 +112,14 @@ public class BlockUserMenuFactory {
 
         @Override
         public boolean confirmBlock(String name) {
-            //{0}: P2P user's name
-            return confirm(I18n.tr("Block P2P user {0}?", name));
+            //{0}: P2P User's name
+            return confirm(I18n.tr("Block P2P uUer {0}?", name));
         }
 
         @Override
         public boolean confirmBlockAll() {
-            //{0}: P2P user's name
-            return confirm(I18n.tr("Block P2P users?"));
+            //{0}: P2P User's name
+            return confirm(I18n.tr("Block P2P uUers?"));
         }
         
         @Override
@@ -148,14 +148,14 @@ public class BlockUserMenuFactory {
         //the block messages will be different for search and download when we handle side effects of blocking
         @Override
         public boolean confirmBlock(String name) {
-            //{0}: P2P user's name
-            return confirm(I18n.tr("Block P2P user {0}?", name));
+            //{0}: P2P User's name
+            return confirm(I18n.tr("Block P2P User {0}?", name));
         }
 
         @Override
         public boolean confirmBlockAll() {
-            //{0}: P2P user's name
-            return confirm(I18n.tr("Block P2P users?"));
+            //{0}: P2P User's name
+            return confirm(I18n.tr("Block P2P Users?"));
         }
 
         @Override
