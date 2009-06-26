@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,6 +27,7 @@ import org.limewire.core.api.library.SharedFileList;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.OSUtils;
 
 class LibraryNavTableEditor extends JPanel implements TableCellEditor {
 
@@ -60,6 +62,10 @@ class LibraryNavTableEditor extends JPanel implements TableCellEditor {
                 stopCellEditing();
             }
         });
+        // OSX paints a giant blue border when selected which takes up too much room
+        // for the table row height
+        if(OSUtils.isMacOSX()) 
+            textField.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         
         setBackground(selectedColor);
         
