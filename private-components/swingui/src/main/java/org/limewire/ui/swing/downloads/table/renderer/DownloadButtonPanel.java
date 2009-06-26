@@ -88,7 +88,7 @@ public class DownloadButtonPanel extends JPanel {
         pauseButton.setVisible(state == DownloadState.DOWNLOADING);  //used to be connecting also. keeping consistent with tray
         resumeButton.setVisible(state.isResumable());
         tryAgainButton.setVisible(state == DownloadState.STALLED && canTryAgain);
-        searchAgainButton.setVisible(true || state == DownloadState.STALLED && !canTryAgain && !item.isStoreDownload());
+        searchAgainButton.setVisible(state == DownloadState.STALLED && !canTryAgain && !item.isStoreDownload());
     }
 
 }
