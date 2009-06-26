@@ -16,9 +16,7 @@ import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.ui.swing.action.BackAction;
 import org.limewire.ui.swing.components.HeaderBar;
-import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.painter.TextShadowPainter;
@@ -45,7 +43,7 @@ public class UploadPanel extends JXPanel{
     
     @Inject
     public UploadPanel(UploadTable uploadTable, HeaderBarDecorator headerBarFactory,
-            ButtonDecorator buttonDecorator, BackAction backAction, UploadListManager uploadListManager){
+            ButtonDecorator buttonDecorator, UploadListManager uploadListManager){
         super(new BorderLayout());
         
         this.listManager = uploadListManager;
@@ -53,7 +51,7 @@ public class UploadPanel extends JXPanel{
         this.headerBarDecorator = headerBarFactory;
 
         uploadTable.setTableHeader(null);
-        initHeader(backAction);
+        initHeader();
         
         JScrollPane scrollPane = new JScrollPane(uploadTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -76,14 +74,11 @@ public class UploadPanel extends JXPanel{
         listManager.clearFinished();
     }
 
-    private void initHeader(Action backAction) {
+    private void initHeader() {
         JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
         headerTitlePanel.setOpaque(false);        
         JXLabel titleTextLabel = new JXLabel(I18n.tr("Uploads"));
         titleTextLabel.setForegroundPainter(new TextShadowPainter());
-        IconButton backButton = new IconButton(backAction);
-        backButton.setRolloverEnabled(true);        
-        headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
         
         header = new HeaderBar(headerTitlePanel);

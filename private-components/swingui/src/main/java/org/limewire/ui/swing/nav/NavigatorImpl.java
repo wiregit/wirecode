@@ -9,8 +9,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.home.HomeMediator;
-import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Singleton;
@@ -198,11 +196,6 @@ class NavigatorImpl implements Navigator {
         public void select() {
             assert valid;
             select(null);
-            if(navMediator instanceof HomeMediator) {
-                ((HomeMediator)navMediator).getComponent().loadDefaultUrl();
-            } else if(navMediator instanceof StoreMediator) {
-                ((StoreMediator)navMediator).getComponent().loadDefaultUrl();
-            }
         }
         
         @Override
