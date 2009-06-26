@@ -7,19 +7,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.io.IOUtils;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.util.FileUtils;
-
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.matchers.Matcher;
 
 class M3UList {
 
@@ -50,27 +45,24 @@ class M3UList {
     }
 
     public void save() {
-        FilterList<LocalFileItem> filterList = new FilterList<LocalFileItem>(localFileList.getModel(), new AudioMatcher());
         final List<LocalFileItem> writeableList;
         
-        filterList.getReadWriteLock().readLock().lock();
+        localFileList.getModel().getReadWriteLock().readLock().lock();
         try {
-            writeableList = Collections.unmodifiableList(filterList.subList(0, filterList.size()));
+            writeableList = new ArrayList<LocalFileItem>(localFileList.getModel().subList(0, localFileList.getModel().size()));
         } finally {
-            filterList.getReadWriteLock().readLock().unlock();
+            localFileList.getModel().getReadWriteLock().readLock().unlock();
         }
         
-        if(writeableList != null) {
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {
-                    try {
-                        saveInternalList(writeableList);
-                    } catch (Exception e) {
-                        //TODO: notify user
-                    }
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                try {
+                    saveInternalList(writeableList);
+                } catch (Exception e) {
+                    //TODO: notify user
                 }
-            });
-        }
+            }
+        });
     }
     
     /**
@@ -150,16 +142,5 @@ class M3UList {
             IOUtils.close(m3uFile);
         }
         return m3uFileList;
-    }
-    
-    /**
-     * Matches only files that we consider to be Audio files. Audio
-     * files are defined by the Category.Audio.
-     */
-    private class AudioMatcher implements Matcher<LocalFileItem> {
-        @Override
-        public boolean matches(LocalFileItem item) {
-            return item.getCategory() == Category.AUDIO;
-        }
     }
 }
