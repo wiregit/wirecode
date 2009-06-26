@@ -63,7 +63,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
         add(new JScrollPane(filterTable), "span 2, grow, wrap");
         
         add(defaultButton, "alignx left");
-        add(okButton, "alignx right");
+        add(okButton, "tag ok, alignx right");
     }
     
     @Override

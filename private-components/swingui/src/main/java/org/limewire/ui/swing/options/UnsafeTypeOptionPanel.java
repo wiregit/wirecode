@@ -64,7 +64,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         add(documentCheckBox, "split, gapbottom 15, gapleft 25, wrap");
         
         //add(new JLabel(I18n.tr("By default, LimeWire allows you to share documents with your friends")), "push");
-        add(okButton, "gapbefore push");
+        add(okButton, "tag ok, gapbefore push");
         
         okButton.addActionListener(new ActionListener() {
             @Override

@@ -40,7 +40,7 @@ public class ITunesOptionPanel extends OptionPanel {
         add(addToITunesCheckBox, "wrap");
         add(getITunesSharePanel(), "wrap");
         
-        add(new JButton(new OKDialogAction()), "gapleft push");
+        add(new JButton(new OKDialogAction()), "tag ok, gapleft push");
     }
     
     @Override

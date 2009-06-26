@@ -57,7 +57,7 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
         add(addKeywordButton,"wrap");
         add(new JScrollPane(filterTable), "span 2, grow, wrap");
         
-        add(okButton, "skip 1, alignx right");
+        add(okButton, "tag ok, skip 1, alignx right");
     }
     
     @Override
