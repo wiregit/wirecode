@@ -569,6 +569,7 @@ class LibraryImpl implements Library, FileCollection {
                 ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(file);
                 setFutureForFile(file, urnFuture);  
                 LOG.debugf("Submitting URN future for {0}", file);
+                broadcastQueued(file);
                 urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URN>>>() {
                     @Override
                     public void handleEvent(FutureEvent<Set<URN>> event) {
@@ -577,6 +578,7 @@ class LibraryImpl implements Library, FileCollection {
                         if(contains(fd)) {
                             addUrnsToFileDesc(fd, metadata, event, task);
                         }
+                        broadcastFinished(file);
                     }
                 });
             } else {
@@ -592,7 +594,8 @@ class LibraryImpl implements Library, FileCollection {
                     removeFutureForFile(file);
                     task.set(fd);
                 } else {
-                    LOG.debugf("URNs precalculated for {0}, but needs safe-check or XML", file);        
+                    LOG.debugf("URNs precalculated for {0}, but needs safe-check or XML", file);
+                    broadcastQueued(file);
                     rwLock.writeLock().lock();
                     try {
                         LOG.debugf("Submitting finish loading FD for {0}", fd.getFile());
@@ -604,6 +607,7 @@ class LibraryImpl implements Library, FileCollection {
                                 if(contains(fd)) {
                                     finishLoadingFileDesc(fd, metadata, task, false);
                                 }
+                                broadcastFinished(file);
                             }
                         }));
                     } finally {
@@ -614,6 +618,14 @@ class LibraryImpl implements Library, FileCollection {
         } else {
             LOG.debugf("Unable to create FileDesc for {0}", file);
         }
+    }
+    
+    private void broadcastQueued(File file) {
+        fileProcessingListeners.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.QUEUED, file));
+    }
+    
+    private void broadcastFinished(File file) {
+        fileProcessingListeners.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.FINISHED, file));
     }
     
     /** Step 2 of loading FDs. */
