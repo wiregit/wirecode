@@ -45,7 +45,14 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
 
 
     private void loadSnapshot() {
-        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>(remoteLibraryManager.getAllFriendsFileList().getModel());
+        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>();
+        
+        remoteLibraryManager.getAllFriendsFileList().getModel().getReadWriteLock().readLock().lock();
+        try {        
+            remoteFileItems.addAll(remoteLibraryManager.getAllFriendsFileList().getModel());
+        } finally {
+            remoteLibraryManager.getAllFriendsFileList().getModel().getReadWriteLock().readLock().unlock();
+        }
         
         //add all files
         for (SearchResult item : remoteFileItems) {
