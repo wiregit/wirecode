@@ -9,6 +9,8 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Locale;
 
 import javax.swing.Action;
@@ -230,6 +232,23 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         });
         autoLoginCheckBox.setOpaque(false);
 
+        // Hack to get the enter key to start login for JCheckBox
+        autoLoginCheckBox.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyCode() == 0x0) {
+                    prepLogin();
+                }
+            }
+            
+        });
+
         signInButton = new JXButton(signinAction);
         buttonDecorator.decorateGreenFullButton(signInButton);
         signInButton.setFont(signInButtonFont);
@@ -353,27 +372,31 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         }
 
         public void actionPerformed(ActionEvent e) {
-            String user = usernameField.getText().trim();
-            String password = new String(passwordField.getPassword());
-            if(user.equals("") || password.equals("")) {
-                return;
-            }            
-            if(accountConfig.getLabel().equals("Jabber")) {
-                String service = serviceField.getText().trim();
-                if(service.equals(""))
-                    return;
-                accountConfig.setServiceName(service);
-            }
-            accountConfig.setUsername(user);
-            accountConfig.setPassword(password);
-            if(autoLoginCheckBox.isSelected()) {
-                // Set this as the auto-login account
-                accountManager.setAutoLoginConfig(accountConfig);
-            } else {
-                // If there was previously an auto-login account, delete it
-                accountManager.setAutoLoginConfig(null);
-            }
-            login(accountConfig);
+            prepLogin();
         }
+    }
+    
+    private void prepLogin() {
+        String user = usernameField.getText().trim();
+        String password = new String(passwordField.getPassword());
+        if(user.equals("") || password.equals("")) {
+            return;
+        }            
+        if(accountConfig.getLabel().equals("Jabber")) {
+            String service = serviceField.getText().trim();
+            if(service.equals(""))
+                return;
+            accountConfig.setServiceName(service);
+        }
+        accountConfig.setUsername(user);
+        accountConfig.setPassword(password);
+        if(autoLoginCheckBox.isSelected()) {
+            // Set this as the auto-login account
+            accountManager.setAutoLoginConfig(accountConfig);
+        } else {
+            // If there was previously an auto-login account, delete it
+            accountManager.setAutoLoginConfig(null);
+        }
+        login(accountConfig);
     }
 }
