@@ -100,8 +100,9 @@ class FacebookLoginAction extends AbstractAction {
                     browser.load(event.getResult());
                     break;
                 case EXCEPTION:
-                    // TODO write error handling ui code 
-                    throw new RuntimeException(event.getException());
+                    // TODO
+                    browser.load("http://limewire.com/");
+                    break;
                 default:
                     throw new IllegalStateException(event.getType().toString());
                 }

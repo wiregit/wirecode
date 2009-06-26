@@ -168,7 +168,10 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 assert response.getStatusLine().getStatusCode() == 302;
                 String url = response.getFirstHeader("Location").getValue();
                 LOG.debugf("login url: {0}", url);
-                configuration.setAttribute("auth-token", parseAuthToken(url));
+                String authToken = parseAuthToken(url);
+                if (authToken != null) {
+                    configuration.setAttribute("auth-token", authToken);
+                }
                 return url;
             }
         });
@@ -186,7 +189,8 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 return authTokenPart;
             }
         }
-        throw new IllegalArgumentException(url);
+        LOG.debugf("could not parse out auth token: {0}", url);
+        return null;
     }
     
         
