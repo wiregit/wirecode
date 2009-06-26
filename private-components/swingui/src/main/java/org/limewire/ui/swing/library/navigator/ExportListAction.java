@@ -7,6 +7,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FileChooser;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
 
@@ -31,7 +32,7 @@ class ExportListAction  extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         LibraryNavItem item = libraryNavigatorPanel.getSelectedNavItem();
         
-        File file = FileChooser.getSaveAsFile(libraryNavigatorPanel,
+        File file = FileChooser.getSaveAsFile(GuiUtils.getMainFrame(),
                 I18n.tr("Export M3U List"), 
                 new File(FileChooser.getLastInputDirectory(), getSuggestedFileName(item.getDisplayText())),
                 new M3UFileFilter());

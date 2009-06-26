@@ -7,6 +7,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FileChooser;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -30,7 +31,7 @@ class ImportListAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         LibraryNavItem item = libraryNavigatorPanel.getSelectedNavItem();
         
-        File file = FileChooser.getInputFile(null,
+        File file = FileChooser.getInputFile(GuiUtils.getMainFrame(),
                 I18n.tr("Import M3U List"), 
                 I18n.tr("Load"),
                 FileChooser.getLastInputDirectory(),

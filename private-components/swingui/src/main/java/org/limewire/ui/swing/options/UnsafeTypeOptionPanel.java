@@ -49,7 +49,9 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         setLayout(new MigLayout("gapy 10"));
 
         programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share Programs with anyone"));
+        programCheckBox.setContentAreaFilled(false);
         documentCheckBox = new JCheckBox(I18n.tr("Allow me to add Documents to my Public Shared list and share them with the world"));
+        documentCheckBox.setContentAreaFilled(false);
         okButton = new JButton(new OKDialogAction());
     
         settingMap = new HashMap<Setting, JCheckBox>();

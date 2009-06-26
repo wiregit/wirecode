@@ -195,6 +195,7 @@ public final class FileTypeOptionPanelManager {
         }
         
         this.mainContainer = new JPanel(new BorderLayout());        
+        this.mainContainer.setOpaque(false);
         this.mediaLayout   = new CardLayout();
         this.currentPanel  = new JPanel(mediaLayout);
         

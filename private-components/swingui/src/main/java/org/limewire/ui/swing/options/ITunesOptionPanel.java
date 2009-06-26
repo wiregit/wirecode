@@ -79,6 +79,8 @@ public class ITunesOptionPanel extends OptionPanel {
             
             setLayout(new MigLayout("insets 0, gap 0"));
             
+            setOpaque(false);
+            
             shareWithITunesCheckBox = new JCheckBox(I18n.tr("Share the audio section of My Library on my local network using iTunes"));
             shareWithITunesCheckBox.setContentAreaFilled(false);
             shareWithITunesCheckBox.addItemListener(new ItemListener(){
