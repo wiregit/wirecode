@@ -48,20 +48,20 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
 
         setLayout(new MigLayout("gapy 10"));
 
-        programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share programs with the P2P Network and my friends"));
-        documentCheckBox = new JCheckBox(I18n.tr("Allow me to share documents with the P2P Network"));
+        programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share Programs with anyone"));
+        documentCheckBox = new JCheckBox(I18n.tr("Allow me to add Documents to my Public Shared list and share them with the world"));
         okButton = new JButton(new OKDialogAction());
     
         settingMap = new HashMap<Setting, JCheckBox>();
         settingMap.put(LibrarySettings.ALLOW_PROGRAMS, programCheckBox);
         settingMap.put(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, documentCheckBox);
         
-        add(new JLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents:")), "span 2, wrap");
+        add(new JLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents. We strongly recommend you don't enable them.")), "span 2, wrap");
         
         add(programCheckBox, "split, gapleft 25, wrap");
         add(documentCheckBox, "split, gapbottom 15, gapleft 25, wrap");
         
-        add(new JLabel(I18n.tr("By default, LimeWire allows you to share documents with your friends")), "push");
+        //add(new JLabel(I18n.tr("By default, LimeWire allows you to share documents with your friends")), "push");
         add(okButton);
         
         okButton.addActionListener(new ActionListener() {

@@ -274,8 +274,8 @@ public class LibraryOptionPanel extends OptionPanel {
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
             
             configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
-                    unsafeTypeOptionPanel, I18n.tr("Unsafe Categories"),
-                    I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
+                    unsafeTypeOptionPanel, I18n.tr("Unsafe File Sharing"),
+                    I18n.tr("Configure..."), I18n.tr("Configure unsafe file sharing settings")));
             final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
             HyperlinkButton learnMoreButton = new LearnMoreButton(learnMoreUrl);
             

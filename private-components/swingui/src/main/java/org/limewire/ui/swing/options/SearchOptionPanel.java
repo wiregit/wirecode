@@ -214,8 +214,8 @@ public class SearchOptionPanel extends OptionPanel {
             super(I18n.tr("Search Filtering"));
            
             configureButton = new JButton(new DialogDisplayAction( SearchOptionPanel.this,
-                    unsafeOptionPanel, I18n.tr("Unsafe Categories"),
-                    I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
+                    unsafeOptionPanel, I18n.tr("Unsafe File Sharing"),
+                    I18n.tr("Configure..."), I18n.tr("Configure unsafe file sharing settings")));
             
             filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
