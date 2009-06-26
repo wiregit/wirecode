@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -19,6 +18,7 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
 import org.limewire.setting.Setting;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
@@ -56,13 +56,13 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         settingMap.put(LibrarySettings.ALLOW_PROGRAMS, programCheckBox);
         settingMap.put(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, documentCheckBox);
         
-        add(new JLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents. We strongly recommend you don't enable them.")), "span 2, wrap");
+        add(new MultiLineLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents. We strongly recommend you don't enable them."), 600), "span 2, wrap");
         
         add(programCheckBox, "split, gapleft 25, wrap");
         add(documentCheckBox, "split, gapbottom 15, gapleft 25, wrap");
         
         //add(new JLabel(I18n.tr("By default, LimeWire allows you to share documents with your friends")), "push");
-        add(okButton);
+        add(okButton, "gapbefore push");
         
         okButton.addActionListener(new ActionListener() {
             @Override
