@@ -242,7 +242,7 @@ public class XMPPUserEntryLoginPanel extends JPanel {
             }
             @Override
             public void keyTyped(KeyEvent e) {
-                if (e.getKeyCode() == 0x0) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     prepLogin();
                 }
             }
