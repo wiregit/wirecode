@@ -10,7 +10,11 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendRequest;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -22,7 +26,7 @@ import com.google.inject.Inject;
 public class FriendRequestPanel extends JXPanel {
     
     private final List<FriendRequest> pendingRequests;
-     private final JLabel requestLabel;
+    private final JLabel requestLabel;
     
     @Inject 
     public FriendRequestPanel(BarPainterFactory barPainterFactory) {
@@ -51,8 +55,23 @@ public class FriendRequestPanel extends JXPanel {
         add(no, "alignx right");
         
         ensureRequestVisible();
-        
-        
+    }
+    
+    
+    @Inject
+    void registerListener(final ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendConnectionEvent event) {
+                switch(event.getType()) {
+                case CONNECT_FAILED:
+                case DISCONNECTED:
+                    connectionSupport.removeListener(this);
+                    FriendRequestPanel.this.setVisible(false);
+                }
+            }
+        });
     }
 
     public void addRequest(FriendRequest request) {
