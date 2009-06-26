@@ -42,6 +42,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     @Resource private Icon gmailIconLarge;
     @Resource private Icon ljIconLarge;
     @Resource private Icon facebookIconLarge;
+    @Resource private Icon otherIconLarge;
     
     @Inject
     public FriendAccountConfigurationManagerImpl(PasswordManager passwordManager,
@@ -76,7 +77,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     private void loadCustomServer() {
         String custom = SwingUiSettings.USER_DEFINED_JABBER_SERVICENAME.get();
         FriendAccountConfigurationImpl customConfig =
-            new FriendAccountConfigurationImpl(custom, "Jabber", resource, Network.Type.XMPP);
+            new FriendAccountConfigurationImpl(custom, "Jabber", resource, Network.Type.XMPP, otherIconLarge);
         configs.put(customConfig.getLabel(), customConfig);
         String autoLogin = SwingUiSettings.XMPP_AUTO_LOGIN.get();
         if(!autoLogin.equals("")) {

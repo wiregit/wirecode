@@ -49,8 +49,8 @@ class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
     }
     
     /** Constructs a basic XMPPAccountConfiguration that cannot modify the serviceName. */
-    public FriendAccountConfigurationImpl(String serviceName, String label, String resource, Type type) {
-        this(false, serviceName, label, null, null, resource, UnresolvedIpPort.EMPTY_LIST, false, type);
+    public FriendAccountConfigurationImpl(String serviceName, String label, String resource, Type type, Icon largeIcon) {
+        this(false, serviceName, label, null, largeIcon, resource, UnresolvedIpPort.EMPTY_LIST, false, type);
     }
     
     private FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, Icon largeIcon, String resource, List<UnresolvedIpPort> defaultServers, boolean modifyUser, Type type) {

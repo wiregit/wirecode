@@ -36,8 +36,6 @@ public class ServiceSelectionLoginPanel extends JPanel {
     @Resource Color messageTextForeground;
     @Resource Font messageTextFont;
     
-    @Resource Icon facebookIcon;
-    
     @Resource private Icon shareIcon;
     @Resource private Icon browseIcon;
     @Resource private Icon chatIcon;
@@ -66,7 +64,6 @@ public class ServiceSelectionLoginPanel extends JPanel {
         topPanel.add(shareLabel, "gaptop 8");
         
         JLabel shareIconLabel = new JLabel(shareIcon);
-        //ResizeUtils.forceSize(shareIcon, new Dimension(153,90));
         topPanel.add(shareIconLabel, "gapright 14, wrap");
         
         JLabel browseLabel = new JLabel(I18n.tr("Browse"));
@@ -75,7 +72,6 @@ public class ServiceSelectionLoginPanel extends JPanel {
         topPanel.add(browseLabel);
         
         JLabel browseIconLabel = new JLabel(browseIcon);
-        //ResizeUtils.forceSize(browseIcon, new Dimension(153,90));
         topPanel.add(browseIconLabel, "gapright 14, wrap");
         
         JLabel chatLabel = new JLabel(I18n.tr("Chat"));
@@ -84,7 +80,6 @@ public class ServiceSelectionLoginPanel extends JPanel {
         topPanel.add(chatLabel);
         
         JLabel chatIconLabel = new JLabel(chatIcon);
-        //ResizeUtils.forceSize(chatIcon, new Dimension(153,90));
         topPanel.add(chatIconLabel);
         
         
@@ -139,7 +134,6 @@ public class ServiceSelectionLoginPanel extends JPanel {
         
         public ServiceAction(String nameOverride, FriendAccountConfiguration config) {
             super(nameOverride, config.getLargeIcon());
-            this.
             putValue(CONFIG, config);
         }
         

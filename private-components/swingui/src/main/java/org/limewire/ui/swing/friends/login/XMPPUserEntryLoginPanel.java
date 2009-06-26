@@ -341,7 +341,7 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     public boolean requestFocusInWindow() {
         if (serviceField.isVisible()) {
             return serviceField.requestFocusInWindow();
-        } 
+        }
         else {
             return usernameField.requestFocusInWindow();
         }
