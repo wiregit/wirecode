@@ -87,6 +87,7 @@ public class LibraryPanel extends JPanel {
 //    private final GhostDragGlassPane ghostGlassPane;
     
     private JPanel tableListPanel;
+    private JScrollPane libraryScrollPane;
     private CardLayout tableListLayout;
     
     private JXButton addFilesButton;
@@ -139,9 +140,9 @@ public class LibraryPanel extends JPanel {
         tableListPanel = new JPanel(tableListLayout);
         
         libraryTable.setTransferHandler(transferHandler);
-        JScrollPane libraryScrollPane = new JScrollPane(libraryTable);
+        libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
-        configureEnclosingScrollPane(libraryScrollPane);
+
         tableListPanel.add(libraryScrollPane, TABLE);
         
         setupStoreHighlighter();
@@ -190,6 +191,7 @@ public class LibraryPanel extends JPanel {
             public void run() {
                 eventList = libraryList.getSwingModel();
                 selectTable(libraryTableComboBox.getSelectedTableFormat(), libraryTableComboBox.getSelectedCategory());
+                configureEnclosingScrollPane(libraryScrollPane);
             }
         });
         
