@@ -77,7 +77,7 @@ class LibrarySharingEditablePanel {
     
     @Inject
     public LibrarySharingEditablePanel(ApplySharingAction applyAction,
-            CancelSharingAction cancelAction, TextFieldDecorator textFieldDecorator,
+            CancelSharingAction cancelAction, LibrarySharingAction libraryAction, TextFieldDecorator textFieldDecorator,
             ButtonDecorator buttonDecorator, @Named("known") Map<String, Friend> knownFriends) {
         GuiUtils.assignResources(this);
         this.knownFriends = knownFriends;
@@ -163,9 +163,11 @@ class LibrarySharingEditablePanel {
         
         applyButton = new JXButton(applyAction);
         applyButton.setFont(selectFont);
+        applyButton.addActionListener(libraryAction);
         buttonDecorator.decorateDarkFullButton(applyButton, AccentType.NONE);
         cancelButton = new HyperlinkButton(cancelAction);
         cancelButton.setFont(selectFont);
+        cancelButton.addActionListener(libraryAction);
         
         component.add(applyButton, "split 2, gaptop 5, gapbottom 5, gapright unrelated, alignx center");
         component.add(cancelButton, "gaptop 5, gapbottom 5, wrap");
