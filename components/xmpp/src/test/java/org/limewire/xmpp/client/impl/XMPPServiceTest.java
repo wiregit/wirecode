@@ -174,10 +174,10 @@ public class XMPPServiceTest extends XmppBaseTestCase {
      * list of connections
      */
     public void testUserLogout() throws InterruptedException, ExecutionException {
-        List<? extends FriendConnection> connections = service.getConnections();
-        assertTrue(connections.get(0).isLoggedIn());
-        connections.get(0).logout().get();
-        assertFalse(connections.get(0).isLoggedIn());
+        XMPPFriendConnectionImpl connection = service.getActiveConnection();
+        assertTrue(connection.isLoggedIn());
+        connection.logout().get();
+        assertFalse(connection.isLoggedIn());
     }
 
     /**
@@ -196,10 +196,9 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(FriendPresence.Type.available, buddy2.getType());
         assertEquals(FriendPresence.Mode.available, buddy2.getMode());
 
-        for(FriendConnection connection : service.getConnections()) {
-            if(connection.getConfiguration().getUserInputLocalID().equals(USERNAME_2)) {
-                connection.setMode(FriendPresence.Mode.away).get();
-            }
+        FriendConnection connection = service.getActiveConnection();
+        if(connection.getConfiguration().getUserInputLocalID().equals(USERNAME_2)) {
+            connection.setMode(FriendPresence.Mode.away).get();
         }
 
         Thread.sleep(SLEEP);

@@ -48,7 +48,7 @@ public abstract class XmppBaseTestCase extends BaseTestCase {
         registry.initialize();
         registry.start();
         service = injector.getInstance(XMPPConnectionFactoryImpl.class);
-        service.setMultipleConnectionsAllowed(true);
+//        service.setMultipleConnectionsAllowed(true);
     }
 
     protected Injector createInjector(Module... modules) {

@@ -45,9 +45,6 @@ class ReconnectionManager implements EventListener<FriendConnectionEvent> {
             if(event.getException() != null && connected) {
                     FriendConnection connection = event.getSource();
                     final FriendConnectionConfiguration configuration = connection.getConfiguration();
-                synchronized (this.serviceImpl) {
-                    this.serviceImpl.connections.remove(connection);
-                }
                 Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
                     @Override
                     public void run() {
