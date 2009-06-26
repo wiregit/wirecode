@@ -358,14 +358,14 @@ public class DownloadHeaderPanel extends JXPanel {
         sortButtonGroup.add(fileType);
         sortButtonGroup.add(extension);
         
-        isDescending = new JMenuItem(new AbstractAction(I18n.tr("Descending")){
+        isDescending = new JMenuItem(new AbstractAction(I18n.tr("Reverse Order")){
             {
                 putValue(Action.SELECTED_KEY, true);
                 putValue(Action.SMALL_ICON, downArrow);
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                putValue(Action.NAME, isDescending.isSelected()? I18n.tr("Descending") : I18n.tr("Ascending"));
+                putValue(Action.NAME, isDescending.isSelected()? I18n.tr("Reverse Order") : I18n.tr("Reverse Order"));
                 putValue(Action.SMALL_ICON, isDescending.isSelected()? downArrow : upArrow);
                 sortButtonGroup.getSelectedButton().getAction().actionPerformed(null);
             }            
