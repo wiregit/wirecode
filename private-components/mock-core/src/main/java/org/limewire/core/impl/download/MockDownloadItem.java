@@ -51,7 +51,7 @@ public class MockDownloadItem implements DownloadItem {
 	}
 	
 	@Override
-	public boolean isSearchAgainEnabled() {
+	public boolean isTryAgainEnabled() {
 	    return false;
 	}
 	

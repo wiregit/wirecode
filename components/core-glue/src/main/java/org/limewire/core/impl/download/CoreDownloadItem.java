@@ -341,7 +341,7 @@ class CoreDownloadItem implements DownloadItem {
     }
     
     @Override
-    public boolean isSearchAgainEnabled() {
+    public boolean isTryAgainEnabled() {
         return downloader.getState() == com.limegroup.gnutella.Downloader.DownloadState.WAITING_FOR_USER;
     }
 

@@ -168,7 +168,7 @@ public interface DownloadItem extends PropertiableFile {
     public File getSaveFile();
 
     /** @return true if {@link #resume()} will search for more sources. */
-    boolean isSearchAgainEnabled(); 
+    boolean isTryAgainEnabled(); 
     
     /**@return The date the download started*/
     Date getStartDate();

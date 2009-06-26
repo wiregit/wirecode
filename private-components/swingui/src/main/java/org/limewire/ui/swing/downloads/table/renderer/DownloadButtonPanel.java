@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
@@ -22,6 +23,7 @@ public class DownloadButtonPanel extends JPanel {
     private final JButton pauseButton;
     private final JButton resumeButton;
     private final JButton tryAgainButton;
+    private final JButton searchAgainButton;
 
     public DownloadButtonPanel() {
         this(null);
@@ -56,24 +58,37 @@ public class DownloadButtonPanel extends JPanel {
         resumeButton.setVisible(false);
         resumeButton.setToolTipText(I18n.tr("Resume download"));    
         resumeButton.setFont(font);
+        
+        searchAgainButton =  new HyperlinkButton(I18n.tr("Search Again"));;
+        searchAgainButton.setActionCommand(DownloadActionHandler.SEARCH_AGAIN_COMMAND);
+        searchAgainButton.addActionListener(actionListener);
+        resumeButton.setVisible(false);
+        searchAgainButton.setToolTipText(I18n.tr("Search Again"));    
+        searchAgainButton.setFont(font);
 
 
         add(resumeButton, "hidemode 3");
         add(pauseButton, "hidemode 3");
         add(tryAgainButton, "hidemode 3");
+        add(searchAgainButton, "hidemode 3");
     }
     
     public void addActionListener(ActionListener actionListener){
         pauseButton.addActionListener(actionListener);
         resumeButton.addActionListener(actionListener);
         tryAgainButton.addActionListener(actionListener);
+        searchAgainButton.addActionListener(actionListener);
     }
 
 
-    public void updateButtons(DownloadState state) {
+    public void updateButtons(DownloadItem item) {
+        DownloadState state = item.getState();
+        boolean canTryAgain = item.isTryAgainEnabled();
+        
         pauseButton.setVisible(state == DownloadState.DOWNLOADING);  //used to be connecting also. keeping consistent with tray
         resumeButton.setVisible(state.isResumable());
-        tryAgainButton.setVisible(state == DownloadState.STALLED);
+        tryAgainButton.setVisible(state == DownloadState.STALLED && canTryAgain);
+        searchAgainButton.setVisible(true || state == DownloadState.STALLED && !canTryAgain && !item.isStoreDownload());
     }
 
 }

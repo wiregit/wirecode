@@ -222,7 +222,7 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
 
-        assertTrue(coreDownloadItem.isSearchAgainEnabled());
+        assertTrue(coreDownloadItem.isTryAgainEnabled());
 
         context.checking(new Expectations() {
             {
@@ -231,7 +231,7 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
 
-        assertFalse(coreDownloadItem.isSearchAgainEnabled());
+        assertFalse(coreDownloadItem.isTryAgainEnabled());
         context.assertIsSatisfied();
     }
 

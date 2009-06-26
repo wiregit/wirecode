@@ -2,6 +2,7 @@ package org.limewire.ui.swing.downloads.table;
 
 import java.io.File;
 
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
@@ -10,14 +11,20 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
+import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
+import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -40,6 +47,7 @@ public class DownloadActionHandler {
     public final static String LINK_COMMAND = "link";
     public final static String SHARE_COMMAND = "share";
     public final static String CHANGE_LOCATION_COMMAND = "change location";
+    public final static String SEARCH_AGAIN_COMMAND = "search again";
     
    // private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
     
@@ -50,18 +58,24 @@ public class DownloadActionHandler {
     private final FileInfoDialogFactory fileInfoFactory;
 //    private final Provider<ShareWidgetFactory> shareFactory;
     private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final SearchHandler searchHandler;
+    private final KeywordAssistedSearchBuilder searchBuilder;
     
     @Inject
     public DownloadActionHandler(//Provider<ShareWidgetFactory> shareFactory, 
             DownloadListManager downloadListManager, 
             LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler){
+            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,
+            SearchHandler searchHandler,
+            KeywordAssistedSearchBuilder searchBuilder){
         this.downloadListManager = downloadListManager;
 //        this.shareFactory = shareFactory;
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.searchHandler = searchHandler;
+        this.searchBuilder = searchBuilder;
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){
@@ -124,7 +138,27 @@ public class DownloadActionHandler {
             } catch (SaveLocationException ex) {
                 saveLocationExceptionHandler.get().handleSaveLocationException(new NoOpDownloadAction(), ex, true);
             }
+        } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
+            searchHandler.doSearch(createSearchInfo(item));
         }
+    }
+    
+    private SearchInfo createSearchInfo(DownloadItem item) {
+        String title = item.getPropertyString(FilePropertyKey.TITLE);
+        if(title == null) {
+            title = FileUtils.getFilenameNoExtension(item.getFileName());
+        }
+        
+        // make search based on on title and category
+        SearchInfo search = searchBuilder.attemptToCreateAdvancedSearch(title, SearchCategory
+                .forCategory(item.getCategory()));
+
+        if (search != null) {
+            return search;
+        }
+
+        // Fall back on the normal search
+        return search = DefaultSearchInfo.createKeywordSearch(title, SearchCategory.forCategory(item.getCategory()));
     }
     
     /**

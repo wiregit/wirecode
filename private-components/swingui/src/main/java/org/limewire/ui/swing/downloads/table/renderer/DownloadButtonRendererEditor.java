@@ -42,7 +42,7 @@ public class DownloadButtonRendererEditor extends TableRendererEditor{
             int row, int column) {
         if(value instanceof DownloadItem) {
             item =(DownloadItem)value;
-            buttonPanel.updateButtons(item.getState());
+            buttonPanel.updateButtons(item);
             return this;
         } else {
             return emptyPanel;
@@ -53,7 +53,7 @@ public class DownloadButtonRendererEditor extends TableRendererEditor{
     protected Component doTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
         if(value instanceof DownloadItem) {
-            buttonPanel.updateButtons(((DownloadItem)value).getState());
+            buttonPanel.updateButtons(((DownloadItem)value));
             return this;
         } else {
             return emptyPanel;
