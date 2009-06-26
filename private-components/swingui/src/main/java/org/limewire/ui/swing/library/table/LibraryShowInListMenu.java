@@ -9,7 +9,7 @@ import org.limewire.ui.swing.library.LibrarySelected;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class LibraryShowInListMenu extends ShowInListMenu {
+class LibraryShowInListMenu extends ShowInListMenu {
     
     @Inject
     public LibraryShowInListMenu(@LibrarySelected Provider<List<File>> selectedFiles,

@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 
-public class LibraryAddToListMenu extends AddToListMenu { 
+class LibraryAddToListMenu extends AddToListMenu { 
     
     @Inject
     public LibraryAddToListMenu(@LibrarySelected Provider<LocalFileList> selectedLocalFileList,

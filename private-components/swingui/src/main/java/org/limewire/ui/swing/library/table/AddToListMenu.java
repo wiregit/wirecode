@@ -23,9 +23,8 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class AddToListMenu extends JMenu {
+public abstract class AddToListMenu extends JMenu {
 
-    
     private final Provider<List<File>> selectedFiles;
     private final Provider<LocalFileList> selectedLocalFileList; 
     private final AddToListMenuIcons icons = new AddToListMenuIcons();
@@ -43,6 +42,7 @@ public class AddToListMenu extends JMenu {
     public AddToListMenu(final Provider<LocalFileList> selectedLocalFileList,
             Provider<List<File>> selectedFiles) {
         super("Add to List");  
+        
         this.selectedLocalFileList = selectedLocalFileList;
         this.selectedFiles = selectedFiles;
     }
@@ -102,17 +102,16 @@ public class AddToListMenu extends JMenu {
         }
     }
     
-    public class AddToListMenuIcons {
-        
+    public class AddToListMenuIcons {  
         @Resource
         private Icon publicIcon;
         @Resource
         private Icon unsharedIcon;
         @Resource
         private Icon sharedIcon;
-        {
+        
+        public AddToListMenuIcons() {
             GuiUtils.assignResources(this);
         }
-        
     }
 }

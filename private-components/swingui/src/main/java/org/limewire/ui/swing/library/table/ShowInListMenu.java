@@ -26,7 +26,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class ShowInListMenu extends JMenu {
+public abstract class ShowInListMenu extends JMenu {
     
     private final Provider<List<File>> selectedFiles;
     private LibraryPanel libraryPanel;
@@ -50,7 +50,6 @@ public class ShowInListMenu extends JMenu {
         
         this.selectedFiles = selectedFiles;
         this.selectedLocalFileList = selectedLocalFileList;
-       
     }
     
     @Inject
@@ -123,7 +122,7 @@ public class ShowInListMenu extends JMenu {
         @Resource
         private Icon sharedIcon;
         
-        {
+        public ShowInListMenuIcons() {
             GuiUtils.assignResources(this);
         }
     }

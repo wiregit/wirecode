@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 
-public class DownloadShowInListMenu extends ShowInListMenu { 
+class DownloadShowInListMenu extends ShowInListMenu { 
     
     @Inject
     public DownloadShowInListMenu(@FinishedDownloadSelected Provider<List<File>> selectedFiles) {
