@@ -3,7 +3,7 @@ package org.limewire.ui.swing.library.sharing;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,9 +143,7 @@ public class LibrarySharingPanel {
 
     /** Stops sharing the current list with any friends. */
     void stopSharing() {
-        for(String friend : new ArrayList<String>(currentList.getFriendIds())) {
-            currentList.removeFriend(friend);
-        }
+        currentList.setFriendList(Collections.<String>emptyList());
     }
     
     /** Sets the new list of IDs that should be shared. */

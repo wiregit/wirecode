@@ -660,11 +660,13 @@ class LibraryFileData extends AbstractSettingsGroup {
         try {
             List<String> ids = collectionShareData.get(collectionId);
             if(ids == null) {
-                ids = new ArrayList<String>();
-                collectionShareData.put(collectionId, ids);
+                ids = Collections.emptyList();
             }
+            
             if(!ids.contains(friendId)) {
+                ids = new ArrayList<String>(ids);                
                 ids.add(friendId);
+                collectionShareData.put(collectionId, Collections.unmodifiableList(ids));
                 dirty = true;
                 return true;
             } else {
@@ -680,8 +682,12 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.writeLock().lock();
         try {
             List<String> ids = collectionShareData.get(collectionId);
-            if(ids != null) {
-                return ids.remove(friendId);
+            if(ids != null && ids.contains(friendId)) {
+                ids = new ArrayList<String>(ids);
+                ids.remove(friendId);
+                collectionShareData.put(collectionId, Collections.unmodifiableList(ids));
+                dirty = true;
+                return true;
             } else {
                 return false;
             }
@@ -723,10 +729,10 @@ class LibraryFileData extends AbstractSettingsGroup {
             if(new HashSet<String>(oldIds).equals(newIds)) {
                 return null;
             } else {            
-                newIds = Collections.unmodifiableList(new ArrayList<String>(newIds));            
                 if(newIds.isEmpty()) {
                     collectionShareData.remove(collectionId);
                 } else {
+                    newIds = Collections.unmodifiableList(new ArrayList<String>(newIds));            
                     collectionShareData.put(collectionId, newIds);
                 }
                 dirty = true;
