@@ -30,7 +30,7 @@ public class AddFriendDialog extends LimeJDialog {
         setLocationRelativeTo(GuiUtils.getMainFrame());
         // The dialog can only be popped up when the user is signed in, so
         // connection should never be null
-        Objects.nonNull(connection, "XMPP connection");
+        Objects.nonNull(connection, "connection");
         setModalityType(ModalityType.MODELESS);
         setLayout(new MigLayout());
         setResizable(false);

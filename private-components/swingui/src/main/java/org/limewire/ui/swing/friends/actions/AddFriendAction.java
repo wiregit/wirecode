@@ -15,7 +15,8 @@ class AddFriendAction extends AbstractAction {
      * Creates add friend action.
      * <p>
      * Action is disabled if <code>friendConnection</code> is null or does
-     * not support adding friends, see {@link FriendConnection#supportsAddRemoveFriend()}.
+     * not support adding friends, see {@link FriendConnection#supportsAddRemoveFriend()}
+     * or is not logged in.
      * 
      * @param friendConnection can be null, action will be constructed in a
      * disabled state then
@@ -23,7 +24,7 @@ class AddFriendAction extends AbstractAction {
     public AddFriendAction(FriendConnection friendConnection) {
         super(I18n.tr("Add Friend..."));
         this.friendConnection = friendConnection;
-        setEnabled(friendConnection != null && friendConnection.supportsAddRemoveFriend());
+        setEnabled(friendConnection != null && friendConnection.supportsAddRemoveFriend() && friendConnection.isLoggedIn());
     }
     
     @Override
