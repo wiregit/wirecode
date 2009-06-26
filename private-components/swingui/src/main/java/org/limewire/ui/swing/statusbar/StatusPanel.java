@@ -27,19 +27,17 @@ public class StatusPanel extends JXPanel {
     @Resource private int height;
 
     private final SharedFileCountPanel sharedFileCountPanel;
-    private final DownloadCountPanel downloadCountPanel;
     
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, MiniPlayerPanel miniPlayerPanel, 
             FriendStatusPanel friendStatusPanel, 
             ConnectionStatusPanel connectionStatus, ProStatusPanel proStatusPanel,
-            SharedFileCountPanel sharedFileCountPanel, DownloadCountPanel downloadCountPanel,
+            SharedFileCountPanel sharedFileCountPanel, 
             BarPainterFactory barPainterFactory, FileProcessingPanel fileProcessingPanel) {
         
         GuiUtils.assignResources(this);
         
         this.sharedFileCountPanel = sharedFileCountPanel;
-        this.downloadCountPanel = downloadCountPanel;
         
         setLayout(new BorderLayout());
         ResizeUtils.forceHeight(this, height);
@@ -61,7 +59,6 @@ public class StatusPanel extends JXPanel {
         
         leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 2, gapbottom 2");
         leftPanel.add(sharedFileCountPanel, "growy, gaptop 0, gapbottom 0");
-        leftPanel.add(downloadCountPanel, "growy, gaptop 2, gapbottom 2");
         //leftPanel.add(fileProcessingPanel, "growy, gaptop 0, gapbottom 0"); TODO add back in, turning off for the beta.
         
         centerPanel.add(proStatusPanel, "growy, gaptop 2");
@@ -103,7 +100,6 @@ public class StatusPanel extends JXPanel {
         }
         
         this.sharedFileCountPanel.setVisible(sharingVisible);
-        this.downloadCountPanel.setVisible(sharingVisible);
         
     }
 }

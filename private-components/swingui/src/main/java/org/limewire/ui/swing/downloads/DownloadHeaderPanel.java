@@ -42,6 +42,7 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.DownloadMediator.SortOrder;
+import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.listener.ActionHandListener;
@@ -174,6 +175,8 @@ public class DownloadHeaderPanel extends JXPanel {
     private final Action fileTypeSortAction = new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE);
     private final Action extensionSortAction = new SortAction(I18n.tr("File Extension"), SortOrder.EXTENSION);
     
+    private final EventList<DownloadItem> activeList;
+    
     private final Action downloadSettingsAction = new AbstractAction(I18n.tr("Download Options...")) {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -188,6 +191,10 @@ public class DownloadHeaderPanel extends JXPanel {
         
         this.downloadMediator = downloadMediator;
         dock = dockIconFactory.createDockIcon();   
+        
+
+        activeList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
+                new DownloadStateExcluder(DownloadState.ERROR, DownloadState.DONE, DownloadState.CANCELLED));
 
         initialize();
     }
@@ -448,8 +455,8 @@ public class DownloadHeaderPanel extends JXPanel {
 
         @Override
         public void listChanged(ListEvent<DownloadItem> listChanges) {
-            if (listChanges.getSourceList().size() > 0) {
-                titleTextLabel.setText(I18n.tr("Downloads({0})", listChanges.getSourceList().size()));
+            if (activeList.size() > 0) {
+                titleTextLabel.setText(I18n.tr("Downloads({0})", activeList.size()));
             } else {
                 titleTextLabel.setText(I18n.tr("Downloads"));
             }
