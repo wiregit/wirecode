@@ -18,6 +18,7 @@ import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -70,7 +71,7 @@ class P2PLinkSearchHandler implements SearchHandler {
             
             addFeature(new AddressFeature(address));
             this.id = info;
-            this.name = address.getAddressDescription();
+            this.name = Objects.nonNull(address.getAddressDescription(), "address");
         }
         
         @Override

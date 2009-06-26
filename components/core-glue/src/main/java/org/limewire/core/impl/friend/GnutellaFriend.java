@@ -12,6 +12,7 @@ import org.limewire.friend.api.MessageWriter;
 import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PresenceEvent;
 import org.limewire.listener.EventListener;
+import org.limewire.util.Objects;
 
 public class GnutellaFriend implements Friend {
 
@@ -22,8 +23,8 @@ public class GnutellaFriend implements Friend {
 
     public GnutellaFriend(String name, String renderName, String id,
             FriendPresence presence) {
-        this.name = name;
-        this.renderName = renderName;
+        this.name = Objects.nonNull(name, "name");
+        this.renderName = Objects.nonNull(renderName, "renderName");
         this.id = id;
         Map<String, FriendPresence> map = new HashMap<String, FriendPresence>(1);
         map.put(presence.getPresenceId(), presence);
