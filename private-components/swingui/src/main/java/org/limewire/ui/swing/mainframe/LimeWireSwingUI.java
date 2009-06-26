@@ -19,6 +19,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -51,6 +52,7 @@ public class LimeWireSwingUI extends JPanel {
     private final JLayeredPane layeredPane;
     private final ProNagController proNagController;
     private final LimeSplitPane splitPane;
+    private final Provider<SignOnMessageLayer> signOnMessageProvider;
     
 	@Inject
     public LimeWireSwingUI(
@@ -61,12 +63,14 @@ public class LimeWireSwingUI extends JPanel {
             ProNagController proNagController, 
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
+            Provider<SignOnMessageLayer> signOnMessageProvider,
             MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider, @GlobalLayeredPane JLayeredPane limeWireLayeredPane) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;  	
     	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
+    	this.signOnMessageProvider = signOnMessageProvider;
         this.centerPanel = new JPanel(new GridBagLayout());    	
     	
     	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanelProvider.get());
@@ -105,7 +109,6 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(chatFrame, JLayeredPane.PALETTE_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(chatFrame));
         layeredPane.addComponentListener(new PanelResizer(chatFrame));
         layeredPane.add(sharedFileCountPopup, JLayeredPane.PALETTE_LAYER);
         layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
@@ -203,7 +206,9 @@ public class LimeWireSwingUI extends JPanel {
      * Listens for Update events and display a dialog if a update exists.
      * @param updateEvent
      */
-    @Inject void register(ListenerSupport<UpdateEvent> updateEvent, final Application application) {
+    @Inject void register(ListenerSupport<UpdateEvent> updateEvent,
+            ListenerSupport<FriendConnectionEvent> connectionSupport,
+            final Application application) {
         updateEvent.addListener(new EventListener<UpdateEvent>() {
             @Override
             @SwingEDTEvent
@@ -217,5 +222,18 @@ public class LimeWireSwingUI extends JPanel {
                 dialog.setVisible(true);
             }
         });
+        
+        // Add listener to display sign-on message if enabled.
+        if (SignOnMessageLayer.isSignOnMessageEnabled()) {
+            connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
+                @Override
+                @SwingEDTEvent
+                public void handleEvent(FriendConnectionEvent event) {
+                    if (event.getType() == FriendConnectionEvent.Type.CONNECTED) {
+                        signOnMessageProvider.get().showMessage();
+                    }
+                }
+            });
+        }
     }
 }
