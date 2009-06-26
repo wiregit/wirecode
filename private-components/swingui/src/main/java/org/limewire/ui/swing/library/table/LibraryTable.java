@@ -304,6 +304,8 @@ public class LibraryTable extends MouseableTable {
     private class DoubleClickHandler implements TableDoubleClickHandler{
         @Override
         public void handleDoubleClick(int row) {
+            if(getSelectedItem() == null) 
+                getSelectionModel().setSelectionInterval(row, row);
             File file = getSelectedItem().getFile();
             PlayerUtils.playOrLaunch(file);
         }
