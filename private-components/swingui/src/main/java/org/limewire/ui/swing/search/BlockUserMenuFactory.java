@@ -113,7 +113,7 @@ public class BlockUserMenuFactory {
         @Override
         public boolean confirmBlock(String name) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block P2P uUer {0}?", name));
+            return confirm(I18n.tr("Block P2P User {0}?", name));
         }
 
         @Override
