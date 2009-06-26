@@ -266,6 +266,7 @@ public class RemoteHostWidget extends JPanel {
                     action.putValue(Action.NAME, action.getValue(SINGULAR_ACTION_NAME));
                 } else if (submenu.getMenuComponentCount() == 0) {
                     itemToAdd = new JMenuItem(submenu.getText());
+                    comboBox.decorateMenuComponent(itemToAdd);
                     itemToAdd.setEnabled(false);
                 }
                 
