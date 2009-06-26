@@ -7,8 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -17,11 +15,6 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Provides convenience functionality ranging from getting user information,
@@ -235,51 +228,7 @@ public class CommonUtils {
             }
         }
     }
-
-    /**
-     * Returns the stack traces of all current Threads.
-     */
-    public static String getAllStackTraces() {
-        try {
-            Map<Thread, StackTraceElement[]> map = Thread.getAllStackTraces();
-
-            List<Map.Entry<Thread, StackTraceElement[]>> sorted = new ArrayList<Map.Entry<Thread, StackTraceElement[]>>(
-                    map.entrySet());
-            Collections.sort(sorted, new Comparator<Map.Entry<Thread, StackTraceElement[]>>() {
-                public int compare(Map.Entry<Thread, StackTraceElement[]> a,
-                        Map.Entry<Thread, StackTraceElement[]> b) {
-                    return a.getKey().getName().compareTo(b.getKey().getName());
-                }
-            });
-
-            StringBuilder buffer = new StringBuilder();
-            for (Map.Entry<Thread, StackTraceElement[]> entry : sorted) {
-                Thread key = entry.getKey();
-                StackTraceElement[] value = entry.getValue();
-
-                buffer.append(key.getName()).append("\n");
-                for (StackTraceElement aValue : value) {
-                    buffer.append("    ").append(aValue).append("\n");
-                }
-                buffer.append("\n");
-            }
-
-            // Remove the last '\n'
-            if (buffer.length() > 0) {
-                buffer.setLength(buffer.length() - 1);
-            }
-
-            return buffer.toString();
-        } catch (Exception err) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            pw.println("An error occured during getting the StackTraces of all active Threads");
-            err.printStackTrace(pw);
-            pw.flush();
-            return sw.toString();
-        }
-    }
-
+    
     /**
      * Converts a value in seconds to: "d:hh:mm:ss" where d=days, hh=hours,
      * mm=minutes, ss=seconds, or "h:mm:ss" where h=hours<24, mm=minutes,

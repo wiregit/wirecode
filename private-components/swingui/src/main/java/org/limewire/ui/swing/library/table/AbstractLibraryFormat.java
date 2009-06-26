@@ -32,6 +32,11 @@ public abstract class AbstractLibraryFormat<T extends FileItem> extends Abstract
     }
     
     @Override
+    public boolean equals(Object obj) {
+        return getClass().equals(obj.getClass());
+    }
+    
+    @Override
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
     }

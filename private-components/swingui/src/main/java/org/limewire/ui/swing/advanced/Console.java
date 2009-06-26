@@ -68,7 +68,7 @@ import org.limewire.ui.swing.settings.ConsoleSettings;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.ThreadUtils;
 
 import com.google.inject.Inject;
 
@@ -604,7 +604,7 @@ public class Console extends JPanel {
             output.setEnabled(altCtrlDown);
             
             String log = output.getText().trim();
-            String traces = CommonUtils.getAllStackTraces();
+            String traces = ThreadUtils.getAllStackTraces();
             
             if (log.length() == 0 
                     && traces.length() == 0) {

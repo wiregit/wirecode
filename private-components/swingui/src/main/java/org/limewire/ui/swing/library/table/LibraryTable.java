@@ -148,6 +148,7 @@ public class LibraryTable extends MouseableTable {
     public void setEventList(EventList<LocalFileItem> eventList, AbstractLibraryFormat<LocalFileItem> tableFormat) {
         uninstallListeners();
         
+        AbstractLibraryFormat<LocalFileItem> oldTableFormat = fileItemFormat;
         fileItemFormat = tableFormat;
         
         SortedList<LocalFileItem> newSortedList = GlazedListsFactory.sortedList(eventList);
@@ -157,7 +158,9 @@ public class LibraryTable extends MouseableTable {
         setModel(newLibraryTableModel);
         setSelectionModel(newEventSelectionModel);
         newEventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
-        newLibraryTableModel.setTableFormat(tableFormat);
+        if(oldTableFormat == null || !oldTableFormat.equals(tableFormat)) {
+            newLibraryTableModel.setTableFormat(tableFormat);
+        }
         
         if(cachedLibraryTableModel != null) {
             cachedEventSelectionModel.dispose();
