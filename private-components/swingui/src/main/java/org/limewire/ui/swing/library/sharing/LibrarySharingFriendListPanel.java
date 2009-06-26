@@ -158,7 +158,7 @@ class LibrarySharingFriendListPanel {
             }
         }
         if(unknown > 0) {
-            newModel.add(I18n.tr("{0} friends from another account", unknown));
+            newModel.add(I18n.tr("{0} friends from other accounts", unknown));
             // TODO: Do something about row sizes.
             friendList.setRowHeightEnabled(true);            
         } else {

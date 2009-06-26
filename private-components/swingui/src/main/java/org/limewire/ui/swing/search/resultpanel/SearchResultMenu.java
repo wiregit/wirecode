@@ -117,7 +117,7 @@ public class SearchResultMenu extends JPopupMenu {
         addSeparator();
         
         if(locateInLibraryVisible){
-            add(new AbstractAction(tr("Locate In Library")) {
+            add(new AbstractAction(tr("Locate in Library")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     libraryMediator.selectInLibrary(firstItem.getUrn());
