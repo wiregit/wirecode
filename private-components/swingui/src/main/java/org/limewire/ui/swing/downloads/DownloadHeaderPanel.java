@@ -3,13 +3,11 @@ package org.limewire.ui.swing.downloads;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
@@ -39,13 +37,13 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.DownloadMediator.SortOrder;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
-import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -71,14 +69,6 @@ public class DownloadHeaderPanel extends JXPanel {
     @Resource
     private Color bottomGradientColor;
 
-    @Resource
-    private Icon moreIcon;
-
-    @Resource
-    private Icon moreIconRollover;
-
-    @Resource
-    private Icon moreIconPressed;
 
     @Resource
     private Icon upArrow;
@@ -174,6 +164,8 @@ public class DownloadHeaderPanel extends JXPanel {
     private final Action speedSortAction = new SortAction(I18n.tr("Speed"), SortOrder.SPEED);
     private final Action fileTypeSortAction = new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE);
     private final Action extensionSortAction = new SortAction(I18n.tr("File Extension"), SortOrder.EXTENSION);
+
+    private final ComboBoxDecorator comboBoxDecorator;
     
     private final EventList<DownloadItem> activeList;
     
@@ -186,11 +178,13 @@ public class DownloadHeaderPanel extends JXPanel {
 
     
     @Inject
-    public DownloadHeaderPanel(DownloadMediator downloadMediator, DockIconFactory dockIconFactory) {
+    public DownloadHeaderPanel(DownloadMediator downloadMediator, DockIconFactory dockIconFactory,
+            ComboBoxDecorator comboBoxDecorator) {
         GuiUtils.assignResources(this);
         
         this.downloadMediator = downloadMediator;
         dock = dockIconFactory.createDockIcon();   
+        this.comboBoxDecorator = comboBoxDecorator;
         
 
         activeList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
@@ -317,18 +311,19 @@ public class DownloadHeaderPanel extends JXPanel {
         menu.add(downloadSettingsAction);
 
         moreButton = new LimeComboBox();
-        moreButton.setIcon(moreIcon);
-        moreButton.setRolloverIcon(moreIconRollover);
-        moreButton.setPressedIcon(moreIconPressed);
-        moreButton.setMargin(new Insets(0, 0, 0, 0));
-        moreButton.setBorderPainted(false);
-        moreButton.setContentAreaFilled(false);
-        moreButton.setFocusPainted(false);
-        moreButton.setRolloverEnabled(false);
-        moreButton.setHideActionText(true);
-        moreButton.setBorder(BorderFactory.createEmptyBorder());
-        moreButton.setOpaque(false);
-        moreButton.addMouseListener(new ActionHandListener()); 
+        comboBoxDecorator.decorateLinkComboBox(moreButton);
+        moreButton.setText(I18n.tr("Options"));
+//        moreButton.setRolloverIcon(moreIconRollover);
+//        moreButton.setPressedIcon(moreIconPressed);
+//        moreButton.setMargin(new Insets(0, 0, 0, 0));
+//        moreButton.setBorderPainted(false);
+//        moreButton.setContentAreaFilled(false);
+//        moreButton.setFocusPainted(false);
+//        moreButton.setRolloverEnabled(false);
+//        moreButton.setHideActionText(true);
+//        moreButton.setBorder(BorderFactory.createEmptyBorder());
+//        moreButton.setOpaque(false);
+//        moreButton.addMouseListener(new ActionHandListener()); 
 
         moreButton.overrideMenu(menu);        
     }
