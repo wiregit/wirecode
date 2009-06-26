@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +47,7 @@ import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
+import org.limewire.ui.swing.library.sharing.LibrarySharingAction;
 import org.limewire.ui.swing.library.sharing.LibrarySharingPanel;
 import org.limewire.ui.swing.library.sharing.PublicSharedFeedbackPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
@@ -99,7 +102,7 @@ public class LibraryPanel extends JPanel {
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler,
             Provider<LibraryImageTable> libraryImagePanelProvider, ComboBoxDecorator comboBoxDecorator,
-            GhostDragGlassPane ghostGlassPane) {
+            GhostDragGlassPane ghostGlassPane, LibrarySharingAction libraryAction) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.libraryNavigatorPanel = navPanel;
@@ -115,19 +118,19 @@ public class LibraryPanel extends JPanel {
         
         GuiUtils.assignResources(this);
         
-        layoutComponents(headerBarDecorator, playerPanel, addFileAction);
+        layoutComponents(headerBarDecorator, playerPanel, addFileAction, libraryAction);
 
         setEventList(new BasicEventList<LocalFileItem>());
         
         comboBoxDecorator.decorateDarkFullComboBox(libraryTableComobBox);
     }
     
-    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction) {
+    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
         headerBar.setLayout(new MigLayout("insets 0, gap 0, fill"));
         headerBar.setDefaultComponentHeight(-1);
-        createAddFilesButton(addFileAction);
+        createAddFilesButton(addFileAction, libraryAction);
         headerBar.add(addFilesButton);
         headerBar.add(playerPanel, "grow, align 50%");
         headerBar.add(libraryTableComboBox, "alignx right, gapright 5");
@@ -211,6 +214,16 @@ public class LibraryPanel extends JPanel {
         });
     }
     
+    /**
+     * Returns a Rectangle contains the location and size of the table within
+     * this container.
+     */
+    public Rectangle getTableListRect() {
+        Point location = tableListPanel.getLocation();
+        Dimension size = tableListPanel.getSize();
+        return new Rectangle(location.x, location.y, size.width, size.height);
+    }
+    
     public void selectLocalFileList(LocalFileList localFileList) {
         libraryNavigatorPanel.selectLocalFileList(localFileList);
     }
@@ -289,13 +302,14 @@ public class LibraryPanel extends JPanel {
         }
     }
     
-    private void createAddFilesButton(AddFileAction addFileAction) {
+    private void createAddFilesButton(AddFileAction addFileAction, LibrarySharingAction libraryAction) {
         addFilesButton = new JXButton(addFileAction);
         addFilesButton.setIcon(plusIcon);
         addFilesButton.setRolloverIcon(plusIcon);
         addFilesButton.setPressedIcon(plusIcon);
         addFilesButton.setPreferredSize(new Dimension(getPreferredSize().width, 23));
         addFilesButton.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+        addFilesButton.addActionListener(libraryAction);
         buttonDecorator.decorateDarkFullImageButton(addFilesButton, AccentType.SHADOW);
     }
     
