@@ -10,6 +10,8 @@ public class LimeWireUiFriendsLoginModule extends AbstractModule {
         bind(XMPPUserEntryLoginPanelFactory.class).toProvider(
               FactoryProvider.newFactory(XMPPUserEntryLoginPanelFactory.class, XMPPUserEntryLoginPanel.class));
         bind(AutoLoginService.class);
+        bind(FacebookLoginActionFactory.class).toProvider(FactoryProvider.newFactory(FacebookLoginActionFactory.class,
+                FacebookLoginAction.class));
     }
 
 }

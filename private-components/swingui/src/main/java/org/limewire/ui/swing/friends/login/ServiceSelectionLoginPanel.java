@@ -46,7 +46,8 @@ public class ServiceSelectionLoginPanel extends JPanel {
     @Inject
     public ServiceSelectionLoginPanel(LoginPopupPanel parent, FriendAccountConfigurationManager accountManager,
             ButtonDecorator buttonDecorator, FriendConnectionFactory friendConnectionFactory,
-            Provider<XMPPUserEntryLoginPanelFactory> xmppLoginPanelFactory) {
+            Provider<XMPPUserEntryLoginPanelFactory> xmppLoginPanelFactory,
+            FacebookLoginActionFactory facebookLoginActionFactory) {
         
         super(new BorderLayout());
         setOpaque(false);
@@ -95,7 +96,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
         bottomPanel.setOpaque(false);
         
-        JXButton facebookButton = new JXButton(new FacebookLoginAction(accountManager.getConfig("Facebook"), friendConnectionFactory, parent));
+        JXButton facebookButton = new JXButton(facebookLoginActionFactory.create(accountManager.getConfig("Facebook")));
         facebookButton.setVisible(FacebookSettings.FACEBOOK_ENABLED.getValue());
         JXButton gmailButton = new JXButton(new ServiceAction(accountManager.getConfig("Gmail")));
         JXButton liveJournalButton = new JXButton(new ServiceAction(accountManager.getConfig("LiveJournal")));

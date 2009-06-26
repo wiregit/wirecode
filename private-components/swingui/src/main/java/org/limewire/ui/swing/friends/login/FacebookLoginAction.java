@@ -3,6 +3,7 @@ package org.limewire.ui.swing.friends.login;
 import java.awt.event.ActionEvent;
 
 import org.limewire.concurrent.FutureEvent;
+import org.limewire.core.api.Application;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -23,18 +24,25 @@ import org.mozilla.interfaces.nsIIOService;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIURI;
 
-class FacebookLoginAction extends AbstractAction {
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+
+public class FacebookLoginAction extends AbstractAction {
 
     private final FriendAccountConfiguration config;
     private final FriendConnectionFactory friendConnectionFactory;
     private final LoginPopupPanel loginPanel;
+    private final Application application;
 
-    public FacebookLoginAction(FriendAccountConfiguration config,
-            FriendConnectionFactory friendConnectionFactory, LoginPopupPanel loginPanel) { 
+    @Inject
+    public FacebookLoginAction(@Assisted FriendAccountConfiguration config,
+            FriendConnectionFactory friendConnectionFactory, LoginPopupPanel loginPanel,
+            Application application) { 
         super(config.getLabel(), config.getLargeIcon());
         this.config = config;
         this.friendConnectionFactory = friendConnectionFactory;
         this.loginPanel = loginPanel;
+        this.application = application;
     }
     
     @Override
@@ -100,8 +108,7 @@ class FacebookLoginAction extends AbstractAction {
                     browser.load(event.getResult());
                     break;
                 case EXCEPTION:
-                    // TODO
-                    browser.load("http://limewire.com/");
+                    browser.load(application.getUniqueUrl("http://client-data.limewire.com/fberror/"));
                     break;
                 default:
                     throw new IllegalStateException(event.getType().toString());
