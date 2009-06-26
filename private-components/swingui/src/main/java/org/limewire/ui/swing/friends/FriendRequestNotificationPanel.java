@@ -52,6 +52,12 @@ public class FriendRequestNotificationPanel extends Panel implements Resizable, 
         layeredPane.add(this, JLayeredPane.MODAL_LAYER);
         layeredPane.addComponentListener(this);
         resize();
+        
+        // Ensure under crazy circumstances where a request comes after 
+        //  a logout while things are loged out we can't have an empty popup
+        if (!friendRequestPanel.isVisible()) {
+            cleanup();
+        }
     }
 
     public void addRequest(FriendRequest request) {

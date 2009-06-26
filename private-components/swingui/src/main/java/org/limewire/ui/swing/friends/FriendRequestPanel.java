@@ -27,6 +27,8 @@ public class FriendRequestPanel extends JXPanel {
     
     private final List<FriendRequest> pendingRequests;
     private final JLabel requestLabel;
+    private EventListener<FriendConnectionEvent> connectionListener;
+    private ListenerSupport<FriendConnectionEvent> connectionSupport;
     
     @Inject 
     public FriendRequestPanel(BarPainterFactory barPainterFactory) {
@@ -53,25 +55,26 @@ public class FriendRequestPanel extends JXPanel {
         add(requestLabel, "growx, wrap");
         add(yes, "gapbefore push, split, alignx right");
         add(no, "alignx right");
-        
-        ensureRequestVisible();
     }
-    
-    
+     
     @Inject
-    void registerListener(final ListenerSupport<FriendConnectionEvent> connectionSupport) {
-        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
+    void registerListener(ListenerSupport<FriendConnectionEvent> connectionSupport) {
+    
+        this.connectionSupport = connectionSupport;
+        
+        connectionListener = new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECT_FAILED:
                 case DISCONNECTED:
-                    connectionSupport.removeListener(this);
-                    FriendRequestPanel.this.setVisible(false);
+                    close();
                 }
             }
-        });
+        };
+        
+        connectionSupport.addListener(connectionListener);
     }
 
     public void addRequest(FriendRequest request) {
@@ -82,10 +85,8 @@ public class FriendRequestPanel extends JXPanel {
     private void ensureRequestVisible() {
         if(pendingRequests.size() > 0) {
             requestLabel.setText(I18n.tr("<html><b>{0}</b> wants to be your friend.  Do you accept?</html>", pendingRequests.get(0).getFriendUsername()));
-            setVisible(true);
-            
         } else {
-            setVisible(false);
+            close();
         }
     }
     
@@ -98,6 +99,11 @@ public class FriendRequestPanel extends JXPanel {
             }
         });
         ensureRequestVisible();
+    }
+    
+    private void close() {
+        connectionSupport.removeListener(connectionListener);
+        setVisible(false);
     }
 
 }
