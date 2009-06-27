@@ -90,20 +90,6 @@ public class MockLocalFileItem implements LocalFileItem {
     }
     
     @Override
-    public int getFriendShareCount() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-    
-    @Override
-    public boolean isSharedWithGnutella() {
-        // TODO Auto-generated method stub
-        if(name.indexOf(".bmp") > -1 || name.indexOf(".jpg") > -1)
-            return true;
-        return false;
-    }
-    
-    @Override
     public boolean isShareable() {
         return true;
     }

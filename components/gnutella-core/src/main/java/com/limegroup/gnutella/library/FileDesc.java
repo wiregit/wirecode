@@ -173,16 +173,6 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
      */
     public int getCompletedUploads();
 
-    public void incrementSharedCollectionCount();
-
-    public void decrementSharedCollectionCount();
-
-    public int getSharedCollectionCount();
-
-    public void setInGnutellaCollection(boolean b);
-
-    public boolean isInGnutellaCollection();
-
     public void setStoreFile(boolean b);
 
     public boolean isStoreFile();

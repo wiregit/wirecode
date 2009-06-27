@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.library;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.listener.EventListener;
@@ -15,7 +15,6 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.Objects;
 
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.licenses.License;
@@ -95,14 +94,8 @@ public class FileDescImpl implements FileDesc {
 	 */
 	private int _completedUploads;
 	
-	/** The number of sharelists this is shared in. */
-	private final AtomicInteger shareListCount = new AtomicInteger(0);
-	
-	/** True if this is shared in the gnutella list. */
-	private final AtomicBoolean sharedInGnutella = new AtomicBoolean(false);
-	
 	   /** True if this is a store file. */
-    private final AtomicBoolean storeFile = new AtomicBoolean(false);
+    private volatile boolean storeFile;
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
     private final RareFileStrategy rareFileStrategy;
@@ -443,52 +436,17 @@ public class FileDescImpl implements FileDesc {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#incrementShareListCount()
-     */
-    public void incrementSharedCollectionCount() {
-        shareListCount.incrementAndGet();
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#decrementShareListCount()
-     */
-    public void decrementSharedCollectionCount() {
-        shareListCount.decrementAndGet();
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#getShareListCount()
-     */
-    public int getSharedCollectionCount() {
-        return shareListCount.get();
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#setSharedWithGnutella(boolean)
-     */
-    public void setInGnutellaCollection(boolean b) {
-        sharedInGnutella.set(b);
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#isSharedWithGnutella()
-     */
-    public boolean isInGnutellaCollection() {
-        return sharedInGnutella.get();
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#setStoreFile(boolean)
      */
-    public void setStoreFile(boolean b) {
-        storeFile.set(b);
+    public void setStoreFile(boolean isStoreFile) {
+        storeFile = isStoreFile;
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#isStoreFile()
      */
     public boolean isStoreFile() {
-        return storeFile.get();
+        return storeFile;
     }
     
     @Override

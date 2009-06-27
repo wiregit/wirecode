@@ -199,20 +199,16 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     
     @Override
     protected void fireAddEvent(FileDesc fileDesc) {
-        fileDesc.incrementSharedCollectionCount();
         super.fireAddEvent(fileDesc);
     }
 
     @Override
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        fileDesc.decrementSharedCollectionCount();
         super.fireRemoveEvent(fileDesc);
     }
 
     @Override
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        oldFileDesc.decrementSharedCollectionCount();
-        newFileDesc.incrementSharedCollectionCount();
         super.fireChangeEvent(oldFileDesc, newFileDesc);
     }
 

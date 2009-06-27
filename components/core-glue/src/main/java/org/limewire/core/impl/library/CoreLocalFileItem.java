@@ -62,19 +62,10 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     }
 
     @Override
-    public int getFriendShareCount() {
-        return fileDesc.getSharedCollectionCount();
-    }
-
-    @Override
-    public boolean isSharedWithGnutella() {
-        return fileDesc.isInGnutellaCollection();
-    }
-
-    @Override
     public long getCreationTime() {
-        if(fileDesc.getSHA1Urn() != null) {
-            return creationTimeCache.getCreationTimeAsLong(fileDesc.getSHA1Urn());
+        URN sha1 = fileDesc.getSHA1Urn();
+        if(sha1 != null) {
+            return creationTimeCache.getCreationTimeAsLong(sha1);
         } else {
             return -1;
         }

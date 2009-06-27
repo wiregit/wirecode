@@ -49,56 +49,21 @@ public class CoreLocalFileItemTest extends TestCase {
         creationTimeCache = context.mock(CreationTimeCache.class);
         document = context.mock(LimeXMLDocument.class);
         file = new File("test.txt");
-        context.checking(new Expectations() {
-            {
-                one(fileDesc).getXMLDocument();
-                will(returnValue(document));
-                allowing(fileDesc).getFile();
-                will(returnValue(file));
-            }
-        });
+        context.checking(new Expectations() {{
+            allowing(fileDesc).getFile();
+            will(returnValue(file));
+        }});
         coreLocalFileItem = new CoreLocalFileItem(fileDesc, detailsFactory, creationTimeCache);
-    }
-
-    public void testGetFriendShareCount() {
-        final int friendShareCount = 4;
-        context.checking(new Expectations() {
-            {
-                one(fileDesc).getSharedCollectionCount();
-                will(returnValue(friendShareCount));
-            }
-        });
-        assertEquals(friendShareCount, coreLocalFileItem.getFriendShareCount());
-        context.assertIsSatisfied();
-    }
-
-    public void testIsSharedWithGnutella() {
-        context.checking(new Expectations() {
-            {
-                one(fileDesc).isInGnutellaCollection();
-                will(returnValue(true));
-            }
-        });
-        assertTrue(coreLocalFileItem.isSharedWithGnutella());
-
-        context.checking(new Expectations() {
-            {
-                one(fileDesc).isInGnutellaCollection();
-                will(returnValue(false));
-            }
-        });
-        assertFalse(coreLocalFileItem.isSharedWithGnutella());
-        context.assertIsSatisfied();
     }
 
     public void testGetCreationTime() {
         final long creationTime = 123;
         context.checking(new Expectations() {
             {
-                one(creationTimeCache).getCreationTimeAsLong(null);
-                will(returnValue(creationTime));
                 one(fileDesc).getSHA1Urn();
-                will(returnValue(null));
+                will(returnValue(URN.INVALID));
+                one(creationTimeCache).getCreationTimeAsLong(URN.INVALID);
+                will(returnValue(creationTime));
             }
         });
         assertEquals(creationTime, coreLocalFileItem.getCreationTime());
@@ -192,24 +157,24 @@ public class CoreLocalFileItemTest extends TestCase {
         final String comments = "woah!";
         final URN urn1 = URN.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
-        context.checking(new Expectations() {
-            {
-                allowing(document).getValue(LimeXMLNames.DOCUMENT_AUTHOR);
+        context.checking(new Expectations() {{
+                exactly(2).of(fileDesc).getXMLDocument();
+                will(returnValue(document));
+                exactly(2).of(document).getValue(LimeXMLNames.DOCUMENT_AUTHOR);
                 will(returnValue(author.toString()));
-                allowing(document).getValue(LimeXMLNames.DOCUMENT_TITLE);
+                exactly(2).of(document).getValue(LimeXMLNames.DOCUMENT_TITLE);
                 will(returnValue(title.toString()));
-                allowing(document).getValue(LimeXMLNames.DOCUMENT_TOPIC);
+                exactly(2).of(document).getValue(LimeXMLNames.DOCUMENT_TOPIC);
                 will(returnValue(comments.toString()));
-                allowing(fileDesc).getFileName();
+                exactly(2).of(fileDesc).getFileName();
                 will(returnValue(file.getName()));
-                allowing(fileDesc).getFileSize();
+                exactly(2).of(fileDesc).getFileSize();
                 will(returnValue(1234L));
-                allowing(fileDesc).getSHA1Urn();
+                exactly(2).of(fileDesc).getSHA1Urn();
                 will(returnValue(urn1));
-                allowing(creationTimeCache).getCreationTimeAsLong(urn1);
+                exactly(2).of(creationTimeCache).getCreationTimeAsLong(urn1);
                 will(returnValue(5678L));
-            }
-        });
+        }});
 
         assertEquals(author, coreLocalFileItem.getProperty(FilePropertyKey.AUTHOR));
         assertEquals(title, coreLocalFileItem.getProperty(FilePropertyKey.TITLE));
@@ -276,39 +241,29 @@ public class CoreLocalFileItemTest extends TestCase {
     }
 
     public void testIsShareable() {
-        context.checking(new Expectations() {
-            {
-                one(fileDesc).isStoreFile();
-                will(returnValue(true));
-            }
-        });
+        context.checking(new Expectations() {{
+            one(fileDesc).isStoreFile();
+            will(returnValue(true));
+        }});
         assertFalse(coreLocalFileItem.isShareable());
 
-        context.checking(new Expectations() {
-            {
-                one(fileDesc).isStoreFile();
-                will(returnValue(false));
-            }
-        });
+        context.checking(new Expectations() {{
+            one(fileDesc).isStoreFile();
+            will(returnValue(false));
+        }});
         assertTrue(coreLocalFileItem.isShareable());
 
         final IncompleteFileDesc incompleteFileDesc = context.mock(IncompleteFileDesc.class);
-        context.checking(new Expectations() {
-            {
-                one(incompleteFileDesc).getXMLDocument();
-                will(returnValue(document));
-                allowing(incompleteFileDesc).getFile();
-                will(returnValue(file));
-            }
-        });
+        context.checking(new Expectations() {{
+            allowing(incompleteFileDesc).getFile();
+            will(returnValue(file));
+        }});
         coreLocalFileItem = new CoreLocalFileItem(incompleteFileDesc, detailsFactory,
                 creationTimeCache);
-        context.checking(new Expectations() {
-            {
-                one(incompleteFileDesc).isStoreFile();
-                will(returnValue(false));
-            }
-        });
+        context.checking(new Expectations() {{
+            one(incompleteFileDesc).isStoreFile();
+            will(returnValue(false));
+        }});
         assertFalse(coreLocalFileItem.isShareable());
 
         context.assertIsSatisfied();

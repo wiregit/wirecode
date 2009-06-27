@@ -104,12 +104,6 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void decrementSharedCollectionCount() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public int getAttemptedUploads() {
         // TODO Auto-generated method stub
         return 0;
@@ -168,13 +162,6 @@ public class FileDescStub implements FileDesc {
     public URN getSHA1Urn() {
         return UrnSet.getSha1(urns);
     }
-
-    @Override
-    public int getSharedCollectionCount() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
     @Override
     public URN getTTROOTUrn() {
         // TODO Auto-generated method stub
@@ -217,12 +204,6 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void incrementSharedCollectionCount() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public boolean isLicensed() {
         // TODO Auto-generated method stub
         return false;
@@ -230,12 +211,6 @@ public class FileDescStub implements FileDesc {
 
     @Override
     public boolean isRareFile() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isInGnutellaCollection() {
         // TODO Auto-generated method stub
         return false;
     }
@@ -261,12 +236,6 @@ public class FileDescStub implements FileDesc {
     public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, LimeXMLDocument newDoc) {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    @Override
-    public void setInGnutellaCollection(boolean b) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override

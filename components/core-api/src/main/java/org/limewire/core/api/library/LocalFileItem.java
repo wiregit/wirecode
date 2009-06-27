@@ -15,12 +15,6 @@ public interface LocalFileItem extends FileItem {
     /** Creates {@link FileMetaData} out of this {@link FileItem}. */
     FileMetaData toMetadata();
     
-    /** Returns true if this is shared with Gnutella. */
-    boolean isSharedWithGnutella();
-    
-    /** Returns the number of friends this is shared with. */
-    int getFriendShareCount();
-    
     /** Determines if this file is sharable. */
     boolean isShareable();
     
