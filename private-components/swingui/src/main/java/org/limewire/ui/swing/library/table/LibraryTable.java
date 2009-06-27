@@ -150,9 +150,13 @@ public class LibraryTable extends MouseableTable {
         
         fileItemFormat = tableFormat;
         
-        SortedList<LocalFileItem> newSortedList = GlazedListsFactory.sortedList(eventList);
+        SortedList<LocalFileItem> newSortedList = GlazedListsFactory.sortedList(eventList, null);
         LibraryTableModel newLibraryTableModel = new LibraryTableModel(newSortedList, tableFormat);
         EventSelectionModel<LocalFileItem> newEventSelectionModel = GlazedListsSwingFactory.eventSelectionModel(newSortedList);
+        
+        if(cachedTableSorting != null) {
+            cachedTableSorting.uninstall();
+        }
         
         setModel(newLibraryTableModel);
         setSelectionModel(newEventSelectionModel);
@@ -162,7 +166,6 @@ public class LibraryTable extends MouseableTable {
             cachedEventSelectionModel.dispose();
             cachedLibraryTableModel.dispose();
             cachedSortedList.dispose();
-            cachedTableSorting.uninstall();
         }
         
         EventListJXTableSorting newTableSorting = EventListJXTableSorting.install(this, newSortedList, tableFormat);

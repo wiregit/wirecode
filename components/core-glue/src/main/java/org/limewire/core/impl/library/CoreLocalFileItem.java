@@ -16,6 +16,7 @@ import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.impl.FileMetaDataImpl;
 import org.limewire.util.FileUtils;
+import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -229,7 +230,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         if (getClass() != obj.getClass()) {
             return -1;
         }
-        return getFileName().toLowerCase().compareTo(((CoreLocalFileItem) obj).getFileName().toLowerCase());
+        return Objects.compareToNullIgnoreCase(getFileName(), ((CoreLocalFileItem) obj).getFileName(), true);
     }
     
     /**

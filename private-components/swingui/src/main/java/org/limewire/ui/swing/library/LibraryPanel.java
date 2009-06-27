@@ -62,6 +62,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -93,7 +94,7 @@ public class LibraryPanel extends JPanel {
     private JXButton addFilesButton;
     private LibraryTableComboBox libraryTableComboBox;
     
-    private LibraryCategoryMatcher categoryMatcher;
+    private Category selectedCategory;
     private EventList<LocalFileItem> eventList;
     private FilterList<LocalFileItem> filteredList;
     
@@ -101,7 +102,7 @@ public class LibraryPanel extends JPanel {
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableComboBox libraryTableComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
-            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler,
+            ButtonDecorator buttonDecorator, LibraryTransferHandler transferHandler,
             Provider<LibraryImageTable> libraryImagePanelProvider, ComboBoxDecorator comboBoxDecorator,
             GhostDragGlassPane ghostGlassPane, LibrarySharingAction libraryAction) {
         super(new MigLayout("insets 0, gap 0, fill"));
@@ -112,7 +113,6 @@ public class LibraryPanel extends JPanel {
         this.libraryTableComboBox = libraryTableComobBox;
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
         this.buttonDecorator = buttonDecorator;
-        this.categoryMatcher = categoryMatcher;
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
 //        this.ghostGlassPane = ghostGlassPane;
@@ -121,7 +121,7 @@ public class LibraryPanel extends JPanel {
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction, libraryAction);
 
-        setEventList(new BasicEventList<LocalFileItem>());
+        setEventListOnTable(new BasicEventList<LocalFileItem>());
         
         comboBoxDecorator.decorateDarkFullComboBox(libraryTableComobBox);
     }
@@ -257,7 +257,7 @@ public class LibraryPanel extends JPanel {
     
     List<File> getSelectedFiles() {
         List<LocalFileItem> selected;
-        if(categoryMatcher.getCategory() == Category.IMAGE) {
+        if(selectedCategory == Category.IMAGE) {
             selected = libraryImagePanel.getSelection();
         } else {
             selected = libraryTable.getSelection();
@@ -272,7 +272,7 @@ public class LibraryPanel extends JPanel {
     
     public List<LocalFileItem> getSelectedItems() {
         List<LocalFileItem> selected;
-        if(categoryMatcher.getCategory() == Category.IMAGE) {
+        if(selectedCategory == Category.IMAGE) {
             selected = libraryImagePanel.getSelection();
         } else {
             selected = libraryTable.getSelection();
@@ -281,11 +281,11 @@ public class LibraryPanel extends JPanel {
     }
     
     private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {       
-        categoryMatcher.setCategoryFilter(category);
+        selectedCategory = category;
         
         if(category != Category.IMAGE) {
             tableListLayout.show(tableListPanel, TABLE);
-            setEventList(eventList);
+            setEventListOnTable(eventList);
             libraryTable.setupCellRenderers(category, libraryTableFormat);
             libraryTable.applySavedColumnSettings();
             
@@ -298,7 +298,7 @@ public class LibraryPanel extends JPanel {
                 createImageList();
             }
             tableListLayout.show(tableListPanel, LIST);
-            setEventListImage(eventList);
+            setEventListOnImages(eventList);
             // hide remove button for library
             libraryImagePanel.setShowButtons(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY);
         }
@@ -315,22 +315,29 @@ public class LibraryPanel extends JPanel {
         buttonDecorator.decorateDarkFullImageButton(addFilesButton, AccentType.SHADOW);
     }
     
-    private void disposeOldLists() {
+    private EventList<LocalFileItem> recreateFilterList(EventList<LocalFileItem> eventList) {
         if(filteredList != null) {
             filteredList.dispose();
-        }        
+            filteredList = null;
+        }
+        if(selectedCategory != null) {
+            final Category category = selectedCategory;
+            filteredList = GlazedListsFactory.filterList(eventList, new Matcher<LocalFileItem>() {
+                @Override
+                public boolean matches(LocalFileItem item) {
+                    return item.getCategory().equals(category);
+                }
+            });
+        }
+        return filteredList == null ? eventList : filteredList;
     }
     
-    private void setEventList(EventList<LocalFileItem> eventList) {
-        disposeOldLists();
-        filteredList = GlazedListsFactory.filterList(eventList, categoryMatcher);
-        libraryTable.setEventList(filteredList, libraryTableComboBox.getSelectedTableFormat());
+    private void setEventListOnTable(EventList<LocalFileItem> eventList) {
+        libraryTable.setEventList(recreateFilterList(eventList), libraryTableComboBox.getSelectedTableFormat());
     }
     
-    private void setEventListImage(EventList<LocalFileItem> eventList) {
-        disposeOldLists();
-        filteredList = GlazedListsFactory.filterList(eventList, categoryMatcher);
-        libraryImagePanel.setEventList(filteredList);
+    private void setEventListOnImages(EventList<LocalFileItem> eventList) {
+        libraryImagePanel.setEventList(recreateFilterList(eventList));
     }
     
     private void setPublicSharedComponentVisible(LibraryNavItem navItem) {
