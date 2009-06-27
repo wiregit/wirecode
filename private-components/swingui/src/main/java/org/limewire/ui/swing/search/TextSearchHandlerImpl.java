@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -195,6 +196,21 @@ class TextSearchHandlerImpl implements SearchHandler {
             @Override
             public void handleSearchResult(Search search, SearchResult searchResult) {
                 if(numberOfResults.addAndGet(1) > 10) {
+                    SwingUtils.invokeLater(new Runnable() {
+                        public void run() {
+                            // while not fully connected, assume the
+                            // connections we have are enough
+                            // based on the number of results coming in.
+                            searchPanel.setFullyConnected(true);
+                        }
+                    });
+                    removeListeners(search, searchListenerRef, connectionListenerRef);
+                }
+            }
+            
+            @Override
+            public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {
+                if(numberOfResults.addAndGet(searchResults.size()) > 10) {
                     SwingUtils.invokeLater(new Runnable() {
                         public void run() {
                             // while not fully connected, assume the

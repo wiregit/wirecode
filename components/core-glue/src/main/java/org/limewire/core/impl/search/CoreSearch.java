@@ -268,10 +268,8 @@ public class CoreSearch implements Search {
 
     private class FriendSearchListenerImpl implements FriendSearchListener {
         public void handleFriendResults(Collection<SearchResult> results) {
-            for(SearchResult result : results) {
-                for (SearchListener listener : searchListeners) {
-                    listener.handleSearchResult(CoreSearch.this, result);
-                }
+            for (SearchListener listener : searchListeners) {
+                listener.handleSearchResults(CoreSearch.this, results);
             }            
         }
     }

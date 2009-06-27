@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -461,6 +462,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
         
         @Override
+        public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {
+        }
+        
+        @Override
         public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {
             // do nothing
         }
@@ -519,6 +524,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         @Override
         public void handleSearchResult(Search search, SearchResult searchResult) {}
+        @Override
+        public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {}
         @Override
         public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
     }

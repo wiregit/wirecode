@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -175,8 +176,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
             searchListener = null;
         }
         
-        if (allSearchResults instanceof TransformedList){
-            ((TransformedList)allSearchResults).dispose();
+        if (offEDTResultList instanceof TransformedList){
+            ((TransformedList)offEDTResultList).dispose();
         }
         notifyDisposalListeners();
     }
@@ -319,20 +320,46 @@ class BasicSearchResultsModel implements SearchResultsModel {
             throw new RuntimeException(createMessageDetail("Problem adding result", result), th);
         }
     }
+    
+    @Override
+    public void addSearchResults(Collection<? extends SearchResult> results) {
+        boolean ok = true;
+        // make certain there's nothing w/o a URN in here
+        for(SearchResult result : results) {
+            if(result.getUrn() == null) {
+                // crap, we need to really work on this list & remove bad items.
+                ok = false;
+            }
+        }
+        
+        // filter out any items w/o a URN
+        if(!ok) {
+            ArrayList<SearchResult> cleanup = new ArrayList<SearchResult>(results);
+            for(int i = cleanup.size() - 1; i >= 0; i--) {
+                if(cleanup.get(i).getUrn() == null) {
+                    cleanup.remove(i);
+                }
+            }
+            results = cleanup;
+        }        
+        
+        offEDTResultList.addAll(results);
+    }
+    
 
     /**
      * Removes the specified search result from the results list.
      */
     @Override
     public void removeSearchResult(SearchResult result) {
-        allSearchResults.remove(result);
+        offEDTResultList.remove(result);
     }
     
     /**
      * Removes all results from the model
      */
     public void clear(){
-        allSearchResults.clear();
+        offEDTResultList.clear();
     }
     
     /**

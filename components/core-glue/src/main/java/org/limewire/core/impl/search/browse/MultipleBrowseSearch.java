@@ -87,6 +87,13 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
             }
         }
         
+        @Override
+        public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {
+            for (SearchListener listener : searchListeners) {
+                listener.handleSearchResults(MultipleBrowseSearch.this, searchResults);
+            }
+        }
+        
         /**Clears the count of completed browses*/
         public void clear() {
             stoppedBrowses.set(0);

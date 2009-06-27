@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.Collection;
+
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
@@ -89,6 +91,11 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      * Adds the specified search result to the results list.
      */
     void addSearchResult(SearchResult result);
+    
+    /**
+     * Adds all the search results to the results list.
+     */
+    void addSearchResults(Collection<? extends SearchResult> result);
 
     /**
      * Removes the specified search result from the results list.

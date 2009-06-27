@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.limewire.core.api.search.Search;
@@ -44,9 +45,15 @@ class SwingSearchListener implements SearchListener {
     }
 
     @Override
-    public void handleSearchResult(Search search, final SearchResult searchResult) {
+    public void handleSearchResult(Search search, SearchResult searchResult) {
         // passthrough immediately.
         searchResultsModel.addSearchResult(searchResult);
+    }
+    
+    @Override
+    public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {
+        // passthrough immediately.
+        searchResultsModel.addSearchResults(searchResults);
     }
 
     @Override

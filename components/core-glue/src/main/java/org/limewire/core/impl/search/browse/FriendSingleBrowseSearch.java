@@ -87,10 +87,8 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
         List<SearchResult> remoteFileItems = new ArrayList<SearchResult>(remoteLibraryManager.getFriendLibrary(friend).getModel());
         
         // add all files
-        for (SearchResult item : remoteFileItems) {
-            for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(this, item);
-            }
+        for (SearchListener listener : searchListeners) {
+            listener.handleSearchResults(this, remoteFileItems);
         }
         
         fireBrowseStatusChanged(BrowseState.LOADED);
