@@ -75,7 +75,7 @@ class LibraryImpl implements Library, FileCollection {
     private final ListeningExecutorService diskIoService;
     private final PropertyChangeSupport changeSupport;
     private final DangerousFileChecker dangerousFileChecker;
-    private final EventListenerList<FileProcessingEvent> fileProcessingListeners = new EventListenerList<FileProcessingEvent>();
+    private final EventListenerList<FileProcessingEvent> fileProcessingListeners;
     private final XmlController xmlController;
     
     /** 
@@ -148,7 +148,8 @@ class LibraryImpl implements Library, FileCollection {
                 UrnValidator urnValidator,
                 DangerousFileChecker dangerousFileChecker,
                 XmlController xmlController,
-                @DiskIo ListeningExecutorService diskIoService) {
+                @DiskIo ListeningExecutorService diskIoService,
+                EventListenerList<FileProcessingEvent> processingListenerList) {
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
@@ -164,6 +165,7 @@ class LibraryImpl implements Library, FileCollection {
         this.dangerousFileChecker = dangerousFileChecker;
         this.xmlController = xmlController;
         this.diskIoService = diskIoService;
+        this.fileProcessingListeners = processingListenerList;
     }
     
     @Override
@@ -602,6 +604,7 @@ class LibraryImpl implements Library, FileCollection {
                         setFutureForFile(fd.getFile(), diskIoService.submit(new Runnable() {
                             @Override
                             public void run() {
+                                broadcastProcessing(fd.getFile());
                                 LOG.debugf("Running finish loading FD for {0}", fd.getFile());
                                 removeFutureForFile(fd.getFile());
                                 if(contains(fd)) {
@@ -618,6 +621,10 @@ class LibraryImpl implements Library, FileCollection {
         } else {
             LOG.debugf("Unable to create FileDesc for {0}", file);
         }
+    }
+    
+    private void broadcastProcessing(File file) {
+        fileProcessingListeners.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.PROCESSING, file));
     }
     
     private void broadcastQueued(File file) {

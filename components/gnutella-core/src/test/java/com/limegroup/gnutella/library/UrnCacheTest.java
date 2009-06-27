@@ -62,7 +62,7 @@ public final class UrnCacheTest extends LimeTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-	    urnCache = new UrnCache(ExecutorsHelper.newProcessingQueue("test"));
+	    urnCache = new UrnCache(ExecutorsHelper.newProcessingQueue("test"), null);
 	}
     
     /**

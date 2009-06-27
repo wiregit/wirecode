@@ -358,7 +358,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         });
 		List<URN> sha1s = new ArrayList<URN>();
 		for(int i=0; i<files.length; i++) {
-			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], new UrnCache(ExecutorsHelper.newProcessingQueue("test")));            
+			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], new UrnCache(ExecutorsHelper.newProcessingQueue("test"), null));            
 			cache.addTime(UrnSet.getSha1(urns), files[i].lastModified());
 			sha1s.add(UrnSet.getSha1(urns));
 		}				

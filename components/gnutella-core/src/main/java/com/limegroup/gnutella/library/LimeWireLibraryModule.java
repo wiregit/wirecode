@@ -5,8 +5,10 @@ import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.inject.AbstractModule;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
@@ -69,6 +71,10 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(ListeningExecutorService.class).annotatedWith(DiskIo.class).toInstance(diskE);
         bind(ExecutorService.class).annotatedWith(DiskIo.class).toInstance(diskE);
         bind(Executor.class).annotatedWith(DiskIo.class).toInstance(diskE);
+        
+        EventListenerList<FileProcessingEvent> processingList = new EventListenerList<FileProcessingEvent>();
+        bind(new TypeLiteral<EventListenerList<FileProcessingEvent>>(){}).toInstance(processingList);
+        bind(new TypeLiteral<EventBroadcaster<FileProcessingEvent>>(){}).toInstance(processingList);
     }
     
     @Provides LibraryFileData libraryFileData(LibraryImpl library) {

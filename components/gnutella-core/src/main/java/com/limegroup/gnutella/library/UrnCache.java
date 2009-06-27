@@ -23,8 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
+import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.ServiceScheduler;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
@@ -74,13 +76,16 @@ public final class UrnCache {
 
     /** The future that will contain the URN_MAP when it is done. */
     private final Future<Map<UrnSetKey, Set<URN>>> deserializer;
+    
+    private final EventBroadcaster<FileProcessingEvent> broadcaster;
 
     /**
      * Create and initialize urn cache.
      */
     @Inject
-    UrnCache(@DiskIo ListeningExecutorService diskIoExecutor) {
+    UrnCache(@DiskIo ListeningExecutorService diskIoExecutor, EventBroadcaster<FileProcessingEvent> broadcaster) {
         this.QUEUE = diskIoExecutor;
+        this.broadcaster = broadcaster;
         deserializer = QUEUE.submit(new Callable<Map<UrnSetKey, Set<URN>>>() {
             @SuppressWarnings("unchecked")
             public Map<UrnSetKey, Set<URN>> call() {
@@ -308,6 +313,9 @@ public final class UrnCache {
         }
 
         public Set<URN> call() {
+            if(broadcaster != null) {
+                broadcaster.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.PROCESSING, file));
+            }
             Set<URN> urns;
 
             synchronized (UrnCache.this) {

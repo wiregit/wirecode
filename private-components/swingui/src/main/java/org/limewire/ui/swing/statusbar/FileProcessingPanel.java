@@ -13,6 +13,7 @@ class FileProcessingPanel extends JXLabel {
     
     private int total;
     private int finished;
+    private String processing;
 
     @Inject
     FileProcessingPanel() {
@@ -36,7 +37,12 @@ class FileProcessingPanel extends JXLabel {
                     if (finished == total) {
                         finished = 0;
                         total = 0;
+                        processing = null;
                     }
+                    setNewText();
+                    break;
+                case PROCESSING:
+                    processing = event.getSource().getName();
                     setNewText();
                     break;
                 }
@@ -48,7 +54,12 @@ class FileProcessingPanel extends JXLabel {
         if(total == 0) {
             setVisible(false);
         } else {
-            setText(I18n.tr("Adding {0} of {1}", finished, total));
+            if(processing != null) {
+                // TODO: Pop this up to a something else.  Tooltip?
+                setText(I18n.tr("Adding {0} of {1} - Processing {2}", finished, total, processing));
+            } else {
+                setText(I18n.tr("Adding {0} of {1}", finished, total));
+            }
             setVisible(true);
         }
     }
