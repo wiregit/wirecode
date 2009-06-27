@@ -176,8 +176,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         EventList<Object> sortedList = GlazedListsFactory.sortedList(uniqueList, new PropertyCountComparator());
         
         // Create list and selection models.
-        EventListModel<Object> listModel = new EventListModel<Object>(sortedList);
-        selectionModel = new EventSelectionModel<Object>(sortedList);
+        EventListModel<Object> listModel = new EventListModel<Object>(sortedList, false);
+        selectionModel = new EventSelectionModel<Object>(sortedList, false);
         list.setModel(listModel);
         list.setSelectionModel(selectionModel);
         
@@ -323,8 +323,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         // Set list and selection models.  We use the unique list directly
         // to display values alphabetically.
-        EventListModel<Object> listModel = new EventListModel<Object>(uniqueList);
-        popupSelectionModel = new EventSelectionModel<Object>(uniqueList);
+        EventListModel<Object> listModel = new EventListModel<Object>(uniqueList, false);
+        popupSelectionModel = new EventSelectionModel<Object>(uniqueList, false);
         popupPanel.setListModel(listModel);
         popupPanel.setListSelectionModel(popupSelectionModel);
         

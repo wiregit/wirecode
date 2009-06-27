@@ -96,8 +96,8 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
         uniqueList = uniqueListFactory.getUniqueList();
         
         // Create list and selection models.
-        listModel = new EventListModel<Category>(uniqueList);
-        selectionModel = new EventSelectionModel<Category>(uniqueList);
+        listModel = new EventListModel<Category>(uniqueList, false);
+        selectionModel = new EventSelectionModel<Category>(uniqueList, false);
         list.setModel(listModel);
         list.setSelectionModel(selectionModel);
         

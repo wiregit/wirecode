@@ -25,8 +25,6 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
-import com.google.inject.Provider;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -39,6 +37,8 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.FunctionList.AdvancedFunction;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+
+import com.google.inject.Provider;
 
 /**
  * The default implementation of SearchResultsModel containing the results of
@@ -63,6 +63,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
 
     /** Save exception handler. */
     private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    
+    /** The original list, off the EDT. */
+    private final EventList<SearchResult> offEDTResultList;
 
     /** List of all search results. */
     private final EventList<SearchResult> allSearchResults;
@@ -113,8 +116,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
         // Create filter debugger.
         filterDebugger = new FilterDebugger<VisualSearchResult>();
         
-        // Create list of all search results.  Must be thread safe for EventSelectionModel to work properly.
-        allSearchResults = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
+        // Base list that can receive events off the EDT.
+        offEDTResultList = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
+        
+        // Proxies results onto the swing thread
+        allSearchResults = GlazedListsFactory.swingThreadProxyEventList(offEDTResultList);
         
         // Create list of search results grouped by URN.
         GroupingList<SearchResult> groupingListUrns = GlazedListsFactory.groupingList(
@@ -305,9 +311,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
             return;
         }
         
-        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
+//        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
         try {
-            allSearchResults.add(result);
+            offEDTResultList.add(result);
         } catch (Throwable th) {
             // Throw wrapper exception with detailed message.
             throw new RuntimeException(createMessageDetail("Problem adding result", result), th);

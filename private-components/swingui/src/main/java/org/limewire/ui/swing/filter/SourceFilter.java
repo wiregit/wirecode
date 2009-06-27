@@ -198,8 +198,8 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         sortedList = GlazedListsFactory.sortedList(currentUniqueList, new SourceItemCountComparator());
         
         // Create list and selection models.
-        listModel = new EventListModel<SourceItem>(sortedList);
-        selectionModel = new EventSelectionModel<SourceItem>(sortedList);
+        listModel = new EventListModel<SourceItem>(sortedList, false);
+        selectionModel = new EventSelectionModel<SourceItem>(sortedList, false);
         list.setSelectionModel(selectionModel);
         list.setModel(listModel);
         
@@ -407,8 +407,8 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         // Set list and selection models.  We use the unique list directly
         // to display values alphabetically.
-        EventListModel<SourceItem> listModel = new EventListModel<SourceItem>(uniqueFriendList);
-        popupSelectionModel = new EventSelectionModel<SourceItem>(uniqueFriendList);
+        EventListModel<SourceItem> listModel = new EventListModel<SourceItem>(uniqueFriendList, false);
+        popupSelectionModel = new EventSelectionModel<SourceItem>(uniqueFriendList, false);
         popupPanel.setListModel(listModel);
         popupPanel.setListSelectionModel(popupSelectionModel);
         

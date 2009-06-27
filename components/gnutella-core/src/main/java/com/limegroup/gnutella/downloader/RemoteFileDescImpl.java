@@ -3,7 +3,6 @@ package com.limegroup.gnutella.downloader;
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -19,6 +18,7 @@ import org.limewire.util.Objects;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -126,7 +126,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
         _creationTime = createTime;
         _xmlDoc = xmlDoc;
         _http11 = http11;
-        _urns = Collections.unmodifiableSet(urns);
+        _urns = UrnSet.resolve(urns);
     }
 
     /** Returns true if the host supports TLS. */
@@ -273,12 +273,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
      *         <tt>null</tt> if there is none
      */
     public final URN getSHA1Urn() {
-        for (URN urn : _urns) {
-            if (urn.isSHA1()) {
-                return urn;
-            }
-        }
-        return null;
+        return UrnSet.getSha1(_urns);
     }
 
     /*

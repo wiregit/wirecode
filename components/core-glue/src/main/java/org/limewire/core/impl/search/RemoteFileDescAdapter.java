@@ -56,6 +56,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final String extension;
     private final String fileName;
     private final String fileNameNoExtension;
+    private final URN wrapperUrn;
     
     /**
      * Cached lists of sources from {@link #getSources()}
@@ -86,10 +87,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.rfd = rfd;
         this.locs = new ArrayList<IpPort>(locs);
         this.friendPresence = friendPresence;
-        properties = new HashMap<FilePropertyKey, Object>();
-        fileName = rfd.getFileName();
-        extension = FileUtils.getFileExtension(rfd.getFileName());
-        fileNameNoExtension = FileUtils.getFilenameNoExtension(fileName);
+        this.wrapperUrn = rfd.getSHA1Urn() == null ? null : new URNImpl(rfd.getSHA1Urn());
+        this.properties = new HashMap<FilePropertyKey, Object>();
+        this.fileName = rfd.getFileName();
+        this.extension = FileUtils.getFileExtension(rfd.getFileName());
+        this.fileNameNoExtension = FileUtils.getFilenameNoExtension(fileName);
         
         LimeXMLDocument doc = rfd.getXMLDocument();
         long fileSize = rfd.getSize();
@@ -245,8 +247,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     @Override
     public URN getUrn() {
-        com.limegroup.gnutella.URN urn = rfd.getSHA1Urn();
-        return urn == null ? null : new URNImpl(urn);
+        return wrapperUrn;
     }
 
     /**
