@@ -85,7 +85,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
 
         if(!isFileAddable(file)) {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(
-                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADD_FAILED, file),
+                    file, FileViewChangeEvent.Type.FILE_ADD_FAILED, 
                     FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
         }
         
@@ -105,7 +105,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
 
         if(!isFileAddable(file)) {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(
-                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADD_FAILED, file),
+                    file, FileViewChangeEvent.Type.FILE_ADD_FAILED, 
                     FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
         }
 
@@ -402,7 +402,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
             return fd;
         } else {
             throw new ExecutionException(new FileViewChangeFailedException(
-                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADD_FAILED, fd.getFile()),
+                    fd.getFile(), FileViewChangeEvent.Type.FILE_ADD_FAILED, 
                     FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
         }
     }
@@ -420,9 +420,9 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
                 // if that's why we failed, then we return the file anyway (because it is added.)
                 if(ee.getCause() instanceof FileViewChangeFailedException) {
                     FileViewChangeFailedException fe = (FileViewChangeFailedException)ee.getCause();
-                    if(fe.getEvent().getType() == FileViewChangeEvent.Type.FILE_ADD_FAILED) {
-                        if(contains(fe.getEvent().getFile())) {
-                            return getFileDesc(fe.getEvent().getFile());
+                    if(fe.getType() == FileViewChangeEvent.Type.FILE_ADD_FAILED) {
+                        if(contains(fe.getFile())) {
+                            return getFileDesc(fe.getFile());
                         }
                     }
                 }

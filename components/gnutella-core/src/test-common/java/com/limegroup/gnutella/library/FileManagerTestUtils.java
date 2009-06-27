@@ -24,6 +24,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.FileViewChangeFailedException.Reason;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class FileManagerTestUtils {    
@@ -41,7 +42,7 @@ public class FileManagerTestUtils {
         return URN.createSHA1Urn(f);
     }
 
-    public static void assertAddFails(String reason, FileCollection fileList, File... files) throws Exception {
+    public static void assertAddFails(Reason reason, FileCollection fileList, File... files) throws Exception {
         for (File file : files) {
             try {
                 FileDesc fd = fileList.add(file).get(5, TimeUnit.SECONDS);
@@ -49,9 +50,9 @@ public class FileManagerTestUtils {
             } catch (ExecutionException expected) {
                 assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
                 FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
-                assertEquals(FileViewChangeEvent.Type.FILE_ADD_FAILED, cause.getEvent().getType());
-                assertEquals(file, cause.getEvent().getFile());
-                assertEquals(reason, cause.getReason().toString());
+                assertEquals(FileViewChangeEvent.Type.FILE_ADD_FAILED, cause.getType());
+                assertEquals(file, cause.getFile());
+                assertEquals(reason, cause.getReason());
             }
         }
     }
@@ -71,8 +72,7 @@ public class FileManagerTestUtils {
         assertNotNull(fileList.fileRenamed(old, newFile).get(1, TimeUnit.SECONDS));
     }
     
-    public static void assertFileRenameFails(String reason, Library fileList, File old, File newFile) throws Exception {
-        FileDesc oldFd = fileList.getFileDesc(old);
+    public static void assertFileRenameFails(FileViewChangeFailedException.Reason reason, Library fileList, File old, File newFile) throws Exception {
         Future<FileDesc> future = fileList.fileRenamed(old, newFile);
 
         try {
@@ -81,11 +81,9 @@ public class FileManagerTestUtils {
         } catch (ExecutionException expected) {
             assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
             FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
-            assertEquals(FileViewChangeEvent.Type.FILE_CHANGE_FAILED, cause.getEvent().getType());
-            assertEquals(old, cause.getEvent().getOldFile());
-            assertEquals(newFile, cause.getEvent().getFile());
-            assertEquals(oldFd, cause.getEvent().getOldValue());
-            assertEquals(reason, cause.getReason().toString());
+            assertEquals(FileViewChangeEvent.Type.FILE_CHANGE_FAILED, cause.getType());
+            assertEquals(old, cause.getFile());
+            assertEquals(reason, cause.getReason());
         }
     }
     
@@ -93,8 +91,7 @@ public class FileManagerTestUtils {
         assertNotNull(fileList.fileChanged(file, LimeXMLDocument.EMPTY_LIST).get(1, TimeUnit.SECONDS));
     }
     
-    public static void assertFileChangedFails(String reason, Library fileList, File file) throws Exception {
-        FileDesc oldFd = fileList.getFileDesc(file);
+    public static void assertFileChangedFails(FileViewChangeFailedException.Reason reason, Library fileList, File file) throws Exception {
         Future<FileDesc> future = fileList.fileChanged(file, LimeXMLDocument.EMPTY_LIST);
         
         try {
@@ -103,11 +100,9 @@ public class FileManagerTestUtils {
         } catch (ExecutionException expected) {
             assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
             FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
-            assertEquals(FileViewChangeEvent.Type.FILE_CHANGE_FAILED, cause.getEvent().getType());
-            assertEquals(file, cause.getEvent().getOldFile());
-            assertEquals(file, cause.getEvent().getFile());
-            assertEquals(oldFd, cause.getEvent().getOldValue());
-            assertEquals(reason, cause.getReason().toString());
+            assertEquals(FileViewChangeEvent.Type.FILE_CHANGE_FAILED, cause.getType());
+            assertEquals(file, cause.getFile());
+            assertEquals(reason, cause.getReason());
         }
     }
     

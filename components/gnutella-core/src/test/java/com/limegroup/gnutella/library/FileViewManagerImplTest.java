@@ -340,16 +340,32 @@ public class FileViewManagerImplTest extends LimeTestCase {
 
         Listener l = new Listener();
         v.addListener(l);
+        l.assertNoChanges();
         FileManagerTestUtils.assertFileChanges(library, f1);
+        FileDesc newFd1 = library.getFileDesc(f1);
         assertEquals(1, v.size());
         assertNotSame(fd1, v.iterator().next());        
-        assertEquals(library.getFileDesc(f1), v.iterator().next());
-        FileViewChangeEvent e = l.getEventAndClear();
-        assertEquals(f1, e.getOldFile());
-        assertEquals(fd1, e.getOldValue());        
-        assertEquals(f1, e.getFile());
-        assertEquals(library.getFileDesc(f1), e.getFileDesc());
-        assertEquals(Type.FILE_CHANGED, e.getType());
+        assertEquals(newFd1, v.iterator().next());
+        // Note: Because when a FileDesc is changed it has to recalculate the URNs,
+        //       that means the the library sends two events: FILE_CHANGED & FILE_META_CHANGED,
+        //       the meta changing after the new URN is calculated.  The initial FILE_CHANGED
+        //       is for a FileDesc that has no URN or metadata!!
+        //       This has the effect of causing a view to temporarily remove the file,
+        //       waiting for the URN to calculate.
+        //       The end result is that the view sends two events: REMOVE, ADD.
+        //       It removes when the change happens (because it can't share a file w/o a URN),
+        //       and it re-adds when the meta changes, because it can share it now.
+        List<FileViewChangeEvent> events = l.getEventsAndClear(2);
+        FileViewChangeEvent remove = events.get(0);
+        assertSame(fd1, remove.getFileDesc());
+        assertEquals(f1, remove.getFile());
+        assertEquals(Type.FILE_REMOVED, remove.getType());
+        
+        FileViewChangeEvent add = events.get(1);
+        assertSame(newFd1, add.getFileDesc());
+        assertEquals(f1, add.getFile());
+        assertEquals(Type.FILE_ADDED, add.getType());
+        
     }
     
     public void testFileChangedWithDuplicates() throws Exception {
@@ -364,15 +380,41 @@ public class FileViewManagerImplTest extends LimeTestCase {
         Listener l = new Listener();
         v.addListener(l);
         FileManagerTestUtils.assertFileChanges(library, f1);
+        FileDesc newFd1 = library.getFileDesc(f1);
         assertEquals(1, v.size());
         assertNotSame(fd1, v.iterator().next());
-        assertEquals(library.getFileDesc(f1), v.iterator().next());
-        FileViewChangeEvent e = l.getEventAndClear();
-        assertEquals(f1, e.getOldFile());
-        assertEquals(fd1, e.getOldValue());        
-        assertEquals(f1, e.getFile());
-        assertEquals(library.getFileDesc(f1), e.getFileDesc());
-        assertEquals(Type.FILE_CHANGED, e.getType());
+        assertEquals(newFd1, v.iterator().next());
+        // Note: Because when a FileDesc is changed it has to recalculate the URNs,
+        //       that means the the library sends two events: FILE_CHANGED & FILE_META_CHANGED,
+        //       the meta changing after the new URN is calculated.  The initial FILE_CHANGED
+        //       is for a FileDesc that has no URN or metadata!!
+        //       This has the effect of causing a view to temporarily remove the file,
+        //       waiting for the URN to calculate.
+        //       The end result is that the view sends two events: REMOVE, ADD.
+        //       It removes when the change happens (because it can't share a file w/o a URN),
+        //       and it re-adds when the meta changes, because it can share it now.
+        // Further complication:
+        //       Because each collection resends a META_CHANGE when it hears it,
+        //       we learn about multiple META_CHANGES.  Each view also needs to resend
+        //       the META_CHANGE, so listeners can be kept up to date with changes to the
+        //       metadata.  It's hard to distinguish between a valid META_CHANGE and one
+        //       that existed because two different collections shared with a single person.
+        //       So, for now, we just accept that an additional META_CHANGE will be sent.
+        List<FileViewChangeEvent> events = l.getEventsAndClear(3);
+        FileViewChangeEvent remove = events.get(0);
+        assertSame(fd1, remove.getFileDesc());
+        assertEquals(f1, remove.getFile());
+        assertEquals(Type.FILE_REMOVED, remove.getType());
+        
+        FileViewChangeEvent add = events.get(1);
+        assertSame(newFd1, add.getFileDesc());
+        assertEquals(f1, add.getFile());
+        assertEquals(Type.FILE_ADDED, add.getType());
+        
+        FileViewChangeEvent meta = events.get(2);
+        assertSame(newFd1, meta.getFileDesc());
+        assertEquals(f1, meta.getFile());
+        assertEquals(Type.FILE_META_CHANGED, meta.getType());
     }
     
     public void testFileChangeFails() throws Exception {
@@ -393,7 +435,7 @@ public class FileViewManagerImplTest extends LimeTestCase {
 
         Listener l = new Listener();
         v.addListener(l);
-        FileManagerTestUtils.assertFileChangedFails("NOT_MANAGEABLE", library, copy1);
+        FileManagerTestUtils.assertFileChangedFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, library, copy1);
         assertEquals(0, v.size());
         FileViewChangeEvent e = l.getEventAndClear();
         assertEquals(copyFd1, e.getFileDesc());
@@ -474,7 +516,7 @@ public class FileViewManagerImplTest extends LimeTestCase {
         v.addListener(l);
         
         File fake = new File("fake").getCanonicalFile();
-        FileManagerTestUtils.assertFileRenameFails("NOT_MANAGEABLE", library, f1, fake);
+        FileManagerTestUtils.assertFileRenameFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, library, f1, fake);
         assertEquals(0, v.size());
         
         FileViewChangeEvent e = l.getEventAndClear();
@@ -498,6 +540,18 @@ public class FileViewManagerImplTest extends LimeTestCase {
                 throw new AssertionFailedError("More than 1 change: " + changes);
             } else {
                 return changes.remove(0);
+            }
+        }
+        
+        List<FileViewChangeEvent> getEventsAndClear(int expected) {
+            if(changes.isEmpty()) {
+                throw new AssertionFailedError("no changes!");
+            } else if(changes.size() != expected) {
+                throw new AssertionFailedError("Unexpected changecount: " + changes.size() + ", changes: " + changes);
+            } else {
+                List<FileViewChangeEvent> list = new ArrayList<FileViewChangeEvent>(changes);
+                changes.clear();
+                return list;
             }
         }
         

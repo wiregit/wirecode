@@ -88,7 +88,7 @@ public class LibraryTest extends LimeTestCase {
         cm.request(u1, new StubContentResponseObserver(), 1000);
         cm.handleContentResponse(new ContentResponse(u1, false));
 
-        assertAddFails("CANT_CREATE_FD", fileList, f1);
+        assertAddFails(FileViewChangeFailedException.Reason.INVALID_URN, fileList, f1);
         assertAdds(fileList, f2, f3, f4);
 
         assertEquals("unexpected # of files", 3, fileList.size());
@@ -117,7 +117,7 @@ public class LibraryTest extends LimeTestCase {
 
         // Make sure adding a new file to be shared doesn't work if it
         // returned bad before.
-        assertAddFails("CANT_CREATE_FD", fileList, f2);
+        assertAddFails(FileViewChangeFailedException.Reason.INVALID_URN, fileList, f2);
         assertFalse("shouldn't be shared", fileList.contains(f2));
     }
     
@@ -184,7 +184,7 @@ public class LibraryTest extends LimeTestCase {
         assertAdds(fileList, f1, f3);
         assertEquals(2, fileList.size());        
         
-        assertFileRenameFails("NOT_MANAGEABLE", fileList, f1, new File(_scratchDir, "!<invalid file>"));
+        assertFileRenameFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, fileList, f1, new File(_scratchDir, "!<invalid file>"));
         assertEquals(1, fileList.size());
         assertContainsFiles(CollectionUtils.listOf(fileList), f3);
         
@@ -192,7 +192,7 @@ public class LibraryTest extends LimeTestCase {
         assertEquals(1, fileList.size());
         assertContainsFiles(CollectionUtils.listOf(fileList), f2);
 
-        assertFileRenameFails("OLD_WASNT_MANAGED", fileList, f1, f3);
+        assertFileRenameFails(FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED, fileList, f1, f3);
         
         assertLoads(fileList);
         assertEquals(1, fileList.size());
@@ -217,10 +217,10 @@ public class LibraryTest extends LimeTestCase {
         assertNotSame(fd, fileList.getFileDescsMatching(fileList.getFileDesc(f1).getSHA1Urn()).get(0));
         
         f1.delete();
-        assertFileChangedFails("NOT_MANAGEABLE", fileList, f1);
+        assertFileChangedFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, fileList, f1);
         assertEquals(0, fileList.size());
         
-        assertFileChangedFails("OLD_WASNT_MANAGED", fileList, f2);
+        assertFileChangedFails(FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED, fileList, f2);
         assertEquals(0, fileList.size());
         
         assertLoads(fileList);
@@ -236,7 +236,7 @@ public class LibraryTest extends LimeTestCase {
 
         // Try to add a huge file. (It will be ignored.)
         f3 = createFakeTestFile(maxSize + 1l, _scratchDir);
-        assertAddFails("NOT_MANAGEABLE", fileList, f3);
+        assertAddFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, fileList, f3);
         
         // Add really big files.
         f4 = createFakeTestFile(maxSize - 1, _scratchDir);
@@ -259,7 +259,7 @@ public class LibraryTest extends LimeTestCase {
 
         // Try to add a hidden file
         f3 = createHiddenTestFile(1, _scratchDir);
-        assertAddFails("NOT_MANAGEABLE", fileList, f3);
+        assertAddFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, fileList, f3);
         assertEquals(2, fileList.size());
         
         assertLoads(fileList);
@@ -280,7 +280,7 @@ public class LibraryTest extends LimeTestCase {
         File asf =
             TestUtils.getResourceFile("com/limegroup/gnutella/resources/Kol_Nidre.wma");
         f3 = createPartialCopy(asf, "foo", _scratchDir, 1024);
-        assertAddFails("DANGEROUS_FILE", fileList, f3);
+        assertAddFails(FileViewChangeFailedException.Reason.DANGEROUS_FILE, fileList, f3);
         assertEquals(2, fileList.size());
         
         assertLoads(fileList);

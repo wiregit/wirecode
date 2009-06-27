@@ -14,7 +14,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
  * This class extends FileDesc and wraps an incomplete File, so it can be used
  * for partial file sharing.
  */
-public class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFileDesc {
+class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFileDesc {
     /**
      * Ranges smaller than this will never be offered to other servents.
      */

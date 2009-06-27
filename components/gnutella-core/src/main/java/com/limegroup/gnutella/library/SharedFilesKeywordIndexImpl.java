@@ -319,8 +319,6 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         case FILE_ADDED:
             addFileDesc(evt.getFileDesc(), complete);
             break;
-        case FILE_META_CHANGED:
-            // fall-through, it's easiest this way.
         case FILE_CHANGED:
             removeFileDesc(evt.getOldValue(), complete);
             addFileDesc(evt.getFileDesc(), complete);
@@ -330,6 +328,11 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             break;
         case FILES_CLEARED:
             clear(complete);
+            break;
+        case FILE_META_CHANGED:
+            // purposely do nothing!
+            // meta change on a view means metadata changed,
+            // and we don't process metadata here!
             break;
         }
     }

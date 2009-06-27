@@ -28,7 +28,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * various utility methods for checking against the encapsulated data.<p>
  */
 
-public class FileDescImpl implements FileDesc {
+class FileDescImpl implements FileDesc {
 
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 

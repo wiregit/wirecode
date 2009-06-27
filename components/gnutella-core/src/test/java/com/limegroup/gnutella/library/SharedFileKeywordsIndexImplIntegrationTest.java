@@ -181,11 +181,11 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         assertEquals("unexpected response length", 1, responses.length);
         
         f1.delete();
-        assertFileChangedFails("NOT_MANAGEABLE", managedList, f1);
+        assertFileChangedFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, managedList, f1);
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
         
-        assertFileChangedFails("OLD_WASNT_MANAGED", managedList, f2);
+        assertFileChangedFails(FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED, managedList, f2);
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
     }

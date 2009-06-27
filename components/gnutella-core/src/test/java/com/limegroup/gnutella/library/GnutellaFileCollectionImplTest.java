@@ -6,7 +6,6 @@ import static com.limegroup.gnutella.library.FileManagerTestUtils.assertContains
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChangedFails;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChanges;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenames;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.assertLoads;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
@@ -40,6 +39,7 @@ import com.limegroup.gnutella.messages.vendor.ContentResponse;
 public class GnutellaFileCollectionImplTest extends LimeTestCase {
 
     @Inject private LibraryImpl managedList;
+    @Inject @GnutellaFiles private FileView fileView;
     @Inject @GnutellaFiles private FileCollection fileList;
     @Inject private UrnValidator urnValidator;
     @Inject private Injector injector;
@@ -89,7 +89,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
         cm.request(u1, new StubContentResponseObserver(), 1000);
         cm.handleContentResponse(new ContentResponse(u1, false));
 
-        assertAddFails("CANT_CREATE_FD", fileList, f1);
+        assertAddFails(FileViewChangeFailedException.Reason.INVALID_URN, fileList, f1);
         assertAdds(fileList, f2, f3, f4);
 
         assertEquals("unexpected # of files", 3, fileList.size());
@@ -118,7 +118,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
 
         // Make sure adding a new file to be shared doesn't work if it
         // returned bad before.
-        assertAddFails("CANT_CREATE_FD", fileList, f2);
+        assertAddFails(FileViewChangeFailedException.Reason.INVALID_URN, fileList, f2);
         assertFalse("shouldn't be shared", fileList.contains(f2));
     }
     
@@ -230,10 +230,10 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
         assertNotSame(fd, fileList.getFileDesc(fileList.getFileDesc(f1).getSHA1Urn()));
         
         f1.delete();
-        assertFileChangedFails("NOT_MANAGEABLE", managedList, f1);
+        assertFileChangedFails(FileViewChangeFailedException.Reason.NOT_MANAGEABLE, managedList, f1);
         assertEquals(0, fileList.size());
         
-        assertFileChangedFails("OLD_WASNT_MANAGED", managedList, f2);
+        assertFileChangedFails(FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED, managedList, f2);
         assertEquals(0, fileList.size());
     }
 
@@ -273,26 +273,23 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
         assertTrue(it.hasNext());
         it.next();
         assertTrue(it.hasNext());
-        assertLoads(managedList);
+        it.next();
         assertFalse(it.hasNext());
-        try {
-            it.next();
-            fail("should have thrown");
-        } catch (NoSuchElementException expected) {
-        }
     }
     
-    public void testStoreFileDoesntAdd() throws Exception {
+    public void testStoreFileDoesntAddToView() throws Exception {
         f1 = createNewTestStoreFile(_storeDir);
         
         assertFalse(managedList.contains(f1));
-        assertAddFails("CANT_ADD_TO_LIST", fileList, f1);
+        assertAdds(fileList, f1);
         assertTrue(managedList.contains(f1));
+        assertFalse(fileView.contains(f1));
         
         f2 = createNewTestStoreFile(_scratchDir);
         assertFalse(managedList.contains(f2));
-        assertAddFails("CANT_ADD_TO_LIST", fileList, f2);
+        assertAdds(fileList, f2);
         assertTrue(managedList.contains(f2));
+        assertFalse(fileView.contains(f2));
     } 
     
     // TODO: Test change from store -> non-store (become shared?)

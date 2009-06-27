@@ -364,23 +364,25 @@ public class ServerSideWhatIsNewTest
         
         CreationTimeCache ctCache = creationTimeCache;
         URN tempFile1URN = gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn();
-        Long cTime = ctCache.getCreationTime(tempFile1URN);
+//        Long cTime = ctCache.getCreationTime(tempFile1URN);
 
         FileWriter fw = new FileWriter(tempFile1, true);
         fw.write("extra");
         fw.close();
-        tempFile1.setLastModified(tempFile1.lastModified()+3000);
+        long newModified = tempFile1.lastModified()+3000;
+        tempFile1.setLastModified(newModified);
         
         final FileDesc beforeChanged = gnutellaFileView.getFileDesc(tempFile1);
         assertNotNull(beforeChanged);
         
-        final CountDownLatch fileChangedLatch = new CountDownLatch(1);
+        final CountDownLatch fileChangedLatch = new CountDownLatch(2);
         gnutellaFileView.addListener(new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent evt) {
-                if (evt.getType() != FileViewChangeEvent.Type.FILE_CHANGED)
-                    return;
-                if (evt.getOldValue() == beforeChanged)
+                switch(evt.getType()) {
+                case FILE_ADDED:
+                case FILE_REMOVED:
                     fileChangedLatch.countDown();
+                }
             }
         });
         library.fileChanged(tempFile1, LimeXMLDocument.EMPTY_LIST);
@@ -391,8 +393,14 @@ public class ServerSideWhatIsNewTest
         
         assertNotNull(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn());
         assertNotEquals(tempFile1URN, gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn());
-        assertEquals(ctCache.getCreationTime(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn()),
-                     cTime);
+        // TODO: Before introducing FileDescs w/o URNs, it was possible to do a FILE_CHANGED
+        //       event and map old data to new... but because views require URNs, we have
+        //       to now remove the old FD & then later add the new one, having a time
+        //       where nothing exists.
+        /// The old check here asserted the new FDs creation time was the same as the old one.
+        /// Can't do that anymore. :-(
+//        assertEquals(cTime, ctCache.getCreationTime(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn()));
+        assertEquals(newModified, ctCache.getCreationTime(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn()).longValue());
 
         // now just send another What Is New query and make sure everything
         // is kosher - probably overkill but whatever....
@@ -439,20 +447,24 @@ public class ServerSideWhatIsNewTest
         // we are changing tempFile1 to become tempFile2 - but since we
         // call fileChanged(), then the common URN should get tempFile1's
         // cTime
-        Long cTime = ctCache.getCreationTime(tempFile1URN);
+//        Long cTime = ctCache.getCreationTime(tempFile1URN);
         byte[] contents = FileUtils.readFileFully(tempFile2);
         FileOutputStream fos = new FileOutputStream(tempFile1, false);
         fos.write(contents);
         fos.close();
-        tempFile1.setLastModified(tempFile1.lastModified()+3000);
+        long newModified = tempFile1.lastModified()+3000;
+        tempFile1.setLastModified(newModified);
         FileDesc beforeChanged = gnutellaFileView.getFileDesc(tempFile1);
         assertNotNull(beforeChanged);
         
-        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(2);
         gnutellaFileView.addListener(new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent evt) {
-                if(FileViewChangeEvent.Type.FILE_CHANGED == evt.getType())
+                switch(evt.getType()) {
+                case FILE_ADDED:
+                case FILE_REMOVED:
                     latch.countDown();
+                }
             }
         });
         library.fileChanged(tempFile1, LimeXMLDocument.EMPTY_LIST);
@@ -463,8 +475,15 @@ public class ServerSideWhatIsNewTest
         assertNotNull(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn());
         assertNotEquals(tempFile1URN, gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn());
         assertEquals(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn(), gnutellaFileView.getFileDesc(tempFile2).getSHA1Urn());
-        assertEquals(ctCache.getCreationTime(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn()),
-                     cTime);
+        // TODO: Before introducing FileDescs w/o URNs, it was possible to do a FILE_CHANGED
+        //       event and map old data to new... but because views require URNs, we have
+        //       to now remove the old FD & then later add the new one, having a time
+        //       where nothing exists.
+        /// The old check here asserted the new FDs creation time was the same as the old one.
+        /// Can't do that anymore. :-(
+//        assertEquals(cTime, ctCache.getCreationTime(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn()));
+        assertEquals(ctCache.getCreationTime(gnutellaFileView.getFileDesc(tempFile2).getSHA1Urn()),
+                     ctCache.getCreationTime(gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn()));
         
         // now just send another What Is New query and make sure everything
         // is kosher - probbably overkill but whatever....

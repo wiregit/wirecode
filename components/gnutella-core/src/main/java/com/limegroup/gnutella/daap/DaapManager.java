@@ -386,6 +386,24 @@ public class DaapManager {
             
         }
     }
+    
+    /** Handles a change in metadata event. */
+    private synchronized void handleMetaChangeEvent(FileViewChangeEvent evt) {
+        URN urn = evt.getFileDesc().getSHA1Urn();
+        Song song = urnToSong.get(urn);
+        if (song != null) {
+            String name = evt.getFileDesc().getFileName().toLowerCase(Locale.US);                
+            if (isSupportedAudioFormat(name)) {
+                updateSongAudioMeta(autoCommitTxn, song, evt.getFileDesc());
+            } else if (isSupportedVideoFormat(name)) {
+                updateSongVideoMeta(autoCommitTxn, song, evt.getFileDesc());
+            } else {
+                database.removeSong(autoCommitTxn, song);
+            }
+        } else {
+            handleAddEvent(evt);
+        }
+    }
 
     /**
      * Handles an add event.
@@ -1102,7 +1120,6 @@ public class DaapManager {
                     return;
 
                 switch (evt.getType()) {
-                case FILE_META_CHANGED:
                 case FILE_CHANGED:
                     handleChangeEvent(evt);
                     break;
@@ -1114,6 +1131,9 @@ public class DaapManager {
                     break;
                 case FILES_CLEARED:
                     handleClearEvent();
+                    break;
+                case FILE_META_CHANGED:
+                    handleMetaChangeEvent(evt);
                     break;
                 }
             }

@@ -121,7 +121,10 @@ final class UptimeStatTimer implements Service {
             updateUptimeHistory(currentUptime);
             long totalUptime = ApplicationSettings.TOTAL_UPTIME.getValue() + elapsed;
             ApplicationSettings.TOTAL_UPTIME.setValue(totalUptime);
-            ApplicationSettings.AVERAGE_UPTIME.setValue(totalUptime / ApplicationSettings.SESSIONS.getValue());
+            int sessions = ApplicationSettings.SESSIONS.getValue();
+            if(sessions > 0) {
+                ApplicationSettings.AVERAGE_UPTIME.setValue(totalUptime / sessions);
+            }
             ApplicationSettings.FRACTIONAL_UPTIME.setValue(stats.calculateFractionalUptime());
             ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(now); // Pessimistic
         }        

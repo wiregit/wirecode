@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -1508,13 +1509,21 @@ public class UploadTest extends LimeTestCase {
         FileDesc fd = gnutellaFileView.getFileDesc(URN.createSHA1Urn(hash));
         fd.getFile().setLastModified(System.currentTimeMillis());
         assertNotEquals(fd.getFile().lastModified(), fd.lastModified());
+        final File file = fd.getFile();
 
         // catch notification when file is reshared
-        final CountDownLatch latch = new CountDownLatch(1);
+        final List<FileViewChangeEvent> changes = new CopyOnWriteArrayList<FileViewChangeEvent>();
+        final CountDownLatch latch = new CountDownLatch(2);
         EventListener<FileViewChangeEvent> listener = new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent event) {
-                if (event.getType() == FileViewChangeEvent.Type.FILE_CHANGED) {
-                    latch.countDown();
+                changes.add(event);
+                
+                if(event.getFile().equals(file)) {
+                    if(changes.size() == 1 && event.getType() == FileViewChangeEvent.Type.FILE_REMOVED) {
+                        latch.countDown();
+                    } else if(changes.size() == 2 && event.getType() == FileViewChangeEvent.Type.FILE_ADDED) {
+                        latch.countDown();
+                    }
                 }
             }            
         };
@@ -1530,7 +1539,7 @@ public class UploadTest extends LimeTestCase {
                 HttpClientUtils.releaseConnection(response);
             }
 
-            assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
+            assertTrue("didn't get right changes, got: " + changes, latch.await(500, TimeUnit.MILLISECONDS));
 
             fd = gnutellaFileView.getFileDesc(URN.createSHA1Urn(hash));
             assertNotNull(fd);
