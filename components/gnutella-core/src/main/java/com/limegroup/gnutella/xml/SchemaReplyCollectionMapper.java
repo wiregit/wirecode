@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.xml;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
@@ -40,7 +40,7 @@ public class SchemaReplyCollectionMapper implements XmlController {
         this.limeXMLReplyCollectionFactory = limeXMLReplyCollectionFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         
-        mapper = new HashMap<String, LimeXMLReplyCollection>();
+        mapper = new ConcurrentHashMap<String, LimeXMLReplyCollection>();
     }
 
 
@@ -51,7 +51,7 @@ public class SchemaReplyCollectionMapper implements XmlController {
      * this method will replace the old reply collection with the new one. 
      * The old collection will be lost!
      */
-    public synchronized void add(String schemaURI, LimeXMLReplyCollection replyCollection) {
+    public void add(String schemaURI, LimeXMLReplyCollection replyCollection) {
         mapper.put(schemaURI, replyCollection);
     }
     
@@ -62,15 +62,14 @@ public class SchemaReplyCollectionMapper implements XmlController {
      * @ return the <tt>LimeXMLReplyCollection</tt> for the given schema URI,
      * or <tt>null</tt> if we the requested mapping does not exist
      */
-    public synchronized LimeXMLReplyCollection getReplyCollection(String schemaURI) {
+    public LimeXMLReplyCollection getReplyCollection(String schemaURI) {
         return mapper.get(schemaURI);
     }
     
     /**
      * Returns a collection of all available LimeXMLReplyCollections.
-     * YOU MUST SYNCHRONIZE ITERATION OVER THE COLLECTION IF IT CAN BE MODIFIED.
      */
-    public synchronized Collection<LimeXMLReplyCollection> getCollections() {
+    public Collection<LimeXMLReplyCollection> getCollections() {
         return mapper.values();
     }
     
@@ -130,7 +129,7 @@ public class SchemaReplyCollectionMapper implements XmlController {
         });
     }
     
-    private synchronized void removeFileDesc(FileDesc fd) {
+    private void removeFileDesc(FileDesc fd) {
         // Get the schema URI of each document and remove from the collection
         // We must remember the schemas and then remove the doc, or we will
         // get a concurrent mod exception because removing the doc also
@@ -150,7 +149,7 @@ public class SchemaReplyCollectionMapper implements XmlController {
      * Notifies all the LimeXMLReplyCollections that the initial loading
      * has completed.
      */
-    private synchronized void finishLoading() {
+    private void finishLoading() {
         Collection<LimeXMLReplyCollection> replies = getCollections();
         for (LimeXMLReplyCollection col : replies)
             col.loadFinished();
@@ -161,11 +160,9 @@ public class SchemaReplyCollectionMapper implements XmlController {
      */
     private void save(LibraryStatusEvent event) {
         if (event.getLibrary().isLoadFinished()) {
-            synchronized (this) {
-                Collection<LimeXMLReplyCollection> replies = getCollections();
-                for (LimeXMLReplyCollection col : replies)
-                    col.writeMapToDisk();                
-            }
+            Collection<LimeXMLReplyCollection> replies = getCollections();
+            for (LimeXMLReplyCollection col : replies)
+                col.writeMapToDisk();
         }
     }
     
@@ -181,7 +178,7 @@ public class SchemaReplyCollectionMapper implements XmlController {
     }
     
     @Override
-    public synchronized boolean loadCachedXml(FileDesc fd, Collection<? extends LimeXMLDocument> prebuilt) {
+    public boolean loadCachedXml(FileDesc fd, Collection<? extends LimeXMLDocument> prebuilt) {
         Collection<LimeXMLReplyCollection> replies = getCollections();
         boolean loaded = false;
         for (LimeXMLReplyCollection col : replies) {
@@ -198,7 +195,7 @@ public class SchemaReplyCollectionMapper implements XmlController {
      * exists for the FileDesc, one is created for it.
      */
     @Override
-    public synchronized boolean loadXml(FileDesc fd) {
+    public boolean loadXml(FileDesc fd) {
         Collection<LimeXMLReplyCollection> replies = getCollections();
         boolean loaded = false;
         for (LimeXMLReplyCollection col : replies) {

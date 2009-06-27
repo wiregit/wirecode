@@ -10,6 +10,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -34,14 +35,26 @@ class RemoveFromLibraryAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {       
         File currentSong = PlayerUtils.getCurrentSongFile();
-        List<LocalFileItem> items = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
-        for(LocalFileItem item : items) {
+        List<LocalFileItem> selected = selectedLocalFileItems.get();
+        final List<File> toRemove = new ArrayList<File>(selected.size());
+        for(LocalFileItem item : selected) {
             if(item.getFile().equals(currentSong)){
                 PlayerUtils.stop();
             }
             if(!item.isIncomplete()) {
-                libraryManager.getLibraryManagedList().removeFile(item.getFile());
+                toRemove.add(item.getFile());
             }
+        }
+        
+        if(!toRemove.isEmpty()) {
+            BackgroundExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for(File file : toRemove) {
+                        libraryManager.getLibraryManagedList().removeFile(file);
+                    }
+                }
+            });
         }
     }
 }

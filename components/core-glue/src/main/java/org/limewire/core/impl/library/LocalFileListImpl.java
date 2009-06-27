@@ -54,9 +54,7 @@ abstract class LocalFileListImpl implements LocalFileList {
 
     @Override
     public void removeFile(File file) {
-        if(contains(file)) {
-            getCoreCollection().remove(file);
-        }
+        getCoreCollection().remove(file);
     }
     
     @Override

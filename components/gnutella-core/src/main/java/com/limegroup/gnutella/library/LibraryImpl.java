@@ -363,10 +363,10 @@ class LibraryImpl implements Library, FileCollection {
     
     /** Actually performs the clear & dispatches an event. Does not save the clear to LibraryFileData. */
     private void clearImpl() {
-        List<Future> fileFutures;
+        Map<File, Future> fileFutures;
         rwLock.writeLock().lock();
         try {
-            fileFutures = new ArrayList<Future>(fileToFutures.values());
+            fileFutures = new HashMap<File, Future>(fileToFutures);
             fileToFutures.clear();
             files.clear();
             urnMap.clear();
@@ -375,8 +375,10 @@ class LibraryImpl implements Library, FileCollection {
             rwLock.writeLock().unlock();
         }
         
-        for(Future future : fileFutures) {
-            future.cancel(true);
+        for(Map.Entry<File, Future> entry : fileFutures.entrySet()) {
+            if(entry.getValue().cancel(true)) {
+                broadcastFinished(entry.getKey());
+            }
         }
         
         dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILES_CLEARED, true));
@@ -581,7 +583,10 @@ class LibraryImpl implements Library, FileCollection {
                         if(contains(fd)) {
                             addUrnsToFileDesc(fd, metadata, event, task, oldFileDesc);
                         }
-                        broadcastFinished(file);
+                        
+                        if(event.getType() != FutureEvent.Type.CANCELLED) {
+                            broadcastFinished(file);
+                        }
                     }
                 });
             } else {
@@ -785,6 +790,7 @@ class LibraryImpl implements Library, FileCollection {
      */
     private FileDesc removeInternal(File file) {
         FileDesc fd;
+        boolean cancelled = false;
         rwLock.writeLock().lock();
         try {
             fd = fileToFileDescMap.get(file);
@@ -793,13 +799,17 @@ class LibraryImpl implements Library, FileCollection {
             }
             Future future = fileToFutures.remove(file);
             if(future != null) {
-                future.cancel(true);
+                cancelled = future.cancel(true);
+                
             }
         } finally {
             rwLock.writeLock().unlock();
         }
         if(fd != null) {
             getLibraryData().removeManagedFile(file);
+        }
+        if(cancelled) {
+            broadcastFinished(file);
         }
         return fd;
     }

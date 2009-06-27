@@ -187,16 +187,30 @@ public class LimeXMLReplyCollection {
     public LimeXMLDocument createIfNecessary(FileDesc fd) {
         LimeXMLDocument doc = null;
 
+        boolean needsXml = false;
+        File file = fd.getFile();
+        FileAndUrn fileAndUrn = new FileAndUrn(fd);
         synchronized(LOCK) {
-            if(!mainMap.containsKey(new FileAndUrn(fd))) {
-                File file = fd.getFile();
+            if(!mainMap.containsKey(fileAndUrn)) {
                 // If we have no documents for this FD attempt to parse the file.
                 if(fd.getLimeXMLDocuments().size() == 0) {
-                    doc = constructDocument(file);
-                    if(doc != null) {
-                        if(LOG.isDebugEnabled())
-                            LOG.debug("Adding newly constructed document for file: " + file + ", document: " + doc);
-                        addReply(fd, doc);
+                    needsXml = true;
+                }
+            }
+        }
+        
+        if(needsXml) {
+            // Create the doc outside of the lock.
+            doc = constructDocument(file);
+            if(doc != null) {
+                synchronized(LOCK) {
+                    // If we still need the doc, set it!
+                    if(!mainMap.containsKey(fileAndUrn)) {
+                        if(fd.getLimeXMLDocuments().size() == 0) {
+                            if(LOG.isDebugEnabled())
+                                LOG.debug("Adding newly constructed document for file: " + file + ", document: " + doc);
+                            addReply(fd, doc);
+                        }
                     }
                 }
             }
