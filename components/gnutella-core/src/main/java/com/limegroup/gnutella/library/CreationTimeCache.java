@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,7 +40,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.MediaTypeAggregator;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -265,7 +265,7 @@ public class CreationTimeCache {
             throw new IllegalArgumentException("Null URN.");
         if (time <= 0)
             throw new IllegalArgumentException("Bad Time = " + time);
-        Long cTime = new Long(time);
+        Long cTime = Long.valueOf(time);
 
         // populate urn to time
         Long existing = getUrnToTime().get(urn);
@@ -295,7 +295,7 @@ public class CreationTimeCache {
         // populate time to set of urns
         Set<URN> urnSet = getTimeToUrn().get(cTime);
         if (urnSet == null) {
-            urnSet = new UrnSet();
+            urnSet = new HashSet<URN>(); // purposely not a UrnSet -- we need to have multiple SHA1s in the list.
             getTimeToUrn().put(cTime, urnSet);
         }
         urnSet.add(urn);
@@ -332,7 +332,7 @@ public class CreationTimeCache {
             // may be non-null at loop end
             List<URN> toRemove = null;
             Set<URN> urnList = new LinkedHashSet<URN>();
-
+            
             // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns
             // the
             // entries in descending order....
@@ -449,7 +449,7 @@ public class CreationTimeCache {
             // put the urn in a set of urns that have that creation time....
             Set<URN> urnSet = timeToUrn.get(cTime);
             if (urnSet == null) {
-                urnSet = new UrnSet();
+                urnSet = new HashSet<URN>(); // purposely not a UrnSet -- we need multiple SHA1s in the list
                 // populate the reverse mapping
                 timeToUrn.put(cTime, urnSet);
             }
@@ -505,20 +505,24 @@ public class CreationTimeCache {
         }
     }
 
-    private void fileAdded(File file, URN urn) {
-        synchronized (this) {
-            Long cTime = getCreationTime(urn);
-            if (cTime == null)
-                cTime = new Long(file.lastModified());
-            // if cTime is non-null but 0, then the IO subsystem is
-            // letting us know that the file was FNF or an IOException
-            // occurred - the best course of action is to
-            // ignore the issue and not add it to the CTC, hopefully
-            // we'll get a correct reading the next time around...
-            if (cTime.longValue() > 0) {
-                // these calls may be superfluous but are quite fast....
-                addTime(urn, cTime.longValue());
-                commitTime(urn);
+    private void fileAdded(FileDesc fd) {
+        URN sha1 = fd.getSHA1Urn();
+        if (!LibraryUtils.isForcedShare(fd) && sha1 != null) {
+            synchronized (this) {
+                Long cTime = getCreationTime(sha1);
+                if (cTime == null) {
+                    cTime = Long.valueOf(fd.lastModified());
+                }
+                // if cTime is non-null but 0, then the IO subsystem is
+                // letting us know that the file was FNF or an IOException
+                // occurred - the best course of action is to
+                // ignore the issue and not add it to the CTC, hopefully
+                // we'll get a correct reading the next time around...
+                if (cTime.longValue() > 0) {
+                    // these calls may be superfluous but are quite fast....
+                    addTime(sha1, cTime.longValue());
+                    commitTime(sha1);
+                }
             }
         }
     }
@@ -556,12 +560,8 @@ public class CreationTimeCache {
             // meta notification -- no big if it doesn't exist.
         case FILE_ADDED:
             // Commit the time in the CreationTimeCache, but don't share
-            // the installer. We populate free LimeWire's with free installers
-            // so we have to make sure we don't influence the what is new
-            // result set.
-            if (!LibraryUtils.isForcedShare(evt.getFileDesc()) && evt.getFileDesc().getSHA1Urn() != null) {
-                fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
-            }
+            // the installer.
+            fileAdded(evt.getFileDesc());
             break;
         case FILE_REMOVED:
             if(evt.getFileDesc().getSHA1Urn() != null) {
@@ -570,9 +570,7 @@ public class CreationTimeCache {
             break;
         case FILE_CHANGED:
             if(evt.getOldValue().getSHA1Urn() == null) {
-                if (!LibraryUtils.isForcedShare(evt.getFileDesc()) && evt.getFileDesc().getSHA1Urn() != null) {
-                    fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
-                }
+                fileAdded(evt.getFileDesc());
             } else if(evt.getFileDesc().getSHA1Urn() != null) {
                 fileChanged(evt.getOldValue().getSHA1Urn(), evt.getFileDesc().getSHA1Urn());
             } else {

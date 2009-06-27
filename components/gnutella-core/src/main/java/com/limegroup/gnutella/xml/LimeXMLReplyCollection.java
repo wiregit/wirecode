@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -145,7 +146,7 @@ public class LimeXMLReplyCollection {
      * Initializes the map using either LimeXMLDocuments in the list of potential
      * documents, or elements stored in oldMap.  Items in potential take priority.
      */
-    public LimeXMLDocument initialize(FileDesc fd, List<? extends LimeXMLDocument> potential) {
+    LimeXMLDocument initialize(FileDesc fd, Collection<? extends LimeXMLDocument> potential) {
         LimeXMLDocument doc = null;
         
         // First try to get a doc from the potential list.

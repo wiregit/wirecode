@@ -654,7 +654,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         responses[1]=responseFactory.createResponse(0x2FF2, 0xF11F, "OneMore file  ", UrnHelper.SHA1);
         // first take input of proxies
         String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com"};
+                          "www.google.com"};
         Set proxies = new TreeSet(IpPort.COMPARATOR);
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
@@ -1105,7 +1105,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         
         String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com", "www.berkeley.edu"};
+                          "www.google.com", "www.berkeley.edu"};
 
         for (int outer = 0; outer < hosts.length; outer++) {
             //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
@@ -1748,7 +1748,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
 
         String[] hosts = {"www.limewire.com", "www.limewire.org",
-                "www.susheeldaswani.com", "www.berkeley.edu"};
+                "www.google.com", "www.berkeley.edu"};
 
         //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
         Set proxies = new TreeSet(IpPort.COMPARATOR);
@@ -1792,7 +1792,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
 
         String[] hosts = {"www.limewire.com", "www.limewire.org",
-                "www.susheeldaswani.com", "www.berkeley.edu"};
+                "www.google.com", "www.berkeley.edu"};
 
         //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
         Set proxies = new TreeSet(IpPort.COMPARATOR);
@@ -1877,7 +1877,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
 
         String[] hosts = {"www.limewire.com", "www.limewire.org",
-                "www.susheeldaswani.com", "www.berkeley.edu"};
+                "www.google.com", "www.berkeley.edu"};
 
         //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
         Set proxies = new TreeSet(IpPort.COMPARATOR);

@@ -655,7 +655,7 @@ class LibraryImpl implements Library, FileCollection {
             }
             
             // Now that we have a URN, preload the cached XML for it.
-            xmlController.loadCachedXml(fd);
+            xmlController.loadCachedXml(fd, metadata);
             // Finish loading it immediately, since we're in a blocking thread already
             finishLoadingFileDesc(fd, metadata, task, true);
         }
@@ -699,7 +699,7 @@ class LibraryImpl implements Library, FileCollection {
             // If we had a SHA1 urn, attempt to load cached XML so it exists
             // before the first FILE_ADDED event is sent.
             if (fd.getSHA1Urn() != null) {
-                xmlController.loadCachedXml(fd);
+                xmlController.loadCachedXml(fd, metadata);
             }
             
             // It is very important that the events get dispatched

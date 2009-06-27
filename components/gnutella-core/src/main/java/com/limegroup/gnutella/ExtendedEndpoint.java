@@ -315,14 +315,14 @@ public class ExtendedEndpoint extends Endpoint {
     private void recordConnectionAttempt(Buffer<Long> buf, long now) {
         if (buf.isEmpty()) {
             //a) No attempts; just add it.
-            buf.addFirst(new Long(now));
+            buf.addFirst(Long.valueOf(now));
         } else if (now - buf.first().longValue() >= WINDOW_TIME) {
             //b) Attempt more than WINDOW_TIME milliseconds ago.  Add.
-            buf.addFirst(new Long(now));
+            buf.addFirst(Long.valueOf(now));
         } else {
             //c) Attempt within WINDOW_TIME.  Coalesce.
             buf.removeFirst();
-            buf.addFirst(new Long(now));
+            buf.addFirst(Long.valueOf(now));
         }
     }
 

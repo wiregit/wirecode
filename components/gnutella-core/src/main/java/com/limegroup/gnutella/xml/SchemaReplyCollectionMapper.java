@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.xml;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -182,11 +181,11 @@ public class SchemaReplyCollectionMapper implements XmlController {
     }
     
     @Override
-    public synchronized boolean loadCachedXml(FileDesc fd) {
+    public synchronized boolean loadCachedXml(FileDesc fd, Collection<? extends LimeXMLDocument> prebuilt) {
         Collection<LimeXMLReplyCollection> replies = getCollections();
         boolean loaded = false;
         for (LimeXMLReplyCollection col : replies) {
-            LimeXMLDocument doc = col.initialize(fd, Collections.<LimeXMLDocument>emptyList());
+            LimeXMLDocument doc = col.initialize(fd, prebuilt);
             if(doc != null) {
                 loaded = true;
             }

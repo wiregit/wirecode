@@ -691,7 +691,7 @@ public final class BugManager {
                 }
                 
                 if( thisNextTime != 0 ) {
-                    BUG_TIMES.put(INFO.getParsedBug(), new Long(now + thisNextTime));
+                    BUG_TIMES.put(INFO.getParsedBug(), Long.valueOf(now + thisNextTime));
                     dirty = true;
                 }
                 

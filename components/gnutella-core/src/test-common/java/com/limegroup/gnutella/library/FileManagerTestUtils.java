@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -53,6 +54,11 @@ public class FileManagerTestUtils {
                 assertEquals(reason, cause.getReason().toString());
             }
         }
+    }
+    
+    public static void assertAdds(FileCollection fileList, File file, LimeXMLDocument xml) throws Exception {
+        assertNotNull(fileList.add(file, Collections.singletonList(xml)).get(1, TimeUnit.SECONDS));
+        assertEquals(xml, fileList.getFileDesc(file).getXMLDocument());
     }
 
     public static void assertAdds(FileCollection fileList, File... files) throws Exception {

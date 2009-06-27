@@ -59,7 +59,7 @@ public class FileManagerTestCase extends LimeTestCase {
     @Inject protected LimeXMLDocumentFactory limeXMLDocumentFactory;
     @Inject protected CreationTimeCache creationTimeCache;
     @Inject protected QueryRequestFactory queryRequestFactory;
-    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
+    @Inject @GnutellaFiles protected FileCollection gnutellaFileCollection;
 
     public FileManagerTestCase(String name) {
         super(name);
@@ -80,6 +80,7 @@ public class FileManagerTestCase extends LimeTestCase {
             }
         }, LimeTestUtils.createModule(this));
         injector.getInstance(ServiceRegistry.class).initialize();
+        injector.getInstance(FileManager.class).start();
     }
 
     @Override
@@ -209,45 +210,5 @@ public class FileManagerTestCase extends LimeTestCase {
         void await(long timeout) throws Exception {
             assertTrue(latch.await(timeout, TimeUnit.MILLISECONDS));
         }
-    }
-
-    protected FileViewChangeEvent addIfShared(File f) throws Exception {
-        Listener fel = new Listener();
-        gnutellaFileView.addListener(fel);
-        gnutellaFileCollection.add(f, LimeXMLDocument.EMPTY_LIST);
-        fel.await(5000);
-        return fel.evt;
-    }
-
-    protected FileViewChangeEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
-        Listener fel = new Listener();
-        gnutellaFileView.addListener(fel);
-        gnutellaFileCollection.add(f, l);
-        fel.await(5000);
-        return fel.evt;
-    }
-
-    protected FileViewChangeEvent addAlways(File f) throws Exception {
-        Listener fel = new Listener();
-        gnutellaFileView.addListener(fel);
-        gnutellaFileCollection.add(f);
-        fel.await(5000);
-        return fel.evt;
-    }
-
-    protected FileViewChangeEvent renameFile(File f1, File f2) throws Exception {
-        Listener fel = new Listener();
-        gnutellaFileView.addListener(fel);
-        library.fileRenamed(f1, f2);
-        fel.await(5000);
-        return fel.evt;
-    }
-
-    protected FileViewChangeEvent fileChanged(File f1) throws Exception {
-        Listener fel = new Listener();
-        gnutellaFileView.addListener(fel);
-        library.fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
-        fel.await(5000);
-        return fel.evt;
     }
 }

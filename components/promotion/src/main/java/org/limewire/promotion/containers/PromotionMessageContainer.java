@@ -552,7 +552,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         if (!(obj instanceof PromotionMessageContainer))
             return false;
         PromotionMessageContainer compare = (PromotionMessageContainer) obj;
-        if (!new Long(getUniqueID()).equals(compare.getUniqueID()))
+        if (getUniqueID() != compare.getUniqueID())
             return false;
         if (!getKeywords().equals(compare.getKeywords()))
             return false;
