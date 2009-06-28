@@ -95,9 +95,16 @@ public class BaseResultPanel extends JXPanel {
 
     /** Table component for the List view. */
     private final ListViewTable resultsList;
+    /** The category the list is currently configured for. */
+    private SearchCategory listConfiguredFor;
 
     /** Table component for the Table view. */
     private final ResultsTable<VisualSearchResult> resultsTable;
+    /** The category the table is currently configured for. */
+    private SearchCategory tableConfiguredFor;
+    
+    /** The currently filtered SearchCategory. */
+    private SearchCategory currentCategory;
     
     /** cache for RowDisplayResult which could be expensive to generate with large search result sets */
     private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
@@ -207,6 +214,10 @@ public class BaseResultPanel extends JXPanel {
      * Configures the List view to display results for the selected category.
      */
     private void configureList() {
+        LOG.debugf("Configuring list view for {0}, configured already for {1}", currentCategory, listConfiguredFor);
+        
+        listConfiguredFor = currentCategory;
+        
         // Remove listener with reference to previous list.
         if (maxSizedList != null) {
             maxSizedList.removeListEventListener(maxSizedListener);
@@ -215,7 +226,7 @@ public class BaseResultPanel extends JXPanel {
         // Get sorted list for selected category.
         final EventList<VisualSearchResult> sortedList = searchResultsModel.getSortedSearchResults();
         
-        // Create sized list.
+        // Create sized list. (the old one will be disposed when we set the new one on the model)
         maxSizedList = GlazedListsFactory.rangeList(sortedList);
         maxSizedList.setHeadRange(0, MAX_DISPLAYED_RESULT_SIZE + 1);
         
@@ -311,8 +322,6 @@ public class BaseResultPanel extends JXPanel {
                                 //this will prevent the jumping when expanding child results as mentioned in
                                 //https://www.limewire.org/jira/browse/LWC-2545
                                 if (resultsList.getRowHeight(row) != newRowHeight) {
-                                    LOG.debugf("Row: {0} vsr: {1} config: {2}", row, vsr.getHeading(), 
-                                            result.getConfig());
                                     resultsList.setRowHeight(row, newRowHeight);
                                     setRowSize = true;
                                 }
@@ -340,6 +349,10 @@ public class BaseResultPanel extends JXPanel {
      * Configures the Table view to display results for the selected category.
      */
     private void configureTable() {
+        LOG.debugf("Configuring table view for {0}, configured already for {1}", currentCategory, tableConfiguredFor);
+        
+        tableConfiguredFor = currentCategory;
+        
         // Uninstall components with references to previous list.
         if (resultsTableSorting != null) {
             resultsTableSorting.uninstall();
@@ -477,12 +490,27 @@ public class BaseResultPanel extends JXPanel {
      * Displays search results for the specified search category.
      */
     public void showCategory(SearchCategory searchCategory) {
-        // Select category to update sorted list.
-        searchResultsModel.setSelectedCategory(searchCategory);
-        
-        // Configure results list and table.
-        configureList();
-        configureTable();
+        if(currentCategory != searchCategory) {
+            currentCategory = searchCategory;
+            
+            // Select category to update sorted list.
+            searchResultsModel.setSelectedCategory(searchCategory);
+            
+            // Reconfigure the lists for the new category.
+            // If one hasn't been configured yet, only configure
+            // the visible one.  (We reconfigure after it's already
+            // been configured because it's easy.  It would be
+            // better to unconfigure the invisible one and
+            // configure it only when it becomes visible.)
+            if(listConfiguredFor != null || visibleComponent == resultsList) {
+                configureList();
+            } 
+            if(tableConfiguredFor != null || visibleComponent == resultsTable) {
+                configureTable();
+            }
+        } else {
+            LOG.debugf("Resetting current category {0}!", currentCategory);
+        }
     }
 
     /**
@@ -491,10 +519,23 @@ public class BaseResultPanel extends JXPanel {
      */
     public void setViewType(SearchViewType mode) {
         layout.show(this, mode.name());
-        switch(mode) {
-        case LIST: this.visibleComponent = resultsList; break;
-        case TABLE: this.visibleComponent = resultsTable; break;
-        default: throw new IllegalStateException("unsupported mode: " + mode);
+        switch (mode) {
+        case LIST:
+            // Only reconfigure when changing the view if it's configured
+            // for the wrong category...
+            if(currentCategory != null && listConfiguredFor != currentCategory) {
+                configureList();
+            }
+            this.visibleComponent = resultsList;
+            break;
+        case TABLE:
+            if(currentCategory != null && tableConfiguredFor != currentCategory) {
+                configureTable();
+            }
+            this.visibleComponent = resultsTable;
+            break;
+        default:
+            throw new IllegalStateException("unsupported mode: " + mode);
         }
     }
 

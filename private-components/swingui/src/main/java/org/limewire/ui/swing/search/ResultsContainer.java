@@ -25,9 +25,6 @@ public class ResultsContainer extends JXPanel {
 
     /** Results panel containing display tables. */
     private final BaseResultPanel baseResultPanel;
-    
-    /** Current view type; either LIST or TABLE. */
-    private SearchViewType mode = SearchViewType.forId(SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue());
 
     /**
      * Constructs a ResultsContainer with the specified search results data
@@ -41,6 +38,8 @@ public class ResultsContainer extends JXPanel {
         
         // Create result panel.
         baseResultPanel = baseFactory.create(searchResultsModel);
+        // set the default view type.
+        baseResultPanel.setViewType(SearchViewType.forId(SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue()));
         
         setLayout(new BorderLayout());
         
@@ -53,10 +52,7 @@ public class ResultsContainer extends JXPanel {
      * @param mode LIST or TABLE
      */
     public void setViewType(SearchViewType mode) {
-        this.mode = mode;
-        if (baseResultPanel != null) {
-            baseResultPanel.setViewType(mode);
-        }
+        baseResultPanel.setViewType(mode);
     }
     
     /**
@@ -64,7 +60,6 @@ public class ResultsContainer extends JXPanel {
      */
     public void showCategory(SearchCategory category) {
         baseResultPanel.showCategory(category);
-        baseResultPanel.setViewType(mode);
     }
 
     /**

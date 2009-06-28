@@ -1,21 +1,12 @@
-/**
- * 
- */
 package org.limewire.ui.swing.search;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public enum SearchViewType {
     LIST(0), TABLE(1);
 
-    private static final Map<Integer, SearchViewType> modeById = new HashMap<Integer, SearchViewType>();
-
-    static {
-        modeById.put(LIST.getId(), LIST);
-        modeById.put(TABLE.getId(), TABLE);
-    }
-
+    /**
+     * The explicit id of the type. Not an ordinal because it is serialized over
+     * multiple sessions.
+     */
     private final int id;
 
     SearchViewType(int id) {
@@ -32,10 +23,11 @@ public enum SearchViewType {
      * SearchSettings.SEARCH_VIEW_TYPE_ID.
      */
     public static SearchViewType forId(int id) {
-        SearchViewType searchViewType = modeById.get(id);
-        if (searchViewType == null) {
-            searchViewType = LIST;
+        for(SearchViewType type : values()) {
+            if(type.getId() == id) {
+                return type;
+            }
         }
-        return searchViewType;
+        return LIST;
     }
 }
