@@ -309,8 +309,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             SearchCategory displayCategory = SearchCategory.forCategory(category);
             
             // Apply category to property filters and fire event.
-            propertyPanel.setFilterCategory(displayCategory);
-            fireCategorySelected(displayCategory);
+            if(propertyPanel.setFilterCategory(displayCategory)) {
+                fireCategorySelected(displayCategory);
+            }
             
         } else if (categoryFilter.getCategoryCount() == 1) {
             // Get only remaining category.
@@ -318,13 +319,15 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             SearchCategory displayCategory = SearchCategory.forCategory(category);
             
             // Apply category to property filters and fire event.
-            propertyPanel.setFilterCategory(displayCategory);
-            fireCategorySelected(displayCategory);
+            if(propertyPanel.setFilterCategory(displayCategory)) {
+                fireCategorySelected(displayCategory);
+            }
             
         } else {
             // No specific category so reapply defaults.
-            propertyPanel.setFilterCategory(defaultFilterCategory);
-            fireCategorySelected(defaultDisplayCategory);
+            if(propertyPanel.setFilterCategory(defaultFilterCategory)) {
+                fireCategorySelected(defaultDisplayCategory);
+            }
         }
     }
 
@@ -578,10 +581,10 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         /**
          * Sets the specified filter category, and updates the visible filters.
          */
-        public void setFilterCategory(SearchCategory filterCategory) {
+        public boolean setFilterCategory(SearchCategory filterCategory) {
             // Skip if category not changed.
             if (currentCategory == filterCategory) {
-                return;
+                return false;
             }
             currentCategory = filterCategory;
 
@@ -625,6 +628,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             // Validate layout and repaint container.
             validate();
             repaint();
+            return true;
         }
         
         /**

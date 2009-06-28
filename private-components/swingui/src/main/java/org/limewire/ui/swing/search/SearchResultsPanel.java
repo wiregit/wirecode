@@ -491,7 +491,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         @Override
         public Dimension getPreferredSize() {
             if(scrollable == null) {
-                return super.getPreferredScrollableViewportSize();
+                return super.getPreferredSize();
             } else {
                 int width = super.getPreferredSize().width;
                 int height = ((JComponent)scrollable).getPreferredSize().height;

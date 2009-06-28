@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import java.awt.CardLayout;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -90,8 +90,6 @@ public class BaseResultPanel extends JXPanel {
 
     private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
     private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
-    
-    private final CardLayout layout = new CardLayout();
 
     /** Table component for the List view. */
     private final ListViewTable resultsList;
@@ -177,10 +175,7 @@ public class BaseResultPanel extends JXPanel {
         
         searchResultsModel.addDisposalListener(new ResultModelDisposalListener());
         
-        setLayout(layout);
- 
-        add(resultsList, SearchViewType.LIST.name());
-        add(resultsTable, SearchViewType.TABLE.name());
+        setLayout(new BorderLayout());
     }
     
     /**
@@ -518,7 +513,9 @@ public class BaseResultPanel extends JXPanel {
      * @param mode LIST or TABLE
      */
     public void setViewType(SearchViewType mode) {
-        layout.show(this, mode.name());
+        if(visibleComponent != null) {
+            remove((Component)visibleComponent);
+        }
         switch (mode) {
         case LIST:
             // Only reconfigure when changing the view if it's configured
@@ -537,6 +534,7 @@ public class BaseResultPanel extends JXPanel {
         default:
             throw new IllegalStateException("unsupported mode: " + mode);
         }
+        add((Component)visibleComponent);
     }
 
     /**
