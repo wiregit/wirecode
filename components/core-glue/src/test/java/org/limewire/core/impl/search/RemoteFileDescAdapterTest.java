@@ -513,8 +513,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd).getClientGUID();
             will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
             
-            one(rfd).getSHA1Urn();
-            will(returnValue(null));
             allowing(rfd).getSHA1Urn();
             will(returnValue(urn));
             
@@ -523,7 +521,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         
         RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
         
-        assertNull(rfdAdapter.getUrn());
         assertEquals(new URNImpl(urn), rfdAdapter.getUrn());
         
         context.assertIsSatisfied();

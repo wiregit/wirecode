@@ -1,5 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -37,7 +39,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
      * Try to create a RemoteFileItem with a presence that does not yet have an AddressFeature.
      */
     @SuppressWarnings("unchecked")
-    public void testCreateWithoutAddressFeature() throws SaveLocationException, InvalidDataException {
+    public void testCreateWithoutAddressFeature() throws Exception {
         Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
@@ -65,12 +67,10 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             will(returnValue("this is identification"));
             allowing(presence);
             
-            Set<String> urnSet = new HashSet<String>();
-            urnSet.add("urn:sha1:GLSSGFSDF43443DFSFDFSDSDUGYQYPFB");
-            urnSet.add("urn:sha1:GLSSGFSSDFSDF3DFSFDFSDSDUGYQYPFB");
+            URN sha1 = URN.createSHA1Urn("urn:sha1:GLSSGFSSDFSDF3DFSFDFSDSDUGYQYPFB");
             
             allowing(fileMetaData).getUrns();
-            will(returnValue(urnSet));
+            will(returnValue(Collections.singleton(sha1.toString())));
             allowing(fileMetaData);
             
             allowing(remoteFileDescFactory).createRemoteFileDesc(
@@ -83,6 +83,8 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             
             allowing(initialRFD).getCreationTime();
             will(returnValue(creationTime));
+            allowing(initialRFD).getUrns();
+            will(returnValue(Collections.singleton(sha1)));
             allowing(initialRFD);
             
         }});
@@ -103,7 +105,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
      * Try to create a normal RemoteFileItem.
      */
     @SuppressWarnings("unchecked")
-    public void testCreateWithAddressFeature() throws SaveLocationException, InvalidDataException {
+    public void testCreateWithAddressFeature() throws Exception {
         final Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
@@ -138,9 +140,10 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             will(returnValue("this is identification"));
             allowing(presence);
             
-            Set<String> urnSet = new HashSet<String>();
+            URN sha1 = URN.createSHA1Urn("urn:sha1:GLSSGFSSDFSDF3DFSFDFSDSDUGYQYPFB");
+            
             allowing(fileMetaData).getUrns();
-            will(returnValue(urnSet));
+            will(returnValue(Collections.singleton(sha1.toString())));
             allowing(fileMetaData);
             
             allowing(remoteFileDescFactory).createRemoteFileDesc(
@@ -153,6 +156,8 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             
             allowing(initialRFD).getCreationTime();
             will(returnValue(creationTime));
+            allowing(initialRFD).getUrns();
+            will(returnValue(Collections.singleton(sha1)));
             allowing(initialRFD);
             
         }});

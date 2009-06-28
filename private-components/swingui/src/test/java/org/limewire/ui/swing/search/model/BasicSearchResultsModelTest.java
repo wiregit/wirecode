@@ -17,6 +17,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Provider;
@@ -59,6 +60,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName2UrnsNameComesEarly() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -90,9 +92,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         Assert.assertNull(group0.getSimilarityParent());
         Assert.assertEquals(group0, group1.getSimilarityParent());
+        }});
     }
 
     public void testGroupingByName2UrnsNameComesLate() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -124,9 +128,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         Assert.assertNull(group1.getSimilarityParent());
         Assert.assertEquals(group1, group0.getSimilarityParent());
+        }});
     }
 
     public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -165,9 +171,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         Assert.assertNull(group1.getSimilarityParent());
         Assert.assertEquals(group1, group0.getSimilarityParent());
+        }});
     }
 
     public void testGroupByName4Urns() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -212,10 +220,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertNull(group0.getSimilarityParent());
         Assert.assertEquals(group0, group2.getSimilarityParent());
         Assert.assertEquals(group0, group3.getSimilarityParent());
-
+        }});
     }
 
     public void testGroupingByName3Urns() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -255,9 +264,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertNull(group0.getSimilarityParent());
         Assert.assertEquals(group0, group1.getSimilarityParent());
         Assert.assertEquals(group0, group2.getSimilarityParent());
+        }});
     }
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -299,9 +310,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertNull(group1.getSimilarityParent());
         Assert.assertEquals(group1, group0.getSimilarityParent());
         Assert.assertEquals(group1, group2.getSimilarityParent());
+        }});
     }
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -345,9 +358,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertNull(group1.getSimilarityParent());
         Assert.assertEquals(group1, group2.getSimilarityParent());
         Assert.assertEquals(group1, group0.getSimilarityParent());
+        }});
     }
 
     public void testVisibility() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -436,10 +451,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertNull(group0.getSimilarityParent());
         Assert.assertEquals(group0, group2.getSimilarityParent());
         Assert.assertEquals(group0, group1.getSimilarityParent());
+        }});
     }
     
     public void testSameNameHyphenNameHyphenName() {
-       
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         
         Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
         properties1.put(FilePropertyKey.NAME, "test-foo-bar");
@@ -472,9 +488,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         Assert.assertNull(group0.getSimilarityParent());
         Assert.assertEquals(group0, group1.getSimilarityParent());
+        }});
     }
     
     public void testNotSameNameOrButSameTrackMetaData() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
         properties1.put(FilePropertyKey.NAME, "test");
         SearchResult searchResult1 = new TestSearchResult("1", "test.mp3", properties1);
@@ -509,10 +527,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertNull(group1.getSimilarityParent());
         Assert.assertNull(group0.getSimilarityParent());
 
-    
+        }});
     }
     
     public void testSameNameOrAlbumAndTrackMetaData() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
         properties1.put(FilePropertyKey.NAME, "test-blah");
         SearchResult searchResult1 = new TestSearchResult("1", "test-blah.mp3", properties1);
@@ -547,9 +566,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         Assert.assertNull(group0.getSimilarityParent());
         Assert.assertEquals(group0, group1.getSimilarityParent());
+        }});
     }
     
     public void testSameNameOrArtistAndTrackMetaData() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
         properties1.put(FilePropertyKey.NAME, "test-blah");
         SearchResult searchResult1 = new TestSearchResult("1", "test-blah.mp3", properties1);
@@ -583,10 +604,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         Assert.assertNull(group0.getSimilarityParent());
         Assert.assertEquals(group0, group1.getSimilarityParent());
+        }});
     }
 
     /** Tests method to retrieve filtered search results. */
     public void testGetFilteredSearchResults() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         // Create test search results.
         TestSearchResult testResult1 = new TestSearchResult("1", "xray");
         TestSearchResult testResult2 = new TestSearchResult("2", "zulu");
@@ -622,11 +645,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         int expectedSize = 1;
         int actualSize = filteredList.size();
         assertEquals("filtered list size", expectedSize, actualSize);
+        }});
     }
     
     /** Tests method to retrieve sorted and filtered search results. */
     public void testGetSortedSearchResults() {
-        
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         final PropertiableHeadings propertiableHeadings = context.mock(PropertiableHeadings.class);
 
         context.checking(new Expectations(){
@@ -671,10 +695,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         expectedReturn = "whiskey";
         actualReturn = sortedList.get(0).getHeading();
         assertEquals("sorted list", expectedReturn, actualReturn);
+        }});
     }
 
     /** Tests method to set filter editor with filter text. */
     public void testSetFilterEditor() {
+        SwingUtils.invokeAndWait(new Runnable() { public void run() {
         // Create test search results.
         TestSearchResult testResult1 = new TestSearchResult("1", "xray");
         TestSearchResult testResult2 = new TestSearchResult("2", "zulu");
@@ -704,6 +730,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         expectedSize = 1;
         actualSize = filteredList.size();
         assertEquals("filtered list size", expectedSize, actualSize);
+        }});
     }
    
     /**

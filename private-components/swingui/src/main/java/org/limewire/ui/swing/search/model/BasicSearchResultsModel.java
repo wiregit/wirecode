@@ -329,6 +329,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
             if(result.getUrn() == null) {
                 // crap, we need to really work on this list & remove bad items.
                 ok = false;
+                break;
             }
         }
         

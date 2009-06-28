@@ -1,6 +1,8 @@
 package org.limewire.core.impl.search;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -131,7 +133,6 @@ public class CoreSearchTest extends BaseTestCase {
                 allowing(address1).getAddressDescription();
                 will(returnValue("address 1 description"));
                 allowing(remoteFileDesc1).getFileName();
-
                 will(returnValue(fileName1));
                 allowing(remoteFileDesc1).getSize();
                 will(returnValue(1234L));
@@ -139,6 +140,8 @@ public class CoreSearchTest extends BaseTestCase {
                 will(returnValue(null));
                 allowing(remoteFileDesc1).getCreationTime();
                 will(returnValue(5678L));
+                allowing(remoteFileDesc1).getSHA1Urn();
+                will(returnValue(null));
                 one(searchListener).handleSearchResult(with(same(coreSearch)),
                         with(new SearchResultMatcher(fileName1)));
             }
@@ -214,12 +217,11 @@ public class CoreSearchTest extends BaseTestCase {
         context.checking(new Expectations() {{
                 allowing(searchResult1).getFileName();
                 will(returnValue(fileName1));
-                one(searchListener).handleSearchResult(with(same(coreSearch)),
-                        with(new SearchResultMatcher(fileName1)));
+                one(searchListener).handleSearchResults(with(same(coreSearch)),
+                        with(new SearchResultsListMatcher(Collections.singletonList(fileName1))));
         }});
 
-        friendSearchListener.get().handleFriendResults(
-                Arrays.asList(searchResult1));
+        friendSearchListener.get().handleFriendResults(Arrays.asList(searchResult1));
 
         context.assertIsSatisfied();
     }
@@ -347,6 +349,31 @@ public class CoreSearchTest extends BaseTestCase {
         assertEquals(displayUrl, sponsoredResult.getVisibleUrl());
         
         context.assertIsSatisfied();
+    }
+    
+    private final class SearchResultsListMatcher extends BaseMatcher<Collection<? extends SearchResult>> {
+        private final List<String> names;
+
+        private SearchResultsListMatcher(List<String> names) {
+            this.names = names;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean matches(Object item) {
+            Collection<? extends SearchResult> searchResults = (Collection<? extends SearchResult>)item;
+            assertEquals(item.toString(), names.size(), searchResults.size());
+            int i = 0;
+            for(SearchResult result : searchResults) {
+                assertEquals(names.get(i++), result.getFileName());
+            }
+            return true;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+
+        }
     }
 
     private final class SearchResultMatcher extends BaseMatcher<SearchResult> {
