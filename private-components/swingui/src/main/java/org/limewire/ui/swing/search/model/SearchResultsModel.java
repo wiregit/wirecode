@@ -96,11 +96,6 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      * Adds all the search results to the results list.
      */
     void addSearchResults(Collection<? extends SearchResult> result);
-
-    /**
-     * Removes the specified search result from the results list.
-     */
-    void removeSearchResult(SearchResult result);
     
     /**
      * Removes all results from the model

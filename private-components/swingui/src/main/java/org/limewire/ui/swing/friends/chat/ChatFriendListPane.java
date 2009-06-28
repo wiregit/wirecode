@@ -66,7 +66,6 @@ import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.GlazedJXTable;
-import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -78,7 +77,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -203,7 +202,7 @@ public class ChatFriendListPane extends JPanel {
     }
     
     private static ChatFriend getFriend(JTable table, int index) {
-        EventTableModel model = (EventTableModel)table.getModel();
+        DefaultEventTableModel model = (DefaultEventTableModel)table.getModel();
         return index < 0 ? null : (ChatFriend) model.getElementAt(index);
     }
     
@@ -228,7 +227,7 @@ public class ChatFriendListPane extends JPanel {
             }
         };
         
-        final JXTable table = new CustomTooltipLocationTable(GlazedListsSwingFactory.eventTableModel(friendsList, format)); 
+        final JXTable table = new CustomTooltipLocationTable(new DefaultEventTableModel<ChatFriend>(friendsList, format)); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new LaunchChatListener());
         //Add as mouse listener and motion listener because it cares about MouseExit and MouseMove events
@@ -300,7 +299,7 @@ public class ChatFriendListPane extends JPanel {
             ChatFriend chatFriend = getFriend(table, row);
             
             if (chatFriend.isChatting()) {
-                EventTableModel model = (EventTableModel) table.getModel();
+                DefaultEventTableModel model = (DefaultEventTableModel) table.getModel();
                 if (model.getRowCount() > (row + 1)) {
                     ChatFriend nextFriend = (ChatFriend) model.getElementAt(row + 1);
                     if (!nextFriend.isChatting()) {
@@ -536,7 +535,7 @@ public class ChatFriendListPane extends JPanel {
                 return null;
             }
             
-            EventTableModel model = (EventTableModel) friendsTable.getModel();
+            DefaultEventTableModel model = (DefaultEventTableModel) friendsTable.getModel();
             ChatFriend chatFriend = (ChatFriend) model.getElementAt(row);
             
             if (chatFriend.isChatting() && isOverCloseIcon(mousePoint)) {

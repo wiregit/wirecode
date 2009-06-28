@@ -34,6 +34,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.friend.api.FriendConnection;
@@ -59,8 +60,9 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -197,7 +199,9 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         matcher = new VisiblityMatcher();
         filteredSharedFileLists.setMatcher(matcher);
         
-        table = new MouseableTable(new EventTableModel<SharedFileList>(filteredSharedFileLists,
+        SwingThreadProxyEventList<SharedFileList> stpl = GlazedListsFactory.swingThreadProxyEventList(filteredSharedFileLists);
+        
+        table = new MouseableTable(new DefaultEventTableModel<SharedFileList>(stpl,
                 new TableFormat<SharedFileList>() {
                     @Override
                     public int getColumnCount() {

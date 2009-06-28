@@ -68,8 +68,8 @@ import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.EventSelectionModel;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -126,10 +126,10 @@ public class BaseResultPanel extends JXPanel {
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
     
-    private EventSelectionModel<VisualSearchResult> listSelectionModel;
+    private DefaultEventSelectionModel<VisualSearchResult> listSelectionModel;
     
     private EventListJXTableSorting resultsTableSorting; 
-    private EventSelectionModel<VisualSearchResult> selectionModel;
+    private DefaultEventSelectionModel<VisualSearchResult> selectionModel;
     private ColorHighlighter resultsColorHighlighter;
     private Scrollable visibleComponent;
     private final SearchResultMenuFactory menuFactory;
@@ -233,7 +233,7 @@ public class BaseResultPanel extends JXPanel {
         if (listSelectionModel != null) {
             listSelectionModel.dispose();
         }
-        listSelectionModel = new EventSelectionModel<VisualSearchResult>(maxSizedList, false);
+        listSelectionModel = new DefaultEventSelectionModel<VisualSearchResult>(maxSizedList);
         listSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         resultsList.setSelectionModel(listSelectionModel);
         resultsList.setEnterKeyAction(new ResultEnterAction(listSelectionModel.getSelected(), downloadHandler));
@@ -291,7 +291,7 @@ public class BaseResultPanel extends JXPanel {
             @Override
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
                 
-                EventTableModel tableModel = resultsList.getEventTableModel();
+                DefaultEventTableModel tableModel = resultsList.getEventTableModel();
                 if (tableModel.getRowCount() == 0) {
                     return;
                 }
@@ -300,7 +300,7 @@ public class BaseResultPanel extends JXPanel {
                 Runnable runner = new Runnable() {
                     @Override
                     public void run() {
-                        EventTableModel model = resultsList.getEventTableModel();
+                        DefaultEventTableModel model = resultsList.getEventTableModel();
                         
                         resultsList.setIgnoreRepaints(true);
                         boolean setRowSize = false;
@@ -372,7 +372,7 @@ public class BaseResultPanel extends JXPanel {
         if (selectionModel != null) {
             selectionModel.dispose();
         }
-        selectionModel = new EventSelectionModel<VisualSearchResult>(sortedList, false);
+        selectionModel = new DefaultEventSelectionModel<VisualSearchResult>(sortedList);
         resultsTable.setSelectionModel(selectionModel);
         resultsTable.setEnterKeyAction(new ResultEnterAction(selectionModel.getSelected(), downloadHandler));
             

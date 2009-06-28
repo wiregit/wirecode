@@ -46,8 +46,8 @@ import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.swing.EventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.DefaultEventListModel;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 /**
  * Filter component to select items according to their sources.
@@ -70,9 +70,9 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     private UniqueList<SourceItem> currentUniqueList;
     private SortedList<SourceItem> sortedList;
-    private EventListModel<SourceItem> listModel;
-    private EventSelectionModel<SourceItem> selectionModel;
-    private EventSelectionModel<SourceItem> popupSelectionModel;
+    private DefaultEventListModel<SourceItem> listModel;
+    private DefaultEventSelectionModel<SourceItem> selectionModel;
+    private DefaultEventSelectionModel<SourceItem> popupSelectionModel;
     private SelectionListener selectionListener;
     private FilterPopupPanel filterPopupPanel;
 
@@ -198,8 +198,8 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         sortedList = GlazedListsFactory.sortedList(currentUniqueList, new SourceItemCountComparator());
         
         // Create list and selection models.
-        listModel = new EventListModel<SourceItem>(sortedList, false);
-        selectionModel = new EventSelectionModel<SourceItem>(sortedList, false);
+        listModel = new DefaultEventListModel<SourceItem>(sortedList);
+        selectionModel = new DefaultEventSelectionModel<SourceItem>(sortedList);
         list.setSelectionModel(selectionModel);
         list.setModel(listModel);
         
@@ -407,8 +407,8 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         // Set list and selection models.  We use the unique list directly
         // to display values alphabetically.
-        EventListModel<SourceItem> listModel = new EventListModel<SourceItem>(uniqueFriendList, false);
-        popupSelectionModel = new EventSelectionModel<SourceItem>(uniqueFriendList, false);
+        DefaultEventListModel<SourceItem> listModel = new DefaultEventListModel<SourceItem>(uniqueFriendList);
+        popupSelectionModel = new DefaultEventSelectionModel<SourceItem>(uniqueFriendList);
         popupPanel.setListModel(listModel);
         popupPanel.setListSelectionModel(popupSelectionModel);
         
@@ -462,9 +462,9 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Listener to handle selection changes to update the matcher editor.  
      */
     private class SelectionListener implements ListSelectionListener {
-        private final EventSelectionModel<SourceItem> selectionModel;
+        private final DefaultEventSelectionModel<SourceItem> selectionModel;
         
-        public SelectionListener(EventSelectionModel<SourceItem> selectionModel) {
+        public SelectionListener(DefaultEventSelectionModel<SourceItem> selectionModel) {
             this.selectionModel = selectionModel;
         }
 

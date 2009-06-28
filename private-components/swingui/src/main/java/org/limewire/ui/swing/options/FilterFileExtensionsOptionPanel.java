@@ -17,8 +17,9 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 /**
  * Creates a table to manage which file extensions will not show up in search results.
@@ -38,7 +39,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
         keywordTextField = new JTextField(30);
         addKeywordButton = new JButton(I18n.tr("Add Extension"));
         
-        filterTable = new FilterTable(GlazedListsSwingFactory.eventTableModel(eventList, new FilterTableFormat(I18n.tr("Extensions"))));
+        filterTable = new FilterTable(new DefaultEventTableModel<String>(eventList, new FilterTableFormat(I18n.tr("Extensions"))));
         okButton = new JButton(okAction);
         addKeywordButton.addActionListener(new ActionListener(){
             @Override

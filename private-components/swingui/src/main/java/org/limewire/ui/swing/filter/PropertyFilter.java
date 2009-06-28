@@ -41,8 +41,8 @@ import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.swing.EventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.DefaultEventListModel;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 import com.google.inject.Provider;
 
@@ -65,8 +65,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private FilterList<Object> nonNullList;
     private UniqueListFactory<Object> uniqueListFactory;
     private UniqueList<Object> uniqueList;
-    private EventSelectionModel<Object> selectionModel;
-    private EventSelectionModel<Object> popupSelectionModel;
+    private DefaultEventSelectionModel<Object> selectionModel;
+    private DefaultEventSelectionModel<Object> popupSelectionModel;
     private FilterPopupPanel morePopupPanel;
     
     /**
@@ -176,8 +176,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         EventList<Object> sortedList = GlazedListsFactory.sortedList(uniqueList, new PropertyCountComparator());
         
         // Create list and selection models.
-        EventListModel<Object> listModel = new EventListModel<Object>(sortedList, false);
-        selectionModel = new EventSelectionModel<Object>(sortedList, false);
+        DefaultEventListModel<Object> listModel = new DefaultEventListModel<Object>(sortedList);
+        selectionModel = new DefaultEventSelectionModel<Object>(sortedList);
         list.setModel(listModel);
         list.setSelectionModel(selectionModel);
         
@@ -323,8 +323,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         // Set list and selection models.  We use the unique list directly
         // to display values alphabetically.
-        EventListModel<Object> listModel = new EventListModel<Object>(uniqueList, false);
-        popupSelectionModel = new EventSelectionModel<Object>(uniqueList, false);
+        DefaultEventListModel<Object> listModel = new DefaultEventListModel<Object>(uniqueList);
+        popupSelectionModel = new DefaultEventSelectionModel<Object>(uniqueList);
         popupPanel.setListModel(listModel);
         popupPanel.setListSelectionModel(popupSelectionModel);
         
@@ -378,9 +378,9 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Listener to handle selection changes to update the matcher editor.  
      */
     private class SelectionListener implements ListSelectionListener {
-        private final EventSelectionModel<Object> selectionModel;
+        private final DefaultEventSelectionModel<Object> selectionModel;
 
-        public SelectionListener(EventSelectionModel<Object> selectionModel) {
+        public SelectionListener(DefaultEventSelectionModel<Object> selectionModel) {
             this.selectionModel = selectionModel;
         }
         

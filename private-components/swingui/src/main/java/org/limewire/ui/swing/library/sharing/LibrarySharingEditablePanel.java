@@ -40,14 +40,14 @@ import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
@@ -119,8 +119,9 @@ class LibrarySharingEditablePanel {
         baseEventList = new BasicEventList<EditableSharingData>();
         SortedList<EditableSharingData> sortedList = GlazedListsFactory.sortedList(baseEventList, new FriendComparator());        
         MatcherEditor<EditableSharingData> matcher = new TextComponentMatcherEditor<EditableSharingData>(filterTextField, new FriendFilterator());
-        filteredList = new FilterList<EditableSharingData>(sortedList, matcher);
-        friendTable = new GlazedJXTable(new EventTableModel<EditableSharingData>(filteredList, new EditTableFormat())) {
+        filteredList = GlazedListsFactory.filterList(sortedList, matcher);
+        SwingThreadProxyEventList<EditableSharingData> stpl = GlazedListsFactory.swingThreadProxyEventList(filteredList);
+        friendTable = new GlazedJXTable(new DefaultEventTableModel<EditableSharingData>(stpl, new EditTableFormat())) {
             @Override
             public void editingStopped(ChangeEvent e) {
                 TableCellEditor editor = getCellEditor();

@@ -27,12 +27,11 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
-import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -150,7 +149,7 @@ public class DownloadTable extends MouseableTable {
         model = new DownloadTableModel(downloadItems);
         setModel(model);
         
-        EventSelectionModel<DownloadItem> model = GlazedListsSwingFactory.eventSelectionModel(downloadItems);
+        DefaultEventSelectionModel<DownloadItem> model = new DefaultEventSelectionModel<DownloadItem>(downloadItems);
         setSelectionModel(model);
         model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         this.selectedItems = model.getSelected();

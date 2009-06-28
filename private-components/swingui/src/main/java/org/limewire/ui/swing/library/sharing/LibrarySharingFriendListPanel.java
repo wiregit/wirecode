@@ -36,7 +36,8 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -69,7 +70,8 @@ class LibrarySharingFriendListPanel {
         
         eventList = new BasicEventList<String>();
         SortedList<String> sortedList = GlazedListsFactory.sortedList(eventList, new FriendComparator());
-        friendList.setModel(new EventTableModel<String>(sortedList, new FriendTableFormat()));
+        SwingThreadProxyEventList<String> stpl = GlazedListsFactory.swingThreadProxyEventList(sortedList);
+        friendList.setModel(new DefaultEventTableModel<String>(stpl, new FriendTableFormat()));
         
         component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "134!", ""));        
         component.setOpaque(false);

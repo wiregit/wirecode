@@ -98,7 +98,6 @@
 	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/iTunes-0.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/AppFramework.jar" sourcepath="lib/sources/AppFramework-1.03-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/glazedlists-1.7.0_java15.jar" sourcepath="lib/sources/glazedlists-1.7.0-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/base64-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcip-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/jars/dnsjava-2.0.6.jar" sourcepath="lib/sources/dnsjava-src.zip"/>
@@ -160,6 +159,6 @@
 	<classpathentry kind="lib" path="lib/jars/stax-api-1.0-2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/fb-java-api-2.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/fb-java-api-schema-2.1.1.jar" sourcepath="lib/sources/facebook-java-api-2.1.1-src.jar"/>
+	<classpathentry kind="lib" path="lib/jars/glazedlists-snapshot20090628_java15.jar" sourcepath="lib/sources/glazedlists-snapshot20090628-source_java15.zip"/>
 	<classpathentry kind="output" path="bin"/>
-
 </classpath>

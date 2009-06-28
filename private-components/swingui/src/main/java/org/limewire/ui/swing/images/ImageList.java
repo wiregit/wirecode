@@ -18,14 +18,13 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.table.LibraryPopupMenu;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
-import ca.odell.glazedlists.swing.EventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.DefaultEventListModel;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -42,8 +41,8 @@ public class ImageList extends JXList implements Disposable {
     
     private final ImageCellRenderer imageCellRenderer;
     
-    private EventListModel cachedEventListModel;
-    private EventSelectionModel<LocalFileItem> cachedEventSelectionModel;
+    private DefaultEventListModel cachedEventListModel;
+    private DefaultEventSelectionModel<LocalFileItem> cachedEventSelectionModel;
     
     @Inject
     public ImageList(final ImageCellRenderer imageCellRenderer, Provider<LibraryPopupMenu> libraryPopupMenu) {
@@ -72,8 +71,8 @@ public class ImageList extends JXList implements Disposable {
     }
     
     public void setModel(EventList<LocalFileItem> eventList) {
-        EventListModel newEventListModel = GlazedListsSwingFactory.eventListModel(eventList);
-        EventSelectionModel<LocalFileItem> newEventSelectionModel = GlazedListsSwingFactory.eventSelectionModel(eventList);
+        DefaultEventListModel newEventListModel = new DefaultEventListModel<LocalFileItem>(eventList);
+        DefaultEventSelectionModel<LocalFileItem> newEventSelectionModel = new DefaultEventSelectionModel<LocalFileItem>(eventList);
         
         setModel(newEventListModel);
         setSelectionModel(newEventSelectionModel);

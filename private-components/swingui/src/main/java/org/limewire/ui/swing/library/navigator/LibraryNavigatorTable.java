@@ -28,7 +28,8 @@ import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 
@@ -74,8 +75,9 @@ public class LibraryNavigatorTable extends GlazedJXTable {
             compositeList.getReadWriteLock().writeLock().unlock();
         }
         
-        SortedList<LibraryNavItem> sortedList = GlazedListsFactory.sortedList(compositeList, new LibraryNavItemComparator());        
-        setModel(new EventTableModel<LibraryNavItem>(sortedList, new SingleColumnTableFormat<LibraryNavItem>("")));
+        SortedList<LibraryNavItem> sortedList = GlazedListsFactory.sortedList(compositeList, new LibraryNavItemComparator());    
+        SwingThreadProxyEventList<LibraryNavItem> stpl = GlazedListsFactory.swingThreadProxyEventList(sortedList);
+        setModel(new DefaultEventTableModel<LibraryNavItem>(stpl, new SingleColumnTableFormat<LibraryNavItem>("")));
         setDropMode(DropMode.ON);
         setTransferHandler(libraryNavTransferHandler);
         setEditable(false);

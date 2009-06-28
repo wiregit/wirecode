@@ -10,20 +10,19 @@ import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.table.LimeSingleColumnTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 
 public class UploadTable extends MouseableTable {
-    private EventTableModel<UploadItem> model;
+    private DefaultEventTableModel<UploadItem> model;
 
     @Inject
     public UploadTable(UploadListManager uploadListManager, CategoryIconManager categoryIconManager, 
             ProgressBarDecorator progressBarFactory, LibraryMediator libraryMediator, LibraryManager libraryManager,
             RemoteHostWidgetFactory remoteHostWidgetFactory, FileInfoDialogFactory fileInfoFactory) {
-        model = GlazedListsSwingFactory.eventTableModel(uploadListManager.getSwingThreadSafeUploads(), new LimeSingleColumnTableFormat<UploadItem>(UploadItem.class));
+        model = new DefaultEventTableModel<UploadItem>(uploadListManager.getSwingThreadSafeUploads(), new LimeSingleColumnTableFormat<UploadItem>(UploadItem.class));
         setModel(model);
         
         setStripeHighlighterEnabled(false);

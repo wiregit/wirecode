@@ -25,7 +25,7 @@ import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 
@@ -124,7 +124,7 @@ public class ConnectionDetailPanel extends JPanel {
      * Initializes the data models in the container.
      */
     public void initData() {
-        if (!(connectionTable.getModel() instanceof EventTableModel)) {
+        if (!(connectionTable.getModel() instanceof DefaultEventTableModel)) {
             // Create connection list for Swing.  We wrap the actual list in a
             // Swing list to ensure that all events are fired on the UI thread.
             TransformedList<ConnectionItem, ConnectionItem> connectionList = 

@@ -20,7 +20,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.sort.TableColumnComparator;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 /**
  * This is essentially a copy of glazedLists.EventListJXTableSorting class. The 
@@ -284,7 +284,7 @@ public class EventListJXTableSorting {
          */
         @SuppressWarnings("unchecked")
         private Comparator getComparator(int modelIndex) {
-            EventTableModel tableModel = (EventTableModel)table.getModel();
+            DefaultEventTableModel tableModel = (DefaultEventTableModel)table.getModel();
             TableFormat tableFormat = tableModel.getTableFormat();
             // TODO: local changes compared to GlazedLists implementation
             // If the tableFormat is an AdvancedTableFormat, use the table column comparators

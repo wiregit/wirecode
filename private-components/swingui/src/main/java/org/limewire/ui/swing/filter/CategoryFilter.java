@@ -31,8 +31,8 @@ import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.swing.EventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.DefaultEventListModel;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 /**
  * Filter component to select search results according to their categories.
@@ -47,8 +47,8 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private FunctionList<E, Category> categoryList;
     private UniqueListFactory<Category> uniqueListFactory;
     private UniqueList<Category> uniqueList;
-    private EventListModel<Category> listModel;
-    private EventSelectionModel<Category> selectionModel;
+    private DefaultEventListModel<Category> listModel;
+    private DefaultEventSelectionModel<Category> selectionModel;
 
     /**
      * Constructs a CategoryFilter using the specified results list.
@@ -96,8 +96,8 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
         uniqueList = uniqueListFactory.getUniqueList();
         
         // Create list and selection models.
-        listModel = new EventListModel<Category>(uniqueList, false);
-        selectionModel = new EventSelectionModel<Category>(uniqueList, false);
+        listModel = new DefaultEventListModel<Category>(uniqueList);
+        selectionModel = new DefaultEventSelectionModel<Category>(uniqueList);
         list.setModel(listModel);
         list.setSelectionModel(selectionModel);
         

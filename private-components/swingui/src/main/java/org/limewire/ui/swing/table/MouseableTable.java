@@ -33,7 +33,7 @@ import org.limewire.ui.swing.util.PropertyUtils;
 
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 public class MouseableTable extends StripedJXTable {
 
@@ -351,12 +351,12 @@ public class MouseableTable extends StripedJXTable {
 
     @Override
     public void setDefaultEditor(Class clazz, TableCellEditor editor) {
-        boolean usesEventTableModel = getModel() instanceof EventTableModel;
+        boolean usesEventTableModel = getModel() instanceof DefaultEventTableModel;
         boolean usesAdvancedTableFormat = false;
         TableFormat tableFormat = null;
 
         if (usesEventTableModel) {
-            tableFormat = ((EventTableModel) getModel()).getTableFormat();
+            tableFormat = ((DefaultEventTableModel)getModel()).getTableFormat();
             usesAdvancedTableFormat =
                 tableFormat instanceof AdvancedTableFormat;
         }
@@ -376,12 +376,12 @@ public class MouseableTable extends StripedJXTable {
 
     @Override
     public void setDefaultRenderer(Class clazz, TableCellRenderer renderer) {
-        boolean usesEventTableModel = getModel() instanceof EventTableModel;
+        boolean usesEventTableModel = getModel() instanceof DefaultEventTableModel;
         boolean usesAdvancedTableFormat = false;
         TableFormat tableFormat = null;
 
         if (usesEventTableModel) {
-            tableFormat = ((EventTableModel) getModel()).getTableFormat();
+            tableFormat = ((DefaultEventTableModel)getModel()).getTableFormat();
             usesAdvancedTableFormat =
                 tableFormat instanceof AdvancedTableFormat;
         }

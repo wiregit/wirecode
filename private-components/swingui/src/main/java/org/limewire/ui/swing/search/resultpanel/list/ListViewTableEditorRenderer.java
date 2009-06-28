@@ -72,7 +72,7 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -528,7 +528,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 
                 // Create list of selected results.
                 List<VisualSearchResult> selectedResults = new ArrayList<VisualSearchResult>();
-                EventTableModel model = ((ResultsTable) table).getEventTableModel();
+                DefaultEventTableModel model = ((ResultsTable) table).getEventTableModel();
                 int[] selectedRows = table.getSelectedRows();
                 for (int row : selectedRows) {
                     Object element = model.getElementAt(row);

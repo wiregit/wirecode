@@ -30,12 +30,11 @@ import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
-import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -46,7 +45,7 @@ public class LibraryTable extends MouseableTable {
     private final int rowHeight = 20;
 
     private LibraryTableModel cachedLibraryTableModel;
-    private EventSelectionModel<LocalFileItem> cachedEventSelectionModel;
+    private DefaultEventSelectionModel<LocalFileItem> cachedEventSelectionModel;
     private EventListJXTableSorting cachedTableSorting;
     private SortedList<LocalFileItem> cachedSortedList;
     
@@ -152,7 +151,7 @@ public class LibraryTable extends MouseableTable {
         
         SortedList<LocalFileItem> newSortedList = GlazedListsFactory.sortedList(eventList, null);
         LibraryTableModel newLibraryTableModel = new LibraryTableModel(newSortedList, tableFormat);
-        EventSelectionModel<LocalFileItem> newEventSelectionModel = GlazedListsSwingFactory.eventSelectionModel(newSortedList);
+        DefaultEventSelectionModel<LocalFileItem> newEventSelectionModel = new DefaultEventSelectionModel<LocalFileItem>(newSortedList);
         
         if(cachedTableSorting != null) {
             cachedTableSorting.uninstall();
