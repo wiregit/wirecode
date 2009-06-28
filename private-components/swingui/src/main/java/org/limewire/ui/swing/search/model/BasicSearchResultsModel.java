@@ -347,15 +347,6 @@ class BasicSearchResultsModel implements SearchResultsModel {
         offEDTResultList.addAll(results);
     }
     
-
-    /**
-     * Removes the specified search result from the results list.
-     */
-    @Override
-    public void removeSearchResult(SearchResult result) {
-        offEDTResultList.remove(result);
-    }
-    
     /**
      * Removes all results from the model
      */
