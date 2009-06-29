@@ -7,8 +7,6 @@ import java.util.Map;
 
 import org.limewire.friend.api.Friend;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
 import org.limewire.listener.EventBroadcaster;
 
 import com.google.inject.Inject;
@@ -23,42 +21,6 @@ class FileCollectionManagerImpl implements FileCollectionManager {
     
     @InspectionPoint("incomplete file list")
     private final IncompleteFileCollectionImpl incompleteCollection;
-    
-    @SuppressWarnings("unused")
-    @InspectableContainer
-    private class LazyInspectableContainer {
-        
-        @InspectionPoint("friend file lists")
-        private final Inspectable FRIEND_FILE_LIST = new Inspectable() {
-            @Override
-            public Object inspect() {
-                // cycle thru all sharedFileCollection objects, and track file list size by friend
-                // list of friend share sizes is what is returned as inspection.
-                Map<String, Object> data = new HashMap<String, Object>();
-                Map<String, Integer> friendToShareSize = new HashMap<String, Integer>();
-                
-                synchronized (this) {
-                    for (SharedFileCollectionImpl shareList : sharedCollections.values()) {
-                        List<String> friendList = shareList.getFriendList();
-                        int shareSize = shareList.size();
-                        for (String friendName : friendList) {
-                            int totalShareSizeForFriend = shareSize;
-                            if (friendToShareSize.get(friendName) != null) {
-                                totalShareSizeForFriend += friendToShareSize.get(friendName);
-                            }
-                            friendToShareSize.put(friendName, totalShareSizeForFriend);    
-                        }
-                    }
-                }
-                List<Integer> sizes = new ArrayList<Integer>(friendToShareSize.keySet().size());
-                for (String friend: friendToShareSize.keySet()) {
-                    sizes.add(friendToShareSize.get(friend));    
-                }
-                data.put("sizes", sizes);
-                return data;
-            }
-        };
-    }
     
     private final SharedFileCollectionImplFactory sharedFileCollectionImplFactory;
     
