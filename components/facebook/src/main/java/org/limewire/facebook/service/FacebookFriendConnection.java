@@ -507,7 +507,7 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private void requestSession() throws IOException, JSONException {
         String authToken = (String)configuration.getAttribute("auth-token");
-        String authUrl = FacebookUtils.getRandomElement(authUrls.get()) + "/getsession/" + authToken + "/";
+        String authUrl = FacebookUtils.getRandomElement(authUrls.get()) + "getsession/" + authToken + "/";
         LOG.debugf("requesting session from {0}...", authUrl);
         HttpGet sessionRequest = new HttpGet(authUrl);
         HttpClient httpClient = createHttpClient();
