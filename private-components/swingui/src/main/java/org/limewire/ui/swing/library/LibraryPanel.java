@@ -53,6 +53,7 @@ import org.limewire.ui.swing.library.sharing.PublicSharedFeedbackPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
+import org.limewire.ui.swing.library.table.LocalFileItemFilterator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -63,6 +64,8 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -97,6 +100,7 @@ public class LibraryPanel extends JPanel {
     private Category selectedCategory;
     private EventList<LocalFileItem> eventList;
     private FilterList<LocalFileItem> filteredList;
+    private FilterList<LocalFileItem> textFilterList;
     
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
@@ -132,8 +136,10 @@ public class LibraryPanel extends JPanel {
         headerBar.setLayout(new MigLayout("insets 0, gap 0, fill"));
         headerBar.setDefaultComponentHeight(-1);
         createAddFilesButton(addFileAction, libraryAction);
-        headerBar.add(addFilesButton);
-        headerBar.add(playerPanel, "grow, align 50%");
+        headerBar.add(addFilesButton, "push");
+        headerBar.add(playerPanel, "pos 0.5al 0.5al");
+        libraryTableComboBox.setPreferredSize(new Dimension(getPreferredSize().width, 24));
+        libraryTableComboBox.setMaximumSize(new Dimension(160, 24));
         headerBar.add(libraryTableComboBox, "alignx right, gapright 5");
         
         tableListLayout = new CardLayout();
@@ -321,6 +327,9 @@ public class LibraryPanel extends JPanel {
             filteredList.dispose();
             filteredList = null;
         }
+        if(textFilterList != null) {
+            textFilterList.dispose();
+        }
         if(selectedCategory != null) {
             final Category category = selectedCategory;
             filteredList = GlazedListsFactory.filterList(eventList, new Matcher<LocalFileItem>() {
@@ -330,7 +339,9 @@ public class LibraryPanel extends JPanel {
                 }
             });
         }
-        return filteredList == null ? eventList : filteredList;
+        MatcherEditor<LocalFileItem> textMatcherEditor = new TextComponentMatcherEditor<LocalFileItem>(libraryTableComboBox.getFilterField(), new LocalFileItemFilterator(selectedCategory) );
+        textFilterList = GlazedListsFactory.filterList(filteredList == null ? eventList : filteredList, textMatcherEditor);
+        return textFilterList;
     }
     
     private void setEventListOnTable(EventList<LocalFileItem> eventList) {
