@@ -315,7 +315,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
         if (row == displayLimit.getLastDisplayedRow()) {
-            lastRowMessage.setText(tr("Not showing {0} results", 
+            lastRowMessage.setText(tr("Not showing {0} results.  Narrow results to see more.", 
                     (displayLimit.getTotalResultsReturned() - displayLimit.getLastDisplayedRow())));
           return lastRowPanel;
         } 
