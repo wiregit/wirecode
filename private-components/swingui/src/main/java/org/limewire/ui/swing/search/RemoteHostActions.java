@@ -11,7 +11,6 @@ import org.limewire.friend.api.Friend;
 public interface RemoteHostActions {
     void chatWith(RemoteHost person);
 
-    void showFilesSharedWith(RemoteHost person);
     /**
      * @param person Can be anonymous but not null.
      */

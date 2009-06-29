@@ -131,18 +131,6 @@ public class RemoteHostWidget extends JPanel {
         };
     }
 
-    private Action getSharingAction(final RemoteHost person) {
-        return new AbstractAction(tr("What I'm Sharing")) {
-            {
-                putValue(SINGULAR_ACTION_NAME, tr("What I'm Sharing with {0}", person.getFriendPresence().getFriend().getRenderName()));
-            }
-        
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getRemoteHostAction().showFilesSharedWith(person);
-            }
-        };
-    }
     
     private RemoteHostActions getRemoteHostAction() {
         if(remoteHostActions == null)
@@ -233,9 +221,6 @@ public class RemoteHostWidget extends JPanel {
             item.setEnabled(person.isBrowseHostEnabled());
             comboBoxMenu.add(item);
  
-            if (person.isSharingEnabled()) {
-                comboBoxMenu.add(createItem(getSharingAction(person)));
-            }
         } else {
             List<JMenuItem> friends = new ArrayList<JMenuItem>();
             List<JMenuItem> friendsDisabled = new ArrayList<JMenuItem>();
@@ -252,9 +237,6 @@ public class RemoteHostWidget extends JPanel {
                 }
                 if (person.isBrowseHostEnabled()) {
                     submenu.add(createItem(getLibraryAction(person)));
-                }
-                if (person.isSharingEnabled()) {
-                    submenu.add(createItem(getSharingAction(person)));
                 }
     
                 JMenuItem itemToAdd = submenu;
