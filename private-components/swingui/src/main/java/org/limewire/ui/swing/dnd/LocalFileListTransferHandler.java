@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.dnd;
 
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,8 +14,10 @@ import java.util.WeakHashMap;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
+import org.apache.commons.logging.Log;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.warnings.LibraryWarningController;
 
@@ -22,21 +26,21 @@ import org.limewire.ui.swing.warnings.LibraryWarningController;
  * {@link TransferHandler}.
  */
 public abstract class LocalFileListTransferHandler extends TransferHandler {
+    private static final Log LOG = LogFactory.getLog(LocalFileListTransferHandler.class);
+    
     private final WeakHashMap<Transferable, Map<LocalFileList, Boolean>> canImportCache = new WeakHashMap<Transferable, Map<LocalFileList, Boolean>>();
 
     private final LibraryWarningController librarySupport;
-    private final GhostDragGlassPane ghostPane;
 
-    public LocalFileListTransferHandler(LibraryWarningController librarySupport, GhostDragGlassPane glassPane) {
+    public LocalFileListTransferHandler(LibraryWarningController librarySupport) {
         this.librarySupport = librarySupport;
-        this.ghostPane = glassPane;
     }
 
     @Override
     protected Transferable createTransferable(JComponent c) {
         List<File> files = getSelectedFiles();
         if (!files.isEmpty()) {
-            return new LocalFileTransferable(files.toArray(new File[files.size()]));
+            return new LocalFileListTransferable(getLocalFileList(), files.toArray(new File[files.size()]));
         } else {
             return null;
         }
@@ -68,8 +72,6 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
             canImport = canImportInternal(info);
             canImportMap.put(localFileList, canImport);
         }
-//        ghostPane.setAccept(canImport);
-//        ghostPane.setVisible(true);
         
         return canImport;
     }
@@ -79,12 +81,27 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
             return false;
         }
 
+        //don't allow dragging and dropping ot the same list.
+        Transferable t = info.getTransferable();
+        if(t.isDataFlavorSupported(LocalFileListTransferable.LOCAL_FILE_LIST_DATA_FLAVOR)) {
+            try {
+                LocalFileList localFileList = (LocalFileList) t.getTransferData(LocalFileListTransferable.LOCAL_FILE_LIST_DATA_FLAVOR);
+                if(localFileList == getLocalFileList()) {
+                    return false;
+                }
+            } catch (IOException e) {
+                LOG.debug("Error get Trasferable contents.", e);
+            } catch (UnsupportedFlavorException e) {
+                LOG.debug("Error get Trasferable contents.", e);
+            }
+        }
+
         List<File> files = Collections.emptyList();
         if (DNDUtils.containsFileFlavors(info)) {
-            Transferable t = info.getTransferable();
             try {
                 files = Arrays.asList(DNDUtils.getFiles(t));
-            } catch (Throwable failed) {
+            } catch (Throwable e) {
+                LOG.debug("Error get Trasferable contents.", e);
                 return true;
             }
         }
