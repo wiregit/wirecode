@@ -69,12 +69,18 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
             // {1}: total size
             // {2}: download speed
             // {3}: download source
-            return I18n.tr("{0} of {1} ({2}) from {3}",
+            if(item.getDownloadSourceCount() == 0){
+                return I18n.tr("{0} of {1} ({2})",
+                        GuiUtils.toUnitbytes(item.getCurrentSize()), 
+                        GuiUtils.toUnitbytes(item.getTotalSize()),
+                        GuiUtils.rate2speed(item.getDownloadSpeed()));
+            } else { 
+                return I18n.tr("{0} of {1} ({2}) from {3}",
                     GuiUtils.toUnitbytes(item.getCurrentSize()), 
                     GuiUtils.toUnitbytes(item.getTotalSize()),
                     GuiUtils.rate2speed(item.getDownloadSpeed()), 
-                    getPeopleText(item),
-                    item.getDownloadSourceCount());
+                    getPeopleText(item));
+            }
         case TRYING_AGAIN:
             return getTryAgainMessage(item.getRemainingTimeInState());
         case STALLED:
