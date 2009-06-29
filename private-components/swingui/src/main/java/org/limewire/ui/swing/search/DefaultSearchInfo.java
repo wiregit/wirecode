@@ -25,6 +25,11 @@ public class DefaultSearchInfo implements SearchInfo {
         return new DefaultSearchInfo(title, "", advancedSearch, searchCategory, SearchType.KEYWORD);
     }
     
+    public static DefaultSearchInfo createBrowseSearch(SearchType type){
+        assert(type.isBrowse());
+        return new DefaultSearchInfo("", "", Collections.<FilePropertyKey, String>emptyMap(), SearchCategory.ALL, type);
+    }
+    
     
     /** Creates a new SearchInfo for the given What's New search. */
     public static DefaultSearchInfo createWhatsNewSearch(SearchCategory searchCategory) {

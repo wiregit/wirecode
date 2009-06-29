@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search;
 
-import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
@@ -23,10 +22,7 @@ public class BrowsePanelFactory {
         this.searchResultsPanelFactory = searchResultsPanelFactory;
     }
 
-    public SearchResultsPanel createBrowsePanel(BrowseSearch search) {
-        // TODO: better SearchInfo
-        SearchInfo searchInfo = DefaultSearchInfo.createKeywordSearch("", SearchCategory.ALL);
-
+    public SearchResultsPanel createBrowsePanel(BrowseSearch search, SearchInfo searchInfo) {
         SearchResultsModel searchModel = searchResultsModelFactory.createSearchResultsModel(
                 searchInfo, search);
         final SearchResultsPanel searchPanel = searchResultsPanelFactory
@@ -35,6 +31,7 @@ public class BrowsePanelFactory {
         search.addBrowseStatusListener(new SearchPanelBrowseStatusListener(searchPanel));
         return searchPanel;
     }
+
     
      /**
      * Sets the BrowseStatus of the SearchResultsPanel when the status changes.

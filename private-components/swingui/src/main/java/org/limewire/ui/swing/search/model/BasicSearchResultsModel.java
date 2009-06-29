@@ -18,6 +18,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.DisposalListener;
@@ -220,6 +221,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
     @Override
     public int getResultCount() {
         return resultCount.get();
+    }
+    
+    @Override
+    public SearchType getSearchType(){
+        return searchInfo.getSearchType();
     }
 
     @Override

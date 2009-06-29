@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
@@ -32,8 +33,8 @@ public class SearchFilterPanelFactory implements AdvancedFilterPanelFactory<Visu
     
     @Override
     public AdvancedFilterPanel<VisualSearchResult> create(
-            FilterableSource<VisualSearchResult> filterableSource) {
+            FilterableSource<VisualSearchResult> filterableSource, SearchType type) {
         return new AdvancedFilterPanel<VisualSearchResult>(filterableSource,
-                textFieldDecorator, iconManager);
+                textFieldDecorator, iconManager, type);
     }
 }

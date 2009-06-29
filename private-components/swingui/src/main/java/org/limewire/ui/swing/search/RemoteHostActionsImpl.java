@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search;
 import java.util.Collection;
 
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseSearchFactory;
 import org.limewire.friend.api.Friend;
@@ -73,7 +74,8 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     public void viewLibraryOf(RemoteHost person) {
         assert(person != null);
         LOG.debugf("viewLibraryOf: {0}", person);
-        browse(browseSearchFactory.get().createBrowseSearch(person),
+        browse(browseSearchFactory.get().createBrowseSearch(person), 
+                DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
                 person.getFriendPresence().getFriend().getRenderName());
     }
     
@@ -82,6 +84,7 @@ class RemoteHostActionsImpl implements RemoteHostActions {
         assert(friend != null && !friend.isAnonymous());
         LOG.debugf("viewLibraryOf: {0}", friend);
         browse(browseSearchFactory.get().createFriendBrowseSearch(friend), 
+                DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
                 friend.getRenderName());
     }
 
@@ -89,12 +92,14 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     @Override
     public void viewLibrariesOf(Collection<RemoteHost> people) {
          browse(browseSearchFactory.get().createBrowseSearch(people),
+                 DefaultSearchInfo.createBrowseSearch(SearchType.MULTIPLE_BROWSE),
                  getTabTitle(people));
     }
     
     @Override
     public void browseAllFriends() {
          browse(browseSearchFactory.get().createAllFriendsBrowseSearch(),
+                 DefaultSearchInfo.createBrowseSearch(SearchType.ALL_FRIENDS_BROWSE),
                  I18n.tr("All Friends"));
     }
     
@@ -132,8 +137,8 @@ class RemoteHostActionsImpl implements RemoteHostActions {
         return false;
     }
     
-    private void browse(BrowseSearch search, String title) {       
-        SearchResultsPanel searchPanel = browsePanelFactory.createBrowsePanel(search);
+    private void browse(BrowseSearch search, SearchInfo searchInfo, String title) {       
+        SearchResultsPanel searchPanel = browsePanelFactory.createBrowsePanel(search, searchInfo);
         // Add search results display to the UI, and select its navigation item.
         SearchNavItem item = searchNavigator.get().addSearch(title, searchPanel, search, searchPanel.getModel());
         item.select();

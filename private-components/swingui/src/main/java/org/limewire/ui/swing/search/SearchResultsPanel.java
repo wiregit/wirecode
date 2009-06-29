@@ -158,7 +158,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
         
-        filterPanel = filterPanelFactory.create(searchResultsModel);
+        filterPanel = filterPanelFactory.create(searchResultsModel, searchResultsModel.getSearchType());
         
         scrollPane = new JScrollPane();
         scrollPane.setBorder(BorderFactory.createEmptyBorder());

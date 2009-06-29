@@ -26,6 +26,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.Line;
@@ -112,7 +113,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
      */
     public AdvancedFilterPanel(FilterableSource<E> filterableSource,
             TextFieldDecorator textFieldDecorator,
-            Provider<IconManager> iconManager) {
+            Provider<IconManager> iconManager, SearchType type) {
         
         this.filterableSource = filterableSource;
         this.editorList = new BasicEventList<MatcherEditor<E>>();
@@ -171,15 +172,17 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         sourceFilter = filterManager.getSourceFilter();
         sourceFilter.getComponent().setVisible(false);
         
-        // Add listener to show source filter when friend results are received.
-        sourceFilter.addFriendListener(new SourceFilter.FriendListener() {
-            @Override
-            public void friendFound(boolean found) {
-                if (!sourceFilter.isActive()) {
-                    sourceFilter.getComponent().setVisible(found);
+        if (type != SearchType.SINGLE_BROWSE) {
+            // Add listener to show source filter when friend results are received.
+            sourceFilter.addFriendListener(new SourceFilter.FriendListener() {
+                @Override
+                public void friendFound(boolean found) {
+                    if (!sourceFilter.isActive()) {
+                        sourceFilter.getComponent().setVisible(found);
+                    }
                 }
-            }
-        });
+            });
+        }
         
         // Layout components.
         add(filterTextField   , "gap 6 6 6 6, growx, wrap");

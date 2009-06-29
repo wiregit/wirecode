@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.ui.swing.components.DisposalListenerList;
 import org.limewire.ui.swing.filter.FilterableSource;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
@@ -101,5 +102,10 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      * Removes all results from the model
      */
     void clear();
+
+    /**
+     * @return The type of the search
+     */
+    SearchType getSearchType();
     
 }
