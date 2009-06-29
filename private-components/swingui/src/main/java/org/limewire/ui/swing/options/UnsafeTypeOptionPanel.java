@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -18,6 +19,8 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
 import org.limewire.setting.Setting;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
@@ -73,6 +76,41 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
             }
         });
     }
+    
+    @Inject
+    public void register() {
+        manager.addSettingChangedListener(new SettingChangedListener() {
+            @Override
+            public void settingChanged(Setting setting) {
+                settingMap.get(setting).setSelected((Boolean)UnsafeTypeOptionPanel.this.manager.getValue(setting));
+            }
+        });
+        
+        LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {
+           @Override
+            public void settingChanged(final SettingEvent evt) {
+               SwingUtilities.invokeLater(new Runnable() {
+                   @Override
+                    public void run() {
+                       manager.setValue(LibrarySettings.ALLOW_PROGRAMS, LibrarySettings.ALLOW_PROGRAMS.get());
+                    } 
+               });
+            } 
+        });
+
+        LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.addSettingListener(new SettingListener() {
+            @Override
+             public void settingChanged(SettingEvent evt) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                     public void run() {
+                        manager.setValue(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.get());
+                     } 
+                });
+             } 
+         });
+
+    }
         
     @Override
     boolean applyOptions() {
@@ -106,13 +144,6 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         for ( Setting setting : settingMap.keySet() ) {
             settingMap.get(setting).setSelected((Boolean)manager.getValue(setting));
         }
-        
-        manager.addSettingChangedListener(new SettingChangedListener() {
-            @Override
-            public void settingChanged(Setting setting) {
-                settingMap.get(setting).setSelected((Boolean)manager.getValue(setting));
-            }
-        });
     }
     
     private void savePendingSettings() {
