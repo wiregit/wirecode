@@ -13,6 +13,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
+import org.limewire.core.impl.friend.BittorrentPresence;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.friend.api.FriendManager;
@@ -29,6 +30,7 @@ import ca.odell.glazedlists.impl.ThreadSafeList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.Uploader;
 
@@ -175,6 +177,11 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     }
     
     private FriendPresence getFriendPresence(Uploader uploader) {
+        
+        if(uploader instanceof BTUploader) {
+            return new BittorrentPresence(uploader);
+        }
+        
         String id = uploader.getPresenceId();
         FriendPresence currentPresence = null;
         if (id != null) {
