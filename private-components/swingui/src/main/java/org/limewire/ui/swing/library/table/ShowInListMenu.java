@@ -65,16 +65,19 @@ public abstract class ShowInListMenu extends JMenu {
                 JMenu menu = ShowInListMenu.this;
                 menu.removeAll();
                 
-                File selectedFile = ShowInListMenu.this.selectedFiles.get().get(0);
-                // once this is selected, show all the submenus
-                manager.getModel().getReadWriteLock().readLock().lock();
-                try { 
-                    for(SharedFileList fileList : manager.getModel()) {
-                        if(fileList.contains(selectedFile))
-                            menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                File selectedFile = null;
+                if(!selectedFiles.get().isEmpty()) {
+                    selectedFiles.get().get(0);
+                    // once this is selected, show all the submenus
+                    manager.getModel().getReadWriteLock().readLock().lock();
+                    try { 
+                        for(SharedFileList fileList : manager.getModel()) {
+                            if(fileList.contains(selectedFile))
+                                menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                        }
+                    } finally {
+                        manager.getModel().getReadWriteLock().readLock().unlock();
                     }
-                } finally {
-                    manager.getModel().getReadWriteLock().readLock().unlock();
                 }
                 if(menu.getMenuComponentCount() < 1)
                     menu.add(new JMenuItem(I18n.tr("empty"))).setEnabled(false);
