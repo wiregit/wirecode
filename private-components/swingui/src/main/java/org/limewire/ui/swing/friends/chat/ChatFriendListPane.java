@@ -763,6 +763,10 @@ public class ChatFriendListPane extends JPanel {
             }
             
             item.setText(I18n.tr("Browse Files"));
+            
+            if (!chatFriend.isSignedInToLimewire()) {
+                item.setEnabled(false);
+            }
         }
 
         @Override

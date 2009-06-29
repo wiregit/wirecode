@@ -452,6 +452,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         
         downloadlink = new HyperlinkButton(new DownloadFromFriendLibraryAction());
         downloadlink.setFont(linkFont);
+        downloadlink.setEnabled(false);
 
         toolbar = new JXPanel(new MigLayout("insets 0 0 0 5, gap 10, alignx right, aligny 50%"));
         ResizeUtils.forceHeight(toolbar, 22);
