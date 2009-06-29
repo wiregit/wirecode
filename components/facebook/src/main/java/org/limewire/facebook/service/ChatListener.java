@@ -91,6 +91,7 @@ public class ChatListener implements Runnable {
             } catch (IOException e) {
                 LOG.debug("error getting chat message", e);
                 connection.logout();
+                return;
             } catch (JSONException e) {
                 LOG.debug("error parsing chat message", e);
             }

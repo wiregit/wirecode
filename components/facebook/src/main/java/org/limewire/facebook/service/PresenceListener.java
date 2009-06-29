@@ -43,7 +43,7 @@ public class PresenceListener implements Runnable {
             String responseStr = connection.httpPOST("http://www.facebook.com", "/ajax/presence/update.php", nvps);
             if (responseStr == null) {
                 LOG.debug("no response for buddy list post");
-                return;
+                throw new IOException("no buddy list response");
             } 
             LOG.debugf("buddy list response: {0}", responseStr);
 
@@ -75,6 +75,7 @@ public class PresenceListener implements Runnable {
             LOG.debug("error deserializing JSON response", e);
         } catch (IOException e) {
             LOG.debug("POST error", e);
+            connection.logout();
         }        
     }
  

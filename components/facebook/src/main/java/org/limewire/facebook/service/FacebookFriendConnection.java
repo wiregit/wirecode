@@ -389,7 +389,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 loggingIn.set(true);
                 requestSession();
                 fetchAllFriends();
-                readMetadataFromHomePage();
+                readMetadataFromPages();
                 discoInfoHandler = discoInfoHandlerFactory.create(this);
                 chatListener = chatListenerFactory.createChatListener(this);
                 ThreadExecutor.startThread(chatListener, "chat-listener-thread");
@@ -530,7 +530,7 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
-    public void readMetadataFromHomePage() throws IOException {
+    public void readMetadataFromPages() throws IOException {
         String homePage = httpGET(HOME_PAGE);
 
         if(homePage == null){
@@ -585,10 +585,10 @@ public class FacebookFriendConnection implements FriendConnection {
     // There is a pool of chat servers.  Each user is assigned a single chat server forever (it appears).
     // That server is identified by a number called a "channel".
     // We read its value here.
-    private void readChannel(String homePage) throws IOException {
+    private void readChannel(String page) throws IOException {
         String channel;
         String channelPrefix = " \"channel";
-        int channelBeginPos = homePage.indexOf(channelPrefix)
+        int channelBeginPos = page.indexOf(channelPrefix)
                 + channelPrefix.length();
         if (channelBeginPos < channelPrefix.length()){
             channel = chatChannel.get();
@@ -599,7 +599,7 @@ public class FacebookFriendConnection implements FriendConnection {
             LOG.debugf("using cached channel: {0}", channel);
         }
         else {
-            channel = homePage.substring(channelBeginPos,
+            channel = page.substring(channelBeginPos,
                     channelBeginPos + 2);
             chatChannel.set(channel);
         }
