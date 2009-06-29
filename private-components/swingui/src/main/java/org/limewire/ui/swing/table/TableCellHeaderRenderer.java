@@ -101,8 +101,8 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
         setFont(font);
         
         if(column >= 0) {
-            // show the appropriate arrow if this column is sorted
-            SortOrder order = getSortOrder((GlazedJXTable)table, table.convertColumnIndexToModel(column));
+            // show the appropriate arrow if this column is sorted            
+            SortOrder order = getSortOrder(table, table.convertColumnIndexToModel(column));
             if(order == SortOrder.UNSORTED) { 
                 setIcon(null);
             } else if(order == SortOrder.ASCENDING) {
@@ -120,20 +120,24 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
      * column index.  The sort order is meaningful only if the column is the 
      * first sort key column; otherwise, SortOrder.UNSORTED is returned.
      */
-    private SortOrder getSortOrder(GlazedJXTable table, int modelColumn) {
-        SortController sortController = table.getSortController();
-        if (sortController == null) {
-            return SortOrder.UNSORTED;
-        }
-        
-        List<? extends SortKey> sortKeys = sortController.getSortKeys();
-        if (sortKeys == null) {
-            return SortOrder.UNSORTED;
-        }
-        
-        SortKey firstKey = SortKey.getFirstSortingKey(sortKeys);
-        if ((firstKey != null) && (firstKey.getColumn() == modelColumn)) {
-            return firstKey.getSortOrder();
+    private SortOrder getSortOrder(JTable table, int modelColumn) {
+        if(table instanceof GlazedJXTable) {     
+            SortController sortController = ((GlazedJXTable)table).getSortController();
+            if (sortController == null) {
+                return SortOrder.UNSORTED;
+            }
+            
+            List<? extends SortKey> sortKeys = sortController.getSortKeys();
+            if (sortKeys == null) {
+                return SortOrder.UNSORTED;
+            }
+            
+            SortKey firstKey = SortKey.getFirstSortingKey(sortKeys);
+            if ((firstKey != null) && (firstKey.getColumn() == modelColumn)) {
+                return firstKey.getSortOrder();
+            } else {
+                return SortOrder.UNSORTED;
+            }
         } else {
             return SortOrder.UNSORTED;
         }
