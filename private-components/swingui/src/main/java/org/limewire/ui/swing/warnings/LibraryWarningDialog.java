@@ -30,8 +30,9 @@ class LibraryWarningDialog extends LimeJDialog {
 
     @Inject
     public LibraryWarningDialog(LibraryManager libraryManager) {
-        setTitle(I18n.tr("Choose Categories"));
         this.libraryManager = libraryManager;
+        setTitle(I18n.tr("Choose Categories"));
+        setModal(true);
     }
 
     public void initialize(final LocalFileList fileList, final List<File> files) {
