@@ -100,8 +100,6 @@ public class FileInfoPanel extends JPanel {
     private final MagnetLinkFactory magnetLinkFactory;
     private final LibraryMediator libraryMediator;
     private final PropertyDictionary propertyDictionary;
-//    private final SharedFileListManager shareListManager;
-//    private final FriendManager friendManager;
     private final SpamManager spamManager;
     private final MetaDataManager metaDataManager;
     
@@ -125,8 +123,6 @@ public class FileInfoPanel extends JPanel {
         this.magnetLinkFactory = magnetLinkFactory;
         this.libraryMediator = libraryMediator;
         this.propertyDictionary = propertyDictionary;
-//        this.shareListManager = shareListManager;
-//        this.friendManager = friendManager;
         this.spamManager = spamManager;
         this.metaDataManager = metaDataManager;
         
@@ -221,7 +217,7 @@ public class FileInfoPanel extends JPanel {
                     new AbstractAction(I18n.tr("Locate in Library")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            setVisible(false);
+                            FileInfoPanel.this.getRootPane().getParent().setVisible(false);
                             libraryMediator.selectInLibrary(((LocalFileItem)propertiableFile).getFile());
                         }
                     });
@@ -288,7 +284,7 @@ public class FileInfoPanel extends JPanel {
                     new AbstractAction(I18n.tr("Locate in Library")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            setVisible(false);
+                            FileInfoPanel.this.getRootPane().getParent().setVisible(false);
                             libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getDownloadingFile());
                         }
                     });
