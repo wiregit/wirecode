@@ -16,8 +16,6 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.decorator.SortController;
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
@@ -29,14 +27,14 @@ import org.limewire.ui.swing.settings.TablesHandler;
  */
 public class ColumnStateHandler implements TableColumnModelListener, MouseListener, PropertyChangeListener {
 
-    private final JXTable table;
+    private final GlazedJXTable table;
     private final VisibleTableFormat format;
     
     
     private boolean columnMoved = false;
     private boolean visibleChangeEnabled = true;
     
-    public ColumnStateHandler(JXTable table, VisibleTableFormat format) {
+    public ColumnStateHandler(GlazedJXTable table, VisibleTableFormat format) {
         this.table = table;
         this.format = format;
         startListening();
@@ -100,13 +98,8 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
         }
     }
     
-    private SortOrder getSortOrder(JXTable table, int modelColumn) {
-        FilterPipeline filters = table.getFilters();
-        if (filters == null) {
-            return SortOrder.UNSORTED;
-        }
-        
-        SortController sortController = filters.getSortController();
+    private SortOrder getSortOrder(GlazedJXTable table, int modelColumn) {
+        SortController sortController = table.getSortController();
         if (sortController == null) {
             return SortOrder.UNSORTED;
         }
