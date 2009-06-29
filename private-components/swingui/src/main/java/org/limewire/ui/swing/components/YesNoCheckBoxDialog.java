@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class YesNoCheckBoxDialog extends LimeJDialog {
@@ -28,7 +29,7 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
 
     public YesNoCheckBoxDialog(String message, String checkBoxMessage, boolean checked,
             String yesLabel, String noLabel) {
-        super();
+        super(GuiUtils.getMainFrame());
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel panel = new JPanel();
         MultiLineLabel messageLabel = new MultiLineLabel(message, 350);

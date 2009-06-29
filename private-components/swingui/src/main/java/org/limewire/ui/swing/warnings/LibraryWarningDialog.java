@@ -30,6 +30,7 @@ class LibraryWarningDialog extends LimeJDialog {
 
     @Inject
     public LibraryWarningDialog(LibraryManager libraryManager) {
+        super(GuiUtils.getMainFrame());
         this.libraryManager = libraryManager;
         setTitle(I18n.tr("Choose Categories"));
         setModalityType(ModalityType.APPLICATION_MODAL);

@@ -20,6 +20,7 @@ import org.limewire.ui.swing.util.I18n;
 class SharingWarningDialog extends LimeJDialog {
 
     public SharingWarningDialog() {
+        super(GuiUtils.getMainFrame());
         setTitle(I18n.tr("Share files?"));
         setModalityType(ModalityType.APPLICATION_MODAL);
     }

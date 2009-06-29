@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.URIUtils;
 
@@ -26,7 +27,7 @@ class LocationDialog extends LimeJDialog {
     private JTextField urlField = null;
 
     public LocationDialog() {
-        this((Frame) null);
+        this(GuiUtils.getMainFrame());
     }
 
     public LocationDialog(Frame owner) {
