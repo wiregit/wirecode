@@ -8,5 +8,5 @@ import org.limewire.friend.api.MessageWriter;
  *
  */
 public interface ConversationPaneFactory {
-    ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID);
+    ConversationPane create(MessageWriter writer, ChatFriend chatFriend);
 }

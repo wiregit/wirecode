@@ -819,7 +819,7 @@ public class FacebookFriendConnection implements FriendConnection {
         return true;
     }
 
-    public Network getNetwork() {
+    private Network getNetwork() {
         return network;
     }
 

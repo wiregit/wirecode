@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -34,8 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.text.html.HTMLEditorKit;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
@@ -74,6 +70,8 @@ import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
@@ -83,6 +81,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.name.Named;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Class representing the chat window.
@@ -100,7 +100,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final JEditorPane editor;
     private final String conversationName;
     private final String friendId;
-    private final String loggedInID;
     private final MessageWriter writer;
     private final ChatFriend chatFriend;
 //    private final ShareListManager shareListManager;
@@ -129,7 +128,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final JPanel chatWrapper;
 
     @Inject
-    public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
+    public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend,
                             SharedFileListManager libraryManager, Provider<IconManager> iconManager,
                             ChatHyperlinkListenerFactory chatHyperlinkListenerFactory, RemoteHostActions remoteHostActions,
                             @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
@@ -137,7 +136,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         this.chatFriend = chatFriend;
         this.conversationName = chatFriend.getName();
         this.friendId = chatFriend.getID();
-        this.loggedInID = loggedInID;
 //        this.shareListManager = libraryManager;
         this.iconManager = iconManager;
 //        this.libraryNavigator = libraryNavigator;
@@ -593,7 +591,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                    }
 
                    MessageFileOffer fileOfferMessage =
-                           new MessageFileOfferImpl(loggedInID, friendId, Message.Type.Sent, metadata, null);
+                           new MessageFileOfferImpl(I18n.tr("me"), friendId, Message.Type.Sent, metadata, null);
 
                    if (sentFileOffer) {
                         new MessageReceivedEvent(fileOfferMessage).publish();

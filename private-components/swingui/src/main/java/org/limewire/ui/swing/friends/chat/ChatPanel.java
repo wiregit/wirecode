@@ -12,10 +12,8 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
-
-import net.miginfocom.swing.MigLayout;
+import javax.swing.event.HyperlinkListener;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
@@ -31,6 +29,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Main Chat window. This is the parent container for the chat window.
@@ -125,7 +125,7 @@ public class ChatPanel extends JXPanel implements Displayable {
         LOG.debugf("ConversationSelectedEvent with friend: {0}", chatFriend.getName());
         ConversationPane chatPane = chats.get(chatFriend.getID());
         if (chatPane == null) {
-            chatPane = conversationFactory.create(event.getWriter(), chatFriend, friendsPanel.getLoggedInId());
+            chatPane = conversationFactory.create(event.getWriter(), chatFriend);
             chats.put(chatFriend.getID(), chatPane);
         }
         

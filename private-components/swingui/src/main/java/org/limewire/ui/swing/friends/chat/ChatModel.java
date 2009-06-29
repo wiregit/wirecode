@@ -7,7 +7,6 @@ import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.FileOffer;
 import org.limewire.friend.api.FileOfferEvent;
 import org.limewire.friend.api.Friend;
-import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.FriendPresenceEvent;
 import org.limewire.friend.api.IncomingChatListener;
@@ -18,11 +17,11 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 /**
  * General purpose model for the chat window. Keeps track of presences, userId, etc..
@@ -37,8 +36,6 @@ public class ChatModel {
     private final EventList<ChatFriend> chatFriends;
     /** Mapping of friendId to ChatFriend */
     private final Map<String, ChatFriend> idToFriendMap;
-    /** ID user is logged in with */
-    private String myId;
     
     @Inject
     public ChatModel(ChatFramePanel chatFramePanel) {
@@ -69,33 +66,10 @@ public class ChatModel {
         return idToFriendMap.remove(friendId);
     }
     
-    /**
-     * Returns the id of the user currently signed into chat.
-     */
-    public String getLoggedInId() {
-        return myId;
-    }
-    
     @Inject 
-    void register(ListenerSupport<FriendConnectionEvent> connectionSupport,
-            ListenerSupport<FriendPresenceEvent> presenceSupport,
+    void register(ListenerSupport<FriendPresenceEvent> presenceSupport,
             ListenerSupport<FileOfferEvent> fileOfferEventListenerSupport) {
         
-        // listen for user login changes
-        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendConnectionEvent event) {
-                switch(event.getType()) {
-                case CONNECTED:
-                    myId = formatLoggedInName(event.getSource().getConfiguration().getCanonicalizedLocalID());
-                    break;
-                case DISCONNECTED:
-                    myId = null;
-                    break;
-                }
-            }
-        });
         
         // listen for presence sign on/off changes
         presenceSupport.addListener(new EventListener<FriendPresenceEvent>() {
@@ -203,7 +177,7 @@ public class ChatModel {
         IncomingChatListener incomingChatListener = new IncomingChatListener() {
             public MessageReader incomingChat(MessageWriter writer) {
                 chatFramePanel.createChatPanel();
-                MessageWriter writerWrapper = new MessageWriterImpl(getLoggedInId(), chatFriendForIncomingChat, writer);
+                MessageWriter writerWrapper = new MessageWriterImpl(chatFriendForIncomingChat, writer);
                 ConversationSelectedEvent event =
                         new ConversationSelectedEvent(chatFriendForIncomingChat, writerWrapper, false);
                 event.publish();

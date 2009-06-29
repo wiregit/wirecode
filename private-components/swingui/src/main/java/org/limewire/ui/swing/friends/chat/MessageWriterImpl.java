@@ -6,16 +6,15 @@ import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.MessageWriter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.util.I18n;
 
 class MessageWriterImpl implements MessageWriter {
     private static final Log LOG = LogFactory.getLog(MessageWriterImpl.class);
     
-    private final String localID;
     private final ChatFriend chatFriend;
     private final MessageWriter writer;
 
-    MessageWriterImpl(String localID, ChatFriend chatFriend, MessageWriter writer) {
-        this.localID = localID;
+    MessageWriterImpl(ChatFriend chatFriend, MessageWriter writer) {
         this.chatFriend = chatFriend;
         this.writer = writer;
     }
@@ -36,7 +35,7 @@ class MessageWriterImpl implements MessageWriter {
     }
 
     private Message newMessage(String message, Message.Type type) {
-        return new MessageTextImpl(localID, chatFriend.getID(), type, message);
+        return new MessageTextImpl(I18n.tr("me"), chatFriend.getID(), type, message);
     }
 
     @Override

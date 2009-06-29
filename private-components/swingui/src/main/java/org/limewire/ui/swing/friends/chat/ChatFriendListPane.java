@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -37,8 +35,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXLabel;
@@ -68,6 +64,10 @@ import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -78,9 +78,7 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * The pane that lists all available friends in the chat area.
@@ -333,10 +331,6 @@ public class ChatFriendListPane extends JPanel {
         return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
     }
     
-    public String getLoggedInId() {
-        return chatModel.getLoggedInId();
-    }
-    
     public void fireConversationStarted(String friendId) {
         ChatFriend chatFriend = chatModel.getChatFriend(friendId);
         if(chatFriend != null) {
@@ -350,7 +344,7 @@ public class ChatFriendListPane extends JPanel {
         MessageWriter writerWithEventDispatch = null;
         if (!chatFriend.isChatting() && chatFriend.isSignedIn()) {
             MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
-            writerWithEventDispatch = new MessageWriterImpl(chatModel.getLoggedInId(), chatFriend, writer);
+            writerWithEventDispatch = new MessageWriterImpl(chatFriend, writer);
         }
         new ConversationSelectedEvent(chatFriend, writerWithEventDispatch, true).publish();
         setActiveConversation(chatFriend);
