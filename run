@@ -17,6 +17,7 @@ case ${PLATFORM} in
     Linux)
         OPTS="${OPTS} -Djava.library.path=lib/native/linux";
         OPTS="${OPTS} -Djna.library.path=lib/native/linux";
+	OPTS="${OPTS} -Dsun.java2d.pmoffscreen=false";
         export PATH="${PATH}:lib/native/linux";
         ADDITIONAL=linux
     ;;
