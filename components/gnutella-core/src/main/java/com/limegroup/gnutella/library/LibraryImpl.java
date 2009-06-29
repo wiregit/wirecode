@@ -200,14 +200,6 @@ class LibraryImpl implements Library, FileCollection {
         }
         return fileData;
     }
-
-    /**
-     * Runs the callable in the managed filelist folder thread & returns a
-     * Future used to get its result.
-     */
-    <V> ListeningFuture<V> submitFolder(Callable<V> callable) {
-        return folderLoader.submit(callable);
-    }
     
     /** Initializes all listeners. */
     void initialize() {
@@ -1191,9 +1183,8 @@ class LibraryImpl implements Library, FileCollection {
             }
         }
     }
-
-    @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder, final FileFilter fileFilter) {
+    
+    ListeningFuture<List<ListeningFuture<FileDesc>>> scanFolderAndAddToCollection(final File folder, final FileFilter fileFilter, final FileCollection collection) {
         return folderLoader.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             private final List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
             private final FileFilter filter = fileFilter == null ? newManageableFilter() : fileFilter;
@@ -1208,15 +1199,23 @@ class LibraryImpl implements Library, FileCollection {
                 //TODO try to make non-recursive
                 if(folderOrFile != null ) {
                     if(folderOrFile.isDirectory() && isDirectoryAllowed(folderOrFile)) {
-                        for(File file : folderOrFile.listFiles(filter)) {
-                            addFolderInternal(file);
+                        File[] files = folderOrFile.listFiles(filter);
+                        if(files != null) {
+                            for(File file : files) {
+                                addFolderInternal(file);
+                            }
                         }
                     } else {
-                        futures.add(add(folderOrFile));
+                        futures.add(collection.add(folderOrFile));
                     }
                 }
             }
         });
+    }
+
+    @Override
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder, final FileFilter fileFilter) {
+        return scanFolderAndAddToCollection(folder, fileFilter, this);
     }
 
     @Override

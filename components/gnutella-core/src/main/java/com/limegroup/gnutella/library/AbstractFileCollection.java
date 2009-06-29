@@ -3,12 +3,10 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -56,33 +54,11 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder, final FileFilter fileFilter) {
-        return library.submitFolder(new Callable<List<ListeningFuture<FileDesc>>>() {
-            private final List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-            private final FileFilter filter = fileFilter == null ? library.newManageableFilter() : fileFilter;
-            
-            @Override
-            public List<ListeningFuture<FileDesc>> call() throws Exception {
-                addFolderInternal(folder);
-                return futures;
-            }
-            
-            private void addFolderInternal(File folderOrFile) {
-                //TODO try to make non-recursive
-                if(folderOrFile != null ) {
-                    if(folderOrFile.isDirectory() && library.isDirectoryAllowed(folderOrFile)) {
-                        for(File file : folderOrFile.listFiles(filter)) {
-                            addFolderInternal(file);
-                        }
-                    } else {
-                        futures.add(add(folderOrFile));
-                    }
-                }
-            }
-        });
-    }        
+        return library.scanFolderAndAddToCollection(folder, fileFilter, this);
+    }
+    
     @Override
     public ListeningFuture<FileDesc> add(File file) {
-
         if(!isFileAddable(file)) {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(
                     file, FileViewChangeEvent.Type.FILE_ADD_FAILED, 
