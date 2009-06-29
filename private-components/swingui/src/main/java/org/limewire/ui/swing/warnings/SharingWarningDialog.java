@@ -21,7 +21,7 @@ class SharingWarningDialog extends LimeJDialog {
 
     public SharingWarningDialog() {
         setTitle(I18n.tr("Share files?"));
-        setModal(true);
+        setModalityType(ModalityType.APPLICATION_MODAL);
     }
 
     public void initialize(final SharedFileList fileList, final List<File> files) {

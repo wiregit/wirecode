@@ -32,7 +32,7 @@ class LibraryWarningDialog extends LimeJDialog {
     public LibraryWarningDialog(LibraryManager libraryManager) {
         this.libraryManager = libraryManager;
         setTitle(I18n.tr("Choose Categories"));
-        setModal(true);
+        setModalityType(ModalityType.APPLICATION_MODAL);
     }
 
     public void initialize(final LocalFileList fileList, final List<File> files) {
