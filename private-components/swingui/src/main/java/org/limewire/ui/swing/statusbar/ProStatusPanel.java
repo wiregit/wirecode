@@ -207,7 +207,7 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
      * page.
      */
     private void handleLinkClick() {
-        NativeLaunchUtils.openURL(application.getUniqueUrl(currentLabel.getURL()));
+        NativeLaunchUtils.openURL(application.addClientInfoToUrl(currentLabel.getURL()));
     }
     
     @Override

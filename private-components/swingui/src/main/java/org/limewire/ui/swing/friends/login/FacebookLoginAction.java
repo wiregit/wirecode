@@ -108,7 +108,7 @@ public class FacebookLoginAction extends AbstractAction {
                     browser.load(event.getResult());
                     break;
                 case EXCEPTION:
-                    browser.load(application.getUniqueUrl("http://client-data.limewire.com/fberror/"));
+                    browser.load(application.addClientInfoToUrl("http://client-data.limewire.com/fberror/"));
                     break;
                 default:
                     throw new IllegalStateException(event.getType().toString());

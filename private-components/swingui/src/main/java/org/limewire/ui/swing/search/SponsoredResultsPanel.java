@@ -115,7 +115,7 @@ public class SponsoredResultsPanel extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(!MozillaInitialization.isInitialized()) {
-                NativeLaunchUtils.openURL(application.getUniqueUrl(result.getUrl()));
+                NativeLaunchUtils.openURL(application.addClientInfoToUrl(result.getUrl()));
             } else {            
                 switch(result.getTarget()) {
                 case HOME:
@@ -131,7 +131,7 @@ public class SponsoredResultsPanel extends JXPanel {
                     break;
                 case EXTERNAL:
                 default:
-                    NativeLaunchUtils.openURL(application.getUniqueUrl(result.getUrl()));
+                    NativeLaunchUtils.openURL(application.addClientInfoToUrl(result.getUrl()));
                 }
             }
         }

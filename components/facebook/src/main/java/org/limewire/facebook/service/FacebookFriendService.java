@@ -22,6 +22,7 @@ import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.Network;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.impl.feature.LimewireFeatureInitializer;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.lifecycle.Asynchronous;
@@ -55,14 +56,18 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
 
     private final Provider<String[]> authServerUrls;
 
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
+
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   PresenceHandlerFactory presenceHandlerFactory,
                                   FeatureRegistry featureRegistry,
-                                  @FacebookAuthServerUrls Provider<String[]> authServerUrls) {
+                                  @FacebookAuthServerUrls Provider<String[]> authServerUrls,
+                                  HttpClientInstanceUtils httpClientInstanceUtils) {
         this.connectionFactory = connectionFactory;
         this.presenceHandlerFactory = presenceHandlerFactory;
         this.featureRegistry = featureRegistry;
         this.authServerUrls = authServerUrls;
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
     
@@ -161,9 +166,9 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 if (LOG.isDebugEnabled()) {
                     LOG.debugf("auth urls to choose from {0}", Arrays.asList(authUrls));
                 }
-                String authUrl = FacebookUtils.getRandomElement(authUrls);
+                String authUrl = httpClientInstanceUtils.addClientInfoToUrl(FacebookUtils.getRandomElement(authUrls) + "getlogin/");
                 LOG.debugf("picked auth url: {0}", authUrl);
-                HttpGet getMethod = new HttpGet(authUrl + "getlogin/");
+                HttpGet getMethod = new HttpGet(authUrl);
                 HttpResponse response = httpClient.execute(getMethod);
                 assert response.getStatusLine().getStatusCode() == 302;
                 String url = response.getFirstHeader("Location").getValue();

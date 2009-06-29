@@ -7,7 +7,7 @@ public interface Application {
      * Returns a URL that is unique according to the unique properties of
      * the running application.
      */
-    String getUniqueUrl(String baseUrl);
+    String addClientInfoToUrl(String baseUrl);
 
     /** Returns true if the application is in a 'testing' version. */
     boolean isTestingVersion();

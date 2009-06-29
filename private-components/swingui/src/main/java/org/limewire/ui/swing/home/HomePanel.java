@@ -102,7 +102,7 @@ public class HomePanel extends JXPanel {
     }
 
     public void load(String url) {
-        url = application.getUniqueUrl(url);
+        url = application.addClientInfoToUrl(url);
         if(MozillaInitialization.isInitialized()) {
             if(firstRequest) {
                 if(browser.isLastRequestSuccessful()) {

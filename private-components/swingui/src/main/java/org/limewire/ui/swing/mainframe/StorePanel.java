@@ -79,7 +79,7 @@ public class StorePanel extends JPanel {
     }
 
     public void load(String url) {
-        url = application.getUniqueUrl(url);
+        url = application.addClientInfoToUrl(url);
         if (!MozillaInitialization.isInitialized()) {
             NativeLaunchUtils.openURL(url);
         } else {
