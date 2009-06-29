@@ -318,6 +318,11 @@ public class RemoteFileDescAdapter implements SearchResult {
             } 
             return FRIENDLY_PEER_FACTOR;
         }
+        
+        @Override
+        public String toString() {
+            return "RFD Host for: " + friendPresence;
+        }
     }
     
     /**
@@ -373,6 +378,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         @Override
         public int getRelevance() {
             return ALTLOC_FACTOR;
+        }
+        
+        @Override
+        public String toString() {
+            return "AltLoc Host For: " + presence;
         }
     }
 

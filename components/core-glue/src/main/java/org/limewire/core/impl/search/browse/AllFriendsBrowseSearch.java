@@ -2,6 +2,7 @@ package org.limewire.core.impl.search.browse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchListener;
@@ -16,22 +17,29 @@ import ca.odell.glazedlists.event.ListEventListener;
 class AllFriendsBrowseSearch extends AbstractBrowseSearch {
     
     private final RemoteLibraryManager remoteLibraryManager;
+    private final ExecutorService backgroundExecutor;
     private final ListEventListener<SearchResult> listEventListener = new AllFriendsListEventListener<SearchResult>();
 
   
-    public AllFriendsBrowseSearch(RemoteLibraryManager remoteLibraryManager) {
+    public AllFriendsBrowseSearch(RemoteLibraryManager remoteLibraryManager, ExecutorService backgroundExecutor) {
         this.remoteLibraryManager = remoteLibraryManager;
+        this.backgroundExecutor = backgroundExecutor;
     }
 
 
     @Override
     public void start() {
-        for (SearchListener listener : searchListeners) {
-            listener.searchStarted(AllFriendsBrowseSearch.this);
-        }
-
-        loadSnapshot();
-        installListener();
+        backgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (SearchListener listener : searchListeners) {
+                    listener.searchStarted(AllFriendsBrowseSearch.this);
+                }
+                
+                installListener();
+                loadSnapshot();
+            }
+        });
     }
 
     @Override

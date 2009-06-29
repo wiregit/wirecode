@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.core.api.library.FriendLibrary;
@@ -23,6 +24,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
 
     private final Friend friend;
     private final RemoteLibraryManager remoteLibraryManager;
+    private final ExecutorService executorService;
     private final ListEventListener<FriendLibrary> friendLibraryListEventListener = new FriendLibraryListEventListener();
 
     private final PropertyChangeListener libraryPropertyChangeListener = new LibraryPropertyChangeListener();
@@ -32,21 +34,26 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     /**
      * @param friend the person to be browsed - can not be anonymous or null
      */
-    public FriendSingleBrowseSearch(RemoteLibraryManager remoteLibraryManager, Friend friend) {
+    public FriendSingleBrowseSearch(RemoteLibraryManager remoteLibraryManager, Friend friend, ExecutorService executorService) {
         assert(friend != null && !friend.isAnonymous());
         this.friend = friend;
         this.remoteLibraryManager = remoteLibraryManager;
+        this.executorService = executorService;
     }
 
 
     @Override
     public void start() {
-        for (SearchListener listener : searchListeners) {
-            listener.searchStarted(FriendSingleBrowseSearch.this);
-        }
-
-        startFriendBrowse();
-        installListener();
+        executorService.execute(new Runnable() {
+            public void run() {
+                for (SearchListener listener : searchListeners) {
+                    listener.searchStarted(FriendSingleBrowseSearch.this);
+                }
+                
+                installListener();
+                startFriendBrowse();
+            }
+        });
     }
 
     @Override
@@ -59,9 +66,6 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
 
 
     private void startFriendBrowse() {
-        // TODO: RemoteFileItems are going away. Need a new way to access a
-        // snapshot of what is currently shared.
-
         FriendLibrary library = remoteLibraryManager.getFriendLibrary(friend);
         
         if (library == null) {

@@ -3,15 +3,14 @@ package org.limewire.ui.swing.search;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.JMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.UniqueList;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -31,7 +30,7 @@ public class RemoteHostMenuFactory {
     public JMenu createBrowseMenu(Collection<RemoteHost> allHosts){
 
         //list of unique presenceIds used to check for duplicate hosts
-        final UniqueList<RemoteHost> uniqueHosts = new UniqueList<RemoteHost>(new BasicEventList<RemoteHost>(), new RemoteHostComparator());
+        final Set<RemoteHost> uniqueHosts = new TreeSet<RemoteHost>(new RemoteHostComparator());
         uniqueHosts.addAll(allHosts);
         
         JMenu browse = new JMenu(I18n.tr("Browse Files"));

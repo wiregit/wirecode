@@ -1,6 +1,7 @@
 package org.limewire.core.impl.search.browse;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -11,18 +12,22 @@ import org.limewire.friend.api.Friend;
 import org.limewire.inject.LazySingleton;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 @LazySingleton
-class CoreBrowseSearchFactory implements BrowseSearchFactory{
+class CoreBrowseSearchFactory implements BrowseSearchFactory {
     
-    private RemoteLibraryManager remoteLibraryManager;
-    private BrowseFactory browseFactory;
+    private final RemoteLibraryManager remoteLibraryManager;
+    private final BrowseFactory browseFactory;
+    private final ExecutorService backgroundExecutor;
 
     @Inject
     public CoreBrowseSearchFactory(RemoteLibraryManager remoteLibraryManager,
-    BrowseFactory browseFactory) {
+            BrowseFactory browseFactory,
+            @Named("backgroundExecutor") ExecutorService backgroundExecutor) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.browseFactory = browseFactory;
+        this.backgroundExecutor = backgroundExecutor;
     }
     
     /**
@@ -30,7 +35,7 @@ class CoreBrowseSearchFactory implements BrowseSearchFactory{
      */
     public BrowseSearch createFriendBrowseSearch(Friend friend){
         assert(friend != null && !friend.isAnonymous());
-        return new FriendSingleBrowseSearch(remoteLibraryManager, friend);
+        return new FriendSingleBrowseSearch(remoteLibraryManager, friend, backgroundExecutor);
     }
     
     /**
@@ -51,7 +56,7 @@ class CoreBrowseSearchFactory implements BrowseSearchFactory{
     }
     
     public BrowseSearch createAllFriendsBrowseSearch(){
-        return new AllFriendsBrowseSearch(remoteLibraryManager);
+        return new AllFriendsBrowseSearch(remoteLibraryManager, backgroundExecutor);
     }
    
     

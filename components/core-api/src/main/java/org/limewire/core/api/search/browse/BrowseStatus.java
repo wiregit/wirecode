@@ -4,12 +4,26 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.limewire.friend.api.Friend;
+import org.limewire.util.StringUtils;
 
 public class BrowseStatus {
     
     public enum BrowseState {
-        LOADED(true), FAILED(false), PARTIAL_FAIL(true), UPDATED(true), LOADING(true), UPDATED_PARTIAL_FAIL(true), OFFLINE(false), 
-        /** The list of files from all friends is empty */
+        /** The browse completed successfully. */
+        LOADED(true),
+        /** The browse failed. */
+        FAILED(false),
+        /** Some of the browses failed (but some succeeded) -- used in multi-browse searches. */
+        PARTIAL_FAIL(true),
+        /** Some updates are available, but it is not completed. */
+        UPDATED(true),
+        /** Not all browses have completed, but none have failed yet. */
+        LOADING(true),
+        /** Useful in multi-browse: some browses have updates, but others have failed. */
+        UPDATED_PARTIAL_FAIL(true),
+        /** Useful for friend browses: the friend is currently offline. */
+        OFFLINE(false),
+        /** Useful for multi-friend browses: some friends are online, but sharing nothing. */
         NO_FRIENDS_SHARING(false) ;
         
         private boolean ok;
@@ -46,5 +60,10 @@ public class BrowseStatus {
 
     public BrowseSearch getBrowseSearch() {
         return search;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 }

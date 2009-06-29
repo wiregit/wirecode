@@ -106,4 +106,9 @@ public class GnutellaFriend implements Friend {
     public boolean isSubscribed() {
         return false;
     }
+    
+    @Override
+    public String toString() {
+        return "renderName[" + renderName + "], name[" + name + "], id[" + id + "]"; 
+    }
 }

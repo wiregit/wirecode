@@ -26,8 +26,9 @@ class CoreBrowse implements Browse {
     private final FriendPresence friendPresence;
     private final QueryReplyListenerList listenerList;
     private final AtomicBoolean started = new AtomicBoolean(false);
+    private final AtomicBoolean stopped = new AtomicBoolean(false);
     private volatile byte[] browseGuid;
-    private volatile QueryReplyListener listener;
+    private volatile BrowseResultAdapter listener;
 
     @Inject
     public CoreBrowse(@Assisted FriendPresence friendPresence, SearchServices searchServices,
@@ -52,6 +53,13 @@ class CoreBrowse implements Browse {
 
     @Override
     public void stop() {
+        // if the listener hadn't already stopped,
+        // this is a 'cancel' which we'll consider a failed browse.
+        if(!stopped.getAndSet(true)) {
+            if(listener != null) {
+                listener.browseListener.browseFinished(false);
+            }
+        }
         // TODO: This should cancel the browse if it was active.
         listenerList.removeQueryReplyListener(browseGuid, listener);
         searchServices.stopQuery(new GUID(browseGuid));
@@ -66,13 +74,18 @@ class CoreBrowse implements Browse {
         
         @Override
         public void browseFinished(boolean success) {
+            // only push to delegate if this hasn't already been stoppeed.
+            if(!stopped.getAndSet(true)) {
+                delegate.browseFinished(success);
+            }
             stop();
-            delegate.browseFinished(success);
         }
         
         @Override
         public void handleBrowseResult(SearchResult searchResult) {
-            delegate.handleBrowseResult(searchResult);
+            if(!stopped.get()) {
+                delegate.handleBrowseResult(searchResult);
+            }
         }
     }
 

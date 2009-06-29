@@ -32,25 +32,13 @@ class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
         for (SearchListener listener : searchListeners) {
             listener.searchStarted(AnonymousSingleBrowseSearch.this);
         }
-
-        startAnonymousBrowse();
-    }
-
-    @Override
-    public void stop() {
-        for (SearchListener listener : searchListeners) {
-            listener.searchStopped(AnonymousSingleBrowseSearch.this);
-        }
-        stopAnonymousBrowse();
-    }
-
-
-    private void startAnonymousBrowse() {
         browse = browseFactory.createBrowse(friendPresence);
         browse.start(new BrowseEventForwarder());
     }
 
-    private void stopAnonymousBrowse() {
+    @Override
+    public void stop() {
+        // let the stopping of the browse trigger the events.
         assert (browse != null);
         browse.stop();
     }

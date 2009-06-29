@@ -91,15 +91,13 @@ class SpamListEventListener implements ListEventListener<VisualSearchResult> {
                     private VisualSearchResult pickNewParent(final VisualSearchResult visualSearchResult) {
                         VisualSearchResult newParent = null;
                         if (visualSearchResult.getSimilarResults().size() > 0) {
-                            newParent = visualSearchResult.getSimilarResults().get(
-                                    0);
+                            newParent = visualSearchResult.getSimilarResults().get(0);
                             newParent.setSimilarityParent(null);
                             visualSearchResult.removeSimilarSearchResult(newParent);
 
                         }
 
-                        for (VisualSearchResult simResult : visualSearchResult
-                                .getSimilarResults()) {
+                        for (VisualSearchResult simResult : visualSearchResult.getSimilarResults()) {
                             visualSearchResult.removeSimilarSearchResult(simResult);
                             if (newParent != null) {
                                 newParent.addSimilarSearchResult(simResult);
@@ -108,8 +106,7 @@ class SpamListEventListener implements ListEventListener<VisualSearchResult> {
                         }
 
                         if (newParent != null) {
-                            newParent.setChildrenVisible(visualSearchResult
-                                    .isChildrenVisible());
+                            newParent.setChildrenVisible(visualSearchResult.isChildrenVisible());
                             newParent.setVisible(true);
                         }
                         visualSearchResult.setChildrenVisible(false);

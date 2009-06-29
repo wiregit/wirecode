@@ -93,8 +93,7 @@ public class GnutellaPresence extends AbstractFriendPresence implements FriendPr
     public GnutellaPresence(Address address, String id) {
         this.id = id;
         addFeature(new AddressFeature(address));
-        this.friend = new GnutellaFriend(describe(address),
-                describeFriendly(address), id, this);
+        this.friend = new GnutellaFriend(describe(address), describeFriendly(address), id, this);
     }
     
     private String describe(Address address) {
@@ -161,5 +160,10 @@ public class GnutellaPresence extends AbstractFriendPresence implements FriendPr
     @Override
     public Mode getMode() {
         return Mode.available;
+    }
+    
+    @Override
+    public String toString() {
+        return "GnutellaPresence for: " + friend;
     }
 }
