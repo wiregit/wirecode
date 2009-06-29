@@ -1,10 +1,12 @@
 package org.limewire.ui.swing.downloads.table.renderer;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.border.LineBorder;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
@@ -26,6 +28,7 @@ public class DownloadProgressRenderer extends JXPanel implements TableCellRender
     @Resource private int progressBarHeight;
     /**the progress bar disappears when the column width is less than this value*/
     @Resource private int progressBarCutoffWidth;
+    @Resource private Color progressBarBorder;
 
     private LimeProgressBar progressBar;
     private JLabel timeLabel;
@@ -36,7 +39,8 @@ public class DownloadProgressRenderer extends JXPanel implements TableCellRender
         GuiUtils.assignResources(this);
         
         progressBar = new LimeProgressBar(0, 100);
-        progressBarDecorator.decoratePlain(progressBar);        
+        progressBarDecorator.decoratePlain(progressBar);  
+        progressBar.setBorder(new LineBorder(progressBarBorder));
         Dimension size = new Dimension(progressBarWidth, progressBarHeight);
         progressBar.setMaximumSize(size);
         progressBar.setPreferredSize(size);
