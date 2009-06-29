@@ -55,7 +55,7 @@ public class LibrarySettings extends LimeProps {
     
     /** True if DOCUMENTS files are managed. */
     public static final BooleanSetting MANAGE_DOCUMENTS =
-        FACTORY.createBooleanSetting("MANAGE_DOCUMENTS_FILES", true);
+        FACTORY.createBooleanSetting("MANAGE_DOCUMENTS_FILES", false);
     
     /** True if PROGRAMS files are managed. */
     public static final BooleanSetting MANAGE_PROGRAMS =
@@ -63,7 +63,7 @@ public class LibrarySettings extends LimeProps {
     
     /** True if OTHER files are managed. */
     public static final BooleanSetting MANAGE_OTHER =
-        FACTORY.createBooleanSetting("MANAGE_OTHER_FILES", true);
+        FACTORY.createBooleanSetting("MANAGE_OTHER_FILES", false);
     
     /** True if the user should be prompted about what categories to share during a folder drop. */
     public static final BooleanSetting ASK_ABOUT_FOLDER_DROP_CATEGORIES =
