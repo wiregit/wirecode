@@ -143,9 +143,12 @@ class StatusActions {
                 switch (event.getType()) {
                 case CONNECTED:
                 case CONNECTING:
-                    availableAction.setEnabled(true);
-                    doNotDisturbAction.setEnabled(true);
-                    updateSelections();
+                    FriendConnection connection = event.getSource();
+                    if(connection != null && connection.supportsMode()) {
+                        availableAction.setEnabled(true);
+                        doNotDisturbAction.setEnabled(true);
+                        updateSelections();
+                    }
                     break;
                 case CONNECT_FAILED:
                 case DISCONNECTED:
