@@ -146,7 +146,7 @@ public class SearchResultMenu extends JPopupMenu {
         if (allHosts.size() > 0) {
             // TODO: don't show browse menuItem in browse view
             add(browseMenuFactory.createBrowseMenu(allHosts));
-            addSeparator();
+            //addSeparator();
 
             JMenu blockUserMenu = blockUserMenuFactory.createSearchBlockMenu(allHosts, selectedItems);
             if (blockUserMenu != null) {
