@@ -10,10 +10,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
-import org.limewire.inject.AbstractModule;
-import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
-import org.limewire.net.address.AddressEvent;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
@@ -29,8 +25,14 @@ import org.limewire.friend.impl.FileMetaDataImpl;
 import org.limewire.friend.impl.FileMetaDataImpl.Element;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressRegistry;
+import org.limewire.inject.AbstractModule;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.net.address.AddressEvent;
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 
 public class XMPPServiceTest extends XmppBaseTestCase {
@@ -43,7 +45,8 @@ public class XMPPServiceTest extends XmppBaseTestCase {
     private RosterListenerMock aliceRosterListener;
     private RosterListenerMock bobRosterListener;
     private FileOfferHandlerMock fileOfferHandler;
-    private FriendAddressRegistry addressRegistry;
+    private FriendConnection friendConnectionAlice;
+    private FriendConnection friendConnectionBob;
 
     public XMPPServiceTest(String name) {
         super(name);
@@ -52,15 +55,14 @@ public class XMPPServiceTest extends XmppBaseTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        addressRegistry = injector.getInstance(FriendAddressRegistry.class);
         aliceRosterListener = new RosterListenerMock();
         bobRosterListener = new RosterListenerMock();
         FriendConnectionConfiguration alice = new FriendConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
                 SERVICE, aliceRosterListener);
         FriendConnectionConfiguration bob = new FriendConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
                 SERVICE, bobRosterListener);
-        service.login(alice).get();
-        service.login(bob).get();
+        friendConnectionAlice = factories[0].login(alice).get();
+        friendConnectionBob = factories[1].login(bob).get();
         // Allow login, roster, presence, library messages to be sent, received
         Thread.sleep(SLEEP * 2); // TODO wait()/notify()
         assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
@@ -129,6 +131,13 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(USERNAME_1, bobRosterListener.getFirstRosterEntry());
         assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
+        // send address update of Bob's address
+        AddressEventTestBroadcaster addressEventBroadcaster = getAddressBroadcaster(injectors[1]);
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
+                AddressEvent.Type.ADDRESS_CHANGED));
+        
+        // send address update of Alices's address
+        addressEventBroadcaster = getAddressBroadcaster(injectors[0]);
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 AddressEvent.Type.ADDRESS_CHANGED));
 
@@ -144,7 +153,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertNotNull(addressFeature);
         FriendAddress friendAddress = (FriendAddress)addressFeature.getFeature();
         assertEquals(buddy2.getPresenceId(), friendAddress.getFullId());
-        Connectable address = (Connectable)addressRegistry.get(friendAddress);
+        Connectable address = (Connectable)injectors[0].getInstance(FriendAddressRegistry.class).get(friendAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -161,7 +170,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertNotNull(addressFeature);
         friendAddress = (FriendAddress)addressFeature.getFeature();
         assertEquals(buddy1.getPresenceId(), friendAddress.getFullId());
-        address = (Connectable)addressRegistry.get(friendAddress);
+        address = (Connectable)injectors[1].getInstance(FriendAddressRegistry.class).get(friendAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -174,10 +183,9 @@ public class XMPPServiceTest extends XmppBaseTestCase {
      * list of connections
      */
     public void testUserLogout() throws InterruptedException, ExecutionException {
-        XMPPFriendConnectionImpl connection = service.getActiveConnection();
-        assertTrue(connection.isLoggedIn());
-        connection.logout().get();
-        assertFalse(connection.isLoggedIn());
+        assertTrue(friendConnectionAlice.isLoggedIn());
+        friendConnectionAlice.logout().get();
+        assertFalse(friendConnectionAlice.isLoggedIn());
     }
 
     /**
@@ -196,10 +204,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(FriendPresence.Type.available, buddy2.getType());
         assertEquals(FriendPresence.Mode.available, buddy2.getMode());
 
-        FriendConnection connection = service.getActiveConnection();
-        if(connection.getConfiguration().getUserInputLocalID().equals(USERNAME_2)) {
-            connection.setMode(FriendPresence.Mode.away).get();
-        }
+        friendConnectionBob.setMode(FriendPresence.Mode.away).get();
 
         Thread.sleep(SLEEP);
 
@@ -238,11 +243,6 @@ public class XMPPServiceTest extends XmppBaseTestCase {
      */
     public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException, FriendException {
 
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
-                AddressEvent.Type.ADDRESS_CHANGED));
-
-        Thread.sleep(SLEEP);
-
         FriendPresence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         Map<Element, String> data = new EnumMap<Element, String>(Element.class);
         data.put(Element.id, new Random().nextInt() + "");
@@ -278,7 +278,9 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(USERNAME_1, bobRosterListener.getFirstRosterEntry());
         assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
+        getAddressBroadcaster(injectors[0]).listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
+                AddressEvent.Type.ADDRESS_CHANGED));
+        getAddressBroadcaster(injectors[1]).listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 AddressEvent.Type.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
@@ -292,7 +294,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertNotNull(addressFeature);
         FriendAddress friendAddress = (FriendAddress)addressFeature.getFeature();
         assertEquals(buddy2.getPresenceId(), friendAddress.getFullId());
-        Connectable address = (Connectable)addressRegistry.get(friendAddress);
+        Connectable address = (Connectable)injectors[0].getInstance(FriendAddressRegistry.class).get(friendAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -306,12 +308,14 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertNotNull(addressFeature);
         friendAddress = (FriendAddress)addressFeature.getFeature();
         assertEquals(buddy1.getPresenceId(), friendAddress.getFullId());
-        address = (Connectable)addressRegistry.get(friendAddress);
+        address = (Connectable)injectors[1].getInstance(FriendAddressRegistry.class).get(friendAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
 
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("200.200.200.200", 5000, false),
+        getAddressBroadcaster(injectors[0]).listeners.broadcast(new AddressEvent(new ConnectableImpl("200.200.200.200", 5000, false),
+                AddressEvent.Type.ADDRESS_CHANGED));
+        getAddressBroadcaster(injectors[1]).listeners.broadcast(new AddressEvent(new ConnectableImpl("200.200.200.200", 5000, false),
                 AddressEvent.Type.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
@@ -325,7 +329,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertNotNull(addressFeature);
         friendAddress = (FriendAddress)addressFeature.getFeature();
         assertEquals(buddy2.getPresenceId(), friendAddress.getFullId());
-        address = (Connectable)addressRegistry.get(friendAddress);
+        address = (Connectable)injectors[0].getInstance(FriendAddressRegistry.class).get(friendAddress);
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
@@ -339,7 +343,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertNotNull(addressFeature);
         friendAddress = (FriendAddress)addressFeature.getFeature();
         assertEquals(buddy1.getPresenceId(), friendAddress.getFullId());
-        address = (Connectable)addressRegistry.get(friendAddress);
+        address = (Connectable)injectors[1].getInstance(FriendAddressRegistry.class).get(friendAddress);
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
@@ -352,67 +356,76 @@ public class XMPPServiceTest extends XmppBaseTestCase {
      */
     public void testChatWithMultiplePresencesOfSameUser()
             throws InterruptedException, FriendException, UnknownHostException, ExecutionException {
-        // Create a second presence for Bob
-        RosterListenerMock bob2RosterListener = new RosterListenerMock();
-        FriendConnectionConfiguration bob2 = 
-            new FriendConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
-                    SERVICE, bob2RosterListener);
-        service.login(bob2).get();
-        Thread.sleep(SLEEP);
-
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(
-                new ConnectableImpl("199.199.199.199", 2048, true),
-                AddressEvent.Type.ADDRESS_CHANGED));
-        Thread.sleep(SLEEP);
-
-        // Simulate Alice talking to two presences of Bob
-        MessageReaderMock aliceFromBob = new MessageReaderMock();
-        FriendPresence bobPresence = aliceRosterListener.getFirstPresence(USERNAME_2);
-        MessageWriter aliceToBob = bobPresence.getFriend().createChat(aliceFromBob);
-
-        // Alice writes a message to Bob
-        aliceToBob.writeMessage("Hello Bob");
-        aliceToBob.writeMessage("Both Bobs should get this");
-        Thread.sleep(SLEEP);
-
-        // Confirm that both presences of Bob get the message
-        List<String> receivedByBob = bobRosterListener.listener.reader.messages;
-        List<String> receivedByBob2 = bob2RosterListener.listener.reader.messages;
-
-        assertEquals(2, receivedByBob.size());
-        assertEquals("Hello Bob", receivedByBob.get(0));
-        assertEquals("Both Bobs should get this", receivedByBob.get(1));
-
-        assertEquals(2, receivedByBob2.size());
-        assertEquals("Hello Bob", receivedByBob2.get(0));
-        assertEquals("Both Bobs should get this", receivedByBob2.get(1));
-
-        // Bob sends a message; Alice should get it
-        MessageWriter bobToAlice = bobRosterListener.listener.writer;
-        bobToAlice.writeMessage("Bob writing to Alice");
-        Thread.sleep(SLEEP);
-        assertEquals(1, aliceFromBob.messages.size());
-        assertEquals("Bob writing to Alice", aliceFromBob.messages.get(0));
-
-        // When Alice writes back, only Bob should receive the message
-        aliceToBob.writeMessage("Only Bob should get this");
-        Thread.sleep(SLEEP);
-        assertEquals(3, receivedByBob.size()); // One extra message received
-        assertEquals("Only Bob should get this", receivedByBob.get(2));
-        assertEquals(2, receivedByBob2.size()); // Other presence is unaffected
-
-        // Bob2 writes to Alice; when Alice writes back, only Bob2 should
-        // receive the message
-        MessageWriter bob2ToAlice = bob2RosterListener.listener.writer;
-        bob2ToAlice.writeMessage("Bob2 writing to Alice");
-        Thread.sleep(SLEEP);
-        assertEquals(2, aliceFromBob.messages.size());
-        assertEquals("Bob2 writing to Alice", aliceFromBob.messages.get(1));
-
-        aliceToBob.writeMessage("Only Bob2 should get this");
-        Thread.sleep(SLEEP);
-        assertEquals(3, receivedByBob2.size()); // One extra message received
-        assertEquals("Only Bob2 should get this", receivedByBob2.get(2));
-        assertEquals(3,receivedByBob.size()); // Other presence is unaffected
+        Injector injector = createInjector(getModules());
+        ServiceRegistry registry = injector.getInstance(ServiceRegistry.class);
+        registry.start();
+        XMPPConnectionFactoryImpl factory = injector.getInstance(XMPPConnectionFactoryImpl.class);
+        try {
+            // Create a second presence for Bob
+            RosterListenerMock bob2RosterListener = new RosterListenerMock();
+            FriendConnectionConfiguration bob2 = 
+                new FriendConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
+                        SERVICE, bob2RosterListener);
+            factory.login(bob2).get();
+            Thread.sleep(SLEEP);
+            
+            getAddressBroadcaster(injectors[0]).listeners.broadcast(new AddressEvent(
+                    new ConnectableImpl("199.199.199.199", 2048, true),
+                    AddressEvent.Type.ADDRESS_CHANGED));
+            Thread.sleep(SLEEP);
+            
+            // Simulate Alice talking to two presences of Bob
+            MessageReaderMock aliceFromBob = new MessageReaderMock();
+            FriendPresence bobPresence = aliceRosterListener.getFirstPresence(USERNAME_2);
+            MessageWriter aliceToBob = bobPresence.getFriend().createChat(aliceFromBob);
+            
+            // Alice writes a message to Bob
+            aliceToBob.writeMessage("Hello Bob");
+            aliceToBob.writeMessage("Both Bobs should get this");
+            Thread.sleep(SLEEP);
+            
+            // Confirm that both presences of Bob get the message
+            List<String> receivedByBob = bobRosterListener.listener.reader.messages;
+            List<String> receivedByBob2 = bob2RosterListener.listener.reader.messages;
+            
+            assertEquals(2, receivedByBob.size());
+            assertEquals("Hello Bob", receivedByBob.get(0));
+            assertEquals("Both Bobs should get this", receivedByBob.get(1));
+            
+            assertEquals(2, receivedByBob2.size());
+            assertEquals("Hello Bob", receivedByBob2.get(0));
+            assertEquals("Both Bobs should get this", receivedByBob2.get(1));
+            
+            // Bob sends a message; Alice should get it
+            MessageWriter bobToAlice = bobRosterListener.listener.writer;
+            bobToAlice.writeMessage("Bob writing to Alice");
+            Thread.sleep(SLEEP);
+            assertEquals(1, aliceFromBob.messages.size());
+            assertEquals("Bob writing to Alice", aliceFromBob.messages.get(0));
+            
+            // When Alice writes back, only Bob should receive the message
+            aliceToBob.writeMessage("Only Bob should get this");
+            Thread.sleep(SLEEP);
+            assertEquals(3, receivedByBob.size()); // One extra message received
+            assertEquals("Only Bob should get this", receivedByBob.get(2));
+            assertEquals(2, receivedByBob2.size()); // Other presence is unaffected
+            
+            // Bob2 writes to Alice; when Alice writes back, only Bob2 should
+            // receive the message
+            MessageWriter bob2ToAlice = bob2RosterListener.listener.writer;
+            bob2ToAlice.writeMessage("Bob2 writing to Alice");
+            Thread.sleep(SLEEP);
+            assertEquals(2, aliceFromBob.messages.size());
+            assertEquals("Bob2 writing to Alice", aliceFromBob.messages.get(1));
+            
+            aliceToBob.writeMessage("Only Bob2 should get this");
+            Thread.sleep(SLEEP);
+            assertEquals(3, receivedByBob2.size()); // One extra message received
+            assertEquals("Only Bob2 should get this", receivedByBob2.get(2));
+            assertEquals(3,receivedByBob.size()); // Other presence is unaffected
+        } finally {
+            factory.stop();
+            registry.stop();
+        }
     }
 }

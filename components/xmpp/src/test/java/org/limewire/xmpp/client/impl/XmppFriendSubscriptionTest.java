@@ -10,6 +10,9 @@ import org.limewire.friend.api.FriendRequest;
 import org.limewire.friend.api.FriendRequestEvent;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.EventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+
 import com.google.inject.TypeLiteral;
 import com.google.inject.Key;
 
@@ -18,6 +21,8 @@ import com.google.inject.Key;
  * (friend requests, and friend accept/decline/removes)
  */
 public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
+    
+    private static final Log LOG = LogFactory.getLog(XmppFriendSubscriptionTest.class);
 
     private static final String USERNAME_5 = "automatedtestfriend5@gmail.com";
     private static final String USERNAME_6 = "automatedtestfriend6@gmail.com";
@@ -45,8 +50,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         FriendConnectionConfiguration configSix = new FriendConnectionConfigurationMock(USERNAME_6, PASSWORD_56,
                 SERVICE, autoSixRosterListener);
 
-        connectionFive = (XMPPFriendConnectionImpl)service.login(configFive).get();
-        connectionSix = (XMPPFriendConnectionImpl)service.login(configSix).get();
+        connectionFive = (XMPPFriendConnectionImpl)factories[0].login(configFive).get();
+        connectionSix = (XMPPFriendConnectionImpl)factories[1].login(configSix).get();
 
         // Allow login, roster, presence, library messages to be sent, received
         Thread.sleep(SLEEP);
@@ -68,10 +73,11 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         super.tearDown();
     }
 
-    private EventListener<FriendRequestEvent> getFriendRequestListener(final String userName, final boolean accept) {
+    private EventListener<FriendRequestEvent> createFriendRequestListener(final String userName, final boolean accept) {
         return new EventListener<FriendRequestEvent>() {
             @Override
             public void handleEvent(FriendRequestEvent event) {
+                LOG.debugf("handling friend request: {0}", event);
                 FriendRequest friendRequest = event.getData();
                 if (friendRequest.getFriendUsername().equals(userName)) {
                     friendRequest.getDecisionHandler().handleDecision(userName, accept);
@@ -81,13 +87,13 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
     }
 
     private void setFriendRequestListener(String userName, boolean accept) {
-        acceptFriendListener = getFriendRequestListener(userName, accept);
-        injector.getInstance(Key.get(new TypeLiteral<ListenerSupport<FriendRequestEvent>>(){})).
+        acceptFriendListener = createFriendRequestListener(userName, accept);
+        injectors[1].getInstance(Key.get(new TypeLiteral<ListenerSupport<FriendRequestEvent>>(){})).
                 addListener(acceptFriendListener);
     }
 
     private void removeFriendRequestListener() {
-        injector.getInstance(Key.get(new TypeLiteral<ListenerSupport<FriendRequestEvent>>(){})).
+        injectors[1].getInstance(Key.get(new TypeLiteral<ListenerSupport<FriendRequestEvent>>(){})).
                 removeListener(acceptFriendListener);
         acceptFriendListener = null;
     }
@@ -142,8 +148,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         FriendConnectionConfiguration configSix = new FriendConnectionConfigurationMock(USERNAME_6, PASSWORD_56,
                 SERVICE, autoSixRosterListener);
 
-        connectionFive = (XMPPFriendConnectionImpl) service.login(configFive).get();
-        connectionSix = (XMPPFriendConnectionImpl) service.login(configSix).get();
+        connectionFive = (XMPPFriendConnectionImpl) factories[0].login(configFive).get();
+        connectionSix = (XMPPFriendConnectionImpl) factories[1].login(configSix).get();
 
         Thread.sleep(SLEEP);
 
@@ -196,8 +202,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         FriendConnectionConfiguration configSix = new FriendConnectionConfigurationMock(USERNAME_6, PASSWORD_56,
                 SERVICE, autoSixRosterListener);
 
-        connectionFive = (XMPPFriendConnectionImpl) service.login(configFive).get();
-        connectionSix = (XMPPFriendConnectionImpl) service.login(configSix).get();
+        connectionFive = (XMPPFriendConnectionImpl) factories[0].login(configFive).get();
+        connectionSix = (XMPPFriendConnectionImpl) factories[1].login(configSix).get();
 
         Thread.sleep(SLEEP);
         
