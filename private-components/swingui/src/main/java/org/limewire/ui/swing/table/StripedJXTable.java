@@ -55,32 +55,48 @@ public class StripedJXTable extends GlazedJXTable {
      * Paints fake rows to fill the viewport.
      */
     protected void paintEmptyRows(Graphics g) {
-        final int rowCount = getRowCount();
-        final Rectangle clip = g.getClipBounds();
-        final int height = clip.y + clip.height;
-        
+        int rowCount = getRowCount();
+        Rectangle clip = g.getClipBounds();
+        int clipHeight = clip.y + clip.height;
+        int tableHeight = getHeight();
+        int clipViewableRows = clipHeight / rowHeight;
+        int tableViewableRows = tableHeight / rowHeight;
+        int startDrawingAt = rowCount * rowHeight;
+
         // paint rows and horizontal lines
-        if (rowCount * rowHeight < height) {
-            for (int i = rowCount; i <= height/rowHeight; ++i) {
-                g.setColor(getColorForRow(i));
-                g.fillRect(clip.x, i * rowHeight, clip.width, rowHeight);
-                
-                // paint horizontal rows if they're shown
-                if(getShowHorizontalLines() && i > rowCount) {
-                    g.setColor(gridColor);
-                    g.drawLine(clip.x, i * rowHeight, clip.width, i * rowHeight);
+        if (startDrawingAt < tableHeight) {
+            if(clipViewableRows < tableViewableRows) {
+                // we need to call repaint in order to trigger things to properly paint.
+                // ideally, we would just change the clip and draw...
+                // but because tables are generally inside of a JViewport,
+                // we can't do that, because the viewport draws to a backbuffer
+                // and then blts the changes... so we need to tell the viewport
+                // that we need to do our drawing explicitly.
+                // it will recall this method with the proper clip,
+                // and we can paint!
+                repaint(clip.x, startDrawingAt, clip.width, tableHeight - startDrawingAt);
+            } else {
+                for (int i = rowCount; i <= clipViewableRows; ++i) {
+                    g.setColor(getColorForRow(i));
+                    g.fillRect(clip.x, i * rowHeight, clip.width, rowHeight);
+                    
+                    // paint horizontal rows if they're shown
+                    if(getShowHorizontalLines() && i > rowCount) {
+                        g.setColor(gridColor);
+                        g.drawLine(clip.x, i * rowHeight, clip.width, i * rowHeight);
+                    }
                 }
-            }
-            
-            // paint vertical lines if they're shown
-            if (getShowVerticalLines()) {
-                g.setColor(gridColor);
-                TableColumnModel columnModel = getColumnModel();
-                int x = 0;
-                for (int i = 0; i < columnModel.getColumnCount(); ++i) {
-                    TableColumn column = columnModel.getColumn(i);
-                    x += column.getWidth();
-                    g.drawLine(x - 1, rowCount * rowHeight, x - 1, height);
+                
+                // paint vertical lines if they're shown
+                if (getShowVerticalLines()) {
+                    g.setColor(gridColor);
+                    TableColumnModel columnModel = getColumnModel();
+                    int x = 0;
+                    for (int i = 0; i < columnModel.getColumnCount(); ++i) {
+                        TableColumn column = columnModel.getColumn(i);
+                        x += column.getWidth();
+                        g.drawLine(x - 1, rowCount * rowHeight, x - 1, clipHeight);
+                    }
                 }
             }
 
