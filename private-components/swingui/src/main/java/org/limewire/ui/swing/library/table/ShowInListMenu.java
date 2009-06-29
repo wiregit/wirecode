@@ -65,9 +65,8 @@ public abstract class ShowInListMenu extends JMenu {
                 JMenu menu = ShowInListMenu.this;
                 menu.removeAll();
                 
-                File selectedFile = null;
                 if(!selectedFiles.get().isEmpty()) {
-                    selectedFiles.get().get(0);
+                    File selectedFile = selectedFiles.get().get(0);
                     // once this is selected, show all the submenus
                     manager.getModel().getReadWriteLock().readLock().lock();
                     try { 
