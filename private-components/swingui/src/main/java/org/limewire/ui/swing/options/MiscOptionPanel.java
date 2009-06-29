@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.options;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -17,9 +19,10 @@ import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.settings.ApplicationSettings;
-import org.limewire.core.settings.FacebookSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.UrlAction;
@@ -32,14 +35,11 @@ import org.limewire.ui.swing.settings.QuestionsHandler;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import net.miginfocom.swing.MigLayout;
 
 /**
  * Misc Option View.
@@ -216,7 +216,7 @@ public class MiscOptionPanel extends OptionPanel {
 
             serviceComboBox = new JComboBox();
             for(String label : accountManager.get().getLabels()) {
-                if(!label.equals("Facebook") || FacebookSettings.FACEBOOK_ENABLED.get()) {
+                if(!label.equals("Facebook")) {
                     serviceComboBox.addItem(label);
                 }
             }

@@ -23,6 +23,7 @@ import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -96,8 +97,9 @@ public class ServiceSelectionLoginPanel extends JPanel {
         JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
         bottomPanel.setOpaque(false);
         
-        JXButton facebookButton = new JXButton(facebookLoginActionFactory.create(accountManager.getConfig("Facebook")));
-        facebookButton.setVisible(FacebookSettings.FACEBOOK_ENABLED.getValue());
+        boolean supportsFacebook = MozillaInitialization.isInitialized() && FacebookSettings.FACEBOOK_ENABLED.get();
+        JXButton facebookButton = supportsFacebook ? new JXButton(facebookLoginActionFactory.create(accountManager.getConfig("Facebook"))) : new JXButton();
+        facebookButton.setVisible(supportsFacebook);
         JXButton gmailButton = new JXButton(new ServiceAction(accountManager.getConfig("Gmail")));
         JXButton liveJournalButton = new JXButton(new ServiceAction(accountManager.getConfig("LiveJournal")));
         JXButton otherButton = new JXButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber")));
