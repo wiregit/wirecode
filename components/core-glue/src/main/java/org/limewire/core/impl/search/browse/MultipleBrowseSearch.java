@@ -178,14 +178,15 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
                 break;
             }
             
-           BrowseState state = getReleventMultipleBrowseState(status);           
-           if (state != null) {
+           BrowseState state = getReleventMultipleBrowseState(status);
+            if (state != null) {
                 BrowseStatus browseStatus = new BrowseStatus(MultipleBrowseSearch.this, state, failedList.toArray(new Friend[failedList.size()]));
                 for (BrowseStatusListener listener : browseStatusListeners) {
                     listener.statusChanged(browseStatus);
                 }
             }
 
+            activeBrowses.remove(status.getBrowseSearch());
             startPendingBrowse();
         }        
         

@@ -1,13 +1,10 @@
 package org.limewire.ui.swing.search.model;
 
-import java.awt.EventQueue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingUtilities;
@@ -41,8 +38,6 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.FunctionList.AdvancedFunction;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.util.concurrent.Lock;
-import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Provider;
 
@@ -69,6 +64,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
 
     /** Save exception handler. */
     private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    
+    /** The original list, off the EDT. */
+    private final EventList<SearchResult> offEDTResultList;
 
     /** List of all search results. */
     private final EventList<SearchResult> allSearchResults;
@@ -101,8 +99,6 @@ class BasicSearchResultsModel implements SearchResultsModel {
     private SortOption sortOption;
     
     private List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
-    
-    private final ListQueuer listQueuer = new ListQueuer();
 
     /**
      * Constructs a BasicSearchResultsModel with the specified search details,
@@ -121,24 +117,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
         // Create filter debugger.
         filterDebugger = new FilterDebugger<VisualSearchResult>();
         
-        // Underlying list, with no locks -- always accessed on EDT.
-        allSearchResults = new BasicEventList<SearchResult>(new ReadWriteLock() {
-            private Lock noopLock = new Lock() {
-                @Override public void lock() {}
-                @Override public boolean tryLock() { return true; }
-                @Override public void unlock() {}
-            };
-            
-            @Override
-            public Lock readLock() {
-                return noopLock;
-            }
-            
-            @Override
-            public Lock writeLock() {
-                return noopLock;
-            }
-        });
+        // Base list that can receive events off the EDT.
+        offEDTResultList = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
+        
+        // Proxies results onto the swing thread
+        allSearchResults = GlazedListsFactory.swingThreadProxyEventList(offEDTResultList);
         
         // Create list of search results grouped by URN.
         GroupingList<SearchResult> groupingListUrns = GlazedListsFactory.groupingList(
@@ -193,8 +176,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
             searchListener = null;
         }
         
-        if (allSearchResults instanceof TransformedList){
-            ((TransformedList)allSearchResults).dispose();
+        if (offEDTResultList instanceof TransformedList){
+            ((TransformedList)offEDTResultList).dispose();
         }
         notifyDisposalListeners();
     }
@@ -331,7 +314,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
         
 //        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
         try {
-            listQueuer.add(result);
+            offEDTResultList.add(result);
         } catch (Throwable th) {
             // Throw wrapper exception with detailed message.
             throw new RuntimeException(createMessageDetail("Problem adding result", result), th);
@@ -361,14 +344,14 @@ class BasicSearchResultsModel implements SearchResultsModel {
             results = cleanup;
         }        
         
-        listQueuer.addAll(results);
+        offEDTResultList.addAll(results);
     }
     
     /**
      * Removes all results from the model
      */
     public void clear(){
-        listQueuer.clear();
+        offEDTResultList.clear();
     }
     
     /**
@@ -519,70 +502,6 @@ class BasicSearchResultsModel implements SearchResultsModel {
     private void notifyDisposalListeners(){
         for (DisposalListener listener : disposalListeners){
             listener.objectDisposed(this);
-        }
-    }
-    
-    private class ListQueuer implements Runnable {
-        private volatile boolean scheduled = false;
-        private final BlockingQueue<SearchResult> queue = new ArrayBlockingQueue<SearchResult>(50);
-        private final List<SearchResult> transferQ = new ArrayList<SearchResult>(50);
-        
-        void add(SearchResult result) {
-            assert !EventQueue.isDispatchThread();
-            
-            try {
-                queue.put(result);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            schedule();
-        }
-        
-        void addAll(Collection<? extends SearchResult> results) {
-            assert !EventQueue.isDispatchThread();
-            
-            for(SearchResult result : results) {
-                add(result);
-            }
-        }
-        
-        void clear() {
-            assert EventQueue.isDispatchThread();
-            queue.clear();
-            allSearchResults.clear();
-        }
-        
-        private void schedule() {
-            if(!scheduled) {
-                scheduled = true;
-                SwingUtilities.invokeLater(this);
-            }
-        }
-        
-        @Override
-        public void run() {
-            queue.drainTo(transferQ);
-            allSearchResults.addAll(transferQ);
-            transferQ.clear();
-            
-            // Something may have gotten added while we were in this method.
-            // If that's the case, then just reschedule the run for later.
-            // (to avoid starving the event thread of processing other events)
-            if(!queue.isEmpty()) {
-                // don't use schedule -- just force an invokeLater,
-                // schedule is already true.
-                SwingUtilities.invokeLater(this);
-            } else {
-                scheduled = false;
-                // if the Q isn't empty after we set scheduled to false,
-                // we must reschedule, because it's possible another
-                // thread added an item but didn't set schedule to true,
-                // because it was already true when that thread had
-                // priority.
-                if(!queue.isEmpty()) {
-                    schedule();
-                }
-            }
         }
     }
 }

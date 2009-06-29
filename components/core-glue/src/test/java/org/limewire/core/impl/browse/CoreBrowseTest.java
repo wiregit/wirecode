@@ -27,7 +27,7 @@ public class CoreBrowseTest extends BaseTestCase {
 
     /**
      * Tests that the supplied browse listener is populated with search results
-     * as handleBrowseResult is called on the internal {@link BrowseListeer} of the
+     * as handleBrowseResult is called on the internal {@link BrowseListener} of the
      * {@link CoreBrowse} object.
      */
     public void testBasicBrowseListenerPopulation() {
@@ -75,8 +75,6 @@ public class CoreBrowseTest extends BaseTestCase {
                 
                 Sequence sequence1 = context.sequence("seq");
                 exactly(1).of(testBrowseListener).browseFinished(false);
-                inSequence(sequence1);
-                exactly(1).of(testBrowseListener).browseFinished(true);
                 inSequence(sequence1);
             }
         });
