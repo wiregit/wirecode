@@ -86,30 +86,8 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
             }
         });
         
-        LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {
-           @Override
-            public void settingChanged(final SettingEvent evt) {
-               SwingUtilities.invokeLater(new Runnable() {
-                   @Override
-                    public void run() {
-                       manager.setValue(LibrarySettings.ALLOW_PROGRAMS, LibrarySettings.ALLOW_PROGRAMS.get());
-                    } 
-               });
-            } 
-        });
-
-        LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.addSettingListener(new SettingListener() {
-            @Override
-             public void settingChanged(SettingEvent evt) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                     public void run() {
-                        manager.setValue(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.get());
-                     } 
-                });
-             } 
-         });
-
+        registerSettingListener(LibrarySettings.ALLOW_PROGRAMS);
+        registerSettingListener(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING);
     }
         
     @Override
@@ -150,6 +128,20 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         for ( Setting setting : settingMap.keySet() ) {
             manager.setValue(setting, settingMap.get(setting).isSelected());
         }
+    }
+    
+    private void registerSettingListener(final Setting setting) {
+        setting.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(final SettingEvent evt) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                 public void run() {
+                    manager.setValue(setting, setting.get());
+                 } 
+            }); 
+            }
+        });
     }
     
 }
