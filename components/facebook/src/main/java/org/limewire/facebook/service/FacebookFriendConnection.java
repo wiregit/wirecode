@@ -59,6 +59,7 @@ import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
 import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.facebook.service.settings.FacebookAPIKey;
+import org.limewire.facebook.service.settings.FacebookAuthServerUrls;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
@@ -109,7 +110,6 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
-    private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
     private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
 
@@ -177,6 +177,8 @@ public class FacebookFriendConnection implements FriendConnection {
     private String session;
     private String uid;
     private String secret;
+
+    private final Provider<String[]> authUrls;
     
     @Inject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -195,7 +197,8 @@ public class FacebookFriendConnection implements FriendConnection {
                                     ChatListenerFactory chatListenerFactory,
                                     DiscoInfoHandlerFactory discoInfoHandlerFactory,
                                     @Named("backgroundExecutor")ScheduledListeningExecutorService executorService,
-                                    @ChatChannel MutableProvider<String> chatChannel) {
+                                    @ChatChannel MutableProvider<String> chatChannel,
+                                    @FacebookAuthServerUrls Provider<String[]> authUrls) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -207,6 +210,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.chatListenerFactory = chatListenerFactory;
         this.executorService = executorService;
         this.chatChannel = chatChannel;
+        this.authUrls = authUrls;
         this.addressHandler = addressHandlerFactory.create(this);
         this.authTokenHandler = authTokenHandlerFactory.create(this);
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
@@ -503,8 +507,9 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private void requestSession() throws IOException, JSONException {
         String authToken = (String)configuration.getAttribute("auth-token");
-        LOG.debugf("requesting session from {0}...", FACEBOOK_GET_SESSION_URL + authToken + "/");
-        HttpGet sessionRequest = new HttpGet(FACEBOOK_GET_SESSION_URL + authToken + "/");
+        String authUrl = FacebookUtils.getRandomElement(authUrls.get()) + "/getsession/" + authToken + "/";
+        LOG.debugf("requesting session from {0}...", authUrl);
+        HttpGet sessionRequest = new HttpGet(authUrl);
         HttpClient httpClient = createHttpClient();
         HttpResponse response = httpClient.execute(sessionRequest);
         parseSessionResponse(response);

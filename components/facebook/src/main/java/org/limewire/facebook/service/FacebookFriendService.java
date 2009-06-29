@@ -161,9 +161,9 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 if (LOG.isDebugEnabled()) {
                     LOG.debugf("auth urls to choose from {0}", Arrays.asList(authUrls));
                 }
-                String authUrl = authUrls[(int)Math.floor(Math.random()*authUrls.length)];
+                String authUrl = FacebookUtils.getRandomElement(authUrls);
                 LOG.debugf("picked auth url: {0}", authUrl);
-                HttpGet getMethod = new HttpGet(authUrl);
+                HttpGet getMethod = new HttpGet(authUrl + "/getlogin/");
                 HttpResponse response = httpClient.execute(getMethod);
                 assert response.getStatusLine().getStatusCode() == 302;
                 String url = response.getFirstHeader("Location").getValue();

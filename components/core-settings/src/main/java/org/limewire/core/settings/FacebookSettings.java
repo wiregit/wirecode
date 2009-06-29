@@ -22,9 +22,15 @@ public class FacebookSettings extends LimeProps {
      * Facebook auth server urls.
      */
     public static final StringArraySetting AUTH_SERVER_URLS =
+        // have to be without trailing slash
         FACTORY.createRemoteStringArraySetting("FACEBOOK_AUTH_SERVER_URLS", new String[] {
-                "http://coelacanth:5555/getlogin/",
-                "http://cruncher:5555/getlogin/",
+                "http://coelacanth:5555",
+                "http://cruncher:5555",
         }, "Facebook.authServerUrls");
 
+    /**
+     * The Facebook API key, a remote setting.
+     */
+    public static final StringSetting API_KEY = 
+        FACTORY.createRemoteStringSetting("FACEBOOK_API_KEY", "28615065c80948753945e963923c43ca", "Facebook.apiKey");
 }
