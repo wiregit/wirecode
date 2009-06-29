@@ -42,7 +42,7 @@ public class OtherTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_OTHER_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_OTHER_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_OTHER_PATH", I18n.tr("Location"), 200, false, true),
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_OTHER_ACTION", "", 40, true, false)
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_OTHER_ACTION", I18n.tr("Remove"), 40, true, false)
         });
         this.iconManager = iconManager;
     }

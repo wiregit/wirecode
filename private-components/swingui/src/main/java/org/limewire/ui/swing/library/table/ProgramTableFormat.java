@@ -42,7 +42,7 @@ public class ProgramTableFormat<T extends LocalFileItem> extends AbstractLibrary
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_PROGRAM_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_PROGRAM_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_PROGRAM_PATH", I18n.tr("Location"), 200, false, true),
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_PROGRAM_ACTION", "", 40, true, false)
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_PROGRAM_ACTION", I18n.tr("Remove"), 40, true, false)
         });
     }
 

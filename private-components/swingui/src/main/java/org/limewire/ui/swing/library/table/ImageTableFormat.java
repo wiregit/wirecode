@@ -20,7 +20,7 @@ public class ImageTableFormat <T extends LocalFileItem> extends AbstractLibraryF
         super(ACTION_INDEX, "LIBRARY_IMAGE_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_IMAGE_FILENAME", I18n.tr("Filename"), 100, true, true),
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_IMAGE_SIZE", I18n.tr("Size"), 278, true, true),
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_IMAGE_ACTION", "", 40, true, false)
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_IMAGE_ACTION", I18n.tr("Remove"), 40, true, false)
         });     
     }
     

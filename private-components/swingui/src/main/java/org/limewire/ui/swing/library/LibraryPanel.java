@@ -282,7 +282,7 @@ public class LibraryPanel extends JPanel {
     
     private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {       
         selectedCategory = category;
-        
+
         if(category != Category.IMAGE) {
             tableListLayout.show(tableListPanel, TABLE);
             setEventListOnTable(eventList);
@@ -291,8 +291,9 @@ public class LibraryPanel extends JPanel {
             
             // hide the remove button for Library Tables
             TableColumnExt column = libraryTable.getColumnExt(libraryTableFormat.getColumnName(libraryTableFormat.getActionColumn()));
-            if(column != null)
+            if(column != null) {
                 column.setVisible(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY);
+            }
         } else {
             if(libraryImagePanel == null) {
                 createImageList();
