@@ -214,7 +214,8 @@ public class MainDownloadPanel extends JPanel {
         int downloadCount = sourceList.size();
         
         if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
-            new DownloadVisibilityEvent(true).publish();
+            //Do nothing - it is already set.
+            return;
         } else if (downloadCount == 0 && isVisible()) {
             new DownloadVisibilityEvent(false).publish();
         } else if (downloadCount > 0 && !isVisible()) {
