@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.table;
 
-import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.ListSelectionModel;
@@ -24,6 +23,8 @@ public class GlazedJXTable extends BasicJXTable {
     private SizeSequenceMapper simpleRowModelMapper;
     private SelectionMapper simpleSelectionMapper;
     private SortController sortController;
+    /** A hack required for pretending that there's no row heights while calling tableChanged. */
+    private boolean inTableChangeRowHeightHack;
 
     public GlazedJXTable() {
         super();
@@ -62,6 +63,35 @@ public class GlazedJXTable extends BasicJXTable {
 
     private void initialize() {
         // Add initialization steps here.
+    }
+    
+    // overriden to return false while doing a tableChanged event, 
+    // so that we don't null out the parent's SizeSequence,
+    // this is designed to allow JTable to properly control its SizeSequence
+    // instead of requiring a mapper between model/view, where
+    // we have no model distinction.
+    @Override
+    public boolean isRowHeightEnabled() {
+        if(inTableChangeRowHeightHack) {
+            return false;
+        } else { 
+            return super.isRowHeightEnabled();
+        }
+    }
+
+    // overriden to to turn off isRowHeightEnabled while doing a tableChanged, 
+    // so that we don't null out the parent's SizeSequence,
+    // this is designed to allow JTable to properly control its SizeSequence
+    // instead of requiring a mapper between model/view, where
+    // we have no model distinction.
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        inTableChangeRowHeightHack = true;
+        try {
+            super.tableChanged(e);
+        } finally {
+            inTableChangeRowHeightHack = false;
+        }
     }
     
     @Override
@@ -106,126 +136,28 @@ public class GlazedJXTable extends BasicJXTable {
         this.sortController = sortController;
     }
     
+    /** Stub out all size sequence mapping. */
     private static class SimpleSizeSequenceMapper extends SizeSequenceMapper {
-
-        private SizeSequence viewSizes;
-        private SizeSequence modelSizes;
-        private int defaultHeight;
-
-        @Override
-        public void setViewSizeSequence(SizeSequence selection, int height) {
-            SizeSequence old = this.viewSizes;
-            if (old != null) {
-                clearModelSizes();
-            }
-            this.viewSizes = selection;
-            this.defaultHeight = height;
-            mapTowardsModel();
-        }
-
-        @Override
-        public SizeSequence getViewSizeSequence() {
-            return viewSizes;
-        }
-
-        @Override
-        public void setFilters(FilterPipeline pipeline) {
-//            restoreSelection();
-        }
-
-        @Override
-        public void clearModelSizes() {
-            modelSizes = null;
-        }
-
-        @Override
-        public void insertIndexInterval(int start, int length, int value) {
-            if (modelSizes == null) return;
-            modelSizes.insertEntries(start, length, value);
-        }
-
-        @Override
-        public void removeIndexInterval(int start, int length) {
-            if (modelSizes == null) return;
-            modelSizes.removeEntries(start, length);
-        }
-        
-        @Override
-        public void restoreSelection() {
-            if (viewSizes == null) return;
-            int[] sizes = new int[getOutputSize()];
-            Arrays.fill(sizes, defaultHeight);
-            viewSizes.setSizes(sizes);
-//            viewSizes.setSizes(new int[0]);
-//            viewSizes.insertEntries(0, getOutputSize(), defaultHeight);
-
-            int[] selected = modelSizes.getSizes();
-            for (int i = 0; i < selected.length; i++) {
-              int index = convertToView(i);
-              // index might be -1, ignore. 
-              if (index >= 0) {
-                  viewSizes.setSize(index, selected[i]);
-              }
-            }
-        }
-
-        private void mapTowardsModel() {
-            if (viewSizes == null) return;
-            modelSizes = new SizeSequence(getInputSize(), defaultHeight);
-            int[] selected = viewSizes.getSizes(); 
-            for (int i = 0; i < selected.length; i++) {
-                int modelIndex = convertToModel(i);
-                modelSizes.setSize(modelIndex, selected[i]); 
-            }
-        }
-
-        private int getInputSize() {
-            return 0;
-        }
-
-        private int getOutputSize() {
-            return 0;
-        }
-
-        private int convertToModel(int index) {
-            return index;
-        }
-        
-        private int convertToView(int index) {
-            return index;
-        }        
-
-        @Override
-        protected void updateFromPipelineChanged() {
-//            restoreSelection();
-        }
-
+        @Override public void setViewSizeSequence(SizeSequence selection, int height) {}
+        @Override public SizeSequence getViewSizeSequence() { return null; }
+        @Override public void setFilters(FilterPipeline pipeline) {}
+        @Override public void clearModelSizes() {}
+        @Override public void insertIndexInterval(int start, int length, int value) {}
+        @Override public void removeIndexInterval(int start, int length) {}        
+        @Override public void restoreSelection() {}
+        @Override protected void updateFromPipelineChanged() {}
     }
     
+    /** Don't do any selection mapping. */
     private static class SimpleSelectionMapper implements SelectionMapper {
-
-        @Override
-        public ListSelectionModel getViewSelectionModel() {
-            return null;
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return false;
-        }
-
-        @Override
-        public void setViewSelectionModel(ListSelectionModel viewSelectionModel) {}
-        @Override
-        public void setFilters(FilterPipeline pipeline) {}
-        @Override
-        public void setEnabled(boolean enabled) {}
-        @Override
-        public void clearModelSelection() {}
-        @Override
-        public void insertIndexInterval(int start, int length, boolean before) {}
-        @Override
-        public void removeIndexInterval(int start, int end) {}
+        @Override public ListSelectionModel getViewSelectionModel() { return null; }
+        @Override public boolean isEnabled() { return false; }
+        @Override public void setViewSelectionModel(ListSelectionModel viewSelectionModel) {}
+        @Override public void setFilters(FilterPipeline pipeline) {}
+        @Override public void setEnabled(boolean enabled) {}
+        @Override public void clearModelSelection() {}
+        @Override public void insertIndexInterval(int start, int length, boolean before) {}
+        @Override public void removeIndexInterval(int start, int end) {}
     }
 
 
