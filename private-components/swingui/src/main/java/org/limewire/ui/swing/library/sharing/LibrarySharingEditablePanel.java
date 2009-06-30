@@ -88,7 +88,7 @@ class LibrarySharingEditablePanel {
         JLabel shareLabel = new JLabel(I18n.tr("Sharing list with..."));
         shareLabel.setFont(sharingLabelFont);
         shareLabel.setForeground(sharingLabelColor);
-        component.add(shareLabel, "gapleft 5, gaptop 6, wrap");        
+        component.add(shareLabel, "gapleft 5, gaptop 5, wrap");        
         
         filterTextField = new PromptTextField(I18n.tr("Filter..."));
         textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
