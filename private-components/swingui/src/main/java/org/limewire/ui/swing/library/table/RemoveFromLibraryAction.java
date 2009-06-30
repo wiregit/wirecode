@@ -5,9 +5,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -36,25 +39,37 @@ class RemoveFromLibraryAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {       
         File currentSong = PlayerUtils.getCurrentSongFile();
         List<LocalFileItem> selected = selectedLocalFileItems.get();
-        final List<File> toRemove = new ArrayList<File>(selected.size());
-        for(LocalFileItem item : selected) {
-            if(item.getFile().equals(currentSong)){
-                PlayerUtils.stop();
+        
+        int confirmation = FocusJOptionPane.showConfirmDialog(null, getMessage(selected), I18n.tr("Remove Files"), JOptionPane.OK_CANCEL_OPTION); 
+        if (confirmation == JOptionPane.OK_OPTION) {
+            final List<File> toRemove = new ArrayList<File>(selected.size());
+            for(LocalFileItem item : selected) {
+                if(item.getFile().equals(currentSong)){
+                    PlayerUtils.stop();
+                }
+                if(!item.isIncomplete()) {
+                    toRemove.add(item.getFile());
+                }
             }
-            if(!item.isIncomplete()) {
-                toRemove.add(item.getFile());
+            
+            if(!toRemove.isEmpty()) {
+                BackgroundExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        for(File file : toRemove) {
+                            libraryManager.getLibraryManagedList().removeFile(file);
+                        }
+                    }
+                });
             }
         }
-        
-        if(!toRemove.isEmpty()) {
-            BackgroundExecutorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    for(File file : toRemove) {
-                        libraryManager.getLibraryManagedList().removeFile(file);
-                    }
-                }
-            });
+    }
+    
+    private String getMessage(List<LocalFileItem> list) {
+        if(list.size() == 1) {
+            return I18n.tr("Remove {0} from Library? This will unshare this file with everyone.", list.get(0).getFileName());
+        } else {
+            return I18n.tr("Remove {0} files from Library? This will unshare these files with everyone.", list.size());
         }
     }
 }
