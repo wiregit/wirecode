@@ -33,8 +33,10 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 import com.google.inject.Inject;
@@ -49,6 +51,7 @@ public class LibraryTable extends MouseableTable {
     private DefaultEventSelectionModel<LocalFileItem> cachedEventSelectionModel;
     private EventListJXTableSorting cachedTableSorting;
     private SortedList<LocalFileItem> cachedSortedList;
+    private FilterList<LocalFileItem> cachedPlayableList;
     
     private AbstractLibraryFormat<LocalFileItem> fileItemFormat;
     private ColumnStateHandler columnStateHandler;
@@ -61,6 +64,7 @@ public class LibraryTable extends MouseableTable {
     private final Provider<NameRenderer> nameRenderer;
     private final Provider<RemoveRenderer> removeRenderer;
     private final Provider<IsPlayingRenderer> isPlayingRenderer;
+    private final Provider<LaunchFileAction> launchAction;
     private final IconLabelRenderer iconLabelRenderer;
     private final RemoveEditor removeEditor;
     
@@ -73,6 +77,7 @@ public class LibraryTable extends MouseableTable {
             Provider<LibraryPopupMenu> libraryPopupMenu,
             Provider<RemoveRenderer> removeRenderer,
             Provider<IsPlayingRenderer> isPlayingRenderer,
+            Provider<LaunchFileAction> launchAction,
             IconLabelRendererFactory iconLabelRendererFactory,
             RemoveEditor removeEditor) {
         this.defaultCellRenderer = defaultCellRenderer;
@@ -82,6 +87,7 @@ public class LibraryTable extends MouseableTable {
         this.nameRenderer = nameRenderer;
         this.removeRenderer = removeRenderer;
         this.isPlayingRenderer = isPlayingRenderer;
+        this.launchAction = launchAction;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
         this.removeEditor = removeEditor;
         
@@ -145,7 +151,7 @@ public class LibraryTable extends MouseableTable {
             return null;
     }
     
-    public void setEventList(EventList<LocalFileItem> eventList, AbstractLibraryFormat<LocalFileItem> tableFormat) {
+    public void setEventList(EventList<LocalFileItem> eventList, AbstractLibraryFormat<LocalFileItem> tableFormat, boolean playable) {
         uninstallListeners();
         
         fileItemFormat = tableFormat;
@@ -153,6 +159,7 @@ public class LibraryTable extends MouseableTable {
         SortedList<LocalFileItem> newSortedList = GlazedListsFactory.sortedList(eventList, null);
         LibraryTableModel newLibraryTableModel = new LibraryTableModel(newSortedList, tableFormat);
         DefaultEventSelectionModel<LocalFileItem> newEventSelectionModel = new DefaultEventSelectionModel<LocalFileItem>(newSortedList);
+        FilterList<LocalFileItem> newPlayableList = playable ? createPlayableList(newSortedList) : null;
         
         if(cachedTableSorting != null) {
             cachedTableSorting.uninstall();
@@ -162,6 +169,9 @@ public class LibraryTable extends MouseableTable {
         setSelectionModel(newEventSelectionModel);
         newEventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         
+        if (cachedPlayableList != null) {
+            cachedPlayableList.dispose();
+        }
         if(cachedLibraryTableModel != null) {
             cachedEventSelectionModel.dispose();
             cachedLibraryTableModel.dispose();
@@ -174,8 +184,29 @@ public class LibraryTable extends MouseableTable {
         cachedLibraryTableModel = newLibraryTableModel;
         cachedEventSelectionModel = newEventSelectionModel;
         cachedTableSorting = newTableSorting;
+        cachedPlayableList = newPlayableList;
         
         installListeners();
+    }
+    
+    /**
+     * Creates a list of playable file items using the specified source list.
+     */
+    private FilterList<LocalFileItem> createPlayableList(EventList<LocalFileItem> sourceList) {
+        // Return filter list for playable files.
+        return GlazedListsFactory.filterList(sourceList, new Matcher<LocalFileItem>() {
+            @Override
+            public boolean matches(LocalFileItem item) {
+                return PlayerUtils.isPlayableFile(item.getFile());
+            }
+        });
+    }
+    
+    /**
+     * Returns the list of playable file items.
+     */
+    public EventList<LocalFileItem> getPlayableList() {
+        return cachedPlayableList;
     }
     
     public boolean isRowDisabled(int row) {
@@ -307,10 +338,10 @@ public class LibraryTable extends MouseableTable {
     private class DoubleClickHandler implements TableDoubleClickHandler{
         @Override
         public void handleDoubleClick(int row) {
-            if(getSelectedItem() == null) 
+            if (getSelectedItem() == null) { 
                 getSelectionModel().setSelectionInterval(row, row);
-            File file = getSelectedItem().getFile();
-            PlayerUtils.playOrLaunch(file);
+            }
+            launchAction.get().actionPerformed(null);
         }
     }
     
