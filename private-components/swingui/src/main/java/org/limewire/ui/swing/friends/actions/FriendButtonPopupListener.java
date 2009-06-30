@@ -54,7 +54,6 @@ public class FriendButtonPopupListener implements PopupMenuListener {
             menu.add(browseFriendAction.get()).setEnabled(!shouldAllowLogin);
             menu.addSeparator();
             menu.add(new AddFriendAction(friendConnection));
-            menu.add(new RemoveFriendAction(friendConnection));
             menu.addSeparator();
             menu.add(statusActions.get().getAvailableMenuItem());
             menu.add(statusActions.get().getDnDMenuItem());
