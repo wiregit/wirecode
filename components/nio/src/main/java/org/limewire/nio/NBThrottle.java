@@ -288,15 +288,6 @@ public class NBThrottle implements Throttle {
     }
     
     /**
-     * Set the number of bytes to write per second.
-     * 
-     * @param bytesPerSecond
-     */
-    public void limit(int bytesPerSecond) {
-        _bytesPerTick = bytesPerSecond * MILLIS_PER_TICK / 1000;
-    }
-    
-    /**
      * Notification from <code>NIODispatcher</code> that some time has passed.
      * <p>
      * Returns <code>true</code> if all requests were satisfied. Returns 
