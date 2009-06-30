@@ -10,7 +10,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
 import javax.swing.JLayeredPane;
-import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -24,6 +23,7 @@ import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -87,7 +87,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                 SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(false);
             }
         });
-        buttonDecorator.decorateDarkFullButton(continueSharingButton);
+       buttonDecorator.decorateDarkFullImageButton(continueSharingButton, AccentType.SHADOW);
 
         JXButton unshareAllButton = new JXButton(new AbstractAction(I18n.tr("Unshare All")) {
             @Override
@@ -97,16 +97,13 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                 shareListManager.removeDocumentsFromPublicLists();
             }
         });
-        buttonDecorator.decorateDarkFullButton(unshareAllButton);
+        buttonDecorator.decorateDarkFullImageButton(unshareAllButton, AccentType.SHADOW);
 
         continueSharingButton.setPreferredSize(new Dimension(150, 25));
         continueSharingButton.setMinimumSize(new Dimension(150, 25));
         unshareAllButton.setPreferredSize(new Dimension(150, 25));
         unshareAllButton.setMinimumSize(new Dimension(150, 25));
         
-        continueSharingButton.setHorizontalAlignment(SwingConstants.CENTER);
-        unshareAllButton.setHorizontalAlignment(SwingConstants.CENTER);
-
         add(continueSharingButton, "alignx center, gaptop 15");
         add(unshareAllButton, "wrap");
 
