@@ -186,6 +186,7 @@ public class ChatListener implements Runnable {
         int formIdBeginPos = homePage.indexOf(postFormIDPrefix)
                 + postFormIDPrefix.length();
         if (formIdBeginPos < postFormIDPrefix.length()){
+            LOG.debugf("no post form id: {0}", homePage);
             throw new IOException("can't find post form id");
         }
         else {
