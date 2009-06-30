@@ -33,8 +33,8 @@ public class AddFileAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        final List<File> files = FileChooser.getInput(GuiUtils.getMainFrame(), I18n.tr("Add Files(s)"), 
-                I18n.tr("Add Files(s)"), FileChooser.getLastInputDirectory(),
+        final List<File> files = FileChooser.getInput(GuiUtils.getMainFrame(), I18n.tr("Add File(s)"), 
+                I18n.tr("Add File(s)"), FileChooser.getLastInputDirectory(),
                 JFileChooser.FILES_AND_DIRECTORIES, JFileChooser.APPROVE_OPTION, true,
                 new FileFilter() {
                     @Override

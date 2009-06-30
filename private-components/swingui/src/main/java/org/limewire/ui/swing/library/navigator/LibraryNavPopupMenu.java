@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.library.navigator;
 
+import javax.swing.Action;
 import javax.swing.JPopupMenu;
 
 import org.limewire.ui.swing.library.AddFileAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
+import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -28,6 +30,8 @@ class LibraryNavPopupMenu extends JPopupMenu {
         this.renameAction = renameAction;
         this.clearAction = clearAction;
         this.deleteAction = deleteAction;
+        
+        this.addAction.putValue(Action.NAME, I18n.tr("Add Files..."));
 
         init(navPanel.getSelectedNavItem());
     }
