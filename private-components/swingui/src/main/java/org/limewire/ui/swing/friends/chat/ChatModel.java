@@ -92,11 +92,6 @@ public class ChatModel {
         });
     }
     
-    private String formatLoggedInName(String fullLoggedInId) {
-        int index = fullLoggedInId.lastIndexOf("@");
-        return (index == -1) ? fullLoggedInId : fullLoggedInId.substring(0, index);
-    }
-    
     /**
      * Handles an file offer from a presence. Ensures that ChatPanel has been created
      * prior to firing the MessageRecieved event.
