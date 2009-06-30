@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -270,13 +271,17 @@ public class FileInfoPanel extends JPanel {
             break;
         case DOWNLOADING_FILE:
             if(propertiableFile instanceof DownloadItem) {
-                locationPanel.add(createLabelField(((DownloadItem)propertiableFile).getDownloadingFile().getAbsolutePath()), "span, growx, wrap");
+                File launchableFile = ((DownloadItem)propertiableFile).getDownloadingFile();
+                if(launchableFile != null && launchableFile.getAbsoluteFile() != null)
+                    locationPanel.add(createLabelField(launchableFile.getAbsolutePath()), "span, growx, wrap");
+                else
+                    locationPanel.add(createLabelField(propertiableFile.getFileName()), "span, growx, wrap");
                 
                 HyperlinkButton locateOnDisk2 = new HyperlinkButton(
                     new AbstractAction(I18n.tr("Locate on Disk")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getDownloadingFile());
+                            NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getLaunchableFile());
                         }
                     });
                 
@@ -285,7 +290,7 @@ public class FileInfoPanel extends JPanel {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             FileInfoPanel.this.getRootPane().getParent().setVisible(false);
-                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getDownloadingFile());
+                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getLaunchableFile());
                         }
                     });
                 
