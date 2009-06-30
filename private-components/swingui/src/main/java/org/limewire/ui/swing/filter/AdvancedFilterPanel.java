@@ -300,10 +300,12 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     }
     
     /**
-     * Updates the display category.  This method updates the displayed 
-     * property filters, and fires a <code>categorySelected</code> event to
-     * update the display category.  (The event is used to update the column
-     * layout in the table view.) 
+     * Updates the category.  There are two distinct category settings: the 
+     * "filter category" determines the displayed property filters, while the
+     * "display category" determines the table column layout.  These may be
+     * different.  This method updates the filter category in 
+     * PropertyFilterPanel, and fires a <code>categorySelected</code> event to
+     * update the display category.
      */
     private void updateCategory() {
         if (categoryFilter.isActive()) {
@@ -312,9 +314,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             SearchCategory displayCategory = SearchCategory.forCategory(category);
             
             // Apply category to property filters and fire event.
-            if(propertyPanel.setFilterCategory(displayCategory)) {
-                fireCategorySelected(displayCategory);
-            }
+            propertyPanel.setFilterCategory(displayCategory);
+            fireCategorySelected(displayCategory);
             
         } else if (categoryFilter.getCategoryCount() == 1) {
             // Get only remaining category.
@@ -322,15 +323,13 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             SearchCategory displayCategory = SearchCategory.forCategory(category);
             
             // Apply category to property filters and fire event.
-            if(propertyPanel.setFilterCategory(displayCategory)) {
-                fireCategorySelected(displayCategory);
-            }
+            propertyPanel.setFilterCategory(displayCategory);
+            fireCategorySelected(displayCategory);
             
         } else {
             // No specific category so reapply defaults.
-            if(propertyPanel.setFilterCategory(defaultFilterCategory)) {
-                fireCategorySelected(defaultDisplayCategory);
-            }
+            propertyPanel.setFilterCategory(defaultFilterCategory);
+            fireCategorySelected(defaultDisplayCategory);
         }
     }
 
@@ -584,10 +583,10 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         /**
          * Sets the specified filter category, and updates the visible filters.
          */
-        public boolean setFilterCategory(SearchCategory filterCategory) {
+        public void setFilterCategory(SearchCategory filterCategory) {
             // Skip if category not changed.
             if (currentCategory == filterCategory) {
-                return false;
+                return;
             }
             currentCategory = filterCategory;
 
@@ -631,7 +630,6 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             // Validate layout and repaint container.
             validate();
             repaint();
-            return true;
         }
         
         /**
