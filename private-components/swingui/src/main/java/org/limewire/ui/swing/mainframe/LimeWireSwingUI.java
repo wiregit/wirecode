@@ -36,6 +36,7 @@ import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
 import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.update.UpdatePanel;
@@ -169,6 +170,18 @@ public class LimeWireSwingUI extends JPanel {
                 top.setMinimumSize(new Dimension(0, splitPane.getHeight()/2));
             }
         });
+        
+        bottom.addComponentListener(new ComponentAdapter(){
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int height = bottom.getHeight();
+                if(height >= bottom.getPreferredSize().height){
+                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(height);
+                } else {
+                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(bottom.getPreferredSize().height);
+                }
+            }
+        });
 
         return splitPane;
     }
@@ -182,9 +195,13 @@ public class LimeWireSwingUI extends JPanel {
        splitPane.getDivider().setVisible(isVisible);
        splitPane.getBottomComponent().setVisible(isVisible);
        if (isVisible) {
+           int savedHeight = SwingUiSettings.DOWNLOAD_TRAY_SIZE.getValue();
+           int height = savedHeight == 0 ? splitPane.getBottomComponent().getPreferredSize().height :
+               savedHeight;
+           
             splitPane.setDividerLocation(splitPane.getSize().height - splitPane.getInsets().bottom
                     - splitPane.getDividerSize()
-                    - splitPane.getBottomComponent().getPreferredSize().height);
+                    - height);
         }
    }
     

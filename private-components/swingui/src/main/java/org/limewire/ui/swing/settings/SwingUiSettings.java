@@ -247,6 +247,10 @@ public final class SwingUiSettings extends LimeProps {
     /** Setting for whether or not to resolve host names in Advanced Tools. */
     public static final BooleanSetting RESOLVE_CONNECTION_HOSTNAMES =
         FACTORY.createBooleanSetting("RESOLVE_CONNECTION_HOSTNAMES", true);
+    
+    /**Saves the download tray size when it the tray is resized    */
+    public static final IntSetting DOWNLOAD_TRAY_SIZE = 
+        FACTORY.createIntSetting("DOWNLOAD_TRAY_SIZE", 0);
 
     /**
      * Returns the default directory for the file chooser.
