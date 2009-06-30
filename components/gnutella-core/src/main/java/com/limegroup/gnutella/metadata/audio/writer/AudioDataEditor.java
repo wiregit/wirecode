@@ -2,6 +2,7 @@ package com.limegroup.gnutella.metadata.audio.writer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -49,7 +50,7 @@ public class AudioDataEditor implements MetaWriter {
      * @return true if the audio subtype was chosen properly for the file type
      */
     protected boolean isValidFileType(String fileName) {
-        String fileExtension = FileUtils.getFileExtension(fileName);
+        String fileExtension = FileUtils.getFileExtension(fileName).toLowerCase(Locale.US);
         for(String extension : getSupportedExtensions()) {
             if(fileExtension.equals(extension))
                 return true;

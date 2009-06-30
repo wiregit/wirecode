@@ -25,6 +25,7 @@ import org.limewire.collection.IdentityHashSet;
 import org.limewire.collection.StringTrie;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ConverterObjectInputStream;
+import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.NameValue;
@@ -645,7 +646,7 @@ public class LimeXMLReplyCollection {
         if (writer != null)  {
             writeState = commitMetaData(fd, writer);
         }
-        assert writeState != MetaDataState.INCORRECT_FILETYPE : "trying to write data to unwritable file";
+        assert writeState != MetaDataState.INCORRECT_FILETYPE : "trying to write data to unwritable file of type " + FileUtils.getFileExtension(fd.getFile());
 
         return writeState;
     }
