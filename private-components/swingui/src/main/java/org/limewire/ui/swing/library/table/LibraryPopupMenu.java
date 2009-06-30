@@ -1,11 +1,14 @@
 package org.limewire.ui.swing.library.table;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
@@ -17,6 +20,7 @@ import com.google.inject.Provider;
 public class LibraryPopupMenu extends JPopupMenu {
 
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
+    private final SharedFileListManager sharedFileListManager;
     private final LibraryNavigatorPanel libraryNavigatorPanel;
     private final Provider<PlayAction> playAction;
     private final Provider<LaunchFileAction> launchAction;
@@ -31,6 +35,7 @@ public class LibraryPopupMenu extends JPopupMenu {
     
     @Inject
     public LibraryPopupMenu(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
+            SharedFileListManager sharedFileListManager,
             LibraryNavigatorPanel libraryNavigatorPanel, Provider<RemoveFromAllListAction> removeFromAllListAction,
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
             Provider<PlayAction> playAction, RemoveFromLibraryAction removeAction,
@@ -39,6 +44,7 @@ public class LibraryPopupMenu extends JPopupMenu {
             Provider<LibraryShowInListMenu> showInListMenu,
             DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
         this.selectedLocalFileItems = selectedLocalFileItems;
+        this.sharedFileListManager = sharedFileListManager;
         this.libraryNavigatorPanel = libraryNavigatorPanel;
         this.launchAction = launchAction;
         this.locateAction = locateAction;
@@ -68,7 +74,7 @@ public class LibraryPopupMenu extends JPopupMenu {
                 add(removeListAction.get());
             } else {
                 add(showInListMenu.get());
-                add(removeFromAllListAction.get());
+                add(removeFromAllListAction.get()).setEnabled(existsInAnyList(localFileItem.get(0).getFile()));
             }
             addSeparator();
             
@@ -88,5 +94,16 @@ public class LibraryPopupMenu extends JPopupMenu {
             add(removeAction);
             add(deleteAction);
         }
+    }
+    
+    private boolean existsInAnyList(File file) {
+        boolean contains = false;
+        for(SharedFileList sharedFileList : sharedFileListManager.getModel()) {
+            if(sharedFileList.contains(file)) {
+                contains = true;
+                break;
+            }
+        }
+        return contains;
     }
 }

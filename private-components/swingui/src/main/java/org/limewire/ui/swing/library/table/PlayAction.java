@@ -22,7 +22,7 @@ class PlayAction extends AbstractAction {
     
     @Inject
     public PlayAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems) {
-        super(I18n.tr("Play"));
+        super(I18n.tr("Play Once"));
 
         this.selectedLocalFileItems = selectedLocalFileItems;
     }

@@ -23,7 +23,7 @@ class LaunchFileAction extends AbstractAction {
     
     @Inject
     public LaunchFileAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems) {
-        super(I18n.tr("Play/Open/View"));
+        super(I18n.tr("Open"));
 
         this.selectedLocalFileItems = selectedLocalFileItems;
     }
