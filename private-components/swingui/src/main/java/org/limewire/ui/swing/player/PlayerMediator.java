@@ -2,15 +2,20 @@ package org.limewire.ui.swing.player;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
+import org.limewire.ui.swing.library.LibraryPanel;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -32,26 +37,54 @@ public class PlayerMediator {
     private static final String WAVE = "wave";
     
     private final Provider<AudioPlayer> audioPlayerProvider;
+    private final Provider<LibraryPanel> libraryPanelProvider;
     private final List<PlayerMediatorListener> listenerList;
     
     /** Audio player component. */
     private AudioPlayer audioPlayer;
+    
     /** Current list of songs. */
-    private EventList<LocalFileItem> playList;
+    private List<LocalFileItem> playList;
+    
+    /** Identifier for current playlist. */
+    private PlaylistId playlistId;
+    
     /** File item for the last opened song. */
     private LocalFileItem fileItem = null;
+    
     /** Map containing properties for the last opened song. */
     private Map audioProperties = null;
+    
     /** Progress of current song from 0.0 to 1.0. */
     private float progress;
     
+    /** Indicator for shuffle mode. */
+    private boolean shuffle = false;
+    
+    /** Randomized list of songs to be played. */
+    private List<LocalFileItem> shuffleList;
+    
     /**
-     * Constructs a PlayerMediator using the specified AudioPlayer provider.
+     * Constructs a PlayerMediator using the specified services.
      */
     @Inject
-    public PlayerMediator(Provider<AudioPlayer> audioPlayerProvider) {
+    public PlayerMediator(Provider<AudioPlayer> audioPlayerProvider,
+            Provider<LibraryPanel> libraryPanelProvider) {
         this.audioPlayerProvider = audioPlayerProvider;
+        this.libraryPanelProvider = libraryPanelProvider;
         this.listenerList = new ArrayList<PlayerMediatorListener>();
+    }
+    
+    /**
+     * Returns the audio player component.  When first called, this method
+     * creates the component and registers this mediator as a listener.
+     */
+    private AudioPlayer getPlayer() {
+        if (audioPlayer == null) {
+            audioPlayer = audioPlayerProvider.get();
+            audioPlayer.addAudioPlayerListener(new PlayerListener());
+        }
+        return audioPlayer;
     }
     
     /**
@@ -75,8 +108,8 @@ public class PlayerMediator {
      * specified value.
      */
     private void fireProgressUpdated(float progress) {
-        for (PlayerMediatorListener listener : listenerList) {
-            listener.progressUpdated(progress);
+        for (int i = 0, size = listenerList.size(); i < size; i++) {
+            listenerList.get(i).progressUpdated(progress);
         }
     }
     
@@ -85,8 +118,8 @@ public class PlayerMediator {
      * song name.
      */
     private void fireSongChanged(String name) {
-        for (PlayerMediatorListener listener : listenerList) {
-            listener.songChanged(name);
+        for (int i = 0, size = listenerList.size(); i < size; i++) {
+            listenerList.get(i).songChanged(name);
         }
     }
     
@@ -95,8 +128,8 @@ public class PlayerMediator {
      * specified state.
      */
     private void fireStateChanged(PlayerState state) {
-        for (PlayerMediatorListener listener : listenerList) {
-            listener.stateChanged(state);
+        for (int i = 0, size = listenerList.size(); i < size; i++) {
+            listenerList.get(i).stateChanged(state);
         }
     }
     
@@ -104,35 +137,127 @@ public class PlayerMediator {
      * Returns the current status of the audio player.
      */
     public PlayerState getStatus() {
-        return getAudioPlayer().getStatus();
+        return getPlayer().getStatus();
     }
     
     /**
-     * Sets the current play list.
+     * Returns true if the specified library item is the active playlist.
      */
-    public void setPlayList(EventList<LocalFileItem> playList) {
-        this.playList = playList;
+    public boolean isActivePlaylist(LibraryNavItem navItem) {
+        if (navItem != null) {
+            PlaylistId newId = new PlaylistId(navItem);
+            return newId.equals(playlistId);
+        }
+        return false;
+    }
+    
+    /**
+     * Sets the active playlist using the specified library item.
+     */
+    public void setActivePlaylist(LibraryNavItem navItem) {
+        if (navItem != null) {
+            playlistId = new PlaylistId(navItem);
+        } else {
+            playlistId = null;
+            if (playList != null) playList.clear();
+        }
+    }
+    
+    /**
+     * Returns the current playlist.
+     */
+    private List<LocalFileItem> getPlaylist() {
+        // Compare selected list to playlist.
+        PlaylistId selectedId = new PlaylistId(libraryPanelProvider.get().getSelectedNavItem());
+        Category selectedCategory = libraryPanelProvider.get().getSelectedCategory();
+        
+        if (selectedId.equals(playlistId) && 
+                libraryPanelProvider.get().isPlayable(selectedCategory)) {
+            // Selected list is same so return list from library.
+            return libraryPanelProvider.get().getPlayableList();
+        } else {
+            // Selected list is different so return internal playlist.
+            return playList;
+        }
+    }
+    
+    /**
+     * Sets the internal playlist using the specified list of file items.
+     */
+    public void setPlaylist(EventList<LocalFileItem> fileList) {
+        // Clear current playlist.
+        if (playList == null) {
+            playList = new ArrayList<LocalFileItem>(); 
+        } else {
+            playList.clear();
+        }
+        
+        if (fileList == null) return;
+        
+        // Copy files into playlist.
+        for (int i = 0, size = fileList.size(); i < size; i++) {
+            playList.add(fileList.get(i));
+        }
+    }
+    
+    /**
+     * Returns true if shuffle mode is enabled.
+     */
+    public boolean isShuffle() {
+        return shuffle;
+    }
+    
+    /**
+     * Sets an indicator to enable shuffle mode.
+     */
+    public void setShuffle(boolean shuffle) {
+        this.shuffle = shuffle;
+        
+        // Update shuffle list.
+        if (shuffle) {
+            updateShuffleList();
+        } else {
+            clearShuffleList();
+        }
     }
     
     /**
      * Sets the volume (gain) value on a linear scale from 0.0 to 1.0.
      */
     public void setVolume(double value) {
-        getAudioPlayer().setVolume(value);
+        getPlayer().setVolume(value);
     }
     
     /**
-     * Pauses the audio player. 
+     * Pauses the current song in the audio player. 
      */
     public void pause() {
-        getAudioPlayer().pause();
+        getPlayer().pause();
     }
     
     /**
      * Resumes playing the current song in the audio player. 
      */
-    public void play() {
-        getAudioPlayer().unpause();
+    public void resume() {
+        getPlayer().unpause();
+    }
+    
+    /**
+     * Starts playing the specified file item in the audio player.
+     */
+    public void play(LocalFileItem localFileItem) {
+        // Stop current song.
+        getPlayer().stop();
+        
+        // Play new song.
+        this.fileItem = localFileItem;
+        getPlayer().loadSong(localFileItem.getFile());
+        getPlayer().playSong();
+        
+        // Update shuffle list when enabled.
+        if (shuffle) {
+            updateShuffleList();
+        }
     }
     
     /**
@@ -149,7 +274,7 @@ public class PlayerMediator {
             // currently, only mp3 and wav files can be seeked upon
             if (isSeekable(songType) && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
                 final long skipBytes = Math.round((Integer) audioProperties.get(AUDIO_LENGTH_BYTES)* percent);
-                getAudioPlayer().seekLocation(skipBytes);
+                getPlayer().seekLocation(skipBytes);
             }
         }
     }
@@ -158,7 +283,7 @@ public class PlayerMediator {
      * Stops playing the current song in the audio player.
      */
     public void stop() {
-        getAudioPlayer().stop();
+        getPlayer().stop();
     }
     
     /**
@@ -167,13 +292,15 @@ public class PlayerMediator {
     public void nextSong() {
         if (fileItem != null) {
             // Stop current song.
-            getAudioPlayer().stop();
+            getPlayer().stop();
             
-            // Get next song in playlist.
+            // Get next file item.
             fileItem = getNextFileItem();
+            
+            // Play song.
             if (fileItem != null) {
-                getAudioPlayer().loadSong(fileItem.getFile());
-                getAudioPlayer().playSong();
+                getPlayer().loadSong(fileItem.getFile());
+                getPlayer().playSong();
             }
         }
     }
@@ -184,20 +311,18 @@ public class PlayerMediator {
     public void prevSong() {
         if (fileItem != null) {
             // Stop current song.
-            getAudioPlayer().stop();
+            getPlayer().stop();
             
-            if (progress >= 0.1f) {
-                // Restart current song.
-                getAudioPlayer().loadSong(fileItem.getFile());
-                getAudioPlayer().playSong();
-                
-            } else {
-                // Get previous song in playlist.
+            // If near beginning of current song, then get previous song.
+            // Otherwise, restart current song.
+            if (progress < 0.1f) {
                 fileItem = getPrevFileItem();
-                if (fileItem != null) {
-                    getAudioPlayer().loadSong(fileItem.getFile());
-                    getAudioPlayer().playSong();
-                }
+            }
+            
+            // Play song.
+            if (fileItem != null) {
+                getPlayer().loadSong(fileItem.getFile());
+                getPlayer().playSong();
             }
         }
     }
@@ -206,42 +331,92 @@ public class PlayerMediator {
      * Returns true if this file is currently playing, false otherwise
      */
     public boolean isPlaying(File file) {
-        //TODO: fix logic here
+        return getPlayer().isPlaying(file);
+    }
+    
+    /**
+     * Returns true if the currently playing song is seekable.
+     */
+    public boolean isSeekable() {
+        if (audioProperties != null) {
+            return isSeekable((String) audioProperties.get(AUDIO_TYPE));
+        }
         return false;
     }
     
     /**
-     * Returns the audio player component.
+     * Returns true if the specified song type is seekable, which means that 
+     * the progress position can be set.  At present, only MP3 and Wave files 
+     * are seekable.
      */
-    private AudioPlayer getAudioPlayer() {
-        if (audioPlayer == null) {
-            audioPlayer = audioPlayerProvider.get();
-            audioPlayer.addAudioPlayerListener(new PlayerListener());
+    private boolean isSeekable(String songType) {
+        if (songType == null) {
+            return false;
         }
-        return audioPlayer;
+        return songType.equalsIgnoreCase(MP3) || songType.equalsIgnoreCase(WAVE);
     }
     
     /**
-     * Returns the next file item in the playlist.
+     * Clears the shuffle list of items to be played.
+     */
+    private void clearShuffleList() {
+        if (shuffleList != null) {
+            shuffleList.clear();
+        }
+    }
+    
+    /**
+     * Updates the shuffle list of items to be played.
+     */
+    private void updateShuffleList() {
+        // Create shuffle list.
+        shuffleList = new ArrayList<LocalFileItem>();
+        
+        // Get current playlist.
+        List<LocalFileItem> playlist = getPlaylist();
+        if ((playlist == null) || (playlist.size() == 0)) return;
+        
+        // Set shuffle list elements and randomize.
+        for (int i = 0; i < playlist.size(); i++) {
+            shuffleList.add(playlist.get(i));
+        }
+        Collections.shuffle(shuffleList);
+        
+        // Move currently playing song to the beginning.
+        int index = shuffleList.indexOf(fileItem);
+        if (index >= 0) {
+            shuffleList.remove(index);
+            shuffleList.add(0, fileItem);
+        }
+    }
+    
+    /**
+     * Returns the next file item in the specified file list.
      */
     private LocalFileItem getNextFileItem() {
-        if (fileItem != null) {
-            int index = playList.indexOf(fileItem);
-            if (index < (playList.size() - 1)) {
-                return playList.get(index + 1);
+        // Get file list.
+        List<LocalFileItem> fileList = shuffle ? shuffleList : getPlaylist();
+        
+        if ((fileItem != null) && (fileList != null)) {
+            int index = fileList.indexOf(fileItem);
+            if (index < (fileList.size() - 1)) {
+                return fileList.get(index + 1);
             }
         }
         return null;
     }
     
     /**
-     * Returns the previous file item in the playlist.
+     * Returns the previous file item in the specified file list.
      */
     private LocalFileItem getPrevFileItem() {
-        if (fileItem != null) {
-            int index = playList.indexOf(fileItem);
+        // Get file list.
+        List<LocalFileItem> fileList = shuffle ? shuffleList : getPlaylist();
+        
+        if ((fileItem != null) && (fileList != null)) {
+            int index = fileList.indexOf(fileItem);
             if (index > 0) {
-                return playList.get(index - 1);
+                return fileList.get(index - 1);
             }
         }
         return null;
@@ -266,16 +441,6 @@ public class PlayerMediator {
         } else {
             return I18n.tr("Unknown");
         }
-    }
-    
-    /**
-     * Returns true if the song type is seekable, which means that the progress
-     * position can be set.  At present, only MP3 and Wave files are seekable.
-     */
-    private boolean isSeekable(String songType) {
-        if (songType == null)
-            return false;
-        return songType.equalsIgnoreCase(MP3) || songType.equalsIgnoreCase(WAVE);
     }
     
     /**
@@ -313,6 +478,35 @@ public class PlayerMediator {
             
             // Notify UI about state change.
             fireStateChanged(event.getState());
+        }
+    }
+    
+    /**
+     * An identifier for a playlist.
+     */
+    private static class PlaylistId {
+        private final NavType type;
+        private final int id;
+        
+        public PlaylistId(LibraryNavItem navItem) {
+            this.type = navItem.getType();
+            this.id = navItem.getId();
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof PlaylistId) {
+                return (type == ((PlaylistId) obj).type) && (id == ((PlaylistId) obj).id);
+            }
+            return false;
+        }
+        
+        @Override
+        public int hashCode() {
+            int result = 17;
+            result = 31 * result + type.hashCode();
+            result = 31 * result + id;
+            return result;
         }
     }
 }

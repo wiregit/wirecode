@@ -13,6 +13,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
@@ -25,6 +26,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.player.api.PlayerState;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeSliderBar;
 import org.limewire.ui.swing.components.MarqueeButton;
@@ -33,7 +36,9 @@ import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
@@ -41,10 +46,6 @@ import com.google.inject.Provider;
 
 /**
  * Main UI container for the media player.
- * 
- * NOTE: This class should be treated as a singleton and the only proper media 
- * player (except the mini player) in the application otherwise there will be 
- * contention regarding play control and volume.
  */
 public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     
@@ -77,6 +78,10 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     @Resource private Icon volumeIconPressed;
     @Resource private Icon volumeIconRollover;
     @Resource private Icon volumeIconDisabled;
+    @Resource private Icon shuffleIcon;
+    @Resource private Icon shuffleIconPressed;
+    @Resource private Icon shuffleIconRollover;
+    @Resource private Icon shuffleIconActive;
           
     @Resource private Font font;
     
@@ -88,27 +93,12 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     private final LimeSliderBar progressSlider;
     private final JPanel statusPanel;
     private final JButton volumeButton;
+    private final JButton shuffleButton;
     
     private final JPopupMenu volumeControlPopup;
     private final VolumeSlider volumeSlider; 
     
     private final MarqueeButton titleLabel;
-    
-//    private final AudioPlayer player;
-//    private final LibraryMediator libraryMediator;
-
-//    /**
-//     * Pointer to the last opened song's file
-//     */
-//    private File file = null;
-    
-//    /**
-//     * Map of properties of the last opened song
-//     */
-//    private Map audioProperties = null;
-    
-//    private static final String MP3 = "mp3";
-//    private static final String WAVE = "wave";
     
     private static final String BACK = "BACK";
     private static final String PLAY = "PLAY";
@@ -118,8 +108,6 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     private static final String SHUFFLE = "SHUFFLE";
 
     private final Provider<PlayerMediator> playerProvider;
-
-    private PlayerMediator playerMediator;
     
     /**
      * Constructs a PlayerPanel with the specified component providers and
@@ -127,11 +115,9 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
      */
     @Inject
     public PlayerPanel(Provider<PlayerMediator> playerProvider,
-            //AudioPlayer player, //LibraryMediator libraryMediator, 
             SliderBarDecorator sliderBarDecorator) {
+        
         this.playerProvider = playerProvider;
-//        this.player = player;
-//        this.libraryMediator = libraryMediator;
 
         GuiUtils.assignResources(this);
         
@@ -171,13 +157,17 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         volumeSlider = new VolumeSlider(0, 100);
         volumeControlPopup = volumeSlider.createPopup();
         
+        shuffleButton = new IconButton(shuffleIcon, shuffleIconRollover, shuffleIconPressed, shuffleIconActive);
+        shuffleButton.addActionListener(playerListener);
+        shuffleButton.setActionCommand(SHUFFLE);
+        
         progressSlider = new LimeSliderBar();
         sliderBarDecorator.decoratePlain(progressSlider);
         initProgressControl();
         
         statusPanel = new JPanel(new MigLayout());
         
-        titleLabel = new MarqueeButton("Stopped", 150);
+        titleLabel = new MarqueeButton(I18n.tr("Stopped"), 150);
         titleLabel.setFont(font);
 
         ResizeUtils.forceSize(titleLabel, new Dimension(206, (int)
@@ -203,15 +193,15 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         innerPanel.add(forwardButton, "gapright 3");
         innerPanel.add(statusPanel, "gapbottom 2, hidemode 2");
         innerPanel.add(volumeButton, "gapleft 2");
+        innerPanel.add(shuffleButton, "gapleft 2");
         
-//        innerPanel.setVisible(false);
+        innerPanel.setVisible(SwingUiSettings.PLAYER_ENABLED.getValue());
         add(innerPanel, "gaptop 2, gapbottom 2");
                 
         EventAnnotationProcessor.subscribe(this);
 
         VolumeController volumeController = new VolumeController();
         volumeSlider.addChangeListener(volumeController);
-//        player.addAudioPlayerListener(new PlayerListener());      
         
         volumeControlPopup.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -227,18 +217,29 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
             }
         });
         
-        //stop player and hide player if setting disabled
-//        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
-//            @Override
-//            public void settingChanged(SettingEvent evt) {
-//                SwingUtilities.invokeLater(new Runnable(){
-//                    public void run() {
-//                        PlayerPanel.this.player.stop();
-//                        PlayerPanel.this.innerPanel.setVisible(false);
-//                    }
-//                });
-//            }
-//        });
+        // Stop player if disabled, and show/hide player.
+        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
+            @Override
+            public void settingChanged(final SettingEvent evt) {
+                SwingUtilities.invokeLater(new Runnable(){
+                    public void run() {
+                        boolean enabled = SwingUiSettings.PLAYER_ENABLED.getValue();
+                        if (!enabled) {
+                            getPlayerMediator().stop();
+                        }
+                        PlayerPanel.this.innerPanel.setVisible(enabled);
+                    }
+                });
+            }
+        });
+    }
+    
+    /**
+     * Registers listeners for player events.
+     */
+    @Inject
+    void register() {
+        getPlayerMediator().addMediatorListener(this);
     }
     
     /**
@@ -287,57 +288,17 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
                 arcWidth, arcHeight, AccentType.SHADOW);
     }
     
-//    private void previousSong() {
-//        if (file != null) {
-//            player.stop();
-//            file = libraryMediator.getPreviousInLibrary(file);
-//            if (file != null) {
-//                player.loadSong(file);
-//                player.playSong();
-//                return;
-//            }
-//        }
-//        throw new NotImplementedException("Player logic needs to move");
-//        // If there is no next song because we are past the start of the list
-//        innerPanel.setVisible(false);
-//    }
-    
-//    private void nextSong() {
-//        if (file != null) {
-//            player.stop();
-//            file = libraryMediator.getNextInLibrary(file);
-//            if (file != null) {
-//                player.loadSong(file);
-//                player.playSong();
-//                return;
-//            }
-//        }
-//        throw new NotImplementedException("Player logic needs to move");
-//        // If there is no next song because we are at the end of the list
-//        innerPanel.setVisible(false);
-//    }
+    /**
+     * Returns the mediator component that controls the player.
+     */
+    public PlayerMediator getPlayerMediator() {
+        return playerProvider.get();
+    }
     
     /**
-     * Returns the controller for the media player.
+     * Handles update to the specified progress value to adjust the visual
+     * position of the slider.
      */
-    private PlayerMediator getPlayerMediator() {
-        if (playerMediator == null) {
-            playerMediator = playerProvider.get();
-            playerMediator.addMediatorListener(this);
-            }
-        return playerMediator;
-        }
-        
-//    /**
-//     * Returns true if the song type is seekable, which means that the progress
-//     * position can be set.  At present, only MP3 and Wave files are seekable.
-//     */
-//    private boolean isSeekable(String songType) {
-//        if (songType == null)
-//            return false;
-//        return songType.equalsIgnoreCase(MP3) || songType.equalsIgnoreCase(WAVE);
-//    }
-    
     @Override
     public void progressUpdated(float progress) {
         if (!(progressSlider.getValueIsAdjusting() || getPlayerMediator().getStatus() == PlayerState.SEEKING)) {
@@ -345,10 +306,16 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         }
     }
     
+    /**
+     * Handles song change to the specified song name.
+     */
     @Override
     public void songChanged(String name) {
         // Update volume.
         updateVolume();
+        
+        // Enable progress slider.
+        progressSlider.setEnabled(getPlayerMediator().isSeekable());
         
         // Set song text.
         titleLabel.setText(name);
@@ -357,25 +324,35 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
 
         if (!innerPanel.isVisible()) {
             innerPanel.setVisible(true);
-            }
         }
+    }
     
+    /**
+     * Hanldes state change in the player to the specified state.
+     */
     @Override
     public void stateChanged(PlayerState playerState) {
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
             updateVolume();
         }
         
+        // Update buttons based on player status.
         PlayerState status = getPlayerMediator().getStatus();
         if (status == PlayerState.PLAYING || status == PlayerState.SEEKING_PLAY) {
             playButton.setVisible(false);
             pauseButton.setVisible(true);
-        } else if (status == PlayerState.STOPPED) {
-        innerPanel.setVisible(false);
+            titleLabel.start();
+            
+        } else if (status == PlayerState.PAUSED) {
+            playButton.setVisible(true);
+            pauseButton.setVisible(false);
             titleLabel.stop();
+            
         } else {
             playButton.setVisible(true);
             pauseButton.setVisible(false);
+            titleLabel.setText(I18n.tr("Stopped"));
+            titleLabel.setToolTipText(I18n.tr("Stopped"));
             titleLabel.stop();
         }            
     }
@@ -388,7 +365,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     }
     
     /**
-     * Listener to handle user actions on various buttons.
+     * Listener to handle user actions on various player buttons.
      */
     private class ButtonListener implements ActionListener {
         
@@ -401,31 +378,15 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand() == PLAY){
-                //player.unpause();
-                getPlayerMediator().play();
+                getPlayerMediator().resume();
                 
             } else if (e.getActionCommand() == PAUSE){
-                //player.pause();
                 getPlayerMediator().pause();
                 
             } else if (e.getActionCommand() == FORWARD) {
-                //nextSong();
                 getPlayerMediator().nextSong();
                 
             } else if (e.getActionCommand() == BACK) {
-//                if ((double)progressSlider.getValue() / (double)progressSlider.getMaximum() < .1) {
-//                    previousSong();
-//                } else {
-//                    player.stop();
-//                    
-//                    // If somehow the user is able to press the back button
-//                    //  when no song is loaded do not attempt to load an empty
-//                    //  deck
-//                    if (file != null) {
-//                        player.loadSong(file);
-//                        player.playSong();
-//                    }
-//                }
                 getPlayerMediator().prevSong();
                     
             } else if (e.getActionCommand() == VOLUME) {
@@ -434,7 +395,10 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
                 }
                 
             } else if (e.getActionCommand() == SHUFFLE) {
-                // TODO implement
+                // Toggle shuffle mode.
+                getPlayerMediator().setShuffle(!getPlayerMediator().isShuffle());
+                // Update button state.
+                shuffleButton.setSelected(getPlayerMediator().isShuffle());
             }
         }
     }
@@ -454,142 +418,24 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
                 if (!waiting) {
                     waiting = true;
                 }
-            } 
-            else if (waiting) {
+                
+            } else if (waiting) {
                 waiting = false;
                 double percent = (double)progressSlider.getValue() / (double)progressSlider.getMaximum();
                 getPlayerMediator().skip(percent);
                 progressSlider.setValue((int)(percent * progressSlider.getMaximum()));
             }
         }
-        
-//        /**
-//         * Skips the current song to a new position in the song. If the song's
-//         * length is unknown (streaming audio), then ignore the skip
-//         * 
-//         * @param percent of the song frames to skip from begining of file
-//         */
-//        private void skip(double percent) {
-//            
-//            // need to know something about the audio type to be able to skip
-//            if (audioProperties != null && audioProperties.containsKey(AUDIO_TYPE)) {
-//                String songType = (String) audioProperties.get(AUDIO_TYPE);
-//                
-//                // currently, only mp3 and wav files can be seeked upon
-//                if ( isSeekable(songType)
-//                        && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
-//                    final long skipBytes = Math.round((Integer) audioProperties
-//                            .get(AUDIO_LENGTH_BYTES)
-//                            * percent);
-//                    player.seekLocation(skipBytes);
-//                }
-//            }
-//        }
     }
 
     /**
      * Listener to update volume when volume slider is adjusted.
      */
     private class VolumeController implements ChangeListener {
-        
+
         @Override
         public void stateChanged(ChangeEvent e) {
             updateVolume();
+        }
     }
-    }
-    
-    /**
-     * Listener to handle media player events to update the UI container.
-     *
-    private class PlayerListener implements AudioPlayerListener {
-       
-        @Override
-        public void progressChange(int bytesread) {
-            // if we know the length of the song, update the progress bar
-            if (audioProperties != null && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
-                int byteslength = ((Integer) audioProperties.get(AUDIO_LENGTH_BYTES))
-                        .intValue();
-
-                float progressUpdate = bytesread * 1.0f / byteslength * 1.0f;
-                throw new NotImplementedException("Player logic needs to move");
-//                if (!(progressSlider.getValueIsAdjusting() || player.getStatus() == PlayerState.SEEKING))
-//                    setProgressValue((int) (progressSlider.getMaximum() * progressUpdate));
-            }
-        }
-
-        /**
-         * Updates the current progress of the progress bar, on the Swing thread.
-         *
-        private void setProgressValue(final int update) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    progressSlider.setValue(update);
-                }
-            });
-        }
-        
-        @Override
-        public void songOpened(Map<String, Object> properties) {
-           
-           audioProperties = properties; 
-           
-           updateVolume();
-           
-//           if (player.getCurrentSong() != null) {
-//               file = player.getCurrentSong().getFile();
-//           }
-            
-           String songText = null;
-           
-           if (isSeekable((String) properties.get(AUDIO_TYPE))) {
-               progressSlider.setEnabled(true);
-           } 
-           else {
-               progressSlider.setEnabled(false);
-           }
-           
-           if (properties.get("author") == null || properties.get("title") == null) {
-               if (file == null) {
-                   songText = I18n.tr("Unknown");
-               }
-               else {
-                   songText = file.getName();
-               }
-           } 
-           else {
-               songText = properties.get("author") + " - " + properties.get("title");
-           }
-
-           titleLabel.setText(songText);
-           titleLabel.setToolTipText(songText);
-           titleLabel.start();
-           
-           if(!innerPanel.isVisible()) {
-               innerPanel.setVisible(true);
-           }
-        }
-
-        @Override
-        public void stateChange(AudioPlayerEvent event) {
-//            if (event.getState() == PlayerState.EOM) {
-//                nextSong();
-//            } 
-//            else if (event.getState() == PlayerState.OPENED || event.getState() == PlayerState.SEEKED) {
-//                updateVolume();
-//            }
-//            
-//            if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
-//                playButton.setVisible(false);
-//                pauseButton.setVisible(true);
-//            } else if(player.getStatus() == PlayerState.STOPPED){
-//                innerPanel.setVisible(false);
-//                titleLabel.stop();
-//            } else {
-//                playButton.setVisible(true);
-//                pauseButton.setVisible(false);
-//                titleLabel.stop();
-//            }            
-            }
-            
-    }*/
 }
