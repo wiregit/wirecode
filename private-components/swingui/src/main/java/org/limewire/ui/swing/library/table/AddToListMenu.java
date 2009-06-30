@@ -59,7 +59,11 @@ public abstract class AddToListMenu extends JMenu {
                 manager.getModel().getReadWriteLock().readLock().lock();
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
-                        menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                        if(selectedFiles.get().size() == 1) {
+                            menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled((selectedLocalFileList == null || fileList != selectedLocalFileList.get()) && !fileList.contains(selectedFiles.get().get(0)));
+                        } else {
+                            menu.add(new AddListAction(fileList.getCollectionName(), getListIcon(fileList), fileList)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                        }
                     }
                 } finally {
                     manager.getModel().getReadWriteLock().readLock().unlock();
