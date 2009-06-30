@@ -24,8 +24,7 @@ public class FacebookSettings extends LimeProps {
     public static final StringArraySetting AUTH_SERVER_URLS =
         // have to be with trailing
         FACTORY.createRemoteStringArraySetting("FACEBOOK_AUTH_SERVER_URLS", new String[] {
-                "http://coelacanth:5555/",
-                "http://cruncher:5555/",
+                "http://ec2-72-44-49-148.compute-1.amazonaws.com/"
         }, "Facebook.authServerUrls");
 
     /**
