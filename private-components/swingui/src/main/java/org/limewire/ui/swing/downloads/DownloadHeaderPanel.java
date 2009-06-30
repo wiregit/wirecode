@@ -3,11 +3,14 @@ package org.limewire.ui.swing.downloads;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
@@ -18,7 +21,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -27,6 +33,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
@@ -36,8 +43,6 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.DownloadMediator.SortOrder;
@@ -68,6 +73,9 @@ public class DownloadHeaderPanel extends JXPanel {
 
     @Resource
     private Color bottomGradientColor;
+    
+    @Resource
+    private Icon moreButtonArrow;
 
 
     @Resource
@@ -79,13 +87,14 @@ public class DownloadHeaderPanel extends JXPanel {
 
     private final DockIcon dock;
 
-    private LimeComboBox moreButton;
+    private HyperlinkButton moreButton;    
+    private long menuClosedDelayTime;
+    private Color moreButtonDefaultForeground;
 
     private JXButton clearFinishedNowButton;
     private JLabel clearFinishedLabel;
 
     private HyperlinkButton fixStalledButton;
-    private JLabel fixStalledLabel;
 
     private JCheckBoxMenuItem clearFinishedCheckBox;
 
@@ -164,9 +173,7 @@ public class DownloadHeaderPanel extends JXPanel {
     private final Action speedSortAction = new SortAction(I18n.tr("Speed"), SortOrder.SPEED);
     private final Action fileTypeSortAction = new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE);
     private final Action extensionSortAction = new SortAction(I18n.tr("File Extension"), SortOrder.EXTENSION);
-
-    private final ComboBoxDecorator comboBoxDecorator;
-    
+     
     private final EventList<DownloadItem> activeList;
     
     private final Action downloadSettingsAction = new AbstractAction(I18n.tr("Download Options...")) {
@@ -178,13 +185,11 @@ public class DownloadHeaderPanel extends JXPanel {
 
     
     @Inject
-    public DownloadHeaderPanel(DownloadMediator downloadMediator, DockIconFactory dockIconFactory,
-            ComboBoxDecorator comboBoxDecorator) {
+    public DownloadHeaderPanel(DownloadMediator downloadMediator, DockIconFactory dockIconFactory) {
         GuiUtils.assignResources(this);
         
         this.downloadMediator = downloadMediator;
         dock = dockIconFactory.createDockIcon();   
-        this.comboBoxDecorator = comboBoxDecorator;
         
 
         activeList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
@@ -210,9 +215,6 @@ public class DownloadHeaderPanel extends JXPanel {
 
         fixStalledButton = new HyperlinkButton(fixStalledAction);
         fixStalledButton.setVisible(false);
-        fixStalledLabel = new JLabel(fixStalledButton.getText());
-        fixStalledLabel.setFont(fixStalledButton.getFont());
-        fixStalledLabel.setEnabled(false);
 
         initializeMoreButton();
         
@@ -220,10 +222,9 @@ public class DownloadHeaderPanel extends JXPanel {
     }
     
     private void layoutComponents(){
-        setLayout(new MigLayout("insets 4 0 4 0, gap 0, novisualpadding, fill"));
+        setLayout(new MigLayout("insets 2 0 2 0, gap 0, novisualpadding, fill"));
         add(titleTextLabel, "gapbefore 5, push");   
         add(fixStalledButton, "gapafter 5, hidemode 3");  
-        add(fixStalledLabel, "gapafter 5, hidemode 3");
         add(clearFinishedNowButton, "gapafter 5, hidemode 3");
         add(clearFinishedLabel, "gapafter 5, hidemode 3");
         add(moreButton, "gapafter 5");  
@@ -268,15 +269,12 @@ public class DownloadHeaderPanel extends JXPanel {
         stalledList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                fixStalledButton.setVisible(listChanges.getSourceList().size() != 0);
-                fixStalledLabel.setVisible(!fixStalledButton.isVisible());
-                
+                fixStalledButton.setVisible(listChanges.getSourceList().size() != 0);                
                 cancelStallededAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
             }
         });        
     }
-    
-    
+
     private void initializeMoreButton(){
         pauseAction.setEnabled(false);
         resumeAction.setEnabled(false);
@@ -299,7 +297,7 @@ public class DownloadHeaderPanel extends JXPanel {
             }
         });
 
-        JPopupMenu menu = new JPopupMenu();
+        final JPopupMenu menu = new JPopupMenu();    
         menu.add(pauseAction);
         menu.add(resumeAction);
         menu.add(createCancelSubMenu());
@@ -310,22 +308,57 @@ public class DownloadHeaderPanel extends JXPanel {
         menu.addSeparator();
         menu.add(downloadSettingsAction);
 
-        moreButton = new LimeComboBox();
-        comboBoxDecorator.decorateLinkComboBox(moreButton);
-        moreButton.setText(I18n.tr("Options"));
-//        moreButton.setRolloverIcon(moreIconRollover);
-//        moreButton.setPressedIcon(moreIconPressed);
-//        moreButton.setMargin(new Insets(0, 0, 0, 0));
-//        moreButton.setBorderPainted(false);
-//        moreButton.setContentAreaFilled(false);
-//        moreButton.setFocusPainted(false);
-//        moreButton.setRolloverEnabled(false);
-//        moreButton.setHideActionText(true);
-//        moreButton.setBorder(BorderFactory.createEmptyBorder());
-//        moreButton.setOpaque(false);
-//        moreButton.addMouseListener(new ActionHandListener()); 
+        moreButton = new HyperlinkButton(I18n.tr("Options"));
+        moreButtonDefaultForeground = moreButton.getForeground();
+        moreButton.setIcon(moreButtonArrow);
+        moreButton.setHorizontalTextPosition(SwingConstants.LEFT);
+        moreButton.setFocusPainted(false);
+        moreButton.setBorder(BorderFactory.createEmptyBorder(2,6,3,6));
+        moreButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!menu.isShowing() && System.currentTimeMillis() - menuClosedDelayTime > 200){
+                    menu.show(moreButton, 0, moreButton.getHeight());
+                }
+            }      
+        });      
+        moreButton.setBackgroundPainter(new Painter<JXButton>() {
+            @Override
+            public void paint(Graphics2D g, JXButton object, int width, int height) {
+                if (menu.isShowing()) {
+                    g = (Graphics2D)g.create();
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g.setColor(Color.BLACK);
+                    g.fillRoundRect(0, 0, width, height, 10, 10);
+                    g.dispose();
+                }
+            }
+        });
+        menu.addPopupMenuListener(new PopupMenuListener() {
 
-        moreButton.overrideMenu(menu);        
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                cancel();
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                cancel();
+            }
+
+            private void cancel() {
+                menuClosedDelayTime = System.currentTimeMillis();
+                moreButton.setNormalForeground(moreButtonDefaultForeground);
+                moreButton.setRolloverForeground(moreButtonDefaultForeground);
+            }
+
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                moreButton.setNormalForeground(Color.WHITE);
+                moreButton.setRolloverForeground(Color.WHITE);
+
+            }
+        });
     }
     
     private JMenu createCancelSubMenu(){
