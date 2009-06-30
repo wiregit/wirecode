@@ -17,6 +17,9 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionEvent.Type;
+import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.MessageComponent.MessageBackground;
@@ -35,6 +38,7 @@ public class BrowseFailedMessagePanel extends JPanel {
 
     private final SearchResultsModel searchResultsModel;
     private final ChatFrame chatFrame;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
 
     private BrowseSearch browseSearch;
     
@@ -44,8 +48,9 @@ public class BrowseFailedMessagePanel extends JPanel {
 
     private List<Friend> friends;
 
-    public BrowseFailedMessagePanel(ChatFrame chatFrame, SearchResultsModel searchResultsModel) {
+    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, ChatFrame chatFrame, SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
+        this.connectionEventBean = connectionEventBean;
         this.chatFrame = chatFrame;
         this.searchResultsModel = searchResultsModel;
     }
@@ -96,13 +101,22 @@ public class BrowseFailedMessagePanel extends JPanel {
             messageComponent.addComponent(refresh, "gapleft 5, wrap");
         }
         
-        
-        if (state == BrowseState.NO_FRIENDS_SHARING){
-            JLabel subMessage = new JLabel(I18n.tr("When they sign on LimeWire and share with you, their files will appear here."));
+        if(state == BrowseState.NO_FRIENDS_SHARING || state == BrowseState.OFFLINE){
+            String subText = null;
+            if (isUserOffline()) {
+                if(state == BrowseState.NO_FRIENDS_SHARING){
+                subText = I18n.tr("When you sign on to LimeWire, your friends' files will appear here.");
+                } else {//BrowseState.OFFLINE
+                    subText = I18n.tr("When you sign on to LimeWire, your friend's files will appear here.");
+                }
+            } else {
+                I18n.tr("When they sign on LimeWire and share with you, their files will appear here.");
+            }
+                
+            JLabel subMessage = new JLabel(subText);
             messageComponent.decorateSubLabel(subMessage);            
             messageComponent.addComponent(subMessage, "");
         }
-        
         
         return messageComponent;
     }
@@ -112,7 +126,7 @@ public class BrowseFailedMessagePanel extends JPanel {
     }
     
     private JComponent createBottomComponent(){
-        if(state == BrowseState.NO_FRIENDS_SHARING){
+        if(state == BrowseState.NO_FRIENDS_SHARING && !isUserOffline()){
             JLabel message = new JLabel("Chat and tell them to sign on.");
             message.setFont(chatFont);
             message.setForeground(chatForeground);
@@ -137,22 +151,47 @@ public class BrowseFailedMessagePanel extends JPanel {
 
 
     private String getLabelText() {
+        if (isUserOffline()
+                && (state == BrowseState.NO_FRIENDS_SHARING || state == BrowseState.OFFLINE)) {
+            return getUserOfflineText();
+        }
+
         if (state == BrowseState.NO_FRIENDS_SHARING) {
             return I18n.tr("No friends are sharing with you");
-        } else if (state == BrowseState.OFFLINE){
-            if (friends.size() == 1) {
-                return I18n.tr("{0} is not signed on to LimeWire.", friends.get(0).getRenderName());
+
+        }
+        
+        if (state == BrowseState.OFFLINE) {
+            if (isSingleBrowse()) {
+                return I18n.tr("{0} is not signed on to LimeWire.", getSingleFriendName());
             } else {
                 return I18n.tr("These people are not signed on to LimeWire.");
             }
-            
-        } else {
-        if (friends.size() == 1) {
-            return I18n.tr("There was a problem browsing {0}.", friends.get(0).getRenderName());
+        }
+
+        if (isSingleBrowse()) {
+            return I18n.tr("There was a problem browsing {0}.", getSingleFriendName());
         } else {
             return I18n.tr("There was a problem viewing these people.");
         }
-        }
+
+    }
+
+    private boolean isUserOffline(){
+        return connectionEventBean.getLastEvent().getType() != Type.CONNECTED;
+    }
+    
+    private boolean isSingleBrowse(){
+        return friends.size() == 1;
+    }   
+    
+    
+    private String getSingleFriendName(){
+        return friends.get(0).getRenderName();
+    }
+    
+    private String getUserOfflineText(){
+        return I18n.tr("You are offline.");
     }
 
 }

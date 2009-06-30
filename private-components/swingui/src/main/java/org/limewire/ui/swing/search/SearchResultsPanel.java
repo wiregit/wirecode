@@ -31,6 +31,8 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.listener.EventBean;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
@@ -143,7 +145,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             SponsoredResultsPanel sponsoredResultsPanel,
             HeaderBarDecorator headerBarDecorator,
             CategoryIconManager categoryIconManager, 
-            ChatFrame chatFrame) {
+            ChatFrame chatFrame,
+            EventBean<FriendConnectionEvent> connectionEventBean) {
 
         GuiUtils.assignResources(this);
         
@@ -153,7 +156,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
-        this.browseFailedPanel = new BrowseFailedMessagePanel(chatFrame, searchResultsModel);
+        this.browseFailedPanel = new BrowseFailedMessagePanel(connectionEventBean, chatFrame, searchResultsModel);
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
