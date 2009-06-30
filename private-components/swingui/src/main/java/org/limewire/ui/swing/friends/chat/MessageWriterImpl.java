@@ -21,17 +21,25 @@ class MessageWriterImpl implements MessageWriter {
 
     @Override
     public void writeMessage(final String message) throws FriendException {
-        ThreadExecutor.startThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    writer.writeMessage(message);
-                } catch (FriendException e) {
-                    LOG.error("send message failed", e);
+        
+        if (chatFriend.isSignedIn()) {
+            ThreadExecutor.startThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        writer.writeMessage(message);
+                    } catch (FriendException e) {
+                        // todo: have a way of reporting the exception!
+                        LOG.error("send message failed", e);
+                    }
                 }
-            }
-        }, "send-message");
-        new MessageReceivedEvent(newMessage(message, Message.Type.Sent)).publish();
+            }, "send-message");
+            new MessageReceivedEvent(
+                newMessage(message, Message.Type.Sent)).publish();
+        } else {
+            new MessageReceivedEvent(
+                newMessage(message, Message.Type.Send_Failed_FriendSignOut)).publish();
+        }
     }
 
     private Message newMessage(String message, Message.Type type) {

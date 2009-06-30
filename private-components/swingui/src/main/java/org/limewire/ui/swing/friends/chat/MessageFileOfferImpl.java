@@ -55,8 +55,18 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
     }
 
     private String formatOutgoing() {
-        String fileOfferSent = tr("Sharing file with {0}", getFriendID());
-        return fileOfferSent + formatButtonText(getFileOffer().getName(), false);
+        StringBuffer fileOfferOutgoingMsg = new StringBuffer();
+        
+        fileOfferOutgoingMsg.append(tr("Sharing file with {0}", getFriendID()));
+        fileOfferOutgoingMsg.append(formatButtonText(getFileOffer().getName(), false));
+        
+        if (getType() == Type.Send_Failed_FriendSignOut) {
+            fileOfferOutgoingMsg.append("<br/><b>").
+                append(tr("File offer not sent because friend signed off.")).
+                append("</b><br/>");
+        }
+        
+        return fileOfferOutgoingMsg.toString();
     }
 
     private String formatButtonText(String buttonText, boolean buttonEnabled) {

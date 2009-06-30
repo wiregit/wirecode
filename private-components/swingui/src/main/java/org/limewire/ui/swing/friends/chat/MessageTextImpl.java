@@ -10,6 +10,7 @@ import javax.swing.text.html.StyleSheet;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 public class MessageTextImpl extends AbstractMessageImpl implements MessageText {
 
@@ -41,7 +42,14 @@ public class MessageTextImpl extends AbstractMessageImpl implements MessageText 
 
     @Override
     public String format() {
-        return insertBreaksAddAnchorsTags(message.replace("<", "&lt;").replace(">", "&gt;"));
+        String message = insertBreaksAddAnchorsTags(this.message.replace("<", "&lt;").replace(">", "&gt;"));
+        
+        if (getType() == Type.Send_Failed_FriendSignOut) {
+            message += "<br/><b>" + tr("Message not sent because friend signed off.") +
+                    "</b><br/>";
+        }
+        
+        return message;
     }
 
     /**

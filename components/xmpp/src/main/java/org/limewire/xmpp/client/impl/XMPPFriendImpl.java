@@ -391,7 +391,9 @@ public class XMPPFriendImpl extends AbstractFriend {
 
         @Override
         public void stateChanged(Chat chat, org.jivesoftware.smackx.ChatState state) {
-            reader.newChatState(ChatState.valueOf(state.toString()));
+            if (isSignedIn()) {
+                reader.newChatState(ChatState.valueOf(state.toString()));
+            }
         }
     }
 }

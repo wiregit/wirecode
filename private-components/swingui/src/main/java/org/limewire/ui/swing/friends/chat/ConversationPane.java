@@ -306,14 +306,12 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         case ADDED:
             currentChatState = ChatState.active;
             displayMessages(false);
-            inputPanel.getInputComponent().setEnabled(true);
             if ((nosaveLink != null) && hasFeature(NoSaveFeature.ID)) {
                 nosaveLink.setVisible(true);
             }
             break;
         case REMOVED:
             displayMessages(true);
-            inputPanel.getInputComponent().setEnabled(false);
             if (nosaveLink != null) {
                 nosaveLink.setVisible(false);
             }
@@ -368,7 +366,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     }
 
     public void displayMessages() {
-        displayMessages(false);
+        displayMessages(!chatFriend.isSignedIn());
     }
 
     public ChatFriend getChatFriend() {
@@ -578,10 +576,17 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                if(event.getResult() != null) {
                    FileMetaData metadata = event.getResult().toMetadata();
                    boolean sentFileOffer = false;
+                   Friend friend = chatFriend.getFriend();
+                   
+                   // do not send file offer if user not signed in.
+                   if (!friend.isSignedIn()) {
+                        new MessageReceivedEvent(new MessageFileOfferImpl(I18n.tr("me"), 
+                                friendId, Message.Type.Send_Failed_FriendSignOut, metadata, null)).publish();
+                       return;
+                   }
 
                    // if active presence exists, send file offer to it,
                    // otherwise broadcast to every presence with FileOfferFeature.ID feature
-                   Friend friend = chatFriend.getFriend();
                    FriendPresence activePresence = friend.getActivePresence();
                    if ((activePresence != null) && activePresence.hasFeatures(FileOfferFeature.ID)) {
                         sentFileOffer = performFileOffer(metadata, activePresence);
@@ -591,11 +596,9 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                        }
                    }
 
-                   MessageFileOffer fileOfferMessage =
-                           new MessageFileOfferImpl(I18n.tr("me"), friendId, Message.Type.Sent, metadata, null);
-
                    if (sentFileOffer) {
-                        new MessageReceivedEvent(fileOfferMessage).publish();
+                        new MessageReceivedEvent(new MessageFileOfferImpl(I18n.tr("me"), 
+                                friendId, Message.Type.Sent, metadata, null)).publish();
                    } else {
                        // TODO: Devise how to handle file offer sending failures, using tooltip perhaps?
                    }

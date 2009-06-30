@@ -11,11 +11,12 @@ package org.limewire.ui.swing.friends.chat;
  */
 public interface Message {
     /**
-     * Sent     == message sent with destination of friend
-     * Received == message received from friend
-     * Server   == server chat status related message
+     * Sent                      == message sent with destination of friend
+     * Received                  == message received from friend
+     * Server                    == server chat status related message
+     * Send_Failed_FriendSignOut == send failed due to the friend signing out
      */
-    enum Type { Sent, Received, Server };
+    enum Type { Sent, Received, Server, Send_Failed_FriendSignOut };
 
     /**
      * @return the sender display name
