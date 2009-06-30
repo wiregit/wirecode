@@ -376,4 +376,11 @@ public class LibraryPanel extends JPanel {
             return !item.isShareable();
         }
     }
+    
+    /**
+	 * Clears any active filters on the library.
+	 */
+    public void clearFilters() {
+        libraryTableComboBox.clearFilters();
+    }
 }

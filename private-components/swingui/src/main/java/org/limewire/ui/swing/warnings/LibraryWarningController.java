@@ -20,12 +20,14 @@ public class LibraryWarningController {
     private final Provider<LibraryWarningDialog> libraryWarningPanel;
 
     private final Provider<SharingWarningDialog> sharingWarningPanel;
-
+    private final LibraryFileAdder libraryFileAdder;
+    
     @Inject
     public LibraryWarningController(Provider<LibraryWarningDialog> libraryCategoryWarning,
-            Provider<SharingWarningDialog> sharingWarningPanel) {
+            Provider<SharingWarningDialog> sharingWarningPanel, LibraryFileAdder libraryFileAdder) {
         this.libraryWarningPanel = libraryCategoryWarning;
         this.sharingWarningPanel = sharingWarningPanel;
+        this.libraryFileAdder = libraryFileAdder;
     }
 
     public void addFiles(final LocalFileList fileList, final List<File> files) {
@@ -55,19 +57,7 @@ public class LibraryWarningController {
             SharingWarningDialog panel = sharingWarningPanel.get();
             panel.initialize(sharedFileList, files);
         } else {
-            addFilesInner(fileList, files);
-        }
-    }
-
-    static void addFilesInner(final LocalFileList fileList, final List<File> files) {
-        for (File file : files) {
-            if (fileList.isFileAddable(file)) {
-                if (file.isDirectory()) {
-                    fileList.addFolder(file);
-                } else {
-                    fileList.addFile(file);
-                }
-            }
+            libraryFileAdder.addFilesInner(fileList, files);
         }
     }
 }

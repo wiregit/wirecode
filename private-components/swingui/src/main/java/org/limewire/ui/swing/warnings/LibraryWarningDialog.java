@@ -27,11 +27,13 @@ import com.google.inject.Inject;
 class LibraryWarningDialog extends LimeJDialog {
 
     private final LibraryManager libraryManager;
+    private final LibraryFileAdder libraryFileAdder;
 
     @Inject
-    public LibraryWarningDialog(LibraryManager libraryManager) {
+    public LibraryWarningDialog(LibraryManager libraryManager, LibraryFileAdder libraryFileAdder) {
         super(GuiUtils.getMainFrame());
         this.libraryManager = libraryManager;
+        this.libraryFileAdder = libraryFileAdder;
         setTitle(I18n.tr("Choose Categories"));
         setModalityType(ModalityType.APPLICATION_MODAL);
     }
@@ -70,7 +72,7 @@ class LibraryWarningDialog extends LimeJDialog {
                 LibrarySettings.ASK_ABOUT_FOLDER_DROP_CATEGORIES.set(!alwaysAsk.isSelected());
                 libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(
                         categories.getSelected());
-                LibraryWarningController.addFilesInner(fileList, files);
+                libraryFileAdder.addFilesInner(fileList, files);
                 LibraryWarningDialog.this.dispose();
             }
         }), "alignx right");

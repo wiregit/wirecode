@@ -14,13 +14,20 @@ import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+
 class SharingWarningDialog extends LimeJDialog {
 
-    public SharingWarningDialog() {
+    private final LibraryFileAdder libraryFileAdder;
+    
+    @Inject
+    public SharingWarningDialog(LibraryMediator libraryMediator, LibraryFileAdder libraryFileAdder) {
         super(GuiUtils.getMainFrame());
+        this.libraryFileAdder = libraryFileAdder;
         setTitle(I18n.tr("Share files?"));
         setModalityType(ModalityType.APPLICATION_MODAL);
     }
@@ -51,7 +58,7 @@ class SharingWarningDialog extends LimeJDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SharingSettings.WARN_SHARING_FOLDER.setValue(warnMeCheckbox.isSelected());
-                LibraryWarningController.addFilesInner(fileList, files);
+                libraryFileAdder.addFilesInner(fileList, files);
                 SharingWarningDialog.this.dispose();
             }
         }), "alignx right");

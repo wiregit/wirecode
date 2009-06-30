@@ -52,7 +52,8 @@ class LibraryTableComboBox extends LimeComboBox {
     private final PromptTextField promptTextField;
     private final JPopupMenu popupMenu;
     private final ButtonGroup buttonGroup = new ButtonGroup();
-
+    private final JMenuItem allMenuItem;
+    
     /** Action that is currently selected in the menu */
     private ComboBoxAction selectedAction;
     
@@ -80,9 +81,9 @@ class LibraryTableComboBox extends LimeComboBox {
         textFieldDecorator.decorateClearablePromptField(promptTextField, AccentType.NONE);
         promptTextField.setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
 
-        JMenuItem item = createRadioMenuItem(new ComboBoxAction(I18n.tr("All"), null,  allFormat));
-        item.setSelected(true);
-        popupMenu.add(item);
+        allMenuItem = createRadioMenuItem(new ComboBoxAction(I18n.tr("All"), null,  allFormat));
+        allMenuItem.setSelected(true);
+        popupMenu.add(allMenuItem);
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Audio"), Category.AUDIO,audioFormat)));
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Video"), Category.VIDEO, videoFormat)));
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Image"), Category.IMAGE, imageFormat)));
@@ -91,7 +92,7 @@ class LibraryTableComboBox extends LimeComboBox {
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Other"), Category.OTHER, otherFormat)));
         popupMenu.add(promptTextField);
 
-        setSelectedAction((ComboBoxAction)item.getAction());
+        setSelectedAction((ComboBoxAction)allMenuItem.getAction());
     }
     
     @Inject
@@ -211,5 +212,14 @@ class LibraryTableComboBox extends LimeComboBox {
         public void actionPerformed(ActionEvent e) {
             setSelectedAction(this);
         }                
+    }
+
+    /**
+     * Clears filters on the combobox. Sets filter text to an empty string and selects
+     * the all category menu item.
+     */
+    public void clearFilters() {
+        promptTextField.setText("");
+        allMenuItem.doClick();
     }
 }

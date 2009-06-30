@@ -61,4 +61,18 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         item.select();
         getComponent().selectLocalFileList(list);
     }
+
+    /**
+     * Returns true if the library has been initialized. 
+     */
+    public boolean isInitialized() {
+        return libraryPanel != null;
+    }
+    
+    /**
+     * Clears any active filters on the library.
+     */
+    public void clearFilters() {
+        getComponent().clearFilters();
+    }
 }
