@@ -5,18 +5,17 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import javax.swing.JMenu;
-import javax.swing.JOptionPane;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.YesNoCheckBoxDialog;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.settings.QuestionsHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
 
 import com.google.inject.Inject;
 
@@ -65,7 +64,7 @@ public class BlockUserMenuFactory {
             blockMenu.add(new AbstractAction(I18n.tr("All P2P Users")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (blockHandler.confirmBlockAll()) {
+                    if (blockHandler.confirmBlockAll(p2pUsers.size())) {
                         for (Friend user : p2pUsers) {
                             spamManager.addToBlackList(user.getName());
                         }
@@ -96,7 +95,7 @@ public class BlockUserMenuFactory {
         public boolean confirmBlock(String name);
         
         /**whether or not to block the hosts*/
-        public boolean confirmBlockAll();
+        public boolean confirmBlockAll(int hostCount);
         
         
         /** done after blocking hosts*/
@@ -117,7 +116,7 @@ public class BlockUserMenuFactory {
         }
 
         @Override
-        public boolean confirmBlockAll() {
+        public boolean confirmBlockAll(int hostCount) {
             //{0}: P2P User's name
             return confirm(I18n.tr("Block P2P uUers?"));
         }
@@ -153,9 +152,9 @@ public class BlockUserMenuFactory {
         }
 
         @Override
-        public boolean confirmBlockAll() {
+        public boolean confirmBlockAll(int hostCount) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block P2P Users?"));
+            return confirm(I18n.tr("Block {0} P2P Users?", hostCount));
         }
 
         @Override
@@ -165,9 +164,20 @@ public class BlockUserMenuFactory {
         
     }
     
-    private boolean confirm(String message){
-        return FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(), message, null, 
-                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;  
+    private boolean confirm(String message) {
+        if (!QuestionsHandler.CONFIRM_BLOCK_HOST.getValue()) {
+            // no need to confirm here
+            return true;
+        }
+
+        final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(message, I18n
+                .tr("Don't ask me again"), !QuestionsHandler.CONFIRM_BLOCK_HOST.getValue());
+        yesNoCheckBoxDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+        yesNoCheckBoxDialog.setVisible(true);
+
+        QuestionsHandler.CONFIRM_BLOCK_HOST.setValue(!yesNoCheckBoxDialog.isCheckBoxSelected());
+        
+        return yesNoCheckBoxDialog.isConfirmed();
     }
     
     

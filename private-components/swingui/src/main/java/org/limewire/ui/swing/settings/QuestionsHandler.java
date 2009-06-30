@@ -42,7 +42,10 @@ public class QuestionsHandler extends LimeWireSettings {
     public static final BooleanSetting WARN_TORRENT_SEED_MORE =
     	FACTORY.createBooleanSetting("TORRENT_SEED_MORE", true);
 	
-    
+
+    /** Setting for whether or not to confirm blocking a host */
+    public static final BooleanSetting CONFIRM_BLOCK_HOST =
+        FACTORY.createBooleanSetting("CONFIRM_BLOCK_HOST", true);
     
 
 }

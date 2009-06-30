@@ -13,15 +13,17 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class YesNoCheckBoxDialog extends LimeJDialog {
-    public static String YES_COMMAND = "YES";
+    public static final String YES_COMMAND = "YES";
 
-    public static String NO_COMMAND = "NO";
+    public static final String NO_COMMAND = "NO";
 
     private JButton yesButton = null;
 
     private JButton noButton = null;
 
     private JCheckBox checkBox;
+    
+    private String selectedCommand;
 
     public YesNoCheckBoxDialog(String message, String checkBoxMessage, boolean checked) {
         this(message, checkBoxMessage, checked,I18n.tr("Yes"), I18n.tr("No"));
@@ -42,6 +44,7 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
         yesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                selectedCommand = YES_COMMAND;
                 YesNoCheckBoxDialog.this.dispose();
             }
         });
@@ -50,6 +53,7 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
         noButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                selectedCommand = NO_COMMAND;
                 YesNoCheckBoxDialog.this.dispose();
             }
         });
@@ -76,5 +80,12 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
 
     public synchronized boolean isCheckBoxSelected() {
         return checkBox.isSelected();
+    }
+    
+    /**
+     * @return true if yes was clicked
+     */
+    public boolean isConfirmed(){
+        return selectedCommand == YES_COMMAND;
     }
 }
