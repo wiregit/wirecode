@@ -50,7 +50,7 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
 
     @Override
     public String format() {
-        boolean isIncoming = (getType() == Message.Type.Received);
+        boolean isIncoming = (getType() == Message.Type.RECEIVED);
         return isIncoming ? formatIncoming() : formatOutgoing();
     }
 
@@ -60,7 +60,7 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
         fileOfferOutgoingMsg.append(tr("Sharing file with {0}", getFriendID()));
         fileOfferOutgoingMsg.append(formatButtonText(getFileOffer().getName(), false));
         
-        if (getType() == Type.Send_Failed_FriendSignOut) {
+        if (getType() == Type.SEND_FAILED_SIGNOUT) {
             fileOfferOutgoingMsg.append("<br/><b>").
                 append(tr("File offer not sent because friend signed off.")).
                 append("</b><br/>");

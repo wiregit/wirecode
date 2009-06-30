@@ -44,7 +44,7 @@ public class MessageTextImpl extends AbstractMessageImpl implements MessageText 
     public String format() {
         String message = insertBreaksAddAnchorsTags(this.message.replace("<", "&lt;").replace(">", "&gt;"));
         
-        if (getType() == Type.Send_Failed_FriendSignOut) {
+        if (getType() == Type.SEND_FAILED_SIGNOUT) {
             message += "<br/><b>" + tr("Message not sent because friend signed off.") +
                     "</b><br/>";
         }

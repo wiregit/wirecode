@@ -265,7 +265,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         messages.add(message);
         Type type = message.getType();
 
-        if (type != Type.Sent) {
+        if (type != Type.SENT) {
             currentChatState = ChatState.active;
         }
 
@@ -335,7 +335,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                 NoSave status = ((NoSaveStatus)feature.getFeature()).getStatus();
                 if (status != noSaveState) {
                     NoSaveStatusMessage msg = new NoSaveStatusMessage(friendId,
-                            Message.Type.Server, status);
+                            Message.Type.SERVER, status);
                     new MessageReceivedEvent(msg).publish();
                 }
             }
@@ -581,7 +581,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                    // do not send file offer if user not signed in.
                    if (!friend.isSignedIn()) {
                         new MessageReceivedEvent(new MessageFileOfferImpl(I18n.tr("me"), 
-                                friendId, Message.Type.Send_Failed_FriendSignOut, metadata, null)).publish();
+                                friendId, Message.Type.SEND_FAILED_SIGNOUT, metadata, null)).publish();
                        return;
                    }
 
@@ -598,7 +598,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
                    if (sentFileOffer) {
                         new MessageReceivedEvent(new MessageFileOfferImpl(I18n.tr("me"), 
-                                friendId, Message.Type.Sent, metadata, null)).publish();
+                                friendId, Message.Type.SENT, metadata, null)).publish();
                    } else {
                        // TODO: Devise how to handle file offer sending failures, using tooltip perhaps?
                    }

@@ -54,7 +54,7 @@ class ChatDocumentBuilder {
 
             Type type = message.getType();
 
-            if (message.getType() != Message.Type.Server) {
+            if (message.getType() != Message.Type.SERVER) {
                 if (lastMessageType == null) {
                     //The first message of a conversation
                     appendMessageSender(builder, message);
@@ -70,7 +70,7 @@ class ChatDocumentBuilder {
             
             builder.append(LINE_BREAK);
             
-            if (type == Type.Sent) {
+            if (type == Type.SENT) {
                 lastMessageTimeFromMe = message.getMessageTimeMillis();
             }
         }
@@ -82,12 +82,12 @@ class ChatDocumentBuilder {
     }
 
     private static boolean sixtySecondRule(long lastMessageTimeFromMe, Message message) {
-        return message.getType() == Type.Sent && lastMessageTimeFromMe + 60000 < message.getMessageTimeMillis();
+        return message.getType() == Type.SENT && lastMessageTimeFromMe + 60000 < message.getMessageTimeMillis();
     }
 
     private static StringBuilder appendMessageSender(StringBuilder builder, Message message) {
         Type type = message.getType();
-        String cssClass = type == Type.Sent ? "me" : "them";
+        String cssClass = type == Type.SENT ? "me" : "them";
         String content = message.getSenderName();
         return builder.append("<div class=\"")
         .append(cssClass)

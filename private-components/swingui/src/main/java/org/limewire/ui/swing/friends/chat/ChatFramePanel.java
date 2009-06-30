@@ -110,7 +110,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
     
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
-        if (event.getMessage().getType() != Message.Type.Sent) {
+        if (event.getMessage().getType() != Message.Type.SENT) {
             String messageFriendID = event.getMessage().getFriendID();
             mostRecentConversationFriendId = messageFriendID;
             notifyUnseenMessageListener(event);
@@ -118,7 +118,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
                 chatPanel.markActiveConversationRead();
             }
         }
-        if (event.getMessage().getType() != Message.Type.Sent &&
+        if (event.getMessage().getType() != Message.Type.SENT &&
              (!GuiUtils.getMainFrame().isActive() || !isVisible())) {
             notifier.showMessage(getNoticeForMessage(event));
             
@@ -161,7 +161,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
         final Message message = event.getMessage();
 
         // todo: each message type should know how to display itself as a notification
-        String title = message.getType() == Message.Type.Server ?
+        String title = message.getType() == Message.Type.SERVER ?
                 tr("Message from the chat server") :
                 tr("Chat from {0}", message.getSenderName());
         String messageString = message.toString();

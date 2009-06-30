@@ -35,10 +35,10 @@ class MessageWriterImpl implements MessageWriter {
                 }
             }, "send-message");
             new MessageReceivedEvent(
-                newMessage(message, Message.Type.Sent)).publish();
+                newMessage(message, Message.Type.SENT)).publish();
         } else {
             new MessageReceivedEvent(
-                newMessage(message, Message.Type.Send_Failed_FriendSignOut)).publish();
+                newMessage(message, Message.Type.SEND_FAILED_SIGNOUT)).publish();
         }
     }
 

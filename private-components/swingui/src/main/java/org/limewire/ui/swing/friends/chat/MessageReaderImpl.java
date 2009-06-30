@@ -13,7 +13,7 @@ class MessageReaderImpl implements MessageReader {
     @Override
     public void readMessage(final String message) {
         if (message != null) {
-            final Message msg = newMessage(message, Message.Type.Received);
+            final Message msg = newMessage(message, Message.Type.RECEIVED);
             new MessageReceivedEvent(msg).publish();
         }
     }

@@ -315,10 +315,10 @@ public class ChatFriendListPane extends JPanel {
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         ChatFriend chatFriend = chatModel.getChatFriend(message.getFriendID());
 
-        if (message.getType() != Type.Sent) {
+        if (message.getType() != Type.SENT) {
             chatFriend.setReceivedUnviewedMessages(true);
         }
-        if (!chatFriend.isActiveConversation() && message.getType() != Type.Sent) {
+        if (!chatFriend.isActiveConversation() && message.getType() != Type.SENT) {
             if (!friendTimerMap.containsKey(chatFriend)) {
                 AlternatingIconTimer iconTimer = new AlternatingIconTimer(chatFriend);
                 friendTimerMap.put(chatFriend, iconTimer);

@@ -113,7 +113,7 @@ public class ChatModel {
             FriendPresence fileOfferPresence = presences.get(fromJID);
             if (fileOfferPresence != null) {
                 new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendId, fromFriendId,
-                        Type.Received, metadata, fileOfferPresence)).publish();
+                        Type.RECEIVED, metadata, fileOfferPresence)).publish();
             }
         }
     }
