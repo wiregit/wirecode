@@ -70,7 +70,7 @@ public class BandWidthSlider extends JComponent {
                 labelText = I18n.tr("Unlimited");
             else {
                 Float f = new Float(((slider.getValue() / 100.0))
-                        * ConnectionSettings.CONNECTION_SPEED.getValue());
+                        * ConnectionSettings.CONNECTION_SPEED.getValue() / 8);
                 NumberFormat formatter = NumberFormat.getInstance();
                 formatter.setMaximumFractionDigits(2);
                 labelText = String.valueOf(formatter.format(f)) + " KB/s";
