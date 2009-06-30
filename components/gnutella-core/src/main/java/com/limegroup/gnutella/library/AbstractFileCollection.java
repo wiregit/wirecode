@@ -298,6 +298,9 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         // and the overridden methods cannot be expected to be OK with locks.
         if (removeFileDescImpl(oldFileDesc)) {
             if(addFileDescImpl(newFileDesc)) {
+            	// the internal LibraryFileData list is destroyed when a FILE_CHANGE occurs, 
+            	// so resave ourselves to the list
+                saveChange(newFileDesc.getFile(), true);
                 success = true;
             } else {
                 failed = true;
