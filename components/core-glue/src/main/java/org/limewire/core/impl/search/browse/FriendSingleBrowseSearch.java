@@ -26,7 +26,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     private final RemoteLibraryManager remoteLibraryManager;
     private final ExecutorService executorService;
     private final ListEventListener<FriendLibrary> friendLibraryListEventListener = new FriendLibraryListEventListener();
-
+    private final FriendLibraryModelListener friendLibraryModelListener = new FriendLibraryModelListener();
     private final PropertyChangeListener libraryPropertyChangeListener = new LibraryPropertyChangeListener();
     
     private final AtomicReference<FriendLibrary> currentLibrary = new AtomicReference<FriendLibrary>();
@@ -76,6 +76,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
            }  
             
         } else {
+            setLibrary(library);
             if(library.getState() == LibraryState.LOADING){
                 library.addPropertyChangeListener(libraryPropertyChangeListener);                
             } else {
@@ -88,7 +89,14 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     /**Loads a snapshot of the available files, alerts BrowseStatusListeners that we have loaded, 
      * and SearchListeners that the search has stopped.*/
     private void loadLibrary(){
-        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>(remoteLibraryManager.getFriendLibrary(friend).getModel());
+        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>();
+        
+        remoteLibraryManager.getFriendLibrary(friend).getModel().getReadWriteLock().readLock().lock();
+        try {        
+            remoteFileItems.addAll(remoteLibraryManager.getFriendLibrary(friend).getModel());
+        } finally {
+            remoteLibraryManager.getFriendLibrary(friend).getModel().getReadWriteLock().readLock().unlock();
+        }
         
         // add all files
         for (SearchListener listener : searchListeners) {
@@ -113,7 +121,29 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
         remoteLibraryManager.getFriendLibraryList().removeListEventListener(friendLibraryListEventListener);  
         if (currentLibrary.get() != null) {
             currentLibrary.get().removePropertyChangeListener(libraryPropertyChangeListener);
+            currentLibrary.get().getModel().removeListEventListener(friendLibraryModelListener);
+            currentLibrary.set(null);
         }
+    }
+    
+    private synchronized void setLibrary(FriendLibrary newLibrary){
+        FriendLibrary oldLibrary = currentLibrary.get();
+        if(newLibrary == oldLibrary){
+            return;
+        }
+        if(oldLibrary != null){
+            oldLibrary.getModel().removeListEventListener(friendLibraryModelListener);            
+        }
+        
+        //Add a property change listener to the new library and keep a reference to the library so we can remove the listener later.
+        newLibrary.getModel().addListEventListener(friendLibraryModelListener);
+        newLibrary.addPropertyChangeListener(libraryPropertyChangeListener);
+        currentLibrary.set(newLibrary);
+        
+        if(currentLibrary.get().getState() == LibraryState.LOADED){
+            fireBrowseStatusChanged(BrowseState.UPDATED);
+        }
+        
     }
     
     private void fireBrowseStatusChanged(BrowseState state, Friend... friends){
@@ -130,9 +160,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
                 if (listChanges.getType() == ListEvent.INSERT) {
                     FriendLibrary newLibrary = (FriendLibrary) listChanges.getSourceList().get(listChanges.getIndex());
                     if (newLibrary.getFriend().getId().equals(friend.getId())) {//There is a new library for our friend!
-                        //Add a property change listener to the new library and keep a reference to the library so we can remove the listener later.
-                        currentLibrary.set(remoteLibraryManager.getFriendLibrary(friend));
-                        currentLibrary.get().addPropertyChangeListener(libraryPropertyChangeListener);
+                        setLibrary(remoteLibraryManager.getFriendLibrary(friend));
                     }
                 } else if (listChanges.getType() == ListEvent.DELETE && remoteLibraryManager.getFriendLibrary(friend) == null){   
                     //our friend has logged off
@@ -141,6 +169,13 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
                 }
             }
         }
+    }
+    
+    private class FriendLibraryModelListener implements ListEventListener<SearchResult>{
+        @Override
+        public void listChanged(ListEvent<SearchResult> listChanges) {
+            fireBrowseStatusChanged(BrowseState.UPDATED);
+        }        
     }
     
     private class LibraryPropertyChangeListener implements PropertyChangeListener {
