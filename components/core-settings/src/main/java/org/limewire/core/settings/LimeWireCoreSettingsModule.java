@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.facebook.service.settings.FacebookAPIKey;
+import org.limewire.facebook.service.settings.FacebookAppID;
 import org.limewire.facebook.service.settings.FacebookAuthServerUrls;
 import org.limewire.geocode.GeoLocation;
 import org.limewire.geocode.GeocodeUrl;
@@ -20,5 +21,6 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<MutableProvider<String>>(){}).annotatedWith(ChatChannel.class).toInstance(FacebookSettings.CHAT_CHANNEL);
         bind(new TypeLiteral<String[]>(){}).annotatedWith(FacebookAuthServerUrls.class).toProvider(FacebookSettings.AUTH_SERVER_URLS);
         bind(new TypeLiteral<String>(){}).annotatedWith(FacebookAPIKey.class).toProvider(FacebookSettings.API_KEY);
+        bind(new TypeLiteral<String>(){}).annotatedWith(FacebookAppID.class).toProvider(FacebookSettings.APP_ID);
     }
 }

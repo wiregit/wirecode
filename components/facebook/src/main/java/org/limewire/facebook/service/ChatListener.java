@@ -7,13 +7,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.facebook.service.livemessage.LiveMessageHandler;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
+import org.limewire.facebook.service.settings.FacebookAppID;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.MessageReader;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.inject.assistedinject.Assisted;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * This listens for new chat messages and live messages, and dispatches them to the
@@ -26,6 +28,7 @@ public class ChatListener implements Runnable {
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private final FacebookFriendConnection connection;
     private final LiveMessageHandlerRegistry handlerRegistry;
+    private final Provider<String> facebookAppID;
 
     private final ChatManager chatManager;
     private final String uid;
@@ -36,9 +39,11 @@ public class ChatListener implements Runnable {
 
     @Inject
     ChatListener(@Assisted FacebookFriendConnection connection,
-               LiveMessageHandlerRegistry handlerRegistry) {
+                 LiveMessageHandlerRegistry handlerRegistry,
+                 @FacebookAppID Provider<String> facebookAppID) {
         this.connection = connection;
         this.handlerRegistry = handlerRegistry;
+        this.facebookAppID = facebookAppID;
         this.seq = -1;
         this.uid = connection.getUID();
         this.channel = connection.getChannel();
@@ -106,13 +111,18 @@ public class ChatListener implements Runnable {
             JSONArray ms = message.getJSONArray("ms");
             final JSONObject payload = ms.getJSONObject(0);
             String msgType = payload.getString("type");
-
-            if(payload.has("event_name")) {
+            String appId = payload.optString("app_id", "");
+            
+            if("app_msg".equals(msgType) && appId.equals(facebookAppID.get())) {
                 processLiveMessage(payload);
             } else if ("msg".equals(msgType) || "typ".equals(msgType)) {
                 processChatMessage(payload, msgType);
+            } else {
+                LOG.debugf("unhandled payload: {0}", payload.toString());
             }
-        }            
+        } else {
+            LOG.debugf("unhandled message: {0}", message.toString());    
+        }
     }
 
     private void processLiveMessage(JSONObject payload) throws JSONException {

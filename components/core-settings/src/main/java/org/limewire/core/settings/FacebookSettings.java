@@ -32,4 +32,10 @@ public class FacebookSettings extends LimeProps {
      */
     public static final StringSetting API_KEY = 
         FACTORY.createRemoteStringSetting("FACEBOOK_API_KEY", "28615065c80948753945e963923c43ca", "Facebook.apiKey");
+    
+    /**
+     * The Facebook LimeWire Application ID, a remote setting.
+     */
+    public static final StringSetting APP_ID = 
+        FACTORY.createRemoteStringSetting("FACEBOOK_APP_ID", "93767281887", "Facebook.appId");
 }
