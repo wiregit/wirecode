@@ -34,7 +34,6 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.FontUtils;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -116,7 +115,6 @@ public class IntentDialog extends LimeJDialog {
         bodyLabel.setHtmlLinkForeground(new Color(0x2152a6));
         bodyLabel.setEditable(false);
         bodyLabel.setOpaque(false);
-        bodyLabel.addHyperlinkListener(GuiUtils.getHyperlinkListener());
         
         languageLabel = new JLabel();
         languageLabel.setFont(smallFont);
