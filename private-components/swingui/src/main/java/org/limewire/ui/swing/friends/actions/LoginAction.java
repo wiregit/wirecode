@@ -15,7 +15,7 @@ public class LoginAction extends AbstractAction {
     
     @Inject
     public LoginAction(Provider<LoginPopupPanel> friendsSignInPanel) {
-        super(I18n.tr("Login"));
+        super(I18n.tr("Sign in"));
 
         this.friendsSignInPanel = friendsSignInPanel;
     }

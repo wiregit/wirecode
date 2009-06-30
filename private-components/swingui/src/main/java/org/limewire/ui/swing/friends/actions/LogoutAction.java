@@ -14,7 +14,7 @@ class LogoutAction extends AbstractAction {
     
     @Inject
     public LogoutAction(FriendConnection friendConnection) {
-        super(I18n.tr("Logout"));
+        super(I18n.tr("Sign out"));
         this.friendConnection = friendConnection;
     }
     
