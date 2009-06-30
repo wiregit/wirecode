@@ -85,23 +85,33 @@ public class MouseableTable extends StripedJXTable {
         int row = rowAtPoint(event.getPoint());
         int col = columnAtPoint(event.getPoint());
         if (row > -1 && col > -1) {
-            Object value = getValueAt(row, col);
-            JComponent renderer = getRendererComponent(row, col, value);
-
-            if (value != null && isClipped(renderer, col)) {
-                String toolTip = renderer.getToolTipText();
-
-                if (toolTip != null) {
-                    return toolTip;
-                } else if (renderer instanceof JLabel) {
-                    // works for DefaultTableCellRenderer
-                    return ((JLabel) renderer).getText();
-                }
-
-                return PropertyUtils.getToolTipText(value);
-            }
+            return getToolTipText(row, col);
         }
 
+        return null;
+    }
+
+    /**
+     * Returns the tooltip text for the item at the given row and column.
+     * The default implementation only shows the tooltip text if the text is clipped. 
+     */
+    protected String getToolTipText(int row, int col) {
+        Object value = getValueAt(row, col);
+        JComponent renderer = getRendererComponent(row, col, value);
+
+        if (value != null && isClipped(renderer, col)) {
+            String toolTip = renderer.getToolTipText();
+
+            if (toolTip != null) {
+                return toolTip;
+            } else if (renderer instanceof JLabel) {
+                // works for DefaultTableCellRenderer
+                return ((JLabel) renderer).getText();
+            }
+
+            return PropertyUtils.getToolTipText(value);
+        }
+        
         return null;
     }
 

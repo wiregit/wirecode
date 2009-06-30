@@ -11,6 +11,7 @@ import java.util.Set;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.impl.InvalidURN;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FileMetaData;
@@ -194,11 +195,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         if(urn != null) {
             return new URNImpl(urn);
         } else {
-            return new org.limewire.core.api.URN() {
-                @Override
-                public int compareTo(org.limewire.core.api.URN o) {
-                    return toString().compareTo(o.toString());
-                }};
+            return InvalidURN.instance;
         }
     }
 
@@ -236,6 +233,11 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
             reloadedMap.put(FilePropertyKey.LOCATION, getFile().getParent());
             propertiesMap = reloadedMap;
         }
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return !InvalidURN.instance.equals(getUrn());
     }
     
 }

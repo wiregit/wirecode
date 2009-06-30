@@ -114,4 +114,9 @@ public class MockLocalFileItem implements LocalFileItem {
         // TODO Auto-generated method stub
         return 0;
     }
+
+    @Override
+    public boolean isLoaded() {
+       return true;
+    }
 }

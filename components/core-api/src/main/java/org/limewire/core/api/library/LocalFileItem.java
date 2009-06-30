@@ -37,4 +37,7 @@ public interface LocalFileItem extends FileItem {
     
     /** Returns the number of uploads this has completed. */
     int getNumUploadAttempts();    
+    
+    /** Returns true if the file has finished loading. Its urn has been calculated. */
+    boolean isLoaded();
 }

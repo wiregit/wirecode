@@ -30,6 +30,7 @@ import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
@@ -311,5 +312,19 @@ public class LibraryTable extends MouseableTable {
             File file = getSelectedItem().getFile();
             PlayerUtils.playOrLaunch(file);
         }
+    }
+    
+    @Override
+    protected String getToolTipText(int row, int col) {
+        Object value = getValueAt(row, col);
+        if(value != null && value instanceof LocalFileItem) {
+            LocalFileItem localFileItem = (LocalFileItem) value;
+            if(!localFileItem.isLoaded()) {
+                return I18n.tr("This file is still processing.");
+            } else if(!localFileItem.isShareable()) {
+                return I18n.tr("This file is unshareable.");
+            }
+        }  
+        return super.getToolTipText(row, col);
     }
 }

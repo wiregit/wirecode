@@ -42,7 +42,6 @@ import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
-import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
@@ -88,7 +87,6 @@ public class LibraryPanel extends JPanel {
     private final LocalFileListTransferHandler transferHandler;
     private final Provider<LibraryImageTable> libraryImagePanelProvider;
     private LibraryImageTable libraryImagePanel;
-//    private final GhostDragGlassPane ghostGlassPane;
     
     private JPanel tableListPanel;
     private JScrollPane libraryScrollPane;
@@ -108,7 +106,7 @@ public class LibraryPanel extends JPanel {
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryTransferHandler transferHandler,
             Provider<LibraryImageTable> libraryImagePanelProvider, ComboBoxDecorator comboBoxDecorator,
-            GhostDragGlassPane ghostGlassPane, LibrarySharingAction libraryAction) {
+            LibrarySharingAction libraryAction) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.libraryNavigatorPanel = navPanel;
@@ -119,7 +117,6 @@ public class LibraryPanel extends JPanel {
         this.buttonDecorator = buttonDecorator;
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
-//        this.ghostGlassPane = ghostGlassPane;
         
         GuiUtils.assignResources(this);
         
@@ -151,28 +148,13 @@ public class LibraryPanel extends JPanel {
 
         tableListPanel.add(libraryScrollPane, TABLE);
         
-        setupStoreHighlighter();
+        setupHighlighters();
         
         add(libraryNavigatorPanel, "dock west, growy");
         add(headerBar, "dock north, growx");
         add(publicSharedFeedbackPanel.getComponent(), "dock north, growx, hidemode 3");
         add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
         add(tableListPanel, "grow");
-        
-//        try {
-//            libraryTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryTable, ghostGlassPane));
-//        } catch (TooManyListenersException e) {
-//        }
-//        
-//        //hides system drag cursor when drag starts from within the app
-//        DragSource source = DragSource.getDefaultDragSource();
-//        source.addDragSourceListener(new DragSourceAdapter(){
-//            @Override
-//            public void dragEnter(java.awt.dnd.DragSourceDragEvent e) { 
-//                DragSourceContext context = e.getDragSourceContext();
-//                context.setCursor(Cursor.getDefaultCursor());
-//            }
-//        });
     }
     
     /**
@@ -254,10 +236,6 @@ public class LibraryPanel extends JPanel {
     private void createImageList() {
         libraryImagePanel = libraryImagePanelProvider.get();
         libraryImagePanel.setTransferHandler(transferHandler);
-//        try {
-//            libraryImagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libraryImagePanel, ghostGlassPane));
-//        } catch (TooManyListenersException e) {
-//        }
         tableListPanel.add(libraryImagePanel, LIST); 
     }
     
@@ -356,12 +334,18 @@ public class LibraryPanel extends JPanel {
         publicSharedFeedbackPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.PUBLIC_SHARED);
     }
     
-    private void setupStoreHighlighter() {
+    private void setupHighlighters() {
         TableColors tableColors = new TableColors();
-        ColorHighlighter highlighter = new ColorHighlighter(new StoreHighlightPredicate(), 
+        ColorHighlighter storeHighlighter = new ColorHighlighter(new StoreHighlightPredicate(), 
                 null, tableColors.getDisabledForegroundColor(), 
                 null, tableColors.getDisabledForegroundColor());
-        libraryTable.addHighlighter(highlighter);
+        
+        ColorHighlighter libraryHighlighter = new ColorHighlighter(new LibraryHighlightPredicate(), 
+                null, tableColors.getDisabledForegroundColor(), 
+                null, tableColors.getDisabledForegroundColor());
+        
+        libraryTable.addHighlighter(storeHighlighter);
+        libraryTable.addHighlighter(libraryHighlighter);
     }
     
     private class StoreHighlightPredicate implements HighlightPredicate {
@@ -374,6 +358,22 @@ public class LibraryPanel extends JPanel {
             
             LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
             return !item.isShareable();
+        }
+    }
+    
+    /**
+     * Highlights the item if it has an invalid urn. 
+     */
+    private class LibraryHighlightPredicate implements HighlightPredicate {
+        @Override
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
+            if(navItem == null) {
+                return false;
+            }
+            
+            LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
+            return !item.isLoaded();
         }
     }
     
