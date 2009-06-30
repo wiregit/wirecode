@@ -363,7 +363,8 @@ public class BaseResultPanel extends JXPanel {
 
         // Create sorted list and set table model.
         SortedList<VisualSearchResult> sortedList = GlazedListsFactory.sortedList(eventList, null);
-        resultsTable.setEventListFormat(sortedList, tableFormat, true);
+        EventList<VisualSearchResult> downstreamList = eventList;
+        resultsTable.setEventListFormat(downstreamList, tableFormat, true);
         
         //link the jxtable column headers to the sorted list
         resultsTableSorting = EventListJXTableSorting.install(resultsTable, sortedList, tableFormat);   
@@ -372,7 +373,7 @@ public class BaseResultPanel extends JXPanel {
         if (selectionModel != null) {
             selectionModel.dispose();
         }
-        selectionModel = new DefaultEventSelectionModel<VisualSearchResult>(sortedList);
+        selectionModel = new DefaultEventSelectionModel<VisualSearchResult>(downstreamList);
         resultsTable.setSelectionModel(selectionModel);
         resultsTable.setEnterKeyAction(new ResultEnterAction(selectionModel.getSelected(), downloadHandler));
             
@@ -382,7 +383,7 @@ public class BaseResultPanel extends JXPanel {
         resultsTable.applySavedColumnSettings();
 
         TableColors tableColors = new TableColors();
-        resultsColorHighlighter = new ColorHighlighter(new DownloadedHighlightPredicate(sortedList), 
+        resultsColorHighlighter = new ColorHighlighter(new DownloadedHighlightPredicate(downstreamList), 
                 null, tableColors.getDisabledForegroundColor(), 
                 null, tableColors.getDisabledForegroundColor());
         resultsTable.addHighlighter(resultsColorHighlighter);
@@ -570,13 +571,13 @@ public class BaseResultPanel extends JXPanel {
 	 * Paints the foreground of a table row. 
 	 */
     private static class DownloadedHighlightPredicate implements HighlightPredicate {
-        private SortedList<VisualSearchResult> sortedList;
-        public DownloadedHighlightPredicate (SortedList<VisualSearchResult> sortedList) {
-            this.sortedList = sortedList;
+        private EventList<VisualSearchResult> eventList;
+        public DownloadedHighlightPredicate (EventList<VisualSearchResult> sortedList) {
+            this.eventList = sortedList;
         }
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-            VisualSearchResult result = sortedList.get(adapter.row);
+            VisualSearchResult result = eventList.get(adapter.row);
             return result.isSpam();
         }       
     }
