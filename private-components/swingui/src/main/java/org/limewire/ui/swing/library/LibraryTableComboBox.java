@@ -3,8 +3,6 @@ package org.limewire.ui.swing.library;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -15,6 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -40,16 +39,22 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class LibraryTableComboBox extends LimeComboBox {
+/**
+ * Allows the user to filter by category and filter 
+ * with a filter textfield.
+ */
+class LibraryTableComboBox extends LimeComboBox {
     
     private final CategoryIconManager categoryIconManager;
 
-    Provider<AllTableFormat<LocalFileItem>> allFormat;
-    
+    /** Is added to the button to display custom icon/text */
+    private final JLabel comboBoxDisplayLabel;
+    private final PromptTextField promptTextField;
+    private final JPopupMenu popupMenu;
+    private final ButtonGroup buttonGroup = new ButtonGroup();
+
+    /** Action that is currently selected in the menu */
     private ComboBoxAction selectedAction;
-    private JLabel textLabel;
-    private PromptTextField promptTextField;
-    private ButtonGroup buttonGroup = new ButtonGroup();
     
     @Inject
     public LibraryTableComboBox(Provider<AllTableFormat<LocalFileItem>> allFormat, 
@@ -63,12 +68,19 @@ public class LibraryTableComboBox extends LimeComboBox {
             TextFieldDecorator textFieldDecorator) {
         
         this.categoryIconManager = categoryIconManager;
-        this.allFormat = allFormat;
         
-        final JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu = new JPopupMenu();
         overrideMenu(popupMenu);
-        ComboBoxAction action = new ComboBoxAction(I18n.tr("All"), null,  allFormat);
-        JMenuItem item = createRadioMenuItem(action);
+        
+        comboBoxDisplayLabel = new JLabel();
+        add(comboBoxDisplayLabel);
+        
+        promptTextField = new PromptTextField(I18n.tr("Filter"));
+        TextFieldClipboardControl.install(promptTextField);
+        textFieldDecorator.decorateClearablePromptField(promptTextField, AccentType.NONE);
+        promptTextField.setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
+
+        JMenuItem item = createRadioMenuItem(new ComboBoxAction(I18n.tr("All"), null,  allFormat));
         item.setSelected(true);
         popupMenu.add(item);
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Audio"), Category.AUDIO,audioFormat)));
@@ -77,37 +89,13 @@ public class LibraryTableComboBox extends LimeComboBox {
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Document"), Category.DOCUMENT, documentFormat)));
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Programs"), Category.PROGRAM, programFormat)));
         popupMenu.add(createRadioMenuItem(new ComboBoxAction(I18n.tr("Other"), Category.OTHER, otherFormat)));
-        
-        textLabel = new JLabel();
-        add(textLabel);
-        
-        promptTextField = new PromptTextField(I18n.tr("Filter"));
-        TextFieldClipboardControl.install(promptTextField);
-        textFieldDecorator.decorateClearablePromptField(promptTextField, AccentType.NONE);
-        promptTextField.setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
-        promptTextField.addKeyListener(new KeyAdapter(){
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if(e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    popupMenu.setVisible(false);
-                }
-            }      
-        });
-
         popupMenu.add(promptTextField);
-        popupMenu.addPropertyChangeListener(new PropertyChangeListener(){
 
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().equals("visible") && ((Boolean)evt.getNewValue()) == true) {
-                    promptTextField.requestFocusInWindow();
-                    promptTextField.selectAll();
-                    //TODO: this isn't getting the focus
-                }
-            }
-            
-        });
-        
+        setSelectedAction((ComboBoxAction)item.getAction());
+    }
+    
+    @Inject
+    public void register() {       
         popupMenu.addPopupMenuListener(new PopupMenuListener(){
 
             @Override
@@ -116,16 +104,28 @@ public class LibraryTableComboBox extends LimeComboBox {
 
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                // user may have made changes to the text but not used any enter mechanism
                 setDisplayText();
             }
 
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                SwingUtilities.invokeLater(new Runnable(){
+                    public void run() {
+                        promptTextField.grabFocus();                        
+                    }
+                });
             }
             
         });
-
-        setMySelectedItem(action);
+        promptTextField.addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if(e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    popupMenu.setVisible(false);
+                }
+            }      
+        });
     }
     
     public JTextField getFilterField() {
@@ -140,7 +140,7 @@ public class LibraryTableComboBox extends LimeComboBox {
         return selectedAction.getCategory();
     }
     
-    private void setMySelectedItem(ComboBoxAction action) {
+    private void setSelectedAction(ComboBoxAction action) {
         selectedAction = action;
         setDisplayText();
         fireChangeEvent(action);
@@ -149,10 +149,10 @@ public class LibraryTableComboBox extends LimeComboBox {
     private void setDisplayText() {
         String text = getFilterField().getText();
         if(text != null && text.trim().length() > 0) 
-            textLabel.setText(getFilterField().getText().trim());
+            comboBoxDisplayLabel.setText(getFilterField().getText().trim());
         else
-            textLabel.setText(selectedAction.getText());
-        textLabel.setIcon(selectedAction.getIcon());
+            comboBoxDisplayLabel.setText(selectedAction.getText());
+        comboBoxDisplayLabel.setIcon(selectedAction.getIcon());
     }
     
     private JMenuItem createRadioMenuItem(Action action) {
@@ -161,6 +161,9 @@ public class LibraryTableComboBox extends LimeComboBox {
         return menuItem;
     }
     
+    /**
+     * An action for a menuItem to choose which category to show.
+     */
     private class ComboBoxAction extends AbstractAction {
 
         private final Provider<? extends AbstractLibraryFormat<LocalFileItem>> tableFormat;
@@ -206,7 +209,7 @@ public class LibraryTableComboBox extends LimeComboBox {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            setMySelectedItem(this);
+            setSelectedAction(this);
         }                
     }
 }
