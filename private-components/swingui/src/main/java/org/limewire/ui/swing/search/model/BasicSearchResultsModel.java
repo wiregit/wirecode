@@ -39,6 +39,8 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.FunctionList.AdvancedFunction;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.util.concurrent.Lock;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Provider;
 
@@ -65,9 +67,6 @@ class BasicSearchResultsModel implements SearchResultsModel {
 
     /** Save exception handler. */
     private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
-    
-    /** The original list, off the EDT. */
-    private final EventList<SearchResult> offEDTResultList;
 
     /** List of all search results. */
     private final EventList<SearchResult> allSearchResults;
@@ -100,6 +99,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
     private SortOption sortOption;
     
     private List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
+    
+    private final ListQueuer listQueuer = new ListQueuer();
 
     /**
      * Constructs a BasicSearchResultsModel with the specified search details,
@@ -118,11 +119,24 @@ class BasicSearchResultsModel implements SearchResultsModel {
         // Create filter debugger.
         filterDebugger = new FilterDebugger<VisualSearchResult>();
         
-        // Base list that can receive events off the EDT.
-        offEDTResultList = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
-        
-        // Proxies results onto the swing thread
-        allSearchResults = GlazedListsFactory.swingThreadProxyEventList(offEDTResultList);
+        // Underlying list, with no locks -- always accessed on EDT.
+        allSearchResults = new BasicEventList<SearchResult>(new ReadWriteLock() {
+            private Lock noopLock = new Lock() {
+                @Override public void lock() {}
+                @Override public boolean tryLock() { return true; }
+                @Override public void unlock() {}
+            };
+            
+            @Override
+            public Lock readLock() {
+                return noopLock;
+            }
+            
+            @Override
+            public Lock writeLock() {
+                return noopLock;
+            }
+        });
         
         // Create list of search results grouped by URN.
         GroupingList<SearchResult> groupingListUrns = GlazedListsFactory.groupingList(
@@ -177,8 +191,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
             searchListener = null;
         }
         
-        if (offEDTResultList instanceof TransformedList){
-            ((TransformedList)offEDTResultList).dispose();
+        if (allSearchResults instanceof TransformedList){
+            ((TransformedList)allSearchResults).dispose();
         }
         notifyDisposalListeners();
     }
@@ -224,7 +238,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
     
     @Override
-    public SearchType getSearchType(){
+    public SearchType getSearchType() {
         return searchInfo.getSearchType();
     }
 
@@ -320,7 +334,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
         
 //        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
         try {
-            offEDTResultList.add(result);
+            listQueuer.add(result);
         } catch (Throwable th) {
             // Throw wrapper exception with detailed message.
             throw new RuntimeException(createMessageDetail("Problem adding result", result), th);
@@ -350,14 +364,14 @@ class BasicSearchResultsModel implements SearchResultsModel {
             results = cleanup;
         }        
         
-        offEDTResultList.addAll(results);
+        listQueuer.addAll(results);
     }
     
     /**
      * Removes all results from the model
      */
     public void clear(){
-        offEDTResultList.clear();
+        listQueuer.clear();
     }
     
     /**
@@ -508,6 +522,72 @@ class BasicSearchResultsModel implements SearchResultsModel {
     private void notifyDisposalListeners(){
         for (DisposalListener listener : disposalListeners){
             listener.objectDisposed(this);
+        }
+    }
+    
+    private class ListQueuer implements Runnable {
+        private final Object LOCK = new Object();
+        private final List<SearchResult> queue = new ArrayList<SearchResult>();
+        private final ArrayList<SearchResult> transferQ = new ArrayList<SearchResult>();
+        private boolean scheduled = false;
+        
+        void add(SearchResult result) {
+            synchronized(LOCK) {
+                queue.add(result);
+                schedule();
+            }
+        }
+        
+        void addAll(Collection<? extends SearchResult> results) {
+            synchronized(LOCK) {
+                queue.addAll(results);
+                schedule();
+            }
+        }
+        
+        void clear() {
+            synchronized(LOCK) {
+                queue.clear();
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        allSearchResults.clear();
+                    }
+                });
+            }
+        }
+        
+        private void schedule() {
+            if(!scheduled) {
+                scheduled = true;
+                SwingUtilities.invokeLater(this);
+            }
+        }
+        
+        @Override
+        public void run() {
+            // move to transferQ inside lock
+            transferQ.clear();
+            synchronized(LOCK) {
+                transferQ.addAll(queue);
+                queue.clear();
+            }
+            
+            // move to searchResults outside lock,
+            // so we don't hold a lock while allSearchResults
+            // triggers events.
+            allSearchResults.addAll(transferQ);
+            transferQ.clear();
+            
+            synchronized(LOCK) {
+                scheduled = false;
+                // If the queue wasn't empty, we need to reschedule
+                // ourselves, because something got added to the queue
+                // without scheduling itself, since we had scheduled=true
+                if(!queue.isEmpty()) {
+                    schedule();
+                }
+            }
         }
     }
 }
