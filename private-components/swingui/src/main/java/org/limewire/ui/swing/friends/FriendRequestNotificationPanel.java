@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.friends;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Panel;
 import java.awt.Rectangle;
@@ -28,10 +29,12 @@ public class FriendRequestNotificationPanel extends Panel implements Resizable, 
         
         this.layeredPane = layeredPane;
         this.friendRequestPanel = friendRequestPanel;
+
+        setLayout(new BorderLayout());
         
-        ResizeUtils.forceSize(friendRequestPanel, new Dimension(300, 100));
+        ResizeUtils.forceSize(friendRequestPanel, new Dimension(260, 100));
            
-        this.add(friendRequestPanel);
+        add(friendRequestPanel, BorderLayout.CENTER);
 
         friendRequestPanel.addComponentListener(new ComponentListener() {
             @Override
