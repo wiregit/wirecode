@@ -560,6 +560,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
         private void schedule() {
             if(!scheduled) {
                 scheduled = true;
+                // purposely SwingUtilities & not SwingUtils so
+                // that we force it to the back of the stack
                 SwingUtilities.invokeLater(this);
             }
         }
