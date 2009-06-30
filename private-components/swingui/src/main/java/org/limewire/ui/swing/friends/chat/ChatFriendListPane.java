@@ -48,6 +48,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -544,9 +545,14 @@ public class ChatFriendListPane extends JPanel {
                 .append("<body>")
                 .append("<img src=\"")
                 .append(ChatFriendsUtil.getIconURL(chatFriend.getMode())).append("\"/>&nbsp;")
-                .append("<b>").append(chatFriend.getName())
-                .append(" &lt;").append(chatFriend.getID())
-                .append("&gt;").append("</b><br/>");
+                .append("<b>").append(chatFriend.getName());
+            
+            if(chatFriend.getFriend().getNetwork().getType() != Network.Type.FACEBOOK) {
+                tooltip.append(" &lt;").append(chatFriend.getID())
+                    .append("&gt;");
+            }
+                
+            tooltip.append("</b><br/>");
             String status = chatFriend.getStatus();
             if (status != null && status.length() > 0) {
                 //using width to limit the size of the tooltip, unfortunately looks like max-width does not work 
