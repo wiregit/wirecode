@@ -137,4 +137,9 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     public void clear() {
         eventList.clear();
     }
+
+    @Override
+    public void cancelPendingTasks() {
+        
+    }
 }

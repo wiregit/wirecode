@@ -1244,4 +1244,19 @@ class LibraryImpl implements Library, FileCollection {
     public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         fileProcessingListeners.removeListener(listener);    
     }
+    
+    @Override
+    public void cancelPendingTasks() {
+        rwLock.readLock().lock();
+        List<File> files = null;
+        try {
+            files = new ArrayList<File>(fileToFutures.keySet());
+        } finally {
+            rwLock.readLock().unlock();       
+        }
+        
+        for(File file : files) {
+            remove(file);
+        }
+    }
 }

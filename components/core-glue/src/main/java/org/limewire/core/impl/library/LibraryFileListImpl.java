@@ -87,4 +87,9 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         managedList.removeFileProcessingListener(listener);
     }
+    
+    @Override
+    public void cancelPendingTasks() {
+        managedList.cancelPendingTasks();
+    }
 }

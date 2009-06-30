@@ -18,4 +18,9 @@ public interface LibraryFileList extends LocalFileList {
     void addFileProcessingListener(EventListener<FileProcessingEvent> listener);
     
     void removeFileProcessingListener(EventListener<FileProcessingEvent> listener);
+
+    /**
+     * Cancels any pending file tasks.
+     */
+    void cancelPendingTasks();
 }

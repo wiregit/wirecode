@@ -103,4 +103,9 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         
     }
+
+    @Override
+    public void cancelPendingTasks() {
+        
+    }
 }

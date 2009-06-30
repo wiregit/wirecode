@@ -1,6 +1,10 @@
 package org.limewire.ui.swing.statusbar;
 
-import org.jdesktop.swingx.JXLabel;
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+
+import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.listener.EventListener;
@@ -9,7 +13,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-class FileProcessingPanel extends JXLabel {
+class FileProcessingPanel extends JXButton {
     
     private int total;
     private int finished;
@@ -22,7 +26,13 @@ class FileProcessingPanel extends JXLabel {
     }
 
     @Inject
-    void register(LibraryManager libraryManager) {
+    void register(final LibraryManager libraryManager) {
+        setAction(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                libraryManager.getLibraryManagedList().cancelPendingTasks();
+            }
+        });
         libraryManager.getLibraryManagedList().addFileProcessingListener(new EventListener<FileProcessingEvent>() {
             @Override
             @SwingEDTEvent

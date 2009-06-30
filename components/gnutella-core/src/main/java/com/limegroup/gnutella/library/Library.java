@@ -69,4 +69,9 @@ public interface Library extends FileCollection {
     void addFileProcessingListener(EventListener<FileProcessingEvent> listener);
     
     void removeFileProcessingListener(EventListener<FileProcessingEvent> listener);
+    
+    /**
+     * Cancels any pending file tasks.
+     */
+    void cancelPendingTasks();
 }
