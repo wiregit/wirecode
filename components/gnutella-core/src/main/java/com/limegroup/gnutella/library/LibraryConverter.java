@@ -12,6 +12,7 @@ import java.util.Set;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 
 /**
@@ -45,8 +46,9 @@ class LibraryConverter {
         
         for(File file : oldData.SPECIAL_FILES_TO_SHARE) {
             file = FileUtils.canonicalize(file);            
-            newData.addManagedFile(file);
-            newData.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
+            if(addManagedFile(newData, file)) {
+                newData.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
+            }
         }
         
         for(File file : oldData.FILES_NOT_TO_SHARE) {
@@ -67,7 +69,7 @@ class LibraryConverter {
         
         for(File file : oldData.SPECIAL_STORE_FILES) {
             file = FileUtils.canonicalize(file);
-            newData.addManagedFile(file);
+            addManagedFile(newData, file);
         }
         
         LibrarySettings.VERSION.set(LibrarySettings.LibraryVersion.FIVE_0_0.name());
@@ -78,6 +80,19 @@ class LibraryConverter {
         OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.revertToDefault();
         OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.revertToDefault();
         OldLibrarySettings.EXTENSIONS_TO_SHARE.revertToDefault();
+    }
+
+    /**
+     * Checks to make sure that the file is not a document before adding file to managed file list.
+     * Returns true if the files was not a document, false otherwise. 
+     */
+    private boolean addManagedFile(LibraryFileData newData, File file) {
+        MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
+        if(!MediaType.getDocumentMediaType().equals(mediaType) && !MediaType.getProgramMediaType().equals(mediaType)) {
+            newData.addManagedFile(file);
+            return true;
+        }
+        return false;
     }
     
     private void convertSharedFiles(List<File> sharedFolders, List<File> excludedFolders,
@@ -110,7 +125,9 @@ class LibraryConverter {
         if(fileList != null) {
             for (File file : fileList) {
                 file = FileUtils.canonicalize(file);
-                data.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
+                if(addManagedFile(data, file)) {
+                    data.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
+                }
             }
         }
 
