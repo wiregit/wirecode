@@ -30,7 +30,7 @@ public class LibraryNavItem {
         return localFileList;
     }
     
-    int getId() {
+    public int getId() {
         return sharedFileList != null ? sharedFileList.getId() : -1;
     }
     
