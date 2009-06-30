@@ -75,9 +75,11 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
             data = (EditableSharingData) value;
             checkBox.setText(textFor(data));
             checkBox.setSelected(data.isSelected());
+            setToolTipText(textFor(data));
         } else {
             checkBox.setText("");
             checkBox.setSelected(false);
+            setToolTipText("");
         }     
         return this;
     }
@@ -89,9 +91,11 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
             EditableSharingData data = (EditableSharingData) value;
             checkBox.setText(textFor(data));
             checkBox.setSelected(data.isSelected());
+            setToolTipText(textFor(data));
         } else {
             checkBox.setText("");
             checkBox.setSelected(false);
+            setToolTipText("");
         }     
         return this;
     }

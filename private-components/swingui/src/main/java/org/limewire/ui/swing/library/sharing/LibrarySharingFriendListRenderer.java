@@ -41,12 +41,12 @@ class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {
             value = "";
         }        
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
         setBorder(border);
         setFont(font);
         setForeground(fontColor);
         setOpaque(!scrollPane.getVerticalScrollBar().isVisible());
         setBackground(backgroundColor);
+        setToolTipText((String)value);
 
         return this;
     }
