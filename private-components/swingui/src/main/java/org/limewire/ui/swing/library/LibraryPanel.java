@@ -54,6 +54,7 @@ import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LocalFileItemFilterator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -83,6 +84,7 @@ public class LibraryPanel extends JPanel {
     private final LibraryNavigatorPanel libraryNavigatorPanel;
     private final LibrarySharingPanel librarySharingPanel;
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
+    private final PlayerPanel playerPanel;
     private final ButtonDecorator buttonDecorator;
     private final LocalFileListTransferHandler transferHandler;
     private final Provider<LibraryImageTable> libraryImagePanelProvider;
@@ -100,6 +102,8 @@ public class LibraryPanel extends JPanel {
     private FilterList<LocalFileItem> filteredList;
     private FilterList<LocalFileItem> textFilterList;
     
+    private LibraryNavItem selectedNavItem;
+    
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableComboBox libraryTableComobBox, 
@@ -114,6 +118,7 @@ public class LibraryPanel extends JPanel {
         this.librarySharingPanel = sharingPanel;
         this.libraryTableComboBox = libraryTableComobBox;
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
+        this.playerPanel = playerPanel;
         this.buttonDecorator = buttonDecorator;
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
@@ -177,6 +182,7 @@ public class LibraryPanel extends JPanel {
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
+                selectedNavItem = libraryNavigatorPanel.getSelectedNavItem();
                 eventList = libraryList.getSwingModel();
                 selectTable(libraryTableComboBox.getSelectedTableFormat(), libraryTableComboBox.getSelectedCategory());
                 configureEnclosingScrollPane(libraryScrollPane);
@@ -188,6 +194,15 @@ public class LibraryPanel extends JPanel {
         libraryTableComboBox.addSelectionListener(new SelectionListener(){
             @Override
             public void selectionChanged(Action item) {
+                // If selected navItem is playlist and old category playable 
+                // and new category not playable, then save playlist.
+                PlayerMediator playerMediator = playerPanel.getPlayerMediator();
+                if (playerMediator.isActivePlaylist(selectedNavItem) &&
+                        isPlayable(selectedCategory) &&
+                        !isPlayable(libraryTableComboBox.getSelectedCategory())) {
+                    playerMediator.setPlaylist(libraryTable.getPlayableList());
+                }
+                
                 selectTable(libraryTableComboBox.getSelectedTableFormat(), libraryTableComboBox.getSelectedCategory());
             }
         });
@@ -195,6 +210,16 @@ public class LibraryPanel extends JPanel {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
+                
+                // If previous navItem was playlist and new navItem not playlist 
+                // and category playable, then save playlist.
+                PlayerMediator playerMediator = playerPanel.getPlayerMediator();
+                if (playerMediator.isActivePlaylist(selectedNavItem) &&
+                        !playerMediator.isActivePlaylist(navItem) &&
+                        isPlayable(selectedCategory)) {
+                    playerMediator.setPlaylist(libraryTable.getPlayableList());
+                }
+                selectedNavItem = navItem;
 
                 setPublicSharedComponentVisible(navItem);
                 eventList = navItem.getLocalFileList().getSwingModel();
@@ -237,6 +262,34 @@ public class LibraryPanel extends JPanel {
         libraryImagePanel = libraryImagePanelProvider.get();
         libraryImagePanel.setTransferHandler(transferHandler);
         tableListPanel.add(libraryImagePanel, LIST); 
+    }
+    
+    /**
+     * Returns true if the specified category is playable.
+     */
+    public boolean isPlayable(Category category) {
+        return (category == null) || (category == Category.AUDIO);
+    }
+    
+    /**
+     * Returns the current list of playable file items.
+     */
+    public EventList<LocalFileItem> getPlayableList() {
+        return libraryTable.getPlayableList();
+    }
+    
+    /**
+     * Returns the selected display category.
+     */
+    public Category getSelectedCategory() {
+        return selectedCategory;
+    }
+    
+    /**
+     * Returns the selected library item.
+     */
+    public LibraryNavItem getSelectedNavItem() {
+        return selectedNavItem;
     }
     
     List<File> getSelectedFiles() {
@@ -323,7 +376,7 @@ public class LibraryPanel extends JPanel {
     }
     
     private void setEventListOnTable(EventList<LocalFileItem> eventList) {
-        libraryTable.setEventList(recreateFilterList(eventList), libraryTableComboBox.getSelectedTableFormat());
+        libraryTable.setEventList(recreateFilterList(eventList), libraryTableComboBox.getSelectedTableFormat(), isPlayable(selectedCategory));
     }
     
     private void setEventListOnImages(EventList<LocalFileItem> eventList) {
