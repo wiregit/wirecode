@@ -76,5 +76,10 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(ListViewRowHeightRule.class).to(ListViewRowHeightRuleImpl.class);
         bind(SearchResultTruncator.class).toProvider(LazyBinder.newLazyProvider(
                 SearchResultTruncator.class, SearchResultTruncatorImpl.class));
+        
+
+        bind(BrowseFailedMessagePanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                    BrowseFailedMessagePanelFactory.class, BrowseFailedMessagePanel.class));
     }
 }

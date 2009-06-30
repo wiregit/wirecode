@@ -31,8 +31,6 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.friend.api.FriendConnectionEvent;
-import org.limewire.listener.EventBean;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
@@ -41,7 +39,6 @@ import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
-import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
@@ -145,8 +142,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             SponsoredResultsPanel sponsoredResultsPanel,
             HeaderBarDecorator headerBarDecorator,
             CategoryIconManager categoryIconManager, 
-            ChatFrame chatFrame,
-            EventBean<FriendConnectionEvent> connectionEventBean) {
+            BrowseFailedMessagePanelFactory browseFailedMessagePanelFactory) {
 
         GuiUtils.assignResources(this);
         
@@ -156,7 +152,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
-        this.browseFailedPanel = new BrowseFailedMessagePanel(connectionEventBean, chatFrame, searchResultsModel);
+        this.browseFailedPanel = browseFailedMessagePanelFactory.create(searchResultsModel);
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
@@ -244,6 +240,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         sortAndFilterPanel.dispose();
         filterPanel.dispose();
         classicSearchReminderPanel.dispose();
+        browseFailedPanel.dispose();
         searchResultsModel.dispose();
     }
     

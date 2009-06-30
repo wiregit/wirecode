@@ -20,6 +20,10 @@ import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendConnectionEvent.Type;
 import org.limewire.listener.EventBean;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.MessageComponent.MessageBackground;
@@ -28,10 +32,13 @@ import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+
 /**
- * Replaces the search results when a browse fails.
+ * Replaces the search results when a browse fails.  Must be disposed.
  */
-public class BrowseFailedMessagePanel extends JPanel {
+public class BrowseFailedMessagePanel extends JPanel implements Disposable{
 
     @Resource private Font chatFont;
     @Resource private Color chatForeground;
@@ -39,6 +46,8 @@ public class BrowseFailedMessagePanel extends JPanel {
     private final SearchResultsModel searchResultsModel;
     private final ChatFrame chatFrame;
     private final EventBean<FriendConnectionEvent> connectionEventBean;
+    private EventListener<FriendConnectionEvent> connectionListener;
+    private ListenerSupport<FriendConnectionEvent> connectionSupport;
 
     private BrowseSearch browseSearch;
     
@@ -48,7 +57,8 @@ public class BrowseFailedMessagePanel extends JPanel {
 
     private List<Friend> friends;
 
-    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, ChatFrame chatFrame, SearchResultsModel searchResultsModel) {
+    @Inject
+    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, ChatFrame chatFrame, @Assisted SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
         this.connectionEventBean = connectionEventBean;
         this.chatFrame = chatFrame;
@@ -65,7 +75,26 @@ public class BrowseFailedMessagePanel extends JPanel {
         }
         updateLabel();
     }
-
+    
+    @Inject
+    void registerListener(ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        
+        this.connectionSupport = connectionSupport;
+        //TODO: this should probably be handled in the BrowseSearch models eventually
+        connectionListener = new EventListener<FriendConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendConnectionEvent event) {
+                if (isInitialized) {
+                    updateLabel();
+                    repaint();
+                }
+            }
+        };
+        
+        connectionSupport.addListener(connectionListener);
+    }
+  
     private void initialize() {
         setLayout(new MigLayout("insets 0, gap 0, fill"));
     }
@@ -110,7 +139,7 @@ public class BrowseFailedMessagePanel extends JPanel {
                     subText = I18n.tr("When you sign on to LimeWire, your friend's files will appear here.");
                 }
             } else {
-                I18n.tr("When they sign on LimeWire and share with you, their files will appear here.");
+                subText = I18n.tr("When they sign on LimeWire and share with you, their files will appear here.");
             }
                 
             JLabel subMessage = new JLabel(subText);
@@ -192,6 +221,12 @@ public class BrowseFailedMessagePanel extends JPanel {
     
     private String getUserOfflineText(){
         return I18n.tr("You are offline.");
+    }
+
+    public void dispose() {
+        if (connectionSupport != null) {
+            connectionSupport.removeListener(connectionListener);
+        }
     }
 
 }
