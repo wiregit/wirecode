@@ -23,7 +23,6 @@ import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
@@ -60,7 +59,6 @@ public class LimeWireSwingUI extends JPanel {
             TopPanel topPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel chatFrame,
-            AudioPlayer player,
             ProNagController proNagController, 
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
