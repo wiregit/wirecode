@@ -59,7 +59,7 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
         
         setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
         
-        processingLine = new JLabel(I18n.tr("Scanning"));
+        processingLine = new JLabel(I18n.tr("Scanning..."));
         stopButton = new HyperlinkButton(new AbstractAction(I18n.tr("stop")){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -101,7 +101,7 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
     
     public void notifyDone() {
         stopButton.setVisible(false);
-        processingLine.setText(I18n.tr("Finished"));
+        processingLine.setText(I18n.tr("All Completed"));
         processingLine.setIcon(null);
     }
     
