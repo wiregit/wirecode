@@ -19,6 +19,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -26,7 +27,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-public class FriendRequestPanel extends JPanel {
+public class FriendRequestPanel extends JPanel implements Disposable {
     
     private final List<FriendRequest> pendingRequests;
     private EventListener<FriendConnectionEvent> connectionListener;
@@ -123,10 +124,13 @@ public class FriendRequestPanel extends JPanel {
         });
         ensureRequestVisible();
     }
-    
+        
     private void close() {
-        connectionSupport.removeListener(connectionListener);
         setVisible(false);
     }
 
+    @Override
+    public void dispose() {
+        connectionSupport.removeListener(connectionListener);
+    }
 }

@@ -3,14 +3,18 @@ package org.limewire.ui.swing.components.decorators;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Paint;
 
 import javax.swing.BorderFactory;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
+import org.limewire.ui.swing.painter.ButtonForegroundPainter;
+import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
+import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.PopupVisibilityChecker;
 import org.limewire.ui.swing.painter.factories.ButtonPainterFactory;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -173,6 +177,17 @@ public class ButtonDecorator {
         button.setForeground(flatTextForeground);
         button.setFont(flatTextFont);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+    
+    public void decorateStatusPopupButton(JXButton button, 
+            PopupVisibilityChecker visibilityChecker, 
+            Paint background, Paint border) {
+        button.setBackgroundPainter(new StatusBarPopupButtonPainter(visibilityChecker, background, border));
+        button.setForegroundPainter(new ButtonForegroundPainter());
+        
+        decorateGeneral(button);
+        
+        button.setBorder(BorderFactory.createEmptyBorder(0,8,0,8));
     }
         
     private static void decorateGeneral(JXButton button) {

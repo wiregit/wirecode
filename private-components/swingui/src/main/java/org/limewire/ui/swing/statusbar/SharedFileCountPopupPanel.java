@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -14,6 +13,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -31,9 +32,7 @@ import javax.swing.table.TableColumn;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
@@ -47,9 +46,11 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.library.LibraryMediator;
+import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.PopupVisibilityChecker;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -75,10 +76,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private static final String FILES_COLUMN_ID = "Files";
     private static final int ROW_HEIGHT = 18;
     
-    @Resource private Color dividerForeground = PainterUtils.TRASPARENT;;
-    @Resource private Color rolloverBackground = PainterUtils.TRASPARENT;
-    @Resource private Color activeBackground = PainterUtils.TRASPARENT;
-    @Resource private Color activeBorder = PainterUtils.TRASPARENT;
+    @Resource private Color background = PainterUtils.TRASPARENT;
     @Resource private Color border = PainterUtils.TRASPARENT;
     @Resource private Font headerFont;
    
@@ -124,7 +122,8 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             ListenerSupport<FriendConnectionEvent> connectionSupport,
             LibraryMediator libraryMediator,
             Provider<AutoLoginService> autoLoginServiceProvider,
-            EventBean<FriendConnectionEvent> friendConnectionBean) {
+            EventBean<FriendConnectionEvent> friendConnectionBean,
+            ButtonDecorator buttonDecorator) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
@@ -137,7 +136,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         GuiUtils.assignResources(this);
         
-        setUpButton();
+        setUpButton(buttonDecorator);
         
         setVisible(false);
     }
@@ -411,44 +410,24 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                 (int)parentBounds.getHeight() - h, w, h);
     }
     
-    private void setUpButton() {
-        sharedFileCountPanel.setBorder(BorderFactory.createEmptyBorder(0,8,0,8));
-        sharedFileCountPanel.setFocusPainted(false);
-        sharedFileCountPanel.setBorderPainted(false);
-        sharedFileCountPanel.setFocusable(false);
-        sharedFileCountPanel.setOpaque(false);
-        sharedFileCountPanel.setBackgroundPainter(new StatusBarPopupButtonPainter());
-    }
-
-    private class StatusBarPopupButtonPainter extends AbstractPainter<JXButton>{
-
-        public StatusBarPopupButtonPainter() {
-            setAntialiasing(false);
-            setCacheable(false);
-        }
-
-        @Override
-        protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
-            if(SharedFileCountPopupPanel.this.isVisible()) {
-                g.setPaint(activeBackground);
-                g.fillRect(0, 0, width, height);
-                g.setPaint(border);
-                g.drawLine(0, 0, 0, height-1);
-                g.drawLine(0, height-1, width-1, height-1);
-                g.drawLine(width-1, 0, width-1, height-1);
-            } else if (object.getModel().isRollover() && shareListManager.getSharedFileCount() != 0) {
-                g.setPaint(rolloverBackground);
-                g.fillRect(0, 2, width-1, height-2);
-                g.setPaint(activeBorder);
-                g.drawLine(0, 1, 0, height-1);
-                g.drawLine(width-1, 1, width-1, height-1);
+    private void setUpButton(ButtonDecorator buttonDecorator) {
+        
+        buttonDecorator.decorateStatusPopupButton(sharedFileCountPanel, new PopupVisibilityChecker() {
+            @Override
+            public boolean isPopupVisible() {
+                return isVisible();
             }
-            else {
-                g.setPaint(dividerForeground);
-                g.drawLine(0, 3, 0, height-4);
-                g.drawLine(width-1, 3, width-1, height-4);
+        }, background, border);
+        
+        sharedFileCountPanel.setEnabled(shareListManager.getSharedFileCount() != 0);
+        shareListManager.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals(SharedFileListManager.SHARED_FILE_COUNT)) {
+                    sharedFileCountPanel.setEnabled(shareListManager.getSharedFileCount() != 0);
+                }
             }
-        }    
+        });
     }
     
     private class RepaintListener implements ListEventListener {

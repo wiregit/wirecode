@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 
 import org.limewire.friend.api.FriendRequestEvent;
 import org.limewire.listener.EventListener;
@@ -13,56 +13,60 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FriendRequestNotificationController implements ComponentListener {
+public class FriendRequestNotificationController extends ComponentAdapter {
+        
+    private FriendRequestNotificationPanel currentPanel = null;
 
-    
-        private FriendRequestNotificationPanel currentPanel = null;
+    private final Provider<FriendRequestNotificationPanel> friendRequestNotifiactionPanelProvider;
 
-        private final Provider<FriendRequestNotificationPanel> friendRequestNotifiactionPanelProvider;
-
-        @Inject
-        public FriendRequestNotificationController(
-                Provider<FriendRequestNotificationPanel> friendRequestNotifiactionPanelProvider) {
-            this.friendRequestNotifiactionPanelProvider = friendRequestNotifiactionPanelProvider;
-        }
-
-        @Inject
-        public void register(ListenerSupport<FriendRequestEvent> friendRequestListeners) {
-            friendRequestListeners.addListener(new EventListener<FriendRequestEvent>() {
-                @Override
-                @SwingEDTEvent
-                public void handleEvent(FriendRequestEvent event) {
-                    if (currentPanel == null) {
-                        currentPanel = friendRequestNotifiactionPanelProvider.get();
-                        // component hidden event comes in to tell us we can show more
-                        // warnings.
-                        currentPanel.addComponentListener(FriendRequestNotificationController.this);
-                    }
-                    
-                    currentPanel.addRequest(event.getData());
-                }
-            });
-        }
-
-        @Override
-        public void componentHidden(ComponentEvent e) {
-            currentPanel = null;
-        }
-
-        @Override
-        public void componentMoved(ComponentEvent e) {
-
-        }
-
-        @Override
-        public void componentResized(ComponentEvent e) {
-
-        }
-
-        @Override
-        public void componentShown(ComponentEvent e) {
-
-        }
-
+    @Inject
+    public FriendRequestNotificationController(
+            Provider<FriendRequestNotificationPanel> friendRequestNotifiactionPanelProvider) {
+        this.friendRequestNotifiactionPanelProvider = friendRequestNotifiactionPanelProvider;
     }
+
+    @Inject
+    public void register(ListenerSupport<FriendRequestEvent> friendRequestListeners) {
+        friendRequestListeners.addListener(new EventListener<FriendRequestEvent>() {
+            
+            /*  Testing code.  Please leave in until further notice.
+            {
+             new Timer(5000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    requests();
+                }
+             }).start();
+            }
+            
+            public void requests() {
+                handleEvent(new FriendRequestEvent(new FriendRequest("test", new FriendRequestDecisionHandler() {
+                    @Override
+                    public void handleDecision(String friendUsername, boolean accepted) {
+                    }
+                }), org.limewire.friend.api.FriendRequestEvent.Type.REQUESTED));
+            }
+            */
+            
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendRequestEvent event) {
+                if (currentPanel == null) {
+                    currentPanel = friendRequestNotifiactionPanelProvider.get();
+                    // component hidden event comes in to tell us we can show more
+                    // warnings.
+                    currentPanel.addComponentListener(FriendRequestNotificationController.this);
+                }
+                    
+                currentPanel.addRequest(event.getData());
+            }
+        });
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent e) {
+        currentPanel.dispose();
+        currentPanel = null;
+    }
+}
 
