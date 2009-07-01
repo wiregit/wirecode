@@ -3,6 +3,7 @@ package org.limewire.ui.swing.friends.actions;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
@@ -103,9 +104,12 @@ class StatusActions {
         };
 
         this.availableItem = new JCheckBoxMenuItem(availableAction);
-        ;
         this.doNotDisturbItem = new JCheckBoxMenuItem(doNotDisturbAction);
 
+        ButtonGroup statusButtonGroup = new ButtonGroup();
+        statusButtonGroup.add(availableItem);
+        statusButtonGroup.add(doNotDisturbItem);
+        
         updateSelections();
 
         FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
