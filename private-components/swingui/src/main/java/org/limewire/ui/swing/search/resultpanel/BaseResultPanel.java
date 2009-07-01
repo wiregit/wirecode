@@ -363,7 +363,7 @@ public class BaseResultPanel extends JXPanel {
 
         // Create sorted list and set table model.
         SortedList<VisualSearchResult> sortedList = GlazedListsFactory.sortedList(eventList, null);
-        EventList<VisualSearchResult> downstreamList = eventList;
+        EventList<VisualSearchResult> downstreamList = sortedList;
         resultsTable.setEventListFormat(downstreamList, tableFormat, true);
         
         //link the jxtable column headers to the sorted list
