@@ -23,7 +23,9 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.PainterUtils;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 
@@ -78,7 +80,7 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
     }
     
     @Inject
-    void register() {
+    void register(final IconManager iconManager) {
         listener = new EventListener<FileProcessingEvent>() {
             @Override
             @SwingEDTEvent
@@ -86,6 +88,7 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
                 switch (event.getType()) {
                 case PROCESSING:
                     processingLine.setText(event.getSource().getName());
+                    processingLine.setIcon(iconManager.getIconForExtension(FileUtils.getFileExtension(event.getSource().getName())));
                     stopButton.setVisible(true);
                     break;
                 }
@@ -99,6 +102,7 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
     public void notifyDone() {
         stopButton.setVisible(false);
         processingLine.setText(I18n.tr("Finished"));
+        processingLine.setIcon(null);
     }
     
     @Override
