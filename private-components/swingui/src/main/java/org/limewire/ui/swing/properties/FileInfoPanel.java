@@ -49,6 +49,7 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.MetaDataException;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchResult;
@@ -63,18 +64,19 @@ import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.components.YesNoCheckBoxDialog;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.CopyMagnetLinkToClipboardAction;
+import org.limewire.ui.swing.settings.QuestionsHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -103,6 +105,7 @@ public class FileInfoPanel extends JPanel {
     private final PropertyDictionary propertyDictionary;
     private final SpamManager spamManager;
     private final MetaDataManager metaDataManager;
+    private final SharedFileListManager sharedFileListManager;
     
     private final Map<FilePropertyKey, JComponent> changedProps = new HashMap<FilePropertyKey, JComponent>();
     
@@ -117,7 +120,8 @@ public class FileInfoPanel extends JPanel {
             ThumbnailManager thumbnailManager, MagnetLinkFactory magnetLinkFactory,
             PropertyDictionary propertyDictionary, LibraryMediator libraryMediator,
             SharedFileListManager shareListManager, FriendManager friendManager,
-            SpamManager spamManager, MetaDataManager metaDataManager) {
+            SpamManager spamManager, MetaDataManager metaDataManager,
+            SharedFileListManager sharedFileListManager) {
         this.iconManager = iconManager;
         this.categoryIconManager = categoryIconManager;
         this.thumbnailManager = thumbnailManager;
@@ -126,6 +130,7 @@ public class FileInfoPanel extends JPanel {
         this.propertyDictionary = propertyDictionary;
         this.spamManager = spamManager;
         this.metaDataManager = metaDataManager;
+        this.sharedFileListManager = sharedFileListManager;
         
         this.type = type;
         this.propertiableFile = propertiableFile;
@@ -316,36 +321,35 @@ public class FileInfoPanel extends JPanel {
         switch(type) {
         case LOCAL_FILE:
             if(propertiableFile instanceof LocalFileItem) {
-                List<String> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
+                List<SharedFileList> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
                 if(sharedWithList.size() > 0) {
-                    final JPanel sharingPanel = createPanel(I18n.tr("Sharing with"));
+                    final JPanel sharingPanel = createPanel(I18n.tr("Sharing from these lists:"));
                     final JPanel listPanel = new JPanel(new MigLayout("fillx, nogrid, gap 0! 0!, insets 0 0 0 0"));
                     listPanel.setBackground(backgroundColor);
                     
-                    for(String friend : sharedWithList) {
-//                        final Friend shareFriend = friend;
-                        final JLabel friendLabel = new JLabel(friend);
-                        final JButton friendButton = new IconButton(removeIcon, removeIconRollover, removeIconPressed);
-                        friendButton.addActionListener(new ActionListener() {
+                    for(SharedFileList sharedFileList : sharedWithList) {
+                        final SharedFileList shareList = sharedFileList;
+                        final JLabel listNameLabel = new JLabel(sharedFileList.getCollectionName());
+                        final JButton removeButton = new IconButton(removeIcon, removeIconRollover, removeIconPressed);
+                        removeButton.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                if(true) throw new NotImplementedException();
-//                                if(shareFriend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId())) {
-//                                    shareListManager.getGnutellaShareList().removeFile(((LocalFileItem)propertiableFile).getFile());
-//                                } else {
-//                                    shareListManager.getOrCreateFriendShareList(shareFriend).removeFile(((LocalFileItem)propertiableFile).getFile());
-//                                }
-                                listPanel.remove(friendLabel);
-                                listPanel.remove(friendButton);
-                                //make sure the friend actually disappears
-                                sharingPanel.revalidate();
-                                //make sure we don't get stuck on the hand cursor
-                                setCursor(Cursor.getDefaultCursor());
+                                
+                                if(showConfirmation(I18n.tr("Remove {0} from list {1}?", propertiableFile.getFileName(), shareList.getCollectionName()))) {
+                                    shareList.removeFile(((LocalFileItem)propertiableFile).getFile());
+    
+                                    listPanel.remove(listNameLabel);
+                                    listPanel.remove(removeButton);
+                                    //make sure the friend actually disappears
+                                    sharingPanel.revalidate();
+                                    //make sure we don't get stuck on the hand cursor
+                                    setCursor(Cursor.getDefaultCursor());
+                                }
                             }
                         });
                         
-                        listPanel.add(friendButton);
-                        listPanel.add(friendLabel, "gapright 20, wrap");
+                        listPanel.add(removeButton);
+                        listPanel.add(listNameLabel, "gapright 20, wrap");
                     }
                     JScrollPane scroll = new JScrollPane(listPanel);
                     scroll.setOpaque(false);
@@ -357,6 +361,23 @@ public class FileInfoPanel extends JPanel {
             }
             break;
         }
+    }
+    
+    private boolean showConfirmation(String message) {
+        if (!QuestionsHandler.CONFIRM_REMOVE_FILE_INFO_SHARING.getValue()) {
+            // no need to confirm here
+            return true;
+        }
+
+        final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(I18n.tr("Remove File"), message, I18n
+                .tr("Don't ask me again"), !QuestionsHandler.CONFIRM_REMOVE_FILE_INFO_SHARING.getValue(),
+                I18n.tr("Yes"), I18n.tr("No"));
+        yesNoCheckBoxDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+        yesNoCheckBoxDialog.setVisible(true);
+
+        QuestionsHandler.CONFIRM_REMOVE_FILE_INFO_SHARING.setValue(!yesNoCheckBoxDialog.isCheckBoxSelected());
+        
+        return yesNoCheckBoxDialog.isConfirmed();
     }
     
     /**
@@ -717,22 +738,22 @@ public class FileInfoPanel extends JPanel {
         }
     }
     
-    private List<String> getSharedWithList(LocalFileItem fileItem) {
-        List<String> sharedWith = new ArrayList<String>();
+    /**
+     * Returns list of file lists that are shared and contain this file.
+     */
+    private List<SharedFileList> getSharedWithList(LocalFileItem fileItem) {
+        List<SharedFileList> sharedWith = new ArrayList<SharedFileList>();
         
-//        if(fileItem)
-//        
-//        if(shareListManager.getGnutellaShareList().contains(fileItem.getFile()))
-//            sharedWith.add(SharingTarget.GNUTELLA_SHARE.getFriend());
-//        
-//        for(Friend friend : friendManager.getKnownFriends()) {  
-//            boolean isShared = shareListManager.getOrCreateFriendShareList(friend).contains(fileItem.getFile());
-//            if (isShared) {
-//                sharedWith.add(friend);
-//            }
-//        }
+        sharedFileListManager.getModel().getReadWriteLock().readLock().lock();
+        try {
+            for(SharedFileList sharedFileList : sharedFileListManager.getModel()) {
+                if(sharedFileList.contains(fileItem.getFile()) && sharedFileList.getFriendIds().size() > 0)
+                    sharedWith.add(sharedFileList);
+            }
+        } finally {
+            sharedFileListManager.getModel().getReadWriteLock().readLock().unlock();
+        }
         return sharedWith;
-//        throw new NotImplementedException();
     }
     
     private JPanel createPanel() {

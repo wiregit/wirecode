@@ -31,7 +31,12 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
 
     public YesNoCheckBoxDialog(String message, String checkBoxMessage, boolean checked,
             String yesLabel, String noLabel) {
-        super(GuiUtils.getMainFrame());
+        this("", message, checkBoxMessage, checked, yesLabel, noLabel);
+    }
+    
+    public YesNoCheckBoxDialog(String title, String message, String checkBoxMessage, boolean checked,
+            String yesLabel, String noLabel) {
+        super(GuiUtils.getMainFrame(), title);
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel panel = new JPanel();
         MultiLineLabel messageLabel = new MultiLineLabel(message, 350);
@@ -61,7 +66,7 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
         panel.add(messageLabel, "wrap");
         panel.add(checkBox, "wrap");
         panel.add(yesButton, "alignx right");
-        panel.add(noButton, "alignx right, wrap");
+        panel.add(noButton, "alignx right");
 
         setContentPane(panel);
         pack();

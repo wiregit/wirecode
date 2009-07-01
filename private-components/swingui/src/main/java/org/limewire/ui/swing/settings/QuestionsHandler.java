@@ -47,6 +47,12 @@ public class QuestionsHandler extends LimeWireSettings {
     public static final BooleanSetting CONFIRM_BLOCK_HOST =
         FACTORY.createBooleanSetting("CONFIRM_BLOCK_HOST", true);
     
+    /** Setting for wether to shown the confirmation dialog when
+      * unsharing a file from within FileInfo
+      */
+    public static final BooleanSetting CONFIRM_REMOVE_FILE_INFO_SHARING =
+        FACTORY.createBooleanSetting("CONFIRM_REMOVE_FILE_INFO_SHARING", true);
+    
 
 }
 
