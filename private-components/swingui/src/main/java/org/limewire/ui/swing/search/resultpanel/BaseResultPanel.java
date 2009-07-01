@@ -601,7 +601,7 @@ public class BaseResultPanel extends JXPanel {
                         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
                             VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
                             return vsr != null && vsr.isChildrenVisible();
-                        }}, similarResultParentBackgroundColor, null, similarResultParentBackgroundColor, null));
+                        }}, similarResultParentBackgroundColor, null, getTableColors().selectionColor, null));
         }
         
         @Override
