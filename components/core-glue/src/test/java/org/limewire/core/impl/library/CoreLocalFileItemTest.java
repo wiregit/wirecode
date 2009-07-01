@@ -36,6 +36,8 @@ public class CoreLocalFileItemTest extends TestCase {
     private LimeXMLDocument document;
 
     private File file;
+    
+    private static final String FILE_TO_DOWNLOAD_URN = "urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
 
     @Override
     protected void setUp() throws Exception {
@@ -52,6 +54,8 @@ public class CoreLocalFileItemTest extends TestCase {
         context.checking(new Expectations() {{
             allowing(fileDesc).getFile();
             will(returnValue(file));
+            allowing(fileDesc).getSHA1Urn();
+            will(returnValue(URN.createSHA1Urn(FILE_TO_DOWNLOAD_URN)));
         }});
         coreLocalFileItem = new CoreLocalFileItem(fileDesc, detailsFactory, creationTimeCache);
     }
@@ -240,7 +244,7 @@ public class CoreLocalFileItemTest extends TestCase {
         context.assertIsSatisfied();
     }
 
-    public void testIsShareable() {
+    public void testIsShareable() throws Exception {
         context.checking(new Expectations() {{
             one(fileDesc).isStoreFile();
             will(returnValue(true));
@@ -257,6 +261,8 @@ public class CoreLocalFileItemTest extends TestCase {
         context.checking(new Expectations() {{
             allowing(incompleteFileDesc).getFile();
             will(returnValue(file));
+            allowing(incompleteFileDesc).getSHA1Urn();
+            will(returnValue(URN.createSHA1Urn(FILE_TO_DOWNLOAD_URN)));
         }});
         coreLocalFileItem = new CoreLocalFileItem(incompleteFileDesc, detailsFactory,
                 creationTimeCache);
