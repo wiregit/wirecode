@@ -12,6 +12,7 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
+import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
@@ -246,6 +247,24 @@ public class PlayerMediator {
     }
     
     /**
+     * Starts playing the specified file in the audio player.  The playlist
+     * is automatically cleared so the player will stop when the song finishes.
+     */
+    public void play(File file) {
+        // Stop current song.
+        getPlayer().stop();
+        
+        // Play new song.
+        this.fileItem = null;
+        getPlayer().loadSong(file);
+        getPlayer().playSong();
+        
+        // Clear play and shuffle lists.
+        setActivePlaylist(null);
+        shuffleList.clear();
+    }
+    
+    /**
      * Starts playing the specified file item in the audio player.
      */
     public void play(LocalFileItem localFileItem) {
@@ -293,18 +312,16 @@ public class PlayerMediator {
      * Plays the next song in the playlist.
      */
     public void nextSong() {
+        // Stop current song.
+        getPlayer().stop();
+
+        // Get next file item.
+        fileItem = getNextFileItem();
+
+        // Play song.
         if (fileItem != null) {
-            // Stop current song.
-            getPlayer().stop();
-            
-            // Get next file item.
-            fileItem = getNextFileItem();
-            
-            // Play song.
-            if (fileItem != null) {
-                getPlayer().loadSong(fileItem.getFile());
-                getPlayer().playSong();
-            }
+            getPlayer().loadSong(fileItem.getFile());
+            getPlayer().playSong();
         }
     }
     
@@ -312,22 +329,28 @@ public class PlayerMediator {
      * Plays the previous song in the playlist.
      */
     public void prevSong() {
-        if (fileItem != null) {
-            // Stop current song.
-            getPlayer().stop();
-            
-            // If near beginning of current song, then get previous song.
-            // Otherwise, restart current song.
-            if (progress < 0.1f) {
-                fileItem = getPrevFileItem();
-            }
-            
-            // Play song.
-            if (fileItem != null) {
-                getPlayer().loadSong(fileItem.getFile());
-                getPlayer().playSong();
-            }
+        // Stop current song.
+        getPlayer().stop();
+
+        // If near beginning of current song, then get previous song.
+        // Otherwise, restart current song.
+        if (progress < 0.1f) {
+            fileItem = getPrevFileItem();
         }
+
+        // Play song.
+        if (fileItem != null) {
+            getPlayer().loadSong(fileItem.getFile());
+            getPlayer().playSong();
+        }
+    }
+    
+    /**
+     * Returns the current playing file.
+     */
+    public File getCurrentSongFile() {
+        AudioSource source = getPlayer().getCurrentSong();
+        return (source != null) ? source.getFile() : null;
     }
     
     /**
