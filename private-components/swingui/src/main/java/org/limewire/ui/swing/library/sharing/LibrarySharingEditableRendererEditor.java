@@ -12,20 +12,17 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
+class LibrarySharingEditableRendererEditor extends JCheckBox implements TableCellRenderer, TableCellEditor {
 
     private @Resource Font font;
     private @Resource Color fontColor;
@@ -35,36 +32,34 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     
-    private final JCheckBox checkBox;
-    
     private EditableSharingData data;
     
     public LibrarySharingEditableRendererEditor() {
-        super(new MigLayout("fill, insets 0, gap 0"));
+//        super(new MigLayout("fill, insets 0, gap 0"));
 
         GuiUtils.assignResources(this);
        
-        checkBox = new JCheckBox();
-        checkBox.setBorder(BorderFactory.createEmptyBorder());
-        checkBox.setIcon(uncheckedCheckBox);
-        checkBox.setSelectedIcon(checkedCheckBox);
-        checkBox.setOpaque(false);
-        checkBox.setIconTextGap(6);
-        checkBox.setFont(font);
-        checkBox.setFocusPainted(false);
-        checkBox.setForeground(fontColor);
-        checkBox.addActionListener(new ActionListener(){
+//        checkBox = new JCheckBox();
+        setBorder(BorderFactory.createEmptyBorder(0,5,0,0));
+        setIcon(uncheckedCheckBox);
+        setSelectedIcon(checkedCheckBox);
+        setOpaque(false);
+        setIconTextGap(6);
+        setFont(font);
+        setFocusPainted(false);
+        setForeground(fontColor);
+        addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(data != null) {
-                    data.setSelected(checkBox.isSelected());
+                    data.setSelected(isSelected());
                 }
                 stopCellEditing();
             }
         });
                 
         setBackground(backgroundColor);
-        add(checkBox, "gapleft 5, aligny 50%, growx");
+//        add(checkBox, "gapleft 5, aligny 50%");
     }
     
     @Override
@@ -73,12 +68,12 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
 
         if(value instanceof EditableSharingData) {
             data = (EditableSharingData) value;
-            checkBox.setText(textFor(data));
-            checkBox.setSelected(data.isSelected());
+            setText(textFor(data));
+            setSelected(data.isSelected());
             setToolTipText(textFor(data));
         } else {
-            checkBox.setText("");
-            checkBox.setSelected(false);
+            setText("");
+            setSelected(false);
             setToolTipText("");
         }     
         return this;
@@ -87,14 +82,15 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
+        
         if(value instanceof EditableSharingData) {
             EditableSharingData data = (EditableSharingData) value;
-            checkBox.setText(textFor(data));
-            checkBox.setSelected(data.isSelected());
+            setText(textFor(data));
+            setSelected(data.isSelected());
             setToolTipText(textFor(data));
         } else {
-            checkBox.setText("");
-            checkBox.setSelected(false);
+            setText("");
+            setSelected(false);
             setToolTipText("");
         }     
         return this;
