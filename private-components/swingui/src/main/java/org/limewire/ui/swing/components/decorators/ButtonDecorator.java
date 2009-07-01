@@ -181,8 +181,9 @@ public class ButtonDecorator {
     
     public void decorateStatusPopupButton(JXButton button, 
             PopupVisibilityChecker visibilityChecker, 
-            Paint background, Paint border) {
-        button.setBackgroundPainter(new StatusBarPopupButtonPainter(visibilityChecker, background, border));
+            Paint background, Paint border, 
+            org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.DrawMode mode) {
+        button.setBackgroundPainter(new StatusBarPopupButtonPainter(visibilityChecker, background, border, mode));
         button.setForegroundPainter(new ButtonForegroundPainter());
         
         decorateGeneral(button);

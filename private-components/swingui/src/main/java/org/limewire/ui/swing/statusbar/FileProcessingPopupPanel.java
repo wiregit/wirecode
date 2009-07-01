@@ -42,7 +42,7 @@ public class FileProcessingPopupPanel extends OverlayPopupPanel {
     public void resize() {
         Rectangle parentBounds = layeredPane.getBounds();
         int w = 200;
-        int h = 60;
+        int h = 46;
         
         int x = 0; 
             

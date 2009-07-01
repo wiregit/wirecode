@@ -50,6 +50,7 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.library.LibraryMediator;
+import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.DrawMode;
 import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.PopupVisibilityChecker;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -398,7 +399,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             public boolean isPopupVisible() {
                 return isVisible();
             }
-        }, background, border);
+        }, background, border, DrawMode.RIGHT_CONNECTING);
         
         sharedFileCountPanel.setEnabled(shareListManager.getSharedFileCount() != 0);
         shareListManager.addPropertyChangeListener(new PropertyChangeListener() {

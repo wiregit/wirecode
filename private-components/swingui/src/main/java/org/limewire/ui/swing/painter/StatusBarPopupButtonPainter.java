@@ -15,17 +15,20 @@ public class StatusBarPopupButtonPainter extends AbstractPainter<JXButton> {
     private final PopupVisibilityChecker visibilityChecker;
     private final Paint activeBackground;
     private final Paint activeBorder;
+    private final DrawMode mode;
     
     @Resource private Color dividerForeground = PainterUtils.TRASPARENT;
     @Resource private Color rolloverBackground = PainterUtils.TRASPARENT;
     @Resource private Color rolloverBorder = PainterUtils.TRASPARENT;
     
-    public StatusBarPopupButtonPainter(PopupVisibilityChecker visibilityChecker, Paint activeBackground, Paint activeBorder) {
+    public StatusBarPopupButtonPainter(PopupVisibilityChecker visibilityChecker,
+            Paint activeBackground, Paint activeBorder, DrawMode mode) {
         GuiUtils.assignResources(this);
         
         this.visibilityChecker = visibilityChecker;
         this.activeBackground = activeBackground;
         this.activeBorder = activeBorder;
+        this.mode = mode;
         
         setAntialiasing(false);
         setCacheable(false);
@@ -49,12 +52,20 @@ public class StatusBarPopupButtonPainter extends AbstractPainter<JXButton> {
         }
         else {
             g.setPaint(dividerForeground);
-            g.drawLine(0, 3, 0, height-4);
-            g.drawLine(width-1, 3, width-1, height-4);
+            if (mode != DrawMode.LEFT_CONNECTING) {
+                g.drawLine(0, 3, 0, height-4);
+            }
+            if (mode != DrawMode.RIGHT_CONNECTING) {
+                g.drawLine(width-1, 3, width-1, height-4);
+            }
         }
     }
     
     public static interface PopupVisibilityChecker {
         boolean isPopupVisible();
+    }
+    
+    public enum DrawMode {
+        NORMAL, LEFT_CONNECTING, RIGHT_CONNECTING; 
     }
 }

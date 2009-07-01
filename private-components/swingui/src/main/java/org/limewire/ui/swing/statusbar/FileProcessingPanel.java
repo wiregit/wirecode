@@ -14,6 +14,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.DrawMode;
 import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.PopupVisibilityChecker;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -51,7 +52,7 @@ class FileProcessingPanel extends JXButton {
             public boolean isPopupVisible() {
                 return popup != null ? popup.isVisible() : false;
             }
-        }, activeBackground, activeBorder);
+        }, activeBackground, activeBorder, DrawMode.NORMAL);
         
         addActionListener(new ActionListener() {
             @Override
