@@ -5,11 +5,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -33,17 +36,24 @@ public class RemoveFromListAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        LocalFileList localFileList = selectedLocalFileList.get();
-        
-        File currentSong = PlayerUtils.getCurrentSongFile();
-        List<LocalFileItem> items = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
-        for(LocalFileItem item : items) {
-            if(item.getFile().equals(currentSong)){
-                PlayerUtils.stop();
+        final File currentSong = PlayerUtils.getCurrentSongFile();
+        BackgroundExecutorService.execute(new Runnable() {
+            public void run() {
+                LocalFileList localFileList = selectedLocalFileList.get();
+                List<LocalFileItem> items = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
+                for(LocalFileItem item : items) {
+                    if(item.getFile().equals(currentSong)){
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                PlayerUtils.stop();
+                            }
+                        });
+                    }
+                    if(!item.isIncomplete()) {
+                        localFileList.removeFile(item.getFile());
+                    }
+                }
             }
-            if(!item.isIncomplete()) {
-                localFileList.removeFile(item.getFile());
-            }
-        }
+        });
     }
 }
