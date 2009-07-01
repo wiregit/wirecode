@@ -38,7 +38,7 @@ class HelpMenu extends MnemonicMenu {
         
         if(!application.isProVersion()) {
             addSeparator();
-            add(new UrlAction(I18n.tr("Get personalized &tech support"),"http://www.limewire.com/client_redirect/?page=gopro"));
+            add(new UrlAction(I18n.tr("Get Personalized &Tech Support"),"http://www.limewire.com/client_redirect/?page=gopro"));
         }
         
         if (!OSUtils.isMacOSX()) {
