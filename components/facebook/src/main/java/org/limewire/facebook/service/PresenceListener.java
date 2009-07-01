@@ -73,6 +73,9 @@ public class PresenceListener implements Runnable {
             lastOnlineFriends = onlineFriendIds;
         } catch (JSONException e) {
             LOG.debug("error deserializing JSON response", e);
+            // TODO remove after beta
+            connection.logout();
+            throw new  RuntimeException(e);
         } catch (IOException e) {
             LOG.debug("POST error", e);
             connection.logout();
