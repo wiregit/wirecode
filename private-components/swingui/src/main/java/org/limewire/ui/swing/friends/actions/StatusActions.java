@@ -50,6 +50,7 @@ class StatusActions {
     private final JCheckBoxMenuItem doNotDisturbItem;
 
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
+    private final ButtonGroup statusButtonGroup = new ButtonGroup();
 
     @Inject
     public StatusActions(EventBean<FriendConnectionEvent> friendConnectionEventBean) {
@@ -106,9 +107,6 @@ class StatusActions {
         this.availableItem = new JCheckBoxMenuItem(availableAction);
         this.doNotDisturbItem = new JCheckBoxMenuItem(doNotDisturbAction);
 
-        ButtonGroup statusButtonGroup = new ButtonGroup();
-        statusButtonGroup.add(availableItem);
-        statusButtonGroup.add(doNotDisturbItem);
         
         updateSelections();
 
@@ -128,10 +126,17 @@ class StatusActions {
     private void updateSelections() {
         FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
         if (friendConnection != null && friendConnection.isLoggedIn()) {
+            statusButtonGroup.remove(availableItem);
+            statusButtonGroup.remove(doNotDisturbItem);
+            statusButtonGroup.add(availableItem);
+            statusButtonGroup.add(doNotDisturbItem);
             boolean dndBool = FriendSettings.DO_NOT_DISTURB.getValue();
             availableItem.setSelected(!dndBool);
             doNotDisturbItem.setSelected(dndBool);
         } else {
+            //removing from button group so that no items are selected while they are disabled.
+            statusButtonGroup.remove(availableItem);
+            statusButtonGroup.remove(doNotDisturbItem);
             // do not show selections when logged out
             availableItem.setSelected(false);
             doNotDisturbItem.setSelected(false);
