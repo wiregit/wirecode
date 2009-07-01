@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionListener;
 
@@ -58,8 +59,11 @@ public class LibraryNavigatorPanel extends JXPanel {
         
         setBorder(BorderFactory.createMatteBorder(0,0,0,1, borderColor));
         
-        JScrollPane scrollPane = new JScrollPane(table);
+        JPanel panel = new JPanel(new MigLayout("fill, gap 0, insets 0"));
+        panel.setBackground(backgroundColor);
+        JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
+        panel.add(table, "grow, wrap");
         
         table.getColumnModel().getColumn(0).setCellRenderer(renderer);
         table.getColumnModel().getColumn(0).setCellEditor(editor);
@@ -68,7 +72,7 @@ public class LibraryNavigatorPanel extends JXPanel {
         add(scrollPane, "growx, growy, wrap");
 
         createCreateListButton();
-        add(createListButton, "aligny top, gaptop 5, gapleft 30, wrap");
+        panel.add(createListButton, "aligny top, gapbottom 5, gapleft 30");
 
         
 //        try {
