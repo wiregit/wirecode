@@ -92,6 +92,7 @@ public class ActiveLimeWireCheck {
             file = new RandomAccessFile(f, "rw");
             lock = file.getChannel().tryLock(); // Null if we can't get the lock
         } catch(IOException e) {
+            e.printStackTrace();
             // Couldn't access the file - something's badly wrong, so quit
             LOG.error("Failed to access lock file", e);
             return true;
@@ -138,10 +139,14 @@ public class ActiveLimeWireCheck {
             return false;
         String type = ExternalControl.isTorrentRequest(arg) ? "TORRENT" : "MAGNET";
         try {
+            LOG.debug("Opening socket...");
             socket = new Socket();
-            socket.connect(new InetSocketAddress("127.0.0.1", port), 1000);
+            // Give LW a while to respond -- it might be busy.
+            // In the case where no one is even listening on the port,
+            // this will fail with a ConnectException really fast.
+            socket.connect(new InetSocketAddress("127.0.0.1", port), 10000);
             InputStream istream = socket.getInputStream(); 
-            socket.setSoTimeout(1000); 
+            socket.setSoTimeout(10000); 
             ByteReader byteReader = new ByteReader(istream);
             OutputStream os = socket.getOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(os);
@@ -149,13 +154,16 @@ public class ActiveLimeWireCheck {
             out.write(type + " " + arg + " ");
             out.write("\r\n");
             out.flush();
+            LOG.debug("Trying to read..");
             String str = byteReader.readLine();
+            LOG.debug("Read!");
             return str != null && str.startsWith(CommonUtils.getUserName());
         } catch (IOException e) {
             LOG.debug("Failed to contact existing instance", e);
         } finally {
             IOUtils.close(socket);
         }
+        LOG.debug("Returning");
         return false;
     }
 
