@@ -532,7 +532,7 @@ public class FriendLibraries {
             Collection<SearchResult> filesForWord;
             filesForWord = get(word);
             if (filesForWord == null) {
-                filesForWord = new ArrayList<SearchResult>();
+                filesForWord = new ArrayList<SearchResult>(1);
                 put(word, filesForWord);
             }
             filesForWord.add(newFile);
