@@ -50,7 +50,7 @@ public class FileInfoDialog extends LimeJDialog {
     @Inject
     public FileInfoDialog(@Assisted PropertiableFile propertiableFile, @Assisted FileInfoType type,
                         FileInfoPanelFactory factory) {
-
+        super(GuiUtils.getMainFrame());
         GuiUtils.assignResources(this);
         
         this.fileInfoPanel = factory.createFileInfoPanel(propertiableFile, type);

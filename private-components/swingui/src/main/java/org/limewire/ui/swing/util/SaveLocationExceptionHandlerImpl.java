@@ -184,7 +184,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
     private void createOverwriteDialogue(final File saveFile, final DownloadAction downLoadAction,
             final SaveLocationException sle, final boolean supportNewSaveDir) {
 
-        final JDialog dialog = new LimeJDialog();
+        final JDialog dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
 
         final MultiLineLabel message = new MultiLineLabel(I18n
