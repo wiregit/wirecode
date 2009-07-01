@@ -37,10 +37,10 @@ public class RemoveFromListAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         final File currentSong = PlayerUtils.getCurrentSongFile();
+        final List<LocalFileItem> items = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
         BackgroundExecutorService.execute(new Runnable() {
             public void run() {
                 LocalFileList localFileList = selectedLocalFileList.get();
-                List<LocalFileItem> items = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
                 for(LocalFileItem item : items) {
                     if(item.getFile().equals(currentSong)){
                         SwingUtilities.invokeLater(new Runnable() {
