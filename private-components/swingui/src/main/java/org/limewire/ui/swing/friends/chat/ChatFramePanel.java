@@ -170,7 +170,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
             public void actionPerformed(ActionEvent e) {
                 ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
                 map.get("restoreView").actionPerformed(e);
-                chatPanel.fireConversationStarted(message.getFriendID());
+                fireConversationStarted(message.getFriendID());
             }
         });
         return notification;
