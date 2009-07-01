@@ -389,43 +389,22 @@ public class LibraryPanel extends JPanel {
     
     private void setupHighlighters() {
         TableColors tableColors = new TableColors();
-        ColorHighlighter storeHighlighter = new ColorHighlighter(new StoreHighlightPredicate(), 
-                null, tableColors.getDisabledForegroundColor(), 
-                null, tableColors.getDisabledForegroundColor());
-        
-        ColorHighlighter libraryHighlighter = new ColorHighlighter(new LibraryHighlightPredicate(), 
+        ColorHighlighter storeHighlighter = new ColorHighlighter(new GrayHighlightPredicate(), 
                 null, tableColors.getDisabledForegroundColor(), 
                 null, tableColors.getDisabledForegroundColor());
         
         libraryTable.addHighlighter(storeHighlighter);
-        libraryTable.addHighlighter(libraryHighlighter);
     }
     
-    private class StoreHighlightPredicate implements HighlightPredicate {
+    private class GrayHighlightPredicate implements HighlightPredicate {
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
-            if(navItem == null || navItem.getType() != NavType.LIST ||
-                    (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() == 0))
-                return false;
             
             LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
-            return !item.isShareable();
-        }
-    }
-    
-    /**
-     * Highlights the item if it has an invalid urn. 
-     */
-    private class LibraryHighlightPredicate implements HighlightPredicate {
-        @Override
-        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-            LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
-            if(navItem == null) {
-                return false;
-            }
-            
-            LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
+            if(navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0)
+                return !item.isShareable(); 
+
             return !item.isLoaded();
         }
     }

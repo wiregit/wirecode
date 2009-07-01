@@ -186,7 +186,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     @Override
     public boolean isShareable() {
-        return !fileDesc.isStoreFile() && !isIncomplete();
+        return !InvalidURN.instance.equals(getUrn()) && !fileDesc.isStoreFile() && !isIncomplete();
     }
     
     @Override

@@ -10,7 +10,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
@@ -102,7 +101,6 @@ public class LibraryTable extends MouseableTable {
             @Override
             public void handlePopupMouseEvent(MouseEvent e) {
                 showHeaderPopupMenu(e.getPoint());
-                //printHeaderWidths();
             }
         }; 
 
@@ -350,17 +348,6 @@ public class LibraryTable extends MouseableTable {
         }
     }
     
-    /**
-     * Prints the header widths for testing
-     */
-    private void printHeaderWidths(){
-        System.out.println("");
-        for(int i=0; i < this.getColumnCount(); i++){
-            TableColumn col = this.getColumn(i);
-            System.out.println(col.getHeaderValue().toString() + " -- " + col.getWidth());
-        }
-    }
-    
     @Override
     protected String getToolTipText(int row, int col) {
         Object value = getValueAt(row, col);
@@ -369,7 +356,7 @@ public class LibraryTable extends MouseableTable {
             if(!localFileItem.isLoaded()) {
                 return I18n.tr("This file is still processing.");
             } else if(!localFileItem.isShareable()) {
-                return I18n.tr("This file is unshareable.");
+                return I18n.tr("This file cannot be shared.");
             }
         }  
         return super.getToolTipText(row, col);
