@@ -402,7 +402,7 @@ public class LibraryPanel extends JPanel {
             LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
             
             LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
-            if(navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0)
+            if( navItem.getType() == NavType.PUBLIC_SHARED || (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0))
                 return !item.isShareable(); 
 
             return !item.isLoaded();
