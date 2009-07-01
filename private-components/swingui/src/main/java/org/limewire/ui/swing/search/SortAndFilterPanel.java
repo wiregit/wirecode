@@ -274,10 +274,13 @@ public class SortAndFilterPanel implements Disposable {
      * Adds the sorting and filtering components to the specified panel.
      */
     public void layoutComponents(JPanel panel) {
-        panel.setLayout(new MigLayout("insets 0, filly, novisualpadding, gapx 0", "push[][][][][]"));
+        //forces buttons to be the correct size on mac
+        listViewToggleButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, sortCombo.getPreferredSize().height));
+        tableViewToggleButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, sortCombo.getPreferredSize().height));
         
-        panel.add(sortLabel, "gapafter 10, hidemode 3");
-        panel.add(sortCombo, "gapafter 10, hidemode 3");
+        panel.setLayout(new MigLayout("insets 0, novisualpadding, gapx 0"));
+        panel.add(sortLabel, "gapafter 10, hidemode 0");
+        panel.add(sortCombo, "gapafter 10, hidemode 0");
         panel.add(listViewToggleButton);
         panel.add(tableViewToggleButton, "gapafter 10");
     }

@@ -429,7 +429,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      * the constructor.  
      */
     private void layoutComponents() {
-        MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!", 
+        MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!, novisualpadding", 
                                 "[][grow]",       // col constraints
                                 "[][][][grow]");  // row constraints
         
