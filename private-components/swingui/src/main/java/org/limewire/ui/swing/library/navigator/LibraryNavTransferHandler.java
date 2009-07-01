@@ -50,6 +50,11 @@ class LibraryNavTransferHandler extends LocalFileListTransferHandler {
             Point point = dropLocation.getDropPoint();
             int column = libraryNavigatorTable.columnAtPoint(point);
             int row = libraryNavigatorTable.rowAtPoint(point);
+            
+            if(column < 0 || row < 0) {
+                return false;
+            }
+            
             LibraryNavItem libraryNavItem = (LibraryNavItem) libraryNavigatorTable.getValueAt(row, column);
             if (libraryNavItem != null) {
                 this.localFileList = libraryNavItem.getLocalFileList();            
