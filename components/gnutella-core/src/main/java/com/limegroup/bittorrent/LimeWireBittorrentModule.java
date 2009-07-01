@@ -34,7 +34,7 @@ public class LimeWireBittorrentModule extends AbstractModule {
                     if (download_speed >= 100) {
                         return 0;
                     }
-                    int limit = ConnectionSettings.CONNECTION_SPEED.getValue() * 1024 * download_speed / 100;
+                    int limit = (ConnectionSettings.CONNECTION_SPEED.getValue() / 8) * 1024 * download_speed / 100;
                     return limit;
                 }
 
@@ -44,7 +44,7 @@ public class LimeWireBittorrentModule extends AbstractModule {
                     if (upload_speed >= 100) {
                         return 0;
                     }
-                    int limit = ConnectionSettings.CONNECTION_SPEED.getValue() * 1024 * upload_speed / 100;
+                    int limit = (ConnectionSettings.CONNECTION_SPEED.getValue() / 8) * 1024 * upload_speed / 100;
                     return limit;
                 }
 
