@@ -4,8 +4,11 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -23,8 +26,7 @@ import org.limewire.friend.api.Network;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.impl.feature.LimewireFeatureInitializer;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
-import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.http.httpclient.SimpleLimeHttpClient;
+import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -36,6 +38,7 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * A <code>FriendConnectionFactory</code> for facebook.  Facebook communication is done via their API + chat protocol.
@@ -57,18 +60,21 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     private final Provider<String[]> authServerUrls;
 
     private final HttpClientInstanceUtils httpClientInstanceUtils;
+    private final ClientConnectionManager httpConnectionManager;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   PresenceHandlerFactory presenceHandlerFactory,
                                   FeatureRegistry featureRegistry,
                                   @FacebookAuthServerUrls Provider<String[]> authServerUrls,
-                                  HttpClientInstanceUtils httpClientInstanceUtils) {
+                                  HttpClientInstanceUtils httpClientInstanceUtils,
+                                  @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager) {
         this.connectionFactory = connectionFactory;
         this.presenceHandlerFactory = presenceHandlerFactory;
         this.featureRegistry = featureRegistry;
         this.authServerUrls = authServerUrls;
         this.httpClientInstanceUtils = httpClientInstanceUtils;
-        executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
+        this.httpConnectionManager = httpConnectionManager;
+        executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));         
     }
     
     @Inject
@@ -160,8 +166,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
             public String call() throws Exception {
                 HttpParams params = new BasicHttpParams();
                 HttpClientParams.setRedirecting(params, false);
-                LimeHttpClient httpClient = new SimpleLimeHttpClient();
-                httpClient.setParams(params);   
+                HttpClient httpClient = new DefaultHttpClient(httpConnectionManager, params); 
                 String[] authUrls = authServerUrls.get();
                 if (LOG.isDebugEnabled()) {
                     LOG.debugf("auth urls to choose from {0}", Arrays.asList(authUrls));
@@ -169,7 +174,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 String authUrl = httpClientInstanceUtils.addClientInfoToUrl(FacebookUtils.getRandomElement(authUrls) + "getlogin/");
                 LOG.debugf("picked auth url: {0}", authUrl);
                 HttpGet getMethod = new HttpGet(authUrl);
-                HttpResponse response = httpClient.execute(getMethod);
+                HttpResponse response = httpClient.execute(getMethod);                
                 assert response.getStatusLine().getStatusCode() == 302;
                 String url = response.getFirstHeader("Location").getValue();
                 LOG.debugf("login url: {0}", url);
@@ -177,6 +182,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 if (authToken != null) {
                     configuration.setAttribute("auth-token", authToken);
                 }
+                HttpClientUtils.releaseConnection(response);
                 return url;
             }
         });

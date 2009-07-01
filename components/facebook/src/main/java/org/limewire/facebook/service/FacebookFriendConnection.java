@@ -29,6 +29,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.cookie.MalformedCookieException;
@@ -73,7 +74,6 @@ import org.limewire.friend.api.MessageReader;
 import org.limewire.friend.api.MessageWriter;
 import org.limewire.friend.api.MutableFriendManager;
 import org.limewire.friend.api.Network;
-import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.AuthTokenFeature;
 import org.limewire.friend.api.feature.ConnectBackRequestFeature;
@@ -82,6 +82,7 @@ import org.limewire.friend.api.feature.FileOfferFeature;
 import org.limewire.friend.api.feature.LibraryChangedNotifierFeature;
 import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.inject.MutableProvider;
 import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.listener.EventBroadcaster;
@@ -89,12 +90,13 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SecurityUtils;
 import org.limewire.util.URIUtils;
+import org.limewire.http.httpclient.HttpClientUtils;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 /**
@@ -179,7 +181,8 @@ public class FacebookFriendConnection implements FriendConnection {
     private String secret;
 
     private final Provider<String[]> authUrls;
-    
+    private final ClientConnectionManager httpConnectionManager;
+
     @Inject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
                                     @FacebookAPIKey Provider<String> apiKey,
@@ -198,7 +201,8 @@ public class FacebookFriendConnection implements FriendConnection {
                                     DiscoInfoHandlerFactory discoInfoHandlerFactory,
                                     @Named("backgroundExecutor")ScheduledListeningExecutorService executorService,
                                     @ChatChannel MutableProvider<String> chatChannel,
-                                    @FacebookAuthServerUrls Provider<String[]> authUrls) {
+                                    @FacebookAuthServerUrls Provider<String[]> authUrls,
+                                    @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -211,6 +215,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.executorService = executorService;
         this.chatChannel = chatChannel;
         this.authUrls = authUrls;
+        this.httpConnectionManager = httpConnectionManager;
         this.addressHandler = addressHandlerFactory.create(this);
         this.authTokenHandler = authTokenHandlerFactory.create(this);
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
@@ -437,11 +442,7 @@ public class FacebookFriendConnection implements FriendConnection {
 
         HttpClient httpClient = createHttpClient();
         HttpResponse response = httpClient.execute(httpPost);
-        HttpEntity entity = response.getEntity();
-
-        if (entity != null) {
-            entity.consumeContent();
-        }
+        HttpClientUtils.releaseConnection(response);
     }
 
     String getUID() {
@@ -510,9 +511,12 @@ public class FacebookFriendConnection implements FriendConnection {
         String authUrl = FacebookUtils.getRandomElement(authUrls.get()) + "getsession/" + authToken + "/";
         LOG.debugf("requesting session from {0}...", authUrl);
         HttpGet sessionRequest = new HttpGet(authUrl);
+        // keep alive in-between getToken and getSession. Close after.
+        sessionRequest.addHeader("Connection", "close");
         HttpClient httpClient = createHttpClient();
         HttpResponse response = httpClient.execute(sessionRequest);
         parseSessionResponse(response);
+        HttpClientUtils.releaseConnection(response);
     }
 
     private void parseSessionResponse(HttpResponse response) throws IOException, JSONException {
@@ -617,7 +621,7 @@ public class FacebookFriendConnection implements FriendConnection {
         String responseStr = null;
         if (entity != null) {
             responseStr = EntityUtils.toString(entity);
-            entity.consumeContent();
+            HttpClientUtils.releaseConnection(response);
         }
         return responseStr;
     }
@@ -638,7 +642,7 @@ public class FacebookFriendConnection implements FriendConnection {
 
         if (entity != null) {
             String responseStr = EntityUtils.toString(entity);
-            entity.consumeContent();
+            HttpClientUtils.releaseConnection(postResponse);
             return responseStr;
         }
         return null;
@@ -824,7 +828,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     private HttpClient createHttpClient() {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        DefaultHttpClient httpClient = new DefaultHttpClient(httpConnectionManager, null);
         httpClient.setCookieStore(cookieStore);
         return httpClient;
     }
