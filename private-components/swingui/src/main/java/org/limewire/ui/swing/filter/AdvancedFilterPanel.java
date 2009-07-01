@@ -274,9 +274,6 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         // Add filter to display.
         filterDisplayPanel.addFilter(filter);
-        
-        // Update display category.
-        updateCategory();
     }
 
     /**
@@ -294,9 +291,6 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         // Reset filter for use.
         filter.reset();
-        
-        // Update display category.
-        updateCategory();
     }
     
     /**
@@ -403,6 +397,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             } else {
                 removeActiveFilter(filter);
             }
+            updateCategory();
         }
     }
     
@@ -425,6 +420,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             for (Filter<E> filter : filterList) {
                 removeActiveFilter(filter);
             }
+            
+            // Update display category.
+            updateCategory();
         }
     }
     
@@ -442,6 +440,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         @Override
         public void actionPerformed(ActionEvent e) {
             removeActiveFilter(filter);
+            updateCategory();
         }
     }
     
@@ -684,6 +683,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             } else {
                 removeActiveFilter(filter);
             }
+            updateCategory();
         }
     }
 
