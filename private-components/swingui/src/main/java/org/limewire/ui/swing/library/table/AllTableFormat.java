@@ -35,15 +35,15 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     @Inject
     public AllTableFormat(IconManager iconManager) {
         super(ACTION_INDEX, "LIBRARY_ALL_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
-                new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", "Name", 493, true, true), 
-                new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 180, true, true),     
+                new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", "Name", 480, true, true), 
+                new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 230, true, true),     
                 new ColumnStateInfo(CREATED_INDEX, "LIBRARY_ALL_CREATED", I18n.tr("Date Created"), 100, false, true), 
-                new ColumnStateInfo(SIZE_INDEX, "LIBRARY_ALL_SIZE", I18n.tr("Size"), 60, true, true),
+                new ColumnStateInfo(SIZE_INDEX, "LIBRARY_ALL_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_ALL_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_ALL_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_ALL_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_ALL_PATH", I18n.tr("Location"), 200, false, true),
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_ALL_ACTION", I18n.tr("Remove"), 40, true, false)
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_ALL_ACTION", I18n.tr(" "), 22, 22, true, false)
         });     
         
         this.iconManager = iconManager;

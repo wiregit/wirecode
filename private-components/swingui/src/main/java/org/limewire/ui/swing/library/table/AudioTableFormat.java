@@ -47,11 +47,11 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
     @Inject
     public AudioTableFormat() {
         super(ACTION_INDEX, "LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
-                new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 25, 25, true, false), 
-                new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 278, true, true),     
-                new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
-                new ColumnStateInfo(ALBUM_INDEX, "LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 180, true, true), 
-                new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_AUDIO_LENGTH", I18n.tr("Length"), 60, true, true), 
+                new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 15, 15, true, false), 
+                new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 274, true, true),     
+                new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 182, true, true), 
+                new ColumnStateInfo(ALBUM_INDEX, "LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 163, true, true), 
+                new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_AUDIO_LENGTH", I18n.tr("Length"), 59, true, true), 
                 new ColumnStateInfo(GENRE_INDEX, "LIBRARY_AUDIO_GENRE", I18n.tr("Genre"), 60, false, true), 
                 new ColumnStateInfo(BITRATE_INDEX, "LIBRARY_AUDIO_BITRATE", I18n.tr("Bitrate"), 50, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_AUDIO_SIZE", I18n.tr("Size"), 50, false, true),
@@ -64,7 +64,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_AUDIO_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_AUDIO_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_AUDIO_PATH", I18n.tr("Location"), 200, false, true),
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_AUDIO_ACTION", I18n.tr("Remove"), 40, true, false)
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_AUDIO_ACTION", I18n.tr(" "), 22, 22, true, false)
         });
     }
 

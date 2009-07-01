@@ -10,6 +10,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
@@ -101,6 +102,7 @@ public class LibraryTable extends MouseableTable {
             @Override
             public void handlePopupMouseEvent(MouseEvent e) {
                 showHeaderPopupMenu(e.getPoint());
+                //printHeaderWidths();
             }
         }; 
 
@@ -345,6 +347,17 @@ public class LibraryTable extends MouseableTable {
                 getSelectionModel().setSelectionInterval(row, row);
             }
             launchAction.get().actionPerformed(null);
+        }
+    }
+    
+    /**
+     * Prints the header widths for testing
+     */
+    private void printHeaderWidths(){
+        System.out.println("");
+        for(int i=0; i < this.getColumnCount(); i++){
+            TableColumn col = this.getColumn(i);
+            System.out.println(col.getHeaderValue().toString() + " -- " + col.getWidth());
         }
     }
     
