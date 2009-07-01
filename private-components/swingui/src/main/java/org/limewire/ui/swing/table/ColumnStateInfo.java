@@ -11,6 +11,7 @@ public class ColumnStateInfo {
     private final String id;
     private final String name;
     private final int defaultWidth;
+    private final int maxWidth;
     private final boolean isShownAtStartup;
     private final boolean isHideable;
     
@@ -18,16 +19,21 @@ public class ColumnStateInfo {
     private final boolean isDefaultlyShown;
     
     public ColumnStateInfo(int modelIndex, String id, String name, int defaultWidth, boolean isShownAtStartup, boolean isHideable) {
-       this.id = id;
-       this.name = name;
-       this.isHideable = isHideable;
-       this.isDefaultlyShown = isShownAtStartup;
-       this.modelIndex = modelIndex;
-       
-       this.isShownAtStartup = TablesHandler.getVisibility(id, isShownAtStartup).getValue();
-       this.defaultWidth = TablesHandler.getWidth(id, defaultWidth).getValue();
-       this.preferredIndex = TablesHandler.getOrder(id, modelIndex).getValue();
+        this(modelIndex, id, name, defaultWidth, -1, isShownAtStartup, isHideable);
     }
+    
+    public ColumnStateInfo(int modelIndex, String id, String name, int defaultWidth, int maxWidth, boolean isShownAtStartup, boolean isHideable) {
+        this.id = id;
+        this.name = name;
+        this.isHideable = isHideable;
+        this.isDefaultlyShown = isShownAtStartup;
+        this.modelIndex = modelIndex;
+        
+        this.isShownAtStartup = TablesHandler.getVisibility(id, isShownAtStartup).getValue();
+        this.defaultWidth = TablesHandler.getWidth(id, defaultWidth).getValue();
+        this.maxWidth = maxWidth;
+        this.preferredIndex = TablesHandler.getOrder(id, modelIndex).getValue();
+     }
     
     /**
      * Returns the model index for this column.
@@ -61,6 +67,10 @@ public class ColumnStateInfo {
     
     public int getDefaultWidth() {
         return defaultWidth;
+    }
+    
+    public int getMaxWidth() {
+        return maxWidth;
     }
     
     /**

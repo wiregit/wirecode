@@ -13,6 +13,9 @@ public interface VisibleTableFormat<T> extends TableFormat<T>{
     /** Initial preferred width of the column.*/
     int getInitialWidth(int columnModelIndex);
     
+    /** Max width for a given column. */
+    int getMaxsWidth(int columnModelIndex);
+    
     /** Returns the column state info for this column.*/
     ColumnStateInfo getColumnInfo(int columnModelIndex);
     

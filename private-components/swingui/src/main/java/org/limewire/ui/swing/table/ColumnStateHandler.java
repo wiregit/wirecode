@@ -162,6 +162,9 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
     
     public void setupColumnWidths() {
         for(int i = 0; i < format.getColumnCount(); i++) {
+            if(format.getMaxsWidth(i) != -1) {
+                table.getColumn(i).setMaxWidth(format.getMaxsWidth(i));
+            }
             table.getColumn(i).setPreferredWidth(format.getInitialWidth(i));
         }
     }
