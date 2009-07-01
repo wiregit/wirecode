@@ -18,6 +18,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -26,7 +27,7 @@ import org.limewire.ui.swing.util.PainterUtils;
 
 import com.google.inject.Inject;
 
-public class FileProcessingPopupContentPanel extends JPanel {
+public class FileProcessingPopupContentPanel extends JPanel implements Disposable {
 
     @Resource private Color border = PainterUtils.TRASPARENT;
     @Resource private Font font;
@@ -36,6 +37,7 @@ public class FileProcessingPopupContentPanel extends JPanel {
     
     private final JLabel processingLine;
     private final HyperlinkButton stopButton;
+    private EventListener<FileProcessingEvent> listener;
     
     @Inject
     public FileProcessingPopupContentPanel(final FileProcessingPanel parent, final LibraryManager libraryManager) {
@@ -55,7 +57,7 @@ public class FileProcessingPopupContentPanel extends JPanel {
         
         setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
         
-        processingLine = new JLabel();
+        processingLine = new JLabel(I18n.tr("Scanning"));
         stopButton = new HyperlinkButton(new AbstractAction(I18n.tr("stop")){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -77,14 +79,30 @@ public class FileProcessingPopupContentPanel extends JPanel {
     
     @Inject
     void register() {
-        libraryManager.getLibraryManagedList().addFileProcessingListener(new EventListener<FileProcessingEvent>() {
+        listener = new EventListener<FileProcessingEvent>() {
             @Override
             @SwingEDTEvent
             public void handleEvent(final FileProcessingEvent event) {
-                processingLine.setText(event.getSource().getName());
+                switch (event.getType()) {
+                case PROCESSING:
+                    processingLine.setText(event.getSource().getName());
+                    stopButton.setVisible(true);
+                    break;
+                }
             }
-        });
+        };
         
-        
+        libraryManager.getLibraryManagedList().addFileProcessingListener(listener);
+    }
+    
+    
+    public void notifyDone() {
+        stopButton.setVisible(false);
+        processingLine.setText(I18n.tr("Finished"));
+    }
+    
+    @Override
+    public void dispose() {
+        libraryManager.getLibraryManagedList().removeFileProcessingListener(listener);
     }
 }

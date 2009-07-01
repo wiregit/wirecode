@@ -62,13 +62,12 @@ class FileProcessingPanel extends JXButton {
                     popup.addComponentListener(new ComponentAdapter() {
                         @Override
                         public void componentHidden(ComponentEvent e) {
-                            popup = null;
+                            closePopup();
                         }
                     });
                 }
                 else {
-                    popup.dispose();
-                    popup = null;
+                    closePopup();
                 }
             }
         });
@@ -76,6 +75,12 @@ class FileProcessingPanel extends JXButton {
         setVisible(false);
     }
 
+    private void closePopup() {
+        setVisible(total != 0);
+        popup.dispose();
+        popup = null;
+    }
+    
     @Inject
     void register(LibraryManager libraryManager) {
         libraryManager.getLibraryManagedList().addFileProcessingListener(new EventListener<FileProcessingEvent>() {
@@ -95,19 +100,19 @@ class FileProcessingPanel extends JXButton {
                     }
                     update();
                     break;
-                case PROCESSING:
-                    update();
-                    break;
                 }
             }
         });
     }
 
     private void update() {
-        if(total == 0) {
-            setVisible(false);
+        if (total == 0) {
             if (popup != null) {
-                popup.dispose();
+                setText(I18n.tr("Done"));
+                popup.notifyDone();
+            }
+            else {
+                setVisible(false);
             }
         } else {
             setText(I18n.tr("Adding {0} of {1}", finished, total));
