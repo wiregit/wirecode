@@ -1,9 +1,14 @@
 package org.limewire.util;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 
@@ -12,6 +17,8 @@ import org.limewire.inspection.InspectionPoint;
  * and determine operating system criteria.
  */
 public class OSUtils {
+    
+    private static final Log LOG = LogFactory.getLog(OSUtils.class);
     
     static {
         setOperatingSystems();
@@ -56,6 +63,11 @@ public class OSUtils {
      * Variable for whether or not we're on Windows Vista.
      */
     private static boolean _isWindowsVista;
+    
+    /**
+     * Variable for whether or not we're on Windows Vista SP2 or higher.
+     */
+    private static boolean _isSlightlyLessBrokenVersionOfWindowsVista;
 
     /** 
      * Variable for whether or not the operating system allows the 
@@ -93,6 +105,7 @@ public class OSUtils {
     public static void setOperatingSystems() {
     	_isWindows = false;
     	_isWindowsVista = false;
+        _isSlightlyLessBrokenVersionOfWindowsVista = false;
     	_isWindowsNT = false;
     	_isWindowsXP = false;
     	_isWindows7 = false;
@@ -144,6 +157,43 @@ public class OSUtils {
     		if(os.endsWith("x")) {
     			_isMacOSX = true;
     		}
+    	}
+        
+        // If this is Windows Vista, try to find out whether SP2 (or higher)
+        // is installed, which removes the half-open TCP connection limit.
+    	if(_isWindowsVista) {
+            BufferedReader br = null;
+    	    try {
+                // Execute reg.exe to query a registry key
+    	        Process p = Runtime.getRuntime().exec(new String[] {
+    	                "reg",
+    	                "query",
+    	                "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion",
+    	                "/v",
+    	                "CSDVersion"
+    	        });
+                // Parse the output
+    	        br = new BufferedReader(
+                    new InputStreamReader(p.getInputStream()));
+    	        String line = null;
+    	        while((line = br.readLine()) != null) {
+    	            if(line.matches(".*CSDVersion.*"))
+    	                break;
+    	        }
+                // Assume there won't be more than 9 service packs for Vista
+    	        if(line != null && line.matches(".*Service Pack [2-9]")) {
+                    LOG.debug("Slightly less broken version of Windows Vista");
+    	            _isSlightlyLessBrokenVersionOfWindowsVista = true;
+                }
+    	    } catch(Throwable t) {
+    	        LOG.debug("Failed to determine Windows version", t);
+    	    } finally {
+                if(br != null) {
+                    try {
+                        br.close();
+                    } catch(IOException ignored) {}
+                }
+            }
     	}
     }    
 
@@ -246,7 +296,7 @@ public class OSUtils {
      * the 10 socket limit.
      */
     public static boolean isSocketChallengedWindows() {
-        return isWindowsVista() || isWindowsXP();
+        return _isWindowsXP || (_isWindowsVista && !_isSlightlyLessBrokenVersionOfWindowsVista);
     }
 
     /**
