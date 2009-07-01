@@ -156,10 +156,11 @@ public class FileInfoPanel extends JPanel {
         addOverviewCategory(propertiableFile, overviewPanel);
 
         
-        HyperlinkButton copyToClipboard = new HyperlinkButton();
-        copyToClipboard.setFont(smallFont);
+        HyperlinkButton copyToClipboard = null;
         if(type == FileInfoType.LOCAL_FILE){
-            if(propertiableFile instanceof LocalFileItem) {
+            if(propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).isShareable()) {
+                copyToClipboard = new HyperlinkButton();
+                copyToClipboard.setFont(smallFont);
                 copyToClipboard.setAction(new AbstractAction(I18n.tr("Copy Link")) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -169,13 +170,17 @@ public class FileInfoPanel extends JPanel {
                 });
             }
         } else if(type == FileInfoType.REMOTE_FILE) {
-            if(propertiableFile instanceof VisualSearchResult)
+            if(propertiableFile instanceof VisualSearchResult) {
+                copyToClipboard = new HyperlinkButton();
+                copyToClipboard.setFont(smallFont);
                 copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction((VisualSearchResult)propertiableFile));
+            }
         } 
         HyperlinkButton moreFileInfo = new HyperlinkButton(new BitziLookupAction(propertiableFile));
         moreFileInfo.setFont(smallFont);
       
-        overviewPanel.add(copyToClipboard, "cell 1 1, alignx right");
+        if(copyToClipboard != null)
+            overviewPanel.add(copyToClipboard, "cell 1 1, alignx right");
         overviewPanel.add(moreFileInfo, "cell 1 2, alignx right");
         
         add(overviewPanel, "growx");
