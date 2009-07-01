@@ -327,7 +327,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
             if (featureEventType == FeatureEvent.Type.ADDED) {
                 downloadlink.setEnabled(true);
             } else if (featureEventType == FeatureEvent.Type.REMOVED) {
-                downloadlink.setEnabled(false);
+                downloadlink.setEnabled(chatFriend.isSignedInToLimewire());
             }
         } else if (feature.getID().equals(NoSaveFeature.ID)) {
             if (featureEventType == FeatureEvent.Type.ADDED) {
