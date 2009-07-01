@@ -44,7 +44,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
@@ -55,7 +55,6 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
-import org.limewire.ui.swing.util.ResizeUtils;
 
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -78,11 +77,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     
     @Resource private Color background = PainterUtils.TRASPARENT;
     @Resource private Color border = PainterUtils.TRASPARENT;
-    @Resource private Font headerFont;
-   
-    @Resource private Icon closeIcon;
-    @Resource private Icon closeIconRollover;
-    @Resource private Icon closeIconPressed;
     
     @Resource private Icon publicIcon;
     @Resource private Icon listSharedIcon;
@@ -168,21 +162,8 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         frame.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
         frame.setPreferredSize(new Dimension(220, 160));
         
-        JPanel topBarPanel = new JPanel(new MigLayout("gap 0, insets 0, fill"));
-        topBarPanel.setBackground(border);
-        ResizeUtils.forceHeight(topBarPanel, 21);
-        
-        JLabel titleBarLabel = new JLabel(I18n.tr("Lists I'm Sharing"));
-        titleBarLabel.setOpaque(false);
-        titleBarLabel.setForeground(Color.WHITE);
-        titleBarLabel.setFont(headerFont);
-        IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
-        closeButton.addActionListener(closeAction);
-        closeButton.setOpaque(false);
-        
-        topBarPanel.add(titleBarLabel, "gapleft 4, dock west");
-        topBarPanel.add(closeButton, "gapright 3, dock east");
-        
+        JPanel topBarPanel = new PopupHeaderBar(I18n.tr("Lists I'm Sharing"), closeAction);
+            
         frame.add(topBarPanel, BorderLayout.NORTH);
         
         JPanel contentPanel = new JPanel(new BorderLayout());

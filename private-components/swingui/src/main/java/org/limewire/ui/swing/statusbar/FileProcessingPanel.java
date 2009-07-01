@@ -17,6 +17,7 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.PopupVisibilityChecker;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.PainterUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -24,6 +25,9 @@ import com.google.inject.Singleton;
 
 @Singleton
 class FileProcessingPanel extends JXButton {
+    
+    @Resource private Color activeBackground = PainterUtils.TRASPARENT;
+    @Resource private Color activeBorder = PainterUtils.TRASPARENT;
     
     @Resource private Font font;
     @Resource private Color foreground;
@@ -47,7 +51,7 @@ class FileProcessingPanel extends JXButton {
             public boolean isPopupVisible() {
                 return popup != null ? popup.isVisible() : false;
             }
-        }, Color.WHITE, new Color(0x313131));
+        }, activeBackground, activeBorder);
         
         addActionListener(new ActionListener() {
             @Override
@@ -67,6 +71,8 @@ class FileProcessingPanel extends JXButton {
                 }
             }
         });
+        
+        setVisible(false);
     }
 
     @Inject
