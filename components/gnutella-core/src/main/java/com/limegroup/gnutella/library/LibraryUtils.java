@@ -81,7 +81,7 @@ public class LibraryUtils {
      * if the file's extension is banned. Otherwise returns true.
      */
     public static boolean isFileAllowedToBeManaged(File file) {
-        String ext = FileUtils.getFileExtension(file);
+        String ext = FileUtils.getFileExtension(file).toLowerCase(Locale.US);
         if(!LibrarySettings.ALLOW_PROGRAMS.getValue() && !LibraryUtils.isForcedShare(file)) {
             MediaType type = MediaType.getMediaTypeForExtension(ext);
             if(type == MediaType.getProgramMediaType())
