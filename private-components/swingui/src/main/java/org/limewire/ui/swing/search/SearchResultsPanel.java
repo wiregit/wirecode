@@ -444,7 +444,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         tabHighlight.setBorderPaint(null);
         
         HeaderBar header = new HeaderBar(searchTitleLabel);
-        header.setLayout(new MigLayout("nogrid, hidemode 3, novisualpadding, insets 0, gap 0!, filly"));
+        header.setLayout(new MigLayout("nogrid, hidemode 3, novisualpadding, insets 0, gap 0!, aligny 50%"));
         header.add(browseStatusPanel, "growx, pushx");
         headerBarDecorator.decorateBasic(header);
         
