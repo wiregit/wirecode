@@ -679,7 +679,8 @@ public final class Initializer {
             new AtomicInteger(JOptionPane.CANCEL_OPTION);
         final String message = I18n.tr("Another instance of LimeWire " +
                 "appears to be running. Please completely shut down all " +
-                "other instances of LimeWire before continuing.");
+                "other instances of LimeWire before continuing. If this " +
+                "problem persists, please restart your computer.");
         SwingUtils.invokeAndWait(new Runnable() {
             @Override
             public void run() {

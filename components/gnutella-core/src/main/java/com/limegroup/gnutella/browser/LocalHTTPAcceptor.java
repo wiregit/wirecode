@@ -20,7 +20,6 @@ import org.limewire.http.auth.AuthenticationInterceptor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ActiveLimeWireCheck;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -77,14 +76,6 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
     @Override
     public String getServiceName() {
         return org.limewire.i18n.I18nMarker.marktr("Magnet Processor");
-    }
-    
-    @Override
-    public void start() {
-        super.start();
-        // Now that we're ready to receive connections from other LimeWire
-        // instances, release the file lock that forces them to wait.
-        ActiveLimeWireCheck.instance().releaseLock();
     }
     
     private class MagnetCommandRequestHandler extends SimpleNHttpRequestHandler  {

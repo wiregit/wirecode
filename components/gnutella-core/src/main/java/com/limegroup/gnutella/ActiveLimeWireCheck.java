@@ -60,7 +60,7 @@ public class ActiveLimeWireCheck {
     /**
      * Releases the file lock obtained at startup. If no lock was obtained,
      * this method has no effect. If a lock was obtained and this method is
-     * never called, the OS will remove the lock when the JVM exits.
+     * never called, the OS *should* remove the lock when the JVM exits.
      */
     public void releaseLock() {
         if(lock != null) {
@@ -92,7 +92,6 @@ public class ActiveLimeWireCheck {
             file = new RandomAccessFile(f, "rw");
             lock = file.getChannel().tryLock(); // Null if we can't get the lock
         } catch(IOException e) {
-            e.printStackTrace();
             // Couldn't access the file - something's badly wrong, so quit
             LOG.error("Failed to access lock file", e);
             return true;
@@ -130,21 +129,26 @@ public class ActiveLimeWireCheck {
      * Tries to contact an existing instance of LimeWire on the configured port
      * and pass it the argument, which may be null.
      * 
+     * @param arg the argument to pass to the running instance, if contacted.
      * @return true if another instance was successfully contacted on the port.
      */
     private boolean tryToContactRunningLimeWire(String arg) {
         Socket socket = null;
+        boolean contacted = false;
         int port = NetworkSettings.PORT.getValue();
-        if(!NetworkUtils.isValidPort(port))
+        if(!NetworkUtils.isValidPort(port)) {
+            LOG.trace("Invalid port");
             return false;
+        }
         String type = ExternalControl.isTorrentRequest(arg) ? "TORRENT" : "MAGNET";
         try {
-            LOG.debug("Opening socket...");
+            LOG.trace("Opening socket");
             socket = new Socket();
             // Give LW a while to respond -- it might be busy.
             // In the case where no one is even listening on the port,
             // this will fail with a ConnectException really fast.
             socket.connect(new InetSocketAddress("127.0.0.1", port), 10000);
+            LOG.trace("Connected");
             InputStream istream = socket.getInputStream(); 
             socket.setSoTimeout(10000); 
             ByteReader byteReader = new ByteReader(istream);
@@ -154,17 +158,25 @@ public class ActiveLimeWireCheck {
             out.write(type + " " + arg + " ");
             out.write("\r\n");
             out.flush();
-            LOG.debug("Trying to read..");
             String str = byteReader.readLine();
-            LOG.debug("Read!");
-            return str != null && str.startsWith(CommonUtils.getUserName());
+            if(str == null) {
+                LOG.trace("Null response");
+                contacted = false;
+            }
+            else if(!str.startsWith(CommonUtils.getUserName())) {
+                LOG.trace("Invalid response");
+                contacted = false;
+            } else {
+                LOG.trace("Valid response");
+                contacted = true;
+            }
         } catch (IOException e) {
             LOG.debug("Failed to contact existing instance", e);
         } finally {
+            LOG.trace("Closing socket");
             IOUtils.close(socket);
         }
-        LOG.debug("Returning");
-        return false;
+        return contacted;
     }
 
     public static class ActiveLimeWireException extends Exception {}
