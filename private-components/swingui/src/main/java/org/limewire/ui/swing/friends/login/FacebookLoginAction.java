@@ -2,10 +2,13 @@ package org.limewire.ui.swing.friends.login;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.SwingUtilities;
+
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.LimeDomListener;
@@ -80,7 +83,11 @@ public class FacebookLoginAction extends AbstractAction {
                             config.setAttribute("url", "http://facebook.com/");
                             config.setAttribute("cookie", cookie);
                             friendConnectionFactory.login(config);
-                            loginPanel.finished();
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    loginPanel.finished();
+                                }
+                            });
                         } else if (url.contains("login")) {
                             String script = "(function() {" +
                             "    function addHiddenInput(name, value) {" +
@@ -102,6 +109,7 @@ public class FacebookLoginAction extends AbstractAction {
         loginPanel.setLoginComponent(browser);
         friendConnectionFactory.requestLoginUrl(config).addFutureListener(new EventListener<FutureEvent<String>>() {
             @Override
+            @SwingEDTEvent
             public void handleEvent(FutureEvent<String> event) {
                 switch (event.getType()) {
                 case SUCCESS:
