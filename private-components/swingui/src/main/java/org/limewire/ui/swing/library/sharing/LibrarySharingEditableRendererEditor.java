@@ -35,11 +35,9 @@ class LibrarySharingEditableRendererEditor extends JCheckBox implements TableCel
     private EditableSharingData data;
     
     public LibrarySharingEditableRendererEditor() {
-//        super(new MigLayout("fill, insets 0, gap 0"));
 
         GuiUtils.assignResources(this);
        
-//        checkBox = new JCheckBox();
         setBorder(BorderFactory.createEmptyBorder(0,5,0,0));
         setIcon(uncheckedCheckBox);
         setSelectedIcon(checkedCheckBox);
@@ -59,7 +57,6 @@ class LibrarySharingEditableRendererEditor extends JCheckBox implements TableCel
         });
                 
         setBackground(backgroundColor);
-//        add(checkBox, "gapleft 5, aligny 50%");
     }
     
     @Override
