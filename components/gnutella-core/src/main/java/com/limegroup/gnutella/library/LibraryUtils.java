@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -11,7 +12,6 @@ import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-
 
 public class LibraryUtils {
     
@@ -76,16 +76,22 @@ public class LibraryUtils {
     }
 
     /**
-     * Checks to see if this file is an program; if it is, and it's also not
-     * a forced share, this returns false.  For all other files types
-     * it return true.
+     * If managing programs is disabled and the specified file is not a forced
+     * share, returns false if the file is a program. Otherwise returns false
+     * if the file's extension is banned. Otherwise returns true.
      */
     public static boolean isFileAllowedToBeManaged(File file) {
+        String ext = FileUtils.getFileExtension(file);
         if(!LibrarySettings.ALLOW_PROGRAMS.getValue() && !LibraryUtils.isForcedShare(file)) {
-            MediaType ext = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
-            return ext != MediaType.getProgramMediaType();
+            MediaType type = MediaType.getMediaTypeForExtension(ext);
+            if(type == MediaType.getProgramMediaType())
+                return false;
         }
-        
+        String dotExt = "." + ext;
+        for(String banned : FilterSettings.BANNED_EXTENSIONS.get()) {
+            if(banned.equals(dotExt))
+                return false;
+        }
         return true;    
     }
     

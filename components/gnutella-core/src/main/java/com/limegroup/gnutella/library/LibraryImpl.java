@@ -518,7 +518,7 @@ class LibraryImpl implements Library, FileCollection {
         }
         
         if (!LibraryUtils.isFileAllowedToBeManaged(file)) {
-            LOG.debugf("Not adding {0} because programs are not allowed to be manageable", file);
+            LOG.debugf("Not adding {0} because files of this type are not allowed to be managed", file);
             dispatchFailure(file, oldFileDesc);
             return new SimpleFuture<FileDesc>(createFailureException(file, oldFileDesc, FileViewChangeFailedException.Reason.PROGRAMS_NOT_MANAGEABLE));
         }
