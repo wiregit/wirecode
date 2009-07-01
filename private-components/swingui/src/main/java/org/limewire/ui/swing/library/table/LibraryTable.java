@@ -58,6 +58,7 @@ public class LibraryTable extends MouseableTable {
     private MousePopupListener mousePopupListener;
     
     private Provider<DefaultLibraryRenderer> defaultCellRenderer;
+    private final Provider<NameCategoryRenderer> nameCategoryRenderer;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
@@ -70,6 +71,7 @@ public class LibraryTable extends MouseableTable {
     
     @Inject
     public LibraryTable(Provider<DefaultLibraryRenderer> defaultCellRenderer,
+            Provider<NameCategoryRenderer> nameCategoryRenderer,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer,
             Provider<QualityRenderer> qualityRenderer,
@@ -81,6 +83,7 @@ public class LibraryTable extends MouseableTable {
             IconLabelRendererFactory iconLabelRendererFactory,
             RemoveEditor removeEditor) {
         this.defaultCellRenderer = defaultCellRenderer;
+        this.nameCategoryRenderer = nameCategoryRenderer;
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
         this.qualityRenderer = qualityRenderer;
@@ -312,7 +315,7 @@ public class LibraryTable extends MouseableTable {
                 throw new IllegalArgumentException("Unknown category:" + category);
             }
         } else {
-            setCellRenderer(AllTableFormat.NAME_INDEX, iconLabelRenderer);
+            setCellRenderer(AllTableFormat.NAME_INDEX, nameCategoryRenderer.get());
             setCellRenderer(AllTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             setCellRenderer(AllTableFormat.ACTION_INDEX, removeRenderer.get());
             setCellEditor(AllTableFormat.ACTION_INDEX, removeEditor);

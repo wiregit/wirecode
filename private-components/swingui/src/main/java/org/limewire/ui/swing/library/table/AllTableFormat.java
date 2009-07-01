@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.settings.TablesHandler;
@@ -57,10 +58,16 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
         case NAME_INDEX: return baseObject;
         case SIZE_INDEX: return baseObject.getSize();
         case TYPE_INDEX:
-            // Use icon manager to return MIME description.
-            return (iconManager != null) ?
-                iconManager.getMIMEDescription(baseObject) : 
-                baseObject.getProperty(FilePropertyKey.DESCRIPTION);
+            if(baseObject.getCategory() == Category.DOCUMENT || baseObject.getCategory() == Category.OTHER) {
+                String mime = iconManager.getMIMEDescription(baseObject);
+                if(mime != null) {
+                    return I18n.tr(baseObject.getCategory().getSingularName()) + " (" + mime + ")";
+                } else {
+                    return I18n.tr(baseObject.getCategory().getSingularName());
+                }
+            } else {
+                return I18n.tr(baseObject.getCategory().getSingularName());
+            }
         case HIT_INDEX: return baseObject.getNumHits();
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
         case UPLOADS_INDEX: return baseObject.getNumUploads();
