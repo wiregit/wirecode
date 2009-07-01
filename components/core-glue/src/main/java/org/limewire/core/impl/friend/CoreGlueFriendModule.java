@@ -1,7 +1,6 @@
 package org.limewire.core.impl.friend;
 
-import org.limewire.core.api.xmpp.FileMetaDataConverter;
-import org.limewire.core.impl.xmpp.FileMetaDataConverterImpl;
+import org.limewire.core.api.friend.FileMetaDataConverter;
 import org.limewire.friend.api.LimeWireFriendModule;
 import org.limewire.friend.impl.LimeWireFriendImplModule;
 
@@ -16,7 +15,6 @@ public class CoreGlueFriendModule extends AbstractModule {
         bind(FriendFirewalledAddressConnector.class).asEagerSingleton();
         bind(FriendRemoteFileDescCreator.class).asEagerSingleton();
         bind(CoreGlueFriendService.class);
-                // TODO fberger move classes into friend module
         bind(FileMetaDataConverter.class).to(FileMetaDataConverterImpl.class);
         bind(FriendShareListRefresher.class);
     }

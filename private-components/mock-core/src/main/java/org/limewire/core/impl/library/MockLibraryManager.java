@@ -17,6 +17,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 
+import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
@@ -200,9 +201,10 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         return -1;
     }
 
+    private final BasicEventList<SharedFileList> model = new BasicEventList<SharedFileList>();
     @Override
     public EventList<SharedFileList> getModel() {
-        return null;
+        return model;
     }
 
     @Override

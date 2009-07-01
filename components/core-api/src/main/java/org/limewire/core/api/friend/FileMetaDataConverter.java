@@ -1,4 +1,4 @@
-package org.limewire.core.api.xmpp;
+package org.limewire.core.api.friend;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.SearchResult;

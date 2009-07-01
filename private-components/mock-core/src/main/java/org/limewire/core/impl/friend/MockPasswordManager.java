@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import org.limewire.friend.api.PasswordManager;
 

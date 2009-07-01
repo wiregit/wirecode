@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,6 +10,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.friend.FileMetaDataConverterImpl;
 import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.FriendPresence;

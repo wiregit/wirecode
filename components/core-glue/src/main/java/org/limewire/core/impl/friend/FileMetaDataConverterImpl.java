@@ -1,13 +1,12 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.friend.FileMetaDataConverter;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.xmpp.FileMetaDataConverter;
-import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.FriendPresence;
@@ -24,7 +23,7 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.util.DataUtils;
 
 @Singleton
-public class FileMetaDataConverterImpl implements FileMetaDataConverter {
+class FileMetaDataConverterImpl implements FileMetaDataConverter {
     private final FriendRemoteFileDescDeserializer remoteFileDescDeserializer;
     private final RemoteFileDescFactory remoteFileDescFactory;
 

@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.util.ArrayList;
 import java.util.Collection;
