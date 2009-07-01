@@ -9,27 +9,32 @@ import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventUtils;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class FriendButtonPopupListener implements PopupMenuListener {
 
+    private final Provider<AutoLoginService> autoLoginServiceProvider;
+    private final Provider<FriendAccountConfigurationManager> accountManagerProvider;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final Provider<LoginAction> loginAction;
     private final Provider<BrowseFriendsAction> browseFriendAction;
-    private final Provider<AutoLoginService> autoLoginServiceProvider;
-    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final Provider<StatusActions> statusActions;
     
     @Inject
-    public FriendButtonPopupListener(EventBean<FriendConnectionEvent> connectionEventBean, Provider<LoginAction> loginAction,
-        Provider<BrowseFriendsAction> browseFriendAction,
+    public FriendButtonPopupListener(EventBean<FriendConnectionEvent> connectionEventBean,
+        Provider<FriendAccountConfigurationManager> accountManager,
         Provider<AutoLoginService> autoLoginServiceProvider,
+        Provider<LoginAction> loginAction,
+        Provider<BrowseFriendsAction> browseFriendAction,
         Provider<StatusActions> statusActions) {
         this.connectionEventBean = connectionEventBean;
+        this.accountManagerProvider = accountManager;
+        this.autoLoginServiceProvider = autoLoginServiceProvider;
         this.loginAction = loginAction;
         this.browseFriendAction = browseFriendAction;
-        this.autoLoginServiceProvider = autoLoginServiceProvider;
         this.statusActions = statusActions;
     }
     
@@ -61,7 +66,7 @@ public class FriendButtonPopupListener implements PopupMenuListener {
             if(shouldAllowLogin)
                 menu.add(loginAction.get());
             else if (canLogout)
-                menu.add(new LogoutAction(friendConnection));
+                menu.add(new LogoutAction(friendConnection, accountManagerProvider.get()));
         }
     }
 }
