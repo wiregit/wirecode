@@ -40,11 +40,14 @@ public class PlayerMediator {
     private final Provider<LibraryPanel> libraryPanelProvider;
     private final List<PlayerMediatorListener> listenerList;
     
+    /** Current list of songs. */
+    private final List<LocalFileItem> playList;
+    
+    /** Randomized list of songs to be played. */
+    private final List<LocalFileItem> shuffleList;
+    
     /** Audio player component. */
     private AudioPlayer audioPlayer;
-    
-    /** Current list of songs. */
-    private List<LocalFileItem> playList;
     
     /** Identifier for current playlist. */
     private PlaylistId playlistId;
@@ -61,9 +64,6 @@ public class PlayerMediator {
     /** Indicator for shuffle mode. */
     private boolean shuffle = false;
     
-    /** Randomized list of songs to be played. */
-    private List<LocalFileItem> shuffleList;
-    
     /**
      * Constructs a PlayerMediator using the specified services.
      */
@@ -72,7 +72,10 @@ public class PlayerMediator {
             Provider<LibraryPanel> libraryPanelProvider) {
         this.audioPlayerProvider = audioPlayerProvider;
         this.libraryPanelProvider = libraryPanelProvider;
+        
         this.listenerList = new ArrayList<PlayerMediatorListener>();
+        this.playList = new ArrayList<LocalFileItem>();
+        this.shuffleList = new ArrayList<LocalFileItem>();
     }
     
     /**
@@ -159,12 +162,13 @@ public class PlayerMediator {
             playlistId = new PlaylistId(navItem);
         } else {
             playlistId = null;
-            if (playList != null) playList.clear();
+            playList.clear();
         }
     }
     
     /**
-     * Returns the current playlist.
+     * Returns the current playlist.  The method may return an empty list, but
+     * never a null list.
      */
     private List<LocalFileItem> getPlaylist() {
         // Compare selected list to playlist.
@@ -174,7 +178,9 @@ public class PlayerMediator {
         if (selectedId.equals(playlistId) && 
                 libraryPanelProvider.get().isPlayable(selectedCategory)) {
             // Selected list is same so return list from library.
-            return libraryPanelProvider.get().getPlayableList();
+            List<LocalFileItem> libraryList = libraryPanelProvider.get().getPlayableList();
+            if (libraryList == null) libraryList = Collections.emptyList();
+            return libraryList;
         } else {
             // Selected list is different so return internal playlist.
             return playList;
@@ -182,15 +188,12 @@ public class PlayerMediator {
     }
     
     /**
-     * Sets the internal playlist using the specified list of file items.
+     * Sets the internal playlist using the specified list of file items.  If
+     * the specified list is empty or null, then the playlist is cleared.
      */
     public void setPlaylist(EventList<LocalFileItem> fileList) {
         // Clear current playlist.
-        if (playList == null) {
-            playList = new ArrayList<LocalFileItem>(); 
-        } else {
-            playList.clear();
-        }
+        playList.clear();
         
         if (fileList == null) return;
         
@@ -217,7 +220,7 @@ public class PlayerMediator {
         if (shuffle) {
             updateShuffleList();
         } else {
-            clearShuffleList();
+            shuffleList.clear();
         }
     }
     
@@ -357,24 +360,15 @@ public class PlayerMediator {
     }
     
     /**
-     * Clears the shuffle list of items to be played.
-     */
-    private void clearShuffleList() {
-        if (shuffleList != null) {
-            shuffleList.clear();
-        }
-    }
-    
-    /**
      * Updates the shuffle list of items to be played.
      */
     private void updateShuffleList() {
-        // Create shuffle list.
-        shuffleList = new ArrayList<LocalFileItem>();
+        // Clear shuffle list.
+        shuffleList.clear();
         
         // Get current playlist.
         List<LocalFileItem> playlist = getPlaylist();
-        if ((playlist == null) || (playlist.size() == 0)) return;
+        if (playlist.size() == 0) return;
         
         // Set shuffle list elements and randomize.
         for (int i = 0; i < playlist.size(); i++) {
@@ -384,20 +378,20 @@ public class PlayerMediator {
         
         // Move currently playing song to the beginning.
         int index = shuffleList.indexOf(fileItem);
-        if (index >= 0) {
+        if (index > 0) {
             shuffleList.remove(index);
             shuffleList.add(0, fileItem);
         }
     }
     
     /**
-     * Returns the next file item in the specified file list.
+     * Returns the next file item in the current playlist.
      */
     private LocalFileItem getNextFileItem() {
         // Get file list.
         List<LocalFileItem> fileList = shuffle ? shuffleList : getPlaylist();
         
-        if ((fileItem != null) && (fileList != null)) {
+        if ((fileItem != null) && (fileList.size() > 0)) {
             int index = fileList.indexOf(fileItem);
             if (index < (fileList.size() - 1)) {
                 return fileList.get(index + 1);
@@ -407,13 +401,13 @@ public class PlayerMediator {
     }
     
     /**
-     * Returns the previous file item in the specified file list.
+     * Returns the previous file item in the current playlist.
      */
     private LocalFileItem getPrevFileItem() {
         // Get file list.
         List<LocalFileItem> fileList = shuffle ? shuffleList : getPlaylist();
         
-        if ((fileItem != null) && (fileList != null)) {
+        if ((fileItem != null) && (fileList.size() > 0)) {
             int index = fileList.indexOf(fileItem);
             if (index > 0) {
                 return fileList.get(index - 1);
