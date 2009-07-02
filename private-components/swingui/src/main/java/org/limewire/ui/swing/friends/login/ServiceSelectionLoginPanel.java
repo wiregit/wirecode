@@ -87,7 +87,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         
         JPanel centerPanel = new JPanel(new MigLayout("gap 0, insets 15 0 0 0, align center"));
         
-        JLabel signOnMessageLabel = new JLabel(I18n.tr("Sign on with any of the services below:"));
+        JLabel signOnMessageLabel = new JLabel(I18n.tr("Share with friends on LimeWire with the following:"));
         signOnMessageLabel.setOpaque(false);
         signOnMessageLabel.setForeground(messageTextForeground);
         signOnMessageLabel.setFont(messageTextFont);

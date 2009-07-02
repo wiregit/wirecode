@@ -42,6 +42,8 @@ public class LoginPopupPanel extends Panel implements Resizable {
     @Resource private Icon closeIconRollover;
     @Resource private Icon closeIconPressed;
     
+    @Resource private Icon windowIcon;
+    
     private final Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider;
     
     private JXPanel frame = null;
@@ -67,6 +69,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         titleBarLabel.setOpaque(false);
         titleBarLabel.setFont(titleBarFont);
         titleBarLabel.setForeground(titleBarForeground);
+        titleBarLabel.setIcon(windowIcon);
           
         JXPanel headerBar = new JXPanel(new MigLayout("insets 0, gap 0, fill"));
         headerBar.setBackground(titleBarBackground);
