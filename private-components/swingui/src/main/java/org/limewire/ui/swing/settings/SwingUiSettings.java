@@ -243,6 +243,10 @@ public final class SwingUiSettings extends LimeProps {
     /** Shows a sign-on overlay message to highlight the Sharing features. */
     public static final BooleanSetting SHOW_SHARING_OVERLAY_MESSAGE =
         FACTORY.createBooleanSetting("SHOW_SHARING_OVERLAY_MESSAGE", true);
+    
+    /** If the Library filters are displayed or not. */
+    public static final BooleanSetting SHOW_LIBRARY_FILTERS =
+        FACTORY.createBooleanSetting("SHOW_LIBRARY_FILTERS", false);
 
     /** Setting for whether or not to resolve host names in Advanced Tools. */
     public static final BooleanSetting RESOLVE_CONNECTION_HOSTNAMES =

@@ -56,6 +56,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.player.PlayerMediatorListener;
 import org.limewire.ui.swing.player.PlayerPanel;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -383,12 +384,14 @@ public class LibraryPanel extends JPanel {
     
     private void createFilterToggleButton() {
         filterToggleButton = new JXButton(I18n.tr("Find"));
+        filterToggleButton.setSelected(SwingUiSettings.SHOW_LIBRARY_FILTERS.getValue());
         filterToggleButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 filterToggleButton.setSelected(!filterToggleButton.isSelected());
                 libraryFilterPanel.getComponent().setVisible(filterToggleButton.isSelected());
                 libraryFilterPanel.clearFilters();
+                SwingUiSettings.SHOW_LIBRARY_FILTERS.setValue(filterToggleButton.isSelected());
             }
         });
         buttonDecorator.decorateDarkFullImageButton(filterToggleButton, AccentType.SHADOW);

@@ -36,6 +36,8 @@ import org.limewire.ui.swing.library.table.OtherTableFormat;
 import org.limewire.ui.swing.library.table.ProgramTableFormat;
 import org.limewire.ui.swing.library.table.VideoTableFormat;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -48,6 +50,7 @@ public class LibraryFilterPanel {
     @Resource Color borderColor;
     @Resource Font buttonFont;
     @Resource Color fontColor;
+    @Resource Color fontSelectedColor;
     
     private final JPanel component;
     private final PromptTextField promptTextField;
@@ -63,6 +66,7 @@ public class LibraryFilterPanel {
             Provider<DocumentTableFormat<LocalFileItem>> documentFormat,
             Provider<ProgramTableFormat<LocalFileItem>> programFormat,
             Provider<OtherTableFormat<LocalFileItem>> otherFormat,
+            SearchTabPainterFactory tabPainterFactory,
             TextFieldDecorator textFieldDecorator) {
         GuiUtils.assignResources(this);
         
@@ -79,11 +83,13 @@ public class LibraryFilterPanel {
         component = new JPanel(new MigLayout("insets 0 5 0 5, gap 0, fill", "", "[28!]"));
         promptTextField = new PromptTextField(I18n.tr("Filter"));
         categoryList = new FancyTabList(searchActionMaps);
+        categoryList.setSelectionPainter(tabPainterFactory.createSelectionPainter());
+        categoryList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
         this.listeners = new CopyOnWriteArrayList<LibraryCategoryListener>();
         
         init(textFieldDecorator);
         
-        component.setVisible(false);
+        component.setVisible(SwingUiSettings.SHOW_LIBRARY_FILTERS.getValue());
     }
     
     private void init(TextFieldDecorator textFieldDecorator) {
@@ -95,6 +101,8 @@ public class LibraryFilterPanel {
         
         categoryList.setTabTextColor(fontColor);
         categoryList.setTextFont(buttonFont);
+        categoryList.setTabTextSelectedColor(fontSelectedColor);
+        categoryList.setUnderlineEnabled(false);
 
         component.add(categoryList, "");
         component.add(promptTextField, "alignx right");
