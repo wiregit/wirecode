@@ -60,6 +60,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
      * @param sharedFileList can not be the public shared list
      */
     public void selectAndRenameSharedList(final SharedFileList sharedFileList) {
+        assert(!sharedFileList.isPublic());
         showLibrary();
         //allow library to show before selecting and editing or the list won't display properly
         SwingUtilities.invokeLater(new Runnable() {
