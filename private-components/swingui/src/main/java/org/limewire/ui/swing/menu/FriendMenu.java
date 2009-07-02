@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.menu;
 
 import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
 
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -22,39 +23,44 @@ import com.google.inject.Inject;
 
 class FriendMenu extends MnemonicMenu {
 
-    private final BrowseFriendsAction browseFriendAction;
+    private final JMenuItem browseFriendMenuItem;
     private final StatusActions statusActions;
     private final JMenuItem loginMenuItem;
     private final JMenuItem logoutMenuItem;
-    private final AddFriendAction addFriendAction;
+    private final JMenuItem addFriendMenuItem;
     private final FriendService friendService;
-
+    private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
+    private final JSeparator addFriendSeperator;
+    private final JSeparator statusSeperator;
+    
     @Inject
     public FriendMenu(EventBean<FriendConnectionEvent> friendConnectionEventBean,
             BrowseFriendsAction browseFriendAction, StatusActions statusActions,
             AddFriendAction addFriendAction, LoginAction loginAction, LogoutAction logoutAction,
             FriendService friendService) {
         super(I18n.tr("&Friends"));
-        this.browseFriendAction = browseFriendAction;
+        this.friendConnectionEventBean = friendConnectionEventBean;
+        this.browseFriendMenuItem = new JMenuItem(browseFriendAction);
         this.statusActions = statusActions;
         this.loginMenuItem = new JMenuItem(loginAction);
         this.logoutMenuItem = new JMenuItem(logoutAction);
-        this.addFriendAction = addFriendAction;
+        this.addFriendMenuItem = new JMenuItem(addFriendAction);
         this.friendService = friendService;
+        this.addFriendSeperator = new JSeparator();
+        this.statusSeperator = new JSeparator();
 
         add(friendService);
-        add(browseFriendAction);
-        addSeparator();
-        add(addFriendAction);
-        addSeparator();
+        add(browseFriendMenuItem);
+        add(addFriendSeperator);
+        add(addFriendMenuItem);
+        add(statusSeperator);
         add(statusActions.getAvailableMenuItem());
         add(statusActions.getDnDMenuItem());
         addSeparator();
         add(loginMenuItem);
         add(logoutMenuItem);
 
-        FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
-        updateSignedInStatus(friendConnection != null && friendConnection.isLoggedIn());
+        updateSignedInStatus();
     }
 
     @Inject
@@ -68,23 +74,27 @@ class FriendMenu extends MnemonicMenu {
                 case CONNECTING:
                 case CONNECT_FAILED:
                 case DISCONNECTED:
-                    FriendConnection connection = event.getSource();
-                    if (connection != null && connection.isLoggedIn()) {
-                        updateSignedInStatus(true);
-                    } else {
-                        updateSignedInStatus(false);
-                    }
+                    updateSignedInStatus();
                     break;
                 }
             }
         });
     }
 
-    private void updateSignedInStatus(boolean signedIn) {
+    private void updateSignedInStatus() {
+        FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
+        boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
+        boolean supportsAddRemoveFriend = signedIn && friendConnection != null && friendConnection.supportsAddRemoveFriend();
+        boolean supportModeChanges = signedIn && friendConnection != null && friendConnection.supportsMode();
+        
         // TODO probably disable login action while logging in.
-        browseFriendAction.setEnabled(signedIn);
-        addFriendAction.setEnabled(signedIn);
+        browseFriendMenuItem.setVisible(signedIn);
+        addFriendMenuItem.setVisible(supportsAddRemoveFriend);
+        addFriendSeperator.setVisible(supportsAddRemoveFriend);
         statusActions.updateSignedInStatus();
+        statusActions.getAvailableMenuItem().setVisible(supportModeChanges);
+        statusActions.getDnDMenuItem().setVisible(supportModeChanges);
+        statusSeperator.setVisible(supportModeChanges);
         loginMenuItem.setVisible(!signedIn);
         logoutMenuItem.setVisible(signedIn);
         friendService.updateSignedInStatus();

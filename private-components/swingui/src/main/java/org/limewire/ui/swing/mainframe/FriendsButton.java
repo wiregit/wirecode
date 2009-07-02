@@ -14,17 +14,22 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.BusyPainter;
+import org.limewire.core.settings.FriendSettings;
+import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.actions.BrowseOrLoginAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 
@@ -33,9 +38,9 @@ public class FriendsButton extends LimeComboBox {
     @Resource private Icon friendOnlineIcon;
     @Resource private Icon friendOfflineIcon;
     @Resource private Icon friendLoadingIcon;
-    @Resource private Icon friendOnlineSelectedIcon;
-    @Resource private Icon friendOfflineSelectedIcon;
-    @Resource private Icon friendLoadingSelectedIcon;
+    @Resource private Icon friendDnDIcon;
+    //TODO support new files icon
+    @Resource private Icon friendNewFilesIcon;
     
     private final BusyPainter busyPainter;
     
@@ -84,7 +89,9 @@ public class FriendsButton extends LimeComboBox {
         addActionListener(browseOrLoginAction);
     }
     
-    private void setIconFromType(FriendConnectionEvent.Type eventType) {
+    private void setIconFromEvent(FriendConnectionEvent event) {
+        
+        FriendConnectionEvent.Type eventType = event == null ? null : event.getType();
         if(eventType == null) {
             eventType = FriendConnectionEvent.Type.DISCONNECTED;
         }
@@ -93,31 +100,49 @@ public class FriendsButton extends LimeComboBox {
         case CONNECT_FAILED:
         case DISCONNECTED:
             setIcon(friendOfflineIcon);
-            setPressedIcon(friendOfflineSelectedIcon);
             stopAnimation();
             break;
         case CONNECTED:
-            setIcon(friendOnlineIcon);
-            setPressedIcon(friendOnlineSelectedIcon);
+            if(FriendSettings.DO_NOT_DISTURB.getValue() && event != null && event.getSource().supportsMode()) {
+                setIcon(friendDnDIcon);
+            } else {
+                setIcon(friendOnlineIcon);
+            }
             stopAnimation();
             break;
         case CONNECTING:
             setIcon(friendLoadingIcon);
-            setPressedIcon(friendLoadingSelectedIcon);
             startAnimation();
         }
     }
 
     
     @Inject
-    void register(EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport) {
-        setIconFromType(EventUtils.getType(connectBean));        
+    void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        setIconFromEvent(connectBean.getLastEvent());        
         connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
-                setIconFromType(event.getType());
+                setIconFromEvent(event);
             }
+        });
+        
+        FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
+           @Override
+            public void settingChanged(SettingEvent evt) {
+               SwingUtils.invokeLater(new Runnable() {
+                  @Override
+                  public void run() {
+                      FriendConnection friendConnection = EventUtils.getSource(connectBean);
+                      if(FriendSettings.DO_NOT_DISTURB.getValue() && friendConnection != null &&  friendConnection.supportsMode()) {
+                          setIcon(friendDnDIcon);
+                      } else {
+                          setIcon(friendOnlineIcon);
+                      }
+                  } 
+               });
+            } 
         });
     }
     
