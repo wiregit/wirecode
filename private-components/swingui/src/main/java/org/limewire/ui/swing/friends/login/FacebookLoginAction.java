@@ -1,17 +1,22 @@
 package org.limewire.ui.swing.friends.login;
 
 import java.awt.event.ActionEvent;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.StringTokenizer;
-import java.io.UnsupportedEncodingException;
 
 import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendConnectionFactory;
+import org.limewire.friend.api.Network;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.LimeDomListener;
@@ -22,12 +27,15 @@ import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
+import org.mozilla.interfaces.nsICookie;
+import org.mozilla.interfaces.nsICookieManager;
 import org.mozilla.interfaces.nsICookieService;
 import org.mozilla.interfaces.nsIDOMEvent;
 import org.mozilla.interfaces.nsIDOMEventListener;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMWindow2;
 import org.mozilla.interfaces.nsIIOService;
+import org.mozilla.interfaces.nsISimpleEnumerator;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIURI;
 
@@ -36,6 +44,8 @@ import com.google.inject.assistedinject.Assisted;
 
 public class FacebookLoginAction extends AbstractAction {
 
+    private static final Log LOG = LogFactory.getLog(FacebookLoginAction.class);
+    
     private final FriendAccountConfiguration config;
     private final FriendConnectionFactory friendConnectionFactory;
     private final LoginPopupPanel loginPanel;
@@ -50,6 +60,27 @@ public class FacebookLoginAction extends AbstractAction {
         this.friendConnectionFactory = friendConnectionFactory;
         this.loginPanel = loginPanel;
         this.application = application;
+    }
+    
+    @Inject 
+    public void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
+        listenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
+            @Override
+            public void handleEvent(FriendConnectionEvent event) {
+                if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED &&
+                        event.getSource().getConfiguration().getType() == Network.Type.FACEBOOK) {
+                    nsICookieManager cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookiemanager;1",
+                            nsICookieManager.class);
+                    nsISimpleEnumerator enumerator = cookieService.getEnumerator();
+                    while(enumerator.hasMoreElements()) {                        
+                        nsICookie cookie = XPCOMUtils.proxy(enumerator.getNext(), nsICookie.class);
+                        if(cookie.getHost().equals(".facebook.com")) {
+                            cookieService.remove(cookie.getHost(), cookie.getName(), cookie.getPath(), false);    
+                        }
+                    }
+                }
+            }
+        });
     }
     
     @Override
@@ -156,7 +187,7 @@ public class FacebookLoginAction extends AbstractAction {
                         }
                     }
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    LOG.debugf(e, "failed to decode {0}", cookieString);
                 }
             }
         
