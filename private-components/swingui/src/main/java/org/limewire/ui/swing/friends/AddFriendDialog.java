@@ -27,7 +27,6 @@ public class AddFriendDialog extends LimeJDialog {
 
     public AddFriendDialog(final FriendConnection connection) {
         super(GuiUtils.getMainFrame(), tr("Add Friend"));
-        setLocationRelativeTo(GuiUtils.getMainFrame());
         // The dialog can only be popped up when the user is signed in, so
         // connection should never be null
         Objects.nonNull(connection, "connection");
@@ -110,5 +109,6 @@ public class AddFriendDialog extends LimeJDialog {
 
         pack();
         setVisible(true);
+        setLocationRelativeTo(GuiUtils.getMainFrame());
     }
 }
