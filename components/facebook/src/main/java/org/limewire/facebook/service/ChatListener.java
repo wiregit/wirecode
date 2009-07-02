@@ -154,7 +154,8 @@ public class ChatListener implements Runnable {
         String parsedSenderId = payload.getString("from");
 
         // look up the MessageReader based on the sender (friend) id
-        if (parsedSenderId != null) {
+        if (parsedSenderId != null && !parsedSenderId.equals(uid)) {
+            connection.addPresence(parsedSenderId);
             MessageReader handler = chatManager.getMessageReader(parsedSenderId);
 
             if (handler != null) {
@@ -173,7 +174,13 @@ public class ChatListener implements Runnable {
                 LOG.debugf("no handler for sender: {0}", parsedSenderId);
             }
         } else {
-            LOG.debugf("no 'from' in message payload: {0}", payload);
+            if(parsedSenderId == null) {
+                LOG.debugf("no 'from' in message payload: {0}", payload);
+            } else if(parsedSenderId.equals(uid)){
+                LOG.debugf("ignoring chat message sent from logged in user: {0}", payload);
+            } else {
+                LOG.debugf("dropped chat message: {0}", payload);
+            }
         }
     }
 
