@@ -160,6 +160,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         shuffleButton = new IconButton(shuffleIcon, shuffleIconRollover, shuffleIconPressed, shuffleIconActive);
         shuffleButton.addActionListener(playerListener);
         shuffleButton.setActionCommand(SHUFFLE);
+        shuffleButton.setRolloverSelectedIcon(shuffleIconActive);
         
         progressSlider = new LimeSliderBar();
         sliderBarDecorator.decoratePlain(progressSlider);
@@ -399,6 +400,8 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
                 getPlayerMediator().setShuffle(!getPlayerMediator().isShuffle());
                 // Update button state.
                 shuffleButton.setSelected(getPlayerMediator().isShuffle());
+                shuffleButton.setPressedIcon(getPlayerMediator().isShuffle() ?
+                        shuffleIconActive : shuffleIconPressed);
             }
         }
     }
