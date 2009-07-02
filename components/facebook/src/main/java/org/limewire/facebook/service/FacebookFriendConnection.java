@@ -901,6 +901,7 @@ public class FacebookFriendConnection implements FriendConnection {
                     facebookFriend.removePresence(facebookFriendPresence);
                     friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(facebookFriendPresence, FriendPresenceEvent.Type.REMOVED));
                     if(!facebookFriend.isSignedIn()) {
+                        removeIncomingChatListener(presence.getFriend().getId());
                         friendManager.removeAvailableFriend(facebookFriend);
                     }
                 } else {

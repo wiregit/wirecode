@@ -133,7 +133,6 @@ public class FacebookFriend extends AbstractFriend {
         for(Feature feature : features) {
             featureRegistry.get(feature.getID()).removeFeature(presence);
         }
-        connection.removeIncomingChatListener(presence.getFriend().getId());
         presenceMap.remove(presence.getPresenceId());
         
     }
