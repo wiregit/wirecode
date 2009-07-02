@@ -19,7 +19,7 @@ import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 
 import com.google.inject.Inject;
 
-public class RemoveEditor extends JPanel implements TableCellEditor {
+class RemoveEditor extends JPanel implements TableCellEditor {
 
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 

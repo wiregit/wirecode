@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.table;
+package org.limewire.ui.swing.library;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import ca.odell.glazedlists.TextFilterator;
 /**
  * Sets up a filter to work with the TextField filter in the Library
  */
-public class LocalFileItemFilterator implements TextFilterator<LocalFileItem> {
+class LocalFileItemFilterator implements TextFilterator<LocalFileItem> {
 
     public LocalFileItemFilterator(Category category) {
         

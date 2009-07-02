@@ -18,7 +18,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class RemoveFromAllListAction extends AbstractAction {
+class RemoveFromAllListAction extends AbstractAction {
     private final Provider<List<File>> selectedFiles;
     private final SharedFileListManager manager;
     

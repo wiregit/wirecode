@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-public class IsPlayingRenderer extends DefaultTableCellRenderer {
+class IsPlayingRenderer extends DefaultTableCellRenderer {
 
     @Resource Icon playingIcon;
     

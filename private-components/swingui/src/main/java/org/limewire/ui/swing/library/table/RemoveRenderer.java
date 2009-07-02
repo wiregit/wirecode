@@ -11,7 +11,7 @@ import org.limewire.inject.LazySingleton;
 import com.google.inject.Inject;
 
 @LazySingleton
-public class RemoveRenderer extends JPanel implements TableCellRenderer {
+class RemoveRenderer extends JPanel implements TableCellRenderer {
     
     @Inject
     public RemoveRenderer(RemoveButton removeButton){       

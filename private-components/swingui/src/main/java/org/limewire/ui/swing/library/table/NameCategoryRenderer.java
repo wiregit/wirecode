@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-public class NameCategoryRenderer extends DefaultLibraryRenderer implements TableCellRenderer {
+class NameCategoryRenderer extends DefaultLibraryRenderer implements TableCellRenderer {
 
     private final Provider<IconManager> iconManager;
     private final CategoryIconManager categoryIconManager;

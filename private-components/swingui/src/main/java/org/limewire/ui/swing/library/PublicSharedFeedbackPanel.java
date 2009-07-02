@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.sharing;
+package org.limewire.ui.swing.library;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 /**
  * Gives feedback about the Public Shared panel
  */
-public class PublicSharedFeedbackPanel {
+class PublicSharedFeedbackPanel {
 
     @Resource Icon publicSharedIcon;
     @Resource Color backgroundColor;
