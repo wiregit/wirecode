@@ -104,8 +104,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
 
     private void loadWellKnownServers() {
         FriendAccountConfiguration facebook =
-            new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIcon, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK);
-        facebook.setUsername("Facebook");
+            new FriendAccountConfigurationImpl(false, "facebook.com", "Facebook", facebookIcon, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK);
         configs.put(facebook.getLabel(), facebook);
         FriendAccountConfiguration gmail =
             new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, gmailIconLarge, resource, getGTalkServers(), Network.Type.XMPP);

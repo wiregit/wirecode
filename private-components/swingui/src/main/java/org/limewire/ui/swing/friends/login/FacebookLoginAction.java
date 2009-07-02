@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.friends.login;
 
 import java.awt.event.ActionEvent;
+import java.net.URLDecoder;
+import java.util.StringTokenizer;
+import java.io.UnsupportedEncodingException;
 
 import javax.swing.SwingUtilities;
 
@@ -16,8 +19,8 @@ import org.limewire.ui.swing.browser.UriAction;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.mozilla.browser.MozillaAutomation;
-import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
+import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
 import org.mozilla.interfaces.nsICookieService;
 import org.mozilla.interfaces.nsIDOMEvent;
@@ -83,6 +86,7 @@ public class FacebookLoginAction extends AbstractAction {
                             cookie = cookieService.getCookieStringFromHttp(uri, null, null);
                             config.setAttribute("url", "http://facebook.com/");
                             config.setAttribute("cookie", cookie);
+                            setUsername(config, cookie);
                             friendConnectionFactory.login(config);
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
@@ -132,5 +136,40 @@ public class FacebookLoginAction extends AbstractAction {
                 }
             }
         });
+    }
+
+    private void setUsername(FriendAccountConfiguration config, String facebookCookies) {
+        if(facebookCookies != null) {
+            StringTokenizer allCookies = new StringTokenizer(facebookCookies, ";");
+            while(allCookies.hasMoreElements()) {
+                String cookieString = allCookies.nextToken().trim();
+                try {
+                    cookieString = URLDecoder.decode(cookieString, "UTF-8");
+                    StringTokenizer cookie = new StringTokenizer(cookieString, "=");
+                    if(cookie.hasMoreElements()) {
+                        String cookieName = cookie.nextToken();
+                        if(cookieName.equals("login_x")) {
+                            if(cookie.hasMoreElements()) {
+                                config.setUsername(extractEmail(cookie.nextToken()));
+                                return;
+                            }
+                        }
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+        
+    }
+}
+
+    private String extractEmail(String s) {
+        int emailNameIndex = s.indexOf("\"email\"");
+        s = s.substring(emailNameIndex + "\"email\"".length());
+        int emailStart = s.indexOf('"');
+        String email = s.substring(emailStart + 1);
+        int emailEndIndex = email.indexOf('"');
+        email = email.substring(0, emailEndIndex);
+        return email;
     }
 }
