@@ -441,4 +441,12 @@ public class LibraryPanel extends JPanel {
     public void clearFilters() {
         libraryTableComboBox.clearFilters();
     }
+
+    /**
+     * Selects the specified SharedFileList in the library nav and starts editing on its name.
+     * @param sharedFileList can not be the public shared list
+     */
+    public void editSharedListName(SharedFileList sharedFileList) {
+        libraryNavigatorPanel.editSharedListName(sharedFileList);     
+    }
 }

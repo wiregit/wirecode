@@ -32,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -66,8 +65,8 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.ShareListIcons;
-import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -106,7 +105,7 @@ public class ChatFriendListPane extends JPanel {
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final Provider<RemoteHostActions> remoteHostActions;
     private final Provider<SharedFileListManager> sharedFileListManager;
-    private final Provider<LibraryNavigatorTable> navTable;
+    private final Provider<LibraryMediator> library;
 
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
@@ -128,13 +127,13 @@ public class ChatFriendListPane extends JPanel {
     public ChatFriendListPane(ChatModel chatModel, 
             Provider<RemoteHostActions> remoteHostActions, 
             Provider<SharedFileListManager> sharedFileListManager,
-            Provider<LibraryNavigatorTable> navTable) {
+            Provider<LibraryMediator> library) {
         super(new BorderLayout());
         this.chatModel = chatModel;
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.remoteHostActions = remoteHostActions;
         this.sharedFileListManager = sharedFileListManager;
-        this.navTable = navTable;
+        this.library = library;
         
         this.chatFriends = chatModel.getChatFriendList();
         
@@ -807,15 +806,9 @@ public class ChatFriendListPane extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             final int id = sharedFileListManager.get().createNewSharedFileList(I18n.tr("Untitled"));
-            sharedFileListManager.get().getModel().get(id).addFriend(friendID);
-            navTable.get().selectLibraryNavItem(id);
-            SwingUtilities.invokeLater(new Runnable(){
-                public void run() {
-                    navTable.get().setEditable(true);
-                    navTable.get().editCellAt(navTable.get().getSelectedRow(), 0);                
-                }
-            });
-        
+            SharedFileList list = sharedFileListManager.get().getModel().get(id);
+            list.addFriend(friendID);
+            library.get().selectAndRenameSharedList(list);
         }
     } 
     

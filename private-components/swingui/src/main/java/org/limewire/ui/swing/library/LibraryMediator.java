@@ -2,6 +2,8 @@ package org.limewire.ui.swing.library;
 
 import java.io.File;
 
+import javax.swing.SwingUtilities;
+
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.SharedFileList;
@@ -42,11 +44,30 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
     }
 
     public void selectInLibrary(File file) {
-        NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, NAME);
-        item.select();
+        showLibrary();
         getComponent().selectLocalFileList(libraryManager.get().getLibraryManagedList());
         getComponent().selectAndScrollTo(file);
         
+    }
+    
+    private void showLibrary(){
+        NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, NAME);
+        item.select();
+    }
+    
+    /**
+     * Selects the specified SharedFileList in the library nav and starts editing on its name.
+     * @param sharedFileList can not be the public shared list
+     */
+    public void selectAndRenameSharedList(final SharedFileList sharedFileList) {
+        showLibrary();
+        //allow library to show before selecting and editing or the list won't display properly
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                getComponent().editSharedListName(sharedFileList);
+            }
+        });
     }
 
     public void selectInLibrary(URN urn) {

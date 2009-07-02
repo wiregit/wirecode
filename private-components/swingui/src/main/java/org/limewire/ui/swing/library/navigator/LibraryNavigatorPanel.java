@@ -6,6 +6,7 @@ import java.awt.Font;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
@@ -133,5 +134,20 @@ public class LibraryNavigatorPanel extends JXPanel {
     
     public LibraryNavItem getSelectedNavItem() {
         return table.getSelectedItem();
+    }
+
+    /**
+     * Selects the specified SharedFileList in the library nav and starts editing on its name.
+     * @param sharedFileList can not be the public shared list
+     */
+    public void editSharedListName(SharedFileList sharedFileList) {
+        assert(!sharedFileList.isPublic());
+        selectLocalFileList(sharedFileList);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                table.setEditable(true);
+                table.editCellAt(getSelectedRow(), 0);
+            }
+        });
     }
 }
