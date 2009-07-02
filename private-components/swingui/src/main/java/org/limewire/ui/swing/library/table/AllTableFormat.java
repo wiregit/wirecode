@@ -9,6 +9,7 @@ import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
@@ -19,15 +20,16 @@ import com.google.inject.Inject;
 
 public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFormat<T> {
 
-    static final int NAME_INDEX = 0;
-    static final int TYPE_INDEX = 1;
-    static final int CREATED_INDEX = 2;
-    static final int SIZE_INDEX = 3;
-    static final int HIT_INDEX = 4;
-    static final int UPLOADS_INDEX = 5;
-    static final int UPLOAD_ATTEMPTS_INDEX = 6;
-    static final int PATH_INDEX = 7;
-    static final int ACTION_INDEX = 8;
+    static final int PLAY_INDEX = 0;
+    static final int NAME_INDEX = 1;
+    static final int TYPE_INDEX = 2;
+    static final int CREATED_INDEX = 3;
+    static final int SIZE_INDEX = 4;
+    static final int HIT_INDEX = 5;
+    static final int UPLOADS_INDEX = 6;
+    static final int UPLOAD_ATTEMPTS_INDEX = 7;
+    static final int PATH_INDEX = 8;
+    static final int ACTION_INDEX = 9;
     
     /** Icon manager used to find native file type information. */
     private IconManager iconManager;
@@ -35,6 +37,7 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     @Inject
     public AllTableFormat(IconManager iconManager) {
         super(ACTION_INDEX, "LIBRARY_ALL_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
+                new ColumnStateInfo(PLAY_INDEX, "LIBRARY_ALL_PLAY", "", 16, 16, true, false), 
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", "Name", 480, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 230, true, true),     
                 new ColumnStateInfo(CREATED_INDEX, "LIBRARY_ALL_CREATED", I18n.tr("Date Created"), 100, false, true), 
@@ -52,6 +55,7 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     @Override
     public Object getColumnValue(T baseObject, int column) {
         switch(column) {
+        case PLAY_INDEX: return baseObject;
         case CREATED_INDEX:
             long creationTime = baseObject.getCreationTime();
             return (creationTime >= 0) ? new Date(creationTime) : null;
@@ -75,6 +79,15 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
         case ACTION_INDEX: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
+    }
+    
+    @Override
+    public Class getColumnClass(int column) {
+        switch(column) {
+        case PLAY_INDEX:
+            return FileItem.class;
+        }
+        return super.getColumnClass(column);
     }
 
     @Override

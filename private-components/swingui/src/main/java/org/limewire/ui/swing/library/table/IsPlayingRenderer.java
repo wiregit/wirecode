@@ -2,8 +2,11 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.Component;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JTable;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
@@ -15,19 +18,19 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-public class IsPlayingRenderer extends DefaultLibraryRenderer {
+public class IsPlayingRenderer extends DefaultTableCellRenderer {
 
     @Resource Icon playingIcon;
     
     private final Provider<PlayerMediator> playerMediator;
+    private final Border emptyBorder;
     
     @Inject
     public IsPlayingRenderer(Provider<PlayerMediator> playerMediator) {
         GuiUtils.assignResources(this);
         
         this.playerMediator = playerMediator;
-        
-
+        emptyBorder = BorderFactory.createEmptyBorder(0,3,0,3);
     }
     
     @Override
@@ -36,6 +39,7 @@ public class IsPlayingRenderer extends DefaultLibraryRenderer {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     
         setText("");
+        setBorder(emptyBorder);
         
         if(value instanceof LocalFileItem) {
             if(playerMediator.get().isPlaying(((LocalFileItem)value).getFile()))

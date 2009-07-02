@@ -315,6 +315,7 @@ public class LibraryTable extends MouseableTable {
                 throw new IllegalArgumentException("Unknown category:" + category);
             }
         } else {
+            setCellRenderer(AllTableFormat.PLAY_INDEX, isPlayingRenderer.get());
             setCellRenderer(AllTableFormat.NAME_INDEX, nameCategoryRenderer.get());
             setCellRenderer(AllTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             setCellRenderer(AllTableFormat.ACTION_INDEX, removeRenderer.get());
