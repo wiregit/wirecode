@@ -88,7 +88,7 @@ class FriendMenu extends MnemonicMenu {
         boolean supportModeChanges = signedIn && friendConnection != null && friendConnection.supportsMode();
         
         // TODO probably disable login action while logging in.
-        browseFriendMenuItem.setVisible(signedIn);
+        browseFriendMenuItem.setEnabled(signedIn);
         addFriendMenuItem.setVisible(supportsAddRemoveFriend);
         addFriendSeperator.setVisible(supportsAddRemoveFriend);
         statusActions.updateSignedInStatus();
