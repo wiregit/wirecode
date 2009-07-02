@@ -24,18 +24,17 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inject.LazySingleton;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 
-import com.google.inject.Singleton;
-
 /**
  *  An audio player to play compressed and uncompressed music.
  */
-@Singleton
+@LazySingleton
 public class LimeWirePlayer implements Runnable, AudioPlayer {
    
     /**
