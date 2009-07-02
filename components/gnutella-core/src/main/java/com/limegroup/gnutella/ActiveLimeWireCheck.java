@@ -142,15 +142,16 @@ public class ActiveLimeWireCheck {
         }
         String type = ExternalControl.isTorrentRequest(arg) ? "TORRENT" : "MAGNET";
         try {
-            LOG.trace("Opening socket");
+            if(LOG.isTraceEnabled())
+                LOG.trace("Connecting to port " + port);
             socket = new Socket();
             // Give LW a while to respond -- it might be busy.
             // In the case where no one is even listening on the port,
             // this will fail with a ConnectException really fast.
-            socket.connect(new InetSocketAddress("127.0.0.1", port), 10000);
+            socket.connect(new InetSocketAddress("127.0.0.1", port), 30000);
             LOG.trace("Connected");
             InputStream istream = socket.getInputStream(); 
-            socket.setSoTimeout(10000); 
+            socket.setSoTimeout(30000); 
             ByteReader byteReader = new ByteReader(istream);
             OutputStream os = socket.getOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(os);

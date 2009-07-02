@@ -119,6 +119,8 @@ public class ExternalControl {
                             + socket.getInetAddress().getHostAddress());
                 return;
             }
+            if(LOG.isInfoEnabled())
+                LOG.info("Request on port " + socket.getLocalPort());
 
             // First read extra parameter
             socket.setSoTimeout(Constants.TIMEOUT);
