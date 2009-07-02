@@ -37,6 +37,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
+import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
@@ -55,6 +56,7 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LocalFileItemFilterator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerMediator;
+import org.limewire.ui.swing.player.PlayerMediatorListener;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -177,7 +179,7 @@ public class LibraryPanel extends JPanel {
     }
     
     @Inject
-    void register(LibraryManager libraryManager) {        
+    void register(LibraryManager libraryManager, PlayerMediator playerMediator) {        
         //Loads the Library after Component has been realized.
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         SwingUtilities.invokeLater(new Runnable(){
@@ -225,6 +227,32 @@ public class LibraryPanel extends JPanel {
                 eventList = navItem.getLocalFileList().getSwingModel();
                 selectSharing(navItem);
                 selectTable(libraryTableComboBox.getSelectedTableFormat(), libraryTableComboBox.getSelectedCategory());
+            }
+        });
+        
+        playerMediator.addMediatorListener(new PlayerMediatorListener(){
+
+            @Override
+            public void progressUpdated(float progress) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void songChanged(String name) {
+                if(libraryTable.isVisible() && (libraryTableComboBox.getSelectedCategory() == Category.AUDIO || 
+                        libraryTableComboBox.getSelectedCategory() == null)) {
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            libraryTable.repaint();     
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void stateChanged(PlayerState state) {
+                
             }
         });
     }
