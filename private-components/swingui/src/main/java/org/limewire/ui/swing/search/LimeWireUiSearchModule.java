@@ -60,12 +60,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
         
         bind(ListViewTableEditorRendererFactory.class).toProvider(
                 FactoryProvider.newFactory(
-                        ListViewTableEditorRendererFactory.class, ListViewTableEditorRenderer.class));
-        
-        bind(SearchTabItemsFactory.class).toProvider(
-                FactoryProvider.newFactory(
-                        SearchTabItemsFactory.class, SearchTabItems.class));
-        
+                        ListViewTableEditorRendererFactory.class, ListViewTableEditorRenderer.class));       
         
         bind(RemoteHostActions.class).toProvider(LazyBinder.newLazyProvider(
                 RemoteHostActions.class, RemoteHostActionsImpl.class));

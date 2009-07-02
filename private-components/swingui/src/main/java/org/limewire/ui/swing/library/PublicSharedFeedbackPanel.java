@@ -45,7 +45,7 @@ class PublicSharedFeedbackPanel {
     
     private void init() {
         component.setBackground(backgroundColor);
-        component.setBorder(BorderFactory.createMatteBorder(0,0,1,0, borderColor));
+        component.setBorder(BorderFactory.createMatteBorder(1,0,0,0, borderColor));
         JLabel label = new JLabel(I18n.tr("Files in this list are shared anonymously with the world."), publicSharedIcon, SwingConstants.LEFT);
         label.setForeground(foregroundColor);
         label.setFont(labelFont);
