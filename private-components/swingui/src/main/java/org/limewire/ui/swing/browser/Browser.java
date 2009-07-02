@@ -138,6 +138,10 @@ public class Browser extends MozillaPanel {
         });
     }
     
+    public void showLoadingPanel() {
+        loadingPane.setCollapsed(false);
+    }
+    
     public void pageLoadStarted() {
         lastRequestFailed = false;
         if(loadStatus == VisibilityMode.DEFAULT) {
