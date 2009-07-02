@@ -8,7 +8,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-class BrowseFriendsAction extends AbstractAction {
+public class BrowseFriendsAction extends AbstractAction {
 
 
     private RemoteHostActions remoteHostActions;

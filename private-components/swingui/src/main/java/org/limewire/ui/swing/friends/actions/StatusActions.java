@@ -14,12 +14,9 @@ import org.limewire.core.settings.FriendSettings;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventUtils;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -33,8 +30,8 @@ import com.google.inject.Inject;
  * Provides JMenuItems to be used for setting available or disabled status for
  * the users. These items are backed by a button group and JCheckBoxMenuItems
  */
-@LazySingleton
-class StatusActions {
+public class StatusActions {
+
     @Resource
     private Icon available;
 
@@ -50,10 +47,11 @@ class StatusActions {
     private final JCheckBoxMenuItem doNotDisturbItem;
 
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
+
     private final ButtonGroup statusButtonGroup = new ButtonGroup();
 
     @Inject
-    public StatusActions(EventBean<FriendConnectionEvent> friendConnectionEventBean) {
+    public StatusActions(final EventBean<FriendConnectionEvent> friendConnectionEventBean) {
 
         this.friendConnectionEventBean = friendConnectionEventBean;
         GuiUtils.assignResources(this);
@@ -66,18 +64,19 @@ class StatusActions {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                FriendConnection friendConnection = EventUtils.getSource(StatusActions.this.friendConnectionEventBean);
+                FriendConnection friendConnection = EventUtils
+                        .getSource(StatusActions.this.friendConnectionEventBean);
                 if (friendConnection != null && friendConnection.supportsMode()) {
                     friendConnection.setMode(FriendPresence.Mode.available).addFutureListener(
-                        new EventListener<FutureEvent<Void>>() {
-                            @Override
-                            public void handleEvent(FutureEvent<Void> event) {
-                                if (event.getType() == FutureEvent.Type.SUCCESS) {
+                            new EventListener<FutureEvent<Void>>() {
+                                @Override
+                                public void handleEvent(FutureEvent<Void> event) {
+                                    if (event.getType() == FutureEvent.Type.SUCCESS) {
                                         FriendSettings.DO_NOT_DISTURB.setValue(false);
+                                    }
                                 }
-                            }
-                        });
-            }
+                            });
+                }
             }
         };
 
@@ -89,26 +88,26 @@ class StatusActions {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                FriendConnection friendConnection = EventUtils.getSource(StatusActions.this.friendConnectionEventBean);
+                FriendConnection friendConnection = EventUtils
+                        .getSource(StatusActions.this.friendConnectionEventBean);
                 if (friendConnection != null && friendConnection.supportsMode()) {
                     friendConnection.setMode(FriendPresence.Mode.dnd).addFutureListener(
-                        new EventListener<FutureEvent<Void>>() {
-                            @Override
-                            public void handleEvent(FutureEvent<Void> event) {
-                                if (event.getType() == FutureEvent.Type.SUCCESS) {
+                            new EventListener<FutureEvent<Void>>() {
+                                @Override
+                                public void handleEvent(FutureEvent<Void> event) {
+                                    if (event.getType() == FutureEvent.Type.SUCCESS) {
                                         FriendSettings.DO_NOT_DISTURB.setValue(true);
+                                    }
                                 }
-                            }
-                        });
-            }
+                            });
+                }
             }
         };
 
         this.availableItem = new JCheckBoxMenuItem(availableAction);
         this.doNotDisturbItem = new JCheckBoxMenuItem(doNotDisturbAction);
 
-        
-        updateSelections();
+        updateSignedInStatus();
 
         FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
             @Override
@@ -116,16 +115,22 @@ class StatusActions {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        updateSelections();
+                        updateSignedInStatus();
                     }
                 });
             }
         });
     }
 
-    private void updateSelections() {
-        FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
-        if (friendConnection != null && friendConnection.isLoggedIn()) {
+    public void updateSignedInStatus() {
+        FriendConnection friendConnection = EventUtils
+                .getSource(StatusActions.this.friendConnectionEventBean);
+        
+        boolean signedIn = friendConnection != null && friendConnection.isLoggedIn()
+                && friendConnection.supportsMode();
+
+        if (signedIn) {
+
             statusButtonGroup.remove(availableItem);
             statusButtonGroup.remove(doNotDisturbItem);
             statusButtonGroup.add(availableItem);
@@ -134,40 +139,17 @@ class StatusActions {
             availableItem.setSelected(!dndBool);
             doNotDisturbItem.setSelected(dndBool);
         } else {
-            //removing from button group so that no items are selected while they are disabled.
+            // removing from button group so that no items are selected while
+            // they are disabled.
             statusButtonGroup.remove(availableItem);
             statusButtonGroup.remove(doNotDisturbItem);
             // do not show selections when logged out
             availableItem.setSelected(false);
             doNotDisturbItem.setSelected(false);
         }
-    }
 
-    @Inject
-    void register(ListenerSupport<FriendConnectionEvent> event) {
-        event.addListener(new EventListener<FriendConnectionEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendConnectionEvent event) {
-                switch (event.getType()) {
-                case CONNECTED:
-                case CONNECTING:
-                    FriendConnection connection = event.getSource();
-                    if(connection != null && connection.supportsMode()) {
-                        availableAction.setEnabled(true);
-                        doNotDisturbAction.setEnabled(true);
-                        updateSelections();
-                    }
-                    break;
-                case CONNECT_FAILED:
-                case DISCONNECTED:
-                    availableAction.setEnabled(false);
-                    doNotDisturbAction.setEnabled(false);
-                    updateSelections();
-                    break;
-                }
-            }
-        });
+        availableAction.setEnabled(signedIn);
+        doNotDisturbAction.setEnabled(signedIn);
     }
 
     public JMenuItem getAvailableMenuItem() {

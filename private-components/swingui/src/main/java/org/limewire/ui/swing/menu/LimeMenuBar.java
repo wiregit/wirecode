@@ -7,9 +7,10 @@ import com.google.inject.Inject;
 public class LimeMenuBar extends JMenuBar {
 
     @Inject
-    LimeMenuBar(FileMenu fileMenu, ViewMenu viewMenu, HelpMenu helpMenu,
+    LimeMenuBar(FileMenu fileMenu, FriendMenu friendMenu, ViewMenu viewMenu, HelpMenu helpMenu,
             ToolsMenu toolsMenu) {
         add(fileMenu);
+        add(friendMenu);
         add(viewMenu);
         add(toolsMenu);
         add(helpMenu);
