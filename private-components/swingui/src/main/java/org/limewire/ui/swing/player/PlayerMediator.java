@@ -172,10 +172,17 @@ public class PlayerMediator {
      * never a null list.
      */
     private List<LocalFileItem> getPlaylist() {
-        // Compare selected list to playlist.
-        PlaylistId selectedId = new PlaylistId(libraryPanelProvider.get().getSelectedNavItem());
+        // Get selected list and category.
+        LibraryNavItem selectedNavItem = libraryPanelProvider.get().getSelectedNavItem();
         Category selectedCategory = libraryPanelProvider.get().getSelectedCategory();
         
+        // No selected list so return internal playlist.
+        if (selectedNavItem == null) {
+            return playList;
+        }
+        
+        // Compare selected list to playlist.
+        PlaylistId selectedId = new PlaylistId(selectedNavItem);
         if (selectedId.equals(playlistId) && 
                 libraryPanelProvider.get().isPlayable(selectedCategory)) {
             // Selected list is same so return list from library.
