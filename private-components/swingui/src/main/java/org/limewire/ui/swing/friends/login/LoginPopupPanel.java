@@ -114,7 +114,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
             validate();
         } else if (visible && !isVisible()) {
             restart();
-        } else if (contentPanel != null){
+        } else if (!visible && contentPanel != null){
             contentPanel.removeAll();
         }
         super.setVisible(visible);
