@@ -98,28 +98,37 @@ public class ServiceSelectionLoginPanel extends JPanel {
         bottomPanel.setOpaque(false);
         
         boolean supportsFacebook = MozillaInitialization.isInitialized() && FacebookSettings.FACEBOOK_ENABLED.get();
-        JXButton facebookButton = supportsFacebook ? new JXButton(facebookLoginActionFactory.create(accountManager.getConfig("Facebook"))) : new JXButton();
-        facebookButton.setVisible(supportsFacebook);
+        
         JXButton gmailButton = new JXButton(new ServiceAction(accountManager.getConfig("Gmail")));
         JXButton liveJournalButton = new JXButton(new ServiceAction(accountManager.getConfig("LiveJournal")));
         JXButton otherButton = new JXButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber")));
         
-        ResizeUtils.forceSize(facebookButton, new Dimension(180, 58));
         ResizeUtils.forceSize(gmailButton, new Dimension(180, 58));
         ResizeUtils.forceSize(liveJournalButton, new Dimension(180, 58));
         ResizeUtils.forceSize(otherButton, new Dimension(180, 58));
         
-        buttonDecorator.decorateFlatButton(facebookButton);
         buttonDecorator.decorateFlatButton(gmailButton);
         buttonDecorator.decorateFlatButton(liveJournalButton);
         buttonDecorator.decorateFlatButton(otherButton);
         
-        JPanel selectionPanel = new JPanel(new MigLayout("gap 0, insets 0 0 30 0, alignx center, filly"));
+        JPanel selectionPanel = new JPanel(new MigLayout("nogrid, gap 0, insets 0 0 30 0, alignx center, filly"));
         selectionPanel.setOpaque(false);
-        selectionPanel.add(facebookButton, "gaptop 10, gapright 30");
-        selectionPanel.add(gmailButton, "wrap");
-        selectionPanel.add(liveJournalButton, "gapright 30, gaptop 30");
-        selectionPanel.add(otherButton);
+        
+        if (supportsFacebook) {
+            JXButton facebookButton = new JXButton(facebookLoginActionFactory.create(accountManager.getConfig("Facebook")));
+            ResizeUtils.forceSize(facebookButton, new Dimension(180, 58));
+            buttonDecorator.decorateFlatButton(facebookButton);
+            
+            selectionPanel.add(facebookButton, "gaptop 10, gapright 30");
+            selectionPanel.add(gmailButton, "wrap");
+            selectionPanel.add(liveJournalButton, "gapright 30, gaptop 30");
+            selectionPanel.add(otherButton);
+        }
+        else {
+            selectionPanel.add(gmailButton, "gaptop 10, gapright 30");
+            selectionPanel.add(liveJournalButton, "wrap");
+            selectionPanel.add(otherButton, "gaptop 30, alignx center");
+        }
         bottomPanel.add(selectionPanel);
         
         add(topPanel, BorderLayout.NORTH);
