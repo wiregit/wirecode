@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends.chat;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -21,19 +23,23 @@ import java.util.WeakHashMap;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
-import javax.swing.JMenuItem;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
@@ -45,6 +51,9 @@ import org.jdesktop.swingx.decorator.BorderHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.MessageWriter;
@@ -54,21 +63,17 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.action.ItemNotifyable;
-import org.limewire.ui.swing.action.PopupDecider;
-import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
+import org.limewire.ui.swing.library.ShareListIcons;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.table.AbstractTableFormat;
-import org.limewire.ui.swing.table.GlazedJXTable;
+import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -79,7 +84,9 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
-import net.miginfocom.swing.MigLayout;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * The pane that lists all available friends in the chat area.
@@ -94,10 +101,12 @@ public class ChatFriendListPane extends JPanel {
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     
     private final EventList<ChatFriend> chatFriends;
-    private final JTable friendsTable;
+    private final MouseableTable friendsTable;
     private final ChatModel chatModel;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final Provider<RemoteHostActions> remoteHostActions;
+    private final Provider<SharedFileListManager> sharedFileListManager;
+    private final Provider<LibraryNavigatorTable> navTable;
 
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
@@ -117,11 +126,15 @@ public class ChatFriendListPane extends JPanel {
 
     @Inject
     public ChatFriendListPane(ChatModel chatModel, 
-            Provider<RemoteHostActions> remoteHostActions) {
+            Provider<RemoteHostActions> remoteHostActions, 
+            Provider<SharedFileListManager> sharedFileListManager,
+            Provider<LibraryNavigatorTable> navTable) {
         super(new BorderLayout());
         this.chatModel = chatModel;
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.remoteHostActions = remoteHostActions;
+        this.sharedFileListManager = sharedFileListManager;
+        this.navTable = navTable;
         
         this.chatFriends = chatModel.getChatFriendList();
         
@@ -131,7 +144,7 @@ public class ChatFriendListPane extends JPanel {
         SortedList<ChatFriend> sortedFriends = GlazedListsFactory.sortedList(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
 
-        addPopupMenus(friendsTable);
+        friendsTable.setPopupHandler(new FriendPopupHandler());
         
         setBorder(new DropShadowBorder(rightEdgeBorderColor, 1, 1.0f, 0, false, false, false, true));
         
@@ -162,41 +175,62 @@ public class ChatFriendListPane extends JPanel {
         closeAllChats();
     }
 
-    private void addPopupMenus(JComponent comp) {
-        FriendContext context = new FriendContext();
-        ViewLibrary viewLibrary = new ViewLibrary(context);
-        JPopupMenu nonChattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(false, context), new OpenChat(context));
-        nonChattingPopup.addSeparator();
-        nonChattingPopup.add(viewLibrary);
-       
-        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary);
-        chattingPopup.addSeparator();
-        chattingPopup.add(new CloseChat(context));
-    }
     
-    private static class FriendPopupDecider implements PopupDecider {
-        private final boolean expected;
-        private final FriendContext context;
-        
-        public FriendPopupDecider(boolean expected, FriendContext context) {
-            this.expected = expected;
-            this.context = context; 
+    private class FriendPopupHandler implements TablePopupHandler {
+
+        @Override
+        public boolean isPopupShowing(int row) {
+            return false;
         }
 
         @Override
-        public boolean shouldDisplay(MouseEvent e) {
-            JTable table = (JTable) e.getComponent();
-            int index = table.rowAtPoint(e.getPoint());
-            if (index < 0) {
-                return false;
+        public void maybeShowPopup(Component component, int x, int y) {
+            int index = friendsTable.rowAtPoint(new Point(x, y));
+            
+            // Popup selects the item (as per spec)
+            friendsTable.getSelectionModel().setSelectionInterval(index, index);
+
+            ChatFriend chatFriend = getFriend(friendsTable, index);
+            createPopupMenu(chatFriend).show(component, x, y);
+        }
+
+        private JPopupMenu createPopupMenu(ChatFriend chatFriend) {
+            JPopupMenu popup = new JPopupMenu();
+
+            if (chatFriend.isChatting()) {
+                popup.add(createShareListSubMenu(chatFriend.getID()));
+                popup.addSeparator();                
+                popup.add(new BrowseFiles(chatFriend));
+                popup.addSeparator();
+                popup.add(new CloseChat(chatFriend));
+            } else {
+                popup.add(new OpenChat(chatFriend));
+                popup.addSeparator();
+                popup.add(createShareListSubMenu(chatFriend.getID()));
+                popup.addSeparator();                
+                popup.add(new BrowseFiles(chatFriend));
             }
-            //Popup selects the item (as per spec)
-            table.getSelectionModel().setSelectionInterval(index, index);
-            
-            ChatFriend chatFriend = getFriend(table, index);
-            
-            context.setFriend(chatFriend);
-            return chatFriend.isChatting() == expected;
+
+            return popup;
+        }
+        
+        private JMenu createShareListSubMenu(String friendID) {
+            JMenu shareListMenu = new JMenu(I18n.tr("Share List"));
+            for (SharedFileList list : sharedFileListManager.get().getModel()) {
+                if(list.isPublic()){//skip the public share list
+                    continue;
+                }
+                
+                if (list.getFriendIds().contains(friendID)) {
+                    shareListMenu.add(new AddRemoveCheckBoxMenuItem(friendID, list));
+                } else {
+                    shareListMenu.add(new AddRemoveCheckBoxMenuItem(friendID, list));
+                }
+            }
+            shareListMenu.addSeparator();
+            shareListMenu.add(new ShareNewList(friendID));
+
+            return shareListMenu;
         }
     }
     
@@ -205,7 +239,7 @@ public class ChatFriendListPane extends JPanel {
         return index < 0 ? null : (ChatFriend) model.getElementAt(index);
     }
     
-    private JTable createFriendsTable(final EventList<ChatFriend> friendsList) {
+    private MouseableTable createFriendsTable(final EventList<ChatFriend> friendsList) {
         TextFilterator<ChatFriend> friendFilterator = new TextFilterator<ChatFriend>() {
             @Override
             public void getFilterStrings(List<String> baseList, ChatFriend element) {
@@ -226,7 +260,7 @@ public class ChatFriendListPane extends JPanel {
             }
         };
         
-        final JXTable table = new CustomTooltipLocationTable(new DefaultEventTableModel<ChatFriend>(friendsList, format)); 
+        final MouseableTable table = new CustomTooltipLocationTable(new DefaultEventTableModel<ChatFriend>(friendsList, format)); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new LaunchChatListener());
         //Add as mouse listener and motion listener because it cares about MouseExit and MouseMove events
@@ -508,7 +542,7 @@ public class ChatFriendListPane extends JPanel {
         }
     }
     
-    private class CustomTooltipLocationTable extends GlazedJXTable {
+    private class CustomTooltipLocationTable extends MouseableTable {
         private final Color GRAY_BACKGROUND = new Color(172, 172, 172);
 
         public CustomTooltipLocationTable(TableModel dm) {
@@ -719,82 +753,95 @@ public class ChatFriendListPane extends JPanel {
             return hoverPoint;
         }
     }
-    
-    private class FriendContext {
-        private WeakReference<ChatFriend> weakFriend;
-        
-        public ChatFriend getFriend() {
-            return weakFriend == null ? null : weakFriend.get();
-        }
-        
-        public void setFriend(ChatFriend chatFriend) {
-            weakFriend = new WeakReference<ChatFriend>(chatFriend);
-        }
-    }
-    
-    private static abstract class AbstractContextAction extends AbstractAction {
-        protected final FriendContext context;
-        
-        public AbstractContextAction(String name, FriendContext context) {
-            super(name);
-            this.context = context;
-        }
-    }
-    
-    private class OpenChat extends AbstractContextAction {
-        public OpenChat(FriendContext context) {
-            super(I18n.tr("Open Chat"), context);
+          
+    private class OpenChat extends AbstractAction {
+        private final ChatFriend chatFriend;
+
+        public OpenChat(ChatFriend chatFriend) {
+            super(I18n.tr("Open Conversation"));
+            this.chatFriend = chatFriend;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ChatFriend chatFriend = context.getFriend();
-            if (chatFriend != null) {
-                startOrSelectConversation(chatFriend);
-            }
+            startOrSelectConversation(chatFriend);
         }
     }
     
-    class ViewLibrary extends AbstractContextAction implements ItemNotifyable {
-        public ViewLibrary(FriendContext context) {
-            super("", context);
-        }
-                
-        @Override
-        public void notifyItem(JMenuItem item) {
-            ChatFriend chatFriend = context.getFriend();
-            
-            if (chatFriend == null) {
-                return;
-            }
-            
-            item.setText(I18n.tr("Browse Files"));
-            
-            if (!chatFriend.isSignedInToLimewire()) {
-                item.setEnabled(false);
-            }
+    class BrowseFiles extends AbstractAction {
+        private final Friend friend;
+        
+        public BrowseFiles(ChatFriend chatFriend) {
+            super(I18n.tr("Browse Files"));
+            setEnabled(chatFriend.isSignedInToLimewire());
+            friend = chatFriend.getFriend();
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ChatFriend chatFriend = context.getFriend();
-            if (chatFriend != null) {
-                remoteHostActions.get().viewLibraryOf(chatFriend.getFriend());
-            }
+                remoteHostActions.get().viewLibraryOf(friend);
         }
     }
    
-    private class CloseChat extends AbstractContextAction {
-        public CloseChat(FriendContext context) {
-            super(I18n.tr("Close conversation"), context);
+    private class CloseChat extends AbstractAction {
+        private ChatFriend chatFriend;
+
+        public CloseChat(ChatFriend chatFriend) {
+            super(I18n.tr("Close conversation"));
+            this.chatFriend = chatFriend;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ChatFriend chatFriend = context.getFriend();
             fireCloseChat(chatFriend);
         }
     }
+    
+    private class ShareNewList extends  AbstractAction {
+        private final String friendID;
+        public ShareNewList(String friendID) {
+            super(I18n.tr("Share New List"));
+            this.friendID = friendID;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            final int id = sharedFileListManager.get().createNewSharedFileList(I18n.tr("Untitled"));
+            sharedFileListManager.get().getModel().get(id).addFriend(friendID);
+            navTable.get().selectLibraryNavItem(id);
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    navTable.get().setEditable(true);
+                    navTable.get().editCellAt(navTable.get().getSelectedRow(), 0);                
+                }
+            });
+        
+        }
+    } 
+    
+    private class AddRemoveCheckBoxMenuItem extends JCheckBoxMenuItem {
+        public AddRemoveCheckBoxMenuItem(final String friendID, final SharedFileList shareList) {            
+            super(shareList.getCollectionName(), new ShareListIcons().getListIcon(shareList));
+            
+            setSelected(shareList.getFriendIds().contains(friendID));
+            
+            addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {                    
+                    if(isSelected()){
+                        shareList.addFriend(friendID);
+                    } else {
+                        shareList.removeFriend(friendID);
+                    }
+                    
+                    setIcon(new ShareListIcons().getListIcon(shareList));
+                }
+            });
+            
+        }
+        
+    }
+
 
     private void setTableCursor(boolean useHandCursor) {
         friendsTable.setCursor(useHandCursor ? HAND_CURSOR : DEFAULT_CURSOR);

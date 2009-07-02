@@ -18,7 +18,11 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.table.SingleColumnTableFormat;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -32,16 +36,20 @@ import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 @LazySingleton
 public class LibraryNavigatorTable extends GlazedJXTable {
 
     @Resource private Color backgroundColor;    
     private TablePopupHandler popupHandler;
+    private final Provider<Navigator> navigatorProvider;
     
     @Inject
     public LibraryNavigatorTable(LibraryNavTransferHandler libraryNavTransferHandler,
-            LibraryManager libraryManager, SharedFileListManager sharedFileListManager) {
+            LibraryManager libraryManager, SharedFileListManager sharedFileListManager,
+            Provider<Navigator> navigatorProvider) {
+        this.navigatorProvider = navigatorProvider;
         GuiUtils.assignResources(this);
 
         initialize();
@@ -84,6 +92,7 @@ public class LibraryNavigatorTable extends GlazedJXTable {
     }
     
     public void selectLibraryNavItem(int id) {
+        showNavTableIfHidden();
         for(int i = 0; i < getModel().getRowCount(); i++) {
             Object value = getModel().getValueAt(i, 0);
             if(value instanceof LibraryNavItem) {
@@ -96,6 +105,7 @@ public class LibraryNavigatorTable extends GlazedJXTable {
     }
     
     public void selectLibraryNavItem(LocalFileList sharedFileList) {
+        showNavTableIfHidden();
         for(int i = 0; i < getModel().getRowCount(); i++) {
             Object value = getModel().getValueAt(i, 0);
             if(value instanceof LibraryNavItem) {
@@ -104,6 +114,14 @@ public class LibraryNavigatorTable extends GlazedJXTable {
                     break;
                 }
             }
+        }
+    }
+    
+    private void showNavTableIfHidden(){
+        if (!isShowing()) {
+            NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY,
+                    LibraryMediator.NAME);
+            item.select();
         }
     }
     

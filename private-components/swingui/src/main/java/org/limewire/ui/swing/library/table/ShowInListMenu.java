@@ -16,11 +16,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.LibraryPanel;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -32,7 +28,6 @@ public abstract class ShowInListMenu extends JMenu {
     private final Provider<List<File>> selectedFiles;
     private LibraryPanel libraryPanel;
     private final ShowInListMenuIcons icons = new ShowInListMenuIcons();
-    private Provider<Navigator> navigatorProvider;
     private Provider<LocalFileList> selectedLocalFileList;
     
     /**
@@ -55,10 +50,9 @@ public abstract class ShowInListMenu extends JMenu {
     
     @Inject
     public void initialize(final SharedFileListManager manager, final LibraryManager libraryManager,
-        LibraryPanel libraryPanel, Provider<Navigator> navigatorProvider){
+        LibraryPanel libraryPanel){
         
         this.libraryPanel = libraryPanel;
-        this.navigatorProvider = navigatorProvider;
         
         // once this is selected, show all the submenus
         addChangeListener(new ChangeListener(){
@@ -118,8 +112,6 @@ public abstract class ShowInListMenu extends JMenu {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, LibraryMediator.NAME);
-            item.select();
             libraryPanel.selectLocalFileList(localFileList);
             libraryPanel.selectAndScrollTo(selectedFile);
         }
