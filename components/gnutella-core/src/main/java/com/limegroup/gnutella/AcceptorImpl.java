@@ -304,6 +304,8 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
                 MessageService.showError(I18nMarker.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
             }
         }
+        if(LOG.isInfoEnabled())
+            LOG.info("Listening on port " + _port);
         
         if (_port != oldPort || tryingRandom) {
             NetworkSettings.PORT.setValue(_port);
