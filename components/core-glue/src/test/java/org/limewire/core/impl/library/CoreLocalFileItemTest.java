@@ -36,8 +36,6 @@ public class CoreLocalFileItemTest extends TestCase {
     private LimeXMLDocument document;
 
     private File file;
-    
-    private static final String FILE_TO_DOWNLOAD_URN = "urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
 
     @Override
     protected void setUp() throws Exception {
@@ -54,8 +52,6 @@ public class CoreLocalFileItemTest extends TestCase {
         context.checking(new Expectations() {{
             allowing(fileDesc).getFile();
             will(returnValue(file));
-            allowing(fileDesc).getSHA1Urn();
-            will(returnValue(URN.createSHA1Urn(FILE_TO_DOWNLOAD_URN)));
         }});
         coreLocalFileItem = new CoreLocalFileItem(fileDesc, detailsFactory, creationTimeCache);
     }
@@ -245,33 +241,43 @@ public class CoreLocalFileItemTest extends TestCase {
     }
 
     public void testIsShareable() throws Exception {
+        final URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         context.checking(new Expectations() {{
             one(fileDesc).isStoreFile();
             will(returnValue(true));
+            one(fileDesc).getSHA1Urn();
+            will(returnValue(urn));
         }});
         assertFalse(coreLocalFileItem.isShareable());
+        context.assertIsSatisfied();
 
         context.checking(new Expectations() {{
             one(fileDesc).isStoreFile();
             will(returnValue(false));
+            one(fileDesc).getSHA1Urn();
+            will(returnValue(urn));
         }});
         assertTrue(coreLocalFileItem.isShareable());
-
+        context.assertIsSatisfied();
+    }
+    
+    public void testIncompleteIsSharable() throws Exception {
+        final URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         final IncompleteFileDesc incompleteFileDesc = context.mock(IncompleteFileDesc.class);
         context.checking(new Expectations() {{
-            allowing(incompleteFileDesc).getFile();
+            one(incompleteFileDesc).getFile();
             will(returnValue(file));
-            allowing(incompleteFileDesc).getSHA1Urn();
-            will(returnValue(URN.createSHA1Urn(FILE_TO_DOWNLOAD_URN)));
         }});
-        coreLocalFileItem = new CoreLocalFileItem(incompleteFileDesc, detailsFactory,
-                creationTimeCache);
+        coreLocalFileItem = new CoreLocalFileItem(incompleteFileDesc, detailsFactory, creationTimeCache);
+        context.assertIsSatisfied();
+        
         context.checking(new Expectations() {{
             one(incompleteFileDesc).isStoreFile();
             will(returnValue(false));
-        }});
+            one(incompleteFileDesc).getSHA1Urn();
+            will(returnValue(urn));
+        }});        
         assertFalse(coreLocalFileItem.isShareable());
-
         context.assertIsSatisfied();
     }
 
