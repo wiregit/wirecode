@@ -520,7 +520,7 @@ class LibraryImpl implements Library, FileCollection {
         if (!LibraryUtils.isFileAllowedToBeManaged(file)) {
             LOG.debugf("Not adding {0} because files of this type are not allowed to be managed", file);
             dispatchFailure(file, oldFileDesc);
-            return new SimpleFuture<FileDesc>(createFailureException(file, oldFileDesc, FileViewChangeFailedException.Reason.PROGRAMS_NOT_MANAGEABLE));
+            return new SimpleFuture<FileDesc>(createFailureException(file, oldFileDesc, FileViewChangeFailedException.Reason.FILE_TYPE_NOT_ALLOWED));
         }
         
         final File interned = new File(file.getPath().intern());
@@ -975,7 +975,7 @@ class LibraryImpl implements Library, FileCollection {
                         case CANT_CANONICALIZE:
                         case INVALID_URN:
                         case NOT_MANAGEABLE:
-                        case PROGRAMS_NOT_MANAGEABLE:
+                        case FILE_TYPE_NOT_ALLOWED:
                             getLibraryData().removeManagedFile(ex.getFile());
                             break;
                         }

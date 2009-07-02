@@ -16,7 +16,7 @@ public class FileViewChangeFailedException extends Exception {
         CANT_CANONICALIZE,
         ALREADY_MANAGED,
         NOT_MANAGEABLE,
-        PROGRAMS_NOT_MANAGEABLE,
+        FILE_TYPE_NOT_ALLOWED,
         INVALID_URN,
         OLD_WASNT_MANAGED,
         CANT_ADD_TO_LIST,
