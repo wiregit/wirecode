@@ -15,6 +15,7 @@ import org.limewire.ui.swing.browser.LimeDomListener;
 import org.limewire.ui.swing.browser.UriAction;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 import org.mozilla.browser.impl.ChromeAdapter;
@@ -107,6 +108,14 @@ public class FacebookLoginAction extends AbstractAction {
             }
         };
         loginPanel.setLoginComponent(browser);
+        MozillaAutomation.blockingLoad(browser, "about:blank");
+        // show a loading panel (but not immediately -- the blocking load finishing may hide it)
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                browser.showLoadingPanel();
+            }
+        });
         friendConnectionFactory.requestLoginUrl(config).addFutureListener(new EventListener<FutureEvent<String>>() {
             @Override
             @SwingEDTEvent
