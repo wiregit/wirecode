@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.search;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchDetails.SearchType;
@@ -11,6 +13,7 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
+import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
 
@@ -33,6 +36,9 @@ class RemoteHostActionsImpl implements RemoteHostActions {
 
 
     private final BrowsePanelFactory browsePanelFactory;
+    
+    private Map<String,SearchNavItem> browseNavItemCache = new HashMap<String, SearchNavItem>();
+    private static final String ALL_FRIENDS_KEY = "ALL_FRIENDS";
 
 
     @Inject
@@ -67,7 +73,7 @@ class RemoteHostActionsImpl implements RemoteHostActions {
         LOG.debugf("viewLibraryOf: {0}", person);
         browse(browseSearchFactory.get().createBrowseSearch(person), 
                 DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
-                person.getFriendPresence().getFriend().getRenderName());
+                person.getFriendPresence().getFriend().getRenderName(), person.getFriendPresence().getFriend().getId());
     }
     
     @Override
@@ -76,7 +82,7 @@ class RemoteHostActionsImpl implements RemoteHostActions {
         LOG.debugf("viewLibraryOf: {0}", friend);
         browse(browseSearchFactory.get().createFriendBrowseSearch(friend), 
                 DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
-                friend.getRenderName());
+                friend.getRenderName(), friend.getId());
     }
 
 
@@ -84,14 +90,14 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     public void viewLibrariesOf(Collection<RemoteHost> people) {
          browse(browseSearchFactory.get().createBrowseSearch(people),
                  DefaultSearchInfo.createBrowseSearch(SearchType.MULTIPLE_BROWSE),
-                 getTabTitle(people));
+                 getTabTitle(people), null);
     }
     
     @Override
     public void browseAllFriends() {
-         browse(browseSearchFactory.get().createAllFriendsBrowseSearch(),
-                 DefaultSearchInfo.createBrowseSearch(SearchType.ALL_FRIENDS_BROWSE),
-                 I18n.tr("All Friends"));
+        browse(browseSearchFactory.get().createAllFriendsBrowseSearch(),
+                DefaultSearchInfo.createBrowseSearch(SearchType.ALL_FRIENDS_BROWSE), 
+                I18n.tr("All Friends"), ALL_FRIENDS_KEY);
     }
     
     private String getTabTitle(Collection<RemoteHost> people){
@@ -128,13 +134,46 @@ class RemoteHostActionsImpl implements RemoteHostActions {
         return false;
     }
     
-    private void browse(BrowseSearch search, SearchInfo searchInfo, String title) {       
+    /**
+     * @param key - null to not cache browse
+     */
+    private void browse(BrowseSearch search, SearchInfo searchInfo, String title, String key) {  
+        if (key != null && browseNavItemCache.get(key) != null) {
+            browseNavItemCache.get(key).select();
+            return;
+        }
+        
         SearchResultsPanel searchPanel = browsePanelFactory.createBrowsePanel(search, searchInfo);
         // Add search results display to the UI, and select its navigation item.
         SearchNavItem item = searchNavigator.get().addSearch(title, searchPanel, search, searchPanel.getModel());
         item.select();
         searchPanel.getModel().start(new SwingSearchListener(searchPanel.getModel(), searchPanel, item));
         searchPanel.setBrowseTitle(title);
+        
+        if (key != null) {
+            browseNavItemCache.put(key, item);
+            item.addNavItemListener(new ItemRemovalListener(key));
+        }
+        
+    }
+    
+    private class ItemRemovalListener implements NavItemListener {
+        private String key;
+
+        public ItemRemovalListener(String key){
+            this.key = key;
+        }
+
+        @Override
+        public void itemRemoved() {
+            browseNavItemCache.remove(key);
+        }
+
+        @Override
+        public void itemSelected(boolean selected) {
+            //do nothing            
+        }
+        
     }
 
 }
