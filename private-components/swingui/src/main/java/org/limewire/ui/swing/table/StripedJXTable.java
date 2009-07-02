@@ -58,7 +58,7 @@ public class StripedJXTable extends GlazedJXTable {
         int rowCount = getRowCount();
         Rectangle clip = g.getClipBounds();
         int clipHeight = clip.y + clip.height;
-        int tableHeight = getHeight();
+        int tableHeight = getVisibleRect().height;
         int clipViewableRows = clipHeight / rowHeight;
         int tableViewableRows = tableHeight / rowHeight;
         int startDrawingAt = rowCount * rowHeight;
