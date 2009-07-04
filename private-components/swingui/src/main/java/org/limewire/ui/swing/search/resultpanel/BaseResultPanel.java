@@ -32,7 +32,6 @@ import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.library.LibraryMediator;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -112,7 +111,6 @@ public class BaseResultPanel extends JXPanel {
     private final SearchResultsModel searchResultsModel;
     
     private final ResultsTableFormatFactory tableFormatFactory;
-    private final Navigator navigator;
     private final ListViewRowHeightRule rowHeightRule;
     private final RemoteHostWidgetFactory fromWidgetfactory;
     private final Provider<IconLabelRendererFactory> iconLabelRendererFactory;
@@ -142,7 +140,6 @@ public class BaseResultPanel extends JXPanel {
             @Assisted SearchResultsModel searchResultsModel,
             ResultsTableFormatFactory tableFormatFactory,
             ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
-            Navigator navigator,
             ListViewRowHeightRule rowHeightRule,
             RemoteHostWidgetFactory fromWidgetFactory,
             SearchResultMenuFactory menuFactory,
@@ -157,7 +154,6 @@ public class BaseResultPanel extends JXPanel {
         this.searchResultsModel = searchResultsModel;
         this.tableFormatFactory = tableFormatFactory;
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
-        this.navigator = navigator;
         this.rowHeightRule = rowHeightRule;
         this.fromWidgetfactory = fromWidgetFactory;
         this.iconLabelRendererFactory = iconLabelRendererFactory;
@@ -168,6 +164,8 @@ public class BaseResultPanel extends JXPanel {
         this.qualityRenderer = qualityRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
+        
+        rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery());
 
         // Create tables.
         this.resultsList = createList();
@@ -264,12 +262,10 @@ public class BaseResultPanel extends JXPanel {
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
-                searchResultsModel.getSearchQuery(), 
-                navigator, downloadHandler, displayLimit);
+                downloadHandler, rowHeightRule, displayLimit);
         
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
-                searchResultsModel.getSearchQuery(), 
-                navigator, downloadHandler, displayLimit);
+                downloadHandler, rowHeightRule, displayLimit);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -308,7 +304,7 @@ public class BaseResultPanel extends JXPanel {
                             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
                             RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
                             if (result == null || result.isStale(vsr)) {
-                                result = rowHeightRule.getDisplayResult(vsr, searchResultsModel.getSearchQuery());
+                                result = rowHeightRule.getDisplayResult(vsr);
                                 vsrToRowDisplayResultMap.put(vsr, result);
                             } 
                             int newRowHeight = result.getConfig().getRowHeight();

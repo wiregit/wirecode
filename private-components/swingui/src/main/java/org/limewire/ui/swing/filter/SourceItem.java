@@ -12,9 +12,9 @@ class SourceItem {
         ANONYMOUS, ANY_FRIEND, FRIEND;
     }
     
-    public static final SourceItem ANONYMOUS_SOURCE = new SourceItem(Type.ANONYMOUS, null);
-    public static final SourceItem ANY_FRIEND_SOURCE = new SourceItem(Type.ANY_FRIEND, null);
-    
+    public static final SourceItem ANONYMOUS_SOURCE = new SourceItem(Type.ANONYMOUS, I18n.tr("P2P Users"));
+    public static final SourceItem ANY_FRIEND_SOURCE = new SourceItem(Type.ANY_FRIEND, I18n.tr("Any Friend"));
+   
     private final Type type;
     private final String name;
     
@@ -30,17 +30,7 @@ class SourceItem {
      * Returns the display name.
      */
     public String getName() {
-        switch (type) {
-        case ANONYMOUS:
-            return I18n.tr("P2P Users");
-            
-        case ANY_FRIEND:
-            return I18n.tr("Any Friend");
-            
-        case FRIEND:
-        default:
-            return name;
-        }
+        return name;
     }
     
     /**
@@ -57,6 +47,10 @@ class SourceItem {
     
     @Override
     public boolean equals(Object obj) {
+        if(obj == this) {
+            return true; 
+        }
+        
         if (obj instanceof SourceItem) {
             SourceItem item2 = (SourceItem) obj;
             if (type == item2.type) {

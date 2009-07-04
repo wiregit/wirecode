@@ -68,7 +68,9 @@ public abstract class AbstractSimilarResultsDetector implements SimilarResultsDe
         for (VisualSearchResult item : child.getSimilarResults()) {
             updateParent(item, parent);
             child.removeSimilarSearchResult(item);
-            parent.addSimilarSearchResult(item);
+            if(parent != item) {
+                parent.addSimilarSearchResult(item);
+            }
         }
     }
 
@@ -84,10 +86,10 @@ public abstract class AbstractSimilarResultsDetector implements SimilarResultsDe
         VisualSearchResult parent2 = o2;
         VisualSearchResult parent3 = o1.getSimilarityParent();
         VisualSearchResult parent4 = o2.getSimilarityParent();
-        double parent1Count = parent1 == null ? 0 : parent1.getRelevance();
-        double parent2Count = parent2 == null ? 0 : parent2.getRelevance();
-        double parent3Count = parent3 == null ? 0 : parent3.getRelevance();
-        double parent4Count = parent4 == null ? 0 : parent4.getRelevance();
+        int parent1Count = parent1 == null ? 0 : parent1.getRelevance();
+        int parent2Count = parent2 == null ? 0 : parent2.getRelevance();
+        int parent3Count = parent3 == null ? 0 : parent3.getRelevance();
+        int parent4Count = parent4 == null ? 0 : parent4.getRelevance();
 
         if (parent4Count > parent3Count && parent4Count > parent2Count
                 && parent4Count > parent1Count) {

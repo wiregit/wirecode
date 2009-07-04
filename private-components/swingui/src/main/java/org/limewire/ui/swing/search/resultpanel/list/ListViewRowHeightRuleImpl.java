@@ -29,9 +29,22 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         new PropertyKeyComparator(FilePropertyKey.DATE_CREATED, FilePropertyKey.AUTHOR);
     private final PropertyKeyComparator PROGRAMS_COMPARATOR = 
         new PropertyKeyComparator(FilePropertyKey.PLATFORM, FilePropertyKey.COMPANY);
+    
+    private SearchHighlightUtil searchHighlightUtil;
+    
+    private String searchText;
+    
+    @Override
+    public void initializeWithSearch(String search) {
+        this.searchText = search;
+        if(searchText != null) {
+            this.searchHighlightUtil = new SearchHighlightUtil(search);
+        }
+        
+    }
 
     @Override
-    public RowDisplayResult getDisplayResult(VisualSearchResult vsr, String searchText) {
+    public RowDisplayResult getDisplayResult(VisualSearchResult vsr) {
         if (vsr.isSpam()) {
             return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState());
         }
@@ -43,19 +56,19 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState());
         case NOT_STARTED:
             String heading = vsr.getHeading();
-            String highlightedHeading = highlightMatches(heading, searchText);
+            String highlightedHeading = highlightMatches(heading);
             
             LOG.debugf("Heading: {0} highlightedMatches: {1}", heading, highlightedHeading);
             
             String subheading = vsr.getSubHeading();
 
-            String highlightedSubheading = highlightMatches(subheading, searchText);
+            String highlightedSubheading = highlightMatches(subheading);
             
             LOG.debugf("Subheading: {0} highlightedMatches: {1}", subheading, highlightedSubheading);
 
             if (!isDifferentLength(heading, highlightedHeading) && !isDifferentLength(subheading, highlightedSubheading)) {
             
-                PropertyMatch propertyMatch = getPropertyMatch(vsr, searchText);
+                PropertyMatch propertyMatch = getPropertyMatch(vsr);
                 
                 if (propertyMatch != null) {
                     return newResult(HeadingSubHeadingAndMetadata, vsr, highlightedHeading, highlightedSubheading, propertyMatch);
@@ -89,7 +102,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         return val == null || EMPTY_STRING.equals(val.trim());
     }
     
-    private PropertyMatch getPropertyMatch(VisualSearchResult vsr, String searchText) {
+    private PropertyMatch getPropertyMatch(VisualSearchResult vsr) {
         if(searchText == null)
             return null;
         
@@ -98,7 +111,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         for (FilePropertyKey key : properties) {
             String value = vsr.getPropertyString(key);
 
-            String propertyMatch = highlightMatches(value, searchText);
+            String propertyMatch = highlightMatches(value);
             if (value != null && isDifferentLength(value, propertyMatch)) {
                 String betterKey = key.toString().toLowerCase();
                 betterKey = betterKey.replace('_', ' ');
@@ -133,14 +146,14 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
      * @param text the text to be modified
      * @return the text containing bold tags
      */
-    private String highlightMatches(String sourceText, String searchText) {
+    private String highlightMatches(String sourceText) {
         boolean haveSearchText = searchText != null && searchText.length() > 0;
 
         // If there is no search or filter text then return sourceText as is.
         if (!haveSearchText)
             return sourceText;
         
-        return SearchHighlightUtil.highlight(searchText, sourceText);
+        return searchHighlightUtil.highlight(sourceText);
     }
     
     private static class RowDisplayResultImpl implements RowDisplayResult {

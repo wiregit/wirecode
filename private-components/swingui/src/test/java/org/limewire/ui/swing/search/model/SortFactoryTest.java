@@ -98,8 +98,8 @@ public class SortFactoryTest extends TestCase {
         assertTrue("equal relevance", (result < 0));
 
         // Set test relevance values.
-        vsr1.setRelevance(1.0);
-        vsr2.setRelevance(2.0);
+        vsr1.setRelevance(1);
+        vsr2.setRelevance(2);
         
         // Verify compare for non-equal relevance - order is descending.
         result = comparator.compare(vsr1, vsr2);
@@ -120,8 +120,8 @@ public class SortFactoryTest extends TestCase {
         assertTrue("equal relevance", (result == 0));
 
         // Set test relevance values.
-        vsr1.setRelevance(1.0);
-        vsr2.setRelevance(2.0);
+        vsr1.setRelevance(1);
+        vsr2.setRelevance(2);
         
         // Verify compare for non-equal relevance.
         result = comparator.compare(vsr1, vsr2);

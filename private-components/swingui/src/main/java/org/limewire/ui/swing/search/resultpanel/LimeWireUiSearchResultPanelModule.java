@@ -6,7 +6,7 @@ import com.google.inject.assistedinject.FactoryProvider;
 public class LimeWireUiSearchResultPanelModule extends AbstractModule {
 
     @Override
-    protected void configure() {                    
+    protected void configure() {
         bind(SearchResultMenuFactory.class).toProvider(FactoryProvider.newFactory(
                 SearchResultMenuFactory.class, SearchResultMenu.class));
     }

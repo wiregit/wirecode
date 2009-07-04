@@ -1,18 +1,14 @@
 package org.limewire.ui.swing.search.model;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,41 +32,33 @@ import com.google.inject.Provider;
  * results. 
  */
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Comparable {
-    private static final Pattern FIND_HTML_MARKUP = Pattern.compile("[<][/]?[\\w =\"\\./:#\\-\\!\\&\\?]*[>]");
 
-    private final Log LOG = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(SearchResultAdapter.class);
+    
+    private static final Matcher FIND_HTML_MARKUP; 
+    static {
+        Pattern p = Pattern.compile("[<][/]?[\\w =\"\\./:#\\-\\!\\&\\?]*[>]");
+        FIND_HTML_MARKUP = p.matcher("");
+    }
 
     private final List<SearchResult> coreResults;
-
-    private Map<FilePropertyKey, Object> properties;
-
     private final Set<Friend> friends;
-
-    private final Set<RemoteHost> remoteHosts;
-    
+    private final Set<RemoteHost> remoteHosts;    
     private final Provider<PropertiableHeadings> propertiableHeadings;
-
+    private Map<FilePropertyKey, Object> properties;
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
-
-    private final Set<VisualSearchResult> similarResults = new HashSet<VisualSearchResult>();
-
+    private List<VisualSearchResult> similarResults = null;
     private VisualSearchResult similarityParent;
-
     private boolean anonymous;
-
     private boolean visible;
-
-    private boolean childrenVisible;
-    
-    private Boolean spamCache;
-    
-    private boolean preExistingDownload = false;
-    
-    private Double relevance = null;
-    
-    private String cachedHeading;
-    
+    private boolean childrenVisible;    
+    private Boolean spamCache;    
+    private boolean preExistingDownload = false;    
+    private int relevance = -1;    
+    private String cachedHeading;    
     private String cachedSubHeading;
+    private String cachedAudioArtistName;
+    private String cachedName;
 
     /**
      * Constructs a SearchResultAdapter with the specified List of core results
@@ -144,7 +132,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     @Override
     public Map<FilePropertyKey, Object> getProperties() {
         if (properties == null) {
-            properties = new HashMap<FilePropertyKey, Object>();
+            properties = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
             for (SearchResult result : coreResults) {
                 Map<FilePropertyKey, Object> props = result.getProperties();
                 properties.putAll(props);
@@ -163,17 +151,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     public String getPropertyString(FilePropertyKey key) {
         Object value = getProperty(key);
         if (value != null) {
-            String stringValue = value.toString();
-
-            if (value instanceof Calendar) {
-                Calendar calendar = (Calendar) value;
-                Date date = calendar.getTime();
-                DateFormat df = SimpleDateFormat.getDateTimeInstance(DateFormat.LONG,
-                        DateFormat.LONG);
-                stringValue = df.format(date);
-            }
-
-            return stringValue;
+            return value.toString();
         } else {
             return null;
         }
@@ -181,17 +159,30 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
 
     @Override
     public String getNameProperty(boolean useAudioArtist) {
-        // Get name and title values.
         String name = getPropertyString(FilePropertyKey.NAME);
-        String title = getPropertyString(FilePropertyKey.TITLE);
         
         // For audio files, use non-blank title, prefixed by non-blank artist.
-        if (getCategory().equals(Category.AUDIO) && !StringUtils.isEmpty(title)) {
-            String artist = getPropertyString(FilePropertyKey.AUTHOR);
-            if (useAudioArtist && !StringUtils.isEmpty(artist)) {
-                name = artist + " - " + title;
+        if (getCategory().equals(Category.AUDIO)) {
+            if(useAudioArtist && cachedAudioArtistName != null) {
+                return cachedAudioArtistName;
+            } else if(!useAudioArtist && cachedName != null) {
+                return cachedName;
+            }
+            
+            String title = getPropertyString(FilePropertyKey.TITLE);
+            if(!StringUtils.isEmpty(title)) {
+                String artist = getPropertyString(FilePropertyKey.AUTHOR);
+                if (useAudioArtist && !StringUtils.isEmpty(artist)) {
+                    name = artist + " - " + title;
+                } else {
+                    name = title;
+                }
+            }
+            
+            if(useAudioArtist) {
+                cachedAudioArtistName = name;
             } else {
-                name = title;
+                cachedName = name;
             }
         }
         
@@ -201,17 +192,24 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     
     @Override
     public void addSimilarSearchResult(VisualSearchResult similarResult) {
+        assert similarResult != this;
+        if(similarResults == null) {
+            similarResults = new CopyOnWriteArrayList<VisualSearchResult>();
+        }
         similarResults.add(similarResult);
     }
 
     @Override
     public void removeSimilarSearchResult(VisualSearchResult result) {
+        if(similarResults == null) {
+            similarResults = new CopyOnWriteArrayList<VisualSearchResult>();
+        }
         similarResults.remove(result);
     }
 
     @Override
     public List<VisualSearchResult> getSimilarResults() {
-        return new ArrayList<VisualSearchResult>(similarResults);
+        return similarResults == null ? Collections.<VisualSearchResult>emptyList() : similarResults;
     }
 
     @Override
@@ -265,7 +263,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
      * is limited to avoid giving high relevance to spam results.
      */
     void update() {
-        relevance = null;
+        relevance = -1;
         remoteHosts.clear();
         friends.clear();
         anonymous = false;
@@ -383,7 +381,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
      * is found).
      */
     private String sanitize(String input) {
-        Matcher matcher = FIND_HTML_MARKUP.matcher(input);
+        Matcher matcher = FIND_HTML_MARKUP.reset(input);
         if (matcher.find()) {
             setSpam(true);
             return matcher.replaceAll("");
@@ -400,15 +398,14 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     }
 
     @Override
-    public double getRelevance() {
-        
-        if(this.relevance == null) {
-            double sum = 0;
+    public int getRelevance() {
+        if(relevance == -1) {        
+            int sum = 0;
             for(SearchResult searchResult : coreResults) {
                 sum += searchResult.getRelevance();
             }
-            this.relevance = sum;
-        } 
+            relevance = sum;
+        }
         return relevance;
     }
 

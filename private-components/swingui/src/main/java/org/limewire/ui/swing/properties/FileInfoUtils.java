@@ -27,7 +27,7 @@ public class FileInfoUtils {
      * empty String if no length is available.
      */
     public static String getLength(PropertiableFile propertiableFile) {
-        Long length = CommonUtils.parseLongNoException(propertiableFile.getPropertyString(FilePropertyKey.LENGTH));
+        Long length = (Long)propertiableFile.getProperty(FilePropertyKey.LENGTH);
         return length != null ? CommonUtils.seconds2time(length) : null;
     }
     
@@ -44,7 +44,7 @@ public class FileInfoUtils {
     }
     
     private static Long getFileSizeLong(PropertiableFile propertiable) {
-        return CommonUtils.parseLongNoException(propertiable.getPropertyString(FilePropertyKey.FILE_SIZE));
+        return (Long)propertiable.getProperty(FilePropertyKey.FILE_SIZE);
     }
     
     /**
@@ -56,6 +56,6 @@ public class FileInfoUtils {
     }
     
     private static Long getQualityScoreLong(PropertiableFile propertiable) {
-        return CommonUtils.parseLongNoException(propertiable.getPropertyString(FilePropertyKey.QUALITY));
+        return (Long)propertiable.getProperty(FilePropertyKey.QUALITY);
     }
 }

@@ -62,8 +62,7 @@ public class SearchResultsModelFactory {
                 .getGroupedSearchResults();
 
         // Create detector to find similar results.
-        SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory
-                .newSimilarResultsDetector();
+        SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory.newSimilarResultsDetector();
 
         // Add list listener for results already downloaded or being downloaded. 
         // AlreadyDownloaded listener needs to be added to the list before the

@@ -1,7 +1,7 @@
 package org.limewire.core.impl.search;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,6 +57,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final String fileName;
     private final String fileNameNoExtension;
     private final URN wrapperUrn;
+    private final Category category;
     
     /**
      * Cached lists of sources from {@link #getSources()}
@@ -88,10 +89,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.locs = new ArrayList<IpPort>(locs);
         this.friendPresence = friendPresence;
         this.wrapperUrn = rfd.getSHA1Urn() == null ? null : new URNImpl(rfd.getSHA1Urn());
-        this.properties = new HashMap<FilePropertyKey, Object>();
+        this.properties = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         this.fileName = rfd.getFileName();
         this.extension = FileUtils.getFileExtension(rfd.getFileName());
         this.fileNameNoExtension = FileUtils.getFilenameNoExtension(fileName);
+        this.category = CategoryConverter.categoryForExtension(extension); 
         
         LimeXMLDocument doc = rfd.getXMLDocument();
         long fileSize = rfd.getSize();
@@ -181,7 +183,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     @Override
     public Category getCategory() {
-        return CategoryConverter.categoryForExtension(extension);
+        return category;
     }
 
     /**

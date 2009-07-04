@@ -19,6 +19,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
@@ -77,7 +78,6 @@ import ca.odell.glazedlists.swing.DefaultEventTableModel;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.internal.Nullable;
 
 /**
  * This class is responsible for rendering an individual SearchResult
@@ -85,15 +85,15 @@ import com.google.inject.internal.Nullable;
  */
 public class ListViewTableEditorRenderer extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
 
+    private static final Log LOG = LogFactory.getLog(ListViewTableEditorRenderer.class);
+    
     private static final int LEFT_COLUMN_WIDTH = 450;
 
     private final CategoryIconManager categoryIconManager;
     
     private static final String HTML = "<html>";
     private static final String CLOSING_HTML_TAG = "</html>";
-    private final Log LOG = LogFactory.getLog(getClass());
-
-    private final String searchText;
+    
     @Resource private Icon similarResultsIcon;
     @Resource private Color subHeadingLabelColor;
     @Resource private Color metadataLabelColor;
@@ -165,19 +165,16 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     ListViewTableEditorRenderer(
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetFactory,
-        @Assisted @Nullable String searchText, 
-        @Assisted Navigator navigator, 
+        Navigator navigator, 
         final @Assisted DownloadHandler downloadHandler,
         Provider<SearchHeadingDocumentBuilder> headingBuilder,
-        ListViewRowHeightRule rowHeightRule,
+        @Assisted ListViewRowHeightRule rowHeightRule,
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
         SearchResultMenuFactory searchResultMenuFactory) {
 
         this.categoryIconManager = categoryIconManager;
-        
-        this.searchText = searchText;
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
         this.displayLimit = displayLimit;
@@ -339,7 +336,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconButton.setIcon(getIcon(vsr));
         itemIconButton.setCursor(getIconCursor(vsr));
 
-        RowDisplayResult result = rowHeightRule.getDisplayResult(vsr, searchText);
+        RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
 
         setLabelVisibility(result.getConfig());
 
@@ -612,13 +609,15 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         //**NOTE** This does not account for all HTML sanitizing, just for HTML
         //**NOTE** that would have been added by search result display code
         private final Pattern findHTMLTagsOrReplacementTokens = Pattern.compile("([<][/]?[\\w =\"#]*[>])|([{][\\d]*[}])");
+        private final Matcher matcher = findHTMLTagsOrReplacementTokens.matcher("");
         
         @Override
         public int getPixelWidth(String text) {
             HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
             StyleSheet css = editorKit.getStyleSheet();
             FontMetrics fontMetrics = css.getFontMetrics(headingFont);
-            text = findHTMLTagsOrReplacementTokens.matcher(text).replaceAll(EMPTY_STRING);
+            matcher.reset(text);
+            text = matcher.replaceAll(EMPTY_STRING);
             return fontMetrics.stringWidth(text);
         }
     }

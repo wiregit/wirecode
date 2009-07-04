@@ -81,7 +81,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
                 subheading += GuiUtils.toQualityString(qualityScore);
                 String bitRate = getPropertyString(propertiable, FilePropertyKey.BITRATE);
                 if (bitRate != null) {
-                    subheading += " (" + getPropertyString(propertiable, FilePropertyKey.BITRATE) + ")";
+                    subheading += " (" + bitRate+ ")";
                 }
                 insertHyphen = true;
             }

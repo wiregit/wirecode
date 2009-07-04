@@ -7,13 +7,13 @@ import java.util.regex.Pattern;
 
 
 public class CleanStringCache {
-    private final Pattern pattern;
+    private final Matcher matcher;
     private final String replacement;
     
     private final Map<String, String> cache;
     
     public CleanStringCache(Pattern pattern, String replacement) {
-        this.pattern = pattern;
+        this.matcher = pattern.matcher("");
         this.replacement = replacement;
         this.cache = new WeakHashMap<String, String>();
     }
@@ -33,7 +33,7 @@ public class CleanStringCache {
      * file1(1).txt, file1(2).txt.
      */
     public String cleanString(String string) {
-        Matcher matcher = pattern.matcher(string);
+        matcher.reset(string);
         string = matcher.replaceAll(replacement);
         return string;
     }
