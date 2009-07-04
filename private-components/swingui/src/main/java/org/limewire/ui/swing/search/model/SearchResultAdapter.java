@@ -201,10 +201,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
 
     @Override
     public void removeSimilarSearchResult(VisualSearchResult result) {
-        if(similarResults == null) {
-            similarResults = new CopyOnWriteArrayList<VisualSearchResult>();
+        if(similarResults != null) {
+            similarResults.remove(result);
         }
-        similarResults.remove(result);
     }
 
     @Override
@@ -294,7 +293,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         boolean oldValue = this.visible;
         this.visible = visible;
         firePropertyChange("visible", oldValue, visible);
-        LOG.debugf("Updating visible to {0} for urn: {1}", visible, getUrn());
+        if(LOG.isDebugEnabled()) {
+            LOG.debugf("Updating visible to {0} for urn: {1}", visible, getUrn());
+        }
     }
 
     @Override

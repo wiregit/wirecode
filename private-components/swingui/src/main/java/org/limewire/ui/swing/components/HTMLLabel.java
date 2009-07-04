@@ -19,6 +19,8 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class HTMLLabel extends JEditorPane {
     
+    public static final Color TRANSPARENT_COLOR = new Color(0, 0, 0, 0);
+    
     private StyleSheet fontStyle = null;
     
     private StyleSheet colorStyle = null;
@@ -31,7 +33,6 @@ public class HTMLLabel extends JEditorPane {
 
     private Color htmlFontColor;
     
-    private static final Color TRANSPARENT_COLOR = new Color(0, 0, 0, 0);
     
     @Resource
     private Color linkColor = Color.BLUE;

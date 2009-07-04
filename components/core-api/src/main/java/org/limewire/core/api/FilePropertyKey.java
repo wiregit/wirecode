@@ -30,7 +30,7 @@ public enum FilePropertyKey {
     private final static Collection<FilePropertyKey> indexableKeys = EnumSet.noneOf(FilePropertyKey.class); 
     private final static Collection<FilePropertyKey> editableKeys = EnumSet.noneOf(FilePropertyKey.class); 
     
-    private boolean isLongKey;
+    private final boolean isLongKey;
     
     private FilePropertyKey(boolean isLongKey) {
         this.isLongKey = isLongKey;

@@ -37,6 +37,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
@@ -46,6 +47,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.RemoteHostWidget;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
@@ -69,6 +71,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthR
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.table.TransparentCellTableRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -100,6 +103,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     @Resource private Color downloadSourceCountColor;
     @Resource private Color similarResultsBackgroundColor;
     @Resource private Color surplusRowLimitColor;
+    @Resource private String headingColor;
     @Resource private Font headingFont;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
@@ -138,9 +142,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private IconButton similarButton = new IconButton();
     private IconButton propertiesButton = new IconButton();
     private JEditorPane heading = new JEditorPane();
-    private JLabel subheadingLabel = new JLabel();
-    private JLabel metadataLabel = new JLabel();
-    private JLabel downloadSourceCount = new JLabel();
+    private JLabel subheadingLabel = new TransparentCellTableRenderer();
+    private JLabel metadataLabel = new TransparentCellTableRenderer();
+    private JLabel downloadSourceCount = new TransparentCellTableRenderer();
     private JXPanel editorComponent;
 
     private VisualSearchResult vsr;
@@ -300,9 +304,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, final int col) {
         vsr = (VisualSearchResult) value;
-        this.table = table;
-        LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
-        
+        this.table = table;        
         editorComponent.setBackground(table.getBackground());
         
         if (value == null) {
@@ -446,14 +448,11 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             html = HTML + pm.getKey() + ":" + html + CLOSING_HTML_TAG;
             metadataLabel.setText(html);
         }
-    }
-
-    
+    }    
 
     private boolean isDownloadEligible(VisualSearchResult vsr) {
         return !vsr.isSpam() && vsr.getDownloadState() == BasicDownloadState.NOT_STARTED;
     }
-
     
     private void initializeComponents() {
         searchResultTextPanel = new JXPanel(){
@@ -467,13 +466,22 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         editorComponent = new JXPanel();
         
-        itemIconButton = new IconButton();
+        itemIconButton = new IconButton(); 
         
         heading.setContentType("text/html");
         heading.setEditable(false);
+        heading.setCaretPosition(0);
+        heading.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);        
         heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
         heading.setOpaque(false);
         heading.setFocusable(false);
+        StyleSheet mainStyle = ((HTMLDocument)heading.getDocument()).getStyleSheet();
+        String rules = "body { font-family: " + headingFont.getFamily() + "; }" +
+                ".title { color: " + headingColor + "; font-size: " + headingFont.getSize() + "; }" +
+                "a { color: " + headingColor + "; }";
+        StyleSheet newStyle = new StyleSheet();
+        newStyle.addRule(rules);
+        mainStyle.addStyleSheet(newStyle);
 
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
