@@ -1,7 +1,6 @@
 package org.limewire.core.impl.friend;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.friend.api.Friend;
@@ -19,16 +18,14 @@ public class GnutellaFriend implements Friend {
     private final String name;
     private final String renderName;
     private final String id;
-    private final Map<String, FriendPresence> map; 
+    private final FriendPresence presence; 
 
     public GnutellaFriend(String name, String renderName, String id,
             FriendPresence presence) {
         this.name = Objects.nonNull(name, "name");
         this.renderName = Objects.nonNull(renderName, "renderName");
         this.id = id;
-        Map<String, FriendPresence> map = new HashMap<String, FriendPresence>(1);
-        map.put(presence.getPresenceId(), presence);
-        this.map = Collections.unmodifiableMap(map);
+        this.presence = presence;
     }
 
     @Override
@@ -99,7 +96,7 @@ public class GnutellaFriend implements Friend {
 
     @Override
     public Map<String, FriendPresence> getPresences() {
-        return map;
+        return Collections.singletonMap(presence.getPresenceId(), presence);
     }
 
     @Override

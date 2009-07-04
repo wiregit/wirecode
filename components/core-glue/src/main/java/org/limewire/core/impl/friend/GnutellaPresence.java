@@ -1,12 +1,16 @@
 package org.limewire.core.impl.friend;
 
 import java.net.InetAddress;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AddressFeature;
-import org.limewire.friend.impl.AbstractFriendPresence;
+import org.limewire.friend.api.feature.Feature;
+import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
@@ -19,8 +23,9 @@ import com.limegroup.gnutella.PushEndpoint;
  * a GnutellaPresence can be created for a Connection, which is supplied to
  * the RemoteLibraryManager to add and browse the presence.
  */
-public class GnutellaPresence extends AbstractFriendPresence implements FriendPresence {
+public class GnutellaPresence implements FriendPresence {
     
+    private final AddressFeature addressFeature;
     private final Friend friend;
     private final String id;
     
@@ -92,7 +97,7 @@ public class GnutellaPresence extends AbstractFriendPresence implements FriendPr
      */
     public GnutellaPresence(Address address, String id) {
         this.id = id;
-        addFeature(new AddressFeature(address));
+        this.addressFeature = new AddressFeature(address);
         this.friend = new GnutellaFriend(describe(address), describeFriendly(address), id, this);
     }
     
@@ -145,7 +150,7 @@ public class GnutellaPresence extends AbstractFriendPresence implements FriendPr
     @Override
     public Type getType() {
         return Type.available;
-        }
+    }
 
     @Override
     public String getStatus() {
@@ -165,5 +170,49 @@ public class GnutellaPresence extends AbstractFriendPresence implements FriendPr
     @Override
     public String toString() {
         return "GnutellaPresence for: " + friend;
+    }
+    
+    @Override
+    public void addFeature(Feature feature) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public <D, F extends Feature<D>> void addTransport(Class<F> clazz, FeatureTransport<D> transport) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public Feature getFeature(URI id) {
+        if(id.equals(AddressFeature.ID)) {
+            return addressFeature;
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public Collection<Feature> getFeatures() {
+        return Collections.<Feature>singleton(addressFeature);
+    }
+    
+    @Override
+    public <F extends Feature<D>, D> FeatureTransport<D> getTransport(Class<F> feature) {
+        return null;
+    }
+    
+    @Override
+    public boolean hasFeatures(URI... ids) {
+        if(addressFeature != null) {
+            for(URI uri : ids) {
+                return uri.equals(AddressFeature.ID);
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public void removeFeature(URI id) {
+        throw new UnsupportedOperationException();
     }
 }

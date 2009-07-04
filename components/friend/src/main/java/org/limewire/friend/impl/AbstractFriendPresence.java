@@ -27,8 +27,8 @@ public abstract class AbstractFriendPresence implements FriendPresence {
     }
 
     public AbstractFriendPresence(EventBroadcaster<FeatureEvent> featureEventBroadcaster){
-        this.features = new ConcurrentHashMap<URI, Feature>();
-        this.featureTransports = new ConcurrentHashMap<Class<? extends Feature<?>>, FeatureTransport>();
+        this.features = new ConcurrentHashMap<URI, Feature>(5, 0.75f, 1);
+        this.featureTransports = new ConcurrentHashMap<Class<? extends Feature<?>>, FeatureTransport>(5, 0.75f, 1);
         this.featureBroadcaster = featureEventBroadcaster;
     }
 
