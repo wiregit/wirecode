@@ -1,11 +1,8 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.limewire.core.api.Category;
@@ -32,13 +29,8 @@ import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     private final Category category;
-
-    private Map<FilePropertyKey, Object> propertiesMap;  // TODO this is a shallow copy of LimeXMLDocument.fieldToValue
-
     private final FileDesc fileDesc;
-
     private final LocalFileDetailsFactory detailsFactory;
-
     private final CreationTimeCache creationTimeCache;
 
     @Inject
@@ -48,18 +40,6 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         this.detailsFactory = detailsFactory;
         this.creationTimeCache = creationTimeCache;
         this.category = CategoryConverter.categoryForFile(fileDesc.getFile());
-    }
-
-    /**
-     * Lazily builds the properties map for this local file item.
-     */
-    private Map<FilePropertyKey, Object> getPropertiesMap() {
-        synchronized (this) {
-            if(propertiesMap == null) {
-                reloadProperties();
-            }
-            return propertiesMap;
-        }
     }
 
     @Override
@@ -113,8 +93,20 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     }
 
     @Override
-    public Object getProperty(FilePropertyKey key) {
-        return getPropertiesMap().get(key);
+    public Object getProperty(FilePropertyKey property) {
+        switch(property) {
+        case LOCATION:
+            return getFile().getParent();
+        case NAME:
+            return getName();
+        case DATE_CREATED:
+            long ct = getCreationTime();
+            return ct == -1 ? null : ct;
+        case FILE_SIZE:
+            return getSize();            
+        default:
+            return FilePropertyKeyPopulator.get(category, property, fileDesc.getXMLDocument());
+        }
     }
 
     @Override
@@ -204,11 +196,6 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         return fileDesc instanceof IncompleteFileDesc;
     }
 
-    @Override
-    public void setProperty(FilePropertyKey key, Object value) {
-        getPropertiesMap().put(key, value);
-    }
-
     public FileDesc getFileDesc() {
         return fileDesc;
     }
@@ -219,20 +206,6 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
             return -1;
         }
         return Objects.compareToNullIgnoreCase(getFileName(), ((CoreLocalFileItem) obj).getFileName(), true);
-    }
-    
-    /**
-     * Reloads the properties map to whatever values are stored in the
-     * LimeXmlDocs for this file.
-     */
-    public void reloadProperties() {
-        synchronized (this) {
-            Map<FilePropertyKey, Object> reloadedMap = Collections.synchronizedMap(new HashMap<FilePropertyKey, Object>());
-            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFileSize(), 
-                    getCreationTime(), reloadedMap, fileDesc.getXMLDocument());
-            reloadedMap.put(FilePropertyKey.LOCATION, getFile().getParent());
-            propertiesMap = reloadedMap;
-        }
     }
 
     @Override

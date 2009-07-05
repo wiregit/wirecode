@@ -43,21 +43,21 @@ public class MetaDataManagerImpl implements MetaDataManager {
     }
 
     @Override
-    public void save(LocalFileItem localFileItem) throws MetaDataException {
+    public void save(LocalFileItem localFileItem, Map<FilePropertyKey, Object> newData) throws MetaDataException {
         if (localFileItem instanceof CoreLocalFileItem) {
             CoreLocalFileItem coreLocalFileItem = (CoreLocalFileItem) localFileItem;
-            saveMetaData(coreLocalFileItem);
+            saveMetaData(coreLocalFileItem, newData);
         }
     }
 
-    private void saveMetaData(CoreLocalFileItem coreLocalFileItem) throws MetaDataException {
+    private void saveMetaData(CoreLocalFileItem coreLocalFileItem, Map<FilePropertyKey, Object> newData) throws MetaDataException {
         FileDesc fileDesc = coreLocalFileItem.getFileDesc();
         Category category = coreLocalFileItem.getCategory();
 
         String limeXMLSchemaUri = FilePropertyKeyPopulator.getLimeXmlSchemaUri(category);
         LimeXMLDocument oldDocument = fileDesc.getXMLDocument(limeXMLSchemaUri);
 
-        String input = buildInput(fileDesc, limeXMLSchemaUri, coreLocalFileItem);
+        String input = buildInput(fileDesc, limeXMLSchemaUri, coreLocalFileItem, newData);
 
         if (oldDocument != null && (input == null || input.trim().length() == 0)) {
             removeMeta(fileDesc, limeXMLSchemaUri);
@@ -71,13 +71,10 @@ public class MetaDataManagerImpl implements MetaDataManager {
         try {
             newDoc = limeXMLDocumentFactory.createLimeXMLDocument(input);
         } catch (SAXException e) {
-            coreLocalFileItem.reloadProperties();
             throw new MetaDataException("Internal Document Error. Data could not be saved.", e);
         } catch (SchemaNotFoundException e) {
-            coreLocalFileItem.reloadProperties();
             throw new MetaDataException("Internal Document Error. Data could not be saved.", e);
         } catch (IOException e) {
-            coreLocalFileItem.reloadProperties();
             throw new MetaDataException("Internal Document Error. Data could not be saved.", e);
         }
 
@@ -98,11 +95,9 @@ public class MetaDataManagerImpl implements MetaDataManager {
         if(metaDataFactory.containsReader(fileDesc.getFile())) {
             final MetaDataState committed = collection.mediaFileToDisk(fileDesc, result);
             if (committed != MetaDataState.NORMAL && committed != MetaDataState.UNCHANGED) {
-                coreLocalFileItem.reloadProperties();
                 throw new MetaDataException("Internal Document Error. Data could not be saved.");
             }
         } else if (!collection.writeMapToDisk()) {
-            coreLocalFileItem.reloadProperties();
             throw new MetaDataException("Internal Document Error. Data could not be saved.");
         }
     }
@@ -130,17 +125,25 @@ public class MetaDataManagerImpl implements MetaDataManager {
                 .createLimeXMLDocument(map.values(), currentDoc.getSchemaURI());
     }
 
-    private String buildInput(FileDesc fileDesc, String limeXMLSchemaUri,
-            LocalFileItem localFileItem) {
+    private String buildInput(FileDesc fileDesc, String limeXMLSchemaUri, LocalFileItem localFileItem, Map<FilePropertyKey, Object> newData) {
         List<NameValue<String>> nameValueList = new ArrayList<NameValue<String>>();
         Category category = localFileItem.getCategory();
         
         for (FilePropertyKey filePropertyKey : FilePropertyKey.getEditableKeys()) {
             String limeXmlName = FilePropertyKeyPopulator.getLimeXmlName(category, filePropertyKey);
             if (limeXmlName != null) {
-                String value = localFileItem.getPropertyString(filePropertyKey);
-                NameValue<String> nameValue = new NameValue<String>(limeXmlName, value);
-                nameValueList.add(nameValue);
+                Object value = newData.get(filePropertyKey);
+                if(value != null) {
+                    value = FilePropertyKeyPopulator.sanitizeValue(filePropertyKey, value);
+                }
+                
+                if(value == null) {
+                    value = localFileItem.getPropertyString(filePropertyKey);
+                }
+                
+                if(value != null) {
+                    nameValueList.add(new NameValue<String>(limeXmlName, value.toString()));
+                }
             }
         }
 

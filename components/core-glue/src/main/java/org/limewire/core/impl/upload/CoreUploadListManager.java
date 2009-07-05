@@ -188,7 +188,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
              currentPresence = friendManager.getMostRelevantFriendPresence(id);
         }
         if (currentPresence == null) {
-            currentPresence = new GnutellaPresence(uploader, uploader.getHost());
+            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(uploader, uploader.getHost());
         }
         return currentPresence;
     }

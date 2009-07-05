@@ -1,9 +1,7 @@
 package org.limewire.core.impl.search;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.limewire.core.api.Category;
@@ -19,7 +17,6 @@ import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
@@ -51,22 +48,16 @@ public class RemoteFileDescAdapter implements SearchResult {
     
     private final FriendPresence friendPresence;
     private final RemoteFileDesc rfd;
-    private final List<IpPort> locs;
-    private final Map<FilePropertyKey, Object> properties;    
     private final String extension;
-    private final String fileName;
-    private final String fileNameNoExtension;
+    private final List<IpPort> locs;
     private final URN wrapperUrn;
     private final Category category;
+    private final int quality;
     
-    /**
-     * Cached lists of sources from {@link #getSources()}
-     */
+    /** Cached lists of sources from {@link #getSources()} */
     private List<RemoteHost> remoteHosts;
     
-    /**
-     * The cached relevance value from {@link #getRelevance()}, -1 is unset
-     */
+    /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
     private int relevance = -1;
 
     /**
@@ -75,7 +66,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     public RemoteFileDescAdapter(RemoteFileDesc rfd,
                                  Set<? extends IpPort> locs) {
-        this(rfd, locs, new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID())));
+        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()));
     }
     
     /**
@@ -89,15 +80,9 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.locs = new ArrayList<IpPort>(locs);
         this.friendPresence = friendPresence;
         this.wrapperUrn = rfd.getSHA1Urn() == null ? null : new URNImpl(rfd.getSHA1Urn());
-        this.properties = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
-        this.fileName = rfd.getFileName();
         this.extension = FileUtils.getFileExtension(rfd.getFileName());
-        this.fileNameNoExtension = FileUtils.getFilenameNoExtension(fileName);
-        this.category = CategoryConverter.categoryForExtension(extension); 
-        
-        LimeXMLDocument doc = rfd.getXMLDocument();
-        long fileSize = rfd.getSize();
-        FilePropertyKeyPopulator.populateProperties(fileName, fileSize, rfd.getCreationTime(), properties, doc);
+        this.category = CategoryConverter.categoryForExtension(extension);
+        this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
     }
 
     /**
@@ -136,7 +121,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     @Override
     public String getFileName() {
-       return fileName;
+       return rfd.getFileName();
     }
     
     /**
@@ -149,7 +134,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     
     @Override
     public String getFileNameWithoutExtension() {
-        return fileNameNoExtension;
+        return FileUtils.getFilenameNoExtension(rfd.getFileName());
     }
 
     /**
@@ -160,22 +145,19 @@ public class RemoteFileDescAdapter implements SearchResult {
         LimeXMLDocument doc = rfd.getXMLDocument();
         return (doc != null) && (doc.getLicenseString() != null);
     }
-        
-    
-    /**
-     * @return the property map associated with the rfd used to generate this adaptor.
-     */
-    @Override
-    public Map<FilePropertyKey, Object> getProperties() {
-        return properties;
-    }
 
     /**
      * @return the specified property using the file key provided. 
      */
     @Override
-    public Object getProperty(FilePropertyKey key) {
-        return getProperties().get(key);
+    public Object getProperty(FilePropertyKey property) {
+        switch(property) {
+        case NAME: return getFileNameWithoutExtension();
+        case DATE_CREATED: return rfd.getCreationTime() == -1 ? null : rfd.getCreationTime();
+        case FILE_SIZE: return rfd.getSize();      
+        case QUALITY: return quality == -1 ? null : Long.valueOf(quality);
+        default: return FilePropertyKeyPopulator.get(category, property, rfd.getXMLDocument());
+        }
     }
 
     /**
@@ -234,7 +216,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         int maxAltSourcesToAdd = SearchSettings.ALT_LOCS_TO_DISPLAY.getValue();
         
         // Add the RfdRemoteHost for the FriendPresence
-        remoteHosts.add(new RfdRemoteHost());
+        remoteHosts.add(new RfdRemoteHost(friendPresence, rfd));
         
         // Add a specific number of the altlocs
         for(int i = 0; i < maxAltSourcesToAdd && i < locs.size(); i++) {
@@ -270,11 +252,19 @@ public class RemoteFileDescAdapter implements SearchResult {
      * An adapter that creates a compatible {@link RemoteHost} from the {@link RemoteFileDesc} and anonymous
      *  or non anonymous {@link FriendPresence} that the main {@link RemoteFileDescAdapter} was constructed with.
      */
-    class RfdRemoteHost implements RelevantRemoteHost {
+    static class RfdRemoteHost implements RelevantRemoteHost {
+        private final FriendPresence friendPresence;
+        private final boolean browseHostEnabled;
+        
+        public RfdRemoteHost(FriendPresence presence, RemoteFileDesc rfd) {
+            this.friendPresence = presence;
+            this.browseHostEnabled = rfd.isBrowseHostEnabled();
+        }
+        
         @Override
         public boolean isBrowseHostEnabled() {
             if(friendPresence.getFriend().isAnonymous()) {
-                return rfd.isBrowseHostEnabled();
+                return browseHostEnabled;
             } else {
                 //ensure friend/user still logged in through LW
                 return friendPresence.hasFeatures(LimewireFeature.ID);
@@ -313,12 +303,14 @@ public class RemoteFileDescAdapter implements SearchResult {
         @Override
         public int getRelevance() {
             if(friendPresence.getFriend().isAnonymous()) {
-                if (rfd.isBrowseHostEnabled()) {
+                if (browseHostEnabled) {
                     return BROWSABLE_ANONYMOUS_PEER_FACTOR;
+                } else {
+                    return NON_BROWSABLE_ANONYMOUS_PEER_FACTOR;
                 }
-                return NON_BROWSABLE_ANONYMOUS_PEER_FACTOR;
-            } 
-            return FRIENDLY_PEER_FACTOR;
+            } else {
+                return FRIENDLY_PEER_FACTOR;
+            }
         }
         
         @Override
@@ -335,9 +327,9 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         AltLocRemoteHost(IpPort ipPort) {
             if(ipPort instanceof Connectable) {
-                this.presence = new GnutellaPresence((Connectable)ipPort, ipPort.getInetSocketAddress().toString());
+                this.presence = new GnutellaPresence.GnutellaPresenceWithConnectable((Connectable)ipPort);
             } else {
-                this.presence = new GnutellaPresence(new ConnectableImpl(ipPort, false), ipPort.getInetSocketAddress().toString());
+                this.presence = new GnutellaPresence.GnutellaPresenceWithConnectable(new ConnectableImpl(ipPort, false));
             }
         }
 

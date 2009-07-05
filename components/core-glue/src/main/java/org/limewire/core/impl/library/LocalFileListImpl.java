@@ -143,7 +143,6 @@ abstract class LocalFileListImpl implements LocalFileList {
     protected void updateFileDesc(FileDesc fd) {
         LocalFileItem item = (LocalFileItem)fd.getClientProperty(FILE_ITEM_PROPERTY);
         if(item != null) {
-            ((CoreLocalFileItem)item).reloadProperties();
             threadSafeList.getReadWriteLock().writeLock().lock();
             try {
                 int idx = threadSafeList.indexOf(item);

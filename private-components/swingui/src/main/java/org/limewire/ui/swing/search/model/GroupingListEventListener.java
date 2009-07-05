@@ -13,7 +13,7 @@ import ca.odell.glazedlists.event.ListEventListener;
  * allow similar results to be grouped.
  */
 class GroupingListEventListener implements ListEventListener<VisualSearchResult> {
-    private final Log LOG = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(GroupingListEventListener.class);
 
     private final SimilarResultsDetector similarResultsDetector;
 

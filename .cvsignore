@@ -10,3 +10,5 @@ output.txt
 junit
 .ivy2
 LimeWire.jar
+*.index
+*.hprof

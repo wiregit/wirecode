@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import org.limewire.core.api.browse.BrowseFactory;
-import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseSearchFactory;
 import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.inject.LazySingleton;
 
 import com.google.inject.Inject;
@@ -30,29 +30,23 @@ class CoreBrowseSearchFactory implements BrowseSearchFactory {
         this.backgroundExecutor = backgroundExecutor;
     }
     
-    /**
-     * @param friend The friend to browse.  Can not be anonymous or null.
-     */
     public BrowseSearch createFriendBrowseSearch(Friend friend){
         assert(friend != null && !friend.isAnonymous());
         return new FriendSingleBrowseSearch(remoteLibraryManager, friend, backgroundExecutor);
     }
     
-    /**
-     * 
-     * @param person The host to browse.  Can be a friend or anonymous.  Can not be null.
-     */
-    public BrowseSearch createBrowseSearch(RemoteHost person){
-        assert(person != null);
-        if(person.getFriendPresence().getFriend().isAnonymous()){
-            return new AnonymousSingleBrowseSearch(browseFactory, person.getFriendPresence());
+    public BrowseSearch createBrowseSearch(FriendPresence presence){
+        assert(presence != null);
+        if(presence.getFriend().isAnonymous()){
+            return new AnonymousSingleBrowseSearch(browseFactory, presence);
         } else {
-            return createFriendBrowseSearch(person.getFriendPresence().getFriend());
+            return createFriendBrowseSearch(presence.getFriend());
         }        
     }
     
-    public BrowseSearch createBrowseSearch(Collection<RemoteHost> people){
-        return new MultipleBrowseSearch(this, people);
+    @Override
+    public BrowseSearch createBrowseSearch(Collection<FriendPresence> presences) {
+        return new MultipleBrowseSearch(this, presences);
     }
     
     public BrowseSearch createAllFriendsBrowseSearch(){

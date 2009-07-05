@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.Category;
@@ -27,9 +25,9 @@ import org.limewire.friend.api.FriendManager;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.Address;
-import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
@@ -46,8 +44,6 @@ class CoreDownloadItem implements DownloadItem {
     private volatile int hashCode = 0;
     private volatile long cachedSize;
     private volatile boolean cancelled = false;
-    
-    private Map<FilePropertyKey, Object> propertiesMap;  // TODO this is a shallow copy of LimeXMLDocument.fieldToValue
 
     /**
      * size in bytes. FINISHING state is only shown for files greater than this
@@ -166,7 +162,7 @@ class CoreDownloadItem implements DownloadItem {
             friendPresence = friendManager.getMostRelevantFriendPresence(((FriendAddress)rfd.getAddress()).getId());
         } 
         if(friendPresence == null) {
-            friendPresence = new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID()));
+            friendPresence = new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID());
         }
         return friendPresence;
     }
@@ -423,8 +419,28 @@ class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public Object getProperty(FilePropertyKey key) {
-        return getPropertiesMap().get(key);
+    public Object getProperty(FilePropertyKey property) {
+        switch(property) {
+        case NAME:
+            return FileUtils.getFilenameNoExtension(getFileName());
+        case DATE_CREATED:
+            File file = downloader.getFile();
+            long ct = -1;
+            if(file != null) {
+                ct = file.lastModified();
+            }
+            return ct == -1 ? null : ct;
+        case FILE_SIZE:
+            return getTotalSize();            
+        default:
+            LimeXMLDocument doc = (LimeXMLDocument)downloader.getAttribute("LimeXMLDocument");
+            if(doc != null) {
+                Category category = CategoryConverter.categoryForFile(getSaveFile());
+                return FilePropertyKeyPopulator.get(category, property, doc);
+            } else {
+                return null;
+            }
+        }
     }
 
     @Override
@@ -437,45 +453,6 @@ class CoreDownloadItem implements DownloadItem {
             return null;
         }
     }
-    
-    /**
-     * Lazily builds the properties map for this local file item.
-     */
-    private Map<FilePropertyKey, Object> getPropertiesMap() {
-        synchronized (this) {
-            if(propertiesMap == null) {
-                reloadProperties();
-            }
-            return propertiesMap;
-        }
-    }
-    
-    /**
-     * Reloads the properties map to whatever values are stored in the
-     * LimeXmlDocs for this file.
-     */
-    public void reloadProperties() {
-        synchronized (this) {
-            Map<FilePropertyKey, Object> reloadedMap = Collections
-                    .synchronizedMap(new HashMap<FilePropertyKey, Object>());
-            long creationTime = -1;
-            File file = downloader.getFile();
-            if(file != null) {
-                creationTime = file.lastModified();
-			}
-			
-			// "LimeXMLDocument" attribute is set in ManagedDownloaderImpl
-            LimeXMLDocument doc = (LimeXMLDocument) downloader.getAttribute("LimeXMLDocument");
-           
-            if (doc != null) {
-                FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(),
-                        downloader.getFile().lastModified(), reloadedMap, doc);
-            }
-            FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(), creationTime, reloadedMap, doc);
-            propertiesMap = reloadedMap;
-        }
-    }
-
 
     @Override
     public Date getStartDate() {

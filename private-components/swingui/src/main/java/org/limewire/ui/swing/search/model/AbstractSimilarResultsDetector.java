@@ -5,7 +5,7 @@ import org.limewire.logging.LogFactory;
 
 public abstract class AbstractSimilarResultsDetector implements SimilarResultsDetector {
 
-    protected final Log LOG = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(AbstractSimilarResultsDetector.class);
 
     /**
      * Finds the parent correlating the two searchResults and then moves these

@@ -2,7 +2,6 @@ package org.limewire.core.api.library;
 
 import java.io.File;
 
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.friend.api.FileMetaData;
 
 /**
@@ -20,11 +19,6 @@ public interface LocalFileItem extends FileItem {
     
     /**True if the file is incomplete.**/
     boolean isIncomplete();
-    
-    /**
-     * Sets the property of this file item to a new value.
-     */
-    void setProperty(FilePropertyKey key, Object value);
     
     /** Returns the last modified date of the file. */
     long getLastModifiedTime();

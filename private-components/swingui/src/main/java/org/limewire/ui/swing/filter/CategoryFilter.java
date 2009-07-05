@@ -27,7 +27,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -44,7 +43,7 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private final JXList list = new JXList();
     
     private Category selectedCategory;
-    private FunctionList<E, Category> categoryList;
+    private EventList<Category> categoryList;
     private UniqueListFactory<Category> uniqueListFactory;
     private UniqueList<Category> uniqueList;
     private DefaultEventListModel<Category> listModel;
@@ -201,10 +200,9 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Returns a list of category values in the specified list of search 
      * results.
      */
-    private FunctionList<E, Category> createCategoryList(
-            EventList<E> resultsList) {
+    private EventList<Category> createCategoryList(EventList<E> resultsList) {
         // Create list of category values.
-        return GlazedListsFactory.functionList(resultsList, new CategoryFunction<E>());
+        return GlazedListsFactory.simpleFunctionList(resultsList, new CategoryFunction<E>());
     }
     
     /**

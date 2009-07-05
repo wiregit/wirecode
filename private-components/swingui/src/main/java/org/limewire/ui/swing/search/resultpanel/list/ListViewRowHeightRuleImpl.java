@@ -6,8 +6,10 @@ import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRul
 import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.logging.Log;
@@ -16,29 +18,42 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
+    private static final Log LOG = LogFactory.getLog(ListViewRowHeightRuleImpl.class);
+    
     private static final String OPEN_HTML = "<html>";
     private static final String CLOSE_HTML = "</html>";
     private static final String EMPTY_STRING = "";
-    private final Log LOG = LogFactory.getLog(getClass());
-    private final PropertyKeyComparator AUDIO_COMPARATOR = 
-        new PropertyKeyComparator(FilePropertyKey.GENRE, FilePropertyKey.BITRATE, FilePropertyKey.TRACK_NUMBER);
-    private final PropertyKeyComparator VIDEO_COMPARATOR = 
-        new PropertyKeyComparator(FilePropertyKey.YEAR, FilePropertyKey.RATING, FilePropertyKey.DESCRIPTION, FilePropertyKey.HEIGHT, 
-                                  FilePropertyKey.WIDTH, FilePropertyKey.BITRATE);
-    private final PropertyKeyComparator DOCUMENTS_COMPARATOR = 
-        new PropertyKeyComparator(FilePropertyKey.DATE_CREATED, FilePropertyKey.AUTHOR);
-    private final PropertyKeyComparator PROGRAMS_COMPARATOR = 
-        new PropertyKeyComparator(FilePropertyKey.PLATFORM, FilePropertyKey.COMPANY);
     
-    private SearchHighlightUtil searchHighlightUtil;
+    private final List<FilePropertyKey> audioKeyOrder;
+    private final List<FilePropertyKey> videoKeyOrder;
+    private final List<FilePropertyKey> documentKeyOrder;
+    private final List<FilePropertyKey> programKeyOrder;
     
+    public ListViewRowHeightRuleImpl() {
+        List<FilePropertyKey> keys = new ArrayList<FilePropertyKey>(Arrays.asList(FilePropertyKey.values()));
+        
+        Collections.sort(keys, new PropertyKeyComparator(FilePropertyKey.GENRE, FilePropertyKey.BITRATE, FilePropertyKey.TRACK_NUMBER));
+        audioKeyOrder = new ArrayList<FilePropertyKey>(keys);
+        
+        Collections.sort(keys, new PropertyKeyComparator(FilePropertyKey.YEAR, FilePropertyKey.RATING, FilePropertyKey.DESCRIPTION, FilePropertyKey.HEIGHT, 
+                                  FilePropertyKey.WIDTH, FilePropertyKey.BITRATE));
+        videoKeyOrder = new ArrayList<FilePropertyKey>(keys);
+        
+        Collections.sort(keys, new PropertyKeyComparator(FilePropertyKey.DATE_CREATED, FilePropertyKey.AUTHOR));
+        documentKeyOrder = new ArrayList<FilePropertyKey>(keys);
+        
+        Collections.sort(keys, new PropertyKeyComparator(FilePropertyKey.PLATFORM, FilePropertyKey.COMPANY));
+        programKeyOrder = new ArrayList<FilePropertyKey>(keys);        
+    }
+    
+    private SearchHighlightUtil searchHighlightUtil;    
     private String searchText;
     
     @Override
     public void initializeWithSearch(String search) {
-        this.searchText = search;
+        searchText = search;
         if(searchText != null) {
-            this.searchHighlightUtil = new SearchHighlightUtil(search);
+            searchHighlightUtil = new SearchHighlightUtil(search);
         }
         
     }
@@ -106,16 +121,27 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         if(searchText == null)
             return null;
         
-        ArrayList<FilePropertyKey> properties = new ArrayList<FilePropertyKey>(vsr.getProperties().keySet());
-        Collections.sort(properties, getComparator(vsr));
-        for (FilePropertyKey key : properties) {
+        List<FilePropertyKey> keys = null;
+        switch(vsr.getCategory()) {
+        case AUDIO: keys = audioKeyOrder; break;
+        case DOCUMENT: keys = documentKeyOrder; break;
+        case PROGRAM: keys = programKeyOrder; break;
+        case VIDEO: keys = videoKeyOrder; break;
+        }
+        
+        if(keys == null) {
+            return null;
+        }
+                
+        for (FilePropertyKey key : keys) {
             String value = vsr.getPropertyString(key);
-
-            String propertyMatch = highlightMatches(value);
-            if (value != null && isDifferentLength(value, propertyMatch)) {
-                String betterKey = key.toString().toLowerCase();
-                betterKey = betterKey.replace('_', ' ');
-                return new PropertyMatchImpl(betterKey, propertyMatch);
+            if (value != null) {
+                String propertyMatch = highlightMatches(value);
+                if (isDifferentLength(value, propertyMatch)) {
+                    String betterKey = key.toString().toLowerCase();
+                    betterKey = betterKey.replace('_', ' ');
+                    return new PropertyMatchImpl(betterKey, propertyMatch);
+                }
             }
         }
 
@@ -125,19 +151,6 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     
     private boolean isDifferentLength(String str1, String str2) {
         return str1 != null && str2 != null && str1.length() != str2.length();
-    }
-    
-    private Comparator<FilePropertyKey> getComparator(VisualSearchResult vsr) {
-        switch (vsr.getCategory()) {
-        case AUDIO:
-            return AUDIO_COMPARATOR;
-        case VIDEO:
-            return VIDEO_COMPARATOR;
-        case DOCUMENT:
-            return DOCUMENTS_COMPARATOR;
-        default:
-            return PROGRAMS_COMPARATOR;
-        }
     }
     
     /**

@@ -1,9 +1,7 @@
 package org.limewire.ui.swing.filter;
 
 import java.util.Collection;
-import java.util.Map;
 
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.friend.api.Friend;
 
@@ -38,11 +36,5 @@ public interface FilterableItem extends PropertiableFile {
      * Returns an indicator that determines if the result is spam.
      */
     boolean isSpam();
-    
-    /**
-     * Returns a map containing FilePropertyKey objects and their associated
-     * values. 
-     */
-    Map<FilePropertyKey, Object> getProperties();
     
 }

@@ -35,7 +35,6 @@ import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.event.ListEvent;
@@ -61,7 +60,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private final JXList list = new JXList();
     private final HyperlinkButton moreButton = new HyperlinkButton();
     
-    private FunctionList<E, Object> propertyList;
+    private EventList<Object> propertyList;
     private FilterList<Object> nonNullList;
     private UniqueListFactory<Object> uniqueListFactory;
     private UniqueList<Object> uniqueList;
@@ -281,13 +280,13 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     /**
      * Returns a list of property values in the specified list of items.
      */
-    private FunctionList<E, Object> createPropertyList(EventList<E> resultsList) {
+    private EventList<Object> createPropertyList(EventList<E> resultsList) {
         switch (filterType) {
         case EXTENSION:
         case PROPERTY:
         case FILE_TYPE:
             // Create list of property values.
-            return GlazedListsFactory.functionList(resultsList, 
+            return GlazedListsFactory.simpleFunctionList(resultsList, 
                     new PropertyFunction(filterType, propertyKey));
             
         default:

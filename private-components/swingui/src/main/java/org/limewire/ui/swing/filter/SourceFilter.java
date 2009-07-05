@@ -330,7 +330,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         CollectionList<E, Friend> collectionList = GlazedListsFactory.collectionList(resultsList, model);
         
         // Create function list.
-        return GlazedListsFactory.functionList(collectionList, new SourceItemFriendFunction());
+        return GlazedListsFactory.simpleFunctionList(collectionList, new SourceItemFriendFunction());
     }
     
     /**

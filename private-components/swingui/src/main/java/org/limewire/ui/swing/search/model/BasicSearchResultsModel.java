@@ -3,13 +3,14 @@ package org.limewire.ui.swing.search.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingUtilities;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -30,13 +31,9 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.GroupingList;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.FunctionList.AdvancedFunction;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.util.concurrent.Lock;
@@ -51,7 +48,7 @@ import com.google.inject.Provider;
  * requests to download a search result.
  */
 class BasicSearchResultsModel implements SearchResultsModel {
-    private final Log LOG = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(BasicSearchResultsModel.class);
     
     /** Filter debugger associated with this model. */
     private final FilterDebugger<VisualSearchResult> filterDebugger;
@@ -68,14 +65,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
     /** Save exception handler. */
     private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
 
-    /** List of all search results. */
-    private final EventList<SearchResult> allSearchResults;
-
     /** Total number of search results. */
-    private final AtomicInteger resultCount = new AtomicInteger();
+    private int resultCount;
 
     /** List of search results grouped by URN. */
-    private final FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults;
+    private final EventList<VisualSearchResult> groupedUrnResults;
 
     /** Observable list of grouped search results. */
     private final ObservableElementList<VisualSearchResult> observableList;
@@ -100,6 +94,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
     
     private List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
     
+    /** Headings to create search results with. */
+    private final Provider<PropertiableHeadings> propertiableHeadings;
+    
     private final ListQueuer listQueuer = new ListQueuer();
 
     /**
@@ -115,12 +112,13 @@ class BasicSearchResultsModel implements SearchResultsModel {
         this.search = search;
         this.downloadListManager = downloadListManager;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.propertiableHeadings = propertiableHeadings;
         
         // Create filter debugger.
         filterDebugger = new FilterDebugger<VisualSearchResult>();
         
         // Underlying list, with no locks -- always accessed on EDT.
-        allSearchResults = new BasicEventList<SearchResult>(new ReadWriteLock() {
+        groupedUrnResults = new BasicEventList<VisualSearchResult>(new ReadWriteLock() {
             private Lock noopLock = new Lock() {
                 @Override public void lock() {}
                 @Override public boolean tryLock() { return true; }
@@ -137,15 +135,6 @@ class BasicSearchResultsModel implements SearchResultsModel {
                 return noopLock;
             }
         });
-        
-        // Create list of search results grouped by URN.
-        GroupingList<SearchResult> groupingListUrns = GlazedListsFactory.groupingList(
-                allSearchResults, new UrnComparator());
-        
-        // Create list of visual search results where each element represents
-        // a single group.
-        groupedUrnResults = GlazedListsFactory.functionList(
-                groupingListUrns, new SearchResultGrouper(resultCount, propertiableHeadings));
         
         // Create observable list that fires an event when results are modified.
         observableList = GlazedListsFactory.observableElementList(groupedUrnResults,
@@ -191,9 +180,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
             searchListener = null;
         }
         
-        if (allSearchResults instanceof TransformedList){
-            ((TransformedList)allSearchResults).dispose();
-        }
+        groupedUrnResults.dispose();
+        
         notifyDisposalListeners();
     }
     
@@ -234,7 +222,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
     
     @Override
     public int getResultCount() {
-        return resultCount.get();
+        return resultCount;
     }
     
     @Override
@@ -462,50 +450,25 @@ class BasicSearchResultsModel implements SearchResultsModel {
         }
     }
     
-    /**
-     * A comparator used to group search results by URN.
-     */
-    private static class UrnComparator implements Comparator<SearchResult> {
-        @Override
-        public int compare(SearchResult o1, SearchResult o2) {
-            return o1.getUrn().compareTo(o2.getUrn());
-        }
-    }
-
-    /**
-     * A GlazedList function used to transform a group of search results into
-     * a single VisualSearchResult.
-     */
-    private static class SearchResultGrouper implements
-            AdvancedFunction<List<SearchResult>, VisualSearchResult> {
-        private final AtomicInteger resultCount;
-        private final Provider<PropertiableHeadings> propertiableHeadings;
-
-        public SearchResultGrouper(AtomicInteger resultCount, Provider<PropertiableHeadings> propertiableHeadings) {
-            this.resultCount = resultCount;
-            this.propertiableHeadings = propertiableHeadings;
-        }
-
-        @Override
-        public void dispose(List<SearchResult> sourceValue, VisualSearchResult transformedValue) {
-            resultCount.addAndGet(-transformedValue.getSources().size());
-        }
-
-        @Override
-        public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
-            VisualSearchResult adapter = new SearchResultAdapter(sourceValue, propertiableHeadings);
-
-            resultCount.addAndGet(adapter.getSources().size());
-            return adapter;
-        }
-
-        @Override
-        public VisualSearchResult reevaluate(List<SearchResult> sourceValue,
-                VisualSearchResult transformedValue) {
-            resultCount.addAndGet(-transformedValue.getSources().size());
-            ((SearchResultAdapter) transformedValue).update();
-            resultCount.addAndGet(transformedValue.getSources().size());
-            return transformedValue;
+    private final ResultFinder resultFinder = new ResultFinder();
+    private void addResultsInternal(Collection<? extends SearchResult> results) {
+        for(SearchResult result : results) {
+            URN urn = result.getUrn();
+            if(urn != null) {
+                int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
+                if(idx >= 0) {
+//                    System.out.println("Found existing @ " + idx + ", adding new result");
+                    SearchResultAdapter vsr = (SearchResultAdapter)groupedUrnResults.get(idx);
+                    vsr.addNewSource(result);
+                    groupedUrnResults.set(idx, vsr);
+                } else {
+                    idx = -(idx + 1);
+//                    System.out.println("No existing, adding new @ " + idx);
+                    SearchResultAdapter vsr = new SearchResultAdapter(result, propertiableHeadings);
+                    groupedUrnResults.add(idx, vsr);
+                }
+                resultCount += result.getSources().size();
+            }
         }
     }
 
@@ -551,7 +514,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        allSearchResults.clear();
+                        groupedUrnResults.clear();
                     }
                 });
             }
@@ -578,7 +541,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
             // move to searchResults outside lock,
             // so we don't hold a lock while allSearchResults
             // triggers events.
-            allSearchResults.addAll(transferQ);
+            addResultsInternal(transferQ);
             transferQ.clear();
             
             synchronized(LOCK) {
@@ -590,6 +553,13 @@ class BasicSearchResultsModel implements SearchResultsModel {
                     schedule();
                 }
             }
+        }
+    }
+    
+    private static class ResultFinder implements Comparator<Object> {
+        @Override
+        public int compare(Object o1, Object o2) {
+            return ((VisualSearchResult)o1).getUrn().compareTo(((URN)o2));
         }
     }
 }

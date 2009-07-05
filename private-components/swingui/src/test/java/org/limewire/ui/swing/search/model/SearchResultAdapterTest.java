@@ -1,12 +1,9 @@
 package org.limewire.ui.swing.search.model;
 
-import java.util.Arrays;
-
 import junit.framework.TestCase;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.MockSearchResult;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
@@ -27,7 +24,7 @@ public class SearchResultAdapterTest extends TestCase {
         propertiableHeadings = new MockPropertiableHeadings();
         context = new Mockery();
         provider = context.mock(Provider.class);
-        adapter = new SearchResultAdapter(Arrays.asList(new SearchResult[] { result }), provider);
+        adapter = new SearchResultAdapter(result, provider);
     }
 
     public void testHeadingAndSubHeadingCached() {

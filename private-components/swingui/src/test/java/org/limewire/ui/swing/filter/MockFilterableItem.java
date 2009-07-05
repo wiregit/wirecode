@@ -53,7 +53,6 @@ public class MockFilterableItem implements FilterableItem {
         return friends;
     }
 
-    @Override
     public Map<FilePropertyKey, Object> getProperties() {
         return properties;
     }

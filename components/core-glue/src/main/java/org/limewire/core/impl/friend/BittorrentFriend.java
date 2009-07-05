@@ -1,7 +1,6 @@
 package org.limewire.core.impl.friend;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.friend.api.Friend;
@@ -13,17 +12,14 @@ import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PresenceEvent;
 import org.limewire.listener.EventListener;
 
-public class BittorrentFriend implements Friend {
+class BittorrentFriend implements Friend {
 
     private final String id;
-
-    private final Map<String, FriendPresence> presences;
+    private final FriendPresence presence;
 
     public BittorrentFriend(String id, BittorrentPresence bittorrentPresence) {
         this.id = id;
-        Map<String, FriendPresence> presences = new HashMap<String, FriendPresence>();
-        presences.put(id, bittorrentPresence);
-        this.presences = Collections.unmodifiableMap(presences);
+        this.presence = bittorrentPresence;
     }
 
     @Override
@@ -63,7 +59,7 @@ public class BittorrentFriend implements Friend {
 
     @Override
     public Map<String, FriendPresence> getPresences() {
-        return presences;
+        return Collections.singletonMap(id, presence);
     }
 
     @Override

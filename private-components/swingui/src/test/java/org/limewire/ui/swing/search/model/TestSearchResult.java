@@ -49,11 +49,6 @@ public class TestSearchResult implements SearchResult {
     }
 
     @Override
-    public Map<FilePropertyKey, Object> getProperties() {
-        return properties;
-    }
-
-    @Override
     public Object getProperty(FilePropertyKey key) {
         return properties.get(key);
     }

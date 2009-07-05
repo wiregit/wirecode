@@ -18,7 +18,6 @@ import com.limegroup.gnutella.Uploader;
 public class BittorrentPresence implements FriendPresence {
 
     private final String id;
-
     private final Friend friend;
 
     public BittorrentPresence(Uploader uploader) {

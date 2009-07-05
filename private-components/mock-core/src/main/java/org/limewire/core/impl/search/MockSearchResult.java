@@ -60,13 +60,8 @@ public class MockSearchResult implements Cloneable, SearchResult {
     }
 
     @Override
-    public Map<FilePropertyKey, Object> getProperties() {
-        return properties;
-    }
-
-    @Override
     public Object getProperty(FilePropertyKey key) {
-        return getProperties().get(key);
+        return properties.get(key);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.filter;
 
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.core.api.FilePropertyKey;
 
@@ -19,13 +18,7 @@ class FilterableItemTextFilterator<E extends FilterableItem> implements TextFilt
         // Add file extension to list.
         baseList.add(item.getFileExtension());
         
-        // Add non-null values for all indexable keys.
-        Map<FilePropertyKey, Object> props = item.getProperties();
-        for (FilePropertyKey key : props.keySet()) {
-            if (!FilePropertyKey.getIndexableKeys().contains(key)) {  
-                continue;
-            }
-            
+        for(FilePropertyKey key : FilePropertyKey.getIndexableKeys()) {
             String value = item.getPropertyString(key);
             if (value != null) {
                 baseList.add(value);

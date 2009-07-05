@@ -36,6 +36,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -427,18 +428,17 @@ public class FileInfoPanel extends JPanel {
         case LOCAL_FILE: 
             if (changedProps.size() != 0 && propertiableFile instanceof LocalFileItem) {
                 LocalFileItem item = (LocalFileItem) propertiableFile;
+                Map<FilePropertyKey, Object> newData = new HashMap<FilePropertyKey, Object>();
                 for (FilePropertyKey key : changedProps.keySet()) {
                     JComponent component = changedProps.get(key);
-                    if(component instanceof JTextField) {
-                        item.setProperty(key, ((JTextField)component).getText().trim());
-                    } else if(component instanceof JTextArea) {
-                        item.setProperty(key, ((JTextArea)component).getText().trim());
+                    if(component instanceof JTextComponent) {
+                        newData.put(key, ((JTextComponent)component).getText().trim());
                     } else if(component instanceof JComboBox) {
-                        item.setProperty(key, ((JComboBox)component).getSelectedItem());
+                        newData.put(key, ((JComboBox)component).getSelectedItem());
                     }
                 }
                 try {
-                    metaDataManager.save(item);
+                    metaDataManager.save(item, newData);
                 } catch (MetaDataException e) {
                     String message = I18n.tr("Unable to save metadata changes.");
                     FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), message, I18n.tr("View File Info"), 

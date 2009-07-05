@@ -266,7 +266,7 @@ public class FileUtils {
         if (index == (name.length() - 1))
             return "";
 
-        return name.substring(index + 1);
+        return name.substring(index + 1).intern();
     }
 
     /**

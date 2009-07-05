@@ -18,6 +18,8 @@ import org.limewire.util.RPNParser.StringLookup;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
@@ -61,7 +63,7 @@ public class LimeXMLDocument implements StringLookup {
     /**
      * Map of canonical attribute name -> value.
      */
-    private Map<String, String> fieldToValue = new HashMap<String, String>();
+    private final Map<String, String> fieldToValue;
     
     /**
      * The schema of this LimeXMLDocument.
@@ -115,10 +117,12 @@ public class LimeXMLDocument implements StringLookup {
         if (result.schemaURI == null)
             throw new SchemaNotFoundException("no schema");
 
-        this.fieldToValue = result.get(0);
-        this.schemaUri = result.schemaURI;
-        setFields(result.canonicalKeyPrefix);
-        internStrings();
+        Map<String, String> map = result.get(0);
+        setFields(result.canonicalKeyPrefix, map);
+        internStrings(map);
+        
+        this.schemaUri = result.schemaURI.intern();
+        this.fieldToValue = ImmutableMap.copyOf(map);
         if(!isValid())
             throw new IOException("Invalid XML: " + xml + ", fieldToValue: " + fieldToValue + ", attrString: " + getAttributeString() + ", schemaURI: " + schemaUri);
     }
@@ -138,12 +142,13 @@ public class LimeXMLDocument implements StringLookup {
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         if(map.isEmpty())
             throw new IllegalArgumentException("empty map");
-
+        
+        map.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
+        setFields(keyPrefix, map);
+        internStrings(map);
+        
         this.schemaUri = schemaURI;
-        this.fieldToValue = map;
-        fieldToValue.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
-        setFields(keyPrefix);
-        internStrings();
+        this.fieldToValue = ImmutableMap.copyOf(map);
 
         if(!isValid())
             throw new IOException("invalid doc! "+map+" \nschema uri: "+schemaURI);
@@ -166,27 +171,28 @@ public class LimeXMLDocument implements StringLookup {
         if(nameValueList.isEmpty())
             throw new IllegalArgumentException("empty list");
 
-        //set the schema URI
-        this.schemaUri = schemaURI;
-                
+        Map<String, String> map = new HashMap<String, String>(nameValueList.size());
         //iterate over the passed list of field names & values
         for(Map.Entry<String, String> next : nameValueList)
-            fieldToValue.put(next.getKey().trim(), next.getValue());
+            map.put(next.getKey().trim(), next.getValue());
         
         // scan for action/id/etc..
-        scanFields();
-        internStrings();
+        scanFields(map);
+        internStrings(map);
+        
+        this.schemaUri = schemaURI;
+        this.fieldToValue = ImmutableMap.copyOf(map);
         
         if(!isValid()) {
             throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaFields: " + ((getSchema() != null) ? getSchema().getCanonicalizedFieldNames() : "n/a"));
         }
     }
 
-    private void internStrings() {
-        for(Map.Entry<String, String> entry : fieldToValue.entrySet()) {
+    private void internStrings(Map<String, String> inputMap) {
+        for(Map.Entry<String, String> entry : inputMap.entrySet()) {
             String key = entry.getKey() != null ? entry.getKey().intern() : null;
             String value = entry.getValue() != null ? entry.getValue().intern() : null;
-            fieldToValue.put(key, value);    
+            inputMap.put(key, value);    
         }
     }
 
@@ -239,7 +245,7 @@ public class LimeXMLDocument implements StringLookup {
                 }
             }
         }
-        CACHED_KEYWORDS = retList;
+        CACHED_KEYWORDS = ImmutableList.copyOf(retList);
         return retList;
     }
 
@@ -348,20 +354,6 @@ public class LimeXMLDocument implements StringLookup {
      */
     public Set<Map.Entry<String, String>> getNameValueSet() {
         return fieldToValue.entrySet();
-    }
-    
-    /**
-     * Returns a set of the names within this LimeXMLDocument.
-     */
-    public Set<String> getNameSet() {
-        return fieldToValue.keySet();
-    }
-    
-    /**
-     * Returns a collection of the values of this LimeXMLDocument.
-     */
-    public Collection<String> getValueList() {
-        return fieldToValue.values();
     }
     
     /**
@@ -569,27 +561,27 @@ public class LimeXMLDocument implements StringLookup {
      * Looks in the fields for the ACTION, IDENTIFIER, and INDEX, and a license.
      * Action is stored, index & identifier are removed.
      */
-    private void scanFields() {
-        String canonicalKey = getCanonicalKey(getNameValueSet());
+    private void scanFields(Map<String, String> inputMap) {
+        String canonicalKey = getCanonicalKey(inputMap.entrySet());
         if(canonicalKey == null)
             return;
 
-        setFields(canonicalKey);
-        fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
-        fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE);
+        setFields(canonicalKey, inputMap);
+        inputMap.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
+        inputMap.remove(canonicalKey + XML_ID_ATTRIBUTE);
     }
     
     /**
      * Stores whether or not an action or CC license are in this LimeXMLDocument.
      */
-    private void setFields(String prefix) {
+    private void setFields(String prefix, Map<String, String> inputMap) {
         // store action.
-        action = fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
-        actionDetail = fieldToValue.get(prefix + XML_ACTION_INFO);
+        action = inputMap.get(prefix + XML_ACTION_ATTRIBUTE);
+        actionDetail = inputMap.get(prefix + XML_ACTION_INFO);
 
         // deal with updating license_type based on the license
-        String license = fieldToValue.get(prefix + XML_LICENSE_ATTRIBUTE);
-        String type = fieldToValue.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+        String license = inputMap.get(prefix + XML_LICENSE_ATTRIBUTE);
+        String type = inputMap.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
         
         if(LOG.isDebugEnabled())
             LOG.debug("type: " + type);
@@ -600,15 +592,15 @@ public class LimeXMLDocument implements StringLookup {
         // a content id & a version id.
         licenseType = LicenseType.determineLicenseType(license, type);        
         if (licenseType == LicenseType.CC_LICENSE) {
-            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
+            inputMap.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
         }        
         if (licenseType == LicenseType.LIMEWIRE_STORE_PURCHASE) {
-            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE,
+            inputMap.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE,
                     LicenseType.LIMEWIRE_STORE_PURCHASE.toString());
         }
         
         // Grab the version, if it exists.
-        String versionString = fieldToValue.get(prefix + XML_VERSION_ATTRIBUTE);
+        String versionString = inputMap.get(prefix + XML_VERSION_ATTRIBUTE);
         if(versionString != null) {
             try {
                 version = Integer.parseInt(versionString);
@@ -621,10 +613,10 @@ public class LimeXMLDocument implements StringLookup {
         } else {
             version = CURRENT_VERSION;
         }
-        fieldToValue.remove(prefix + XML_VERSION_ATTRIBUTE);
+        inputMap.remove(prefix + XML_VERSION_ATTRIBUTE);
         
         if(LOG.isDebugEnabled())
-            LOG.debug("Fields after setting: " + fieldToValue);
+            LOG.debug("Fields after setting: " + inputMap);
     }
     
     /**

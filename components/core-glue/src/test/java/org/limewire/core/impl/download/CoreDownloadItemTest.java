@@ -366,7 +366,7 @@ public class CoreDownloadItemTest extends BaseTestCase {
     public void testGetProperties() {
         context.checking(new Expectations() {
             {
-                one(downloader).getAttribute("LimeXMLDocument");
+                allowing(downloader).getAttribute("LimeXMLDocument");
                 will(returnValue(document));
                 allowing(downloader).getSaveFile();
                 will(returnValue(new File("test.mp3")));
@@ -376,44 +376,6 @@ public class CoreDownloadItemTest extends BaseTestCase {
                 will(returnValue(1234L));
             }
         });
-
-        assertEquals(artist, coreDownloadItem.getProperty(FilePropertyKey.AUTHOR));
-        assertEquals(title, coreDownloadItem.getProperty(FilePropertyKey.TITLE));
-        assertEquals(album, coreDownloadItem.getProperty(FilePropertyKey.ALBUM));
-        assertEquals(genre, coreDownloadItem.getProperty(FilePropertyKey.GENRE));
-        assertEquals(track, coreDownloadItem.getProperty(FilePropertyKey.TRACK_NUMBER));
-        assertEquals(year, coreDownloadItem.getProperty(FilePropertyKey.YEAR));
-        assertEquals(seconds, coreDownloadItem.getProperty(FilePropertyKey.LENGTH));
-        assertEquals(bitrate, coreDownloadItem.getProperty(FilePropertyKey.BITRATE));
-        assertEquals(comments, coreDownloadItem.getProperty(FilePropertyKey.DESCRIPTION));
-
-        assertEquals(artist, coreDownloadItem.getPropertyString(FilePropertyKey.AUTHOR));
-        assertEquals(title, coreDownloadItem.getPropertyString(FilePropertyKey.TITLE));
-        assertEquals(album, coreDownloadItem.getPropertyString(FilePropertyKey.ALBUM));
-        assertEquals(genre, coreDownloadItem.getPropertyString(FilePropertyKey.GENRE));
-        assertEquals(track, coreDownloadItem.getPropertyString(FilePropertyKey.TRACK_NUMBER));
-        assertEquals(year + "", coreDownloadItem.getPropertyString(FilePropertyKey.YEAR));
-        assertEquals(seconds + "", coreDownloadItem.getPropertyString(FilePropertyKey.LENGTH));
-        assertEquals(bitrate + "", coreDownloadItem.getPropertyString(FilePropertyKey.BITRATE));
-        assertEquals(comments, coreDownloadItem.getPropertyString(FilePropertyKey.DESCRIPTION));
-
-        context.assertIsSatisfied();
-    }
-
-    public void testReloadProperties() {
-        context.checking(new Expectations() {
-            {
-                one(downloader).getAttribute("LimeXMLDocument");
-                will(returnValue(document));
-                allowing(downloader).getSaveFile();
-                will(returnValue(new File("test.mp3")));
-                allowing(downloader).getFile();
-                will(returnValue(new File("test.mp3")));
-                allowing(downloader).getContentLength();
-                will(returnValue(1234L));
-            }
-        });
-        coreDownloadItem.reloadProperties();
 
         assertEquals(artist, coreDownloadItem.getProperty(FilePropertyKey.AUTHOR));
         assertEquals(title, coreDownloadItem.getProperty(FilePropertyKey.TITLE));

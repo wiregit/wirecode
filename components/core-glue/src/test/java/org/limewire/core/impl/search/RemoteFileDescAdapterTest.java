@@ -12,7 +12,6 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.AltLocRemoteHost;
@@ -432,37 +431,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
     }
     
     /**
-     * Tests {@link RemoteFileDescAdapter#getProperties()} and 
-     *  {@link RemoteFileDescAdapter#getProperty(FilePropertyKey)}.
-     */
-    public void testProperties() {
-        Mockery context = new Mockery() {{
-            setImposteriser(ClassImposteriser.INSTANCE);
-        }};
-        final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
-        final Set<IpPort> locs = new HashSet<IpPort>();
-
-        context.checking(new Expectations() {{
-            allowing(rfd).getClientGUID();
-            will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
-            
-            allowing(rfd).getFileName();
-            will(returnValue("test.png"));
-            allowing(rfd).getSize();
-            will(returnValue(Long.MAX_VALUE-2));          
-            
-            allowing(rfd);
-        }});
-        
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
-        assertNotNull(rfdAdapter.getProperties());
-        assertEquals("test", rfdAdapter.getProperty(FilePropertyKey.NAME));
-        assertEquals(Long.MAX_VALUE-2, rfdAdapter.getProperty(FilePropertyKey.FILE_SIZE));
-        
-        context.assertIsSatisfied();
-    }
-    
-    /**
      * Tests a few of the methods that delegate to the rfd and ensure they pass on the correct
      *  values.
      */
@@ -575,7 +543,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final Mockery context = new Mockery();
         
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
-        final Set<IpPort> locs = new HashSet<IpPort>();
         final FriendPresence friendPresence = context.mock(FriendPresence.class);
         final Friend friend = context.mock(Friend.class);
         
@@ -590,8 +557,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd);
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, friendPresence);
-        RemoteHost remoteHost = rfdAdapter.new RfdRemoteHost();
+        RemoteHost remoteHost = new RfdRemoteHost(friendPresence, rfd);
                 
         assertSame(friendPresence, remoteHost.getFriendPresence());
         assertTrue(remoteHost.isBrowseHostEnabled());

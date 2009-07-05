@@ -1,11 +1,10 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -41,11 +40,10 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         FIND_HTML_MARKUP = p.matcher("");
     }
 
-    private final List<SearchResult> coreResults;
-    private final Set<Friend> friends;
+    private List<SearchResult> coreResults;
+    private Set<Friend> friends;
     private final Set<RemoteHost> remoteHosts;    
     private final Provider<PropertiableHeadings> propertiableHeadings;
-    private Map<FilePropertyKey, Object> properties;
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private List<VisualSearchResult> similarResults = null;
     private VisualSearchResult similarityParent;
@@ -54,29 +52,16 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     private boolean childrenVisible;    
     private Boolean spamCache;    
     private boolean preExistingDownload = false;    
-    private int relevance = -1;    
+    private int relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
-    private String cachedAudioArtistName;
-    private String cachedName;
 
     /**
      * Constructs a SearchResultAdapter with the specified List of core results
      * and property values.
      */
-    public SearchResultAdapter(List<SearchResult> sourceValue, Provider<PropertiableHeadings> propertiableHeadings) {
-        this.coreResults = sourceValue;
+    public SearchResultAdapter(SearchResult source, Provider<PropertiableHeadings> propertiableHeadings) {
         this.propertiableHeadings = propertiableHeadings;
-        
-        this.friends = new TreeSet<Friend>(new Comparator<Friend>() {
-            @Override
-            public int compare(Friend o1, Friend o2) {
-                String id1 = o1.getId();
-                String id2 = o2.getId();
-                return Objects.compareToNullIgnoreCase(id1, id2, false);
-            }
-        });
-        
         this.remoteHosts = new TreeSet<RemoteHost>(new Comparator<RemoteHost>() {
             @Override
             public int compare(RemoteHost o1, RemoteHost o2) {
@@ -96,7 +81,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         });
         this.visible = true;
         this.childrenVisible = false;
-        update();
+        
+        addNewSource(source);
     }
 
     @Override
@@ -126,25 +112,19 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     
     @Override
     public Collection<Friend> getFriends() {
-        return friends;
-    }
-
-    @Override
-    public Map<FilePropertyKey, Object> getProperties() {
-        if (properties == null) {
-            properties = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
-            for (SearchResult result : coreResults) {
-                Map<FilePropertyKey, Object> props = result.getProperties();
-                properties.putAll(props);
-            }
-        }
-
-        return properties;
+        return friends == null ? Collections.<Friend>emptySet() : friends;
     }
 
     @Override
     public Object getProperty(FilePropertyKey key) {
-        return getProperties().get(key);
+        // find the first non-null value in any of the search results.
+        for(SearchResult result : coreResults) {
+            Object value = result.getProperty(key);
+            if(value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -163,12 +143,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         
         // For audio files, use non-blank title, prefixed by non-blank artist.
         if (getCategory().equals(Category.AUDIO)) {
-            if(useAudioArtist && cachedAudioArtistName != null) {
-                return cachedAudioArtistName;
-            } else if(!useAudioArtist && cachedName != null) {
-                return cachedName;
-            }
-            
             String title = getPropertyString(FilePropertyKey.TITLE);
             if(!StringUtils.isEmpty(title)) {
                 String artist = getPropertyString(FilePropertyKey.AUTHOR);
@@ -177,12 +151,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
                 } else {
                     name = title;
                 }
-            }
-            
-            if(useAudioArtist) {
-                cachedAudioArtistName = name;
-            } else {
-                cachedName = name;
             }
         }
         
@@ -261,22 +229,46 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
      * Reloads the sources from the core search results. The number of alt-locs
      * is limited to avoid giving high relevance to spam results.
      */
-    void update() {
-        relevance = -1;
-        remoteHosts.clear();
-        friends.clear();
-        anonymous = false;
+    void addNewSource(SearchResult result) {
+        // optimize for only having a single result
+        if(coreResults == null) {
+            coreResults = Collections.singletonList(result);
+        } else {
+            if(coreResults.size() == 1) {
+                coreResults = new ArrayList<SearchResult>(coreResults);
+            }
+            coreResults.add(result);
+        }
         
-        for (SearchResult result : coreResults) {
-            List<RemoteHost> sources = result.getSources();
-            remoteHosts.addAll(sources);
+        relevance += result.getRelevance();
+        
+        List<RemoteHost> sources = result.getSources();
+        
+        // Build collection of non-anonymous friends for filtering.
+        for (RemoteHost host : sources) {
+            remoteHosts.add(host);
             
-            // Build collection of non-anonymous friends for filtering.
-            for (RemoteHost source : sources) {
-                Friend friend = source.getFriendPresence().getFriend();
-                if (friend.isAnonymous()) {
-                    anonymous = true;
+            Friend friend = host.getFriendPresence().getFriend();
+            if (friend.isAnonymous()) {
+                anonymous = true;
+            } else {
+                if(friends == null) {
+                    // optimize for a single friend having it
+                    friends = Collections.singleton(friend);
                 } else {
+                    // convert to TreeSet if we need to.
+                    if(!(friends instanceof TreeSet)) {
+                        Set<Friend> newFriends = new TreeSet<Friend>(new Comparator<Friend>() {
+                            @Override
+                            public int compare(Friend o1, Friend o2) {
+                                String id1 = o1.getId();
+                                String id2 = o2.getId();
+                                return Objects.compareToNullIgnoreCase(id1, id2, false);
+                            }
+                        });
+                        newFriends.addAll(friends);
+                        friends = newFriends;
+                    }
                     friends.add(friend);
                 }
             }
@@ -400,13 +392,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
 
     @Override
     public int getRelevance() {
-        if(relevance == -1) {        
-            int sum = 0;
-            for(SearchResult searchResult : coreResults) {
-                sum += searchResult.getRelevance();
-            }
-            relevance = sum;
-        }
         return relevance;
     }
 

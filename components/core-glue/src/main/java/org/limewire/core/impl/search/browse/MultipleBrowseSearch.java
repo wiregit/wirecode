@@ -9,7 +9,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
@@ -20,6 +19,7 @@ import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -36,26 +36,26 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
     private final CombinedSearchListener combinedSearchListener = new CombinedSearchListener();
     private final CombinedBrowseStatusListener combinedBrowseStatusListener = new CombinedBrowseStatusListener();
     private final List<BrowseSearch> activeBrowses = new CopyOnWriteArrayList<BrowseSearch>();
-    private final List<RemoteHost> remoteHosts;
-    private final Queue<RemoteHost> pendingRemoteHosts;
+    private final List<FriendPresence> presences;
+    private final Queue<FriendPresence> pendingPresences;
     private final BrowseSearchFactory browseSearchFactory;
 
     /**
-     * @param hosts the people to be browsed. Can not be null.
+     * @param presences the people to be browsed. Can not be null.
      */
-    public MultipleBrowseSearch(BrowseSearchFactory browseSearchFactory, Collection<RemoteHost> hosts) {
+    public MultipleBrowseSearch(BrowseSearchFactory browseSearchFactory, Collection<FriendPresence> presences) {
         this.browseSearchFactory = browseSearchFactory;
-        this.remoteHosts = new ArrayList<RemoteHost>(hosts);
-        this.pendingRemoteHosts = new ConcurrentLinkedQueue<RemoteHost>();
+        this.presences = new ArrayList<FriendPresence>(presences);
+        this.pendingPresences = new ConcurrentLinkedQueue<FriendPresence>();
     }
  
     @Override
     public void start() {
-        pendingRemoteHosts.addAll(remoteHosts);
+        pendingPresences.addAll(presences);
         
         // Start PARALLEL_BROWSES browses -- as each one finishes, it will start the next browse.
         // This prevents us from doing more than PARALLEL_BROWSES browses in parallel.
-        for(int i = 0; i < PARALLEL_BROWSES && !pendingRemoteHosts.isEmpty(); i++) {
+        for(int i = 0; i < PARALLEL_BROWSES && !pendingPresences.isEmpty(); i++) {
             if(!startPendingBrowse()) {
                 break;
             }
@@ -64,7 +64,7 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
     
     /** Starts a pending browse.  Returns true if it succesfully started. */
     private boolean startPendingBrowse() {
-        RemoteHost host = pendingRemoteHosts.poll();
+        FriendPresence host = pendingPresences.poll();
         if(host != null) {
             LOG.debugf("Starting browse for host {0}", host);
             BrowseSearch browse = browseSearchFactory.createBrowseSearch(host);
@@ -84,7 +84,7 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         // order here is very important --
         // we clear pending hosts first, so that
         // stopped browses don't start another pending browse.
-        pendingRemoteHosts.clear();
+        pendingPresences.clear();
         for (BrowseSearch browse: activeBrowses){
             browse.stop();
         }
@@ -143,7 +143,7 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         @Override
         public void searchStopped(Search search) {
             LOG.debugf("Received search stopped event {0}", search);
-            if (stoppedBrowses.incrementAndGet() == remoteHosts.size()) {
+            if (stoppedBrowses.incrementAndGet() == presences.size()) {
                 //all of our browses have completed
                 for (SearchListener listener : searchListeners) {
                     listener.searchStopped(MultipleBrowseSearch.this);
@@ -205,9 +205,9 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
          * LOADED, and UPDATED, it will be UPDATED_PARTIAL_FAIL.
          */
         private BrowseState getReleventMultipleBrowseState(BrowseStatus status){
-            if(loaded.get() == remoteHosts.size()){
+            if(loaded.get() == presences.size()){
                 return BrowseState.LOADED;
-            } else if(failedList.size() == remoteHosts.size()){
+            } else if(failedList.size() == presences.size()){
                 return BrowseState.FAILED;
             } else if (failedList.size() > 0) {
                 if (loaded.get() > 0) {

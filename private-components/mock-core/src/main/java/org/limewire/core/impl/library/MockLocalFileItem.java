@@ -105,11 +105,6 @@ public class MockLocalFileItem implements LocalFileItem {
     }
 
     @Override
-    public void setProperty(FilePropertyKey key, Object value) {
-        
-    }
-
-    @Override
     public int getNumUploadAttempts() {
         // TODO Auto-generated method stub
         return 0;

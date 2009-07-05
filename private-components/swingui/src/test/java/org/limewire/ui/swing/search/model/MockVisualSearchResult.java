@@ -67,7 +67,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
         return Collections.emptySet();
     }
 
-    @Override
     public Map<FilePropertyKey, Object> getProperties() {
         return properties;
     }

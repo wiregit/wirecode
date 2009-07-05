@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.search;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -9,6 +11,7 @@ import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseSearchFactory;
 import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -71,7 +74,7 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     public void viewLibraryOf(RemoteHost person) {
         assert(person != null);
         LOG.debugf("viewLibraryOf: {0}", person);
-        browse(browseSearchFactory.get().createBrowseSearch(person), 
+        browse(browseSearchFactory.get().createBrowseSearch(person.getFriendPresence()), 
                 DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
                 person.getFriendPresence().getFriend().getRenderName(), person.getFriendPresence().getFriend().getId());
     }
@@ -88,9 +91,14 @@ class RemoteHostActionsImpl implements RemoteHostActions {
 
     @Override
     public void viewLibrariesOf(Collection<RemoteHost> people) {
-         browse(browseSearchFactory.get().createBrowseSearch(people),
-                 DefaultSearchInfo.createBrowseSearch(SearchType.MULTIPLE_BROWSE),
-                 getTabTitle(people), null);
+        List<FriendPresence> presences = new ArrayList<FriendPresence>(people.size());
+        for (RemoteHost host : people) {
+            presences.add(host.getFriendPresence());
+        }
+        browse(browseSearchFactory.get().createBrowseSearch(presences), 
+                DefaultSearchInfo.createBrowseSearch(SearchType.MULTIPLE_BROWSE),
+                getTabTitle(people),
+                null);
     }
     
     @Override

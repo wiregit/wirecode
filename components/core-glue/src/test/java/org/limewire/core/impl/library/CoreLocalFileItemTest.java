@@ -183,17 +183,6 @@ public class CoreLocalFileItemTest extends TestCase {
         assertEquals(author, coreLocalFileItem.getPropertyString(FilePropertyKey.AUTHOR));
         assertEquals(title, coreLocalFileItem.getPropertyString(FilePropertyKey.TITLE));
         assertEquals(comments, coreLocalFileItem.getPropertyString(FilePropertyKey.DESCRIPTION));
-
-        coreLocalFileItem.reloadProperties();
-
-        assertEquals(author, coreLocalFileItem.getProperty(FilePropertyKey.AUTHOR));
-        assertEquals(title, coreLocalFileItem.getProperty(FilePropertyKey.TITLE));
-        assertEquals(comments, coreLocalFileItem.getProperty(FilePropertyKey.DESCRIPTION));
-
-        assertEquals(author, coreLocalFileItem.getPropertyString(FilePropertyKey.AUTHOR));
-        assertEquals(title, coreLocalFileItem.getPropertyString(FilePropertyKey.TITLE));
-        assertEquals(comments, coreLocalFileItem.getPropertyString(FilePropertyKey.DESCRIPTION));
-
     }
 
     public void testToMetadata() throws Exception {

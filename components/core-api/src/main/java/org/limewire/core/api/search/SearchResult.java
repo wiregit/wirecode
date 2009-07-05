@@ -1,7 +1,6 @@
 package org.limewire.core.api.search;
 
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -12,8 +11,6 @@ public interface SearchResult {
 
     String getFileExtension();
     
-    Map<FilePropertyKey, Object> getProperties();
-
     Object getProperty(FilePropertyKey key);
     
     Category getCategory();

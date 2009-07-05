@@ -128,6 +128,16 @@ public class GlazedListsFactory {
         }
     }
     
+    public static <E, S> SimpleFunctionList<S, E> simpleFunctionList(EventList<S> source, Function<S,E> forward) {
+        Lock lock = source.getReadWriteLock().readLock();
+        lock.lock();
+        try {            
+            return new SimpleFunctionList<S, E>(source, forward);
+        } finally {
+            lock.unlock();
+        }
+    } 
+    
     public static <E> GroupingList<E> groupingList(EventList<E> source) {
         Lock lock = source.getReadWriteLock().readLock();
         lock.lock();

@@ -72,7 +72,7 @@ public class CoreConnectionItem implements ConnectionItem {
     @Override
     public FriendPresence getFriendPresence() {
         String id = routedConnection.getAddress() + ":" + routedConnection.getPort();
-        return new GnutellaPresence(routedConnection, id);
+        return new GnutellaPresence.GnutellaPresenceWithString(routedConnection, id);
     }
 
     @Override

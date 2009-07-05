@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search.model;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -39,12 +38,6 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      * Returns the file extension for the search result.
      */
     String getFileExtension();
-
-    /**
-     * Returns a map containing FilePropertyKey objects and their associated
-     * values. 
-     */
-    Map<FilePropertyKey, Object> getProperties();
 
     /**
      * Returns the value associated with the specified FilePropertyKey as a
