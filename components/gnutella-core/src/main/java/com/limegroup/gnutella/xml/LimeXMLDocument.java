@@ -19,7 +19,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
@@ -122,7 +121,7 @@ public class LimeXMLDocument implements StringLookup {
         internStrings(map);
         
         this.schemaUri = result.schemaURI.intern();
-        this.fieldToValue = ImmutableMap.copyOf(map);
+        this.fieldToValue = new HashMap<String, String>(map);
         if(!isValid())
             throw new IOException("Invalid XML: " + xml + ", fieldToValue: " + fieldToValue + ", attrString: " + getAttributeString() + ", schemaURI: " + schemaUri);
     }
@@ -147,8 +146,8 @@ public class LimeXMLDocument implements StringLookup {
         setFields(keyPrefix, map);
         internStrings(map);
         
-        this.schemaUri = schemaURI;
-        this.fieldToValue = ImmutableMap.copyOf(map);
+        this.schemaUri = schemaURI.intern();
+        this.fieldToValue = new HashMap<String, String>(map);
 
         if(!isValid())
             throw new IOException("invalid doc! "+map+" \nschema uri: "+schemaURI);
@@ -180,8 +179,8 @@ public class LimeXMLDocument implements StringLookup {
         scanFields(map);
         internStrings(map);
         
-        this.schemaUri = schemaURI;
-        this.fieldToValue = ImmutableMap.copyOf(map);
+        this.schemaUri = schemaURI.intern();
+        this.fieldToValue = new HashMap<String, String>(map);
         
         if(!isValid()) {
             throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaFields: " + ((getSchema() != null) ? getSchema().getCanonicalizedFieldNames() : "n/a"));
