@@ -21,7 +21,6 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
@@ -56,12 +55,12 @@ public class LibraryFilterPanel {
     @Resource Color fontColor;
     @Resource Color fontSelectedColor;
     
-    @Resource Color tabSelectionTopGradientColor;
-    @Resource Color tabSelectionBottomGradientColor;
-    @Resource Color tabSelectionBorderTopGradientColor;
-    @Resource Color tabSelectionBorderBottomGradientColor;
-    @Resource Color tabHighlightTopGradientColor;
-    @Resource Color tabHighlightBottomGradientColor;
+    @Resource Color selectionTopGradientColor;
+    @Resource Color selectionBottomGradientColor;
+    @Resource Color selectionBorderTopColor;
+    @Resource Color selectionBorderBottomColor;
+    @Resource Color highlightBackgroundColor;
+    @Resource Color highlightBorderColor;
     
     private final JPanel component;
     private final PromptTextField promptTextField;
@@ -93,8 +92,8 @@ public class LibraryFilterPanel {
         component = new JPanel(new MigLayout("insets 0 5 0 5, gap 0, fill", "", "[28!]"));
         promptTextField = new PromptTextField(I18n.tr("Filter"));
         categoryList = new FancyTabList(searchActionMaps);
-        categoryList.setSelectionPainter(createTabSelectionPainter());
-        categoryList.setHighlightPainter(createHighlightPainter());
+        categoryList.setSelectionPainter(new CategoryTabPainter(selectionTopGradientColor, selectionBottomGradientColor, selectionBorderTopColor, selectionBorderBottomColor));
+        categoryList.setHighlightPainter(new CategoryTabPainter(highlightBackgroundColor, highlightBackgroundColor, highlightBorderColor, highlightBorderColor));
         this.listeners = new CopyOnWriteArrayList<LibraryCategoryListener>();
         
         init(textFieldDecorator);
@@ -189,34 +188,22 @@ public class LibraryFilterPanel {
     
     /**
      * Creates a Painter used to render the selected category tab.
-     */
-    private AbstractPainter<FancyTab> createTabSelectionPainter() {
-        RectanglePainter<FancyTab> painter = new RectanglePainter<FancyTab>();
+     */  
+    private class CategoryTabPainter extends RectanglePainter<FancyTab> {
         
-        painter.setFillPaint(new GradientPaint(0, 0, tabSelectionTopGradientColor, 
-                0, 1, tabSelectionBottomGradientColor));
-        painter.setBorderPaint(new GradientPaint(0, 0, tabSelectionBorderTopGradientColor, 
-                0, 1, tabSelectionBorderBottomGradientColor));
-        
-        painter.setRoundHeight(10);
-        painter.setRoundWidth(10);
-        painter.setRounded(true);
-        painter.setPaintStretched(true);
-        painter.setInsets(new Insets(0,0,6,0));
-                
-        painter.setAntialiasing(true);
-        painter.setCacheable(true);
-        
-        return painter;
-    }
-    
-    private AbstractPainter createHighlightPainter() {
-        RectanglePainter tabHighlight = new RectanglePainter();
-        tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, tabHighlightTopGradientColor, 
-                                                    20.0f, 33.0f, tabHighlightBottomGradientColor));
-
-        tabHighlight.setInsets(new Insets(0,0,1,0));
-        tabHighlight.setBorderPaint(null);
-        return tabHighlight;
+        public CategoryTabPainter(Color topGradient, Color bottomGradient, Color topBorder,
+                Color bottomBorder) {
+            setFillPaint(new GradientPaint(0, 0, topGradient, 0, 1, bottomGradient));
+            setBorderPaint(new GradientPaint(0, 0, topBorder, 0, 1, bottomBorder));
+            
+            setRoundHeight(10);
+            setRoundWidth(10);
+            setRounded(true);
+            setPaintStretched(true);
+            setInsets(new Insets(0,0,6,0));
+                    
+            setAntialiasing(true);
+            setCacheable(true);
+        }
     }
 }
