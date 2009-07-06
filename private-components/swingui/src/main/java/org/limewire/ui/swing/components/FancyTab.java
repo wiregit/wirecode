@@ -95,7 +95,7 @@ public class FancyTab extends JXPanel {
         });
             
         setOpaque(false);
-        setToolTipText(getTitle());
+        setToolTipText(getTooltip());
         
         HighlightListener highlightListener = new HighlightListener();
         if (props.isRemovable()) {
@@ -114,7 +114,6 @@ public class FancyTab extends JXPanel {
         add(busyLabel,      "gapbefore 4, gapafter 6, gapbottom 1, aligny bottom, alignx right, cell 3 0, hidemode 3");
         add(removeButton,   "gapbefore 4, gapafter 6, gapbottom 1, aligny bottom, alignx right, cell 3 0, hidemode 3");
     }
-    
     
     @Override
     public String toString() {
@@ -229,7 +228,7 @@ public class FancyTab extends JXPanel {
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
         button.setMargin(new Insets(0, 0, 0, 0));
-        button.setToolTipText(getTitle());
+        button.setToolTipText(getTooltip());
         button.setBorderPainted(false);
         button.setFocusPainted(false);
         button.setRolloverEnabled(true);
@@ -379,6 +378,10 @@ public class FancyTab extends JXPanel {
 
     public String getTitle() {
         return (String)tabActions.getMainAction().getValue(Action.NAME);
+    }
+    
+    private String getTooltip() {
+        return (String)tabActions.getMainAction().getValue(Action.LONG_DESCRIPTION);
     }
     
     private void showPopup(MouseEvent e) {

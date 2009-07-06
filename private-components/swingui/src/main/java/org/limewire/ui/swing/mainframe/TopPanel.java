@@ -209,6 +209,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         });
         final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(advancedPanel));
         final SearchAction action = new SearchAction(item);
+        action.putValue(Action.LONG_DESCRIPTION, action.getValue(Action.NAME));
         
         final Action moreTextAction = new NoOpAction();
         final TabActionMap actionMap = new TabActionMap(
@@ -243,11 +244,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
         search.addSearchListener(action);
 
         final Action moreTextAction = new NoOpAction();
-      
+        action.putValue(Action.LONG_DESCRIPTION, action.getValue(Action.NAME));      
 
         final TabActionMap actionMap = new TabActionMap(
             action, action, moreTextAction, contextActions);
-        
+       
         searchList.addTabActionMapAt(actionMap, 0);
         
         item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, item, (Disposable)searchPanel) {
