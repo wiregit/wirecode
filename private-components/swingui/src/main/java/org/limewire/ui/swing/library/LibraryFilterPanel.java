@@ -65,8 +65,9 @@ public class LibraryFilterPanel {
     private final JPanel component;
     private final PromptTextField promptTextField;
     private final FancyTabList categoryList;
-    private final List<TabActionMap> searchActionMaps;
+    private final List<TabActionMap> categoryActionMaps;
     private final List<LibraryCategoryListener> listeners;
+    private Action allAction;
     
     @Inject
     public LibraryFilterPanel(Provider<AllTableFormat<LocalFileItem>> allFormat, 
@@ -79,7 +80,7 @@ public class LibraryFilterPanel {
             TextFieldDecorator textFieldDecorator) {
         GuiUtils.assignResources(this);
         
-        this.searchActionMaps = new ArrayList<TabActionMap>();
+        this.categoryActionMaps = new ArrayList<TabActionMap>();
         
         addCategory(tr("All"), null, allFormat);
         addCategory(tr("Audio"), Category.AUDIO, audioFormat);
@@ -91,7 +92,7 @@ public class LibraryFilterPanel {
         
         component = new JPanel(new MigLayout("insets 0 5 0 5, gap 0, fill", "", "[28!]"));
         promptTextField = new PromptTextField(I18n.tr("Filter"));
-        categoryList = new FancyTabList(searchActionMaps);
+        categoryList = new FancyTabList(categoryActionMaps);
         categoryList.setSelectionPainter(new CategoryTabPainter(selectionTopGradientColor, selectionBottomGradientColor, selectionBorderTopColor, selectionBorderBottomColor));
         categoryList.setHighlightPainter(new CategoryTabPainter(highlightBackgroundColor, highlightBackgroundColor, highlightBorderColor, highlightBorderColor));
         this.listeners = new CopyOnWriteArrayList<LibraryCategoryListener>();
@@ -129,9 +130,10 @@ public class LibraryFilterPanel {
         return ((LibraryCategoryAction)categoryList.getSelectedTab().getTabActionMap().getMainAction()).getTableFormat();
     }
     
-    public void clearFilters() {
+    public void clearFilters() { 
         promptTextField.setText("");
-        //TODO: select all action
+        allAction.putValue(Action.SELECTED_KEY, true);
+        allAction.actionPerformed(null);
     }
     
     public JTextField getFilterField() {
@@ -144,10 +146,12 @@ public class LibraryFilterPanel {
     
     private void addCategory(String title, Category category, Provider<? extends AbstractLibraryFormat<LocalFileItem>> tableFormat) {
         LibraryCategoryAction action = new LibraryCategoryAction(title, category, tableFormat);
-        if(category == null)
+        if(category == null) {
             action.putValue(Action.SELECTED_KEY, true);
+            allAction = action;
+        }
         TabActionMap map = newTabActionMap(action);
-        searchActionMaps.add(map);
+        categoryActionMaps.add(map);
     }
     
     private TabActionMap newTabActionMap(LibraryCategoryAction action) {

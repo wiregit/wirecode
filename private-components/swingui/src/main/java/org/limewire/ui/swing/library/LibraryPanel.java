@@ -223,6 +223,7 @@ public class LibraryPanel extends JPanel {
                 }
                 selectedNavItem = navItem;
 
+                clearFilters();
                 setPublicSharedComponentVisible(navItem);
                 eventList = navItem.getLocalFileList().getSwingModel();
                 selectSharing(navItem);
