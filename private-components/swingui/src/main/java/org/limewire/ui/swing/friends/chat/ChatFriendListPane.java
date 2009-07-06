@@ -526,7 +526,7 @@ public class ChatFriendListPane extends JPanel {
                 Point hoverPoint = mouseHoverFriend.getHoverPoint();
                 boolean overCloseIcon = isOverCloseIcon(hoverPoint);
                 chatStatus.setIcon(overCloseIcon ? endChatOverIcon : endChatIcon);
-                chatStatus.setToolTipText(tr("Close conversation"));
+                chatStatus.setToolTipText(tr("Close Conversation"));
                 panel.add(chatStatus, "gapleft 4, gapright 2");
             } else {
                 chatStatus.setIcon(getChatIcon(chatFriend));
