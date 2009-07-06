@@ -231,12 +231,10 @@ public class LibraryPanel extends JPanel {
             }
         });
         
+        // Add player listener to repaint table when song changes or player stops.
         playerMediator.addMediatorListener(new PlayerMediatorListener(){
-
             @Override
             public void progressUpdated(float progress) {
-                // TODO Auto-generated method stub
-                
             }
 
             @Override
@@ -253,7 +251,14 @@ public class LibraryPanel extends JPanel {
 
             @Override
             public void stateChanged(PlayerState state) {
-                
+                if ((state == PlayerState.STOPPED) && libraryTable.isVisible() &&
+                        isPlayable(libraryFilterPanel.getSelectedCategory())) {
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            libraryTable.repaint();
+                        }
+                    });
+                }
             }
         });
     }
