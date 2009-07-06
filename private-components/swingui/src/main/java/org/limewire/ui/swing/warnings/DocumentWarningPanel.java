@@ -63,7 +63,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
         HTMLLabel htmlLabel = new HTMLLabel(
                 I18n
                         .tr(
-                                "<html><body>Warning: you are sharing Documents with the world. These Documents may contain personal information. <a href=\"{0}\">learn more</a></body></html>",
+                                "<html><body>Warning: You are sharing Documents with the world. These Documents may contain personal information. <a href=\"{0}\">learn more</a></body></html>",
                                 learnMoreUrl));
         htmlLabel.setEditable(false);
         htmlLabel.setOpaque(false);
