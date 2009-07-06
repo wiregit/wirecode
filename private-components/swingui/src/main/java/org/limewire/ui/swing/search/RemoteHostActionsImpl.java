@@ -74,6 +74,11 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     public void viewLibraryOf(RemoteHost person) {
         assert(person != null);
         LOG.debugf("viewLibraryOf: {0}", person);
+        
+        if (navigateIfTabExists(person.getFriendPresence().getFriend().getId())) {
+            return;
+        }
+        
         browse(browseSearchFactory.get().createBrowseSearch(person.getFriendPresence()), 
                 DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
                 person.getFriendPresence().getFriend().getRenderName(), person.getFriendPresence().getFriend().getId());
@@ -83,6 +88,11 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     public void viewLibraryOf(Friend friend) {
         assert(friend != null && !friend.isAnonymous());
         LOG.debugf("viewLibraryOf: {0}", friend);
+        
+        if(navigateIfTabExists(friend.getId())) {
+            return;
+        }
+        
         browse(browseSearchFactory.get().createFriendBrowseSearch(friend), 
                 DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
                 friend.getRenderName(), friend.getId());
@@ -103,6 +113,10 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     
     @Override
     public void browseAllFriends() {
+        if(navigateIfTabExists(ALL_FRIENDS_KEY)){
+            return;
+        }
+        
         browse(browseSearchFactory.get().createAllFriendsBrowseSearch(),
                 DefaultSearchInfo.createBrowseSearch(SearchType.ALL_FRIENDS_BROWSE), 
                 I18n.tr("All Friends"), ALL_FRIENDS_KEY);
@@ -146,10 +160,6 @@ class RemoteHostActionsImpl implements RemoteHostActions {
      * @param key - null to not cache browse
      */
     private void browse(BrowseSearch search, SearchInfo searchInfo, String title, String key) {  
-        if (key != null && browseNavItemCache.get(key) != null) {
-            browseNavItemCache.get(key).select();
-            return;
-        }
         
         SearchResultsPanel searchPanel = browsePanelFactory.createBrowsePanel(search, searchInfo);
         // Add search results display to the UI, and select its navigation item.
@@ -163,6 +173,18 @@ class RemoteHostActionsImpl implements RemoteHostActions {
             item.addNavItemListener(new ItemRemovalListener(key));
         }
         
+    }
+    
+    /** 
+     * @return true if the tab exists
+     */
+    private boolean navigateIfTabExists(String key){
+        if (key != null && browseNavItemCache.get(key) != null) {
+            browseNavItemCache.get(key).select();
+            return true;
+        }
+        
+        return false;
     }
     
     private class ItemRemovalListener implements NavItemListener {
