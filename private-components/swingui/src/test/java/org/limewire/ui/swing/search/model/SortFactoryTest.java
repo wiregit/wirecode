@@ -58,8 +58,8 @@ public class SortFactoryTest extends TestCase {
         MockVisualSearchResult vsr1 = new MockVisualSearchResult("Hello");
         MockVisualSearchResult vsr2 = new MockVisualSearchResult("World");
         
-        vsr1.getProperties().put(FilePropertyKey.YEAR, "2009");
-        vsr2.getProperties().put(FilePropertyKey.YEAR, "2008");
+        vsr1.getProperties().put(FilePropertyKey.YEAR, 2009L);
+        vsr2.getProperties().put(FilePropertyKey.YEAR, 2008L);
         
         // Get long comparator.
         Comparator<VisualSearchResult> comparator = 
