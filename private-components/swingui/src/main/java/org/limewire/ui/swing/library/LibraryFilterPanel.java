@@ -4,6 +4,8 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +21,11 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.painter.AbstractPainter;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -36,7 +41,6 @@ import org.limewire.ui.swing.library.table.OtherTableFormat;
 import org.limewire.ui.swing.library.table.ProgramTableFormat;
 import org.limewire.ui.swing.library.table.VideoTableFormat;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -52,6 +56,13 @@ public class LibraryFilterPanel {
     @Resource Color fontColor;
     @Resource Color fontSelectedColor;
     
+    @Resource Color tabSelectionTopGradientColor;
+    @Resource Color tabSelectionBottomGradientColor;
+    @Resource Color tabSelectionBorderTopGradientColor;
+    @Resource Color tabSelectionBorderBottomGradientColor;
+    @Resource Color tabHighlightTopGradientColor;
+    @Resource Color tabHighlightBottomGradientColor;
+    
     private final JPanel component;
     private final PromptTextField promptTextField;
     private final FancyTabList categoryList;
@@ -66,7 +77,6 @@ public class LibraryFilterPanel {
             Provider<DocumentTableFormat<LocalFileItem>> documentFormat,
             Provider<ProgramTableFormat<LocalFileItem>> programFormat,
             Provider<OtherTableFormat<LocalFileItem>> otherFormat,
-            SearchTabPainterFactory tabPainterFactory,
             TextFieldDecorator textFieldDecorator) {
         GuiUtils.assignResources(this);
         
@@ -83,8 +93,8 @@ public class LibraryFilterPanel {
         component = new JPanel(new MigLayout("insets 0 5 0 5, gap 0, fill", "", "[28!]"));
         promptTextField = new PromptTextField(I18n.tr("Filter"));
         categoryList = new FancyTabList(searchActionMaps);
-        categoryList.setSelectionPainter(tabPainterFactory.createSelectionPainter());
-        categoryList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
+        categoryList.setSelectionPainter(createTabSelectionPainter());
+        categoryList.setHighlightPainter(createHighlightPainter());
         this.listeners = new CopyOnWriteArrayList<LibraryCategoryListener>();
         
         init(textFieldDecorator);
@@ -175,5 +185,38 @@ public class LibraryFilterPanel {
     
     static interface LibraryCategoryListener {
         void categorySelected(Category category);
+    }
+    
+    /**
+     * Creates a Painter used to render the selected category tab.
+     */
+    private AbstractPainter<FancyTab> createTabSelectionPainter() {
+        RectanglePainter<FancyTab> painter = new RectanglePainter<FancyTab>();
+        
+        painter.setFillPaint(new GradientPaint(0, 0, tabSelectionTopGradientColor, 
+                0, 1, tabSelectionBottomGradientColor));
+        painter.setBorderPaint(new GradientPaint(0, 0, tabSelectionBorderTopGradientColor, 
+                0, 1, tabSelectionBorderBottomGradientColor));
+        
+        painter.setRoundHeight(10);
+        painter.setRoundWidth(10);
+        painter.setRounded(true);
+        painter.setPaintStretched(true);
+        painter.setInsets(new Insets(0,0,6,0));
+                
+        painter.setAntialiasing(true);
+        painter.setCacheable(true);
+        
+        return painter;
+    }
+    
+    private AbstractPainter createHighlightPainter() {
+        RectanglePainter tabHighlight = new RectanglePainter();
+        tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, tabHighlightTopGradientColor, 
+                                                    20.0f, 33.0f, tabHighlightBottomGradientColor));
+
+        tabHighlight.setInsets(new Insets(0,0,1,0));
+        tabHighlight.setBorderPaint(null);
+        return tabHighlight;
     }
 }
