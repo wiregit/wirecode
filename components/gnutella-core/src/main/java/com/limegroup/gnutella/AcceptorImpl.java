@@ -202,8 +202,10 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 			}
 		}
 		
-		if( addrChanged )
+		if(addrChanged) {
+            LOG.infof("Setting address to " + address);
 		    networkManager.addressChanged();
+        }
 	}
 	
 	/* (non-Javadoc)
