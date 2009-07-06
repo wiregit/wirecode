@@ -126,23 +126,30 @@ public class SetupPage2 extends WizardPage {
             autoSharingPanel.add(createAndDecorateSubHeading(I18n
                     .tr("Shared files from your old version will be in your Public Shared list.")),
                     "alignx center");
+            autoSharingPanel
+            .add(
+                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+                    "wrap");
         } else if (newInstall) {
             autoSharingPanel.add(shareDownloadedFilesCheckBox, "alignx center");
             autoSharingPanel.add(createAndDecorateMultiLine(I18n
                     .tr("Add files I download from P2P Users to my Public Shared list."),
                     shareDownloadedFilesCheckBox));
-
+            autoSharingPanel
+            .add(
+                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+                    "wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             autoSharingPanel
                     .add(
                             createAndDecorateSubHeading(I18n
                                     .tr("LimeWire will add files you download from P2P Users into your Public Shared list.")),
                             "alignx center");
+            autoSharingPanel
+            .add(
+                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+                    "wrap");
         }
-        autoSharingPanel
-                .add(
-                        createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
-                        "wrap");
 
         add(autoSharingPanel, "growx, span, sg sameRowSize, wrap");
     }
