@@ -25,7 +25,7 @@ class BuddyListResponseDeserializer {
 		if(response.startsWith(prefix)) {
 			response = response.substring(prefix.length());
         }
-		JSONObject respObjs = new JSONObject(response);
+		JSONObject respObjs = FacebookUtils.parse(response);
 		if(respObjs.getInt("error") == 0) {
 		    JSONObject payload = (JSONObject) respObjs.get("payload");
 		    if(payload != null){

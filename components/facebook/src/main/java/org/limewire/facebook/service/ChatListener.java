@@ -82,7 +82,7 @@ public class ChatListener implements Runnable {
                         if(msgResponseBody.startsWith(prefix)) {
                             msgResponseBody = msgResponseBody.substring(prefix.length());
                         }
-                        JSONObject response = new JSONObject(msgResponseBody);
+                        JSONObject response = FacebookUtils.parse(msgResponseBody);
                         LOG.debugf("message: {0}", response);
                         if(response.getString("t").equals("msg")) {
                             dispatchMessage(response);
@@ -238,7 +238,7 @@ public class ChatListener implements Runnable {
             msgResponseBody = msgResponseBody.substring(prefix.length());
         }
         
-        JSONObject body = new JSONObject(msgResponseBody);
+        JSONObject body = FacebookUtils.parse(msgResponseBody);
         if(body.has("seq")) {
             return body.getInt("seq");
         } else if(body.has("t") && body.getString("t").equals("refresh")) {

@@ -803,7 +803,7 @@ public class FacebookFriendConnection implements FriendConnection {
             response = response.substring(prefix.length());
         }
         try {
-            JSONObject json = new JSONObject(response);
+            JSONObject json = FacebookUtils.parse(response);
             int error = json.getInt("error");
             if (error == 1356003) {
                 LOG.debugf("friend offline: {0}, full response: {1}", friendId, response);
