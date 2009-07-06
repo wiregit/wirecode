@@ -114,7 +114,7 @@ public class LibraryFilterPanel {
         categoryList.setTabTextSelectedColor(fontSelectedColor);
         categoryList.setUnderlineEnabled(false);
 
-        component.add(categoryList, "");
+        component.add(categoryList, "growy");
         component.add(promptTextField, "alignx right");
     }
     
@@ -204,7 +204,7 @@ public class LibraryFilterPanel {
             setRoundWidth(10);
             setRounded(true);
             setPaintStretched(true);
-            setInsets(new Insets(0,0,6,0));
+            setInsets(new Insets(2,0,0,0));
                     
             setAntialiasing(true);
             setCacheable(true);

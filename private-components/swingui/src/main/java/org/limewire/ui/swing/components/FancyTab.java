@@ -108,11 +108,11 @@ public class FancyTab extends JXPanel {
         updateButtons(false);
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
         
-        setLayout(new MigLayout("insets 0 0 10 0, fill, gap 0"));        
-        add(mainButton,     "gapafter 4, gapbefore 6, aligny bottom, width min(pref,50):pref:max, cell 1 0");
-        add(additionalText, "gapafter 4, aligny bottom, cell 2 0, hidemode 3");
-        add(busyLabel,      "gapbefore 4, gapafter 6, gapbottom 1, aligny bottom, alignx right, cell 3 0, hidemode 3");
-        add(removeButton,   "gapbefore 4, gapafter 6, gapbottom 1, aligny bottom, alignx right, cell 3 0, hidemode 3");
+        setLayout(new MigLayout("insets 0 0 0 0, fill, gap 0"));        
+        add(mainButton,     "gapafter 4, gapbefore 6, growy, aligny 50%, width min(pref,50):pref:max, cell 1 0");
+        add(additionalText, "gapafter 4, aligny 50%, cell 2 0, hidemode 3");
+        add(busyLabel,      "gapbefore 4, gapafter 6, gapbottom 1, aligny 50%, alignx right, cell 3 0, hidemode 3");
+        add(removeButton,   "gapbefore 4, gapafter 6, gapbottom 1, aligny 50%, alignx right, cell 3 0, hidemode 3");
     }
     
     @Override
