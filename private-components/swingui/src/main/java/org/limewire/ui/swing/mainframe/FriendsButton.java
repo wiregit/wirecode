@@ -7,6 +7,7 @@ import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.Timer;
 
@@ -14,6 +15,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.BusyPainter;
+import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.settings.FriendSettings;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -31,6 +34,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
 import com.google.inject.Inject;
 
 public class FriendsButton extends LimeComboBox {
@@ -39,15 +45,14 @@ public class FriendsButton extends LimeComboBox {
     @Resource private Icon friendOfflineIcon;
     @Resource private Icon friendLoadingIcon;
     @Resource private Icon friendDnDIcon;
-    //TODO support new files icon
+    @Resource private Icon friendNewFilesIcon;
     
+    private boolean newResultsAvailable = false;
     private final BusyPainter busyPainter;
-    
     private Timer busy;
     
     @Inject
     public FriendsButton(ComboBoxDecorator comboBoxDecorator, BrowseOrLoginAction browseOrLoginAction) {
-     
         GuiUtils.assignResources(this);
         
         comboBoxDecorator.decorateIconComboBox(this);
@@ -89,7 +94,6 @@ public class FriendsButton extends LimeComboBox {
     }
     
     private void setIconFromEvent(FriendConnectionEvent event) {
-        
         FriendConnectionEvent.Type eventType = event == null ? null : event.getType();
         if(eventType == null) {
             eventType = FriendConnectionEvent.Type.DISCONNECTED;
@@ -98,11 +102,14 @@ public class FriendsButton extends LimeComboBox {
         switch(eventType) {
         case CONNECT_FAILED:
         case DISCONNECTED:
+            newResultsAvailable = false;
             setIcon(friendOfflineIcon);
             stopAnimation();
             break;
         case CONNECTED:
-            if(FriendSettings.DO_NOT_DISTURB.getValue() && event != null && event.getSource().supportsMode()) {
+            if(newResultsAvailable) {
+               setIcon(friendNewFilesIcon);
+            } else if(FriendSettings.DO_NOT_DISTURB.getValue() && event != null && event.getSource().supportsMode()) {
                 setIcon(friendDnDIcon);
             } else {
                 setIcon(friendOnlineIcon);
@@ -117,8 +124,10 @@ public class FriendsButton extends LimeComboBox {
 
     
     @Inject
-    void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport) {
-        setIconFromEvent(connectBean.getLastEvent());        
+    void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport, RemoteLibraryManager remoteLibraryManager) {
+        setIconFromEvent(connectBean.getLastEvent());
+        
+        //update icon as connection events come in.
         connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
@@ -127,6 +136,7 @@ public class FriendsButton extends LimeComboBox {
             }
         });
         
+        //update available/dnd icons when property value changes
         FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
            @Override
             public void settingChanged(SettingEvent evt) {
@@ -134,17 +144,41 @@ public class FriendsButton extends LimeComboBox {
                   @Override
                   public void run() {
                       FriendConnection friendConnection = EventUtils.getSource(connectBean);
-                      if(FriendSettings.DO_NOT_DISTURB.getValue() && friendConnection != null &&  friendConnection.supportsMode()) {
-                          setIcon(friendDnDIcon);
-                      } else {
-                          setIcon(friendOnlineIcon);
+                      if(friendConnection != null && friendConnection.isLoggedIn()) {
+                          setIconFromEvent(new FriendConnectionEvent(friendConnection, FriendConnectionEvent.Type.CONNECTED));
                       }
                   } 
                });
             } 
         });
+        
+        //change to new files icon when inserts are detected
+        remoteLibraryManager.getAllFriendsFileList().getSwingModel().addListEventListener(new ListEventListener<SearchResult>() {
+            public void listChanged(ListEvent<SearchResult> listChanges) {
+                while(listChanges.next()) {
+                    if(listChanges.getType() == ListEvent.INSERT) {
+                        newResultsAvailable = true;
+                        FriendConnection friendConnection = EventUtils.getSource(connectBean);
+                        if(friendConnection != null && friendConnection.isLoggedIn()) {
+                            setIconFromEvent(new FriendConnectionEvent(friendConnection, FriendConnectionEvent.Type.CONNECTED));
+                        }
+                    }
+                }
+            }; 
+         });
+        
+        //clear new files icon when button is clicked
+        addActionListener(new AbstractAction() {
+           @Override
+            public void actionPerformed(ActionEvent e) {
+               FriendConnection friendConnection = EventUtils.getSource(connectBean);
+               if(friendConnection != null && friendConnection.isLoggedIn()) {
+                   newResultsAvailable = false;
+                   setIconFromEvent(new FriendConnectionEvent(friendConnection, FriendConnectionEvent.Type.CONNECTED));
+               }
+            } 
+        });
     }
-    
     
     // animation code ripped from JXBusyLabel
     private void startAnimation() {
