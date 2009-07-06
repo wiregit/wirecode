@@ -175,7 +175,8 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 LOG.debugf("picked auth url: {0}", authUrl);
                 HttpGet getMethod = new HttpGet(authUrl);
                 HttpResponse response = httpClient.execute(getMethod);                
-                assert response.getStatusLine().getStatusCode() == 302;
+                int statusCode = response.getStatusLine().getStatusCode(); 
+                assert statusCode == 302 : "code: " + statusCode;
                 String url = response.getFirstHeader("Location").getValue();
                 LOG.debugf("login url: {0}", url);
                 String authToken = parseAuthToken(url);
