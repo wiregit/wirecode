@@ -75,8 +75,10 @@ public class FocusJOptionPane {
         
         Color oldOptionColor = UIManager.getColor("OptionPane.background");
         Color oldPanelColor = UIManager.getColor("Panel.background");
-        UIManager.put("OptionPane.background", GuiUtils.getMainFrame().getBackground());
-        UIManager.put("Panel.background", GuiUtils.getMainFrame().getBackground());
+        if(GuiUtils.getMainFrame() != null) {
+            UIManager.put("OptionPane.background", GuiUtils.getMainFrame().getBackground());
+            UIManager.put("Panel.background", GuiUtils.getMainFrame().getBackground());
+        }
         try {
             JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
         } finally {
