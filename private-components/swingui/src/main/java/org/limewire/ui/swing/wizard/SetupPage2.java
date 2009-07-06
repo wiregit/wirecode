@@ -16,6 +16,8 @@ import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
 
 public class SetupPage2 extends WizardPage {
     private final JCheckBox shareDownloadedFilesCheckBox;
@@ -40,8 +42,9 @@ public class SetupPage2 extends WizardPage {
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
 
         boolean newInstall = InstallSettings.PREVIOUS_RAN_VERSIONS.get().size() == 0;
+        boolean four18Upgrade = isFour18Upgrade();
 
-        addAutoSharing(newInstall);
+        addAutoSharing(newInstall, four18Upgrade);
         addSeperator();
         addModifyInfo();
         if (!newInstall) {
@@ -50,6 +53,24 @@ public class SetupPage2 extends WizardPage {
         }
 
         initSettings();
+    }
+
+    private boolean isFour18Upgrade() {
+        boolean has418 = false;
+        boolean has5x = false;
+        for (String previousVersion : InstallSettings.PREVIOUS_RAN_VERSIONS.get()) {
+            try {
+                Version version = new Version(previousVersion);
+                if (version.getMajor() == 5) {
+                    has5x = true;
+                } else if (version.getMajor() == 4) {
+                    has418 = true;
+                }
+            } catch (VersionFormatException e) {
+                // do nothing
+            }
+        }
+        return has418 && !has5x;
     }
 
     private void addSeperator() {
@@ -94,32 +115,34 @@ public class SetupPage2 extends WizardPage {
     /**
      * Adds header for Auto-Sharing, checkbox and associated text.
      */
-    private void addAutoSharing(boolean newInstall) {
+    private void addAutoSharing(boolean newInstall, boolean four18Upgrade) {
         JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
 
         autoSharingPanel.add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
                 "alignx center, wrap");
-        if (newInstall) {
+
+        if (four18Upgrade) {
+            autoSharingPanel.add(createAndDecorateSubHeading(I18n
+                    .tr("Shared files from your old version will be in your Public Shared list.")),
+                    "alignx center");
+        } else if (newInstall) {
             autoSharingPanel.add(shareDownloadedFilesCheckBox, "alignx center");
             autoSharingPanel.add(createAndDecorateMultiLine(I18n
                     .tr("Add files I download from P2P Users to my Public Shared list."),
                     shareDownloadedFilesCheckBox));
-            autoSharingPanel
-                    .add(
-                            createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
-                            "wrap");
+
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             autoSharingPanel
                     .add(
                             createAndDecorateSubHeading(I18n
                                     .tr("LimeWire will add files you download from P2P Users into your Public Shared list.")),
                             "alignx center");
-            autoSharingPanel
-                    .add(
-                            createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
-                            "wrap");
         }
+        autoSharingPanel
+                .add(
+                        createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+                        "wrap");
 
         add(autoSharingPanel, "growx, span, sg sameRowSize, wrap");
     }
@@ -136,9 +159,8 @@ public class SetupPage2 extends WizardPage {
 
         modifyInfoPanel.add(myFiles, "alignx center");
         modifyInfoPanel.add(new JLabel(sharing_arrow), "aligny top, gaptop 17");
-        modifyInfoPanel.add(
-                new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large, JLabel.RIGHT),
-                "aligny top, gaptop 15");
+        modifyInfoPanel.add(new JLabel(I18n.tr("Public Shared"), file_sharedlist_p2p_large,
+                JLabel.RIGHT), "aligny top, gaptop 15");
 
         add(modifyInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
