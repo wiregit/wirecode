@@ -158,7 +158,7 @@ public class CoreLocalFileItemTest extends TestCase {
         final URN urn1 = URN.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
         context.checking(new Expectations() {{
-                exactly(2).of(fileDesc).getXMLDocument();
+                allowing(fileDesc).getXMLDocument();
                 will(returnValue(document));
                 exactly(2).of(document).getValue(LimeXMLNames.DOCUMENT_AUTHOR);
                 will(returnValue(author.toString()));
