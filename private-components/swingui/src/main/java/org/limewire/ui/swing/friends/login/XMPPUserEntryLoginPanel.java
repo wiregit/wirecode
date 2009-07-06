@@ -190,7 +190,7 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         serviceLabel = new JLabel(tr("Domain"));
         serviceLabel.setFont(descriptionTextFont);
         serviceLabel.setForeground(descriptionTextForeground);
-        JLabel usernameLabel = new JLabel(accountConfig.getNetworkName().equals("gmail.com") ? tr("Email") : tr("Username"));
+        JLabel usernameLabel = new JLabel("gmail.com".equals(accountConfig.getNetworkName()) ? tr("Email") : tr("Username"));
         usernameLabel.setFont(descriptionTextFont);
         usernameLabel.setForeground(descriptionTextForeground);
         JLabel passwordLabel = new JLabel(tr("Password"));
