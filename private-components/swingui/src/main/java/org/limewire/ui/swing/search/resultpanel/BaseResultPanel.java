@@ -88,7 +88,7 @@ public class BaseResultPanel extends JXPanel {
     private static final int ROW_HEIGHT = ListViewRowHeightRule.RowDisplayConfig.HeadingAndMetadata.getRowHeight();
 
     private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
-    private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
+    private static final Log LOG = LogFactory.getLog(BaseResultPanel.class);
 
     /** Table component for the List view. */
     private final ListViewTable resultsList;

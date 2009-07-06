@@ -38,7 +38,7 @@ import com.limegroup.gnutella.library.GnutellaFiles;
  */
 public class TorrentDownloadListener implements EventListener<DownloadStateEvent> {
 
-    private final Log LOG = LogFactory.getLog(TorrentDownloadListener.class);
+    private static final Log LOG = LogFactory.getLog(TorrentDownloadListener.class);
 
     private final Downloader downloader;
 
