@@ -321,7 +321,7 @@ public class FileInfoPanel extends JPanel {
     private void createSharing() {
         switch(type) {
         case LOCAL_FILE:
-            if(propertiableFile instanceof LocalFileItem) {
+            if(propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).isShareable()) {
                 List<SharedFileList> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
                 if(sharedWithList.size() > 0) {
                     final JPanel sharingPanel = createPanel(I18n.tr("Sharing from these lists:"));
