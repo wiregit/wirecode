@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -26,6 +27,7 @@ import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.SelectAndScrollDownloadEvent;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -52,6 +54,7 @@ public class MainDownloadPanel extends JPanel {
     private boolean isInitialized = false;
     private final Provider<DownloadTableFactory> downloadTableFactory;
     private final DownloadListManager downloadListManager;
+    private final ArrayList<DownloadVisibilityListener> downloadVisibilityListeners = new ArrayList<DownloadVisibilityListener>();
     
     @Resource private int preferredHeight;
     
@@ -72,15 +75,16 @@ public class MainDownloadPanel extends JPanel {
         this.notifier = notifier;
 
         GuiUtils.assignResources(this);
-
-        setPreferredSize(new Dimension(getPreferredSize().width, preferredHeight));
+        int savedHeight = SwingUiSettings.DOWNLOAD_TRAY_SIZE.getValue();
+        int height = savedHeight == 0 ? preferredHeight : savedHeight;
+        setPreferredSize(new Dimension(getPreferredSize().width, height));
     }
 
     @EventSubscriber
 	public void handleSelectAndScroll(SelectAndScrollDownloadEvent event) {
         table.selectAndScrollTo(event.getSelectedURN());
         if(getVisibleRect().height < table.getRowHeight()){
-            new DownloadVisibilityEvent(true).publish();
+            alertDownloadVisibilityListeners(true);
         }
     }
 
@@ -107,6 +111,14 @@ public class MainDownloadPanel extends JPanel {
             initialize();
         }
     }
+    
+    public void addDownloadVisibilityListener(DownloadVisibilityListener listener){
+        downloadVisibilityListeners.add(listener);
+    }
+    
+    public void removeDownloadVisibilityListener(DownloadVisibilityListener listener){
+        downloadVisibilityListeners.remove(listener);
+    }
 
     //Lazily initialized - initialize() is called when the first downloadItem is added to the list.  
     private void initialize() {
@@ -127,6 +139,10 @@ public class MainDownloadPanel extends JPanel {
     
     public List<DownloadItem> getSelectedDownloadItems(){
         return table.getSelectedItems();
+    }
+    
+    public int getDefaultPreferredHeight(){
+        return preferredHeight;
     }
 
     
@@ -213,15 +229,25 @@ public class MainDownloadPanel extends JPanel {
         
         int downloadCount = sourceList.size();
         
-        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue() && !isVisible()) {
-            new DownloadVisibilityEvent(true).publish();
-        } else if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue() && !isVisible()){
+            alertDownloadVisibilityListeners(true);
+        } else if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
             //Do nothing - it is already set.
             return;
         } else if (downloadCount == 0 && isVisible()) {
-            new DownloadVisibilityEvent(false).publish();
+            alertDownloadVisibilityListeners(false);
         } else if (downloadCount > 0 && !isVisible()) {
-            new DownloadVisibilityEvent(true).publish();
+            alertDownloadVisibilityListeners(true);
         }
+    }
+    
+    /**
+     * Ignores DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY
+     */
+    private void alertDownloadVisibilityListeners(boolean isVisible) {
+        for (DownloadVisibilityListener listener : downloadVisibilityListeners) {
+            listener.updateVisibility(new DownloadVisibilityEvent(isVisible));
+        }
+
     }
 }

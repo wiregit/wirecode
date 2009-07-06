@@ -2,6 +2,7 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -15,7 +16,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.core.settings.DownloadSettings;
@@ -27,9 +27,9 @@ import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.downloads.DownloadHeaderPanel;
+import org.limewire.ui.swing.downloads.DownloadVisibilityListener;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.nav.Navigator;
@@ -53,6 +53,7 @@ public class LimeWireSwingUI extends JPanel {
     private final ProNagController proNagController;
     private final LimeSplitPane splitPane;
     private final Provider<SignOnMessageLayer> signOnMessageProvider;
+    private final MainDownloadPanel mainDownloadPanel;
     
 	@Inject
     public LimeWireSwingUI(
@@ -70,7 +71,8 @@ public class LimeWireSwingUI extends JPanel {
     	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
     	this.signOnMessageProvider = signOnMessageProvider;
-        this.centerPanel = new JPanel(new GridBagLayout());    	
+        this.centerPanel = new JPanel(new GridBagLayout());   
+        this.mainDownloadPanel = mainDownloadPanel;
     	
     	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanelProvider.get());
     	mainDownloadPanel.setVisible(false);
@@ -118,12 +120,23 @@ public class LimeWireSwingUI extends JPanel {
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
         
-        setDownloadPanelVisibility(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue());
     }
 	
 	@Inject
-	public void registerWithEventBus(){
-        EventAnnotationProcessor.subscribe(this);
+	public void registerListener(){
+	    mainDownloadPanel.addDownloadVisibilityListener(new DownloadVisibilityHandler());
+	}
+	
+	private boolean isFirstPainting = true;
+	@Override
+    public void paint(Graphics g){
+	    if(isFirstPainting && splitPane.getHeight() > 0){
+	        isFirstPainting = false;
+	        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
+	            handleDownloadVisibiltyChange(true);
+	        }
+	    }
+	    super.paint(g);
 	}
 	
 	void hideMainPanel() {
@@ -148,7 +161,7 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-   private LimeSplitPane createSplitPane(final JComponent top, final JComponent bottom, JComponent divider) {
+   private LimeSplitPane createSplitPane(final JComponent top, final MainDownloadPanel bottom, JComponent divider) {
         final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
         splitPane.getDivider().setVisible(false);
         bottom.setVisible(false);
@@ -169,14 +182,14 @@ public class LimeWireSwingUI extends JPanel {
             }
         });
         
-        bottom.addComponentListener(new ComponentAdapter(){
+        mainDownloadPanel.addComponentListener(new ComponentAdapter(){
             @Override
             public void componentResized(ComponentEvent e) {
                 int height = bottom.getHeight();
-                if(height >= bottom.getPreferredSize().height){
+                if(height > bottom.getDefaultPreferredHeight()){
                     SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(height);
                 } else {
-                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(bottom.getPreferredSize().height);
+                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(bottom.getDefaultPreferredHeight());
                 }
             }
         });
@@ -184,22 +197,24 @@ public class LimeWireSwingUI extends JPanel {
         return splitPane;
     }
    
-   @EventSubscriber
-   public void handleDownloadVisibilityEvent(DownloadVisibilityEvent event){
-       setDownloadPanelVisibility(event.getVisibility());
+   private class DownloadVisibilityHandler implements DownloadVisibilityListener {
+    @Override
+    public void updateVisibility(DownloadVisibilityEvent event) {
+        handleDownloadVisibiltyChange(event.getVisibility());
+    }       
    }
    
-   private void setDownloadPanelVisibility(boolean isVisible){
+    
+   private void handleDownloadVisibiltyChange(boolean isVisible){
        splitPane.getDivider().setVisible(isVisible);
        splitPane.getBottomComponent().setVisible(isVisible);
-       if (isVisible) {
-           int savedHeight = SwingUiSettings.DOWNLOAD_TRAY_SIZE.getValue();
-           int height = savedHeight == 0 ? splitPane.getBottomComponent().getPreferredSize().height :
-               savedHeight;
-           
-            splitPane.setDividerLocation(splitPane.getSize().height - splitPane.getInsets().bottom
-                    - splitPane.getDividerSize()
-                    - height);
+       if (isVisible) {           
+           int preferredDividerPosition = splitPane.getSize().height - splitPane.getInsets().bottom
+           - splitPane.getDividerSize()/2
+           - splitPane.getBottomComponent().getPreferredSize().height;
+           if (preferredDividerPosition < (splitPane.getHeight()/2)){
+               preferredDividerPosition = splitPane.getHeight()/2;
+           }
         }
    }
     
