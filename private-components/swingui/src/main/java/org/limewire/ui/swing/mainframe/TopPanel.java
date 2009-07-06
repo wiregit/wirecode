@@ -118,7 +118,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         libraryNav = navigator.createNavItem(NavCategory.LIBRARY, LibraryMediator.NAME, myLibraryMediator);
         JButton libraryButton = new IconButton(NavigatorUtils.getNavAction(libraryNav));
         libraryButton.setName("WireframeTop.libraryButton");
-        libraryButton.setToolTipText(I18n.tr("Library"));
+        libraryButton.setToolTipText(I18n.tr("My Files"));
         libraryButton.setText(null);
         libraryButton.setIconTextGap(1);
         
