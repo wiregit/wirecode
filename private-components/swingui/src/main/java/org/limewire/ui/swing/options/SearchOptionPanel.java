@@ -152,8 +152,12 @@ public class SearchOptionPanel extends OptionPanel {
 
         @Override
         boolean applyOptions() {
-            SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID
-                    .setValue(((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId());
+            
+            SearchCategory category = (SearchCategory) defaultSearchSpinner.getSelectedItem();
+            if (category != null) {
+                SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID
+                    .setValue(category.getId());
+            }
             
             SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.setValue(suggestFriendFiles.isSelected());
             SwingUiSettings.KEEP_SEARCH_HISTORY.setValue(searchTabNumberCheckBox.isSelected());
