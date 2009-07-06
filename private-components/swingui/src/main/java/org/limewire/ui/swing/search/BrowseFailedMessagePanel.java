@@ -207,7 +207,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     }
 
     private boolean isUserOffline(){
-        return connectionEventBean.getLastEvent().getType() != Type.CONNECTED;
+        return connectionEventBean.getLastEvent() == null || connectionEventBean.getLastEvent().getType() != Type.CONNECTED;
     }
     
     private boolean isSingleBrowse(){
