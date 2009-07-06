@@ -646,16 +646,18 @@ public class FileUtils {
             return directory.delete();
 
         File[] files = directory.listFiles();
-        for (File file : files) {
-            try {
-                if (!getCanonicalPath(file).startsWith(canonicalParent))
-                    continue;
-            } catch (IOException ioe) {
-                return false;
+        if(files != null) {
+            for (File file : files) {
+                try {
+                    if (!getCanonicalPath(file).startsWith(canonicalParent))
+                        continue;
+                } catch (IOException ioe) {
+                    return false;
+                }
+    
+                if (!deleteRecursive(file))
+                    return false;
             }
-
-            if (!deleteRecursive(file))
-                return false;
         }
 
         return directory.delete();
@@ -1084,16 +1086,18 @@ public class FileUtils {
         }
 
         File[] files = directory.listFiles();
-        for (File file : files) {
-            try {
-                if (!getCanonicalPath(file).startsWith(canonicalParent))
-                    continue;
-            } catch (IOException ioe) {
-                return false;
+        if(files != null) {
+            for (File file : files) {
+                try {
+                    if (!getCanonicalPath(file).startsWith(canonicalParent))
+                        continue;
+                } catch (IOException ioe) {
+                    return false;
+                }
+    
+                if (!forceDeleteRecursive(file))
+                    return false;
             }
-
-            if (!forceDeleteRecursive(file))
-                return false;
         }
 
         return forceDelete(directory);
