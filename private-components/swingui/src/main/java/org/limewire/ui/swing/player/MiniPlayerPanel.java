@@ -178,8 +178,9 @@ public class MiniPlayerPanel extends JPanel {
             } 
             else {
                 String text = null;
-                if (player.getCurrentSong() != null) {
-                    File file = player.getCurrentSong().getFile();
+                AudioSource currentSource = player.getCurrentSong();
+                if (currentSource != null) {
+                    File file = currentSource.getFile();
                     if (file !=null) {
                         text = file.getName();
                     }
