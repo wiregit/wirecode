@@ -23,7 +23,7 @@ public class FancyTabList extends AbstractTabList {
      */
     public FancyTabList(Iterable<? extends TabActionMap> actionMaps) {
         setOpaque(false);
-        setLayout(new MigLayout("debug, insets 0, gap 0, filly, hidemode 2"));  
+        setLayout(new MigLayout("insets 0, gap 0, filly, hidemode 2"));  
         
         setTabActionMaps(actionMaps);
     }
