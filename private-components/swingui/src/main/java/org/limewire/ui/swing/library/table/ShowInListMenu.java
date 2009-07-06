@@ -67,13 +67,16 @@ public abstract class ShowInListMenu extends JMenu {
                     LocalFileList libraryList = libraryManager.getLibraryManagedList();
                     menu.add(new ShowAction(I18n.tr("Library"), getListIcon(libraryList), libraryList, selectedFile)).setEnabled(selectedLocalFileList == null || libraryManager.getLibraryManagedList() != selectedLocalFileList.get());             
                     manager.getModel().getReadWriteLock().readLock().lock();
-                    try { 
-                        if(manager.getModel().size() > 0)
-                            menu.addSeparator();      
+                    try {  
+                        boolean addSeperator = false;
                         for(SharedFileList fileList : manager.getModel()) {
-                            if(fileList.contains(selectedFile))
+                            if(fileList.contains(selectedFile)) {
                                 menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                                addSeperator = true;
+                            }
                         }
+                        if(addSeperator)
+                            menu.insertSeparator(1);
                     } finally {
                         manager.getModel().getReadWriteLock().readLock().unlock();
                     }
