@@ -37,12 +37,15 @@ public class PopupHeaderBar extends JPanel {
         titleBarLabel.setOpaque(false);
         titleBarLabel.setForeground(Color.WHITE);
         titleBarLabel.setFont(font);
-        IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
-        closeButton.addActionListener(closeAction);
-        closeButton.setOpaque(false);
         
         add(titleBarLabel, "gapleft 4, dock west");
-        add(closeButton, "gapright 3, dock east");
+        
+        if (closeAction != null) {
+            IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
+            closeButton.addActionListener(closeAction);
+            closeButton.setOpaque(false);
+            add(closeButton, "gapright 3, dock east");
+        }
     }
     
 }

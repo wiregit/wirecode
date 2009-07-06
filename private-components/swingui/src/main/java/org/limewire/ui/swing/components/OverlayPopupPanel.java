@@ -24,37 +24,38 @@ public abstract class OverlayPopupPanel extends Panel
         this.layeredPane = layeredPane;
         this.childPanel = childPanel;
 
-        setLayout(new BorderLayout());
-        
-        add(childPanel, BorderLayout.CENTER);
+        if (childPanel != null) {
+            setLayout(new BorderLayout());
+            add(childPanel, BorderLayout.CENTER);
 
-        // Match visiblity of the child
-        childPanel.addComponentListener(new ComponentListener() {
-            @Override
-            public void componentHidden(ComponentEvent e) {
-                setVisible(false);                
+            // Match visiblity of the child
+            childPanel.addComponentListener(new ComponentListener() {
+                @Override
+                public void componentHidden(ComponentEvent e) {
+                    setVisible(false);                
+                }
+                @Override
+                public void componentMoved(ComponentEvent e) {
+                }
+                @Override
+                public void componentResized(ComponentEvent e) {
+                }
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    setVisible(true);
+                }
+            });
+
+            // Should hide if the child is hidden
+            if (!childPanel.isVisible()) {
+                setVisible(false);
             }
-            @Override
-            public void componentMoved(ComponentEvent e) {
-            }
-            @Override
-            public void componentResized(ComponentEvent e) {
-            }
-            @Override
-            public void componentShown(ComponentEvent e) {
-                setVisible(true);
-            }
-        });
+        }
         
         layeredPane.add(this, JLayeredPane.MODAL_LAYER);
         layeredPane.addComponentListener(this);
 
         resize();
-        
-        // Should hide if the child is hidden
-        if (!childPanel.isVisible()) {
-            setVisible(false);
-        }
     }
 
     @Override
