@@ -86,8 +86,8 @@ class FriendMenu extends MnemonicMenu {
         boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
         boolean supportsAddRemoveFriend = signedIn && friendConnection != null && friendConnection.supportsAddRemoveFriend();
         boolean supportModeChanges = signedIn && friendConnection != null && friendConnection.supportsMode();
+        boolean loggingIn = friendConnection != null && friendConnection.isLoggingIn();
         
-        // TODO probably disable login action while logging in.
         browseFriendMenuItem.setEnabled(signedIn);
         addFriendMenuItem.setVisible(supportsAddRemoveFriend);
         addFriendSeperator.setVisible(supportsAddRemoveFriend);
@@ -96,6 +96,7 @@ class FriendMenu extends MnemonicMenu {
         statusActions.getDnDMenuItem().setVisible(supportModeChanges);
         statusSeperator.setVisible(supportModeChanges);
         loginMenuItem.setVisible(!signedIn);
+        loginMenuItem.setEnabled(!loggingIn);
         logoutMenuItem.setVisible(signedIn);
         friendService.updateSignedInStatus();
         friendService.setVisible(signedIn);
