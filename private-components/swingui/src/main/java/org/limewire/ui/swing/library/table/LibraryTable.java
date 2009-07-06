@@ -114,6 +114,7 @@ public class LibraryTable extends MouseableTable {
         setDropMode(DropMode.ON);
         
         setDoubleClickHandler(new DoubleClickHandler());
+        setEnterKeyAction(launchAction.get());
     }
     
     private void uninstallListeners() {
