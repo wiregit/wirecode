@@ -35,6 +35,7 @@ import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.friend.api.FriendManager;
+import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -220,7 +221,12 @@ public class CoreDownloadListManager implements DownloadListManager {
             RemoteFileDesc next = rfds[i];
             if(next.getSHA1Urn() != null)
                 sha1RFD = next;
-            alts.remove(next.getAddress()); // Removes an alt that matches the IpPort of the RFD
+            Address address = next.getAddress();
+            // response alts are always only ip ports and no kind of other address
+            // so it suffices to compare ip port instances of rfd addresses with the alt set
+            // since other address types won't match anyways
+            if (address instanceof IpPort) 
+                alts.remove(address); // Removes an alt that matches the IpPort of the RFD
         }
 
         // If no SHA1 rfd, just use the first.
