@@ -40,7 +40,6 @@ public class FriendsButton extends LimeComboBox {
     @Resource private Icon friendLoadingIcon;
     @Resource private Icon friendDnDIcon;
     //TODO support new files icon
-    @Resource private Icon friendNewFilesIcon;
     
     private final BusyPainter busyPainter;
     
