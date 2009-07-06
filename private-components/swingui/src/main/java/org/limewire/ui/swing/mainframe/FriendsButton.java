@@ -17,7 +17,6 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.BusyPainter;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.settings.FriendSettings;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
@@ -25,14 +24,11 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.actions.BrowseOrLoginAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -41,10 +37,9 @@ import com.google.inject.Inject;
 
 public class FriendsButton extends LimeComboBox {
     
-    @Resource private Icon friendOnlineIcon;
-    @Resource private Icon friendOfflineIcon;
+    @Resource private Icon friendEnabledIcon;
+    @Resource private Icon friendDisabledIcon;
     @Resource private Icon friendLoadingIcon;
-    @Resource private Icon friendDnDIcon;
     @Resource private Icon friendNewFilesIcon;
     
     private boolean newResultsAvailable = false;
@@ -103,16 +98,14 @@ public class FriendsButton extends LimeComboBox {
         case CONNECT_FAILED:
         case DISCONNECTED:
             newResultsAvailable = false;
-            setIcon(friendOfflineIcon);
+            setIcon(friendDisabledIcon);
             stopAnimation();
             break;
         case CONNECTED:
             if(newResultsAvailable) {
                setIcon(friendNewFilesIcon);
-            } else if(FriendSettings.DO_NOT_DISTURB.getValue() && event != null && event.getSource().supportsMode()) {
-                setIcon(friendDnDIcon);
-            } else {
-                setIcon(friendOnlineIcon);
+            } else { 
+                setIcon(friendEnabledIcon);
             }
             stopAnimation();
             break;
@@ -134,22 +127,6 @@ public class FriendsButton extends LimeComboBox {
             public void handleEvent(FriendConnectionEvent event) {
                 setIconFromEvent(event);
             }
-        });
-        
-        //update available/dnd icons when property value changes
-        FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
-           @Override
-            public void settingChanged(SettingEvent evt) {
-               SwingUtils.invokeLater(new Runnable() {
-                  @Override
-                  public void run() {
-                      FriendConnection friendConnection = EventUtils.getSource(connectBean);
-                      if(friendConnection != null && friendConnection.isLoggedIn()) {
-                          setIconFromEvent(new FriendConnectionEvent(friendConnection, FriendConnectionEvent.Type.CONNECTED));
-                      }
-                  } 
-               });
-            } 
         });
         
         //change to new files icon when inserts are detected
