@@ -13,7 +13,6 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
-import org.limewire.ui.swing.table.QualityComparator;
 import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
@@ -36,13 +35,12 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
     static final int FILENAME_INDEX = 8;
     static final int TRACK_INDEX = 9;
     static final int YEAR_INDEX = 10;
-    static final int QUALITY_INDEX = 11;
-    static final int DESCRIPTION_INDEX = 12;
-    static final int HIT_INDEX = 13;
-    static final int UPLOADS_INDEX = 14;
-    static final int UPLOAD_ATTEMPTS_INDEX = 15;
-    static final int PATH_INDEX = 16;
-    static final int ACTION_INDEX = 17;
+    static final int DESCRIPTION_INDEX = 11;
+    static final int HIT_INDEX = 12;
+    static final int UPLOADS_INDEX = 13;
+    static final int UPLOAD_ATTEMPTS_INDEX = 14;
+    static final int PATH_INDEX = 15;
+    static final int ACTION_INDEX = 16;
     
     @Inject
     public AudioTableFormat() {
@@ -58,7 +56,6 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
                 new ColumnStateInfo(FILENAME_INDEX, "LIBRARY_AUDIO_FILENAME", I18n.tr("Filename"), 100, false, true), 
                 new ColumnStateInfo(TRACK_INDEX, "LIBRARY_AUDIO_TRACK", I18n.tr("Track"), 50, false, true), 
                 new ColumnStateInfo(YEAR_INDEX, "LIBRARY_AUDIO_YEAR", I18n.tr("Year"), 50, false, true), 
-                new ColumnStateInfo(QUALITY_INDEX, "LIBRARY_AUDIO_QUALITY", I18n.tr("Quality"), 115, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "LIBRARY_AUDIO_DESCRIPTION", I18n.tr("Description"), 100, false, true), 
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_AUDIO_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_AUDIO_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
@@ -82,7 +79,6 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
         case SIZE_INDEX: return baseObject.getSize();
         case TRACK_INDEX: return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
         case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
-        case QUALITY_INDEX: return baseObject;
         case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         case HIT_INDEX: return baseObject.getNumHits();
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
@@ -107,7 +103,6 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
     public Comparator getColumnComparator(int column) {
         switch(column) {
             case TITLE_INDEX: return new NameComparator();
-            case QUALITY_INDEX: return new QualityComparator();
             case TRACK_INDEX: return new TrackComparator();
         }
         return super.getColumnComparator(column);

@@ -25,7 +25,6 @@ import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.NameRenderer;
-import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TimeRenderer;
@@ -61,7 +60,6 @@ public class LibraryTable extends MouseableTable {
     private final Provider<NameCategoryRenderer> nameCategoryRenderer;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
-    private final Provider<QualityRenderer> qualityRenderer;
     private final Provider<NameRenderer> nameRenderer;
     private final Provider<RemoveRenderer> removeRenderer;
     private final Provider<IsPlayingRenderer> isPlayingRenderer;
@@ -74,7 +72,6 @@ public class LibraryTable extends MouseableTable {
             Provider<NameCategoryRenderer> nameCategoryRenderer,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer,
-            Provider<QualityRenderer> qualityRenderer,
             Provider<NameRenderer> nameRenderer,
             Provider<LibraryPopupMenu> libraryPopupMenu,
             Provider<RemoveRenderer> removeRenderer,
@@ -86,7 +83,6 @@ public class LibraryTable extends MouseableTable {
         this.nameCategoryRenderer = nameCategoryRenderer;
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
-        this.qualityRenderer = qualityRenderer;
         this.nameRenderer = nameRenderer;
         this.removeRenderer = removeRenderer;
         this.isPlayingRenderer = isPlayingRenderer;
@@ -275,7 +271,6 @@ public class LibraryTable extends MouseableTable {
                 setCellRenderer(AudioTableFormat.PLAY_INDEX, isPlayingRenderer.get());
                 setCellRenderer(AudioTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(AudioTableFormat.LENGTH_INDEX, timeRenderer.get());
-                setCellRenderer(AudioTableFormat.QUALITY_INDEX, qualityRenderer.get());
                 setCellRenderer(AudioTableFormat.TITLE_INDEX, nameRenderer.get());
                 setCellRenderer(AudioTableFormat.ACTION_INDEX, removeRenderer.get());
                 setCellEditor(AudioTableFormat.ACTION_INDEX, removeEditor);
