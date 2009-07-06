@@ -51,7 +51,7 @@ public class FriendsButton extends LimeComboBox {
         GuiUtils.assignResources(this);
         
         comboBoxDecorator.decorateIconComboBox(this);
-        setToolTipText(I18n.tr("Friends"));
+        setToolTipText(I18n.tr("Browse Friends' Files"));
         setText(null);
         setIconTextGap(1);
 
