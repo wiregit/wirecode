@@ -203,7 +203,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 		}
 		
 		if(addrChanged) {
-            LOG.infof("Setting address to " + address);
+            LOG.infof("Setting address to ", address);
 		    networkManager.addressChanged();
         }
 	}
