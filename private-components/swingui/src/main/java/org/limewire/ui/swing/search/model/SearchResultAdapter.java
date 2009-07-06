@@ -45,7 +45,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     private final Set<RemoteHost> remoteHosts;    
     private final Provider<PropertiableHeadings> propertiableHeadings;
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
-    private List<VisualSearchResult> similarResults = null;
+    private CopyOnWriteArrayList<VisualSearchResult> similarResults = null;
     private VisualSearchResult similarityParent;
     private boolean anonymous;
     private boolean visible;
@@ -164,7 +164,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         if(similarResults == null) {
             similarResults = new CopyOnWriteArrayList<VisualSearchResult>();
         }
-        similarResults.add(similarResult);
+        similarResults.addIfAbsent(similarResult);
     }
 
     @Override
