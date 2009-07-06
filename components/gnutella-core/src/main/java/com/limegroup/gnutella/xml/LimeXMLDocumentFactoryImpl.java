@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.StringUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -87,7 +88,11 @@ class LimeXMLDocumentFactoryImpl implements LimeXMLDocumentFactory {
         Map<String, String> map = new HashMap<String, String>(nameValueList.size());
         //iterate over the passed list of field names & values
         for(Map.Entry<String, String> next : nameValueList) {
-            map.put(next.getKey().trim().intern(), next.getValue().trim().intern());
+            String key = next.getKey() == null ? null : next.getKey().trim().intern();
+            String value = next.getValue() == null ? null : next.getValue().trim().intern();
+            if(!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
+                map.put(key, value);
+            }
         }
         
         // scan for action/id/etc..
