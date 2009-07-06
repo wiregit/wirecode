@@ -45,6 +45,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
     @Inject private Injector injector;
     @Inject private QueryRequestFactory queryRequestFactory;
     @Inject private LimeXMLDocumentHelper limeXMLDocumentHelper;
+    @Inject private LicenseFactory licenseFactory;
     
 	public LicenseSharingTest(String name) {
 		super(name);
@@ -168,8 +169,8 @@ public final class LicenseSharingTest extends ClientSideTestCase {
             assertNotNull(r.getDocument());
             LimeXMLDocument doc = r.getDocument();
             assertTrue(r.toString(), doc.isLicenseAvailable());
-            assertNotNull(r.toString(), doc.getLicense());
-            assertInstanceof(CCLicense.class, doc.getLicense());
+            assertNotNull(r.toString(), doc.getLicenseString());
+            assertInstanceof(CCLicense.class, licenseFactory.create(doc.getLicenseString()));
         }
     }
     
@@ -196,8 +197,8 @@ public final class LicenseSharingTest extends ClientSideTestCase {
             LimeXMLDocument doc = r.getDocument();
             assertNotNull(doc);
             assertTrue(r.toString(), doc.isLicenseAvailable());
-            assertNotNull(r.toString(), doc.getLicense());
-            assertInstanceof(WeedLicense.class, doc.getLicense());
+            assertNotNull(r.toString(), doc.getLicenseString());
+            assertInstanceof(WeedLicense.class, licenseFactory.create(doc.getLicenseString()));
         }
     }
 	
@@ -229,8 +230,8 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 			LimeXMLDocument doc = r.getDocument();
             assertNotNull(doc);
             assertTrue(r.toString(), doc.isLicenseAvailable());
-            assertNotNull(r.toString(), doc.getLicense());
-            assertInstanceof(WeedLicense.class, doc.getLicense());
+            assertNotNull(r.toString(), doc.getLicenseString());
+            assertInstanceof(WeedLicense.class, licenseFactory.create(doc.getLicenseString()));
         }
 	}
     
@@ -262,7 +263,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 			LimeXMLDocument doc = r.getDocument();
             assertNotNull(doc);
             assertTrue(r.toString(), doc.isLicenseAvailable());
-            assertNotNull(r.toString(), doc.getLicense());
+            assertNotNull(r.toString(), licenseFactory.create(doc.getLicenseString()));
         }
 	}
     

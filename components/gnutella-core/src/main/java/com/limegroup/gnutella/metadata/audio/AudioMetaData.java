@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.limewire.util.NameValue;
 
-
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;

@@ -9,6 +9,7 @@ import org.limewire.listener.SourcedEventMulticaster;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 
 /**
  * This class extends FileDesc and wraps an incomplete File, so it can be used
@@ -40,10 +41,11 @@ class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFileDesc 
      * Constructor for the IncompleteFileDesc object.
      */
     public IncompleteFileDescImpl(RareFileStrategy rareFileStrategy,
+            LicenseFactory licenseFactory,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster, File file,
             Set<? extends URN> urns, int index, String completedName, long completedSize,
             VerifyingFile vf) {
-        super(rareFileStrategy, fileDescMulticaster, file, urns, index);
+        super(rareFileStrategy, licenseFactory, fileDescMulticaster, file, urns, index);
         _name = completedName;
         _size = completedSize;
         _verifyingFile = vf;

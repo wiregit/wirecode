@@ -18,6 +18,7 @@ import org.limewire.util.Objects;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -99,9 +100,10 @@ class FileDescImpl implements FileDesc {
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
     private final RareFileStrategy rareFileStrategy;
+    private final LicenseFactory licenseFactory;
     
     private final ConcurrentHashMap<String, Object> clientProperties =
-        new ConcurrentHashMap<String, Object>(4, 0.75f, 4); // non-default initialCapacity,
+        new ConcurrentHashMap<String, Object>(4, 0.75f, 1); // non-default initialCapacity,
                                                             // concurrencyLevel, saves
                                                             // ~1k memory / file.
 
@@ -120,6 +122,7 @@ class FileDescImpl implements FileDesc {
      * @param index the index in the FileManager
      */
     FileDescImpl(RareFileStrategy rareFileStrategy,
+            LicenseFactory licenseFactory,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster,
             File file,
             Set<? extends URN> urns,
@@ -130,6 +133,7 @@ class FileDescImpl implements FileDesc {
 
 		this.rareFileStrategy = rareFileStrategy;
 		this.multicaster = multicaster;
+		this.licenseFactory = licenseFactory;
 		FILE = Objects.nonNull(file, "file");
         _index = index;
         _name = I18NConvert.instance().compose(FILE.getName());
@@ -240,11 +244,7 @@ class FileDescImpl implements FileDesc {
         _limeXMLDocs.add(doc);
         
 	    doc.initIdentifier(FILE);
-	    if(doc.isLicenseAvailable())
-	        _license = doc.getLicense();
-	    
-	    if(doc.getLicenseString() != null && doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name()))
-	            setStoreFile(true);
+	    assignLicense(doc);
     }
     
     /* (non-Javadoc)
@@ -261,11 +261,25 @@ class FileDescImpl implements FileDesc {
         }
         
         newDoc.initIdentifier(FILE);
-        if(newDoc.isLicenseAvailable())
-            _license = newDoc.getLicense();
-        else if(_license != null && oldDoc.isLicenseAvailable())
-            _license = null;        
+        assignLicense(newDoc);
         return true;
+    }
+    
+    private void assignLicense(LimeXMLDocument doc) {
+        _license = null;
+        if(doc.isLicenseAvailable()) {
+            String license = doc.getLicenseString();
+            if(license != null) {
+                _license = licenseFactory.create(license);
+            } else {
+                _license = null;
+            }
+        } else {
+            _license = null;
+        }
+        
+        storeFile = doc.getLicenseString() != null &&
+                    doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
     }
     
     /* (non-Javadoc)
@@ -433,13 +447,6 @@ class FileDescImpl implements FileDesc {
         // should see if other ways to re-add can be done.
         }
         return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#setStoreFile(boolean)
-     */
-    public void setStoreFile(boolean isStoreFile) {
-        storeFile = isStoreFile;
     }
     
     /* (non-Javadoc)

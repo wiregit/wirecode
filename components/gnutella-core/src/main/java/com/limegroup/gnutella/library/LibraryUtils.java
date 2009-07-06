@@ -1,17 +1,16 @@
 package com.limegroup.gnutella.library;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
-import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
-
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 public class LibraryUtils {
     
@@ -87,11 +86,17 @@ public class LibraryUtils {
             if(type == MediaType.getProgramMediaType())
                 return false;
         }
-        String dotExt = "." + ext;
-        for(String banned : FilterSettings.BANNED_EXTENSIONS.get()) {
-            if(banned.equals(dotExt))
-                return false;
-        }
+        
+// TODO: This generated a small # of complaints (and broke some tests, but not hard to fix those)
+//       Before re-adding, should confirm that we definitely want this behavior, and maybe 
+//       turn it into an option?  The UI right now exposes these extensions as
+//       "banned search result extensions", which is a little different than what this code is doing.
+        
+//        String dotExt = "." + ext;
+//        for(String banned : FilterSettings.BANNED_EXTENSIONS.get()) {
+//            if(banned.equals(dotExt))
+//                return false;
+//        }
         return true;    
     }
     

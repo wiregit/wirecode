@@ -182,9 +182,9 @@ public class XMLParsingUtils {
                     //everything goes to lowercase
                     qName = attributes.getQName(i).toLowerCase(Locale.US); 
                     if(!qName.equals("comments")) { // ignore comments!
-                        attributeMap.put(_result.canonicalKeyPrefix + 
-                                qName + "__",
-                                attributes.getValue(i).trim());
+                        attributeMap.put((_result.canonicalKeyPrefix + 
+                                qName + "__").intern(),
+                                attributes.getValue(i).trim().intern());
                     }                                        
                 }
                 _result.add(attributeMap);

@@ -173,8 +173,6 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
      */
     public int getCompletedUploads();
 
-    public void setStoreFile(boolean b);
-
     public boolean isStoreFile();
     
     /** Sets a new property for this FileDesc. */

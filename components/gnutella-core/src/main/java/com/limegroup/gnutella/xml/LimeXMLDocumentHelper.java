@@ -57,7 +57,7 @@ public final class LimeXMLDocumentHelper{
             }
             
             final String indexKey = parsingResult.canonicalKeyPrefix +
-                                    LimeXMLDocument.XML_INDEX_ATTRIBUTE;
+                                    LimeXMLDocumentFactoryImpl.XML_INDEX_ATTRIBUTE;
             LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
             for(Map<String, String> attributes : parsingResult) {
                 String sindex = attributes.remove(indexKey);

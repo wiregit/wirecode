@@ -14,9 +14,9 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
@@ -164,7 +164,7 @@ public class LimeXMLUtils {
             throw new NullPointerException("querying with null doc.");
 
         //First find the names of all the fields in the query
-        Set<Map.Entry<String, String>> queryNameValues = queryDoc.getNameValueSet();
+        Collection<Map.Entry<String, String>> queryNameValues = queryDoc.getNameValueSet();
         int size = queryNameValues.size();
         int matchCount = 0; // number of matches
         int nullCount = 0; // number of fields in query not in replyDoc.

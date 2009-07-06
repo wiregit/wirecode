@@ -243,24 +243,16 @@ public class LimeXMLReplyCollection {
      * </pre>
      */
     private LimeXMLDocument validate(LimeXMLDocument doc, FileDesc fd) {
-        if(!doc.isCurrent()) {
+        if(!((GenericXmlDocument)doc).isCurrent()) {
             if(LOG.isDebugEnabled())
                 LOG.debug("reconstructing old document: " + fd.getFile());
             LimeXMLDocument tempDoc = constructDocument(fd.getFile());
             if (tempDoc != null) {
                 doc = update(doc, tempDoc);
             } else {
-                doc.setCurrent();
+                ((GenericXmlDocument)doc).setCurrent();
             }
         }
-        
-        // Verify the doc has information in it.
-        if(!doc.isValid()) {
-            //If it is invalid, try and rebuild it.
-            doc = constructDocument(fd.getFile());
-            if(doc == null)
-                return null;
-        }   
             
         // check to see if it's corrupted and if so, fix it.
         if( AudioMetaData.isCorrupted(doc) ) {
@@ -792,7 +784,7 @@ public class LimeXMLReplyCollection {
             
             xmlMap = new HashMap<FileAndUrn, String>(mainMap.size());
             for(Map.Entry<FileAndUrn, LimeXMLDocument> entry : mainMap.entrySet())
-                xmlMap.put(entry.getKey(), entry.getValue().getXmlWithVersion());
+                xmlMap.put(entry.getKey(), ((GenericXmlDocument)entry.getValue()).getXmlWithVersion());
             
             dirty = false;
         }
