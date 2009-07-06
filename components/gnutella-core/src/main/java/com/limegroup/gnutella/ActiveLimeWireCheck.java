@@ -101,7 +101,8 @@ public class ActiveLimeWireCheck {
             // port yet; try for one minute to contact it.
             LOG.trace("Could not acquire lock");
             long start = System.currentTimeMillis();
-            while(System.currentTimeMillis() - start < 60 * 1000) {
+            // FIXME: restore timeout to one minute after testing
+            while(System.currentTimeMillis() - start < 5 * 60 * 1000) {
                 if(tryToContactRunningLimeWire(arg)) {
                     LOG.trace("Contacted existing instance");
                     return true;
