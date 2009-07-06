@@ -162,6 +162,7 @@ public class FriendsButton extends LimeComboBox {
                         if(friendConnection != null && friendConnection.isLoggedIn()) {
                             setIconFromEvent(new FriendConnectionEvent(friendConnection, FriendConnectionEvent.Type.CONNECTED));
                         }
+                        break;//breaking only need to run once.
                     }
                 }
             }; 
