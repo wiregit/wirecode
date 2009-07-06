@@ -224,12 +224,11 @@ public class LibraryTable extends MouseableTable {
         LibraryTableModel model = getLibraryTableModel();
         for(int y=0; y < model.getRowCount(); y++) {
             FileItem fileItem = model.getElementAt(y);
-            if(!(fileItem instanceof LocalFileItem)) {
-                break; // Never going to find it.
-            }
-            if(file.equals(((LocalFileItem)fileItem).getFile())) {
-                getSelectionModel().setSelectionInterval(y, y);
-                break;
+            if(fileItem instanceof LocalFileItem) {
+                if(file.equals(((LocalFileItem)fileItem).getFile())) {
+                    getSelectionModel().setSelectionInterval(y, y);
+                    break;
+                }
             }
         }
         ensureRowVisible(getSelectedRow());

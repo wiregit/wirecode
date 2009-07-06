@@ -273,11 +273,13 @@ public class LibraryPanel extends JPanel {
     }
     
     public void selectAndScrollTo(File file) {
-        libraryTable.selectAndScrollTo(file);
+        if(file != null)
+            libraryTable.selectAndScrollTo(file);
     }
     
     public void selectAndScrollTo(URN urn) {
-        libraryTable.selectAndScrollTo(urn);
+        if(urn != null)
+            libraryTable.selectAndScrollTo(urn);
     }
     
     private void selectSharing(LibraryNavItem navItem) {
