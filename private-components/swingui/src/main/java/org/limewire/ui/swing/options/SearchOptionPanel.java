@@ -62,7 +62,7 @@ public class SearchOptionPanel extends OptionPanel {
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
         
-        setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx"));
+        setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx, gap 4"));
         add(getSearchBarPanel(), "growx, wrap");
         add(getFilteringPanel(), "growx, wrap");
         

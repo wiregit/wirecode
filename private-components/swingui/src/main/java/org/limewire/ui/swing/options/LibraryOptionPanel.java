@@ -67,7 +67,7 @@ public class LibraryOptionPanel extends OptionPanel {
         this.playerPanel = new UsePlayerPanel();
         this.categoryPanel = new CategoriesPanel();
 
-        setLayout(new MigLayout("insets 15, fillx"));
+        setLayout(new MigLayout("insets 15, fillx, gap 4"));
 
         // TODO: three different ways to add a panel!?
         add(categoryPanel, "growx, wrap");
@@ -141,14 +141,14 @@ public class LibraryOptionPanel extends OptionPanel {
             warnMeOnAddToSharedFolderCheckBox
                 = new JCheckBox(I18n.tr("Warn me when I add a folder to a list that is shared."));
             warnMeOnAddToSharedFolderCheckBox.setOpaque(false);
-            int indent = 20;
+            int indentAmount = 20;
             add(new JLabel(
                     I18n.tr("When I add a folder to the Library or to a List:")),
                     "wrap");
-            add(askMeRadioButton, indent(indent) + ",wrap");
-            add(alwaysAddRadioButton,indent(indent) +  ",wrap");
-            add(checkBoxes, indent(indent*2) + ",wrap");
-            add(warnMeOnAddToSharedFolderCheckBox, indent(indent*4) +",wrap");
+            add(askMeRadioButton, indent(indentAmount) + ",wrap");
+            add(alwaysAddRadioButton,indent(indentAmount) +  ",wrap");
+            add(checkBoxes, indent(indentAmount*2) + ",wrap");
+            add(warnMeOnAddToSharedFolderCheckBox, indent(indentAmount*2) +",wrap");
         }
 
         private String indent(int indent) {
@@ -305,7 +305,7 @@ public class LibraryOptionPanel extends OptionPanel {
             myFiles.setHorizontalTextPosition(JLabel.CENTER);
 
             modifyInfoPanel.add(new JLabel(I18n.tr("To see or modify files in your Public Shared list, go to:")), 
-                    "wrap");
+                    "gapbottom 10, wrap");
             
             modifyInfoPanel.add(myFiles);
             modifyInfoPanel.add(new JLabel(sharing_arrow), "aligny top, gaptop 17");

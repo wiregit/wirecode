@@ -51,7 +51,7 @@ public class DownloadOptionPanel extends OptionPanel {
         this.iconManager = iconManager;
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
         
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap, gap 4"));
         
         add(getSavingPanel(), "pushx, growx");
 

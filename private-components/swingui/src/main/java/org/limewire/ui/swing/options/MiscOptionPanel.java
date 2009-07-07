@@ -3,7 +3,6 @@ package org.limewire.ui.swing.options;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -16,12 +15,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -57,9 +56,6 @@ public class MiscOptionPanel extends OptionPanel {
     private NotificationsPanel notificationsPanel;
     private FriendsChatPanel friendsChatPanel;
     
-    //Language components, does not exist in its own subcomponent
-    @Resource private Font linkFont;
-    
     private Locale currentLanguage;
     private JLabel comboLabel;
     private final JComboBox languageDropDown;
@@ -73,13 +69,12 @@ public class MiscOptionPanel extends OptionPanel {
         
         GuiUtils.assignResources(this);
 
-        setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx"));
+        setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx, gap 4"));
 
         comboLabel = new JLabel(I18n.tr("Language:"));
         languageDropDown = new LanguageComboBox();
         
         translateButton = new HyperlinkButton(new UrlAction(I18n.tr("Help translate LimeWire!"), TRANSLATE_URL));
-        translateButton.setFont(linkFont);
         
         add(comboLabel);
         add(languageDropDown);
@@ -232,19 +227,24 @@ public class MiscOptionPanel extends OptionPanel {
             usernameField = new JTextField(18);
             passwordField = new JPasswordField(18);
 
-            add(autoLoginCheckBox, "split, wrap");
+            add(autoLoginCheckBox, "wrap");
+            
+            JPanel servicePanel = new JPanel(new MigLayout("insets 0, fill"));
+            servicePanel.setOpaque(false);
+            
+            servicePanel.add(new JLabel(tr("Using:")), "gapleft 25");
+            servicePanel.add(serviceComboBox, "wrap");
 
-            add(new JLabel(tr("Using")), "gapleft 25, split");
-            add(serviceComboBox, "wrap");
+            servicePanel.add(serviceLabel, "gapleft 25, hidemode 3");
+            servicePanel.add(serviceField, "hidemode 3, wrap");
 
-            add(serviceLabel, "gapleft 25, hidemode 3, split");
-            add(serviceField, "hidemode 3, wrap");
+            servicePanel.add(new JLabel(tr("Username:")), "gapleft 25");
+            servicePanel.add(usernameField, "wrap");
 
-            add(new JLabel(tr("Username:")), "gapleft 25, split");
-            add(usernameField, "wrap");
-
-            add(new JLabel(tr("Password:")), "gapleft 25, split");
-            add(passwordField);
+            servicePanel.add(new JLabel(tr("Password:")), "gapleft 25");
+            servicePanel.add(passwordField, "wrap");
+            
+            add(servicePanel);
         }
 
         private void populateInputs() {
