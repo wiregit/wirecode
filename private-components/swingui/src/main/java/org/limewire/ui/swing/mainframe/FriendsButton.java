@@ -2,7 +2,6 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,7 +23,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.actions.BrowseOrLoginAction;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -35,7 +33,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 
-public class FriendsButton extends LimeComboBox {
+public class FriendsButton extends JXButton {
     
     @Resource private Icon friendEnabledIcon;
     @Resource private Icon friendDisabledIcon;
@@ -58,10 +56,11 @@ public class FriendsButton extends LimeComboBox {
         setForegroundPainter(new AbstractPainter<JXButton>() {
             @Override
             protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
-                Icon icon;
+                Icon icon = null;
                 if (object.getModel().isPressed()) {
                     icon = object.getPressedIcon();
-                } else {
+                }
+                if (icon == null) {
                     icon = object.getIcon();
                 }
                 icon.paintIcon(object, g, 0, (height-icon.getIconHeight())/2);
@@ -74,7 +73,6 @@ public class FriendsButton extends LimeComboBox {
                 }
             }
         });
-        setPopupPosition(new Point(0, -4));  
         
         busyPainter = new BusyPainter() {
             @Override
