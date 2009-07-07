@@ -73,9 +73,11 @@ public class DownloadHeaderPanel extends JXPanel {
 
     @Resource
     private Color bottomGradientColor;
-    
+
     @Resource
     private Icon moreButtonArrow;
+    @Resource
+    private Icon moreButtonArrowDownState;
 
 
     @Resource
@@ -353,12 +355,14 @@ public class DownloadHeaderPanel extends JXPanel {
                 menuClosedDelayTime = System.currentTimeMillis();
                 moreButton.setNormalForeground(moreButtonDefaultForeground);
                 moreButton.setRolloverForeground(moreButtonDefaultForeground);
+                moreButton.setIcon(moreButtonArrow);
             }
 
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 moreButton.setNormalForeground(Color.WHITE);
                 moreButton.setRolloverForeground(Color.WHITE);
+                moreButton.setIcon(moreButtonArrowDownState);
 
             }
         });
