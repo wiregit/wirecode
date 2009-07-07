@@ -384,7 +384,9 @@ public class NativeFileIconController implements FileIconController {
             // Do not execute this code on windows 7. The default logic works fine. 
             // On windows 7 this breaks because View.getRoots only returns one root,
             // the path to the Desktop folder.
-            if(OSUtils.isWindows() && !OSUtils.isWindows7() && roots.length == 1) {
+            // We bypass this code on Windows Vista.  It fails because the 
+            // Documents folder no longer has a desktop icon on Vista.
+            if(OSUtils.isWindows() && !OSUtils.isWindowsVista() && !OSUtils.isWindows7() && roots.length == 1) {
                 String path = SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS);
                 if(path != null) {
                     File documents = new File(path);
