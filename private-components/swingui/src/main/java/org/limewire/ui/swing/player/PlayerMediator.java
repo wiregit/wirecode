@@ -247,10 +247,26 @@ public class PlayerMediator {
     }
     
     /**
-     * Resumes playing the current song in the audio player. 
+     * Resumes playing the current song in the audio player.  If the player is
+     * stopped, then attempt to play the first selected item in the library. 
      */
     public void resume() {
-        getPlayer().unpause();
+        PlayerState status = getPlayer().getStatus();
+        if ((status == PlayerState.STOPPED) || (status == PlayerState.UNKNOWN)) {
+            // Get first selected item.
+            List<LocalFileItem> selectedItems = libraryPanelProvider.get().getSelectedItems();
+            if (selectedItems.size() > 0) {
+                LocalFileItem selectedItem = selectedItems.get(0);
+                if (PlayerUtils.isPlayableFile(selectedItem.getFile())) {
+                    // Set active playlist and play file item.
+                    setActivePlaylist(libraryPanelProvider.get().getSelectedNavItem());
+                    play(selectedItem);
+                }
+            }
+            
+        } else {
+            getPlayer().unpause();
+        }
     }
     
     /**
