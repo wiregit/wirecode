@@ -69,6 +69,7 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListene
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListenerFactory;
+import org.limewire.xmpp.client.impl.messages.nosave.NoSaveIQ;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -585,6 +586,9 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 }
                 if (ProviderManager.getInstance().getIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE) == null) {
                     ProviderManager.getInstance().addIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE, new ConnectBackRequestIQProvider());
+                }
+                if (ProviderManager.getInstance().getIQProvider(NoSaveIQ.ELEMENT_NAME, NoSaveIQ.NAME_SPACE) == null) {
+                    ProviderManager.getInstance().addIQProvider(NoSaveIQ.ELEMENT_NAME, NoSaveIQ.NAME_SPACE, NoSaveIQ.getIQProvider());    
                 }
             }
 

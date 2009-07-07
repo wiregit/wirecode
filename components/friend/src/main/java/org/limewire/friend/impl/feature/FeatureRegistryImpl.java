@@ -41,6 +41,13 @@ class FeatureRegistryImpl implements FeatureRegistry {
     }
 
     @Override
+    public Iterable<URI> getAllFeatureUris() {
+        synchronized (lock) {
+            return new ArrayList<URI>(featureInitializers.keySet());
+        }        
+    }
+
+    @Override
     public void registerPrivateInitializer(URI uri, FeatureInitializer featureInitializer) {
         synchronized (lock) {
             featureInitializers.put(uri, featureInitializer);

@@ -81,7 +81,7 @@ public class DiscoInfoListener implements PacketListener {
     }
 
         String featureInitializer = friendPresence != null ? friendPresence.getPresenceId() : from;
-        for (URI uri : featureRegistry.getPublicFeatureUris()) {
+        for (URI uri : featureRegistry.getAllFeatureUris()) {
                 if (discoverInfo.containsFeature(uri.toASCIIString())) {
                     LOG.debugf("initializing feature {0} for {1}", uri.toASCIIString(), featureInitializer);
                 featureRegistry.get(uri).initializeFeature(friendPresence);

@@ -44,4 +44,9 @@ public interface FeatureRegistry {
      * @return the URIs that are meant to be published to other clients
      */
     Iterable<URI> getPublicFeatureUris();
+
+    /**
+     * @return URIs for all features
+     */
+    Iterable<URI> getAllFeatureUris();
 }
