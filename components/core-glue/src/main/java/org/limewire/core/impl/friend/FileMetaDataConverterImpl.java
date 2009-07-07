@@ -24,12 +24,11 @@ import com.limegroup.gnutella.util.DataUtils;
 
 @Singleton
 class FileMetaDataConverterImpl implements FileMetaDataConverter {
-    private final FriendRemoteFileDescDeserializer remoteFileDescDeserializer;
+
     private final RemoteFileDescFactory remoteFileDescFactory;
 
     @Inject
     public FileMetaDataConverterImpl(FriendRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
-        this.remoteFileDescDeserializer = remoteFileDescDeserializer;
         this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
@@ -37,8 +36,8 @@ class FileMetaDataConverterImpl implements FileMetaDataConverter {
         FriendAddress presenceAddress = getAddressFromPresence(presence);
 
         RemoteFileDesc remoteFileDesc = createRfdFromChatResult(presenceAddress, fileMetaData);
-        RemoteFileDescAdapter remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.promoteRemoteFileDescAndExchangeAddress(remoteFileDesc,
-                presenceAddress), IpPort.EMPTY_SET, presence);
+        RemoteFileDescAdapter remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDesc,
+                IpPort.EMPTY_SET, presence);
         return remoteFileDescAdapter;
     }
     

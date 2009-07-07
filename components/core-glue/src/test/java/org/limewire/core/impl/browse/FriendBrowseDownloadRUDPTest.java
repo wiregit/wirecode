@@ -6,10 +6,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -23,9 +21,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
-import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.QueryReplyListenerList;
-import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
@@ -35,9 +31,7 @@ import org.limewire.friend.api.Network;
 import org.limewire.friend.api.RosterEvent;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.FeatureEvent;
-import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.io.IpPort;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -52,7 +46,6 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.limegroup.gnutella.LimeWireCoreModule;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 
 /**
@@ -151,7 +144,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
         CoreBrowse coreBrowse = new CoreBrowse(presence, searchServices, queryReplyListenerList);
 
-        BrowseStatistics browser = new BrowseStatistics(presence);
+        BrowseResultsCollector browser = new BrowseResultsCollector();
         coreBrowse.start(browser);
 
         Map<String, SearchResult> browseResults = waitForBrowse(browser);
@@ -187,7 +180,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
     }
 
-    private Map<String, SearchResult> waitForBrowse(BrowseStatistics browse) throws Exception {
+    private Map<String, SearchResult> waitForBrowse(BrowseResultsCollector browse) throws Exception {
         return browse.waitForBrowseToFinish();
     }
 
@@ -256,43 +249,17 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
                    latch.await(featureWaitTimeout, TimeUnit.SECONDS));
     }
 
-    private class BrowseStatistics implements BrowseListener {
+    private class BrowseResultsCollector implements BrowseListener {
 
-        private final Map<String, SearchResult> searchResults;
-        private final CountDownLatch latch;
-        private final FriendRemoteFileDescDeserializer searchResultToXmppAdapter;
-        private final FriendPresence presence;
-
-        BrowseStatistics(FriendPresence presence) {
-            this.presence = presence;
-            this.searchResultToXmppAdapter = injector.getInstance(FriendRemoteFileDescDeserializer.class);
-            this.searchResults = new ConcurrentHashMap<String, SearchResult>();
-            this.latch = new CountDownLatch(1);
-        }
+        private final Map<String, SearchResult> searchResults = new ConcurrentHashMap<String, SearchResult>();
+        private final CountDownLatch latch = new CountDownLatch(1);
 
         public void handleBrowseResult(SearchResult searchResult) {
-            SearchResult adaptedSearchResultWithXmppAddress = convertToXmppCompatibleSearchResult(searchResult);
-            searchResults.put(searchResult.getFileName(), adaptedSearchResultWithXmppAddress);
+            searchResults.put(searchResult.getFileName(), searchResult);
         }
 
         public void browseFinished(boolean success) {
             latch.countDown();
-        }
-
-        /**
-         * This method (hack) is necessary because it is not currently possible to perform a
-         * friend browse, and use the results of the browse ({@link SearchResult} objects) for
-         * downloading, because the FriendPresence contained in such a SearchResult is a GnutellaPresence
-         */
-        private SearchResult convertToXmppCompatibleSearchResult(SearchResult gnutellaOnlySearchResult) {
-            RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter)gnutellaOnlySearchResult;
-            RemoteFileDesc oldRfd = rfdAdapter.getRfd();
-            FriendAddress friendAddress = new FriendAddress(presence.getPresenceId());
-            RemoteFileDesc newRfd = searchResultToXmppAdapter.promoteRemoteFileDescAndExchangeAddress(oldRfd, friendAddress);
-            Set<IpPort> ipPort = new HashSet<IpPort>();
-            ipPort.addAll(rfdAdapter.getAlts());
-
-            return new RemoteFileDescAdapter(newRfd, ipPort);
         }
 
         public Map<String, SearchResult> waitForBrowseToFinish() throws InterruptedException {

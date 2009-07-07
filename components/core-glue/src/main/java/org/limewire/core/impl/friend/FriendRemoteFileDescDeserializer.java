@@ -39,15 +39,5 @@ public class FriendRemoteFileDescDeserializer implements RemoteFileDescDeseriali
             Set<? extends URN> urns, String vendor, long createTime) {
         return new FriendRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
     }
-
-    /**
-     * Creates an XMPPRemoteFileDesc clone of a RemoteFileDesc replacing the address, XMPP vitals, and 
-     * linking as necessary.
-     * <p> 
-     * Not all attributes will be preserved in the promotion process.
-     */
-    public RemoteFileDesc promoteRemoteFileDescAndExchangeAddress(RemoteFileDesc rfd, FriendAddress address) {
-       return new FriendRemoteFileDesc(address, rfd.getIndex(), rfd.getFileName(), rfd.getSize(), rfd.getClientGUID(), rfd.getSpeed(), rfd.getQuality(), rfd.getXMLDocument(), rfd.getUrns(), 
-               rfd.getVendor(), rfd.getCreationTime(), rfd.isHTTP11(), addressFactory, addressResolver); 
-    }
+    
 }

@@ -23,9 +23,7 @@ import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.LibraryChangedEvent;
 import org.limewire.friend.api.feature.AddressFeature;
-import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.Address;
-import org.limewire.io.IpPortSet;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -57,8 +55,6 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      */
     final Set<PresenceLibrary> librariesToBrowse = Collections.synchronizedSet(new HashSet<PresenceLibrary>());
 
-    private final FriendRemoteFileDescDeserializer remoteFileDescDeserializer;
-    
     /**
      * Is incremented when a new connectivity change event is received, should
      * only be modified holding the lock to {@link #librariesToBrowse}.
@@ -78,7 +74,6 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
         this.socketsManager = socketsManager;
-        this.remoteFileDescDeserializer = remoteFileDescDeserializer;
     }
 
     @Inject 
@@ -157,13 +152,6 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
         final Browse browse = browseFactory.createBrowse(friendPresence);
         
-        final FriendAddress address;
-        if(!friendPresence.getFriend().isAnonymous()) {
-            address = (FriendAddress) addressFeature.getFeature();    
-        } else {
-            address = null;
-        }
-        
         // TODO: We need to capture the Browse and call stop on it when the library is removed,
         //       otherwise the browse can be lingering in the background.
         browse.start(new BrowseListener() {
@@ -175,12 +163,6 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
-                if(!friendPresence.getFriend().isAnonymous()) {
-                    // TODO: This should be removed & the address passed here should be corrected.
-                    // copy construct to add injectables and change address to xmpp address                    
-                    remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.promoteRemoteFileDescAndExchangeAddress(remoteFileDescAdapter.getRfd(), address), 
-                    	new IpPortSet(remoteFileDescAdapter.getAlts()), friendPresence);
-                }
                 if(transitList != null) {
                     transitList.add(remoteFileDescAdapter);
                 } else {
