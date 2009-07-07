@@ -42,14 +42,15 @@ public class SetupPage2 extends WizardPage {
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
 
         boolean newInstall = InstallSettings.PREVIOUS_RAN_VERSIONS.get().size() == 0;
-        boolean five0Orfive1 = isFive0OrFive1Upgrade();
-
+        boolean five0Orfive1Upgrade = isFive0OrFive1Upgrade();
+        boolean fourUpgrade = isFourUpgrade();
+        
         addAutoSharing(newInstall);
         addSeperator();
         addModifyInfo();
         if (!newInstall) {
             addSeperator();
-            addOldVersionInfo(five0Orfive1);
+            addOldVersionInfo(five0Orfive1Upgrade, fourUpgrade);
         }
 
         initSettings();
@@ -75,6 +76,24 @@ public class SetupPage2 extends WizardPage {
             }
         }
         return has50Or51 && !hasGreater;
+    }
+    
+    private boolean isFourUpgrade() {
+        boolean has4 = false;
+        boolean hasGreater = false;
+        for (String previousVersion : InstallSettings.PREVIOUS_RAN_VERSIONS.get()) {
+            try {
+                Version version = new Version(previousVersion);
+                if (version.getMajor() > 4) {
+                    hasGreater = true;
+                } else if (version.getMajor() == 4) {
+                    has4 = true;
+                }
+            } catch (VersionFormatException e) {
+                // do nothing
+            }
+        }
+        return has4 && !hasGreater;
     }
 
     private void addSeperator() {
@@ -168,15 +187,20 @@ public class SetupPage2 extends WizardPage {
         add(modifyInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
 
-    private void addOldVersionInfo(boolean five0Orfive1) {
+    private void addOldVersionInfo(boolean five0Orfive1Upgrade, boolean fourUpgrade) {
         JPanel oldVersionInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
-        if (five0Orfive1) {
+        if (five0Orfive1Upgrade) {
             oldVersionInfoPanel.add(createAndDecorateHeader(I18n
                     .tr("Files shared with the P2P Network in your old version will be in your Public Shared list.")),
                     "alignx center, wrap");
-        } else {
+        } else if(fourUpgrade) {
             oldVersionInfoPanel.add(createAndDecorateHeader(I18n
                     .tr("Shared files from your old version will be in your Public Shared list.")),
+                    "alignx center, wrap");
+        } else {
+            //all other upgrades
+            oldVersionInfoPanel.add(createAndDecorateHeader(I18n
+                    .tr("Shared files from your Public Shared list will continue to be shared.")),
                     "alignx center, wrap");
         }
         add(oldVersionInfoPanel, "growx, span, sg sameRowSize, wrap");
