@@ -17,6 +17,7 @@ import org.limewire.ui.swing.friends.actions.FriendService;
 import org.limewire.ui.swing.friends.actions.LoginAction;
 import org.limewire.ui.swing.friends.actions.LogoutAction;
 import org.limewire.ui.swing.friends.actions.StatusActions;
+import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -32,12 +33,13 @@ class FriendMenu extends MnemonicMenu {
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     private final JSeparator addFriendSeperator;
     private final JSeparator statusSeperator;
+    private final AutoLoginService autoLoginService;
     
     @Inject
     public FriendMenu(EventBean<FriendConnectionEvent> friendConnectionEventBean,
             BrowseFriendsAction browseFriendAction, StatusActions statusActions,
             AddFriendAction addFriendAction, LoginAction loginAction, LogoutAction logoutAction,
-            FriendService friendService) {
+            FriendService friendService, AutoLoginService autoLoginService) {
         super(I18n.tr("&Friends"));
         this.friendConnectionEventBean = friendConnectionEventBean;
         this.browseFriendMenuItem = new JMenuItem(browseFriendAction);
@@ -48,6 +50,7 @@ class FriendMenu extends MnemonicMenu {
         this.friendService = friendService;
         this.addFriendSeperator = new JSeparator();
         this.statusSeperator = new JSeparator();
+        this.autoLoginService = autoLoginService;
 
         add(friendService);
         add(browseFriendMenuItem);
@@ -86,7 +89,7 @@ class FriendMenu extends MnemonicMenu {
         boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
         boolean supportsAddRemoveFriend = signedIn && friendConnection != null && friendConnection.supportsAddRemoveFriend();
         boolean supportModeChanges = signedIn && friendConnection != null && friendConnection.supportsMode();
-        boolean loggingIn = friendConnection != null && friendConnection.isLoggingIn();
+        boolean loggingIn = autoLoginService.isAttemptingLogin() || (friendConnection != null && friendConnection.isLoggingIn());
         
         browseFriendMenuItem.setEnabled(signedIn);
         addFriendMenuItem.setVisible(supportsAddRemoveFriend);
