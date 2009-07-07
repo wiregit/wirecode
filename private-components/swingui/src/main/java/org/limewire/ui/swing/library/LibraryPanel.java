@@ -2,8 +2,10 @@ package org.limewire.ui.swing.library;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -14,6 +16,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -65,6 +68,8 @@ import org.limewire.ui.swing.util.I18n;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -75,8 +80,9 @@ import com.google.inject.Provider;
 @LazySingleton
 public class LibraryPanel extends JPanel {
 
-    @Resource
-    private Icon plusIcon;
+    @Resource private Icon plusIcon;
+    @Resource private Font fileCountFont;
+    @Resource private Color fileCountColor;
     
     private static final String TABLE = "TABLE";
     private static final String LIST = "LIST";
@@ -98,12 +104,14 @@ public class LibraryPanel extends JPanel {
     private CardLayout tableListLayout;
     
     private JXButton addFilesButton;
+    private JLabel fileCountLabel;
     private JXButton filterToggleButton;
     
     private Category selectedCategory;
     private EventList<LocalFileItem> eventList;
     private FilterList<LocalFileItem> filteredList;
     private FilterList<LocalFileItem> textFilterList;
+    private FileCountListener fileCountListener;
     
     private LibraryNavItem selectedNavItem;
     
@@ -141,6 +149,10 @@ public class LibraryPanel extends JPanel {
         createAddFilesButton(addFileAction, libraryAction);
         headerBar.add(addFilesButton, "push");
         headerBar.add(playerPanel, "pos 0.5al 0.5al");
+        fileCountLabel = new JLabel();
+        fileCountLabel.setForeground(fileCountColor);
+        fileCountLabel.setFont(fileCountFont);
+        headerBar.add(fileCountLabel, "aligny 50%, gapright 10");
         createFilterToggleButton();
         headerBar.add(filterToggleButton, "alignx right, gapright 5");
         
@@ -405,12 +417,13 @@ public class LibraryPanel extends JPanel {
         buttonDecorator.decorateDarkFullImageButton(filterToggleButton, AccentType.SHADOW);
     }
     
-    private EventList<LocalFileItem> recreateFilterList(EventList<LocalFileItem> eventList) {
+    private EventList<LocalFileItem> recreateFilterList(final EventList<LocalFileItem> eventList) {
         if(filteredList != null) {
             filteredList.dispose();
             filteredList = null;
         }
         if(textFilterList != null) {
+            textFilterList.removeListEventListener(fileCountListener);
             textFilterList.dispose();
         }
         if(selectedCategory != null) {
@@ -424,6 +437,11 @@ public class LibraryPanel extends JPanel {
         }
         MatcherEditor<LocalFileItem> textMatcherEditor = new TextComponentMatcherEditor<LocalFileItem>(libraryFilterPanel.getFilterField(), new LocalFileItemFilterator(selectedCategory) );
         textFilterList = GlazedListsFactory.filterList(filteredList == null ? eventList : filteredList, textMatcherEditor);
+        setFileCount(textFilterList.size(), filteredList == null ? eventList.size() : filteredList.size());
+        if(fileCountListener == null)
+            fileCountListener = new FileCountListener();
+        textFilterList.addListEventListener(fileCountListener);
+        
         return textFilterList;
     }
     
@@ -446,6 +464,14 @@ public class LibraryPanel extends JPanel {
                 null, tableColors.getDisabledForegroundColor());
         
         libraryTable.addHighlighter(storeHighlighter);
+    }
+    
+    private void setFileCount(int filterSize, int totalCount) {
+        if(filterSize < 0) {
+            fileCountLabel.setText(I18n.tr("{0} files", totalCount));
+        } else { 
+            fileCountLabel.setText(I18n.tr("{0} of {1} files", filterSize, totalCount));
+        }
     }
     
     private class GrayHighlightPredicate implements HighlightPredicate {
@@ -474,5 +500,16 @@ public class LibraryPanel extends JPanel {
      */
     public void editSharedListName(SharedFileList sharedFileList) {
         libraryNavigatorPanel.editSharedListName(sharedFileList);     
+    }
+    
+    /**
+     * Listens for changes on the current list and updates the 
+     * file count label.
+     */
+    private class FileCountListener implements ListEventListener<LocalFileItem> {
+        @Override
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            setFileCount(textFilterList.size(), filteredList == null ? eventList.size() : filteredList.size());
+        }
     }
 }
