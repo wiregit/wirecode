@@ -402,7 +402,7 @@ public class LibraryPanel extends JPanel {
     
     
     private void createFilterToggleButton() {
-        filterToggleButton = new JXButton(I18n.tr("Find"));
+        filterToggleButton = new JXButton(I18n.tr("Filter"));
         filterToggleButton.setSelected(SwingUiSettings.SHOW_LIBRARY_FILTERS.getValue());
         filterToggleButton.addActionListener(new ActionListener(){
             @Override

@@ -55,7 +55,7 @@ public class FancyTabList extends AbstractTabList {
     protected void layoutTabs() {
         removeAll();      
         for (FancyTab tab : getTabs()) {
-            add(tab, "growy, gaptop 3, gapright 2, gapleft 2, gapbottom 3");
+            add(tab, "growy, gaptop 2, gapright 2, gapleft 2, gapbottom 3");
         }        
 
         revalidate();
