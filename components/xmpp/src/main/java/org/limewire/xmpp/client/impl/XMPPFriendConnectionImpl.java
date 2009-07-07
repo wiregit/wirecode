@@ -225,6 +225,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 connection.login(configuration.getUserInputLocalID(), configuration.getPassword(), configuration.getResource());
                 LOG.infof("logged in.");
                 loggedIn.set(true);
+                loggingIn.set(false);
                 connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
             } catch (org.jivesoftware.smack.XMPPException e) {
                 handleLoginError(e);
