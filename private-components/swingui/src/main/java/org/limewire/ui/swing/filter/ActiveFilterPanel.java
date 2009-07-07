@@ -52,7 +52,7 @@ class ActiveFilterPanel extends JXPanel {
         setBackgroundPainter(new RectanglePainter(0, 0, 0, 0, 16, 16, true,
                 backgroundColor, 1.0f, borderColor));
         
-        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
+        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 1, 3));
         label.setFont(textFont);
         label.setForeground(textColor);
         label.setHorizontalAlignment(JLabel.LEADING);
