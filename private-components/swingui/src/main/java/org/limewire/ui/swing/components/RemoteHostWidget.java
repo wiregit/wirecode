@@ -4,6 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +14,6 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -24,6 +24,7 @@ import javax.swing.event.PopupMenuListener;
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
+import org.limewire.ui.swing.search.BlockUserMenuFactory;
 import org.limewire.ui.swing.search.RemoteHostActions;
 
 import com.google.inject.Inject;
@@ -46,6 +47,7 @@ public class RemoteHostWidget extends JPanel {
     private final JPopupMenu comboBoxMenu;
     
     private final Provider<RemoteHostActions> fromActions;
+    private final Provider<BlockUserMenuFactory> blockUserMenuFactory;
     
     private List<RemoteHost> people = new ArrayList<RemoteHost>();
     private List<RemoteHost> poppedUpPeople = Collections.emptyList();
@@ -56,9 +58,11 @@ public class RemoteHostWidget extends JPanel {
     @Inject
     RemoteHostWidget(ComboBoxDecorator comboBoxDecorator,
                            Provider<RemoteHostActions> fromActions,
+                           Provider<BlockUserMenuFactory> blockUserMenuFactory,
                            @Assisted RemoteWidgetType type) {
         
         this.fromActions = fromActions;
+        this.blockUserMenuFactory = blockUserMenuFactory;
         this.type = type;
         
         comboBox = new LimeComboBox();
@@ -122,15 +126,13 @@ public class RemoteHostWidget extends JPanel {
         };
     }
     
-    private Action getMultipleLibraryAction(final Collection<RemoteHost> people) {
-        return new AbstractAction(tr("Browse All")) {    
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getRemoteHostAction().viewLibrariesOf(people);
-            }
-        };
+    /**
+     * Returns an Action to block the specified remote host.
+     */
+    private Action getBlockUserAction(RemoteHost person) {
+        return blockUserMenuFactory.get().createBlockUserAction(
+                tr("Block User"), person.getFriendPresence().getFriend());
     }
-
     
     private RemoteHostActions getRemoteHostAction() {
         if(remoteHostActions == null)
@@ -185,9 +187,9 @@ public class RemoteHostWidget extends JPanel {
                 }
             } else if(foundFriend) {
                 if(type == RemoteWidgetType.TABLE) {
-                    return trn("{0} Friend", "{0} Friends", people.size());
+                    return (people.size() == 1) ? people.get(0).getFriendPresence().getFriend().getRenderName() : tr("{0} Friends", people.size());
                 } else {
-                    return trn("Friend", "Friends", people.size());
+                    return (people.size() == 1) ? people.get(0).getFriendPresence().getFriend().getRenderName() : tr("Friends");
                 }
             } else { // foundAnon
                 if(type == RemoteWidgetType.TABLE) {
@@ -238,6 +240,10 @@ public class RemoteHostWidget extends JPanel {
                 if (person.isBrowseHostEnabled()) {
                     submenu.add(createItem(getLibraryAction(person)));
                 }
+                // Add Block User action for P2P users.
+                if (person.getFriendPresence().getFriend().isAnonymous()) {
+                    submenu.add(createItem(getBlockUserAction(person)));
+                }
     
                 JMenuItem itemToAdd = submenu;
                 // If we only added one item, remove the parent menu and make this it.
@@ -274,19 +280,27 @@ public class RemoteHostWidget extends JPanel {
             // Now go back through our submenus & add them in.
             if (friends.size() + friendsDisabled.size() > 0 &&
                     p2pUsers.size() + p2pUsersDisabled.size() > 0) {
-                JLabel label = new JLabel(tr("Friends"));
-                label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
-                comboBoxMenu.add(label);
+                // Add friends to menu.
                 for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
                     comboBoxMenu.add(friend);
                 }
-                label = new JLabel(tr("P2P Users"));
-                label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
-                comboBoxMenu.add(label);
+                // Add P2P users to menu.
                 for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
                     comboBoxMenu.add(p2pUser);
                 }
-            } else if (friends.size() + friendsDisabled.size() > 0) {
+            } else if (friends.size() + friendsDisabled.size() == 1) {
+                // Only one friend so add sub-menu items directly to menu.
+                for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
+                    if (friend instanceof JMenu) {
+                        Component[] components = ((JMenu) friend).getMenuComponents();
+                        for (Component component : components) {
+                            comboBoxMenu.add(component);
+                        }
+                    } else {
+                        comboBoxMenu.add(friend);
+                    }
+                }
+            } else if (friends.size() + friendsDisabled.size() > 1) {
                 for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
                     comboBoxMenu.add(friend);
                 }
@@ -295,11 +309,6 @@ public class RemoteHostWidget extends JPanel {
                     comboBoxMenu.add(p2pUser);
                 }
             }            
-
-            //and we add the browse all item if there is more than one person
-            if(browsableHosts.size() > 1){            
-                comboBoxMenu.add(createItem(getMultipleLibraryAction(browsableHosts)));
-            }
         }
     }
     
