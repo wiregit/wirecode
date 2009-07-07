@@ -292,13 +292,17 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         return executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                logoutImpl();
+                logoutImpl(null);
                 return null;
             }
         }); 
     }
 
-    void logoutImpl() {
+    /**
+     * 
+     * @param error null if connection is closed by user
+     */
+    void logoutImpl(Exception error) {
         synchronized (this) {
             if(isLoggedIn()) {
                 loggedIn.set(false);
@@ -310,6 +314,15 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
                 connection = null;
                 LOG.info("disconnected.");
+                connectionMulticaster.broadcast(new FriendConnectionEvent(XMPPFriendConnectionImpl.this, FriendConnectionEvent.Type.DISCONNECTED, error));
+                ChatStateManager.remove(connection);
+                if(discoInfoListener != null) {
+                    discoInfoListener.cleanup();
+                }
+                if (noSaveFeatureInitializer != null) {
+                    noSaveFeatureInitializer.cleanup();
+                }
+                featureRegistry.deregisterInitializer(NoSaveFeature.ID);
             } 
         }
     }
@@ -629,14 +642,13 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
 
         @Override
         public void connectionClosed() {
-            connectionMulticaster.broadcast(new FriendConnectionEvent(XMPPFriendConnectionImpl.this, FriendConnectionEvent.Type.DISCONNECTED));
-            cleanup();
+            LOG.debug("smack connection closed");
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
-            connectionMulticaster.broadcast(new FriendConnectionEvent(XMPPFriendConnectionImpl.this, FriendConnectionEvent.Type.DISCONNECTED, e));
-            cleanup();
+            LOG.debug("smack connection closed with error", e);
+            logoutImpl(e);
         }
 
         @Override
@@ -650,16 +662,5 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         @Override
         public void reconnectionSuccessful() {
         }
-        
-        void cleanup() {
-            ChatStateManager.remove(connection);
-            if(discoInfoListener != null) {
-                discoInfoListener.cleanup();
-            }
-            if (noSaveFeatureInitializer != null) {
-                noSaveFeatureInitializer.cleanup();
-            }
-            featureRegistry.deregisterInitializer(NoSaveFeature.ID);
-        }
-    }
+     }
 }

@@ -17,6 +17,21 @@ public class FriendConnectionEvent extends DefaultSourceTypeEvent<FriendConnecti
     public FriendConnectionEvent(FriendConnection source, FriendConnectionEvent.Type event, Exception exception) {
         super(source, event);
         this.exception = exception;
+        switch (event) {
+        case CONNECT_FAILED:
+        case DISCONNECTED:
+            assert !source.isLoggedIn();
+            assert !source.isLoggingIn();
+            break;
+        case CONNECTED:
+            assert source.isLoggedIn();
+            assert !source.isLoggingIn();
+            break;
+        case CONNECTING:
+            assert source.isLoggingIn();
+            assert !source.isLoggedIn();
+            break;
+        }
     }
     
     /**

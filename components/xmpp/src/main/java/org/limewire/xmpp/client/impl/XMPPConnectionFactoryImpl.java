@@ -105,7 +105,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     public void stop() {
         XMPPFriendConnectionImpl connection = getActiveConnection();
         if (connection != null) {
-            connection.logoutImpl();
+            connection.logoutImpl(null);
         }
     }
 
@@ -147,7 +147,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
                         return activeConnection;
                     } else {
                         // logout synchronously
-                        activeConnection.logoutImpl();
+                        activeConnection.logoutImpl(null);
                     }
                 }    
             }                
