@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.menu;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 
@@ -11,6 +12,8 @@ import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.MnemonicMenu;
+import org.limewire.ui.swing.components.PlainCheckBoxMenuItemUI;
+import org.limewire.ui.swing.components.PlainMenuItemUI;
 import org.limewire.ui.swing.friends.actions.AddFriendAction;
 import org.limewire.ui.swing.friends.actions.BrowseFriendsAction;
 import org.limewire.ui.swing.friends.actions.FriendService;
@@ -65,7 +68,21 @@ class FriendMenu extends MnemonicMenu {
 
         updateSignedInStatus();
     }
-
+    
+    @Override
+    public JMenuItem add(JMenuItem item) {
+        if (item instanceof JCheckBoxMenuItem) {
+            item.setUI(new PlainCheckBoxMenuItemUI());
+        } else {
+            //done here instead of super class because this else statement 
+            //can effect a wide range of components poorly.
+            item.setUI(new PlainMenuItemUI());
+        }
+        
+        JMenuItem itemReturned = super.add(item);
+        return itemReturned;
+    }
+    
     @Inject
     void register(ListenerSupport<FriendConnectionEvent> event) {
         event.addListener(new EventListener<FriendConnectionEvent>() {
