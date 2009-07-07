@@ -130,16 +130,19 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         backButton.addActionListener(playerListener);
         backButton.setActionCommand(BACK);
         backButton.setDisabledIcon(backIconDisabled);
+        backButton.setToolTipText(I18n.tr("Skip Back"));
         
         playButton = new IconButton(playIcon, playIconRollover, playIconPressed);
         playButton.addActionListener(playerListener);
         playButton.setActionCommand(PLAY);
         playButton.setDisabledIcon(playIconDisabled);
+        playButton.setToolTipText(I18n.tr("Play"));
 
         pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
         pauseButton.addActionListener(playerListener);
         pauseButton.setActionCommand(PAUSE);
         pauseButton.setVisible(false);
+        pauseButton.setToolTipText(I18n.tr("Pause"));
         
         pauseButton.setMinimumSize(playButton.getMinimumSize());
         pauseButton.setPreferredSize(playButton.getPreferredSize());
@@ -148,11 +151,13 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         forwardButton.addActionListener(playerListener);
         forwardButton.setActionCommand(FORWARD);
         forwardButton.setDisabledIcon(forwardIconDisabled);
+        forwardButton.setToolTipText(I18n.tr("Skip Forward"));
         
         volumeButton = new IconButton(volumeIcon, volumeIconRollover, volumeIconPressed);
         volumeButton.addActionListener(playerListener);
         volumeButton.setActionCommand(VOLUME);
         volumeButton.setDisabledIcon(volumeIconDisabled);
+        volumeButton.setToolTipText(I18n.tr("Volume"));
         
         volumeSlider = new VolumeSlider(0, 100);
         volumeControlPopup = volumeSlider.createPopup();
@@ -161,6 +166,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         shuffleButton.addActionListener(playerListener);
         shuffleButton.setActionCommand(SHUFFLE);
         shuffleButton.setRolloverSelectedIcon(shuffleIconActive);
+        shuffleButton.setToolTipText(I18n.tr("Shuffle"));
         
         progressSlider = new LimeSliderBar();
         sliderBarDecorator.decoratePlain(progressSlider);
