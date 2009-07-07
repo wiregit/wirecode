@@ -150,18 +150,21 @@ public class DownloadActionHandler {
     
     private void changeSaveLocation(DownloadItem item){
         // Prompt user for a new directory.
-        File saveFile = FileChooser.getInputDirectory(GuiUtils.getMainFrame(), item.getSaveFile().getParentFile());
+        File saveDir = FileChooser.getInputDirectory(GuiUtils.getMainFrame(), item.getSaveFile().getParentFile());
         
-        if (saveFile == null || saveFile.equals(item.getSaveFile().getParentFile())){
+        if (saveDir == null || saveDir.equals(item.getSaveFile().getParentFile())){
             //nothing to see here.  move along.
             return;
         }
-        
+        setSaveFile(item, saveDir, false);        
+    }
+    
+    private void setSaveFile(DownloadItem item, File saveDir, boolean overwrite){
         try {
             // Update save file in DownloadItem.
-            item.setSaveFile(saveFile, false);
+            item.setSaveFile(saveDir, false);
         } catch (SaveLocationException ex) {
-            saveLocationExceptionHandler.get().handleSaveLocationException(new ChangeLocationDownloadAction(item), ex, false);
+            saveLocationExceptionHandler.get().handleSaveLocationException(new ChangeLocationDownloadAction(item), ex, overwrite);
         }
     }
     
@@ -176,13 +179,12 @@ public class DownloadActionHandler {
         }
         @Override
         public void download(File saveFile, boolean overwrite) throws SaveLocationException {
-            //Do nothing
+            setSaveFile(item, saveFile, overwrite);
         }
 
         @Override
         public void downloadCanceled(SaveLocationException sle) {
-            changeSaveLocation(item);
-                      
+            // do nothing
         }        
     }
 }
