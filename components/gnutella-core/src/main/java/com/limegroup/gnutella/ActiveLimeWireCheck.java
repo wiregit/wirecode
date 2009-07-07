@@ -98,11 +98,10 @@ public class ActiveLimeWireCheck {
         }
         if(lock == null) {
             // Another instance is running, but it may not be listening on the
-            // port yet; try for one minute to contact it.
+            // port yet; try for two minutes to contact it.
             LOG.trace("Could not acquire lock");
             long start = System.currentTimeMillis();
-            // FIXME: restore timeout to one minute after testing
-            while(System.currentTimeMillis() - start < 5 * 60 * 1000) {
+            while(System.currentTimeMillis() - start < 2 * 60 * 1000) {
                 if(tryToContactRunningLimeWire(arg)) {
                     LOG.trace("Contacted existing instance");
                     return true;
@@ -149,10 +148,10 @@ public class ActiveLimeWireCheck {
             // Give LW a while to respond -- it might be busy.
             // In the case where no one is even listening on the port,
             // this will fail with a ConnectException really fast.
-            socket.connect(new InetSocketAddress("127.0.0.1", port), 30000);
+            socket.connect(new InetSocketAddress("127.0.0.1", port), 10000);
             LOG.trace("Connected");
             InputStream istream = socket.getInputStream(); 
-            socket.setSoTimeout(30000); 
+            socket.setSoTimeout(10000); 
             ByteReader byteReader = new ByteReader(istream);
             OutputStream os = socket.getOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(os);
