@@ -368,6 +368,13 @@ public class PlayerMediator {
     }
     
     /**
+     * Returns true if this file is currently loaded and paused, false otherwise.
+     */
+    public boolean isPaused(File file) {
+        return getPlayer().isPaused(file);
+    }
+    
+    /**
      * Returns true if the currently playing song is seekable.
      */
     public boolean isSeekable() {

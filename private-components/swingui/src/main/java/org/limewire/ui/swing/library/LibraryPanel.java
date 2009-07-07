@@ -251,8 +251,7 @@ public class LibraryPanel extends JPanel {
 
             @Override
             public void songChanged(String name) {
-                if(libraryTable.isVisible() && (libraryFilterPanel.getSelectedCategory() == Category.AUDIO || 
-                        libraryFilterPanel.getSelectedCategory() == null)) {
+                if(libraryTable.isVisible() && isPlayable(libraryFilterPanel.getSelectedCategory())) {
                     SwingUtilities.invokeLater(new Runnable(){
                         public void run() {
                             libraryTable.repaint();     
@@ -263,8 +262,9 @@ public class LibraryPanel extends JPanel {
 
             @Override
             public void stateChanged(PlayerState state) {
-                if ((state == PlayerState.STOPPED) && libraryTable.isVisible() &&
-                        isPlayable(libraryFilterPanel.getSelectedCategory())) {
+                if ((state == PlayerState.STOPPED || state == PlayerState.EOM || state == PlayerState.UNKNOWN) 
+                        && libraryTable.isVisible() 
+                        && isPlayable(libraryFilterPanel.getSelectedCategory())) {
                     SwingUtilities.invokeLater(new Runnable(){
                         public void run() {
                             libraryTable.repaint();

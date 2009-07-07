@@ -42,7 +42,7 @@ class IsPlayingRenderer extends DefaultTableCellRenderer {
         setBorder(emptyBorder);
         
         if(value instanceof LocalFileItem) {
-            if(playerMediator.get().isPlaying(((LocalFileItem)value).getFile()))
+            if(playerMediator.get().isPlaying(((LocalFileItem)value).getFile()) || playerMediator.get().isPaused(((LocalFileItem)value).getFile()))
                 setIcon(playingIcon);
             else
                 setIcon(null);
