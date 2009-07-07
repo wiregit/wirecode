@@ -233,9 +233,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
             } catch (RuntimeException e) {
                 handleLoginError(e);
                 throw e;
-            } finally {
-                loggingIn.set(false);
-            }
+            } 
         }
     }
     
@@ -246,6 +244,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
      * @param e Exception which occurred during login
      */
     private synchronized void handleLoginError(Exception e) {
+        loggingIn.set(false);
         connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
         if (connection != null && connection.isConnected()) {
             connection.disconnect();

@@ -278,6 +278,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private void closeConnection(boolean shouldCleanUpFacebookClient) {
         LOG.debug("logging out from facebook...");
         loggedIn.set(false);
+        loggingIn.set(false);
 
         // over-the-network logout activities
         endChatSession(shouldCleanUpFacebookClient);
@@ -419,9 +420,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 closeConnection(true);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw e;
-            } finally {
-                loggingIn.set(false);
-            }
+            } 
         }
     }
     
