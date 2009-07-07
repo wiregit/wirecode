@@ -185,6 +185,7 @@ public class BaseResultPanel extends JXPanel {
         // Set list table fields that do not change with search category.
         listTable.setShowGrid(true, false);
         listTable.setRowHeightEnabled(true);
+        listTable.setEmptyRowsPainted(false);
         
         return listTable;
     }
@@ -199,7 +200,6 @@ public class BaseResultPanel extends JXPanel {
         table.setPopupHandler(new SearchPopupHandler(downloadHandler, table, menuFactory));
         table.setDoubleClickHandler(new ClassicDoubleClickHandler(table, downloadHandler));
         table.setRowHeight(TABLE_ROW_HEIGHT);
-        table.setEmptyRowsPainted(true);
         
         return table;
     }

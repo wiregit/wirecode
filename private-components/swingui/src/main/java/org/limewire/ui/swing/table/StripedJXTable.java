@@ -24,7 +24,7 @@ import org.jdesktop.swingx.decorator.CompoundHighlighter;
  */
 public class StripedJXTable extends GlazedJXTable {
 
-    private boolean emptyRowsPainted = false;
+    private boolean emptyRowsPainted = true;
     
     public StripedJXTable() {
         super();
