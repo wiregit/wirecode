@@ -17,10 +17,6 @@ import org.limewire.ui.swing.util.ResizeUtils;
 
 public class PopupHeaderBar extends JPanel {
 
-    @Resource private Icon closeIcon;
-    @Resource private Icon closeIconRollover;
-    @Resource private Icon closeIconPressed;
-    
     @Resource private Font font;
     @Resource private Color background = PainterUtils.TRASPARENT;
     
@@ -43,9 +39,8 @@ public class PopupHeaderBar extends JPanel {
         add(titleBarLabel, "gapleft 4, gaptop 1, dock west");
         
         if (closeAction != null) {
-            IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
+            IconButton closeButton = new PopupCloseButton();
             closeButton.addActionListener(closeAction);
-            closeButton.setOpaque(false);
             add(closeButton, "gapright 3, gaptop 1, dock east");
         }
     }

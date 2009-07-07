@@ -8,7 +8,6 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.ToolTipManager;
 
@@ -24,6 +23,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.PopupCloseButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
@@ -39,10 +39,7 @@ public class ChatTopPanel extends JXPanel {
     @Resource private Font textFont;
     @Resource private Color textColor;
     @Resource private Color background;
-    @Resource private Icon closeIcon;
-    @Resource private Icon closeIconRollover;
-    @Resource private Icon closeIconPressed;
-    
+
     private JLabel friendAvailabiltyIcon;
     private JLabel friendNameLabel;
     private JLabel friendStatusLabel;
@@ -75,14 +72,13 @@ public class ChatTopPanel extends JXPanel {
         friendStatusAndModeListeners = new HashMap<String, PropertyChangeListener>();
         ToolTipManager.sharedInstance().registerComponent(this);
         
-        IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
+        IconButton closeButton = new PopupCloseButton();
         closeButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 chatFramePanel.setVisibility(false);
             }
         });
-        closeButton.setOpaque(false);
         add(closeButton, "gapright 3, dock east");
         
         EventAnnotationProcessor.subscribe(this);
