@@ -395,8 +395,7 @@ public class LibraryPanel extends JPanel {
         addFilesButton.setIcon(plusIcon);
         addFilesButton.setRolloverIcon(plusIcon);
         addFilesButton.setPressedIcon(plusIcon);
-        addFilesButton.setPreferredSize(new Dimension(getPreferredSize().width, 23));
-        addFilesButton.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+        addFilesButton.setPreferredSize(new Dimension(addFilesButton.getPreferredSize().width, 23));
         addFilesButton.addActionListener(libraryAction);
         buttonDecorator.decorateDarkFullImageButton(addFilesButton, AccentType.SHADOW);
     }
@@ -414,6 +413,7 @@ public class LibraryPanel extends JPanel {
                 SwingUiSettings.SHOW_LIBRARY_FILTERS.setValue(filterToggleButton.isSelected());
             }
         });
+        filterToggleButton.setPreferredSize(new Dimension(filterToggleButton.getPreferredSize().width, 23));
         buttonDecorator.decorateDarkFullImageButton(filterToggleButton, AccentType.SHADOW);
     }
     
