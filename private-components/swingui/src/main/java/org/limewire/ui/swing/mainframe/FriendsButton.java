@@ -25,6 +25,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.actions.BrowseOrLoginAction;
+import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -84,6 +85,7 @@ public class FriendsButton extends JXButton {
         };
         
         addActionListener(browseOrLoginAction);
+        addMouseListener(new ActionHandListener());
     }
     
     private void setIconFromEvent(FriendConnectionEvent event) {
