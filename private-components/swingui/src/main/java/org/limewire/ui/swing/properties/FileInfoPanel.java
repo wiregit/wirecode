@@ -547,10 +547,11 @@ public class FileInfoPanel extends JPanel {
             panel.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.YEAR), FilePropertyKey.YEAR), "growx, push 17, gapright unrelated");
             panel.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TRACK_NUMBER), FilePropertyKey.TRACK_NUMBER), "growx, push 17, wrap");
 
-            //third line
-            panel.add(createPlainLabel(I18n.tr("Description")), "span, wrap");
-
-            panel.add(descriptionScrollPane, "span, growx, hmin 42");
+            //TODO: temporarily taken out since we aren't reading/writing the description field in id3 tags
+//            //third line
+//            panel.add(createPlainLabel(I18n.tr("Description")), "span, wrap");
+//
+//            panel.add(descriptionScrollPane, "span, growx, hmin 42");
             break;
         case VIDEO:
             panel.add(createPlainLabel(I18n.tr("Title")), "wrap");
