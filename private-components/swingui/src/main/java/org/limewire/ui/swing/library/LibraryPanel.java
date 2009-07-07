@@ -410,6 +410,7 @@ public class LibraryPanel extends JPanel {
                 filterToggleButton.setSelected(!filterToggleButton.isSelected());
                 libraryFilterPanel.getComponent().setVisible(filterToggleButton.isSelected());
                 libraryFilterPanel.clearFilters();
+                libraryFilterPanel.getFilterField().requestFocusInWindow();
                 SwingUiSettings.SHOW_LIBRARY_FILTERS.setValue(filterToggleButton.isSelected());
             }
         });
