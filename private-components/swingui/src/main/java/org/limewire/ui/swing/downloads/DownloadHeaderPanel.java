@@ -134,6 +134,9 @@ public class DownloadHeaderPanel extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearFinishedCheckBox.isSelected());
+            if (clearFinishedCheckBox.isSelected()){
+                downloadMediator.clearFinished();
+            }
         }
     };
 
