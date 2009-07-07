@@ -99,7 +99,7 @@ public class MediaType implements Serializable {
             new String[] {
                 "exe", "zip", "jar", "cab", "msi", "msp",
                 "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", 
-                "iso", "jnlp"
+                "iso", "jnlp", "bat", ".lnk"
             });            
         
     /**
