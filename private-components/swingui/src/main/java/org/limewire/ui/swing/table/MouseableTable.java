@@ -139,7 +139,7 @@ public class MouseableTable extends StripedJXTable {
         setCellSelectionEnabled(false);
         setRowSelectionAllowed(true);
         setTableHeaderRenderer();
-        setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         setFont(colors.getTableFont());
 
         //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
