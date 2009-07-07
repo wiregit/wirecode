@@ -44,12 +44,12 @@ public class SetupPage2 extends WizardPage {
         boolean newInstall = InstallSettings.PREVIOUS_RAN_VERSIONS.get().size() == 0;
         boolean four18Upgrade = isFour18Upgrade();
 
-        addAutoSharing(newInstall, four18Upgrade);
+        addAutoSharing(newInstall);
         addSeperator();
         addModifyInfo();
         if (!newInstall) {
             addSeperator();
-            addOldVersionInfo();
+            addOldVersionInfo(four18Upgrade);
         }
 
         initSettings();
@@ -115,22 +115,14 @@ public class SetupPage2 extends WizardPage {
     /**
      * Adds header for Auto-Sharing, checkbox and associated text.
      */
-    private void addAutoSharing(boolean newInstall, boolean four18Upgrade) {
+    private void addAutoSharing(boolean newInstall) {
         JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
 
         autoSharingPanel.add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
                 "alignx center, wrap");
 
-        if (four18Upgrade) {
-            autoSharingPanel.add(createAndDecorateSubHeading(I18n
-                    .tr("Shared files from your old version will be in your Public Shared list.")),
-                    "alignx center");
-            autoSharingPanel
-            .add(
-                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
-                    "wrap");
-        } else if (newInstall) {
+        if (newInstall) {
             autoSharingPanel.add(shareDownloadedFilesCheckBox, "alignx center");
             autoSharingPanel.add(createAndDecorateMultiLine(I18n
                     .tr("Add files I download from P2P Users to my Public Shared list."),
@@ -172,11 +164,17 @@ public class SetupPage2 extends WizardPage {
         add(modifyInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
 
-    private void addOldVersionInfo() {
+    private void addOldVersionInfo(boolean four18Upgrade) {
         JPanel oldVersionInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
-        oldVersionInfoPanel.add(createAndDecorateHeader(I18n
-                .tr("Shared files from your old version will be in your Public Shared list.")),
+        if (four18Upgrade) {
+            oldVersionInfoPanel.add(createAndDecorateHeader(I18n
+                    .tr("Shared files from your old version will be in your Public Shared list.")),
+                    "alignx center, wrap");
+        } else { 
+            oldVersionInfoPanel.add(createAndDecorateHeader(I18n
+                .tr("Files shared with the P2P Network in your old version will be in your Public Shared list.")),
                 "alignx center, wrap");
+        }
         add(oldVersionInfoPanel, "growx, span, sg sameRowSize, wrap");
     }
 }
