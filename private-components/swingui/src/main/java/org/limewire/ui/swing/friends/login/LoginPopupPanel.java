@@ -7,22 +7,20 @@ import java.awt.Font;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
-
-import net.miginfocom.swing.MigLayout;
+import javax.swing.border.MatteBorder;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,13 +32,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
     @Resource private Dimension size;
     @Resource private Color background;
     @Resource private Color border;
-    @Resource private Color titleBarBackground;
-    @Resource private Color titleBarForeground;
     @Resource private Font titleBarFont;
-    
-    @Resource private Icon closeIcon;
-    @Resource private Icon closeIconRollover;
-    @Resource private Icon closeIconPressed;
     
     @Resource private Icon windowIcon;
     
@@ -63,32 +55,22 @@ public class LoginPopupPanel extends Panel implements Resizable {
         frame = new JXPanel(new BorderLayout());
         frame.setPreferredSize(size);
         frame.setBackground(background);
-        frame.setBorder(new LineBorder(border, 3));
-        
-        JLabel titleBarLabel = new JLabel(I18n.tr("File sharing with friends"));
-        titleBarLabel.setOpaque(false);
-        titleBarLabel.setFont(titleBarFont);
-        titleBarLabel.setForeground(titleBarForeground);
-        titleBarLabel.setIcon(windowIcon);
-          
-        JXPanel headerBar = new JXPanel(new MigLayout("insets 0, gap 0, fill"));
-        headerBar.setBackground(titleBarBackground);
-        
-        IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
-        closeButton.addActionListener(new ActionListener() {
+         
+        PopupHeaderBar headerBar = new PopupHeaderBar(I18n.tr("File sharing with friends"), new AbstractAction() {
             public void actionPerformed(ActionEvent arg0) {
                 finished();
             }
         });
-        
-        headerBar.add(titleBarLabel, "gapleft 3, gapbottom 3, dock west, growx");
-        headerBar.add(closeButton, "gapright 2, gaptop 0, dock east, aligny top, pad -2 0 0 0");
+        headerBar.setIcon(windowIcon);
+        headerBar.setFont(titleBarFont);
+        ResizeUtils.forceHeight(headerBar, 23);
         
         contentPanel = new JPanel(new BorderLayout());
         contentPanel.setOpaque(false);
         
         frame.add(headerBar, BorderLayout.NORTH);
         frame.add(contentPanel, BorderLayout.CENTER);
+        frame.setBorder(new MatteBorder(0, 3, 3, 3, border));
        
         add(frame, BorderLayout.CENTER);
     }

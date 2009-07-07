@@ -160,7 +160,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private void initContent() {
         
         frame = new JXPanel(new BorderLayout());
-        frame.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
         frame.setPreferredSize(new Dimension(220, 160));
         
         JPanel topBarPanel = new PopupHeaderBar(I18n.tr("Lists I'm Sharing"), closeAction);
@@ -173,8 +172,9 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         contentPanel.setOpaque(false);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(5,4,4,4));
-                               
+        contentPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border),
+                BorderFactory.createEmptyBorder(5,4,4,4)));
+                                               
         filteredSharedFileLists = new FilterList<SharedFileList>(shareListManager.getModel());
         
         matcher = new VisiblityMatcher();

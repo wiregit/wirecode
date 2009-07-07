@@ -24,6 +24,8 @@ public class PopupHeaderBar extends JPanel {
     @Resource private Font font;
     @Resource private Color background = PainterUtils.TRASPARENT;
     
+    private final JLabel titleBarLabel;
+    
     public PopupHeaderBar(String title, Action closeAction) {
         super(new MigLayout("gap 0, insets 0, fill"));
         
@@ -33,12 +35,12 @@ public class PopupHeaderBar extends JPanel {
         
         setBackground(background);
         
-        JLabel titleBarLabel = new JLabel(title);
+        titleBarLabel = new JLabel(title);
         titleBarLabel.setOpaque(false);
         titleBarLabel.setForeground(Color.WHITE);
         titleBarLabel.setFont(font);
         
-        add(titleBarLabel, "gapleft 4, dock west");
+        add(titleBarLabel, "gapleft 4, gaptop 1, dock west");
         
         if (closeAction != null) {
             IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
@@ -48,4 +50,15 @@ public class PopupHeaderBar extends JPanel {
         }
     }
     
+    public void setIcon(Icon icon) {
+        titleBarLabel.setIcon(icon);
+    }
+    
+    @Override
+    public void setFont(Font font) {
+        super.setFont(font);
+        if (titleBarLabel != null) {
+            titleBarLabel.setFont(font);
+        }
+    }
 }
