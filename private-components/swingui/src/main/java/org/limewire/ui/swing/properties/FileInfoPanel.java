@@ -292,7 +292,10 @@ public class FileInfoPanel extends JPanel {
                     new AbstractAction(I18n.tr("Locate on Disk")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getLaunchableFile());
+                            if( ((DownloadItem)propertiableFile).isLaunchable() &&
+                                    ((DownloadItem)propertiableFile).getLaunchableFile() != null) {
+                                NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getLaunchableFile());
+                            }
                         }
                     });
                 
@@ -301,7 +304,7 @@ public class FileInfoPanel extends JPanel {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             FileInfoPanel.this.getRootPane().getParent().setVisible(false);
-                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getLaunchableFile());
+                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getUrn());
                         }
                     });
                 
