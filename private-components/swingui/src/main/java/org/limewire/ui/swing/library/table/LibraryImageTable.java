@@ -92,6 +92,7 @@ public class LibraryImageTable extends JPanel implements Scrollable {
                     LibraryNavItem item = navigatorPanel.getSelectedNavItem();
                     item.getLocalFileList().removeFile(items.get(0).getFile());
                 }
+                imageEditor.setVisible(false);
             }
         });
         

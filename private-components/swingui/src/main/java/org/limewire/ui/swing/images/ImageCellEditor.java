@@ -27,6 +27,7 @@ public class ImageCellEditor extends JPanel {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.removeButton = removeButton;
+        this.removeButton.setVisible(false);
         
         GuiUtils.assignResources(this);
         

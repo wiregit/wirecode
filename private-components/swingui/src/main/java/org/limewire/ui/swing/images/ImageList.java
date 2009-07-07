@@ -141,9 +141,11 @@ public class ImageList extends JXList implements Disposable {
             if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
                 ImageList imageList = (ImageList)e.getComponent();
                 int index = imageList.locationToIndex(e.getPoint());
-                LocalFileItem val = (LocalFileItem) imageList.getElementAt(index);
-                File file = val.getFile();
-                NativeLaunchUtils.safeLaunchFile(file);
+                if(index >= 0) {
+                    LocalFileItem val = (LocalFileItem) imageList.getElementAt(index);
+                    File file = val.getFile();
+                    NativeLaunchUtils.safeLaunchFile(file);
+                }
             }
         }
     }
