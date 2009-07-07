@@ -171,11 +171,13 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH = 8000;
 
     /**
-     * Filter for filtering out messages that are considered spam.
+     * Filters for filtering out messages that are considered spam. The route
+     * filter removes messages that shouldn't be forwarded; the personal filter
+     * removes messages that shouldn't be shown to the user. They're created
+     * lazily if and when the connection has been initialized.
      */
-    private volatile SpamFilter _routeFilter;
-
-    private volatile SpamFilter _personalFilter;
+    private volatile SpamFilter _routeFilter = null;
+    private volatile SpamFilter _personalFilter = null;
 
     /*
      * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
@@ -318,6 +320,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
     private final GuidMap guidMap;
 
+    private final SpamFilterFactory spamFilterFactory;
+    
     private final MessageReaderFactory messageReaderFactory;
 
     private final ApplicationServices applicationServices;
@@ -380,8 +384,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this.messageReaderFactory = messageReaderFactory;
         this.applicationServices = applicationServices;
         this.guidMap = guidMapManager.getMap();
-        this._routeFilter = spamFilterFactory.createRouteFilter();
-        this._personalFilter = spamFilterFactory.createPersonalFilter();
+        this.spamFilterFactory = spamFilterFactory;
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = socketsManager;
         this.outOfBandStatistics = outOfBandStatistics;
@@ -428,8 +431,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this.messageReaderFactory = messageReaderFactory;
         this.applicationServices = applicationServices;
         this.guidMap = guidMapManager.getMap();
-        this._routeFilter = spamFilterFactory.createRouteFilter();
-        this._personalFilter = spamFilterFactory.createPersonalFilter();
+        this.spamFilterFactory = spamFilterFactory;
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = null;
         this.outOfBandStatistics = outOfBandStatistics;
@@ -884,7 +886,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         } catch (IOException iox) {
             // ignore for now...
         }
-
+        
+        initializeSpamFilters();
+        
         MessageReader reader = messageReaderFactory.createMessageReader(this);
         if (isReadDeflated())
             reader.setReadChannel(new InflaterReader(inflater));
@@ -892,6 +896,14 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         ((NIOMultiplexor) getSocket()).setReadObserver(reader);
     }
 
+    /**
+     * Initializes the personal and route filters. Package access for testing.
+     */
+    void initializeSpamFilters() {
+        _personalFilter = spamFilterFactory.createPersonalFilter();
+        _routeFilter = spamFilterFactory.createRouteFilter();
+    }
+    
     /*
      * (non-Javadoc)
      * 
