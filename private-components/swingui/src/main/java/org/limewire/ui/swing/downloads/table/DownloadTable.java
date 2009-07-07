@@ -85,7 +85,8 @@ public class DownloadTable extends MouseableTable {
                         colors.evenForeground, colors.selectionColor,
                         colors.selectionForeground));
         
-        setShowGrid(true, false);        
+        setShowGrid(true, false);      
+        setEmptyRowsPainted(true);
         
         TableCellRenderer gapRenderer = new GapRenderer();
 
