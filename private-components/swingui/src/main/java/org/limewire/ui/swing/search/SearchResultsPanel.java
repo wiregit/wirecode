@@ -443,16 +443,16 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         tabHighlight.setBorderPaint(null);
         
         HeaderBar header = new HeaderBar(searchTitleLabel);
-        header.setLayout(new MigLayout("nogrid, hidemode 3, novisualpadding, insets 0, gap 0!, aligny 50%"));
+        header.setLayout(new MigLayout("nogrid, hidemode 3, novisualpadding, insets 0 0 0 0, gap 0!, filly"));
         header.add(browseStatusPanel, "growx, pushx");
         headerBarDecorator.decorateBasic(header);
         
         JPanel sortPanel = new JPanel();
         sortPanel.setOpaque(false);
         sortAndFilterPanel.layoutComponents(sortPanel);
-        header.add(sortPanel, "wmin 300");
+        header.add(sortPanel, "wmin 300, growy");  
         
-        add(header                    , "spanx 2, growx, wrap");
+        add(header                    , "spanx 2, growx, growy, wrap");
         add(classicSearchReminderPanel, "spanx 2, growx, wrap");
         add(messagePanel              , "spanx 2, growx, wrap");
         add(filterPanel, "grow");
