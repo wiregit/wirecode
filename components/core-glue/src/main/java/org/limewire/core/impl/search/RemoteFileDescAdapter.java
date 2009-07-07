@@ -84,6 +84,21 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.category = CategoryConverter.categoryForExtension(extension);
         this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
     }
+    
+    /** A copy constructor for a RemoteFileDescAdapter, except it changes the presence. */
+    public RemoteFileDescAdapter(RemoteFileDescAdapter copy, FriendPresence presence) {
+        this.rfd = copy.rfd;
+        this.locs = copy.locs;
+        this.friendPresence = presence;
+        this.wrapperUrn = copy.wrapperUrn;
+        this.extension = copy.extension;
+        this.category = copy.category;
+        this.quality = copy.quality;
+        
+        // and other items too, if they were constructed..
+        this.remoteHosts = copy.remoteHosts;
+        this.relevance = copy.relevance;
+    }
 
     /**
      * Calculates a rough "relevance", which is a measure of the quality of the sources.  

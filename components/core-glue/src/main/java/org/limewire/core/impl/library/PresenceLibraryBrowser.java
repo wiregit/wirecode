@@ -163,6 +163,8 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
+                // need to upgrade the RFD to be use the friendpresence.
+                remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescAdapter, friendPresence);
                 if(transitList != null) {
                     transitList.add(remoteFileDescAdapter);
                 } else {
