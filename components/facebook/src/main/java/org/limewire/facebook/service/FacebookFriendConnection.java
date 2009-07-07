@@ -83,6 +83,7 @@ import org.limewire.friend.api.feature.LibraryChangedNotifierFeature;
 import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.util.PresenceUtils;
+import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.inject.MutableProvider;
 import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.listener.EventBroadcaster;
@@ -90,7 +91,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SecurityUtils;
 import org.limewire.util.URIUtils;
-import org.limewire.http.httpclient.HttpClientUtils;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -304,6 +304,8 @@ public class FacebookFriendConnection implements FriendConnection {
                 expireSession();
             } catch (FacebookException e) {
                 LOG.debug("error expiring facebook session", e);
+            } catch (IOException e) {
+                LOG.debug("error expiring facebook session", e);
             }
         }
 
@@ -355,17 +357,32 @@ public class FacebookFriendConnection implements FriendConnection {
                         sendLiveMessageDirect(presence, "presence", message);
                     } catch (FacebookException e) {
                         LOG.debug("error sending offline presence notification");
+                    } catch (IOException e) {
+                        LOG.debug("error sending offline presence notification");
                     }
                 }
             }
         }
     }
 
-    private void expireSession() throws FacebookException {
+    private void expireSession() throws FacebookException, IOException {
         synchronized (this) {
             if(facebookClient != null) {
-                facebookClient.auth_expireSession();
+                try {
+                    facebookClient.auth_expireSession();
+                } catch (RuntimeException re) {
+                    handleFacebookAPIRuntimeException(re);
+                }
             }
+        }
+    }
+
+    private void handleFacebookAPIRuntimeException(RuntimeException re) throws IOException {
+        //LWC-3678
+        if(re.getCause() == null || !(re.getCause() instanceof IOException)) {
+            throw re;
+        } else {
+            throw (IOException)re.getCause();
         }
     }
 
@@ -452,9 +469,15 @@ public class FacebookFriendConnection implements FriendConnection {
     /**
      * Fetches all friends and adds them as known friends.
      */
-    private void fetchAllFriends() {
+    private void fetchAllFriends() throws IOException {
         try {
-            JSONArray friends = facebookClient.friends_get();
+            JSONArray friends = null;
+
+            try {
+                friends = facebookClient.friends_get();
+            } catch (RuntimeException re) {
+                handleFacebookAPIRuntimeException(re);
+            }
 
             // friends is null when i have no friends
             if (friends == null) {
@@ -464,7 +487,12 @@ public class FacebookFriendConnection implements FriendConnection {
             for (int i = 0; i < friends.length(); i++) {
                 friendIds.add(friends.getLong(i));
             }
-            JSONArray users = (JSONArray) facebookClient.users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status")));
+            JSONArray users = null;
+            try {
+                users = (JSONArray) facebookClient.users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status")));
+            } catch (RuntimeException re) {
+                handleFacebookAPIRuntimeException(re);
+            }
             Set<String> limeWireFriends = fetchLimeWireFriends();
             LOG.debugf("all friends: {0}", users);
             for (int i = 0; i < users.length(); i++) {
@@ -488,11 +516,16 @@ public class FacebookFriendConnection implements FriendConnection {
      * Fetches friend ids that have the LimeWire application installed
      * and marks the existing friends as LimeWire capable.
      */
-    private Set<String> fetchLimeWireFriends() throws FacebookException {
+    private Set<String> fetchLimeWireFriends() throws FacebookException, IOException {
         JSONArray limeWireFriendIds;
         try {
             Set<String> limeWireIds = new HashSet<String>();
-            Object friends = facebookClient.friends_getAppUsers();
+            Object friends = null;
+            try {
+                friends = facebookClient.friends_getAppUsers();
+            } catch (RuntimeException re) {
+                handleFacebookAPIRuntimeException(re);
+            }
             if(friends instanceof JSONArray) { // is JSONObject when user has no friends with LW installed
                 limeWireFriendIds = (JSONArray)friends;
                 LOG.debugf("limewire friends: {0}", limeWireFriendIds);
@@ -721,6 +754,9 @@ public class FacebookFriendConnection implements FriendConnection {
                             connectionBroadcaster.broadcast(new FriendConnectionEvent(
                                     FacebookFriendConnection.this, FriendConnectionEvent.Type.DISCONNECTED, fe));
                         }
+                    } catch (IOException e) {
+                        LOG.debug("Error sending live message: {0}", e);
+                        // TODO logout?
                     }
                 }
             }
@@ -728,14 +764,18 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     private void sendLiveMessageDirect(FriendPresence presence,
-                                       String type, Map<String, Object> messageMap) throws FacebookException {
+                                       String type, Map<String, Object> messageMap) throws FacebookException, IOException {
         messageMap.put("to", presence.getPresenceId());
         messageMap.put("from", getPresenceId());
         final Long userId = Long.parseLong(presence.getFriend().getId());
 
         JSONObject message = new JSONObject(messageMap);
         LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
-        facebookClient.liveMessage_send(userId, type, message);
+        try {
+            facebookClient.liveMessage_send(userId, type, message);
+        } catch (RuntimeException re) {
+            handleFacebookAPIRuntimeException(re);
+        }
     }
 
     void sendChatMessage(String friendId, String message) throws FriendException {
