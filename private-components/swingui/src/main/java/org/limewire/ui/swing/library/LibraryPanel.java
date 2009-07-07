@@ -437,7 +437,7 @@ public class LibraryPanel extends JPanel {
         }
         MatcherEditor<LocalFileItem> textMatcherEditor = new TextComponentMatcherEditor<LocalFileItem>(libraryFilterPanel.getFilterField(), new LocalFileItemFilterator(selectedCategory) );
         textFilterList = GlazedListsFactory.filterList(filteredList == null ? eventList : filteredList, textMatcherEditor);
-        setFileCount(textFilterList.size(), filteredList == null ? eventList.size() : filteredList.size());
+        setFileCount(textFilterList.size(), eventList.size());
         if(fileCountListener == null)
             fileCountListener = new FileCountListener();
         textFilterList.addListEventListener(fileCountListener);
@@ -467,7 +467,7 @@ public class LibraryPanel extends JPanel {
     }
     
     private void setFileCount(int filterSize, int totalCount) {
-        if(filterSize < 0) {
+        if(selectedCategory == null && filterSize == totalCount) {
             fileCountLabel.setText(I18n.tr("{0} files", totalCount));
         } else { 
             fileCountLabel.setText(I18n.tr("{0} of {1} files", filterSize, totalCount));
