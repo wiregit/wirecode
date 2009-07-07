@@ -42,6 +42,9 @@ public class HeaderBar extends JXPanel {
         this.titleComponent = headerLabel;
         this.componentContainer = new JPanel();
         
+        if(title.length() == 0)
+            titleComponent.setVisible(false);
+        
         init();
     }
     
@@ -61,7 +64,7 @@ public class HeaderBar extends JXPanel {
         this.componentContainer.setOpaque(false);
         
         super.setLayout(new MigLayout("insets 0, fill, aligny center","[][]",""));
-        super.add(titleComponent, "growy, dock west, gapbefore 5, gapafter 10");
+        super.add(titleComponent, "hidemode 3, growy, dock west, gapbefore 5, gapafter 10");
         super.add(componentContainer, "grow, push, right");
     }
     

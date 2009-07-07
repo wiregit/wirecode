@@ -144,7 +144,7 @@ public class LibraryPanel extends JPanel {
     private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
-        headerBar.setLayout(new MigLayout("insets 0, gap 0, fill"));
+        headerBar.setLayout(new MigLayout("insets 0 5 0 5, gap 0, fill"));
         headerBar.setDefaultComponentHeight(-1);
         createAddFilesButton(addFileAction, libraryAction);
         headerBar.add(addFilesButton, "push");
@@ -154,7 +154,7 @@ public class LibraryPanel extends JPanel {
         fileCountLabel.setFont(fileCountFont);
         headerBar.add(fileCountLabel, "aligny 50%, gapright 10");
         createFilterToggleButton();
-        headerBar.add(filterToggleButton, "alignx right, gapright 5");
+        headerBar.add(filterToggleButton, "alignx right");
         
         tableListLayout = new CardLayout();
         tableListPanel = new JPanel(tableListLayout);
@@ -395,7 +395,7 @@ public class LibraryPanel extends JPanel {
         addFilesButton.setIcon(plusIcon);
         addFilesButton.setRolloverIcon(plusIcon);
         addFilesButton.setPressedIcon(plusIcon);
-        addFilesButton.setPreferredSize(new Dimension(addFilesButton.getPreferredSize().width, 23));
+        addFilesButton.setPreferredSize(new Dimension(addFilesButton.getPreferredSize().width, 22));
         addFilesButton.addActionListener(libraryAction);
         buttonDecorator.decorateDarkFullImageButton(addFilesButton, AccentType.SHADOW);
     }
@@ -413,7 +413,7 @@ public class LibraryPanel extends JPanel {
                 SwingUiSettings.SHOW_LIBRARY_FILTERS.setValue(filterToggleButton.isSelected());
             }
         });
-        filterToggleButton.setPreferredSize(new Dimension(filterToggleButton.getPreferredSize().width, 23));
+        filterToggleButton.setPreferredSize(new Dimension(filterToggleButton.getPreferredSize().width, 22));
         buttonDecorator.decorateDarkFullImageButton(filterToggleButton, AccentType.SHADOW);
     }
     
