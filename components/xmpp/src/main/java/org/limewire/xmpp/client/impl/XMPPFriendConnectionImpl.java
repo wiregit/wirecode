@@ -215,8 +215,8 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     void loginImpl() throws FriendException {
         synchronized (this) {
             try {
-                connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));        
                 loggingIn.set(true);
+                connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));        
                 org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(smackConnectionListener);
                 org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
                 connect();
