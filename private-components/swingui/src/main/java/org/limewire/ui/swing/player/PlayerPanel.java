@@ -345,12 +345,12 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         
         // Update buttons based on player status.
         PlayerState status = getPlayerMediator().getStatus();
-        if (status == PlayerState.PLAYING || status == PlayerState.SEEKING_PLAY) {
+        if ((status == PlayerState.PLAYING) || (status == PlayerState.SEEKING_PLAY)) {
             playButton.setVisible(false);
             pauseButton.setVisible(true);
             titleLabel.start();
             
-        } else if (status == PlayerState.PAUSED) {
+        } else if ((status == PlayerState.PAUSED) || (status == PlayerState.SEEKING_PAUSED)) {
             playButton.setVisible(true);
             pauseButton.setVisible(false);
             titleLabel.stop();
