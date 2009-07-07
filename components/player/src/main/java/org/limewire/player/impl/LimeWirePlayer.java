@@ -80,7 +80,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     private volatile PlayerState playerState = UNKNOWN;
     
     
-    private Object seekLock = new Object();
+    private final Object seekLock = new Object();
     /**
      * byte location to skip to in file.
      */
@@ -92,7 +92,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     private volatile boolean loadSong = false;
     
     
-    private Object volumeLock = new Object();
+    private final Object volumeLock = new Object();
     /**
      * true== the thread should update the volume on the sourceDataLine.
      */
@@ -246,7 +246,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     /**
      * Sets the gain(volume) for the outputline.
      * 
-     * @param gain [0.0 <-> 1.0]
+     * @param fGain [0.0 <-> 1.0]
      * @throws IOException thrown when the soundcard does not support this
      *         operation
      */
