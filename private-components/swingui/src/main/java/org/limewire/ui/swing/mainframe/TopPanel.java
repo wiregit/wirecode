@@ -305,6 +305,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
         public void itemRemoved() {
             searchList.removeTabActionMap(actionMap);
             panel.dispose();
+            if(searchList.getTabs().size() == 0){
+                searchBar.setText(null);
+            }
         }
 
         @Override
