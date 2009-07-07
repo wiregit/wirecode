@@ -66,6 +66,7 @@ public class SearchResultMenu extends JPopupMenu {
         boolean showHideSimilarFileVisible = selectedItems.size() == 1 && firstItem.getSimilarResults().size() > 0 && viewType == ViewType.List;
         boolean showHideSimilarFileEnabled = selectedItems.size() == 1 && firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
         boolean viewFileInfoEnabled = selectedItems.size() == 1;
+        boolean downloadAsVisible = selectedItems.size() == 1;
 
         // Add Download menu item.
         add(new AbstractAction(tr("Download")) {
@@ -78,31 +79,33 @@ public class SearchResultMenu extends JPopupMenu {
             }
         }).setEnabled(downloadEnabled);
         
-        // Add Download As menu item.
-        add(new AbstractAction(tr("Download As...")) {
-            public void actionPerformed(ActionEvent e) {
-                for (VisualSearchResult visualSearchResult : selectedItems) {
-                    if (visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
-                        // Create suggested file.  We don't specify a directory
-                        // path so we can use the last input directory.  To get
-                        // the default save directory, we could call
-                        // SharingSettings.getSaveDirectory(fileName).
-                        String fileName = visualSearchResult.getFileName();
-                        File suggestedFile = new File(fileName);
-                        
-                        // Prompt user for local file name.
-                        File saveFile = FileChooser.getSaveAsFile(
-                                GuiUtils.getMainFrame(), tr("Download As"), 
-                                suggestedFile);
-                        
-                        // Start download if not canceled.
-                        if (saveFile != null) {
-                            downloadHandler.download(visualSearchResult, saveFile);
+        // Add Download As menu item if visible.
+        if (downloadAsVisible) {
+            add(new AbstractAction(tr("Download As...")) {
+                public void actionPerformed(ActionEvent e) {
+                    for (VisualSearchResult visualSearchResult : selectedItems) {
+                        if (visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
+                            // Create suggested file.  We don't specify a directory
+                            // path so we can use the last input directory.  To get
+                            // the default save directory, we could call
+                            // SharingSettings.getSaveDirectory(fileName).
+                            String fileName = visualSearchResult.getFileName();
+                            File suggestedFile = new File(fileName);
+
+                            // Prompt user for local file name.
+                            File saveFile = FileChooser.getSaveAsFile(
+                                    GuiUtils.getMainFrame(), tr("Download As"), 
+                                    suggestedFile);
+
+                            // Start download if not canceled.
+                            if (saveFile != null) {
+                                downloadHandler.download(visualSearchResult, saveFile);
+                            }
                         }
                     }
                 }
-            }
-        }).setEnabled(downloadEnabled);
+            }).setEnabled(downloadEnabled);
+        }
 
         // Add Mark/Unmark as Spam menu item.
         add(new AbstractAction(firstItem.isSpam() ? tr("Unmark as Spam") : tr("Mark as Spam")) {
@@ -116,6 +119,7 @@ public class SearchResultMenu extends JPopupMenu {
 
         addSeparator();
         
+        // Add Locate in Library menu item if visible.
         if(locateInLibraryVisible){
             add(new AbstractAction(tr("Locate in Library")) {
                 @Override
