@@ -341,6 +341,9 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     public void stateChanged(PlayerState playerState) {
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
             updateVolume();
+        } else if (playerState == PlayerState.GAIN) {
+            // Exit on volumn change.
+            return;
         }
         
         // Update buttons based on player status.
