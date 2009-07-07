@@ -213,6 +213,22 @@ class LibraryFileData extends AbstractSettingsGroup {
             collectionNames = new HashMap<Integer, String>();
             collectionShareData = new HashMap<Integer, List<String>>();
             convertShareData(oldShareData, fileData, collectionNames, collectionShareData);
+            
+            final Map<File, List<Integer>> fileDataFinal = fileData;
+            LibraryConverterHelper helper = new LibraryConverterHelper(new LibraryConverterHelper.FileAdder() {
+               @Override
+                public void addFile(File file) {
+                   if(!fileDataFinal.containsKey(file)) {
+                       fileDataFinal.put(file, Collections.<Integer>emptyList());
+                   }
+                }
+            });
+            
+            //add save directories to library
+            Set<File> convertedDirectories = new HashSet<File>();
+            List<File> emptyList = Collections.emptyList();
+            helper.convertSaveDirectories(emptyList, emptyList, convertedDirectories);
+            
             safeUrns = new HashSet<String>();
             break;
         case TWO:
@@ -245,7 +261,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             lock.writeLock().unlock();
         }
     }
-
 
     private void validateCollectionData(Map<File, List<Integer>> fileData, Map<Integer, String> collectionNames, Map<Integer, List<String>> collectionShareData) {
         // TODO: Do some validation

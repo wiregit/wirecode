@@ -1,13 +1,10 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.core.settings.LibrarySettings;
@@ -27,7 +24,7 @@ class LibraryConverter {
         return LibrarySettings.VERSION.get() == LibrarySettings.LibraryVersion.FOUR_X.name();
     }
     
-    void convert(LibraryFileData newData) {
+    void convert(final LibraryFileData newData) {
         newData.revertToDefault();
         
         List<File> sharedFolders = new ArrayList<File>();
@@ -63,9 +60,10 @@ class LibraryConverter {
         extensions.addAll(Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.get())));        
         newData.setManagedExtensions(extensions);
         
+        Set<File> convertedDirectories = new HashSet<File>();
         // Here's the bulk of the conversion -- loop through, recursively, previously 
         // shared directories & mark all potential files as shareable.
-        convertSharedFiles(sharedFolders, excludedFolders, excludedFiles, extensions, newData);
+        convertSharedDirectories(sharedFolders, excludedFolders, excludedFiles, extensions, convertedDirectories, newData);
         
         
         for(File file : oldData.SPECIAL_STORE_FILES) {
@@ -73,6 +71,15 @@ class LibraryConverter {
             addManagedFile(newData, file);
         }
         
+        //add save directory contents to library
+        LibraryConverterHelper helper = new LibraryConverterHelper(new LibraryConverterHelper.FileAdder() {
+            @Override
+            public void addFile(File file) {
+                addManagedFile(newData, file);
+            }
+        });
+        helper.convertSaveDirectories(excludedFolders, excludedFiles, convertedDirectories);
+
         LibrarySettings.VERSION.set(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         
         oldData.revertToDefault();
@@ -96,60 +103,20 @@ class LibraryConverter {
         return false;
     }
     
-    private void convertSharedFiles(List<File> sharedFolders, List<File> excludedFolders,
-            List<File> excludedFiles, List<String> extensions, LibraryFileData data) {
-        Set<File> convertedDirectories = new HashSet<File>();
-        for (File file : sharedFolders) {
-            convertDirectory(file, extensions, sharedFolders, excludedFolders, excludedFiles,
-                    convertedDirectories, data);
-        }
-    }
-    
-    private void convertDirectory(File directory, final Collection<String> extensions,
-            final List<File> sharedFolders, final List<File> excludedFolders, final List<File> excludedFiles,
-            Set<File> convertedDirectories, final LibraryFileData data) {
-        // If we already converted this directory, exit.
-        if (convertedDirectories.contains(directory)) {
-            return;
-        }
+    private void convertSharedDirectories(List<File> sharedFolders, List<File> excludedFolders,
+            List<File> excludedFiles, List<String> extensions, Set<File> convertedDirectories, final LibraryFileData data) {
         
-        convertedDirectories.add(directory);
-        File[] fileList = directory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return LibraryUtils.isFileManagable(file)
-                        && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US))
-                        && !excludedFiles.contains(file);
-            }
+        LibraryConverterHelper helper = new LibraryConverterHelper(new LibraryConverterHelper.FileAdder() {
+           @Override
+            public void addFile(File file) {
+               if(addManagedFile(data, file)) {
+                   data.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
+               }
+            } 
         });
-
-        if(fileList != null) {
-            for (File file : fileList) {
-                file = FileUtils.canonicalize(file);
-                if(addManagedFile(data, file)) {
-                    data.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
-                }
-            }
-        }
-
-        if(!LibraryUtils.isForcedShareDirectory(directory)) {
-            File[] dirList = directory.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File folder) {
-                    return folder.isDirectory()
-                            && folder.canRead()
-                            && !data.isIncompleteDirectory(folder)
-                            && !LibraryUtils.isApplicationSpecialShareDirectory(folder)
-                            && !excludedFolders.contains(folder)
-                            && !LibraryUtils.isFolderBanned(folder);
-                }
-            });
-            
-            if(dirList != null) {
-                for (File subdir : dirList) {
-                    convertDirectory(subdir, extensions, sharedFolders, excludedFolders, excludedFiles, convertedDirectories, data);
-                }
-            }
+        
+        for (File directory : sharedFolders) {
+            helper.convertDirectory(directory, extensions, excludedFolders, excludedFiles, convertedDirectories, true);
         }
     }
 }
