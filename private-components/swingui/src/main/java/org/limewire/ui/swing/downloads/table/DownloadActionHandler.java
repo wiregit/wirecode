@@ -124,20 +124,7 @@ public class DownloadActionHandler {
                 libraryMediator.selectInLibrary(urn);
             }
         } else if (actionCommmand == CHANGE_LOCATION_COMMAND){
-         // Prompt user for a new directory.
-            File saveFile = FileChooser.getInputDirectory(GuiUtils.getMainFrame(), item.getSaveFile().getParentFile());
-            
-            if (saveFile == null || saveFile.equals(item.getSaveFile().getParentFile())){
-                //nothing to see here.  move along.
-                return;
-            }
-            
-            try {
-                // Update save file in DownloadItem.
-                item.setSaveFile(saveFile, true);
-            } catch (SaveLocationException ex) {
-                saveLocationExceptionHandler.get().handleSaveLocationException(new NoOpDownloadAction(), ex, true);
-            }
+            changeSaveLocation(item);
         } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
             searchHandler.doSearch(createSearchInfo(item));
         }
@@ -161,18 +148,41 @@ public class DownloadActionHandler {
         return search = DefaultSearchInfo.createKeywordSearch(title, SearchCategory.forCategory(item.getCategory()));
     }
     
+    private void changeSaveLocation(DownloadItem item){
+        // Prompt user for a new directory.
+        File saveFile = FileChooser.getInputDirectory(GuiUtils.getMainFrame(), item.getSaveFile().getParentFile());
+        
+        if (saveFile == null || saveFile.equals(item.getSaveFile().getParentFile())){
+            //nothing to see here.  move along.
+            return;
+        }
+        
+        try {
+            // Update save file in DownloadItem.
+            item.setSaveFile(saveFile, false);
+        } catch (SaveLocationException ex) {
+            saveLocationExceptionHandler.get().handleSaveLocationException(new ChangeLocationDownloadAction(item), ex, false);
+        }
+    }
+    
     /**
-     * Does nothing since nothing needs to be done
+     * Calls changeSaveLocation() on downloadCanceled()
      */
-    private static class NoOpDownloadAction implements DownloadAction{
+    private class ChangeLocationDownloadAction implements DownloadAction{
+        private DownloadItem item;
+
+        ChangeLocationDownloadAction(DownloadItem item){
+            this.item = item;
+        }
         @Override
         public void download(File saveFile, boolean overwrite) throws SaveLocationException {
-            //do nothing
+            //Do nothing
         }
 
         @Override
         public void downloadCanceled(SaveLocationException sle) {
-            //do nothing            
+            changeSaveLocation(item);
+                      
         }        
     }
 }
