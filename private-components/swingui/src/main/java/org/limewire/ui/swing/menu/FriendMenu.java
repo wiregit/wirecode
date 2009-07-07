@@ -103,6 +103,11 @@ class FriendMenu extends MnemonicMenu {
         logoutMenuItem.setVisible(signedIn);
         friendService.updateSignedInStatus();
         friendService.setVisible(signedIn);
+        
+        //needed so that the menu does not stay squished after we add in all the new items.
+        boolean popUpMenuVisible = isPopupMenuVisible();
+        setPopupMenuVisible(false);
+        setPopupMenuVisible(popUpMenuVisible);
     }
 
 }
