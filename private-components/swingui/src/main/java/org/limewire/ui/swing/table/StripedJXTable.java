@@ -24,6 +24,8 @@ import org.jdesktop.swingx.decorator.CompoundHighlighter;
  */
 public class StripedJXTable extends GlazedJXTable {
 
+    private boolean emptyRowsPainted = false;
+    
     public StripedJXTable() {
         super();
     }
@@ -40,6 +42,10 @@ public class StripedJXTable extends GlazedJXTable {
         super(numRows, numColumns);
     }
     
+    public void setEmptyRowsPainted(boolean painted){
+        emptyRowsPainted = painted;
+    }
+    
     /**
      * The parent paints all the real rows then the remaining space is calculated
      * and appropriately painted with grid lines and background colors. These 
@@ -48,7 +54,8 @@ public class StripedJXTable extends GlazedJXTable {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        paintEmptyRows(g);
+        if(emptyRowsPainted)
+            paintEmptyRows(g);
     }
     
     /**

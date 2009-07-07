@@ -3,7 +3,6 @@ package org.limewire.ui.swing.table;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -44,8 +43,6 @@ public class MouseableTable extends StripedJXTable {
     private TableColumnDoubleClickHandler columnDoubleClickHandler;
 
     private TableColors colors = newTableColors();
-
-    private boolean stripesPainted = false;
 
     private TableCellHeaderRenderer defaultRenderer;
 
@@ -427,22 +424,6 @@ public class MouseableTable extends StripedJXTable {
         Rectangle cellRect = getCellRect(0, column, false);
         Rectangle visibleRect = getVisibleRect();
         return visibleRect.intersects(cellRect);
-    }
-    
-    public void setStripesPainted(boolean painted){
-        stripesPainted = painted;
-    }
-    /**
-     * The parent paints all the real rows then the remaining space is calculated
-     * and appropriately painted with grid lines and background colors. These 
-     * rows are not selectable.
-     */
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        if (stripesPainted) {
-            super.paintEmptyRows(g);
-        }
     }
     
     //clears mouseover color

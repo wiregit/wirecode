@@ -256,7 +256,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         table.setCellSelectionEnabled(false);
         table.setRowHeight(ROW_HEIGHT);
         table.setStripeHighlighterEnabled(false);
-        table.setStripesPainted(false);
+        table.setEmptyRowsPainted(false);
      
         repaintTimer = new Timer(50, new ActionListener() {
             @Override

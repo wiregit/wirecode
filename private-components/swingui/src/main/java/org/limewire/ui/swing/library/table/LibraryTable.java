@@ -104,7 +104,7 @@ public class LibraryTable extends MouseableTable {
     }
     
     private void initTable() {
-        setStripesPainted(true);
+        setEmptyRowsPainted(true);
         setShowHorizontalLines(false);
         setShowGrid(false, true);
         

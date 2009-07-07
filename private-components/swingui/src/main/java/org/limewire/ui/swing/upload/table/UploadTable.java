@@ -26,7 +26,7 @@ public class UploadTable extends MouseableTable {
         setModel(model);
         
         setStripeHighlighterEnabled(false);
-        setStripesPainted(false);
+        setEmptyRowsPainted(false);
         setFillsViewportHeight(false);
         
         UploadActionHandler actionHandler = new UploadActionHandler(uploadListManager, libraryMediator, fileInfoFactory);

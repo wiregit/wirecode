@@ -460,11 +460,13 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         add(browseFailedPanel , "hidemode 3, grow");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
-        scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
-        
-        scrollablePanel.add(resultsContainer, "grow, push, alignx left, aligny top");
-        scrollablePanel.add(sponsoredResultsPanel, "aligny top, alignx right, wmin " + sponsoredResultsPanel.getPreferredSize().width + ", pad 8 8 8 0");
+
+        scrollablePanel.setLayout(new BorderLayout());
+        scrollablePanel.add(resultsContainer, BorderLayout.CENTER);
+        scrollablePanel.add(sponsoredResultsPanel, BorderLayout.EAST);
         scrollPane.setViewportView(scrollablePanel);
+
+        
         syncScrollPieces();
     }
 

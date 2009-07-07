@@ -199,6 +199,7 @@ public class BaseResultPanel extends JXPanel {
         table.setPopupHandler(new SearchPopupHandler(downloadHandler, table, menuFactory));
         table.setDoubleClickHandler(new ClassicDoubleClickHandler(table, downloadHandler));
         table.setRowHeight(TABLE_ROW_HEIGHT);
+        table.setEmptyRowsPainted(true);
         
         return table;
     }
