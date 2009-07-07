@@ -46,7 +46,7 @@ public class PopupHeaderBar extends JPanel {
             IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
             closeButton.addActionListener(closeAction);
             closeButton.setOpaque(false);
-            add(closeButton, "gapright 3, dock east");
+            add(closeButton, "gapright 3, gaptop 1, dock east");
         }
     }
     
