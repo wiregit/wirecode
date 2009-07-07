@@ -54,6 +54,10 @@ public class FriendAddressResolverTest extends BaseTestCase {
             will(returnValue(user));
             allowing(connection).getFriend(with(any(String.class)));
             will(returnValue(null));
+            allowing(connection).isLoggedIn();
+            will(returnValue(true));
+            allowing(connection).isLoggingIn();
+            will(returnValue(false));
             allowing(user).getPresences();
             will(returnValue(Collections.singletonMap("me@you.com/resource", friendPresence)));
             allowing(friendPresence).getFeature(AuthTokenFeature.ID);

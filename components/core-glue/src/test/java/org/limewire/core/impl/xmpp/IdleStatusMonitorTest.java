@@ -75,10 +75,16 @@ public class IdleStatusMonitorTest extends TestCase {
         assertNull("XmppActivityEvent fired, but there is no xmpp connection", listener.event);
     }
 
-    private void sendConnectionEvent(org.limewire.friend.api.FriendConnectionEvent.Type connectionState) {
+    private void sendConnectionEvent(final org.limewire.friend.api.FriendConnectionEvent.Type connectionState) {
         
         Mockery context = new Mockery();
-        FriendConnection connection = context.mock(FriendConnection.class);
+        final FriendConnection connection = context.mock(FriendConnection.class);
+        context.checking(new Expectations() {{
+            allowing(connection).isLoggedIn();
+            will(returnValue(connectionState != FriendConnectionEvent.Type.DISCONNECTED));
+            allowing(connection).isLoggingIn();
+            will(returnValue(false));
+        }});
         
         connectionSupport.handleEvent(new FriendConnectionEvent(connection, connectionState));
     }
