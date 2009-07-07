@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.core.settings.LibrarySettings;
@@ -117,7 +118,7 @@ class LibraryConverter {
             @Override
             public boolean accept(File file) {
                 return LibraryUtils.isFileManagable(file)
-                        && extensions.contains(FileUtils.getFileExtension(file))
+                        && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US))
                         && !excludedFiles.contains(file);
             }
         });
