@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.swing.Action;
 import javax.swing.JMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -44,6 +45,21 @@ public class BlockUserMenuFactory {
         return createBlockMenu(allHosts, new SearchBlockHandler());
     }
     
+    /**
+     * Creates an Action to block the user represented by the specified friend.
+     */
+    public Action createBlockUserAction(String actionName, final Friend friend) {
+        return new AbstractAction(actionName) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BlockHandler blockHandler = new SearchBlockHandler();
+                if (blockHandler.confirmBlock(friend.getRenderName())) {
+                    spamManager.addToBlackList(friend.getName());
+                    blockHandler.handleSideEffects();
+                }
+            }
+        };
+    }
 
     private JMenu createBlockMenu(Collection<RemoteHost> allHosts, final BlockHandler blockHandler) {
         final Collection<Friend> p2pUsers = new HashSet<Friend>();
