@@ -210,11 +210,12 @@ public class LimeWireSwingUI extends JPanel {
        splitPane.getBottomComponent().setVisible(isVisible);
        if (isVisible) {           
            int preferredDividerPosition = splitPane.getSize().height - splitPane.getInsets().bottom
-           - splitPane.getDividerSize()/2
+           - splitPane.getDividerSize()
            - splitPane.getBottomComponent().getPreferredSize().height;
            if (preferredDividerPosition < (splitPane.getHeight()/2)){
                preferredDividerPosition = splitPane.getHeight()/2;
            }
+           splitPane.setDividerLocation(preferredDividerPosition);
         }
    }
     
