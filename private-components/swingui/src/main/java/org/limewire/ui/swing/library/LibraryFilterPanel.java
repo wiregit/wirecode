@@ -82,7 +82,7 @@ public class LibraryFilterPanel {
         
         this.categoryActionMaps = new ArrayList<TabActionMap>();
         
-        addCategory(tr("All"), null, allFormat);
+        addCategory(tr("All") + " ", null, allFormat);
         addCategory(tr("Audio"), Category.AUDIO, audioFormat);
         addCategory(tr("Videos"), Category.VIDEO, videoFormat);
         addCategory(tr("Images"), Category.IMAGE, imageFormat);
