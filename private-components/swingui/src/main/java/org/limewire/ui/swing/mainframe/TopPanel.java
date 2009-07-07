@@ -472,7 +472,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
         
         void killBusy() {
-            busyTimer.stop();
+            if (busyTimer != null && busyTimer.isRunning()) {
+                busyTimer.stop();
+            }
             putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);
         }
         
