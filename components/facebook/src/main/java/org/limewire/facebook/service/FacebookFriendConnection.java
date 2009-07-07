@@ -390,8 +390,8 @@ public class FacebookFriendConnection implements FriendConnection {
     void loginImpl() throws FriendException {
         synchronized (this) {
             try {
-                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
                 loggingIn.set(true);
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
                 requestSession();
                 fetchAllFriends();
                 readMetadataFromPages();
@@ -402,6 +402,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 PresenceListener presenceListener = presenceListenerFactory.createPresenceListener(this);
                 presenceListenerFuture = executorService.scheduleAtFixedRate(presenceListener, 0, 60, TimeUnit.SECONDS);
                 loggedIn.set(true);
+                loggingIn.set(false);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
             } catch (IOException e) {
                 LOG.debug("login error", e);
