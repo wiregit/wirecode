@@ -57,8 +57,13 @@ public class SaveLocationException extends IOException {
         /**
          * Thrown when trying to open a torrent file that is too large.
          */
-        TORRENT_FILE_TOO_LARGE
+        TORRENT_FILE_TOO_LARGE,
 
+        /**
+         * Throw when trying to register a torrent if the torrent manager
+         * is not loaded.
+         */
+        NO_TORRENT_MANAGER
     }
 
     /**

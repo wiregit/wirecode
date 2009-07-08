@@ -183,7 +183,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
     
     @Override
-    public void registerTorrentWithTorrentManager() {
+    public void registerTorrentWithTorrentManager() throws SaveLocationException {
         torrent.registerWithTorrentManager();
     }
 
@@ -658,8 +658,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         } else if (LibTorrentBTDownloadMemento.class.isInstance(memento)) {
             initFromCurrentMemento((LibTorrentBTDownloadMemento) memento);
         }
-
-        registerTorrentWithTorrentManager();
+        try {
+            registerTorrentWithTorrentManager();
+        } catch(SaveLocationException e) {
+            // The torrent manager is not loaded.
+            throw new InvalidDataException(e);
+        }
     }
 
     /**

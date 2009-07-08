@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.listener.EventListener;
 
 /**
@@ -201,8 +202,9 @@ public interface Torrent {
 
     /**
      * Registers the torrent with the torrent manager.
+     * @throws SaveLocationException if the torrent manager is not loaded.
      */
-    public void registerWithTorrentManager();
+    public void registerWithTorrentManager() throws SaveLocationException;
 
     /**
      * Removes the listener from the torrent. Returning true if the listener

@@ -20,6 +20,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
@@ -430,7 +431,12 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public void registerWithTorrentManager() {
+    public void registerWithTorrentManager() throws SaveLocationException {
+        if(!torrentManager.isValid()) {
+            throw new SaveLocationException(
+                    SaveLocationException.LocationCode.NO_TORRENT_MANAGER,
+                    initialTorrentFile);
+        }
         for (File file : getIncompleteFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();

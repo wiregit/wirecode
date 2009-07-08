@@ -120,7 +120,7 @@ public class TorrentManagerImpl implements TorrentManager {
                     TorrentException.DISABLED_EXCEPTION);
         }
         if (!isValid()) {
-            throw new TorrentException("The TorrentManager is invalid.",
+            throw new TorrentException("There was a problem loading LibTorrent",
                     TorrentException.LOAD_EXCEPTION);
         }
     }

@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
+import org.limewire.core.api.download.SaveLocationException;
+
 public interface BTDownloader extends CoreDownloader {
 
     /**
@@ -25,7 +27,8 @@ public interface BTDownloader extends CoreDownloader {
 
     /**
      * Registers the internal torrent with the torrent manager.
+     * @throws SaveLocationException if the torrent manager is not loaded.
      */
-    void registerTorrentWithTorrentManager();
+    void registerTorrentWithTorrentManager() throws SaveLocationException;
 
 }

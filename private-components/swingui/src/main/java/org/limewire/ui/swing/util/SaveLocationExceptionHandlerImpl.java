@@ -134,6 +134,10 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         case PATH_NAME_TOO_LONG:
             message = I18n.tr("Sorry, you can't download files to this location.");
             break;
+        case NO_TORRENT_MANAGER:
+            message = I18n.tr("Sorry, there was a problem loading the BitTorrent library.\n" +
+                    "BitTorrent features cannot be used.");
+            break;
         default:
             message = I18n.tr("Sorry, there was a problem downloading your file.");
             break;
