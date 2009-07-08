@@ -135,8 +135,8 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
             message = I18n.tr("Sorry, you can't download files to this location.");
             break;
         case NO_TORRENT_MANAGER:
-            message = I18n.tr("Sorry, there was a problem loading the BitTorrent library.\n" +
-                    "BitTorrent features cannot be used.");
+            message = I18n.tr("Sorry, there is a problem with torrents.\n" +
+                    "Please try reinstalling LimeWire to solve this problem.");
             break;
         default:
             message = I18n.tr("Sorry, there was a problem downloading your file.");
