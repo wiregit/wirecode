@@ -8,8 +8,6 @@ import java.awt.event.ComponentListener;
 
 import javax.swing.JLayeredPane;
 
-import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
-
 public abstract class OverlayPopupPanel extends Panel 
     implements Resizable, ComponentListener, Disposable {
     // heavy weight so it can be on top of other heavy weight components
