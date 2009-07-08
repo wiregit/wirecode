@@ -62,7 +62,7 @@ class LibraryWarningDialog extends OverlayPopupPanel {
             FriendRequestPanel friendRequestPanel,
             LibraryManager libraryManager, LibraryFileAdder libraryFileAdder) {
         
-        super(layeredPane, null);
+        super(layeredPane);
         
         this.libraryManager = libraryManager;
         this.libraryFileAdder = libraryFileAdder;

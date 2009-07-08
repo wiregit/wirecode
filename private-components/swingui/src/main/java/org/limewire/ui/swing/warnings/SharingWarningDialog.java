@@ -52,7 +52,7 @@ class SharingWarningDialog extends OverlayPopupPanel {
     public SharingWarningDialog(
             @GlobalLayeredPane JLayeredPane layeredPane,
             LibraryMediator libraryMediator, LibraryFileAdder libraryFileAdder) {
-        super(layeredPane, null);
+        super(layeredPane);
         
         this.libraryFileAdder = libraryFileAdder;
         

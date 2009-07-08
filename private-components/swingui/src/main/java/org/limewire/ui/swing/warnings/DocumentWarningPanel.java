@@ -43,7 +43,7 @@ public class DocumentWarningPanel extends OverlayPopupPanel {
     public DocumentWarningPanel(final SharedFileListManager shareListManager,
             @GlobalLayeredPane JLayeredPane layeredPane, ButtonDecorator buttonDecorator) {
         
-        super(layeredPane, null);
+        super(layeredPane);
         
         GuiUtils.assignResources(this);
 
