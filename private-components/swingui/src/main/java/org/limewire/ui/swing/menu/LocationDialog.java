@@ -56,7 +56,9 @@ class LocationDialog extends LimeJDialog {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                if (openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    LocationDialog.this.dispose();
+                } else if (openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
                     openButton.doClick();
                 }
             }
