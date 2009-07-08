@@ -343,18 +343,12 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
 
     @Override
     public String getMagnetLink() {
-
-        String sep = System.getProperty("line.separator");
-        StringBuilder bldr = new StringBuilder();
-        for (SearchResult result : getCoreSearchResults()) {
-            bldr.append(result.getMagnetURL()).append(sep);
-        }
-
-        if (bldr.length() > sep.length()) {
-            return bldr.substring(0, bldr.length() - sep.length());
-        }
-
-        return null;
+        //TODO: add other search results as alternative results to the magnet.
+        // A bit too intensive for the release.
+        if(getCoreSearchResults().size() > 0)
+            return getCoreSearchResults().get(0).getMagnetURL();
+        else
+            return null;
     }
 
     @Override
