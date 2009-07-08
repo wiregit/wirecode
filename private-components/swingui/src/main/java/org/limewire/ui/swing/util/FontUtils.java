@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
@@ -11,6 +12,7 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.text.html.StyleSheet;
 
 public class FontUtils {
     
@@ -116,5 +118,25 @@ public class FontUtils {
             }
         }
         return largestRect;
+    }
+    
+    /**
+     * Truncates the given message to a maxWidth in pixels.
+     */
+    public static String getTruncatedMessage(String message, Font font, int maxWidth) {
+        String ELIPSES = "...";
+        while (getPixelWidth(message, font) > (maxWidth)) {
+            message = message.substring(0, message.length() - (ELIPSES.length() + 1)) + ELIPSES;
+        }
+        return message;
+    }
+
+    /**
+     * Returns the width of the message in the given font.
+     */
+    public static int getPixelWidth(String text, Font font) {
+        StyleSheet css = new StyleSheet();
+        FontMetrics fontMetrics = css.getFontMetrics(font);
+        return fontMetrics.stringWidth(text);
     }
 }

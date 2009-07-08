@@ -8,6 +8,7 @@ import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventUtils;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -31,13 +32,16 @@ public class FriendService extends JMenuItem {
     public FriendService(EventBean<FriendConnectionEvent> friendConnectionEventBean) {
         this.friendConnectionEventBean = friendConnectionEventBean;
         GuiUtils.assignResources(this);
+        setIconTextGap(4);
     }
 
     public void updateSignedInStatus() {
         FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
         if (friendConnection != null && friendConnection.isLoggedIn()) {
-            //TODO add ellipses to name if name is too long.
-            setText(friendConnection.getConfiguration().getUserInputLocalID());
+            String friendName = friendConnection.getConfiguration().getUserInputLocalID();
+            friendName = friendName == null ? "" : FontUtils.getTruncatedMessage(friendName, getFont(), 150);
+            
+            setText(friendName);
             String serviceName = friendConnection.getConfiguration().getServiceName();
             if(serviceName.contains("gmail")) {
                 setIcon(gmailIcon);
