@@ -115,7 +115,7 @@ class FileProcessingPanel extends JXButton {
                 setVisible(false);
             }
         } else {
-            setText(I18n.tr("Adding {0} of {1}", finished, total));
+            setText(I18n.tr("Adding {0} of {1}", finished + 1, total));
             setVisible(true);
         }
     }
