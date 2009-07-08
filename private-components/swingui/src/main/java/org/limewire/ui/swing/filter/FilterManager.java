@@ -33,10 +33,6 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
     private final Map<FilterType, Filter<E>> filterMap = 
         new EnumMap<FilterType, Filter<E>>(FilterType.class);
     
-    /** Map containing non-property filters by category. */
-    private final Map<SearchCategory, Map<FilterType, Filter<E>>> filterByCategoryMap = 
-        new EnumMap<SearchCategory, Map<FilterType, Filter<E>>>(SearchCategory.class);
-    
     /** Map containing property filters. */
     private final Map<FilePropertyKey, Filter<E>> propertyFilterMap = 
         new EnumMap<FilePropertyKey, Filter<E>>(FilePropertyKey.class);
@@ -58,15 +54,6 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
             filter.dispose();
         }
         
-        // Dispose of all non-property filters by category.
-        Collection<Map<FilterType, Filter<E>>> filtersByCategory = filterByCategoryMap.values();
-        for (Map<FilterType, Filter<E>> filterMap : filtersByCategory) {
-            filters = filterMap.values();
-            for (Filter<E> filter : filters) {
-                filter.dispose();
-            }
-        }
-        
         // Dispose of all property filters.
         Collection<Filter<E>> propertyFilters = propertyFilterMap.values();
         for (Filter<E> filter : propertyFilters) {
@@ -82,12 +69,6 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
         
         // Add all non-property filters.
         filterList.addAll(filterMap.values());
-        
-        // Add all non-property filters by category.
-        Collection<Map<FilterType, Filter<E>>> filtersByCategory = filterByCategoryMap.values();
-        for (Map<FilterType, Filter<E>> filterMap : filtersByCategory) {
-            filterList.addAll(filterMap.values());
-        }
         
         // Add all property filters.
         filterList.addAll(propertyFilterMap.values());
@@ -130,14 +111,14 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
             filterList.add(getPropertyFilter(FilePropertyKey.AUTHOR));
             filterList.add(getPropertyFilter(FilePropertyKey.ALBUM));
             filterList.add(getPropertyFilter(FilePropertyKey.GENRE));
-            filterList.add(getFilterByCategory(FilterType.FILE_SIZE, filterCategory));
+            filterList.add(getFilter(FilterType.FILE_SIZE, filterCategory));
             filterList.add(getFilter(FilterType.EXTENSION));
             filterList.add(getFilter(FilterType.BIT_RATE));
             filterList.add(getFilter(FilterType.LENGTH));
             break;
             
         case VIDEO:
-            filterList.add(getFilterByCategory(FilterType.FILE_SIZE, filterCategory));
+            filterList.add(getFilter(FilterType.FILE_SIZE, filterCategory));
             filterList.add(getFilter(FilterType.EXTENSION));
             filterList.add(getFilter(FilterType.QUALITY));
             filterList.add(getFilter(FilterType.LENGTH));
@@ -146,7 +127,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
         case DOCUMENT:
         case OTHER:
             filterList.add(getFilter(FilterType.FILE_TYPE));
-            filterList.add(getFilterByCategory(FilterType.FILE_SIZE, filterCategory));
+            filterList.add(getFilter(FilterType.FILE_SIZE, filterCategory));
             filterList.add(getFilter(FilterType.EXTENSION));
             break;
             
@@ -154,7 +135,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
         case IMAGE:
         case PROGRAM:
         default:
-            filterList.add(getFilterByCategory(FilterType.FILE_SIZE, filterCategory));
+            filterList.add(getFilter(FilterType.FILE_SIZE, filterCategory));
             filterList.add(getFilter(FilterType.EXTENSION));
             break;
         }
@@ -168,7 +149,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
     private Filter<E> getFilter(FilterType filterType) {
         Filter<E> filter = filterMap.get(filterType);
         if (filter == null) {
-            filter = createFilter(filterType, null, null);
+            filter = createFilter(filterType, null);
             filterMap.put(filterType, filter);
         }
         return filter;
@@ -177,20 +158,14 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
     /**
      * Returns the filter for the specified filter type and category.
      */
-    private Filter<E> getFilterByCategory(FilterType filterType, SearchCategory filterCategory) {
-        // Get map of cached filters by category.
-        Map<FilterType, Filter<E>> filterMap = filterByCategoryMap.get(filterCategory);
-        if (filterMap == null) {
-            filterMap = new EnumMap<FilterType, Filter<E>>(FilterType.class);
-            filterByCategoryMap.put(filterCategory, filterMap);
+    private Filter<E> getFilter(FilterType filterType, SearchCategory filterCategory) {
+        Filter<E> filter = getFilter(filterType);
+        
+        // Update range in range filters.
+        if (filter instanceof RangeFilter) {
+            ((RangeFilter) filter).updateRange(filterCategory);
         }
         
-        // Get cached filter by type.
-        Filter<E> filter = filterMap.get(filterType);
-        if (filter == null) {
-            filter = createFilter(filterType, null, filterCategory);
-            filterMap.put(filterType, filter);
-        }
         return filter;
     }
     
@@ -200,20 +175,17 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
     private Filter<E> getPropertyFilter(FilePropertyKey propertyKey) {
         Filter<E> filter = propertyFilterMap.get(propertyKey);
         if (filter == null) {
-            filter = createFilter(FilterType.PROPERTY, propertyKey, null);
+            filter = createFilter(FilterType.PROPERTY, propertyKey);
             propertyFilterMap.put(propertyKey, filter);
         }
         return filter;
     }
     
     /**
-     * Creates a new filter for the specified filter type, property key, and
-     * filter category.  For FilterType.PROPERTY, <code>propertyKey</code> must
-     * be non-null.  For FilterType.FILE_SIZE, <code>filterCategory</code> must
-     * be non-null.
+     * Creates a new filter for the specified filter type and property key.
+     * For FilterType.PROPERTY, <code>propertyKey</code> must be non-null.
      */
-    private Filter<E> createFilter(FilterType filterType, FilePropertyKey propertyKey,
-            SearchCategory filterCategory) {
+    private Filter<E> createFilter(FilterType filterType, FilePropertyKey propertyKey) {
         
         switch (filterType) {
         case BIT_RATE:
@@ -227,7 +199,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
                     FilterType.EXTENSION, null, iconManager);
             
         case FILE_SIZE:
-            return new RangeFilter<E>(new FileSizeFilterFormat<E>(filterCategory));
+            return new RangeFilter<E>(new FileSizeFilterFormat<E>());
             
         case FILE_TYPE:
             return new PropertyFilter<E>(filterableSource.getFilteredList(), 
