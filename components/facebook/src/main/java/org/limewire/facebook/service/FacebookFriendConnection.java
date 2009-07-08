@@ -505,7 +505,7 @@ public class FacebookFriendConnection implements FriendConnection {
             }
         } catch (FacebookException e) {
             LOG.debug("friend error", e);
-            throw new RuntimeException("FIX ME!", e);
+            throw new IOException(e);
         } catch (JSONException e) {
             LOG.debug("json error", e);
             throw new RuntimeException("FIX ME!", e);
