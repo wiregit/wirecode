@@ -77,7 +77,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
     private void handleException(final DownloadAction downLoadAction,
             final DownloadException e, final boolean supportNewSaveFileName) {
 
-        if (e.getErrorCode() == DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+        if (e.getErrorCode() == DownloadException.ErrorCode.FILE_ALREADY_DOWNLOADING) {
             // ignore, just return because we are already downloading this file
             downLoadAction.downloadCanceled(e);
             showErrorMessage(e);
@@ -85,8 +85,8 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
         }
 
         // check to make sure this is a DownloadException we can handle
-        if ((e.getErrorCode() != DownloadException.LocationCode.FILE_ALREADY_EXISTS)
-                && (e.getErrorCode() != DownloadException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO)) {
+        if ((e.getErrorCode() != DownloadException.ErrorCode.FILE_ALREADY_EXISTS)
+                && (e.getErrorCode() != DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO)) {
             // Create user message.
             downLoadAction.downloadCanceled(e);
             showErrorMessage(e);

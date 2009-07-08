@@ -21,7 +21,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.download.DownloadException;
-import org.limewire.core.api.download.DownloadException.LocationCode;
+import org.limewire.core.api.download.DownloadException.ErrorCode;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UpdateSettings;
@@ -600,7 +600,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             addRemoteFileDescsToDownloader(files);
             
             throw new DownloadException
-            (LocationCode.FILE_ALREADY_DOWNLOADING,
+            (ErrorCode.FILE_ALREADY_DOWNLOADING,
                     new File(fName != null ? fName : ""));
         }
 
@@ -669,7 +669,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         }
         if (conflicts(magnet.getSHA1Urn(), 0, new File(saveDir,fileName))) {
             throw new DownloadException
-            (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
+            (ErrorCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
 
         //Note: If the filename exists, it would be nice to check that we are
@@ -706,7 +706,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         
         if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir,fileName))) {
             throw new DownloadException
-            (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
+            (ErrorCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
       
         //Start download asynchronously.  This automatically moves downloader to
@@ -728,7 +728,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      
         if (conflictsWithIncompleteFile(incompleteFile)) {
             throw new DownloadException
-            (LocationCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
+            (ErrorCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
         }
 
         if (IncompleteFileManager.isTorrentFile(incompleteFile)) {
@@ -796,7 +796,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
         if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))
-            throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, f);
+            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge();
         ManagedDownloader d = coreDownloaderFactory.createInNetworkDownloader(
@@ -821,7 +821,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             // torrent files are supposed to be small. If it is large it is
             // probably not a valid torrent file
             throw new DownloadException(
-                    DownloadException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
+                    DownloadException.ErrorCode.TORRENT_FILE_TOO_LARGE, torrentFile);
         }
 
         BTDownloader ret;
@@ -852,7 +852,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
             File saveFile = ret.getSaveFile();
             if (saveFile.exists()) {
-                throw new DownloadException(LocationCode.FILE_ALREADY_EXISTS, saveFile);
+                throw new DownloadException(ErrorCode.FILE_ALREADY_EXISTS, saveFile);
             }
         }
         ret.setSaveFile(saveDirectory, null, overwrite);
@@ -868,27 +868,27 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     private void checkActiveAndWaiting(BTDownloader ret) throws DownloadException {
 
         if (torrentManager.get().isManagedTorrent(ret.getTorrentFile())) {
-            throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
                     .getSaveFile());
         } else if (torrentManager.get().isManagedTorrent(
                 StringUtils.toHexString(ret.getSha1Urn().getBytes()))) {
-            throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
                     .getSaveFile());
         }
 
         for (CoreDownloader current : activeAndWaiting) {
             if (ret.getSha1Urn().equals(current.getSha1Urn())) {
-                throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
                         .getIncompleteFile());
             }
 
             if (current.conflictsSaveFile(ret.getSaveFile())) {
-                throw new DownloadException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
+                throw new DownloadException(ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
                         .getSaveFile());
             }
 
             if (current.conflictsSaveFile(ret.getIncompleteFile())) {
-                throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
                         .getIncompleteFile());
             }
         }

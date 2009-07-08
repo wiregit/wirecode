@@ -9,7 +9,7 @@ import java.io.IOException;
  */
 public class DownloadException extends IOException {
 
-    public static enum LocationCode {
+    public static enum ErrorCode {
         /**
          * Attempt to change save location that violates security rules, such as
          * attempting directory traversal .
@@ -69,7 +69,7 @@ public class DownloadException extends IOException {
     /**
      * The error code of this exception.
      */
-    private final LocationCode errorCode;
+    private final ErrorCode errorCode;
 
     /**
      * Handle to the file that caused the exception.
@@ -81,11 +81,11 @@ public class DownloadException extends IOException {
      */
     public DownloadException(IOException cause, File file) {
         super(cause);
-        this.errorCode = LocationCode.FILESYSTEM_ERROR;
+        this.errorCode = ErrorCode.FILESYSTEM_ERROR;
         this.file = file;
     }
 
-    public DownloadException(LocationCode errorCode, File file) {
+    public DownloadException(ErrorCode errorCode, File file) {
         super("error code " + errorCode + ", file " + file);
         this.errorCode = errorCode;
         this.file = file;
@@ -96,7 +96,7 @@ public class DownloadException extends IOException {
      * 
      * @param message optional more detailed message for debugging purposes
      */
-    public DownloadException(LocationCode errorCode, File file, String message) {
+    public DownloadException(ErrorCode errorCode, File file, String message) {
         super(message);
         this.errorCode = errorCode;
         this.file = file;
@@ -107,7 +107,7 @@ public class DownloadException extends IOException {
      * 
      * @return
      */
-    public LocationCode getErrorCode() {
+    public ErrorCode getErrorCode() {
         return errorCode;
     }
 

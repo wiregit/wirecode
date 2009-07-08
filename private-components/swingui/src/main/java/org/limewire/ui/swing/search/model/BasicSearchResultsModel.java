@@ -388,7 +388,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
             
         } catch (final DownloadException e) {
-            if (e.getErrorCode() == DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+            if (e.getErrorCode() == DownloadException.ErrorCode.FILE_ALREADY_DOWNLOADING) {
                 DownloadItem downloadItem = downloadListManager.getDownloadItem(vsr.getUrn());
                 if (downloadItem != null) {
                     downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));

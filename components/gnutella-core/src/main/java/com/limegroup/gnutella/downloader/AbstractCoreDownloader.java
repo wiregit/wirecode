@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
-import org.limewire.core.api.download.DownloadException.LocationCode;
+import org.limewire.core.api.download.DownloadException.ErrorCode;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.CommonUtils;
@@ -124,45 +124,45 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	    catch (IOException ie) {
 	        // if not a directory, give precedence to error messages below
 	        if (saveDirectory.isDirectory()) {
-	            throw new DownloadException(LocationCode.PATH_NAME_TOO_LONG, saveDirectory);
+	            throw new DownloadException(ErrorCode.PATH_NAME_TOO_LONG, saveDirectory);
 	        }
 	    }
 	    
 	    if (!saveDirectory.isDirectory()) {
 	        if (saveDirectory.exists()) {
-	            throw new DownloadException(LocationCode.NOT_A_DIRECTORY, saveDirectory);
+	            throw new DownloadException(ErrorCode.NOT_A_DIRECTORY, saveDirectory);
 	        }
-	        throw new DownloadException(LocationCode.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
+	        throw new DownloadException(ErrorCode.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
 	    }
 	    
 	    File candidateFile = new File(saveDirectory, fileName);
 	    try {
 	        if (!FileUtils.isReallyParent(saveDirectory, candidateFile))
-	            throw new DownloadException(LocationCode.SECURITY_VIOLATION, candidateFile);
+	            throw new DownloadException(ErrorCode.SECURITY_VIOLATION, candidateFile);
 	    } catch (IOException e) {
-	        throw new DownloadException(LocationCode.FILESYSTEM_ERROR, candidateFile);
+	        throw new DownloadException(ErrorCode.FILESYSTEM_ERROR, candidateFile);
 	    }
 		
 	    if (! FileUtils.setWriteable(saveDirectory))    
-	        throw new DownloadException(LocationCode.DIRECTORY_NOT_WRITEABLE,saveDirectory);
+	        throw new DownloadException(ErrorCode.DIRECTORY_NOT_WRITEABLE,saveDirectory);
 		
 	    if (candidateFile.exists()) {
 	        if (!candidateFile.isFile() && !(this instanceof BTDownloader))
-	            throw new DownloadException(LocationCode.FILE_NOT_REGULAR, candidateFile);
+	            throw new DownloadException(ErrorCode.FILE_NOT_REGULAR, candidateFile);
 	        if (!overwrite)
-	            throw new DownloadException(LocationCode.FILE_ALREADY_EXISTS, candidateFile);
+	            throw new DownloadException(ErrorCode.FILE_ALREADY_EXISTS, candidateFile);
 	    }
 		
 		// check if another existing download is being saved to this download
 		// we ignore the overwrite flag on purpose in this case
 		if (saveLocationManager.isSaveLocationTaken(candidateFile)) {
-			throw new DownloadException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
+			throw new DownloadException(ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
 		}
 	     
 	    // Passed sanity checks, so save file
 	    synchronized (this) {
 	        if (!isRelocatable())
-	            throw new DownloadException(LocationCode.FILE_ALREADY_SAVED, candidateFile);
+	            throw new DownloadException(ErrorCode.FILE_ALREADY_SAVED, candidateFile);
 	        this.saveFile = candidateFile;
 	    }
 	}

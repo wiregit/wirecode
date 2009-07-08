@@ -23,7 +23,7 @@ import org.limewire.collection.Range;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
-import org.limewire.core.api.download.DownloadException.LocationCode;
+import org.limewire.core.api.download.DownloadException.ErrorCode;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -387,7 +387,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         }
         catch (DownloadException e) {
             assertEquals("Parent dir should exceed max path length",
-                    LocationCode.PATH_NAME_TOO_LONG,
+                    ErrorCode.PATH_NAME_TOO_LONG,
                     e.getErrorCode());
         }
         finally {
@@ -422,7 +422,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 			}
 			catch (DownloadException e) {
 				assertEquals("Should have no write permissions",
-						LocationCode.DIRECTORY_NOT_WRITEABLE,
+						ErrorCode.DIRECTORY_NOT_WRITEABLE,
 						e.getErrorCode());
 			}
 		}
@@ -434,7 +434,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		}
 		catch (DownloadException e) {
 			assertEquals("Error code should be: directory does not exist",
-						 LocationCode.DIRECTORY_DOES_NOT_EXIST,
+						 ErrorCode.DIRECTORY_DOES_NOT_EXIST,
 						 e.getErrorCode());
 		}
 		try {
@@ -444,7 +444,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		}
 		catch (DownloadException e) {
 			assertEquals("Error code should be: file exists",
-						 LocationCode.FILE_ALREADY_EXISTS,
+						 ErrorCode.FILE_ALREADY_EXISTS,
 						 e.getErrorCode());
 		}
 		try {
@@ -464,7 +464,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		}
 		catch (DownloadException e) {
 			assertEquals("Error code should be: file not a directory", 
-						 LocationCode.NOT_A_DIRECTORY,
+						 ErrorCode.NOT_A_DIRECTORY,
 						 e.getErrorCode());
 		}
         // we force filename normalization
@@ -488,7 +488,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             fail("No exception thrown");
         } catch (DownloadException e) {
             assertEquals("Error code should be: already downloading", 
-					LocationCode.FILE_ALREADY_DOWNLOADING,
+					ErrorCode.FILE_ALREADY_DOWNLOADING,
 					e.getErrorCode());
 		}
 		
@@ -507,7 +507,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		}
 		catch (DownloadException e) {
 			assertEquals("Error code should be: already downloading", 
-					LocationCode.FILE_ALREADY_DOWNLOADING,
+					ErrorCode.FILE_ALREADY_DOWNLOADING,
 					e.getErrorCode());
 		}
 				
@@ -530,7 +530,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		}
 		catch (DownloadException e) {
 			assertEquals("Error code should be: already being saved to", 
-					LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO,
+					ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO,
 					e.getErrorCode());
 		}
 		

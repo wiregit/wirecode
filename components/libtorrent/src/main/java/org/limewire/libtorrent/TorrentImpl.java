@@ -434,7 +434,7 @@ public class TorrentImpl implements Torrent {
     public void registerWithTorrentManager() throws DownloadException {
         if(!torrentManager.isValid()) {
             throw new DownloadException(
-                    DownloadException.LocationCode.NO_TORRENT_MANAGER,
+                    DownloadException.ErrorCode.NO_TORRENT_MANAGER,
                     initialTorrentFile);
         }
         for (File file : getIncompleteFiles()) {

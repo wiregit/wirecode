@@ -128,7 +128,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final File torrentFile = new File(
                 "testTorrentFileDownloadAddedSaveLocationException.torrent");
         final DownloadException e = new DownloadException(
-                DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING, torrentFile);
+                DownloadException.ErrorCode.FILE_ALREADY_DOWNLOADING, torrentFile);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
@@ -209,7 +209,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
         final DownloadException e = new DownloadException(
-                DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING, null);
+                DownloadException.ErrorCode.FILE_ALREADY_DOWNLOADING, null);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
