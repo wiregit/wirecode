@@ -144,21 +144,22 @@ public class LibraryPanel extends JPanel {
     private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
-        headerBar.setLayout(new MigLayout("insets 0 5 0 5, gap 0, fill"));
         createAddFilesButton(addFileAction, libraryAction);
-        headerBar.add(addFilesButton, "push");
-        
-        headerBar.add(playerPanel, "pos 0.5al 0.5al");
-        playerPanel.setMaximumSize(new Dimension(999,999));
-        playerPanel.setPreferredSize(new Dimension(999,999));
+        createFilterToggleButton();
         
         fileCountLabel = new JLabel();
         fileCountLabel.setForeground(fileCountColor);
         fileCountLabel.setFont(fileCountFont);
-        headerBar.add(fileCountLabel, "aligny 50%, gapright 10");
-        createFilterToggleButton();
-        headerBar.add(filterToggleButton, "alignx right");
+
+        headerBar.setLayout(new MigLayout("nogrid, insets 0 5 1 5, gap 0, fill"));
+        headerBar.add(addFilesButton);
+        headerBar.add(playerPanel);
+        headerBar.add(fileCountLabel, "gapafter 5, pad -2 0 0 0");
+        headerBar.add(filterToggleButton);
         
+        playerPanel.setMaximumSize(new Dimension(9999,9999));
+        playerPanel.setPreferredSize(new Dimension(9999,9999));
+                
         tableListLayout = new CardLayout();
         tableListPanel = new JPanel(tableListLayout);
         

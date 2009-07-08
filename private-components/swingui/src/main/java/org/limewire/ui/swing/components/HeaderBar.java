@@ -5,8 +5,10 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.LayoutManager;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -158,7 +160,8 @@ public class HeaderBar extends JXPanel {
     }
     
     private void forceHeight(Component comp) {
-        if (defaultCompHeight != -1) {
+        if (defaultCompHeight != -1 
+                && (comp instanceof JButton || comp instanceof JTextComponent) ) {
             ResizeUtils.forceHeight(comp, defaultCompHeight);
         }
     }
