@@ -113,7 +113,7 @@ class LimeXMLDocumentFactoryImpl implements LimeXMLDocumentFactory {
     
     private LimeXMLDocument createDocument(LimeXMLSchema schema, Map<String, String> map, DocInfo docInfo) throws IOException {
         if (!isValid(schema, map)) {
-            throw new IOException("invalid doc! "+map+" \nschema: " + schema != null ? schema.getSchemaURI() : "null schema");
+            throw new IOException("invalid doc! "+map+" \nschema: " + (schema != null ? schema.getSchemaURI() : "null schema"));
         }
         
         return new GenericXmlDocument(schema, map, docInfo.version, docInfo.action, docInfo.licenseType);
