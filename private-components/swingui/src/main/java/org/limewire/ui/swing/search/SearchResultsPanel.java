@@ -447,10 +447,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         header.add(browseStatusPanel, "growx, pushx");
         headerBarDecorator.decorateBasic(header);
         
-        JPanel sortPanel = new JPanel();
-        sortPanel.setOpaque(false);
-        sortAndFilterPanel.layoutComponents(sortPanel);
-        header.add(sortPanel, "wmin 300, growy");  
+        sortAndFilterPanel.layoutComponents(header);
         
         add(header                    , "spanx 2, growx, growy, wrap");
         add(classicSearchReminderPanel, "spanx 2, growx, wrap");

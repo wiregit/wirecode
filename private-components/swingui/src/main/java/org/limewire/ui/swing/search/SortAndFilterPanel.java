@@ -279,7 +279,7 @@ public class SortAndFilterPanel implements Disposable {
         tableViewToggleButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, sortCombo.getPreferredSize().height));
         
         panel.setLayout(new MigLayout("insets 0, gap 0!, novisualpadding, alignx 100%, aligny 50%"));
-        panel.add(sortLabel, "gapafter 10, hidemode 0");
+        panel.add(sortLabel, "gapafter 5, gapbottom 2, hidemode 0");
         panel.add(sortCombo, "gapafter 10, hidemode 0");
         panel.add(listViewToggleButton);
         panel.add(tableViewToggleButton, "gapafter 5");
