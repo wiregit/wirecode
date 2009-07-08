@@ -53,6 +53,7 @@ public class SponsoredResultsPanel extends JXPanel {
         this.storeMediator = storeMediator;
         this.homeMediator = homeMediator;
         setLayout(new VerticalLayout(10));
+        setBorder(BorderFactory.createEmptyBorder(8,5,0,0));
         setMaximumSize(new Dimension(areaWidth, Integer.MAX_VALUE));
         setMinimumSize(new Dimension(areaWidth, Short.MAX_VALUE));
     }
