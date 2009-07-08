@@ -73,6 +73,8 @@ public class TorrentImpl implements Torrent {
 
     private final AtomicBoolean complete = new AtomicBoolean(false);
     
+    private Boolean isPrivate = null;
+    
     @Inject
     public TorrentImpl(TorrentManager torrentManager,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
@@ -95,7 +97,7 @@ public class TorrentImpl implements Torrent {
     @Override
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
             List<String> paths, File fastResumeFile, File torrentFile, File saveDir,
-            File incompleteFile) throws IOException {
+            File incompleteFile, Boolean isPrivate) throws IOException {
 
         assert (name != null && sha1 != null && totalSize > 0 && trackerURL != null
                 && paths != null && saveDir != null)
@@ -111,6 +113,10 @@ public class TorrentImpl implements Torrent {
 
         if (name != null) {
             this.name = name;
+        }
+        
+        if(isPrivate != null) {
+            this.isPrivate = isPrivate.booleanValue();
         }
 
         if (torrentFile != null && torrentFile.exists()) {
@@ -135,6 +141,10 @@ public class TorrentImpl implements Torrent {
                 if (this.sha1 == null) {
                     this.sha1 = StringUtils.toHexString(btData.getInfoHash());
                 }
+                
+                if(this.isPrivate == null) {
+                    this.isPrivate = btData.isPrivate();
+                }
 
             } finally {
                 IOUtils.close(fileChannel);
@@ -142,11 +152,17 @@ public class TorrentImpl implements Torrent {
             }
         }
         
+        if(this.isPrivate == null) {
+            //private by default if unknown
+            this.isPrivate = Boolean.TRUE;
+        }
+        
         assert torrentDownloadFolder != null;
         assert this.name != null;
         assert this.trackerURL != null;
         assert this.totalSize > 0;
         assert this.sha1 != null;
+        assert this.isPrivate != null;
 
         this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, this.name)
                 : incompleteFile;
@@ -444,5 +460,10 @@ public class TorrentImpl implements Torrent {
     @Override
     public void updateSaveDirectory(File saveDirectory) {
         this.completeFile.set(new File(saveDirectory, name));
+    }
+
+    @Override
+    public boolean isPrivate() {
+        return isPrivate;
     }
 }

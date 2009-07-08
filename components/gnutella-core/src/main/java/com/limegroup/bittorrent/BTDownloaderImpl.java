@@ -47,6 +47,8 @@ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMementoImpl;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 
 /**
@@ -72,6 +74,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     
     private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(DownloadState.QUEUED);
 
+    private final FileCollection gnutellaFileCollection;
+    
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
@@ -80,12 +84,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            Library library, @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
+            Library library, @Named("fastExecutor") ScheduledExecutorService fastExecutor, @GnutellaFiles FileCollection gnutellaFileCollection) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
         this.library = library;
+        this.gnutellaFileCollection = gnutellaFileCollection;
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(fastExecutor);
     }
 
@@ -106,17 +111,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             File completeDir = getSaveFile().getParentFile();
             torrent.moveTorrent(completeDir);
             File completeFile = getSaveFile();
-            if (completeFile.isDirectory()) {
-                library.addFolder(completeFile, new FileFilter() {
-                    @Override
-                    public boolean accept(File file) {
-                        //library addFile method will filter out any truly unaddable files.
-                        return true;
-                    }
-                });
-            } else {
-                library.add(completeFile);
-            }
+            addFileToCollections(completeFile);
             complete.set(true);
             deleteIncompleteFiles();
             lastState.set(DownloadState.COMPLETE);
@@ -138,6 +133,34 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 listeners.broadcast(new DownloadStateEvent(this, currentState));
             }
         }
+    }
+
+    /**
+     * Adds the torrents files to the gnutella share list if the torrent is not
+     * private and sharing is enabled, otehrwise the files are added to the library. 
+     */
+    private void addFileToCollections(File completeFile) {
+        
+        if (completeFile.isDirectory()) {
+            FileFilter torrentFileFilter = new FileFilter() {
+                @Override
+                public boolean accept(File file) {
+                    //library addFile method will filter out any truly unaddable files.
+                    return true;
+                }
+            }; 
+            if(torrent.isPrivate() || !SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
+                library.addFolder(completeFile, torrentFileFilter);
+            } else {
+                gnutellaFileCollection.addFolder(completeFile, torrentFileFilter);
+            }
+        } else {
+            if(torrent.isPrivate() || !SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
+                library.add(completeFile);
+            } else {
+                gnutellaFileCollection.add(completeFile);
+            }
+        }
     };
 
     /**
@@ -146,7 +169,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void init(File torrentFile) throws IOException {
         torrent.init(null, null, -1, null, null, null, torrentFile, SharingSettings
-                .getSaveDirectory(), null);
+                .getSaveDirectory(), null, null);
         File completeFile = torrent.getCompleteFile();
         setDefaultFileName(completeFile.getName());
     }
@@ -535,6 +558,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         File torrentFile = torrent.getTorrentFile();
         String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
         btMemento.setTorrentPath(torrentPath);
+        
+        btMemento.setPrivate(torrent.isPrivate());
+        
+        
     }
 
     public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento)
@@ -562,12 +589,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         try {
             torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
                     .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
-                    fastResumeFile, torrentFile, saveDir, memento.getIncompleteFile());
+                    fastResumeFile, torrentFile, saveDir, memento.getIncompleteFile(), memento.isPrivate());
         } catch (IOException e) {
             try {
                 torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
                         .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
-                        fastResumeFile, null, saveDir, memento.getIncompleteFile());
+                        fastResumeFile, null, saveDir, memento.getIncompleteFile(), memento.isPrivate());
             } catch (IOException e1) {
                 throw new InvalidDataException("Could not initialize the BTDownloader", e1);
             }
@@ -593,6 +620,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         byte[] infoHash = btmetainfo.getInfoHash();
 
         String sha1 = StringUtils.toHexString(infoHash);
+        
+        boolean isPrivate = btmetainfo.isPrivate();
 
         File saveFile = memento.getSaveFile();
         File saveDir = saveFile == null ? SharingSettings.getSaveDirectory() : saveFile
@@ -615,7 +644,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         try {
             torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null, saveDir,
-                    null);
+                    null, isPrivate);
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }

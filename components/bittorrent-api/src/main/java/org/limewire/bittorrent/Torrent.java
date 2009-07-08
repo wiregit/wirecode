@@ -22,7 +22,7 @@ public interface Torrent {
      */
     public void init(String name, String sha1, long totalSize, String trackerURL,
             List<String> paths, File fastResumeFile, File torrentFile, File saveDir,
-            File incompleteFile) throws IOException;
+            File incompleteFile, Boolean isPrivate) throws IOException;
 
     /**
      * Returns the name of this torrent.
@@ -224,5 +224,10 @@ public interface Torrent {
      * Changes the saveDirectory for the torrent. 
      */
     public void updateSaveDirectory(File saveDirectory);
+
+    /**
+     * Returns true if this is a private torrent. 
+     */
+    public boolean isPrivate();
 
 }

@@ -21,6 +21,10 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public String getFastResumePath();
 
+    public String getTorrentPath();
+    
+    public Boolean isPrivate();
+    
     public void setName(String name);
 
     public void setContentLength(long contentLength);
@@ -37,6 +41,6 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public void setTorrentPath(String torrentPath);
 
-    public String getTorrentPath();
+    public void setPrivate(Boolean isPrivate);
 
 }

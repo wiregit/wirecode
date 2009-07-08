@@ -150,4 +150,15 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
         // not needed getDownloadType is overridden to always return
         // BTDownloader.
     }
+
+    @Override
+    public Boolean isPrivate() {
+        Boolean isPublic = (Boolean)serialObjects.get("private");
+        return isPublic;
+    }
+
+    @Override
+    public void setPrivate(Boolean isPrivate) {
+        serialObjects.put("private", isPrivate);
+    }
 }
