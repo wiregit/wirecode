@@ -5,8 +5,6 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
-import org.limewire.core.api.download.DownloadException;
-
 public interface BTDownloader extends CoreDownloader {
 
     /**
@@ -27,8 +25,9 @@ public interface BTDownloader extends CoreDownloader {
 
     /**
      * Registers the internal torrent with the torrent manager.
-     * @throws DownloadException if the torrent manager is not loaded.
+     * @returns true if the torrent was registered, or false if an error
+     * occurred.
      */
-    void registerTorrentWithTorrentManager() throws DownloadException;
+    boolean registerTorrentWithTorrentManager();
 
 }

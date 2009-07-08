@@ -20,7 +20,6 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
@@ -431,12 +430,9 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public void registerWithTorrentManager() throws DownloadException {
-        if(!torrentManager.isValid()) {
-            throw new DownloadException(
-                    DownloadException.ErrorCode.NO_TORRENT_MANAGER,
-                    initialTorrentFile);
-        }
+    public boolean registerWithTorrentManager() {
+        if(!torrentManager.isValid())
+            return false;
         for (File file : getIncompleteFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
@@ -452,6 +448,7 @@ public class TorrentImpl implements Torrent {
             FileUtils.copy(initialTorrentFile, torrentFile);
         }
         torrentManager.registerTorrent(this);
+        return true;
     }
 
     @Override

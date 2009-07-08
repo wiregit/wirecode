@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.listener.EventListener;
 
 /**
@@ -202,9 +201,10 @@ public interface Torrent {
 
     /**
      * Registers the torrent with the torrent manager.
-     * @throws DownloadException if the torrent manager is not loaded.
+     * @returns true if the torrent was registered, or false if an error
+     * occurred.
      */
-    public void registerWithTorrentManager() throws DownloadException;
+    public boolean registerWithTorrentManager();
 
     /**
      * Removes the listener from the torrent. Returning true if the listener

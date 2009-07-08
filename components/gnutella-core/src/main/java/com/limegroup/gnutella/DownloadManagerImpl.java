@@ -856,7 +856,11 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             }
         }
         ret.setSaveFile(saveDirectory, null, overwrite);
-        ret.registerTorrentWithTorrentManager();
+        if(!ret.registerTorrentWithTorrentManager()) {
+            throw new DownloadException(
+                    DownloadException.ErrorCode.NO_TORRENT_MANAGER,
+                    torrentFile);
+        }
         initializeDownload(ret, true);
         return ret;
     }
