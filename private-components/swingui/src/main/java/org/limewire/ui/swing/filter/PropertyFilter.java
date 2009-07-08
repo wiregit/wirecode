@@ -156,13 +156,21 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         uniqueListFactory.setName(getPropertyText());
         uniqueList = uniqueListFactory.getUniqueList();
         
-        // Initialize "more" button.
+        // Initialize label and button visibility.
+        propertyLabel.setVisible(uniqueList.size() > 0);
         moreButton.setVisible(uniqueList.size() > 3);
 
-        // Add listener to display "more" button when needed.
+        // Add listener to display label and button when needed.
         uniqueList.addListEventListener(new ListEventListener<Object>() {
             @Override
             public void listChanged(ListEvent listChanges) {
+                // Update label visibility.
+                if (!propertyLabel.isVisible() && (uniqueList.size() > 0)) {
+                    propertyLabel.setVisible(true);
+                } else if (propertyLabel.isVisible() && (uniqueList.size() < 1)) {
+                    propertyLabel.setVisible(false);
+                }
+                // Update "more" button visibility.
                 if (!moreButton.isVisible() && (uniqueList.size() > 3)) {
                     moreButton.setVisible(true);
                 } else if (moreButton.isVisible() && (uniqueList.size() < 4)) {
