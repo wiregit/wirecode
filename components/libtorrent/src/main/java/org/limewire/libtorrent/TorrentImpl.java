@@ -47,13 +47,14 @@ public class TorrentImpl implements Torrent {
 
     private File incompleteFile = null;
 
-    private File completeFile = null;
+    private AtomicReference<File> completeFile = new AtomicReference<File>(null);
 
     private File torrentFile = null;
 
     // TODO can't think of a way of keeping the incomplete folder
     // clean before the download starts other than keeping a reference
     // to the file that we want to start the download with.
+    //probably should copy to our own temporary directory that gets cleaned up at program start
     private File initialTorrentFile = null;
 
     private volatile File fastResumeFile = null;
@@ -71,7 +72,7 @@ public class TorrentImpl implements Torrent {
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private final AtomicBoolean complete = new AtomicBoolean(false);
-
+    
     @Inject
     public TorrentImpl(TorrentManager torrentManager,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
@@ -97,7 +98,7 @@ public class TorrentImpl implements Torrent {
             File incompleteFile) throws IOException {
 
         assert (name != null && sha1 != null && totalSize > 0 && trackerURL != null
-                && paths != null && paths.size() > 0 && saveDir != null)
+                && paths != null && saveDir != null)
                 || (torrentFile != null && torrentFile.exists() && saveDir != null);
 
         this.sha1 = sha1;
@@ -140,12 +141,18 @@ public class TorrentImpl implements Torrent {
                 IOUtils.close(fis);
             }
         }
+        
+        assert torrentDownloadFolder != null;
+        assert this.name != null;
+        assert this.trackerURL != null;
+        assert this.totalSize > 0;
+        assert this.sha1 != null;
 
         this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, this.name)
                 : incompleteFile;
         this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder, this.name
                 + ".fastresume") : fastResumeFile;
-        this.completeFile = new File(saveDir, this.name);
+        this.completeFile.set(new File(saveDir, this.name));
         this.torrentFile = new File(torrentDownloadFolder, this.name + ".torrent");
         this.initialTorrentFile = torrentFile;
     }
@@ -313,7 +320,7 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public File getCompleteFile() {
-        return completeFile;
+        return completeFile.get();
     }
 
     @Override
@@ -432,5 +439,10 @@ public class TorrentImpl implements Torrent {
             return status.getNumConnections();
         }
         return 0; 
+    }
+
+    @Override
+    public void updateSaveDirectory(File saveDirectory) {
+        this.completeFile.set(new File(saveDirectory, name));
     }
 }

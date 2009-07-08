@@ -201,7 +201,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public Downloader downloadTorrent(File torrentFile, boolean overwrite)
+            public Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite)
                     throws SaveLocationException {
                 return null;
             }

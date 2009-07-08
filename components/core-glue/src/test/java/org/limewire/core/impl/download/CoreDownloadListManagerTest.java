@@ -642,7 +642,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         // overwrite false
         context.checking(new Expectations() {
             {
-                one(downloadManager).downloadTorrent(file, false);
+                one(downloadManager).downloadTorrent(file, null, false);
                 will(returnValue(downloader));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
@@ -650,13 +650,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
             }
         });
 
-        DownloadItem downloadItemResult = coreDownloadListManager.addTorrentDownload(file, false);
+        DownloadItem downloadItemResult = coreDownloadListManager.addTorrentDownload(file, null, false);
         assertEquals(downloadItem, downloadItemResult);
 
         // overwrite true
         context.checking(new Expectations() {
             {
-                one(downloadManager).downloadTorrent(file, true);
+                one(downloadManager).downloadTorrent(file, null, true);
                 will(returnValue(downloader));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
@@ -664,7 +664,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
             }
         });
 
-        downloadItemResult = coreDownloadListManager.addTorrentDownload(file, true);
+        downloadItemResult = coreDownloadListManager.addTorrentDownload(file, null, true);
         assertEquals(downloadItem, downloadItemResult);
 
         context.assertIsSatisfied();

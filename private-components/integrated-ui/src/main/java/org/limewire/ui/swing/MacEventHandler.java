@@ -123,13 +123,13 @@ public class MacEventHandler {
                 externalControl.enqueueControlRequest(file.getAbsolutePath());
             } else {
                 try {
-                    downloadManager.downloadTorrent(file, false);
+                    downloadManager.downloadTorrent(file, null, false);
                 } catch (SaveLocationException e) {
                     activityCallback.handleSaveLocationException(new DownloadAction() {
                         @Override
-                        public void download(File saveFile, boolean overwrite)
+                        public void download(File saveDirectory, boolean overwrite)
                                 throws SaveLocationException {
-                            downloadManager.downloadTorrent(file, overwrite);
+                            downloadManager.downloadTorrent(file, saveDirectory, overwrite);
                         }
 
                         @Override

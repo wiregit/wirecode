@@ -138,13 +138,12 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     public void handleTorrent(final File torrentFile) {
         if(torrentFile != null && torrentFile.exists() && torrentFile.length() > 0) {
             try {
-                downloadManager.downloadTorrent(torrentFile, false);
+                downloadManager.downloadTorrent(torrentFile, null, false);
             } catch (SaveLocationException e) {
                 handleSaveLocationException(new DownloadAction() {
                   @Override
-                    public void download(File saveFile, boolean overwrite) throws SaveLocationException {
-                          // TODO: save file is ignored
-                          downloadManager.downloadTorrent(torrentFile, overwrite);
+                    public void download(File saveDirectory, boolean overwrite) throws SaveLocationException {
+                          downloadManager.downloadTorrent(torrentFile, saveDirectory, overwrite);
                     }
 
                 @Override

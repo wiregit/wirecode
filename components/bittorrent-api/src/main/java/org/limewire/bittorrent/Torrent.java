@@ -220,4 +220,9 @@ public interface Torrent {
      */
     public int getNumConnections();
 
+    /**
+     * Changes the saveDirectory for the torrent. 
+     */
+    public void updateSaveDirectory(File saveDirectory);
+
 }

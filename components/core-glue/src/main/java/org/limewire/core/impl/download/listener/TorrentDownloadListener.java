@@ -92,15 +92,15 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         if ("torrent".equalsIgnoreCase(fileExtension)) {
             try {
                 shareTorrentFile(possibleTorrentFile);
-                downloadManager.downloadTorrent(possibleTorrentFile, false);
+                downloadManager.downloadTorrent(possibleTorrentFile, null, false);
                 downloadItems.remove(getDownloadItem(downloader));
             } catch (SaveLocationException sle) {
                 final File torrentFile = possibleTorrentFile;
                 activityCallback.handleSaveLocationException(new DownloadAction() {
                     @Override
-                    public void download(File saveFile, boolean overwrite)
+                    public void download(File saveDirectory, boolean overwrite)
                             throws SaveLocationException {
-                        downloadManager.downloadTorrent(torrentFile, overwrite);
+                        downloadManager.downloadTorrent(torrentFile, saveDirectory, overwrite);
                         downloadItems.remove(getDownloadItem(downloader));
                     }
 
@@ -120,23 +120,23 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         try {
             torrentFile = btTorrentFileDownloader.getTorrentFile();
             shareTorrentFile(torrentFile);
-            downloadManager.downloadTorrent(torrentFile, false);
+            downloadManager.downloadTorrent(torrentFile, null, false);
             downloadItems.remove(getDownloadItem(downloader));
         } catch (SaveLocationException sle) {
-            final File torrentFileCopy = torrentFile;
+            final File torrentFileFinal = torrentFile;
             activityCallback.handleSaveLocationException(new DownloadAction() {
                 @Override
-                public void download(File saveFile, boolean overwrite) throws SaveLocationException {
-                    downloadManager.downloadTorrent(torrentFileCopy, overwrite);
+                public void download(File saveDirectory, boolean overwrite) throws SaveLocationException {
+                    downloadManager.downloadTorrent(torrentFileFinal, saveDirectory, overwrite);
                     downloadItems.remove(getDownloadItem(downloader));
                 }
 
                 @Override
                 public void downloadCanceled(SaveLocationException sle) {
-                    if (!torrentManager.isDownloadingTorrent(torrentFileCopy)) {
+                    if (!torrentManager.isDownloadingTorrent(torrentFileFinal)) {
                         // need to delete to clean up the torrent file in the
                         // incomplete directory
-                        FileUtils.forceDelete(torrentFileCopy);
+                        FileUtils.forceDelete(torrentFileFinal);
                     }
                 }
 

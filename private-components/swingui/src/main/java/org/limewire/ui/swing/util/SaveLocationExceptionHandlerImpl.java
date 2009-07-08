@@ -50,15 +50,22 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
      * several actions: eat the exception, try downloading again using the
      * supplied <code>downloadAction</code>, or popup a dialog to try and save
      * the download in a new location.
+     * 
+     * @param supportNewSaveFileName - Indicates that the downloader supports a
+     *        new saveFileName. If true the user will have the option of picking
+     *        a new file name, provided they do not have the setting to
+     *        automatically rename the file turned on. Otherwise if it does not
+     *        support a new file name, a directory chooser is opened that will
+     *        allow the
      */
     public void handleSaveLocationException(final DownloadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveDir) {
+            final SaveLocationException sle, final boolean supportNewSaveFileName) {
 
         // Create Runnable to execute task on UI thread. This is necessary
         // if the handler method has been invoked from a background thread.
         SwingUtils.invokeLater(new Runnable() {
             public void run() {
-                handleException(downLoadAction, sle, supportNewSaveDir);
+                handleException(downLoadAction, sle, supportNewSaveFileName);
             }
         });
     }
@@ -68,15 +75,12 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
      * user for input, and should be executed from the UI thread.
      */
     private void handleException(final DownloadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveDir) {
-        // TODO get rid of supportNewSaveDir variable, it looks like bit torrent
-        // can support changing the file name if need be so there should be no
-        // need for it anymore
+            final SaveLocationException sle, final boolean supportNewSaveFileName) {
 
         if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
             // ignore, just return because we are already downloading this file
-             downLoadAction.downloadCanceled(sle);
-             showErrorMessage(sle);
+            downLoadAction.downloadCanceled(sle);
+            showErrorMessage(sle);
             return;
         }
 
@@ -87,40 +91,34 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             downLoadAction.downloadCanceled(sle);
             showErrorMessage(sle);
             return;
-        } else if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO
-                && !supportNewSaveDir) {
-            // prevents infinite loop case where for bit torrent files we can't
-            // change the save file at the moment
-            downLoadAction.downloadCanceled(sle);
-            showErrorMessage(sle);
-            return;
         }
 
         // select a save file name
         File saveFile = null;
-        if (supportNewSaveDir && SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue()) {
+        if (supportNewSaveFileName && SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue()) {
             saveFile = getAutoSaveFile(sle);
         } else {
-            if (supportNewSaveDir) {
+            if (supportNewSaveFileName) {
                 saveFile = FileChooser.getSaveAsFile(GuiUtils.getMainFrame(), I18n
                         .tr("Save File As..."), sle.getFile());
             } else {
                 saveFile = sle.getFile();
                 if (saveFile != null && saveFile.exists()) {
-                    createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveDir);
+                    createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveFileName);
                     return;
                 }
             }
 
             if (saveFile == null) {
-                //null saveFile means user selected cancel
+                // null saveFile means user selected cancel
                 downLoadAction.downloadCanceled(sle);
                 return;
             }
         }
 
-        // if the file already exists at this point, the user has already agreed to overwrite it
-        download(downLoadAction, supportNewSaveDir, saveFile, saveFile.exists());
+        // if the file already exists at this point, the user has already agreed
+        // to overwrite it
+        download(downLoadAction, supportNewSaveFileName, saveFile, saveFile.exists());
     }
 
     private void showErrorMessage(final SaveLocationException sle) {
@@ -182,7 +180,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
     }
 
     private void createOverwriteDialogue(final File saveFile, final DownloadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveDir) {
+            final SaveLocationException sle, final boolean supportNewSaveFileName) {
 
         final JDialog dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
@@ -200,7 +198,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             @Override
             public void actionPerformed(ActionEvent event) {
                 dialog.dispose();
-                download(downLoadAction, supportNewSaveDir, saveFile, true);
+                download(downLoadAction, supportNewSaveFileName, saveFile, true);
             }
         });
 
@@ -209,10 +207,18 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             @Override
             public void actionPerformed(ActionEvent e) {
                 dialog.dispose();
-                if (supportNewSaveDir) {
-                    handleSaveLocationException(downLoadAction, sle, supportNewSaveDir);
-                } else {
-                    downLoadAction.downloadCanceled(sle);
+                File saveFile = sle.getFile();
+                File oldSaveFile = saveFile;
+                File oldSaveFileParent = saveFile != null && saveFile.getParentFile() != null ? saveFile
+                        .getParentFile()
+                        : saveFile;
+                saveFile = FileChooser
+                        .getInputDirectory(GuiUtils.getMainFrame(), I18n.tr("Choose a new directory to save download."), I18n.tr("Select"), oldSaveFileParent);
+                
+                File newSaveParent = saveFile;
+                if (newSaveParent != null && new File(newSaveParent, oldSaveFile.getName()).exists()) {
+                    createOverwriteDialogue(newSaveParent, downLoadAction, sle, supportNewSaveFileName);
+                    return;
                 }
             }
         });

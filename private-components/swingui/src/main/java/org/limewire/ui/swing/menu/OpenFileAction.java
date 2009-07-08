@@ -61,16 +61,16 @@ class OpenFileAction extends AbstractAction {
             for (final File file : files) {
                 if (file.exists()) {
                     try {
-                        downloadListManager.addTorrentDownload(file, 
+                        downloadListManager.addTorrentDownload(file, null,
                                 false);
                     } catch (SaveLocationException sle) {
                         saveLocationExceptionHandler.get().handleSaveLocationException(
                                 new DownloadAction() {
                                     @Override
-                                    public void download(File saveFile, boolean overwrite)
+                                    public void download(File saveDirectory, boolean overwrite)
                                             throws SaveLocationException {
                                         downloadListManager.addTorrentDownload(
-                                                file, overwrite);
+                                                file, saveDirectory, overwrite);
                                     }
 
                                     @Override

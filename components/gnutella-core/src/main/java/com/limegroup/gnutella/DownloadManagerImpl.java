@@ -781,7 +781,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     private Downloader resumeTorrentDownload(File torrentFile) throws CantResumeException,
             SaveLocationException {
         if(torrentManager.get().isValid()) {
-            return downloadTorrent(torrentFile, false);
+            return downloadTorrent(torrentFile, null, false);
         } else {
             throw new CantResumeException("Torrent Manager Invalid", torrentFile.getName());
         }
@@ -815,7 +815,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     }
 
     @Override
-    public synchronized Downloader downloadTorrent(File torrentFile, boolean overwrite)
+    public synchronized Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite)
             throws SaveLocationException {
         if (torrentFile.length() > 1024 * 1024 * 5) {
             // torrent files are supposed to be small. If it is large it is
@@ -828,7 +828,11 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         try {
             ret = coreDownloaderFactory.createBTDownloader(torrentFile);
         } catch (IOException e) {
-            throw new SaveLocationException(e, torrentFile);
+            if(e instanceof SaveLocationException) {
+                throw (SaveLocationException)e;
+            } else {
+                throw new SaveLocationException(e, torrentFile);
+            }
         }
 
         if (overwrite) {
@@ -851,6 +855,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                 throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, saveFile);
             }
         }
+        ret.setSaveFile(saveDirectory, null, overwrite);
         ret.registerTorrentWithTorrentManager();
         initializeDownload(ret, true);
         return ret;

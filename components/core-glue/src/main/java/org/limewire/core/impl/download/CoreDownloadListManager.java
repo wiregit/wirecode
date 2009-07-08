@@ -354,9 +354,9 @@ public class CoreDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public DownloadItem addTorrentDownload(File file, boolean overwrite)
+    public DownloadItem addTorrentDownload(File file, File saveDirectory, boolean overwrite)
             throws SaveLocationException {
-        Downloader downloader = downloadManager.downloadTorrent(file, overwrite);
+        Downloader downloader = downloadManager.downloadTorrent(file, saveDirectory, overwrite);
 		return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
     }
 

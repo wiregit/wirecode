@@ -15,6 +15,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
+import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
 /**
@@ -43,7 +44,7 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	 * The save file this download should be saved too.
 	 * If null, the subclass should return a suggested location.
 	 */
-	protected File saveFile;
+	private File saveFile;
 	
 	/** The default fileName this should use. */
 	private String defaultFileName;
@@ -146,7 +147,7 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	        throw new SaveLocationException(LocationCode.DIRECTORY_NOT_WRITEABLE,saveDirectory);
 		
 	    if (candidateFile.exists()) {
-	        if (!candidateFile.isFile()) // TODO: how does this mix with torrents?
+	        if (!candidateFile.isFile() && !(this instanceof BTDownloader))
 	            throw new SaveLocationException(LocationCode.FILE_NOT_REGULAR, candidateFile);
 	        if (!overwrite)
 	            throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, candidateFile);

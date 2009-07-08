@@ -230,13 +230,13 @@ public class GlueActivityCallbackTest extends BaseTestCase {
             will(returnValue(true));
             allowing(mockFile);
             
-            one(downloadManager).downloadTorrent(with(same(mockFile)), with(any(boolean.class)));
+            one(downloadManager).downloadTorrent(with(same(mockFile)), with(any(File.class)), with(any(boolean.class)));
             
-            one(downloadManager).downloadTorrent(with(same(mockFile)), with(any(boolean.class)));
+            one(downloadManager).downloadTorrent(with(same(mockFile)), with(any(File.class)), with(any(boolean.class)));
             will(throwException(sle));
             
             exactly(1).of(guiCallback).handleSaveLocationException(with(actionCollector), with(same(sle)), with(any(boolean.class)));
-            exactly(1).of(downloadManager).downloadTorrent(mockFile, true);
+            exactly(1).of(downloadManager).downloadTorrent(mockFile, null, true);
         }});
         
         // Torrent that does not exist

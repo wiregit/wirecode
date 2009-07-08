@@ -217,7 +217,7 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
     /**
      * Opens the torrent for the specified file, and begins the torrent download.
      */
-    public Downloader downloadTorrent(File torrentFile, boolean overwrite) throws SaveLocationException;
+    public Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite) throws SaveLocationException;
     
     /**
      * Returns <code>true</code> if there already is a download with the same urn. 

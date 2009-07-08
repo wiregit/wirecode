@@ -17,6 +17,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
@@ -147,9 +148,17 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         torrent.init(null, null, -1, null, null, null, torrentFile, SharingSettings
                 .getSaveDirectory(), null);
         File completeFile = torrent.getCompleteFile();
-        saveFile = completeFile;
+        setDefaultFileName(completeFile.getName());
     }
 
+    
+    @Override
+    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
+            throws SaveLocationException {
+        super.setSaveFile(saveDirectory, fileName, overwrite);
+        torrent.updateSaveDirectory(saveDirectory);
+    }
+    
     @Override
     public void registerTorrentWithTorrentManager() {
         torrent.registerWithTorrentManager();
@@ -418,7 +427,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     protected File getDefaultSaveFile() {
-        return new File(SharingSettings.getSaveDirectory(), torrent.getName());
+        return torrent.getCompleteFile();
     }
 
     @Override

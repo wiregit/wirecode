@@ -103,7 +103,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 will(returnValue(torrentFile));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
-                one(downloadManager).downloadTorrent(torrentFile, false);
+                one(downloadManager).downloadTorrent(torrentFile, null, false);
                 one(torrentManager).isDownloadingTorrent(torrentFile);
                 will(returnValue(false));
             }
@@ -142,14 +142,14 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 will(returnValue(torrentFile));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
-                one(downloadManager).downloadTorrent(torrentFile, false);
+                one(downloadManager).downloadTorrent(torrentFile, null, false);
                 will(throwException(sle));
                 one(activityCallback).handleSaveLocationException(
                         with(new IsAnything<DownloadAction>()),
                         with(new IsEqual<SaveLocationException>(sle)),
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
-                one(downloadManager).downloadTorrent(torrentFile, true);
+                one(downloadManager).downloadTorrent(torrentFile, null, true);
                 one(torrentManager).isDownloadingTorrent(torrentFile);
                 will(returnValue(false));
             }
@@ -186,7 +186,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 will(returnValue(downloadItem));
                 one(downloader).getTorrentFile();
                 will(returnValue(torrentFile));
-                one(downloadManager).downloadTorrent(torrentFile, false);
+                one(downloadManager).downloadTorrent(torrentFile, null, false);
                 one(torrentManager).isDownloadingTorrent(torrentFile);
                 will(returnValue(false));
             }
@@ -225,14 +225,14 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 will(returnValue(downloadItem));
                 one(downloader).getTorrentFile();
                 will(returnValue(torrentFile));
-                one(downloadManager).downloadTorrent(torrentFile, false);
+                one(downloadManager).downloadTorrent(torrentFile, null, false);
                 will(throwException(sle));
                 one(activityCallback).handleSaveLocationException(
                         with(new IsAnything<DownloadAction>()),
                         with(new IsEqual<SaveLocationException>(sle)),
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
-                one(downloadManager).downloadTorrent(torrentFile, true);
+                one(downloadManager).downloadTorrent(torrentFile, null, true);
                 one(torrentManager).isDownloadingTorrent(torrentFile);
                 will(returnValue(false));
             }
