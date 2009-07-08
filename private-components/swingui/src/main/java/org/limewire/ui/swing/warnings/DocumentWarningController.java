@@ -1,14 +1,15 @@
 package org.limewire.ui.swing.warnings;
 
+import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.util.CategoryUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
@@ -38,7 +39,7 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class DocumentWarningController implements ComponentListener {
-    private final AtomicBoolean showing = new AtomicBoolean(false);
+    private boolean showing = false;
 
     private final Provider<DocumentWarningPanel> documentWarningPanel;
 
@@ -50,30 +51,32 @@ public class DocumentWarningController implements ComponentListener {
     @Inject
     public void register(SharedFileListManager sharedFileListManager) {
         if (SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.get()) {
+            
+            ListEventListener<LocalFileItem> listener = new ListEventListener<LocalFileItem>() {
+                @Override
+                public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                    while (listChanges.next()) {
+                        if (listChanges.getType() == ListEvent.INSERT
+                                || listChanges.getType() == ListEvent.UPDATE) {
+                            LocalFileItem localFileItem = listChanges
+                                    .getSourceList()
+                                    .get(listChanges.getIndex());
+                            if (CategoryUtils.getCategory(localFileItem
+                                    .getFile()) == Category.DOCUMENT
+                                    && SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD
+                                            .getValue()) {
+                                showDocumentSharingWarning();
+                            }
+                        }
+                    }
+                }
+            };
+            
             sharedFileListManager.getModel().getReadWriteLock().readLock().lock();
             try {
                 for (SharedFileList shareList : sharedFileListManager.getModel()) {
                     if (shareList.isPublic()) {
-                        shareList.getSwingModel().addListEventListener(
-                                new ListEventListener<LocalFileItem>() {
-                                    @Override
-                                    public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                                        while (listChanges.next()) {
-                                            if (listChanges.getType() == ListEvent.INSERT
-                                                    || listChanges.getType() == ListEvent.UPDATE) {
-                                                LocalFileItem localFileItem = listChanges
-                                                        .getSourceList()
-                                                        .get(listChanges.getIndex());
-                                                if (CategoryUtils.getCategory(localFileItem
-                                                        .getFile()) == Category.DOCUMENT
-                                                        && SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD
-                                                                .getValue()) {
-                                                    showDocumentSharingWarning();
-                                                }
-                                            }
-                                        }
-                                    }
-                                });
+                        shareList.getSwingModel().addListEventListener(listener);
                     }
                 }
             } finally {
@@ -83,7 +86,9 @@ public class DocumentWarningController implements ComponentListener {
     }
 
     private void showDocumentSharingWarning() {
-        if (!showing.getAndSet(true)) {
+        if (!showing) {
+            showing = true;
+            
             DocumentWarningPanel panel = documentWarningPanel.get();
             // component hidden event comes in to tell us we can show more
             // warnings.
@@ -93,7 +98,11 @@ public class DocumentWarningController implements ComponentListener {
 
     @Override
     public void componentHidden(ComponentEvent e) {
-        showing.set(false);
+        Component panel = e.getComponent();
+        if (panel instanceof Disposable) {
+            showing = false;
+            ((Disposable) panel).dispose();
+        }
     }
 
     @Override

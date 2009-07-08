@@ -3,11 +3,8 @@ package org.limewire.ui.swing.warnings;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 
 import javax.swing.JLayeredPane;
 
@@ -20,7 +17,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.components.OverlayPopupPanel;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
@@ -29,11 +26,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-public class DocumentWarningPanel extends Panel implements Resizable, ComponentListener {
-    // heavy weight so it can be on top of other heavy weight components
-
-    private final JLayeredPane layeredPane;
-
+public class DocumentWarningPanel extends OverlayPopupPanel {
     @Resource
     private Color backgroundColor;
 
@@ -49,7 +42,9 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
     @Inject
     public DocumentWarningPanel(final SharedFileListManager shareListManager,
             @GlobalLayeredPane JLayeredPane layeredPane, ButtonDecorator buttonDecorator) {
-        this.layeredPane = layeredPane;
+        
+        super(layeredPane, null);
+        
         GuiUtils.assignResources(this);
 
         setLayout(new MigLayout("nogrid, insets 10"));
@@ -83,7 +78,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
                 .tr("Continue Sharing")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cleanup();
+                setVisible(false);
                 SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(false);
             }
         });
@@ -92,7 +87,7 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
         JXButton unshareAllButton = new JXButton(new AbstractAction(I18n.tr("Unshare All")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cleanup();
+                setVisible(false);
                 SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(true);
                 shareListManager.removeDocumentsFromPublicLists();
             }
@@ -106,19 +101,8 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
         
         add(continueSharingButton, "alignx center, gaptop 15");
         add(unshareAllButton, "wrap");
-
-        layeredPane.add(this, JLayeredPane.MODAL_LAYER);
-        layeredPane.addComponentListener(this);
+        
         resize();
-    }
-
-    private void cleanup() {
-        //firing a component hidden event so that the DocumentWarningController can know when it is ok to show another message.
-        for(ComponentListener componentListener : getComponentListeners()) {
-            componentListener.componentHidden(new ComponentEvent(this, ComponentEvent.COMPONENT_HIDDEN));
-        }
-        layeredPane.removeComponentListener(this);
-        layeredPane.remove(this);
     }
 
     @Override
@@ -127,25 +111,5 @@ public class DocumentWarningPanel extends Panel implements Resizable, ComponentL
         int w = getPreferredSize().width;
         int h = getPreferredSize().height;
         setLocation(parentBounds.width - w, parentBounds.height - h);
-    }
-
-    @Override
-    public void componentHidden(ComponentEvent e) {
-
-    }
-
-    @Override
-    public void componentMoved(ComponentEvent e) {
-
-    }
-
-    @Override
-    public void componentResized(ComponentEvent e) {
-        resize();
-    }
-
-    @Override
-    public void componentShown(ComponentEvent e) {
-
     }
 }

@@ -61,7 +61,9 @@ public abstract class OverlayPopupPanel extends Panel
     @Override
     public void setVisible(boolean b) {
         super.setVisible(b);
-        childPanel.setVisible(b);
+        if (childPanel != null) {
+            childPanel.setVisible(b);
+        }
     }
     
     @Override

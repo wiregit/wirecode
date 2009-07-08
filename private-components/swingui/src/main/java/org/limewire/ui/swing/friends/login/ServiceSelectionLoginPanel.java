@@ -17,6 +17,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.settings.FacebookSettings;
 import org.limewire.friend.api.FriendConnectionFactory;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
@@ -137,7 +138,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         
     }
     
-    private class ServiceAction extends org.limewire.ui.swing.action.AbstractAction {
+    private class ServiceAction extends AbstractAction {
 
         public ServiceAction(FriendAccountConfiguration config) {
             super(config.getLabel(), config.getLargeIcon());
