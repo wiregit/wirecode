@@ -10,6 +10,7 @@ import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.RangeSlider;
 import org.limewire.ui.swing.util.I18n;
 
@@ -105,7 +106,54 @@ class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         return buf.toString();
     }
-
+    
+    /**
+     * Updates the range values based on the specified filter category.
+     */
+    public void updateRange(SearchCategory filterCategory) {
+        // Get current values.
+        int oldLower = slider.getValue();
+        int oldUpper = slider.getUpperValue();
+        long[] oldValues = rangeFormat.getValues();
+        
+        // Determine lower and upper values to be included.
+        long lowerValue = (oldLower > 0) ? oldValues[oldLower] : -1;
+        long upperValue = (oldUpper < oldValues.length - 1) ? oldValues[oldUpper] : -1;
+        
+        // Update range values for category.  By definition, the new range
+        // must include the specified lower and upper values.
+        if (rangeFormat.updateValues(filterCategory, lowerValue, upperValue)) {
+            // Get new value array.
+            long[] newValues = rangeFormat.getValues();
+            
+            // Find lower and upper slider inputs.
+            int newLower = 0;
+            int newUpper = newValues.length - 1;
+            if ((lowerValue > -1) || (upperValue > -1)) {
+                for (int i = 0; i < newValues.length; i++) {
+                    if (newValues[i] == lowerValue) {
+                        newLower = i;
+                    }
+                    if (newValues[i] == upperValue) {
+                        newUpper = i;
+                    }
+                }
+            }
+            
+            // Disable listener and re-initialize slider values.
+            resetAdjusting = true;
+            try {
+                slider.setMaximum(newValues.length - 1);
+                slider.setValue(newLower);
+                slider.setUpperValue(newUpper);
+                slider.repaint();
+                
+            } finally {
+                resetAdjusting = false;
+            }
+        }
+    }
+    
     /**
      * Creates a text string describing the current selected range.
      */
