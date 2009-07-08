@@ -1,10 +1,13 @@
 package org.limewire.ui.swing.player;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Properties;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
@@ -18,6 +21,10 @@ import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.InspectionHistogram;
 
 import ca.odell.glazedlists.EventList;
 
@@ -65,6 +72,9 @@ public class PlayerMediator {
     /** Indicator for shuffle mode. */
     private boolean shuffle = false;
     
+    @InspectionPoint(value = "media-player")
+    private final PlayerInspector inspectable;
+    
     /**
      * Constructs a PlayerMediator using the specified services.
      */
@@ -77,6 +87,7 @@ public class PlayerMediator {
         this.listenerList = new ArrayList<PlayerMediatorListener>();
         this.playList = new ArrayList<LocalFileItem>();
         this.shuffleList = new ArrayList<LocalFileItem>();
+        this.inspectable = new PlayerInspector();
     }
     
     /**
@@ -160,7 +171,11 @@ public class PlayerMediator {
      */
     public void setActivePlaylist(LibraryNavItem navItem) {
         if (navItem != null) {
+            PlaylistId oldPlaylist = playlistId;
             playlistId = new PlaylistId(navItem);
+            if (!playlistId.equals(oldPlaylist)) {
+                inspectable.newListStarted();
+            }
         } else {
             playlistId = null;
             playList.clear();
@@ -275,12 +290,11 @@ public class PlayerMediator {
      */
     public void play(File file) {
         // Stop current song.
-        getPlayer().stop();
+        stop();
         
         // Play new song.
         this.fileItem = null;
-        getPlayer().loadSong(file);
-        getPlayer().playSong();
+        loadAndPlay(file);
         
         // Clear play and shuffle lists.
         setActivePlaylist(null);
@@ -292,17 +306,23 @@ public class PlayerMediator {
      */
     public void play(LocalFileItem localFileItem) {
         // Stop current song.
-        getPlayer().stop();
+        stop();
         
         // Play new song.
         this.fileItem = localFileItem;
-        getPlayer().loadSong(localFileItem.getFile());
-        getPlayer().playSong();
+        loadAndPlay(localFileItem.getFile());
         
         // Update shuffle list when enabled.
         if (shuffle) {
             updateShuffleList();
         }
+    }
+    
+    private void loadAndPlay(File fileToPlay) {
+        AudioPlayer player = getPlayer();
+        player.loadSong(fileToPlay);
+        player.playSong();
+        inspectable.started(fileToPlay);
     }
     
     /**
@@ -336,15 +356,14 @@ public class PlayerMediator {
      */
     public void nextSong() {
         // Stop current song.
-        getPlayer().stop();
+        stop();
 
         // Get next file item.
         fileItem = getNextFileItem();
 
         // Play song.
         if (fileItem != null) {
-            getPlayer().loadSong(fileItem.getFile());
-            getPlayer().playSong();
+            loadAndPlay(fileItem.getFile());
         }
     }
     
@@ -353,7 +372,7 @@ public class PlayerMediator {
      */
     public void prevSong() {
         // Stop current song.
-        getPlayer().stop();
+        stop();
 
         // If near beginning of current song, then get previous song.
         // Otherwise, restart current song.
@@ -363,8 +382,7 @@ public class PlayerMediator {
 
         // Play song.
         if (fileItem != null) {
-            getPlayer().loadSong(fileItem.getFile());
-            getPlayer().playSong();
+            loadAndPlay(fileItem.getFile());
         }
     }
     
@@ -521,6 +539,8 @@ public class PlayerMediator {
             // Go to next song when finished.
             if (event.getState() == PlayerState.EOM) {
                 nextSong();
+            } else if (event.getState() == PlayerState.STOPPED) {
+                inspectable.stopped();
             }
             
             // Notify UI about state change.
@@ -554,6 +574,96 @@ public class PlayerMediator {
             result = 31 * result + type.hashCode();
             result = 31 * result + id;
             return result;
+        }
+    }
+
+    /**
+     * Media Player inspections are cumulative, spanning all limewire sessions.
+     * Statistics are updated and stored via PropertiesSetting objects. During inspection,
+     * statistics are extracted from the properties. 
+     */
+    private class PlayerInspector implements Inspectable, Serializable {
+        
+        // key == percent, value == num times user stopped playing at percent
+        private final Properties percentPlayedProp = SwingUiSettings.MEDIA_PLAYER_PERCENT_PLAYED.get();
+        
+        // key == file name, value = num times file played
+        private final Properties filesPlayed = SwingUiSettings.MEDIA_PLAYER_NUM_PLAYS.get();
+        
+        // key == playlist size, value == num times playlist of this size was played
+        private final Properties playListSizeProp = SwingUiSettings.MEDIA_PLAYER_LIST_SIZE.get();
+
+        /**
+         * Called when media player stops playing a file.
+         */
+        void stopped() {
+            incrementIntProperty(percentPlayedProp, Integer.toString(Math.round(progress*100)));
+            SwingUiSettings.MEDIA_PLAYER_PERCENT_PLAYED.set(percentPlayedProp);
+        }
+
+        /**
+         * Called when media player plays a file.
+         * @param filePlayed File that is played
+         */
+        void started(File filePlayed) {
+            incrementIntProperty(filesPlayed, filePlayed.getName());
+            SwingUiSettings.MEDIA_PLAYER_NUM_PLAYS.set(filesPlayed);
+        }
+
+        /**
+         * Called when media player plays a playlist.
+         */
+        void newListStarted() {
+            List<LocalFileItem> fileList = shuffle ? shuffleList : getPlaylist();
+            incrementIntProperty(playListSizeProp, Integer.toString(fileList.size()));
+            SwingUiSettings.MEDIA_PLAYER_LIST_SIZE.set(playListSizeProp);
+            
+        }
+        
+        private void incrementIntProperty(Properties properties, String key) {
+            String value = properties.getProperty(key);
+            Integer currentNum = (value == null) ? 0 : Integer.valueOf(value);
+            properties.setProperty(key, Integer.toString(currentNum+1));        
+        }
+
+        /**
+         * Convert the PropertiesSetting data into inspectable data
+         */
+        @Override
+        public Object inspect() {
+            int repeats = 0;
+            int numPlayStarts = 0;
+            for (String fileName : filesPlayed.stringPropertyNames()) {
+                int numOfPlaysForFile = Integer.parseInt(filesPlayed.getProperty(fileName));
+                numPlayStarts += numOfPlaysForFile;
+                if (numOfPlaysForFile > 1) {
+                    repeats += numOfPlaysForFile - 1;
+                }
+            }
+            int numPlayStops = 0;
+            InspectionHistogram<Integer> percentPlayed = new InspectionHistogram<Integer>();
+            for (String percentPlayedStr : percentPlayedProp.stringPropertyNames()) {
+                Integer percent = Integer.valueOf(percentPlayedStr);
+                int numPlayedAtPercent = Integer.parseInt(percentPlayedProp.getProperty(percentPlayedStr));
+                numPlayStops += numPlayedAtPercent;
+                percentPlayed.count(percent, numPlayedAtPercent);
+            }
+            int numberOfTimesListPlayed = 0;
+            InspectionHistogram<Integer> playListsize = new InspectionHistogram<Integer>();
+            for (String numFilesInPlayListAsStr : playListSizeProp.stringPropertyNames()) {
+                Integer numFilesInPlayList = Integer.valueOf(numFilesInPlayListAsStr);
+                int numPlayListPlays = Integer.parseInt(playListSizeProp.getProperty(numFilesInPlayListAsStr));
+                numberOfTimesListPlayed += numPlayListPlays;
+                playListsize.count(numFilesInPlayList, numPlayListPlays);
+            }
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("play_starts", numPlayStarts);
+            ret.put("repeats", repeats);
+            ret.put("play_stops", numPlayStops);
+            ret.put("percent_played", percentPlayed.inspect());
+            ret.put("total_list_plays", numberOfTimesListPlayed);
+            ret.put("list_size", playListsize.inspect());
+            return ret;    
         }
     }
 }
