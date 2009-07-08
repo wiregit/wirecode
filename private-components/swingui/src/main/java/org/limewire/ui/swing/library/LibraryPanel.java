@@ -145,10 +145,13 @@ public class LibraryPanel extends JPanel {
         headerBarDecorator.decorateBasic(headerBar);
         
         headerBar.setLayout(new MigLayout("insets 0 5 0 5, gap 0, fill"));
-        headerBar.setDefaultComponentHeight(-1);
         createAddFilesButton(addFileAction, libraryAction);
         headerBar.add(addFilesButton, "push");
+        
         headerBar.add(playerPanel, "pos 0.5al 0.5al");
+        playerPanel.setMaximumSize(new Dimension(999,999));
+        playerPanel.setPreferredSize(new Dimension(999,999));
+        
         fileCountLabel = new JLabel();
         fileCountLabel.setForeground(fileCountColor);
         fileCountLabel.setFont(fileCountFont);
