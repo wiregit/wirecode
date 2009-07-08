@@ -70,13 +70,16 @@ public class MediaType implements Serializable {
                 "123", "abw", "accdb", "accde", "accdr", "accdt", "ans", "asc", "asp",
                 "bdr", "chm", "css", "csv", "dat", "db", "dif", "diz", "doc", "docm", "docx",
                 "dotm", "dotx", "dvi", "eml", "eps", "epsf", "fm", "grv", "gsa", "gts", "hlp",
-                "htm", "html", "info", "js", "jsp", "kfl", "kwd", "latex", "lit", "log", "man",
-                "mcw", "mdb", "mht", "mhtml", "msg", "obi", "odp", "ods", "odt", "one",
-                "onepkg", "ost", "pages", "pdf", "php", "pot", "potm", "potx", "pps", "ppsm",
-                "ppsx", "ppt", "pptm", "pptx", "ps", "pub", "rtf", "sdc", "sdd", "sdp", "sdw",
-                "shw", "sldx", "sxc", "sxd", "sxp", "sxw", "tex", "texi", "toc", "tsv", "txt",
-                "wk1", "wk3", "wk4", "wks", "wp", "wp5", "wpd", "wps", "wri", "xhtml", "xlam",
-                "xls", "xlsb", "xlsm", "xlsx", "xltm", "xltx", "xml", "xsf", "xsn" 
+                "htm", "html", "idb", "idx", "iif", "info", "js", "jsp", "kfl", "kwd", "latex", "lif", 
+                "lit", "log", "man", "mcw", "mdb", "mht", "mhtml", "mny", "msg", "obi", "odp", "ods", 
+                "odt", "ofx", "one", "onepkg", "ost", "pages", "pdf", "php", "pot", "potm", "potx", "pps", "ppsm",
+                "ppsx", "ppt", "pptm", "pptx", "ps", "pub", "qba", "qbb", "qdb", "qbi", "qbm", "qbw", "qbx", "qdf", 
+                "qel", "qfp", "qpd", "qph", "qmd", "qsd", "rtf", "scd", "sdc", "sdd", "sdp", "sdw", "shw", "sldx", 
+                "sxc", "sxd", "sxp", "sxw", "t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08", "t09", "t98", 
+                "t99", "ta0", "ta1", "ta2", "ta3", "ta4", "ta5", "ta6", "ta7", "ta8", "ta9", "tax", "tax2008", 
+                "tex", "texi", "toc", "tsv", "tvl", "txf", "txt", "wk1", "wk3", "wk4", "wks", "wp", "wp5", "wpd", 
+                "wps", "wri", "xhtml", "xlam", "xls", "xlsb", "xlsm", "xlsx", "xltm", "xltx", "xml", 
+                "xsf", "xsn" 
              });
             
     /**
@@ -99,7 +102,7 @@ public class MediaType implements Serializable {
             new String[] {
                 "exe", "zip", "jar", "cab", "msi", "msp",
                 "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", 
-                "iso", "jnlp", "bat", "lnk"
+                "iso", "jnlp", "bat", "lnk", "vbs"
             });            
         
     /**
@@ -142,7 +145,7 @@ public class MediaType implements Serializable {
                 "fli", "flc", "flx", "flv", 
                 "wml", "vrml", "swf", "dcr", "jve", "nsv", 
                 "mkv", "ogm",
-                "cdg", "srt", "sub", "idx", "flv"
+                "cdg", "srt", "sub", "flv"
             });
         
     /**
