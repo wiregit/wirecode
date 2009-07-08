@@ -31,7 +31,7 @@ class LaunchFileAction extends AbstractAction {
     public LaunchFileAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems,
         Provider<LibraryNavigatorPanel> libraryNavProvider,
         Provider<PlayerMediator> playerProvider) {
-        super(I18n.tr("Open"));
+        super(I18n.tr("Play/Open"));
 
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryNavProvider = libraryNavProvider;

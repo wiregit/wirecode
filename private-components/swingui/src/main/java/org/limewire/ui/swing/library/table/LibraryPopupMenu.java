@@ -12,7 +12,6 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
-import org.limewire.ui.swing.player.PlayerUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -22,7 +21,6 @@ public class LibraryPopupMenu extends JPopupMenu {
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     private final SharedFileListManager sharedFileListManager;
     private final LibraryNavigatorPanel libraryNavigatorPanel;
-    private final Provider<PlayAction> playAction;
     private final Provider<LaunchFileAction> launchAction;
     private final Provider<LocateFileAction> locateAction;
     private final Provider<RemoveFromListAction> removeListAction;
@@ -38,7 +36,7 @@ public class LibraryPopupMenu extends JPopupMenu {
             SharedFileListManager sharedFileListManager,
             LibraryNavigatorPanel libraryNavigatorPanel, Provider<RemoveFromAllListAction> removeFromAllListAction,
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
-            Provider<PlayAction> playAction, RemoveFromLibraryAction removeAction,
+            RemoveFromLibraryAction removeAction,
             Provider<RemoveFromListAction> removeListAction, 
             Provider<LibraryAddToListMenu> addToListMenu,
             Provider<LibraryShowInListMenu> showInListMenu,
@@ -52,7 +50,6 @@ public class LibraryPopupMenu extends JPopupMenu {
         this.removeFromAllListAction = removeFromAllListAction;
         this.addToListMenu = addToListMenu;
         this.showInListMenu = showInListMenu;
-        this.playAction = playAction;
         this.removeAction = removeAction;
         this.deleteAction = deleteAction;
         this.fileInfoAction = fileInfoAction;
@@ -65,7 +62,6 @@ public class LibraryPopupMenu extends JPopupMenu {
         // if single selection
         if(localFileItem.size() == 1) {
             add(launchAction.get());
-            add(playAction.get()).setEnabled(PlayerUtils.isPlayableFile(localFileItem.get(0).getFile()));
             addSeparator();
             
             add(addToListMenu.get());
