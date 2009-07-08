@@ -58,7 +58,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
         
         defaultButton = new JButton(new DefaultAction());
         
-        add(new MultiLineLabel(I18n.tr("LimeWire will not show files with the following extensions in your search results or add them to your library"), 300), "span, wrap");
+        add(new MultiLineLabel(I18n.tr("LimeWire will not show files with the following extensions in your search results"), 300), "span, wrap");
         add(keywordTextField, "gapright 10");
         add(addKeywordButton,"wrap");
         add(new JScrollPane(filterTable), "span 2, grow, wrap");
