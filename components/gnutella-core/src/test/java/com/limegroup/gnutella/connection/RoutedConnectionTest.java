@@ -422,14 +422,13 @@ public class RoutedConnectionTest extends ServerSideTestCase {
         QueryRequest urnFile = queryRequestFactory.createQuery(sha1,"java");
         
         GnutellaConnection mc = (GnutellaConnection)routedConnectionFactory.createRoutedConnection("", 1);
-        mc.initializeSpamFilters();
         // default should be no filtering
         assertFalse(mc.isSpam(urnFile));
         
         // now turn filtering on and rebuild filters
         FilterSettings.FILTER_HASH_QUERIES.setValue(true);
         mc = (GnutellaConnection)routedConnectionFactory.createRoutedConnection("", 1);
-        mc.initializeSpamFilters();
+        
         assertTrue(mc.isSpam(urnFile));
 
         FilterSettings.FILTER_HASH_QUERIES.setValue(false);
