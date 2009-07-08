@@ -29,6 +29,8 @@ import org.limewire.util.Objects;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.FunctionList.Function;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.DefaultEventListModel;
 import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
@@ -93,6 +95,21 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
         uniqueListFactory = new UniqueListFactory<Category>(categoryList, new CategoryComparator());
         uniqueListFactory.setName(I18n.tr("Categories"));
         uniqueList = uniqueListFactory.getUniqueList();
+        
+        // Initialize label visibility.
+        categoryLabel.setVisible(uniqueList.size() > 0);
+        
+        // Add listener to display label when needed.
+        uniqueList.addListEventListener(new ListEventListener<Object>() {
+            @Override
+            public void listChanged(ListEvent<Object> listChanges) {
+                if (!categoryLabel.isVisible() && (uniqueList.size() > 0)) {
+                    categoryLabel.setVisible(true);
+                } else if (categoryLabel.isVisible() && (uniqueList.size() < 1)) {
+                    categoryLabel.setVisible(false);
+                }
+            }
+        });
         
         // Create list and selection models.
         listModel = new DefaultEventListModel<Category>(uniqueList);
