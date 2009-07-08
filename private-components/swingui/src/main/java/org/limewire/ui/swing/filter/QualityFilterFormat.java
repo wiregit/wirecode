@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.filter;
 
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -47,7 +48,12 @@ class QualityFilterFormat<E extends FilterableItem> implements RangeFilterFormat
     public boolean isUpperLimitEnabled() {
         return false;
     }
-
+    
+    @Override
+    public boolean updateValues(SearchCategory filterCategory, long lowerValue, long upperValue) {
+        return false;
+    }
+    
     /**
      * A matcher used to filter an item by quality.
      */

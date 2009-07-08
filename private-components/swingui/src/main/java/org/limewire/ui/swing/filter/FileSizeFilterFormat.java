@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -85,30 +88,13 @@ class FileSizeFilterFormat<E extends FilterableItem> implements RangeFilterForma
     };
     
     /** Array of size options in bytes. */
-    private final long[] sizes;
+    private long[] sizes;
     
     /**
-     * Constructs a FileSizeFilterFormat for the specified filter category.
+     * Constructs a FileSizeFilterFormat with default size values.
      */
-    public FileSizeFilterFormat(SearchCategory filterCategory) {
-        switch (filterCategory) {
-        case AUDIO:
-            sizes = AUDIO_SIZES;
-            break;
-            
-        case VIDEO:
-            sizes = VIDEO_SIZES;
-            break;
-            
-        case IMAGE:
-        case DOCUMENT:
-            sizes = IMAGE_SIZES;
-            break;
-            
-        default:
-            sizes = DEFAULT_SIZES;
-            break;
-        }
+    public FileSizeFilterFormat() {
+        sizes = getSizes(SearchCategory.ALL);
     }
 
     @Override
@@ -139,6 +125,91 @@ class FileSizeFilterFormat<E extends FilterableItem> implements RangeFilterForma
     @Override
     public boolean isUpperLimitEnabled() {
         return true;
+    }
+
+    @Override
+    public boolean updateValues(SearchCategory filterCategory, long lowerValue, long upperValue) {
+        // Get array of sizes for category.
+        long[] newSizes = getSizes(filterCategory);
+
+        // Create new value list.
+        List<Long> valueList = createValueList(newSizes, lowerValue, upperValue);
+
+        // Set array of sizes.
+        sizes = new long[valueList.size()];
+        for (int i = 0, len = valueList.size(); i < len; i++) {
+            sizes[i] = valueList.get(i);
+        }
+
+        return true;
+    }
+
+    /**
+     * Creates a list of values containing the specified value array, which
+     * must be sorted in ascending order.  If <code>lowerValue</code> or
+     * <code>upperValue</code> are greater than -1, then their values are
+     * included in the returned list.
+     */
+    List<Long> createValueList(long[] values, long lowerValue, long upperValue) {
+        List<Long> valueList = new ArrayList<Long>();
+
+        // Process value array.
+        for (int i = 0; i < values.length; i++) {
+            // Insert lower value if necessary.
+            if (lowerValue > -1) {
+                if (values[i] == lowerValue) {
+                    lowerValue = -1;
+                } else if (values[i] > lowerValue) {
+                    valueList.add(lowerValue);
+                    lowerValue = -1;
+                }
+            }
+
+            // Insert upper value if necessary.
+            if (upperValue > -1) {
+                if (values[i] == upperValue) {
+                    upperValue = -1;
+                } else if (values[i] > upperValue) {
+                    valueList.add(upperValue);
+                    upperValue = -1;
+                }
+            }
+
+            // Add current value.
+            valueList.add(values[i]);
+        }
+
+        // Add lower value if not found.
+        if (lowerValue > -1) {
+            valueList.add(lowerValue);
+        }
+
+        // Add upper value if not found.
+        if (upperValue > -1) {
+            valueList.add(upperValue);
+        }
+
+        return valueList;
+    }
+
+    /**
+     * Returns an array of size values for the specified filter category.
+     */
+    private long[] getSizes(SearchCategory filterCategory) {
+        switch (filterCategory) {
+        case AUDIO:
+            return AUDIO_SIZES;
+
+        case VIDEO:
+            return VIDEO_SIZES;
+
+        case IMAGE:
+        case DOCUMENT:
+            return IMAGE_SIZES;
+
+        default:
+            return DEFAULT_SIZES;
+        }
     }
 
     /**

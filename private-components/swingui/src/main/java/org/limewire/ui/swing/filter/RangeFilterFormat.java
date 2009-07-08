@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.filter;
 
+import org.limewire.core.api.search.SearchCategory;
+
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
@@ -37,4 +39,12 @@ interface RangeFilterFormat<E extends FilterableItem> {
      * Returns true if the upper limit is enabled.
      */
     boolean isUpperLimitEnabled();
+    
+    /**
+     * Updates the value array based on the specified filter category.  If
+     * <code>lowerValue</code> or <code>upperValue</code> are greater than -1,
+     * then their values must be included in the value array.  The method
+     * returns true if the value array is updated.
+     */
+    boolean updateValues(SearchCategory filterCategory, long lowerValue, long upperValue);
 }
