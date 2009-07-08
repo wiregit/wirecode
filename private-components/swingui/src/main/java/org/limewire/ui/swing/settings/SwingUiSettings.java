@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.settings;
 
 import java.io.File;
-import java.util.Properties;
 
 import org.limewire.core.settings.LimeProps;
 import org.limewire.i18n.I18nMarker;
@@ -12,7 +11,6 @@ import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
-import org.limewire.setting.PropertiesSetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
@@ -271,37 +269,4 @@ public final class SwingUiSettings extends LimeProps {
         return defaultDirectory;
     }
 
-    /**
-     * LimeWire Media Player settings.  Used to persist cumulative statistics
-     * over many sessions, which are collected via inspection.
-     */
-
-    /**
-     * Percentage of a file that has been played.
-     * Measured when user stops playing a file.
-     * 
-     * Key   --> Percentage
-     * Value --> How many times this percentage of a file has been played
-     */
-    public static final PropertiesSetting MEDIA_PLAYER_PERCENT_PLAYED = 
-        FACTORY.createPropertiesSetting("MEDIA_PLAYER_PERCENT_PLAYED", new Properties());
-
-    /**
-     * Number of times each file has been played.  
-     * Also used to calculate repeat plays.
-     * 
-     * Key   --> File Name
-     * Value --> Number of times the file has been played
-     */
-    public static final PropertiesSetting MEDIA_PLAYER_NUM_PLAYS =
-        FACTORY.createPropertiesSetting("MEDIA_PLAYER_NUM_PLAYS", new Properties());
-
-    /**
-     * Quicklist sizes and how often they are played.
-     * 
-     * Key   --> Size of the quick list being played
-     * Value --> How many times each list of that size is played
-     */
-    public static final PropertiesSetting MEDIA_PLAYER_LIST_SIZE =
-        FACTORY.createPropertiesSetting("MEDIA_PLAYER_LIST_SIZE", new Properties());    
 }

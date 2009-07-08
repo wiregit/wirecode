@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.player;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +20,7 @@ import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.settings.MediaPlayerSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.inspection.InspectionHistogram;
@@ -585,20 +584,20 @@ public class PlayerMediator {
     private class PlayerInspector implements Inspectable {
         
         // key == percent, value == num times user stopped playing at percent
-        private final Properties percentPlayedProp = SwingUiSettings.MEDIA_PLAYER_PERCENT_PLAYED.get();
+        private final Properties percentPlayedProp = MediaPlayerSettings.MEDIA_PLAYER_PERCENT_PLAYED.get();
         
         // key == file name, value = num times file played
-        private final Properties filesPlayed = SwingUiSettings.MEDIA_PLAYER_NUM_PLAYS.get();
+        private final Properties filesPlayed = MediaPlayerSettings.MEDIA_PLAYER_NUM_PLAYS.get();
         
         // key == playlist size, value == num times playlist of this size was played
-        private final Properties playListSizeProp = SwingUiSettings.MEDIA_PLAYER_LIST_SIZE.get();
+        private final Properties playListSizeProp = MediaPlayerSettings.MEDIA_PLAYER_LIST_SIZE.get();
 
         /**
          * Called when media player stops playing a file.
          */
         void stopped() {
             incrementIntProperty(percentPlayedProp, Integer.toString(Math.round(progress*100)));
-            SwingUiSettings.MEDIA_PLAYER_PERCENT_PLAYED.set(percentPlayedProp);
+            MediaPlayerSettings.MEDIA_PLAYER_PERCENT_PLAYED.set(percentPlayedProp);
         }
 
         /**
@@ -607,7 +606,7 @@ public class PlayerMediator {
          */
         void started(File filePlayed) {
             incrementIntProperty(filesPlayed, filePlayed.getName());
-            SwingUiSettings.MEDIA_PLAYER_NUM_PLAYS.set(filesPlayed);
+            MediaPlayerSettings.MEDIA_PLAYER_NUM_PLAYS.set(filesPlayed);
         }
 
         /**
@@ -616,8 +615,7 @@ public class PlayerMediator {
         void newListStarted() {
             List<LocalFileItem> fileList = shuffle ? shuffleList : getPlaylist();
             incrementIntProperty(playListSizeProp, Integer.toString(fileList.size()));
-            SwingUiSettings.MEDIA_PLAYER_LIST_SIZE.set(playListSizeProp);
-            
+            MediaPlayerSettings.MEDIA_PLAYER_LIST_SIZE.set(playListSizeProp);
         }
         
         private void incrementIntProperty(Properties properties, String key) {
