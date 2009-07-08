@@ -162,9 +162,9 @@ public class DownloadActionHandler {
     private void setSaveFile(DownloadItem item, File saveDir, boolean overwrite){
         try {
             // Update save file in DownloadItem.
-            item.setSaveFile(saveDir, false);
+            item.setSaveFile(saveDir, overwrite);
         } catch (SaveLocationException ex) {
-            saveLocationExceptionHandler.get().handleSaveLocationException(new ChangeLocationDownloadAction(item), ex, overwrite);
+            saveLocationExceptionHandler.get().handleSaveLocationException(new ChangeLocationDownloadAction(item), ex, false);
         }
     }
     
