@@ -22,7 +22,7 @@ public interface ResultDownloader {
      * @param overwrite whether or not to automatically overwrite any other files at the saveFileLocation
      */
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults, File saveFile, boolean overwrite)
-        throws SaveLocationException;
+        throws DownloadException;
     
     /**
      * Adds a download triggered by the given search results. The search results
@@ -36,7 +36,7 @@ public interface ResultDownloader {
      *        provide different downloads.
      */
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults)
-            throws SaveLocationException;
+            throws DownloadException;
 
     
     

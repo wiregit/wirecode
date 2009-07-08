@@ -12,7 +12,7 @@ public class LimeWireUiUtilModule extends AbstractModule {
         bind(NonBlockFileIconController.class).to(BasicFileIconController.class);
         bind(PropertiableHeadings.class).toProvider(LazyBinder.newLazyProvider(
                 PropertiableHeadings.class, PropertiableHeadingsImpl.class));
-        bind(SaveLocationExceptionHandler.class).to(SaveLocationExceptionHandlerImpl.class);
+        bind(DownloadExceptionHandler.class).to(DownloadExceptionHandlerImpl.class);
         bind(MagnetHandler.class).toProvider(LazyBinder.newLazyProvider(
                 MagnetHandler.class, MagnetHandlerImpl.class));
     }

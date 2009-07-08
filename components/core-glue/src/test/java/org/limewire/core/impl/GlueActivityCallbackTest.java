@@ -11,7 +11,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.monitor.IncomingSearchListener;
@@ -179,35 +179,35 @@ public class GlueActivityCallbackTest extends BaseTestCase {
      *  For before the error should be passed along to {@link ErrorService}, when after it
      *  should go to the set {@link GuiCallback}.
      */
-    public void testHandleSaveLocationException() {
+    public void testHandleDownloadException() {
         Mockery context = new Mockery();
         
         final GuiCallback callback = context.mock(GuiCallback.class);
         final ErrorCallback mockErrorCallback = context.mock(ErrorCallback.class);
         
-        final SaveLocationException sle = new SaveLocationException(new IOException(), new File("a"));
+        final DownloadException e = new DownloadException(new IOException(), new File("a"));
         final DownloadAction downloadAction = context.mock(DownloadAction.class);
         
         GlueActivityCallback activityCallback = new GlueActivityCallback(null);
         
         context.checking(new Expectations() {{
-            exactly(1).of(mockErrorCallback).error(with(same(sle)), with(any(String.class)));
-            exactly(1).of(callback).handleSaveLocationException(downloadAction, sle, false);
+            exactly(1).of(mockErrorCallback).error(with(same(e)), with(any(String.class)));
+            exactly(1).of(callback).handleDownloadException(downloadAction, e, false);
         }});
     
         ErrorCallback originalErrorCallback = ErrorService.getErrorCallback();
         ErrorService.setErrorCallback(mockErrorCallback);        
-        activityCallback.handleSaveLocationException(downloadAction, sle, true);
+        activityCallback.handleDownloadException(downloadAction, e, true);
         ErrorService.setErrorCallback(originalErrorCallback);
         
         
         activityCallback.setGuiCallback(callback);
-        activityCallback.handleSaveLocationException(downloadAction, sle, false);
+        activityCallback.handleDownloadException(downloadAction, e, false);
         
         context.assertIsSatisfied();
     }
     
-    public void testHandleTorrent() throws SaveLocationException {
+    public void testHandleTorrent() throws DownloadException {
         Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
@@ -216,7 +216,7 @@ public class GlueActivityCallbackTest extends BaseTestCase {
         final GuiCallback guiCallback = context.mock(GuiCallback.class);        
         
         final File mockFile = context.mock(File.class);
-        final SaveLocationException sle = new SaveLocationException(new IOException(), mockFile);
+        final DownloadException e = new DownloadException(new IOException(), mockFile);
         final File goodFile = new File("asdsadsad");
         
         GlueActivityCallback activityCallback = new GlueActivityCallback(downloadManager);
@@ -233,9 +233,9 @@ public class GlueActivityCallbackTest extends BaseTestCase {
             one(downloadManager).downloadTorrent(with(same(mockFile)), with(any(File.class)), with(any(boolean.class)));
             
             one(downloadManager).downloadTorrent(with(same(mockFile)), with(any(File.class)), with(any(boolean.class)));
-            will(throwException(sle));
+            will(throwException(e));
             
-            exactly(1).of(guiCallback).handleSaveLocationException(with(actionCollector), with(same(sle)), with(any(boolean.class)));
+            exactly(1).of(guiCallback).handleDownloadException(with(actionCollector), with(same(e)), with(any(boolean.class)));
             exactly(1).of(downloadManager).downloadTorrent(mockFile, null, true);
         }});
         

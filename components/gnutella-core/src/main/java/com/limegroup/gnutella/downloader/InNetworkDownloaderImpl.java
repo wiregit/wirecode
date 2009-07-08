@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.concurrent.ListeningExecutorService;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.InvalidDataException;
 import org.limewire.net.SocketsManager;
@@ -80,7 +80,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager,
-            Library library) throws SaveLocationException {
+            Library library) throws DownloadException {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,

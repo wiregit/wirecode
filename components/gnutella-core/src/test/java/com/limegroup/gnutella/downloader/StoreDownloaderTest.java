@@ -7,7 +7,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -152,7 +152,7 @@ public class StoreDownloaderTest extends LimeTestCase{
             downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
             fail("File already downloading");
         }
-        catch(SaveLocationException e) {
+        catch(DownloadException e) {
             
         }
     }

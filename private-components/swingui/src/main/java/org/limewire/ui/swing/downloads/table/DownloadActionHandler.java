@@ -8,7 +8,7 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.search.SearchCategory;
@@ -23,7 +23,7 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -57,7 +57,7 @@ public class DownloadActionHandler {
     private LibraryManager libraryManager;
     private final FileInfoDialogFactory fileInfoFactory;
 //    private final Provider<ShareWidgetFactory> shareFactory;
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final SearchHandler searchHandler;
     private final KeywordAssistedSearchBuilder searchBuilder;
     
@@ -65,7 +65,7 @@ public class DownloadActionHandler {
     public DownloadActionHandler(//Provider<ShareWidgetFactory> shareFactory, 
             DownloadListManager downloadListManager, 
             LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,
+            Provider<DownloadExceptionHandler> downloadExceptionHandler,
             SearchHandler searchHandler,
             KeywordAssistedSearchBuilder searchBuilder){
         this.downloadListManager = downloadListManager;
@@ -73,7 +73,7 @@ public class DownloadActionHandler {
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
         this.searchHandler = searchHandler;
         this.searchBuilder = searchBuilder;
     }
@@ -163,8 +163,8 @@ public class DownloadActionHandler {
         try {
             // Update save file in DownloadItem.
             item.setSaveFile(saveDir, overwrite);
-        } catch (SaveLocationException ex) {
-            saveLocationExceptionHandler.get().handleSaveLocationException(new ChangeLocationDownloadAction(item), ex, false);
+        } catch (DownloadException ex) {
+            downloadExceptionHandler.get().handleDownloadException(new ChangeLocationDownloadAction(item), ex, false);
         }
     }
     
@@ -178,12 +178,12 @@ public class DownloadActionHandler {
             this.item = item;
         }
         @Override
-        public void download(File saveFile, boolean overwrite) throws SaveLocationException {
+        public void download(File saveFile, boolean overwrite) throws DownloadException {
             setSaveFile(item, saveFile, overwrite);
         }
 
         @Override
-        public void downloadCanceled(SaveLocationException sle) {
+        public void downloadCanceled(DownloadException ignored) {
             // do nothing
         }        
     }

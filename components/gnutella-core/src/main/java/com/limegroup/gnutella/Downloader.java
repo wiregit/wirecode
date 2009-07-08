@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.List;
 
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.io.Address;
 import org.limewire.listener.ListenerSupport;
 
@@ -132,9 +132,9 @@ public interface Downloader extends BandwidthTracker,
      * @param fileName the name of the file to be saved in <code>saveDirectory</code>. 
      * null indicates the default.
      * @param overwrite is true if saving should be allowed to overwrite existing files
-     * @throws SaveLocationException when the new file location could not be set
+     * @throws DownloadException when the new file location could not be set
      */
-    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException;
+    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws DownloadException;
     
     /** Returns the file under which the download will be saved when complete.  
      * Counterpart to setSaveFile. */

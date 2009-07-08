@@ -9,7 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.limewire.concurrent.ListeningExecutorService;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.InvalidDataException;
 import org.limewire.net.SocketsManager;
@@ -86,7 +86,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * @param saveDir can be null, then the default save directory is used
      * @param fileName the final file name, can be <code>null</code>
      *
-     * @throws SaveLocationException if there was an error setting the downloads
+     * @throws DownloadException if there was an error setting the downloads
      * final file location 
      */
 	@Inject

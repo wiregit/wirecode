@@ -30,14 +30,14 @@ public interface DownloadListManager extends ResultDownloader {
     /**
      * Downloads the torrent file at the given uri.
      */
-    public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws SaveLocationException;
+    public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws DownloadException;
 
     /**
      * Opens the given file and starts a downloader based on the information
      * inside of the given file.
      */
     public DownloadItem addTorrentDownload(File file, File saveDirectory, boolean overwrite)
-            throws SaveLocationException;
+            throws DownloadException;
 
     /**
      * Return true if the downloader contains the given urn, false otherwise.
@@ -48,7 +48,7 @@ public interface DownloadListManager extends ResultDownloader {
      * Downloads the given magnet link.
      */
     public DownloadItem addDownload(MagnetLink magnet, File saveFile, boolean overwrite)
-            throws SaveLocationException;
+            throws DownloadException;
 
     /**
      * Adds the specified listener to the list that is notified when a property

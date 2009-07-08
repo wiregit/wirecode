@@ -10,14 +10,14 @@ import org.jdesktop.application.Application;
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MagnetHandler;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
@@ -26,22 +26,22 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class GuiCallbackImpl implements GuiCallback {
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final Provider<MagnetHandler> magnetHandler;
 
     @Inject
     public GuiCallbackImpl(GuiCallbackService guiCallbackService,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,
+            Provider<DownloadExceptionHandler> downloadExceptionHandler,
             Provider<MagnetHandler> magnetHandler) {
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
         this.magnetHandler = magnetHandler;
         guiCallbackService.setGuiCallback(this);
     }
 
     @Override
-    public void handleSaveLocationException(DownloadAction downLoadAction,
-            SaveLocationException sle, boolean supportsNewSaveDir) {
-        saveLocationExceptionHandler.get().handleSaveLocationException(downLoadAction, sle, supportsNewSaveDir);
+    public void handleDownloadException(DownloadAction downLoadAction,
+            DownloadException e, boolean supportsNewSaveDir) {
+        downloadExceptionHandler.get().handleDownloadException(downLoadAction, e, supportsNewSaveDir);
     }
 
     private boolean yesNoQuestion(String message) {

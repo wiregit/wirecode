@@ -9,12 +9,12 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -22,16 +22,16 @@ import com.google.inject.Provider;
 class DownloadableTransferHandler extends TransferHandler {
     private final DownloadListManager downloadListManager;
 
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
 
     private final Provider<List<File>> selectedFiles;
 
     @Inject
     public DownloadableTransferHandler(DownloadListManager downloadListManager,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,
+            Provider<DownloadExceptionHandler> downloadExceptionHandler,
             @FinishedDownloadSelected Provider<List<File>> selectedFiles) {
         this.downloadListManager = downloadListManager;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
         this.selectedFiles = selectedFiles;
     }
 
@@ -66,19 +66,19 @@ class DownloadableTransferHandler extends TransferHandler {
                     try {
                         downloadListManager.addDownload(searchResultTransferable.getSearch(),
                                 searchResultTransferable.getSearchResults());
-                    } catch (SaveLocationException e) {
-                        saveLocationExceptionHandler.get().handleSaveLocationException(
+                    } catch (DownloadException e) {
+                        downloadExceptionHandler.get().handleDownloadException(
                                 new DownloadAction() {
                                     @Override
                                     public void download(File saveFile, boolean overwrite)
-                                            throws SaveLocationException {
+                                            throws DownloadException {
                                         downloadListManager.addDownload(searchResultTransferable
                                                 .getSearch(), searchResultTransferable
                                                 .getSearchResults(), saveFile, overwrite);
                                     }
 
                                     @Override
-                                    public void downloadCanceled(SaveLocationException sle) {
+                                    public void downloadCanceled(DownloadException ignored) {
                                         // do nothing
                                     }
                                 }, e, true);

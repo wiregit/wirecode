@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.inject.LazySingleton;
@@ -24,15 +24,15 @@ class MagnetHandlerImpl implements MagnetHandler {
 
     private final SearchHandler searchHandler;
 
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     
     @Inject
     MagnetHandlerImpl(SearchHandler searchHandler,
             DownloadListManager downloadListManager,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
+            Provider<DownloadExceptionHandler> downloadExceptionHandler) {
         this.downloadListManager = downloadListManager;
         this.searchHandler = searchHandler;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
     }
 
     /**
@@ -44,7 +44,7 @@ class MagnetHandlerImpl implements MagnetHandler {
             @Override
             public void run() {
                 if (magnet.isDownloadable()) {
-                    downloadMagnet(downloadListManager, saveLocationExceptionHandler, magnet);
+                    downloadMagnet(downloadListManager, downloadExceptionHandler, magnet);
                 } else if (magnet.isKeywordTopicOnly()) {
                     searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(magnet
                             .getQueryString(), SearchCategory.ALL));
@@ -59,19 +59,19 @@ class MagnetHandlerImpl implements MagnetHandler {
     }
 
     private void downloadMagnet(final DownloadListManager downloadListManager,
-            final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler, final MagnetLink magnet) {
+            final Provider<DownloadExceptionHandler> downloadExceptionHandler, final MagnetLink magnet) {
         try {
             downloadListManager.addDownload(magnet, null, false);
-        } catch (SaveLocationException e1) {
-            saveLocationExceptionHandler.get().handleSaveLocationException(new DownloadAction() {
+        } catch (DownloadException e1) {
+            downloadExceptionHandler.get().handleDownloadException(new DownloadAction() {
                 @Override
-                public void download(File saveFile, boolean overwrite) throws SaveLocationException {
+                public void download(File saveFile, boolean overwrite) throws DownloadException {
                     downloadListManager
                             .addDownload(magnet, saveFile, overwrite);
                 }
 
                 @Override
-                public void downloadCanceled(SaveLocationException sle) {
+                public void downloadCanceled(DownloadException ignored) {
                     //nothing to do                    
                 }
 

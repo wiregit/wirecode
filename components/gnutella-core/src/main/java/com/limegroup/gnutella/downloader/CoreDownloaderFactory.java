@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 
@@ -25,16 +25,16 @@ public interface CoreDownloaderFactory {
 
     public ManagedDownloader createManagedDownloader(RemoteFileDesc[] files,
             GUID originalQueryGUID, File saveDirectory, String fileName, boolean overwrite)
-            throws SaveLocationException;
+            throws DownloadException;
 
     public MagnetDownloader createMagnetDownloader(MagnetOptions magnet, boolean overwrite,
-            File saveDir, String fileName) throws SaveLocationException;
+            File saveDir, String fileName) throws DownloadException;
 
     public InNetworkDownloader createInNetworkDownloader(DownloadInformation info, File dir,
-            long startTime) throws SaveLocationException;
+            long startTime) throws DownloadException;
 
     public ResumeDownloader createResumeDownloader(File incompleteFile, String name, long size)
-            throws SaveLocationException;
+            throws DownloadException;
 
     /**
      * @param rfd location to download from
@@ -43,10 +43,10 @@ public interface CoreDownloaderFactory {
      * @param overwrite true to overwrite a file with the same name in the
      *        same directory
      * @return StoreDownloader to begin downloading from
-     * @throws SaveLocationException when the new file location could not be set
+     * @throws DownloadException when the new file location could not be set
      */
     public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, File saveDirectory,
-            String fileName, boolean overwrite) throws SaveLocationException;
+            String fileName, boolean overwrite) throws DownloadException;
     
     public BTDownloader createBTDownloader(File torrent) throws IOException;
 

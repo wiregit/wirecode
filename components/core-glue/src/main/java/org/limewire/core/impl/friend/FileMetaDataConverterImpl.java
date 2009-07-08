@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.friend.FileMetaDataConverter;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -32,7 +32,7 @@ class FileMetaDataConverterImpl implements FileMetaDataConverter {
         this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
-    public SearchResult create(FriendPresence presence, FileMetaData fileMetaData) throws InvalidDataException, SaveLocationException {
+    public SearchResult create(FriendPresence presence, FileMetaData fileMetaData) throws InvalidDataException, DownloadException {
         FriendAddress presenceAddress = getAddressFromPresence(presence);
 
         RemoteFileDesc remoteFileDesc = createRfdFromChatResult(presenceAddress, fileMetaData);
@@ -42,7 +42,7 @@ class FileMetaDataConverterImpl implements FileMetaDataConverter {
     }
     
     private RemoteFileDesc createRfdFromChatResult(FriendAddress address, FileMetaData fileMeta)
-            throws SaveLocationException, InvalidDataException {
+            throws DownloadException, InvalidDataException {
         byte[] clientGuid = DataUtils.EMPTY_GUID;
         
         Set<String> urnsAsString = fileMeta.getUrns();

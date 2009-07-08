@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.settings.LWSSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.lifecycle.Service;
@@ -254,10 +254,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
      *        from {@link #createRemoteFileDescriptor(String, String, long)}.
      * @param saveDir directory to which we save the downloaded file
      * @return a new Store {@link Downloader} for the given arguments.
-     * @throws SaveLocationException
+     * @throws DownloadException
      */
     public Downloader createDownloader(RemoteFileDesc rfd, File saveDir)
-            throws SaveLocationException {
+            throws DownloadException {
         //
         // We'll associate the identity hash code of the downloader
         // with this file so that the web page can keep track

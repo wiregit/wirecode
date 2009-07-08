@@ -11,7 +11,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
@@ -139,15 +139,15 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         if(torrentFile != null && torrentFile.exists() && torrentFile.length() > 0) {
             try {
                 downloadManager.downloadTorrent(torrentFile, null, false);
-            } catch (SaveLocationException e) {
-                handleSaveLocationException(new DownloadAction() {
+            } catch (DownloadException e) {
+                handleDownloadException(new DownloadAction() {
                   @Override
-                    public void download(File saveDirectory, boolean overwrite) throws SaveLocationException {
+                    public void download(File saveDirectory, boolean overwrite) throws DownloadException {
                           downloadManager.downloadTorrent(torrentFile, saveDirectory, overwrite);
                     }
 
                 @Override
-                public void downloadCanceled(SaveLocationException sle) {
+                public void downloadCanceled(DownloadException ignored) {
                     //nothing to do
                 }
                 
@@ -243,12 +243,12 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public void handleSaveLocationException(DownloadAction downLoadAction,
-            SaveLocationException sle, boolean supportsNewSaveDir) {
+    public void handleDownloadException(DownloadAction downLoadAction,
+            DownloadException e, boolean supportsNewSaveDir) {
         if(guiCallback != null) {
-            guiCallback.handleSaveLocationException(downLoadAction, sle, supportsNewSaveDir);
+            guiCallback.handleDownloadException(downLoadAction, e, supportsNewSaveDir);
         } else {
-            ErrorService.error(sle, "Error handling SaveLocationException. GuiCallBack not yet initialized.");
+            ErrorService.error(e, "Error handling DownloadException. GuiCallBack not yet initialized.");
         }
     }
 

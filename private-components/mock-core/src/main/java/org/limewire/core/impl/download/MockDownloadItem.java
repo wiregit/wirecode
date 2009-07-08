@@ -16,7 +16,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.io.Address;
 
@@ -239,7 +239,7 @@ public class MockDownloadItem implements DownloadItem {
     }
     
     @Override
-    public void setSaveFile(File saveFile, boolean overwrite) throws SaveLocationException {
+    public void setSaveFile(File saveFile, boolean overwrite) throws DownloadException {
         // Do nothing
     }
 

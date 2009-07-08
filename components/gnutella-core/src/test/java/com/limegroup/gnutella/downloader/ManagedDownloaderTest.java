@@ -21,9 +21,9 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.collection.Range;
 import org.limewire.concurrent.ListeningExecutorService;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
-import org.limewire.core.api.download.SaveLocationException.LocationCode;
+import org.limewire.core.api.download.DownloadException.LocationCode;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -385,10 +385,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     new GUID(GUID.makeGuid()), saveDir, "does not matter", false);
             fail("No exception thrown for dir " + saveDir);
         }
-        catch (SaveLocationException sle) {
+        catch (DownloadException e) {
             assertEquals("Parent dir should exceed max path length",
                     LocationCode.PATH_NAME_TOO_LONG,
-                    sle.getErrorCode());
+                    e.getErrorCode());
         }
         finally {
             File parent = saveDir;
@@ -420,10 +420,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
                         new GUID(GUID.makeGuid()), noWritePermissionDir, "does not matter", false);
 				fail("No exception thrown for dir " + noWritePermissionDir);
 			}
-			catch (SaveLocationException sle) {
+			catch (DownloadException e) {
 				assertEquals("Should have no write permissions",
 						LocationCode.DIRECTORY_NOT_WRITEABLE,
-						sle.getErrorCode());
+						e.getErrorCode());
 			}
 		}
         
@@ -432,28 +432,28 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     new GUID(GUID.makeGuid()), new File("/non existent directory"), null, false);
 			fail("No exception thrown");
 		}
-		catch (SaveLocationException sle) {
+		catch (DownloadException e) {
 			assertEquals("Error code should be: directory does not exist",
 						 LocationCode.DIRECTORY_DOES_NOT_EXIST,
-						 sle.getErrorCode());
+						 e.getErrorCode());
 		}
 		try {
 			gnutellaDownloaderFactory.createManagedDownloader(rfds,
                     new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), false);
 			fail("No exception thrown");
 		}
-		catch (SaveLocationException sle) {
+		catch (DownloadException e) {
 			assertEquals("Error code should be: file exists",
 						 LocationCode.FILE_ALREADY_EXISTS,
-						 sle.getErrorCode());
+						 e.getErrorCode());
 		}
 		try {
 			// should not throw an exception because of overwrite 
 			gnutellaDownloaderFactory.createManagedDownloader(rfds,
                     new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), true); 
 		}
-		catch (SaveLocationException sle) {
-			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
+		catch (DownloadException e) {
+			fail("There shouldn't have been an exception of type " + e.getErrorCode());
 		}
 		try {
 			File f = File.createTempFile("notadirectory", "file");
@@ -462,10 +462,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     new GUID(GUID.makeGuid()), f, null, false);
 			fail("No exception thrown");
 		}
-		catch (SaveLocationException sle) {
+		catch (DownloadException e) {
 			assertEquals("Error code should be: file not a directory", 
 						 LocationCode.NOT_A_DIRECTORY,
-						 sle.getErrorCode());
+						 e.getErrorCode());
 		}
         // we force filename normalization
         gnutellaDownloaderFactory.createManagedDownloader(rfds, new GUID(GUID.makeGuid()), null,
@@ -486,10 +486,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
             downloadManager.download(rfds, emptyRFDList, new GUID(GUID.makeGuid()), false, null,
                     null);
             fail("No exception thrown");
-        } catch (SaveLocationException sle) {
+        } catch (DownloadException e) {
             assertEquals("Error code should be: already downloading", 
 					LocationCode.FILE_ALREADY_DOWNLOADING,
-					sle.getErrorCode());
+					e.getErrorCode());
 		}
 		
 		// already downloading based on hash
@@ -505,10 +505,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
 					new GUID(GUID.makeGuid()), false, null, null);
 			fail("No exception thrown");
 		}
-		catch (SaveLocationException sle) {
+		catch (DownloadException e) {
 			assertEquals("Error code should be: already downloading", 
 					LocationCode.FILE_ALREADY_DOWNLOADING,
-					sle.getErrorCode());
+					e.getErrorCode());
 		}
 				
 		// other download is already being saved to the same file with different hashes
@@ -528,14 +528,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
 					new GUID(GUID.makeGuid()), false, null, "alreadysavedto");
 			fail("should have gotten exception!");
 		}
-		catch (SaveLocationException sle) {
+		catch (DownloadException e) {
 			assertEquals("Error code should be: already being saved to", 
 					LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO,
-					sle.getErrorCode());
+					e.getErrorCode());
 		}
 		
-		// TODO SaveLocationException.FILE_ALREADY_SAVED
-		// SaveLocationException.FILESYSTEM_ERROR is not really reproducible
+		// TODO DownloadException.FILE_ALREADY_SAVED
+		// DownloadException.FILESYSTEM_ERROR is not really reproducible
 	}
 	
 	@SuppressWarnings("unchecked")

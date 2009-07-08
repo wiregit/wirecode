@@ -15,7 +15,7 @@ import junit.framework.Test;
 import org.apache.http.params.BasicHttpParams;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -160,25 +160,25 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             @Override
             public Downloader download(RemoteFileDesc[] files, List<? extends RemoteFileDesc> alts,
                     GUID queryGUID, boolean overwrite, File saveDir, String fileName)
-                    throws SaveLocationException {
+                    throws DownloadException {
                 return null;
             }
 
             @Override
             public Downloader download(MagnetOptions magnet, boolean overwrite, File saveDir,
-                    String fileName) throws IllegalArgumentException, SaveLocationException {
+                    String fileName) throws IllegalArgumentException, DownloadException {
                 return null;
             }
 
             @Override
             public Downloader download(File incompleteFile) throws CantResumeException,
-                    SaveLocationException {
+                    DownloadException {
                 return null;
             }
 
             @Override
             public Downloader download(DownloadInformation info, long now)
-                    throws SaveLocationException {
+                    throws DownloadException {
                 return null;
             }
 
@@ -190,19 +190,19 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             @Override
             public Downloader downloadFromStore(RemoteFileDesc rfd, boolean overwrite,
                     File saveDir, String fileName) throws IllegalArgumentException,
-                    SaveLocationException {
+                    DownloadException {
                 return null;
             }
 
             @Override
             public Downloader downloadTorrent(URI torrentURI, boolean overwrite)
-                    throws SaveLocationException {
+                    throws DownloadException {
                 return null;
             }
 
             @Override
             public Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite)
-                    throws SaveLocationException {
+                    throws DownloadException {
                 return null;
             }
 
@@ -430,8 +430,8 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void handleSaveLocationException(DownloadAction downLoadAction,
-                    SaveLocationException sle, boolean supportsNewSaveDir) {
+            public void handleDownloadException(DownloadAction downLoadAction,
+                    DownloadException e, boolean supportsNewSaveDir) {
                 
             }
 

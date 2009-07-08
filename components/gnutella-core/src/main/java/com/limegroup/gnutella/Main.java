@@ -9,7 +9,7 @@ import java.util.Vector;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -286,8 +286,8 @@ public class Main {
         public String translate(String s) { return s;}
 
         @Override
-        public void handleSaveLocationException(DownloadAction downLoadAction,
-                SaveLocationException sle, boolean supportsNewSaveDir) {
+        public void handleDownloadException(DownloadAction downLoadAction,
+                DownloadException e, boolean supportsNewSaveDir) {
             
         }
 

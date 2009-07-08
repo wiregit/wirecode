@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
-import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.SaveLocationException.LocationCode;
+import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.download.DownloadException.LocationCode;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UpdateSettings;
@@ -281,7 +281,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         for(File file : incompleteFiles) {
             try {
                 download(file);
-            } catch (SaveLocationException e) {
+            } catch (DownloadException e) {
                 LOG.error("SLE loading incomplete file", e);
             } catch (CantResumeException e) {
                 LOG.error("CRE loading incomplete file", e);
@@ -593,13 +593,13 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                                             List<? extends RemoteFileDesc> alts, GUID queryGUID, 
                                             boolean overwrite, File saveDir,
                                             String fileName) 
-        throws SaveLocationException {
+        throws DownloadException {
 
         String fName = getFileName(files, fileName);
         if (conflicts(files, new File(saveDir,fName))) {
             addRemoteFileDescsToDownloader(files);
             
-            throw new SaveLocationException
+            throw new DownloadException
             (LocationCode.FILE_ALREADY_DOWNLOADING,
                     new File(fName != null ? fName : ""));
         }
@@ -656,7 +656,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             boolean overwrite,
             File saveDir,
             String fileName)
-    throws IllegalArgumentException, SaveLocationException {
+    throws IllegalArgumentException, DownloadException {
         
         if (!magnet.isDownloadable()) 
             throw new IllegalArgumentException("magnet not downloadable");
@@ -668,7 +668,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             fileName = magnet.getFileNameForSaving();
         }
         if (conflicts(magnet.getSHA1Urn(), 0, new File(saveDir,fileName))) {
-            throw new SaveLocationException
+            throw new DownloadException
             (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
 
@@ -694,7 +694,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             boolean overwrite,
             File saveDir,
             String fileName)
-    throws IllegalArgumentException, SaveLocationException {
+    throws IllegalArgumentException, DownloadException {
         
         //Purge entries from incompleteFileManager that have no corresponding
         //file on disk.  This protects against stupid users who delete their
@@ -705,7 +705,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         incompleteFileManager.purge();
         
         if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir,fileName))) {
-            throw new SaveLocationException
+            throw new DownloadException
             (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
       
@@ -724,10 +724,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * @see com.limegroup.gnutella.DownloadManager#download(java.io.File)
      */ 
     public synchronized Downloader download(File incompleteFile)
-            throws CantResumeException, SaveLocationException { 
+            throws CantResumeException, DownloadException { 
      
         if (conflictsWithIncompleteFile(incompleteFile)) {
-            throw new SaveLocationException
+            throw new DownloadException
             (LocationCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
         }
 
@@ -779,7 +779,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     }
 
     private Downloader resumeTorrentDownload(File torrentFile) throws CantResumeException,
-            SaveLocationException {
+            DownloadException {
         if(torrentManager.get().isValid()) {
             return downloadTorrent(torrentFile, null, false);
         } else {
@@ -791,12 +791,12 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.version.DownloadInformation, long)
      */
     public synchronized Downloader download(DownloadInformation info, long now) 
-    throws SaveLocationException {
+    throws DownloadException {
         File dir = LibraryUtils.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
         if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))
-            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, f);
+            throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge();
         ManagedDownloader d = coreDownloaderFactory.createInNetworkDownloader(
@@ -807,7 +807,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     
     @Override
     public synchronized Downloader downloadTorrent(URI torrentURI, final boolean overwrite)
-            throws SaveLocationException {
+            throws DownloadException {
         final BTTorrentFileDownloader torrentDownloader = coreDownloaderFactory
                 .createTorrentFileDownloader(torrentURI, true);
         initializeDownload(torrentDownloader, false);
@@ -816,22 +816,22 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
     @Override
     public synchronized Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite)
-            throws SaveLocationException {
+            throws DownloadException {
         if (torrentFile.length() > 1024 * 1024 * 5) {
             // torrent files are supposed to be small. If it is large it is
             // probably not a valid torrent file
-            throw new SaveLocationException(
-                    SaveLocationException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
+            throw new DownloadException(
+                    DownloadException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
         }
 
         BTDownloader ret;
         try {
             ret = coreDownloaderFactory.createBTDownloader(torrentFile);
         } catch (IOException e) {
-            if(e instanceof SaveLocationException) {
-                throw (SaveLocationException)e;
+            if(e instanceof DownloadException) {
+                throw (DownloadException)e;
             } else {
-                throw new SaveLocationException(e, torrentFile);
+                throw new DownloadException(e, torrentFile);
             }
         }
 
@@ -852,7 +852,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
             File saveFile = ret.getSaveFile();
             if (saveFile.exists()) {
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, saveFile);
+                throw new DownloadException(LocationCode.FILE_ALREADY_EXISTS, saveFile);
             }
         }
         ret.setSaveFile(saveDirectory, null, overwrite);
@@ -865,30 +865,30 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * Ensures the eventual download location is not already taken by the files
      * of any other download.
      */
-    private void checkActiveAndWaiting(BTDownloader ret) throws SaveLocationException {
+    private void checkActiveAndWaiting(BTDownloader ret) throws DownloadException {
 
         if (torrentManager.get().isManagedTorrent(ret.getTorrentFile())) {
-            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+            throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
                     .getSaveFile());
         } else if (torrentManager.get().isManagedTorrent(
                 StringUtils.toHexString(ret.getSha1Urn().getBytes()))) {
-            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+            throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
                     .getSaveFile());
         }
 
         for (CoreDownloader current : activeAndWaiting) {
             if (ret.getSha1Urn().equals(current.getSha1Urn())) {
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
                         .getIncompleteFile());
             }
 
             if (current.conflictsSaveFile(ret.getSaveFile())) {
-                throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
+                throw new DownloadException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
                         .getSaveFile());
             }
 
             if (current.conflictsSaveFile(ret.getIncompleteFile())) {
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                throw new DownloadException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
                         .getIncompleteFile());
             }
         }

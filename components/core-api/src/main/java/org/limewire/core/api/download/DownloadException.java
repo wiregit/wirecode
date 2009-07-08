@@ -7,7 +7,7 @@ import java.io.IOException;
  * IOException which can be thrown from when setting the save location on a
  * downloader.
  */
-public class SaveLocationException extends IOException {
+public class DownloadException extends IOException {
 
     public static enum LocationCode {
         /**
@@ -77,26 +77,26 @@ public class SaveLocationException extends IOException {
     private final File file;
 
     /**
-     * Constructs a SaveLocationException with the specified cause and file.
+     * Constructs a DownloadException with the specified cause and file.
      */
-    public SaveLocationException(IOException cause, File file) {
+    public DownloadException(IOException cause, File file) {
         super(cause);
         this.errorCode = LocationCode.FILESYSTEM_ERROR;
         this.file = file;
     }
 
-    public SaveLocationException(LocationCode errorCode, File file) {
+    public DownloadException(LocationCode errorCode, File file) {
         super("error code " + errorCode + ", file " + file);
         this.errorCode = errorCode;
         this.file = file;
     }
 
     /**
-     * Constructs a SaveLocationException for the specified error code.
+     * Constructs a DownloadException for the specified error code.
      * 
      * @param message optional more detailed message for debugging purposes
      */
-    public SaveLocationException(LocationCode errorCode, File file, String message) {
+    public DownloadException(LocationCode errorCode, File file, String message) {
         super(message);
         this.errorCode = errorCode;
         this.file = file;

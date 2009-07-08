@@ -8,7 +8,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.friend.FileMetaDataConverterImpl;
 import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
@@ -182,7 +182,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
      * is caught and handled properly.
      */
     @SuppressWarnings("unchecked")
-    public void testCreateWithBadURN() throws SaveLocationException {
+    public void testCreateWithBadURN() throws DownloadException {
         Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};

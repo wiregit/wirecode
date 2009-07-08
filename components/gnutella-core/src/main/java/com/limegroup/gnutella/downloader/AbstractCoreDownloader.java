@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
-import org.limewire.core.api.download.SaveLocationException.LocationCode;
+import org.limewire.core.api.download.DownloadException.LocationCode;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.CommonUtils;
@@ -104,7 +104,7 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.CoreDownloader#setSaveFile(java.io.File, java.lang.String, boolean)
      */
-	public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
+	public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws DownloadException {
 	    if (fileName == null) {
 	        fileName = getDefaultFileName();
 	    }
@@ -124,45 +124,45 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	    catch (IOException ie) {
 	        // if not a directory, give precedence to error messages below
 	        if (saveDirectory.isDirectory()) {
-	            throw new SaveLocationException(LocationCode.PATH_NAME_TOO_LONG, saveDirectory);
+	            throw new DownloadException(LocationCode.PATH_NAME_TOO_LONG, saveDirectory);
 	        }
 	    }
 	    
 	    if (!saveDirectory.isDirectory()) {
 	        if (saveDirectory.exists()) {
-	            throw new SaveLocationException(LocationCode.NOT_A_DIRECTORY, saveDirectory);
+	            throw new DownloadException(LocationCode.NOT_A_DIRECTORY, saveDirectory);
 	        }
-	        throw new SaveLocationException(LocationCode.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
+	        throw new DownloadException(LocationCode.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
 	    }
 	    
 	    File candidateFile = new File(saveDirectory, fileName);
 	    try {
 	        if (!FileUtils.isReallyParent(saveDirectory, candidateFile))
-	            throw new SaveLocationException(LocationCode.SECURITY_VIOLATION, candidateFile);
+	            throw new DownloadException(LocationCode.SECURITY_VIOLATION, candidateFile);
 	    } catch (IOException e) {
-	        throw new SaveLocationException(LocationCode.FILESYSTEM_ERROR, candidateFile);
+	        throw new DownloadException(LocationCode.FILESYSTEM_ERROR, candidateFile);
 	    }
 		
 	    if (! FileUtils.setWriteable(saveDirectory))    
-	        throw new SaveLocationException(LocationCode.DIRECTORY_NOT_WRITEABLE,saveDirectory);
+	        throw new DownloadException(LocationCode.DIRECTORY_NOT_WRITEABLE,saveDirectory);
 		
 	    if (candidateFile.exists()) {
 	        if (!candidateFile.isFile() && !(this instanceof BTDownloader))
-	            throw new SaveLocationException(LocationCode.FILE_NOT_REGULAR, candidateFile);
+	            throw new DownloadException(LocationCode.FILE_NOT_REGULAR, candidateFile);
 	        if (!overwrite)
-	            throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, candidateFile);
+	            throw new DownloadException(LocationCode.FILE_ALREADY_EXISTS, candidateFile);
 	    }
 		
 		// check if another existing download is being saved to this download
 		// we ignore the overwrite flag on purpose in this case
 		if (saveLocationManager.isSaveLocationTaken(candidateFile)) {
-			throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
+			throw new DownloadException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
 		}
 	     
 	    // Passed sanity checks, so save file
 	    synchronized (this) {
 	        if (!isRelocatable())
-	            throw new SaveLocationException(LocationCode.FILE_ALREADY_SAVED, candidateFile);
+	            throw new DownloadException(LocationCode.FILE_ALREADY_SAVED, candidateFile);
 	        this.saveFile = candidateFile;
 	    }
 	}

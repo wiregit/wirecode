@@ -13,13 +13,13 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -29,14 +29,14 @@ class OpenFileAction extends AbstractAction {
 
     private final DownloadListManager downloadListManager;
 
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
 
     @Inject
     public OpenFileAction(DownloadListManager downloadListManager,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
+            Provider<DownloadExceptionHandler> downloadExceptionHandler) {
         super( I18n.tr("&Open Torrent..."));
         this.downloadListManager = downloadListManager;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
     }
 
     @Override
@@ -63,22 +63,22 @@ class OpenFileAction extends AbstractAction {
                     try {
                         downloadListManager.addTorrentDownload(file, null,
                                 false);
-                    } catch (SaveLocationException sle) {
-                        saveLocationExceptionHandler.get().handleSaveLocationException(
+                    } catch (DownloadException ex) {
+                        downloadExceptionHandler.get().handleDownloadException(
                                 new DownloadAction() {
                                     @Override
                                     public void download(File saveDirectory, boolean overwrite)
-                                            throws SaveLocationException {
+                                            throws DownloadException {
                                         downloadListManager.addTorrentDownload(
                                                 file, saveDirectory, overwrite);
                                     }
 
                                     @Override
-                                    public void downloadCanceled(SaveLocationException sle) {
+                                    public void downloadCanceled(DownloadException ignored) {
 					                    //nothing to do                                        
                                     }
 
-                                }, sle, false);
+                                }, ex, false);
                     }
                 } else {
                     // {0}: name of file

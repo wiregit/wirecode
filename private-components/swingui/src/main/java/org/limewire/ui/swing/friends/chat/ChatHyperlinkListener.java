@@ -17,7 +17,7 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.friend.FileMetaDataConverter;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.InvalidDataException;
@@ -26,7 +26,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -43,19 +43,20 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
 
     private final ResultDownloader downloader;
     private final FileMetaDataConverter remoteFileItemFactory;
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
 //    private final LibraryNavigator libraryNavigator;
 
     @Inject
-    public ChatHyperlinkListener(@Assisted Conversation conversation, ResultDownloader downloader,
-                                 FileMetaDataConverter remoteFileItemFactory,
-                                 Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
+    public ChatHyperlinkListener(@Assisted Conversation conversation,
+            ResultDownloader downloader,
+            FileMetaDataConverter remoteFileItemFactory,
+            Provider<DownloadExceptionHandler> downloadExceptionHandler) {
 //                                 LibraryNavigator libraryNavigator) {
 
         this.conversation = conversation;
         this.downloader = downloader;
         this.remoteFileItemFactory = remoteFileItemFactory;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
 //        this.libraryNavigator = libraryNavigator;
     }
 
@@ -100,23 +101,23 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
             // Track download states by adding listeners to dl item
             addPropertyListener(dl, msgWithfileOffer);
 
-        } catch (SaveLocationException sle) {
+        } catch (DownloadException e) {
             final SearchResult remoteFileItem = file;
             final MessageFileOffer messageFileOffer = msgWithfileOffer;
-            saveLocationExceptionHandler.get().handleSaveLocationException(new DownloadAction() {
+            downloadExceptionHandler.get().handleDownloadException(new DownloadAction() {
                 @Override
                 public void download(File saveFile, boolean overwrite)
-                        throws SaveLocationException {
+                        throws DownloadException {
                     DownloadItem dl = downloader.addDownload(null, Collections.singletonList(remoteFileItem), saveFile, overwrite);
                     addPropertyListener(dl, messageFileOffer);
                 }
 
                 @Override
-                public void downloadCanceled(SaveLocationException sle) {
+                public void downloadCanceled(DownloadException ignored) {
                     //nothing to do                    
                 }
 
-            }, sle, true);
+            }, e, true);
         } catch (InvalidDataException ide) {
             // this means the FileMetaData we received isn't well-formed.
             LOG.error("Unable to access remote file", ide);

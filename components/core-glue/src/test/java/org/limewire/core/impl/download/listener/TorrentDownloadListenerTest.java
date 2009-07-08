@@ -14,7 +14,7 @@ import org.jmock.api.Invocation;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
@@ -119,7 +119,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
      * Testing that downloaders with save files that end in .torrent add a
      * torrent download.
      */
-    public void testTorrentFileDownloadAddedSaveLocationException() throws Exception {
+    public void testTorrentFileDownloadAddedDownloadException() throws Exception {
         Mockery context = new Mockery();
         final Downloader downloader = context.mock(CoreDownloader.class);
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
@@ -127,8 +127,8 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
         final File torrentFile = new File(
                 "testTorrentFileDownloadAddedSaveLocationException.torrent");
-        final SaveLocationException sle = new SaveLocationException(
-                SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING, torrentFile);
+        final DownloadException e = new DownloadException(
+                DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING, torrentFile);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
@@ -143,10 +143,10 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
                 one(downloadManager).downloadTorrent(torrentFile, null, false);
-                will(throwException(sle));
-                one(activityCallback).handleSaveLocationException(
+                will(throwException(e));
+                one(activityCallback).handleDownloadException(
                         with(new IsAnything<DownloadAction>()),
-                        with(new IsEqual<SaveLocationException>(sle)),
+                        with(new IsEqual<DownloadException>(e)),
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
                 one(downloadManager).downloadTorrent(torrentFile, null, true);
@@ -202,14 +202,14 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
      * Testing that downloaders with save files that end in .torrent add a
      * torrent download.
      */
-    public void testBTTorrentFileDownloaderCompletedWithSaveLocationException() throws Exception {
+    public void testBTTorrentFileDownloaderCompletedWithDownloadException() throws Exception {
         Mockery context = new Mockery();
         final BTTorrentFileDownloader downloader = context.mock(BTTorrentFileDownloader.class);
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
-        final SaveLocationException sle = new SaveLocationException(
-                SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING, null);
+        final DownloadException e = new DownloadException(
+                DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING, null);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
@@ -226,10 +226,10 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 one(downloader).getTorrentFile();
                 will(returnValue(torrentFile));
                 one(downloadManager).downloadTorrent(torrentFile, null, false);
-                will(throwException(sle));
-                one(activityCallback).handleSaveLocationException(
+                will(throwException(e));
+                one(activityCallback).handleDownloadException(
                         with(new IsAnything<DownloadAction>()),
-                        with(new IsEqual<SaveLocationException>(sle)),
+                        with(new IsEqual<DownloadException>(e)),
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
                 one(downloadManager).downloadTorrent(torrentFile, null, true);
@@ -245,7 +245,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
     }
 
     /**
-     * Used to call the downloadAction when entering the SaveLocationException
+     * Used to call the downloadAction when entering the DownloadException
      * block. Uses override = true saveFile = null
      */
     private class DownloadActionCaller implements Action {

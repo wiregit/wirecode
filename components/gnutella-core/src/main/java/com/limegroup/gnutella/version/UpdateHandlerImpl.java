@@ -24,7 +24,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.UpdateSettings;
@@ -629,8 +629,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
                     LOG.debug("Starting a new InNetwork Download");
                     try {
                         md = (ManagedDownloader)downloadManager.get().download(next, clock.now());
-                    } catch(SaveLocationException sle) {
-                        LOG.error("Unable to construct download", sle);
+                    } catch(DownloadException e) {
+                        LOG.error("Unable to construct download", e);
                     }
                 }
                 

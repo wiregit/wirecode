@@ -14,7 +14,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
@@ -26,7 +26,7 @@ import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -62,8 +62,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
     /** Core download manager. */
     private final DownloadListManager downloadListManager;
 
-    /** Save exception handler. */
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    /** Download exception handler. */
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
 
     /** Total number of search results. */
     private int resultCount;
@@ -106,12 +106,12 @@ class BasicSearchResultsModel implements SearchResultsModel {
     public BasicSearchResultsModel(SearchInfo searchInfo, Search search, 
             Provider<PropertiableHeadings> propertiableHeadings,
             DownloadListManager downloadListManager,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
+            Provider<DownloadExceptionHandler> downloadExceptionHandler) {
         
         this.searchInfo = searchInfo;
         this.search = search;
         this.downloadListManager = downloadListManager;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
         this.propertiableHeadings = propertiableHeadings;
         
         // Create filter debugger.
@@ -387,8 +387,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
             di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
             
-        } catch (final SaveLocationException sle) {
-            if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+        } catch (final DownloadException e) {
+            if (e.getErrorCode() == DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING) {
                 DownloadItem downloadItem = downloadListManager.getDownloadItem(vsr.getUrn());
                 if (downloadItem != null) {
                     downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
@@ -397,27 +397,27 @@ class BasicSearchResultsModel implements SearchResultsModel {
                         try {
                             // Update save file in DownloadItem.
                             downloadItem.setSaveFile(saveFile, true);
-                        } catch (SaveLocationException ex) {
+                        } catch (DownloadException ex) {
                             LOG.infof(ex, "Unable to relocate downloading file {0}", ex.getMessage());
                         }
                     }
                 }
             } else {
-                saveLocationExceptionHandler.get().handleSaveLocationException(new DownloadAction() {
+                downloadExceptionHandler.get().handleDownloadException(new DownloadAction() {
                     @Override
                     public void download(File saveFile, boolean overwrite)
-                            throws SaveLocationException {
+                            throws DownloadException {
                         DownloadItem di = downloadListManager.addDownload(search, vsr.getCoreSearchResults(), saveFile, overwrite);
                         di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
                         vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
                     }
 
                     @Override
-                    public void downloadCanceled(SaveLocationException sle) {
+                    public void downloadCanceled(DownloadException ignored) {
                         //nothing to do                        
                     }
 
-                }, sle, true);
+                }, e, true);
             }
         }
     }

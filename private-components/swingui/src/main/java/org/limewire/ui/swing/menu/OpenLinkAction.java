@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -17,7 +17,7 @@ import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MagnetHandler;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,7 +30,7 @@ class OpenLinkAction extends AbstractAction {
 
     private final DownloadListManager downloadListManager;
 
-    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
+    private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
 
     private final MagnetFactory magnetFactory;
 
@@ -38,11 +38,12 @@ class OpenLinkAction extends AbstractAction {
 
     @Inject
     public OpenLinkAction(DownloadListManager downloadListManager,
-            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler, MagnetFactory magnetFactory,
+            Provider<DownloadExceptionHandler> downloadExceptionHandler,
+            MagnetFactory magnetFactory,
             Provider<MagnetHandler> magnetHandler) {
         super(I18n.tr("Open &Link..."));
         this.downloadListManager = downloadListManager;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.downloadExceptionHandler = downloadExceptionHandler;
         this.magnetFactory = magnetFactory;
         this.magnetHandler = magnetHandler;
     }
@@ -72,29 +73,29 @@ class OpenLinkAction extends AbstractAction {
                         }
 
                     } else {
-                        downloadTorrent(downloadListManager, saveLocationExceptionHandler, uri);
+                        downloadTorrent(downloadListManager, downloadExceptionHandler, uri);
                     }
                 }
             }
 
             private void downloadTorrent(final DownloadListManager downloadListManager,
-                    final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler, final URI uri) {
+                    final Provider<DownloadExceptionHandler> downloadExceptionHandler, final URI uri) {
                 try {
                     downloadListManager.addTorrentDownload(uri, false);
-                } catch (SaveLocationException sle) {
-                    saveLocationExceptionHandler.get().handleSaveLocationException(new DownloadAction() {
+                } catch (DownloadException e) {
+                    downloadExceptionHandler.get().handleDownloadException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
-                                throws SaveLocationException {
+                                throws DownloadException {
                             downloadListManager.addTorrentDownload(uri, overwrite);
                         }
 
                         @Override
-                        public void downloadCanceled(SaveLocationException sle) {
+                        public void downloadCanceled(DownloadException ignored) {
 		                    //nothing to do
                         }
 
-                    }, sle, false);
+                    }, e, false);
                 }
             }
         });

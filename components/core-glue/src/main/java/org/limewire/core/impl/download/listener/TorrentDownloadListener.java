@@ -12,7 +12,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
@@ -94,22 +94,22 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
                 shareTorrentFile(possibleTorrentFile);
                 downloadManager.downloadTorrent(possibleTorrentFile, null, false);
                 downloadItems.remove(getDownloadItem(downloader));
-            } catch (SaveLocationException sle) {
+            } catch (DownloadException e) {
                 final File torrentFile = possibleTorrentFile;
-                activityCallback.handleSaveLocationException(new DownloadAction() {
+                activityCallback.handleDownloadException(new DownloadAction() {
                     @Override
                     public void download(File saveDirectory, boolean overwrite)
-                            throws SaveLocationException {
+                            throws DownloadException {
                         downloadManager.downloadTorrent(torrentFile, saveDirectory, overwrite);
                         downloadItems.remove(getDownloadItem(downloader));
                     }
 
                     @Override
-                    public void downloadCanceled(SaveLocationException sle) {
+                    public void downloadCanceled(DownloadException ignored) {
                         // nothing to do
                     }
 
-                }, sle, false);
+                }, e, false);
             }
         }
     }
@@ -122,17 +122,17 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
             shareTorrentFile(torrentFile);
             downloadManager.downloadTorrent(torrentFile, null, false);
             downloadItems.remove(getDownloadItem(downloader));
-        } catch (SaveLocationException sle) {
+        } catch (DownloadException e) {
             final File torrentFileFinal = torrentFile;
-            activityCallback.handleSaveLocationException(new DownloadAction() {
+            activityCallback.handleDownloadException(new DownloadAction() {
                 @Override
-                public void download(File saveDirectory, boolean overwrite) throws SaveLocationException {
+                public void download(File saveDirectory, boolean overwrite) throws DownloadException {
                     downloadManager.downloadTorrent(torrentFileFinal, saveDirectory, overwrite);
                     downloadItems.remove(getDownloadItem(downloader));
                 }
 
                 @Override
-                public void downloadCanceled(SaveLocationException sle) {
+                public void downloadCanceled(DownloadException ex) {
                     if (!torrentManager.isDownloadingTorrent(torrentFileFinal)) {
                         // need to delete to clean up the torrent file in the
                         // incomplete directory
@@ -140,7 +140,7 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
                     }
                 }
 
-            }, sle, false);
+            }, e, false);
         }
     }
 

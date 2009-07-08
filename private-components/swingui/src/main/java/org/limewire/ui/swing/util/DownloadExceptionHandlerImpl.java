@@ -15,7 +15,7 @@ import javax.swing.JToggleButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -28,25 +28,25 @@ import org.limewire.util.FileUtils;
 import com.google.inject.Inject;
 
 /**
- * A universal handler for SaveLocationException messages generated while
+ * A universal handler for DownloadExceptions generated while
  * performing downloads.
  */
-public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHandler {
-    private static final Log LOG = LogFactory.getLog(SaveLocationExceptionHandlerImpl.class);
+public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
+    private static final Log LOG = LogFactory.getLog(DownloadExceptionHandlerImpl.class);
 
     private final SaveLocationManager saveLocationManager;
 
     /**
-     * Constructs a SaveLocationExceptionHandler with the specified
+     * Constructs a DownloadExceptionHandler with the specified
      * SaveLocationManager.
      */
     @Inject
-    public SaveLocationExceptionHandlerImpl(SaveLocationManager saveLocationManager) {
+    public DownloadExceptionHandlerImpl(SaveLocationManager saveLocationManager) {
         this.saveLocationManager = saveLocationManager;
     }
 
     /**
-     * Handles the supplied SaveLocationException. The method may take one of
+     * Handles the supplied DownloadException. The method may take one of
      * several actions: eat the exception, try downloading again using the
      * supplied <code>downloadAction</code>, or popup a dialog to try and save
      * the download in a new location.
@@ -58,60 +58,60 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
      *        support a new file name, a directory chooser is opened that will
      *        allow the
      */
-    public void handleSaveLocationException(final DownloadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveFileName) {
+    public void handleDownloadException(final DownloadAction downLoadAction,
+            final DownloadException e, final boolean supportNewSaveFileName) {
 
         // Create Runnable to execute task on UI thread. This is necessary
         // if the handler method has been invoked from a background thread.
         SwingUtils.invokeLater(new Runnable() {
             public void run() {
-                handleException(downLoadAction, sle, supportNewSaveFileName);
+                handleException(downLoadAction, e, supportNewSaveFileName);
             }
         });
     }
 
     /**
-     * Handles the specified SaveLocationException. The method may prompt the
+     * Handles the specified DownloadException. The method may prompt the
      * user for input, and should be executed from the UI thread.
      */
     private void handleException(final DownloadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveFileName) {
+            final DownloadException e, final boolean supportNewSaveFileName) {
 
-        if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+        if (e.getErrorCode() == DownloadException.LocationCode.FILE_ALREADY_DOWNLOADING) {
             // ignore, just return because we are already downloading this file
-            downLoadAction.downloadCanceled(sle);
-            showErrorMessage(sle);
+            downLoadAction.downloadCanceled(e);
+            showErrorMessage(e);
             return;
         }
 
-        // check to make sure this is a SaveLocationException we can handle
-        if ((sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS)
-                && (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO)) {
+        // check to make sure this is a DownloadException we can handle
+        if ((e.getErrorCode() != DownloadException.LocationCode.FILE_ALREADY_EXISTS)
+                && (e.getErrorCode() != DownloadException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO)) {
             // Create user message.
-            downLoadAction.downloadCanceled(sle);
-            showErrorMessage(sle);
+            downLoadAction.downloadCanceled(e);
+            showErrorMessage(e);
             return;
         }
 
         // select a save file name
         File saveFile = null;
         if (supportNewSaveFileName && SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue()) {
-            saveFile = getAutoSaveFile(sle);
+            saveFile = getAutoSaveFile(e);
         } else {
             if (supportNewSaveFileName) {
                 saveFile = FileChooser.getSaveAsFile(GuiUtils.getMainFrame(), I18n
-                        .tr("Save File As..."), sle.getFile());
+                        .tr("Save File As..."), e.getFile());
             } else {
-                saveFile = sle.getFile();
+                saveFile = e.getFile();
                 if (saveFile != null && saveFile.exists()) {
-                    createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveFileName);
+                    createOverwriteDialogue(saveFile, downLoadAction, e, supportNewSaveFileName);
                     return;
                 }
             }
 
             if (saveFile == null) {
                 // null saveFile means user selected cancel
-                downLoadAction.downloadCanceled(sle);
+                downLoadAction.downloadCanceled(e);
                 return;
             }
         }
@@ -121,10 +121,10 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         download(downLoadAction, supportNewSaveFileName, saveFile, saveFile.exists());
     }
 
-    private void showErrorMessage(final SaveLocationException sle) {
+    private void showErrorMessage(final DownloadException e) {
         String message = null;
 
-        switch (sle.getErrorCode()) {
+        switch (e.getErrorCode()) {
         case FILE_ALREADY_DOWNLOADING:
             message = I18n.tr("Sorry, this file is already being downloaded.");
             break;
@@ -144,7 +144,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         }
 
         // Log exception and display user message.
-        LOG.error(message, sle);
+        LOG.error(message, e);
         FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), message, I18n.tr("Download"),
                 JOptionPane.INFORMATION_MESSAGE);
     }
@@ -153,9 +153,9 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
      * Iterates through possible file names until an available one is found and
      * is returned.
      */
-    private File getAutoSaveFile(final SaveLocationException sle) {
+    private File getAutoSaveFile(final DownloadException e) {
         File saveFile;
-        saveFile = sle.getFile();
+        saveFile = e.getFile();
         int index = 1;
         String fileName = FileUtils.getFilenameNoExtension(saveFile.getName());
         String extension = FileUtils.getFileExtension(saveFile);
@@ -171,20 +171,20 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
     }
 
     /**
-     * Downloads the given file using the supplied download action. And handles
-     * any possible SaveLocationExceptions.
+     * Downloads the given file using the supplied download action and handles
+     * any possible DownloadExceptions.
      */
     private void download(final DownloadAction downLoadAction, final boolean supportNewSaveDir,
             File saveFile, boolean overwrite) {
         try {
             downLoadAction.download(saveFile, overwrite);
-        } catch (SaveLocationException e1) {
-            handleSaveLocationException(downLoadAction, e1, supportNewSaveDir);
+        } catch (DownloadException e1) {
+            handleDownloadException(downLoadAction, e1, supportNewSaveDir);
         }
     }
 
     private void createOverwriteDialogue(final File saveFile, final DownloadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveFileName) {
+            final DownloadException ex, final boolean supportNewSaveFileName) {
 
         final JDialog dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
@@ -211,7 +211,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             @Override
             public void actionPerformed(ActionEvent e) {
                 dialog.dispose();
-                File saveFile = sle.getFile();
+                File saveFile = ex.getFile();
                 File oldSaveFile = saveFile;
                 File oldSaveFileParent = saveFile != null && saveFile.getParentFile() != null ? saveFile
                         .getParentFile()
@@ -221,7 +221,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
                 
                 File newSaveParent = saveFile;
                 if (newSaveParent != null && new File(newSaveParent, oldSaveFile.getName()).exists()) {
-                    createOverwriteDialogue(newSaveParent, downLoadAction, sle, supportNewSaveFileName);
+                    createOverwriteDialogue(newSaveParent, downLoadAction, ex, supportNewSaveFileName);
                     return;
                 }
             }

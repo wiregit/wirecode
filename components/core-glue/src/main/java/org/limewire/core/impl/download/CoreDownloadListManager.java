@@ -21,7 +21,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -146,14 +146,14 @@ public class CoreDownloadListManager implements DownloadListManager {
 	}
 
 	@Override
-	public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults) throws SaveLocationException {
+	public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults) throws DownloadException {
 	   return addDownload(search, searchResults, null, false);
 	}
 	
 
     @Override
     public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults,
-            File saveFile, boolean overwrite) throws SaveLocationException {
+            File saveFile, boolean overwrite) throws DownloadException {
         // Train the spam filter even if the results weren't rated as spam
         spamManager.handleUserMarkedGood(searchResults);
         
@@ -173,7 +173,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	
 	private DownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
                                           GUID queryGuid, File saveFile, boolean overwrite, Category category)
-            throws SaveLocationException {
+            throws DownloadException {
         
         File saveDir = null;
         String fileName = null;
@@ -328,14 +328,14 @@ public class CoreDownloadListManager implements DownloadListManager {
 
 
     @Override
-    public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws SaveLocationException {
+    public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws DownloadException {
         Downloader downloader =  downloadManager.downloadTorrent(uri, overwrite);
         DownloadItem downloadItem = (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
         return downloadItem;
     }
     
     @Override
-    public DownloadItem addDownload(MagnetLink magnet, File saveFile, boolean overwrite) throws SaveLocationException {
+    public DownloadItem addDownload(MagnetLink magnet, File saveFile, boolean overwrite) throws DownloadException {
         File saveDir = null;
         String fileName = null;
         
@@ -355,7 +355,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     @Override
     public DownloadItem addTorrentDownload(File file, File saveDirectory, boolean overwrite)
-            throws SaveLocationException {
+            throws DownloadException {
         Downloader downloader = downloadManager.downloadTorrent(file, saveDirectory, overwrite);
 		return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
     }

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -97,10 +97,10 @@ public interface ActivityCallback extends DownloadCallback
     public String translate(String s);
     
     /**
-     * Handles the supplied SaveLocation exception by prompting the user for a new savelocation 
-     * or whether to overwrite the file. 
+     * Handles the supplied DownloadException, for example by prompting the
+     * user for a new save location or whether to overwrite the file. 
      */
-    void handleSaveLocationException(DownloadAction downLoadAction, SaveLocationException sle, boolean supportsNewSaveDir);
+    void handleDownloadException(DownloadAction downLoadAction, DownloadException e, boolean supportsNewSaveDir);
     
     /**
      * Validates with the user that the torrent upload should be cancelled. 

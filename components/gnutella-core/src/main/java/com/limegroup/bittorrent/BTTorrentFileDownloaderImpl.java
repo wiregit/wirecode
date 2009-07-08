@@ -21,7 +21,7 @@ import org.apache.http.params.HttpParams;
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
@@ -285,7 +285,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
-            throws SaveLocationException {
+            throws DownloadException {
     }
 
     @Override

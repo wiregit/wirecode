@@ -12,17 +12,16 @@ public interface DownloadAction {
      * 
      * @param saveFile Location to save the downloaded file.
      * @param overwrite Whether to overwrite or not if the file exists already.
-     * @throws SaveLocationException If the save fails an exception is returned
+     * @throws DownloadException If the save fails an exception is returned
      *         describing the problem.
      */
-    void download(File saveFile, boolean overwrite) throws SaveLocationException;
+    void download(File saveFile, boolean overwrite) throws DownloadException;
 
     /**
      * Indicates that the download was canceled because of a
-     * SaveLocationException, and that the SaveLocationHanldler did not handle
-     * it.
+     * DownloadException, and that the SaveLocationHandler did not handle it.
      * 
-     * @param sle The last known SaveLocationException for this download.
+     * @param e The last known DownloadException for this download.
      */
-    void downloadCanceled(SaveLocationException sle);
+    void downloadCanceled(DownloadException e);
 }

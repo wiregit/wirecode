@@ -18,7 +18,7 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
@@ -170,7 +170,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         try {
             dlItem = downloader.addDownload(null, toDownload);
             waitForDownloadCompletion(dlItem);
-        } catch (SaveLocationException e) {
+        } catch (DownloadException e) {
             e.printStackTrace();
             fail("Failed to save the file: " + e.getMessage());
         }

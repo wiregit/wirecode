@@ -161,7 +161,7 @@ public interface DownloadItem extends PropertiableFile {
     /**
      * Sets the destination path and file name for the download.
      */
-    void setSaveFile(File saveFile, boolean overwrite) throws SaveLocationException;
+    void setSaveFile(File saveFile, boolean overwrite) throws DownloadException;
     
     /** Returns the file under which the download will be saved when complete.  
      * Counterpart to setSaveFile. */
