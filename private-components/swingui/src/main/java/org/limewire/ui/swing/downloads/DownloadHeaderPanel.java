@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -78,6 +79,8 @@ public class DownloadHeaderPanel extends JXPanel {
     private Icon moreButtonArrow;
     @Resource
     private Icon moreButtonArrowDownState;
+    @Resource
+    private Font hyperlinkFont;
 
 
     @Resource
@@ -212,13 +215,16 @@ public class DownloadHeaderPanel extends JXPanel {
 
     private void initializeComponents(){        
         clearFinishedNowButton = new HyperlinkButton(clearFinishedNowAction);
+        clearFinishedNowButton.setFont(hyperlinkFont);
         clearFinishedNowButton.setVisible(false);
         clearFinishedLabel = new JLabel(clearFinishedNowButton.getText());
+        clearFinishedLabel.setFont(hyperlinkFont);
         clearFinishedLabel.setFont(clearFinishedNowButton.getFont());
         clearFinishedLabel.setPreferredSize(clearFinishedNowButton.getPreferredSize());
         clearFinishedLabel.setEnabled(false);
 
         fixStalledButton = new HyperlinkButton(fixStalledAction);
+        fixStalledButton.setFont(hyperlinkFont);
         fixStalledButton.setVisible(false);
 
         initializeMoreButton();
@@ -314,11 +320,12 @@ public class DownloadHeaderPanel extends JXPanel {
         menu.add(downloadSettingsAction);
 
         moreButton = new HyperlinkButton(I18n.tr("Options"));
+        moreButton.setFont(hyperlinkFont);
         moreButtonDefaultForeground = moreButton.getForeground();
         moreButton.setIcon(moreButtonArrow);
         moreButton.setHorizontalTextPosition(SwingConstants.LEFT);
         moreButton.setFocusPainted(false);
-        moreButton.setBorder(BorderFactory.createEmptyBorder(2,6,3,6));
+        moreButton.setBorder(BorderFactory.createEmptyBorder(1,6,1,6));
         moreButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
