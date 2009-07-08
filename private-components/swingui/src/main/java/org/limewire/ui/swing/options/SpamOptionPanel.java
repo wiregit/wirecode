@@ -5,12 +5,12 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -23,6 +23,8 @@ public class SpamOptionPanel extends OptionPanel {
     private SpamManager spamManager;
     
     private JButton clearSpamButton;
+    
+    private final String description = I18n.tr("Reset the Spam filter by clearing all files marked as spam");
     
     @Inject
     public SpamOptionPanel(SpamManager spamManager) {   
@@ -48,7 +50,7 @@ public class SpamOptionPanel extends OptionPanel {
             }
         });
         
-        p.add(new JLabel(I18n.tr("Reset the Spam filter by clearing all files marked as spam")), "push");
+        p.add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
         p.add(clearSpamButton);
         
         return p;
