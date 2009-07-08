@@ -99,7 +99,6 @@ public class Browser extends MozillaPanel {
             loadingPane.add(loadingPaneInner, BorderLayout.CENTER);
             
             add(loadingPane, BorderLayout.SOUTH);
-            loadingPane.setCollapsed(true);
         }
     }
     
