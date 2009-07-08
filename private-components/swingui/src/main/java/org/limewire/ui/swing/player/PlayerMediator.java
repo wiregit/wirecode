@@ -582,7 +582,7 @@ public class PlayerMediator {
      * Statistics are updated and stored via PropertiesSetting objects. During inspection,
      * statistics are extracted from the properties. 
      */
-    private class PlayerInspector implements Inspectable, Serializable {
+    private class PlayerInspector implements Inspectable {
         
         // key == percent, value == num times user stopped playing at percent
         private final Properties percentPlayedProp = SwingUiSettings.MEDIA_PLAYER_PERCENT_PLAYED.get();
