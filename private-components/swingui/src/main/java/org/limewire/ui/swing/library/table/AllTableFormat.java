@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library.table;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.jdesktop.swingx.decorator.SortKey;
@@ -13,6 +12,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
@@ -58,7 +58,7 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
         case PLAY_INDEX: return baseObject;
         case CREATED_INDEX:
             long creationTime = baseObject.getCreationTime();
-            return (creationTime >= 0) ? new Date(creationTime) : null;
+            return (creationTime >= 0) ? GuiUtils.msec2DateTime(creationTime) : null;
         case NAME_INDEX: return baseObject;
         case SIZE_INDEX: return baseObject.getSize();
         case TYPE_INDEX:
