@@ -155,8 +155,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
         add(libraryButton, "gapleft 12, gapbottom 2, gaptop 0");
-        add(friendButton, "gapleft 6, gapbottom 2, gaptop 0");
-        add(storeButton, "gapleft 1, gapbottom 2, gaptop 0, hidemode 3");
+        add(storeButton, "gapleft 1, gapbottom 2, gaptop 0");
+        add(friendButton, "gapleft 6, gapbottom 2, gaptop 0, hidemode 3");
 
         add(searchBar, "gapleft 11, gapbottom 2, gaptop 0");
         add(searchList, "gapleft 10, gaptop 3, gapbottom 1, grow, push");
