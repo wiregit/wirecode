@@ -12,7 +12,6 @@ import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.filter.Filter;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
@@ -69,8 +68,8 @@ abstract class LocalFileListImpl implements LocalFileList {
     
     @Override
     public boolean contains(URN urn) {
-        if(urn instanceof URNImpl) {
-            return containsCoreUrn(((URNImpl)urn).getUrn());
+        if(urn instanceof com.limegroup.gnutella.URN) {
+            return containsCoreUrn((com.limegroup.gnutella.URN)urn);
         } else {
             return false;
         }

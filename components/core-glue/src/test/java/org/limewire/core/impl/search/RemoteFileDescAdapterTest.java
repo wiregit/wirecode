@@ -13,7 +13,6 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.AltLocRemoteHost;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.RfdRemoteHost;
 import org.limewire.friend.api.Friend;
@@ -81,7 +80,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         assertEquals(fileName1, remoteFileDescAdapter1.getFileName());
         assertEquals(fileSize, remoteFileDescAdapter1.getSize());
         assertEquals(remoteFileDesc1, remoteFileDescAdapter1.getRfd());
-        assertEquals(new URNImpl(urn1), remoteFileDescAdapter1.getUrn());
+        assertEquals(urn1, remoteFileDescAdapter1.getUrn());
         assertFalse(remoteFileDescAdapter1.isLicensed());
         assertFalse(remoteFileDescAdapter1.isSpam());
 
@@ -288,7 +287,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         //  ensure the address' are correctly set.  Use a Connectable for the altloc.        
         locs.add(connectable);
         RemoteFileDescAdapter anonRfdAdapter = new RemoteFileDescAdapter(rfd, locs);
-        List<RemoteHost> hosts1 = anonRfdAdapter.getSources();
+        Iterable<RemoteHost> hosts1 = anonRfdAdapter.getSources();
         locs.remove(connectable);
         boolean rfdRemoteHostFound = false;
         boolean altLocFound = false;
@@ -309,7 +308,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         //  ensure the address' are correctly set.  Use a regular IpPort instead of Connectable.
         locs.add(ipPort);
         RemoteFileDescAdapter friendRfdAdapter = new RemoteFileDescAdapter(rfd, locs, friendPresence);
-        List<RemoteHost> hosts2 = friendRfdAdapter.getSources();
+        Iterable<RemoteHost> hosts2 = friendRfdAdapter.getSources();
         locs.remove(ipPort);
         rfdRemoteHostFound = false;
         altLocFound = false;
@@ -328,8 +327,22 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         assertTrue(altLocFound);
         
         // Test duplicate getSources() call, ensure they are the same
-        List<RemoteHost> hosts2repeat = friendRfdAdapter.getSources();
-        assertEquals(hosts2, hosts2repeat);
+        Iterable<RemoteHost> hosts2repeat = friendRfdAdapter.getSources();
+        rfdRemoteHostFound = false;
+        altLocFound = false;
+        for ( RemoteHost host : hosts2repeat ) {
+            if (host instanceof RfdRemoteHost) {
+                assertSame(address, host.getFriendPresence().getFeature(AddressFeature.ID).getFeature());
+                rfdRemoteHostFound = true;
+            } 
+            else if (host instanceof AltLocRemoteHost) {
+                Connectable addressCollected = (Connectable) host.getFriendPresence().getFeature(AddressFeature.ID).getFeature();
+                assertSame("hello", addressCollected.getAddress());
+                altLocFound = true;
+            }
+        }
+        assertTrue(rfdRemoteHostFound);
+        assertTrue(altLocFound);
         
         context.assertIsSatisfied();
         
@@ -489,7 +502,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         
         RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
         
-        assertEquals(new URNImpl(urn), rfdAdapter.getUrn());
+        assertEquals(urn, rfdAdapter.getUrn());
         
         context.assertIsSatisfied();
     }

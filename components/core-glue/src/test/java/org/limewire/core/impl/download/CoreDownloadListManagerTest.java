@@ -17,7 +17,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.spam.SpamManager;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.download.listener.ItunesDownloadListener;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
 import org.limewire.core.impl.download.listener.TorrentDownloadListener;
@@ -193,15 +192,15 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         assertEquals(4, downloads.size());
 
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn1)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn2)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn3)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn4)));
+        assertTrue(coreDownloadListManager.contains(urn1));
+        assertTrue(coreDownloadListManager.contains(urn2));
+        assertTrue(coreDownloadListManager.contains(urn3));
+        assertTrue(coreDownloadListManager.contains(urn4));
 
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn1)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn2)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn3)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn4)));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn1));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn2));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn3));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn4));
 
         context.checking(new Expectations() {
             {
@@ -220,29 +219,29 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         assertEquals(4, downloads.size());
 
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn1)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn2)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn3)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn4)));
+        assertTrue(coreDownloadListManager.contains(urn1));
+        assertTrue(coreDownloadListManager.contains(urn2));
+        assertTrue(coreDownloadListManager.contains(urn3));
+        assertTrue(coreDownloadListManager.contains(urn4));
 
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn1)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn2)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn3)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn4)));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn1));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn2));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn3));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn4));
 
         coreDownloadListManager.clearFinished();
 
         assertEquals(2, downloads.size());
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn1)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn2)));
+        assertTrue(coreDownloadListManager.contains(urn1));
+        assertTrue(coreDownloadListManager.contains(urn2));
 
-        assertFalse(coreDownloadListManager.contains(new URNImpl(urn3)));
-        assertFalse(coreDownloadListManager.contains(new URNImpl(urn4)));
+        assertFalse(coreDownloadListManager.contains(urn3));
+        assertFalse(coreDownloadListManager.contains(urn4));
 
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn1)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn2)));
-        assertNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn3)));
-        assertNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn4)));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn1));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn2));
+        assertNull(coreDownloadListManager.getDownloadItem(urn3));
+        assertNull(coreDownloadListManager.getDownloadItem(urn4));
 
         context.assertIsSatisfied();
     }
@@ -371,16 +370,16 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         coreDownloadListManager.clearFinished();
 
         assertEquals(2, downloads.size());
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn1)));
-        assertTrue(coreDownloadListManager.contains(new URNImpl(urn2)));
+        assertTrue(coreDownloadListManager.contains(urn1));
+        assertTrue(coreDownloadListManager.contains(urn2));
 
-        assertFalse(coreDownloadListManager.contains(new URNImpl(urn3)));
-        assertFalse(coreDownloadListManager.contains(new URNImpl(urn4)));
+        assertFalse(coreDownloadListManager.contains(urn3));
+        assertFalse(coreDownloadListManager.contains(urn4));
 
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn1)));
-        assertNotNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn2)));
-        assertNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn3)));
-        assertNull(coreDownloadListManager.getDownloadItem(new URNImpl(urn4)));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn1));
+        assertNotNull(coreDownloadListManager.getDownloadItem(urn2));
+        assertNull(coreDownloadListManager.getDownloadItem(urn3));
+        assertNull(coreDownloadListManager.getDownloadItem(urn4));
 
         context.assertIsSatisfied();
     }

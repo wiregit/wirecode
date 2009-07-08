@@ -654,19 +654,12 @@ public final class NetworkUtils {
         if (!NetworkUtils.isValidPort(port))
             throw new InvalidDataException("Bad Port: " + port);
         
-        InetAddress host;
-        try {
-            byte[] ip = new byte[ipport.length - 2];
-            System.arraycopy(ipport, 0, ip, 0, ip.length);
-            host = InetAddress.getByAddress(ip);
-        } catch(UnknownHostException uhe) {
-            throw new InvalidDataException("bad host.");
+        IP ip = new IP(ipport, 0);
+        if(!NetworkUtils.isValidAddress(ip)) {
+            throw new InvalidDataException("invalid addr: " + ip);
         }
         
-        if (!NetworkUtils.isValidAddress(host))
-            throw new InvalidDataException("invalid addr: " + host);
-        
-        return new IpPortImpl(new InetSocketAddress(host, port));
+        return new MemoryOptimizedIpPortImpl(ip, shortport);
     }
     
     /**

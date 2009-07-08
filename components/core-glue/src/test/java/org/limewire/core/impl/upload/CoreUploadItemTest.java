@@ -13,7 +13,6 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
@@ -567,7 +566,7 @@ public class CoreUploadItemTest extends BaseTestCase {
                 
             }});
 
-        assertEquals(new URNImpl(urn), upload1.getUrn());
+        assertEquals(urn, upload1.getUrn());
         assertEquals(null, upload2.getUrn());
         
         context.assertIsSatisfied();

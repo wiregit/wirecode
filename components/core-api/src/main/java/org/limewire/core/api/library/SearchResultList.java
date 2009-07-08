@@ -10,13 +10,13 @@ import ca.odell.glazedlists.EventList;
 public interface SearchResultList {
         
     /** Adds a new file into the list. */
-    public void addNewResult(SearchResult file);
+    void addNewResult(SearchResult file);
     
     /** Removes an existing file from the list. */
-    public void removeResult(SearchResult file);
+    void removeResult(SearchResult file);
     
     /** Sets all files in the list to be this collection of files. */
-    public void setNewResults(Collection<SearchResult> files);
+    void setNewResults(Collection<SearchResult> files);
     
     /** An {@link EventList} that describes this list. */
     EventList<SearchResult> getModel();
@@ -25,5 +25,8 @@ public interface SearchResultList {
     EventList<SearchResult> getSwingModel();
     
     /** The size of the list. */
-    public int size();
+    int size();
+    
+    /** Clears all items out of the list. */
+    void clear();
 }

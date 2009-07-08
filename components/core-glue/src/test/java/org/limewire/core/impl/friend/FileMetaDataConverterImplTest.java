@@ -22,6 +22,7 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.BaseTestCase;
 
+import com.google.common.collect.Iterables;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -97,7 +98,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         assertEquals(creationTime, item.getProperty(FilePropertyKey.DATE_CREATED));
         
         // Ensure the correct presence was swapped into the RemoteFileItem
-        assertEquals(presence, item.getSources().get(0).getFriendPresence());
+        assertEquals(presence, Iterables.get(item.getSources(), 0).getFriendPresence());
       
         context.assertIsSatisfied();
     }
@@ -172,7 +173,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         // Ensure, in a round-about fashion, the correct presence was swapped into the RemoteFileItem
         //  and that it has the matching address
         assertEquals(swapAddress,
-                item.getSources().get(0).getFriendPresence().getFeature(AddressFeature.ID).getFeature());
+                Iterables.get(item.getSources(), 0).getFriendPresence().getFeature(AddressFeature.ID).getFeature());
         
         context.assertIsSatisfied();
     }

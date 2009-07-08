@@ -9,7 +9,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.InvalidURN;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.impl.FileMetaDataImpl;
@@ -185,7 +184,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     public org.limewire.core.api.URN getUrn() {
         URN urn = fileDesc.getSHA1Urn();
         if(urn != null) {
-            return new URNImpl(urn);
+            return urn;
         } else {
             return InvalidURN.instance;
         }

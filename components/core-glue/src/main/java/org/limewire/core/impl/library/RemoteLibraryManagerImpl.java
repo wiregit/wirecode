@@ -279,7 +279,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         @Override
         public void setNewResults(Collection<SearchResult> files) {
             throw new UnsupportedOperationException();   
-        }        
+        }
+        
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     private static class FriendLibraryImpl implements FriendLibrary {
@@ -437,6 +442,11 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public void setNewResults(Collection<SearchResult> file) {
             throw new UnsupportedOperationException();
         }
+        
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
 
         void commit() {
         }
@@ -471,8 +481,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
 
     private static class PresenceLibraryImpl implements PresenceLibrary {
-        protected final TransformedList<SearchResult, SearchResult> eventList;
-        protected volatile TransformedList<SearchResult, SearchResult> swingEventList;
+        protected final EventList<SearchResult> eventList;
+        protected volatile EventList<SearchResult> swingEventList;
         private final FriendPresence presence;
         private volatile LibraryState state = LibraryState.LOADING;
         
@@ -534,6 +544,11 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             } finally {
                 eventList.getReadWriteLock().writeLock().unlock();
             }
+        }
+        
+        @Override
+        public void clear() {
+            eventList.clear();
         }
 
         @Override

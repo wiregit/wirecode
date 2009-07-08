@@ -11,7 +11,6 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
@@ -290,7 +289,7 @@ class CoreUploadItem implements UploadItem {
     public URN getUrn() {
         com.limegroup.gnutella.URN urn = uploader.getUrn();
         if(urn != null) {
-            return new URNImpl(urn);
+            return urn;
         }
         return null;
     }

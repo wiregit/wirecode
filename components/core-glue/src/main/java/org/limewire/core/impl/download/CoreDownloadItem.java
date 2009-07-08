@@ -18,7 +18,6 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.impl.RemoteHostRFD;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendManager;
@@ -383,10 +382,7 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public URN getUrn() {
         com.limegroup.gnutella.URN urn = downloader.getSha1Urn();
-        if(urn != null) {
-            return new URNImpl(urn);
-        }
-        return null;
+        return urn;
     }
 
     @Override

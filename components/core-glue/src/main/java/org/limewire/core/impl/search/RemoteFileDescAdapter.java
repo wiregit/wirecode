@@ -1,6 +1,6 @@
 package org.limewire.core.impl.search;
 
-import java.util.ArrayList;
+import java.util.AbstractList;
 import java.util.List;
 import java.util.Set;
 
@@ -9,7 +9,6 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.core.settings.SearchSettings;
@@ -21,6 +20,7 @@ import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -50,12 +50,8 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final RemoteFileDesc rfd;
     private final String extension;
     private final List<IpPort> locs;
-    private final URN wrapperUrn;
     private final Category category;
     private final int quality;
-    
-    /** Cached lists of sources from {@link #getSources()} */
-    private List<RemoteHost> remoteHosts;
     
     /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
     private int relevance = -1;
@@ -77,9 +73,8 @@ public class RemoteFileDescAdapter implements SearchResult {
             Set<? extends IpPort> locs,
             FriendPresence friendPresence) {    
         this.rfd = rfd;
-        this.locs = new ArrayList<IpPort>(locs);
+        this.locs = ImmutableList.copyOf(locs);
         this.friendPresence = friendPresence;
-        this.wrapperUrn = rfd.getSHA1Urn() == null ? null : new URNImpl(rfd.getSHA1Urn());
         this.extension = FileUtils.getFileExtension(rfd.getFileName());
         this.category = CategoryConverter.categoryForExtension(extension);
         this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
@@ -90,13 +85,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.rfd = copy.rfd;
         this.locs = copy.locs;
         this.friendPresence = presence;
-        this.wrapperUrn = copy.wrapperUrn;
         this.extension = copy.extension;
         this.category = copy.category;
         this.quality = copy.quality;
         
         // and other items too, if they were constructed..
-        this.remoteHosts = copy.remoteHosts;
         this.relevance = copy.relevance;
     }
 
@@ -219,26 +212,35 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     @Override
     public List<RemoteHost> getSources() {
-        
-        // Check that the list has not already been retrieved
-        if (remoteHosts != null) {
-            return remoteHosts;
-        }
-        
-        // Initialise a new list
-        remoteHosts = new ArrayList<RemoteHost>();
-        
-        int maxAltSourcesToAdd = SearchSettings.ALT_LOCS_TO_DISPLAY.getValue();
-        
-        // Add the RfdRemoteHost for the FriendPresence
-        remoteHosts.add(new RfdRemoteHost(friendPresence, rfd));
-        
-        // Add a specific number of the altlocs
-        for(int i = 0; i < maxAltSourcesToAdd && i < locs.size(); i++) {
-            remoteHosts.add(new AltLocRemoteHost(locs.get(i)));
-        }
-    
-        return remoteHosts;
+        // This returns a pass-through list for memory optimizations.
+        // Do not cache this or the contents of this without doing
+        // memory profiling and ensuring things are OK.
+        return new AbstractList<RemoteHost>() {
+            
+          @Override public void clear() {
+              throw new UnsupportedOperationException();
+          }
+          
+          @Override public RemoteHost get(int index) {
+              if(index == 0) {
+                  return new RfdRemoteHost(friendPresence, rfd);
+              } else if(index - 1 < SearchSettings.ALT_LOCS_TO_DISPLAY.getValue()) {
+                  return new AltLocRemoteHost(locs.get(index-1));
+              } else {
+                  throw new IndexOutOfBoundsException("index: " + index + ", size: " + size());
+              }
+          }
+          @Override public boolean isEmpty() {
+            return false;
+          }
+          
+          @Override public RemoteHost remove(int index) {
+              throw new UnsupportedOperationException();
+          }
+          @Override public int size() {
+              return Math.min(SearchSettings.ALT_LOCS_TO_DISPLAY.getValue(), locs.size()) + 1;
+          }
+        };
     }
    
     /**
@@ -246,7 +248,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     @Override
     public URN getUrn() {
-        return wrapperUrn;
+        return rfd.getSHA1Urn();
     }
 
     /**

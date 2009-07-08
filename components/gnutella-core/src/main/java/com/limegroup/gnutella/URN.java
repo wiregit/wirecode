@@ -43,7 +43,7 @@ import com.limegroup.gnutella.security.Tiger;
  *
  * @see java.io.Serializable
  */
-public final class URN implements HTTPHeaderValue, Serializable {
+public final class URN implements HTTPHeaderValue, Serializable, org.limewire.core.api.URN {
     
     /** The range of all types for URNs. */
     public static enum Type {        
@@ -582,7 +582,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		
         return (_urnString.equals(urn._urnString) &&
                     _urnType.equals(urn._urnType));
-        }
+    }
 
 	/**
 	 * Overrides the hashCode method of Object to meet the contract of 
@@ -612,6 +612,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	@Override
     public String toString() {
 		return _urnString;
+	}
+	
+	@Override
+	public int compareTo(org.limewire.core.api.URN o) {
+	    return toString().compareTo(o.toString());
 	}
 
 	/**

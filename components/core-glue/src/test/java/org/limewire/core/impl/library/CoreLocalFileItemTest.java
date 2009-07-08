@@ -11,7 +11,6 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.impl.URNImpl;
 import org.limewire.friend.api.FileMetaData;
 
 import com.limegroup.gnutella.URN;
@@ -279,7 +278,7 @@ public class CoreLocalFileItemTest extends TestCase {
                 will(returnValue(urn1));
             }
         });
-        assertEquals(new URNImpl(urn1), coreLocalFileItem.getUrn());
+        assertEquals(urn1, coreLocalFileItem.getUrn());
         context.assertIsSatisfied();
     }
 

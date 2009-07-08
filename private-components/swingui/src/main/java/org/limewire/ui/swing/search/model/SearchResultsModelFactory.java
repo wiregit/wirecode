@@ -59,8 +59,7 @@ public class SearchResultsModelFactory {
                 downloadExceptionHandler);
 
         // Get list of visual search results.
-        EventList<VisualSearchResult> visualSearchResults = searchResultsModel
-                .getGroupedSearchResults();
+        EventList<VisualSearchResult> visualSearchResults = searchResultsModel.getGroupedSearchResults();
 
         // Create detector to find similar results.
         SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory.newSimilarResultsDetector();
@@ -81,8 +80,7 @@ public class SearchResultsModelFactory {
         }
 
         // Add list listener to handle spam results.
-        SpamListEventListener spamListEventListener = new SpamListEventListener(
-                spamManager, similarResultsDetector);
+        SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager, similarResultsDetector);
         visualSearchResults.addListEventListener(spamListEventListener);
 
         return searchResultsModel;

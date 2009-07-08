@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +13,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -30,7 +31,7 @@ import com.google.inject.Provider;
  * An implementation of VisualSearchResult for displaying actual search 
  * results. 
  */
-class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Comparable {
+class SearchResultAdapter implements VisualSearchResult, Comparable {
 
     private static final Log LOG = LogFactory.getLog(SearchResultAdapter.class);
     
@@ -39,6 +40,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         Pattern p = Pattern.compile("[<][/]?[\\w =\"\\./:#\\-\\!\\&\\?]*[>]");
         FIND_HTML_MARKUP = p.matcher("");
     }
+    
+    private static final Comparator<RemoteHost> REMOTE_HOST_COMPARATOR = new RemoteHostComparator();
+    private static final Comparator<Friend> FRIEND_COMPARATOR = new FriendComparator();
 
     private List<SearchResult> coreResults;
     private Set<Friend> friends;
@@ -55,6 +59,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     private int relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
+    private PropertyChangeSupport changeSupport;
 
     /**
      * Constructs a SearchResultAdapter with the specified List of core results
@@ -62,23 +67,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
      */
     public SearchResultAdapter(SearchResult source, Provider<PropertiableHeadings> propertiableHeadings) {
         this.propertiableHeadings = propertiableHeadings;
-        this.remoteHosts = new TreeSet<RemoteHost>(new Comparator<RemoteHost>() {
-            @Override
-            public int compare(RemoteHost o1, RemoteHost o2) {
-                int compare = 0;
-                boolean anonymous1 = o1.getFriendPresence().getFriend().isAnonymous();
-                boolean anonymous2 = o2.getFriendPresence().getFriend().isAnonymous();
-
-                if (anonymous1 == anonymous2) {
-                    compare = o1.getFriendPresence().getFriend().getRenderName().compareToIgnoreCase(o2.getFriendPresence().getFriend().getRenderName());
-                } else if (anonymous1) {
-                    compare = 1;
-                } else if (anonymous2) {
-                    compare = -1;
-                }
-                return compare;
-            }
-        });
+        this.remoteHosts = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
         this.visible = true;
         this.childrenVisible = false;
         
@@ -242,10 +231,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         
         relevance += result.getRelevance();
         
-        List<RemoteHost> sources = result.getSources();
-        
         // Build collection of non-anonymous friends for filtering.
-        for (RemoteHost host : sources) {
+        for (RemoteHost host : result.getSources()) {
             remoteHosts.add(host);
             
             Friend friend = host.getFriendPresence().getFriend();
@@ -258,14 +245,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
                 } else {
                     // convert to TreeSet if we need to.
                     if(!(friends instanceof TreeSet)) {
-                        Set<Friend> newFriends = new TreeSet<Friend>(new Comparator<Friend>() {
-                            @Override
-                            public int compare(Friend o1, Friend o2) {
-                                String id1 = o1.getId();
-                                String id2 = o2.getId();
-                                return Objects.compareToNullIgnoreCase(id1, id2, false);
-                            }
-                        });
+                        Set<Friend> newFriends = new TreeSet<Friend>(FRIEND_COMPARATOR);
                         newFriends.addAll(friends);
                         friends = newFriends;
                     }
@@ -422,5 +402,65 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         
         SearchResultAdapter sra = (SearchResultAdapter) o;
         return getHeading().compareTo(sra.getHeading());
+    }
+    
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        if(changeSupport == null) {
+            changeSupport = new PropertyChangeSupport(this);
+        }
+        changeSupport.addPropertyChangeListener(listener);
+    }
+    
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        if(changeSupport != null) {
+            changeSupport.removePropertyChangeListener(listener);
+        }
+    }
+
+    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
+        if(changeSupport != null) {
+            changeSupport.firePropertyChange(propertyName, oldValue, newValue);
+        }
+    }
+
+    public void firePropertyChange(String propertyName, int oldValue, int newValue) {
+        if(changeSupport != null) {
+            changeSupport.firePropertyChange(propertyName, oldValue, newValue);
+        }
+    }
+
+    public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+        if(changeSupport != null) {
+            changeSupport.firePropertyChange(propertyName, oldValue, newValue);
+        }
+    }
+    
+    private static class RemoteHostComparator implements Comparator<RemoteHost> {
+        @Override
+        public int compare(RemoteHost o1, RemoteHost o2) {
+            int compare = 0;
+            boolean anonymous1 = o1.getFriendPresence().getFriend().isAnonymous();
+            boolean anonymous2 = o2.getFriendPresence().getFriend().isAnonymous();
+
+            if (anonymous1 == anonymous2) {
+                compare = o1.getFriendPresence().getFriend().getRenderName().compareToIgnoreCase(o2.getFriendPresence().getFriend().getRenderName());
+            } else if (anonymous1) {
+                compare = 1;
+            } else if (anonymous2) {
+                compare = -1;
+            }
+            return compare;
+        }
+    }
+    
+    private static class FriendComparator implements Comparator<Friend> {
+        @Override
+        public int compare(Friend o1, Friend o2) {
+            String id1 = o1.getId();
+            String id2 = o2.getId();
+            return Objects.compareToNullIgnoreCase(id1, id2, false);
+        }
     }
 }

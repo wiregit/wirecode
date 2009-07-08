@@ -155,10 +155,23 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         // TODO: We need to capture the Browse and call stop on it when the library is removed,
         //       otherwise the browse can be lingering in the background.
         browse.start(new BrowseListener() {
-            // If the library already has items in it, build up an in-transit
-            // list and do a retainAll at the end.
-            private List<SearchResult> transitList = 
-                presenceLibrary.size() != 0 ? new ArrayList<SearchResult>() : null;
+            // Build an in-transit list and replace at the end, but only if there's
+            // no existing list, or if we have enough memory to duplicate the list.
+            private final List<SearchResult> transitList;
+            
+            // (anonymous constructor)
+            {
+                int size = presenceLibrary.size();
+                if(size == 0) {
+                    transitList = null;
+                } else if (remoteLibraryManager.getAllFriendsFileList().size() > 5000) {
+                    // can run low on memory, so clear old list & add as new ones come.
+                    presenceLibrary.clear();
+                    transitList = null;
+                } else {
+                    transitList = new ArrayList<SearchResult>(size);
+                }
+            }
             
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
