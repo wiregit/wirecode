@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.StringTokenizer;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -171,9 +172,10 @@ public class FacebookLoginAction extends AbstractAction {
         });
         goBackLink.setFont(goBackFont);
         
-        JPanel goBackPanel = new JPanel(new MigLayout("insets 1 0 2 0, gap 0, fill"));
+        JPanel goBackPanel = new JPanel(new MigLayout("insets 0 0 2 0, gap 0, fill"));
         goBackPanel.setBackground(goBackBackground);
         goBackPanel.add(goBackLink, "align center");
+        goBackPanel.setBorder(BorderFactory.createMatteBorder(1,0,0,0, new Color(0xa4a4a4)));
         
         facebookLoginPanel.add(goBackPanel, BorderLayout.SOUTH);
         
