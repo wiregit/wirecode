@@ -200,8 +200,6 @@ class AboutWindow {
         //  business developers
         sb.append(I18n.tr("Behind the scenes business strategy and day-to-day affairs are handled by LimeWire\'s business developers:"));
         sb.append("<ul>\n" +  
-                "  <li>Kevin Bradshaw</li>" +                
-                "  <li>Brian Dick</li>" +
                 "  <li>Nathan Lovejoy</li>" +
                 "  <li>George Searle</li>" +
                 "</ul>");        
