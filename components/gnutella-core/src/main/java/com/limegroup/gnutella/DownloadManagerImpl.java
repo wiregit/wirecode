@@ -64,8 +64,8 @@ import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.downloader.Visitor;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
-import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
+import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -808,6 +808,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     @Override
     public synchronized Downloader downloadTorrent(URI torrentURI, final boolean overwrite)
             throws DownloadException {
+        if(!isSavedDownloadsLoaded()) {
+            throw new DownloadException(DownloadException.ErrorCode.FILES_STILL_RESUMING, null);
+        }
+        
         final BTTorrentFileDownloader torrentDownloader = coreDownloaderFactory
                 .createTorrentFileDownloader(torrentURI, true);
         initializeDownload(torrentDownloader, false);
@@ -817,6 +821,11 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     @Override
     public synchronized Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite)
             throws DownloadException {
+        
+        if(!isSavedDownloadsLoaded()) {
+            throw new DownloadException(DownloadException.ErrorCode.FILES_STILL_RESUMING, torrentFile);
+        }
+        
         if (torrentFile.length() > 1024 * 1024 * 5) {
             // torrent files are supposed to be small. If it is large it is
             // probably not a valid torrent file

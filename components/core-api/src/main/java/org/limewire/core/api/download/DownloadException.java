@@ -63,7 +63,12 @@ public class DownloadException extends IOException {
          * Throw when trying to register a torrent if the torrent manager
          * is not loaded.
          */
-        NO_TORRENT_MANAGER
+        NO_TORRENT_MANAGER, 
+        
+        /**
+         * Throw when trying to start a new download before resume downloaders have finished running.
+         */
+        FILES_STILL_RESUMING
     }
 
     /**
