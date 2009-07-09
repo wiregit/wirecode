@@ -7,14 +7,12 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -30,23 +28,15 @@ class RemoveFromLibraryAction extends AbstractAction {
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     private final LibraryManager libraryManager;
     private final SharedFileListManager sharedFileListManager;
-    private final LibraryTable libraryTable;
-    private final Provider<LibraryImageTable> libraryImageTable;
-    private final LibraryPanel libraryPanel;
     
     @Inject
     public RemoveFromLibraryAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
-            LibraryManager libraryManager, SharedFileListManager sharedFileListManager,
-            LibraryTable libraryTable, Provider<LibraryImageTable> libraryImageTable,
-            LibraryPanel libraryPanel) {
+            LibraryManager libraryManager, SharedFileListManager sharedFileListManager) {
         super(I18n.tr("Remove from Library"));
         
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryManager = libraryManager;
         this.sharedFileListManager = sharedFileListManager;
-        this.libraryTable = libraryTable;
-        this.libraryImageTable = libraryImageTable;
-        this.libraryPanel = libraryPanel;
     }
 
     @Override
@@ -65,15 +55,7 @@ class RemoveFromLibraryAction extends AbstractAction {
                     toRemove.add(item.getFile());
                 }
             }
-            
-            // removing selection from the table, when removing large amounts
-            // of files, can throw an selection index out of bounds when changing
-            // categories while still removing files.
-            if(libraryPanel.getSelectedCategory() == Category.IMAGE) {
-                libraryImageTable.get().getImageList().setSelectionInterval(-1, -1);
-            } else {
-                libraryTable.getSelectionModel().setSelectionInterval(-1, -1);
-            }
+
             if(!toRemove.isEmpty()) {
                 BackgroundExecutorService.execute(new Runnable() {
                     @Override

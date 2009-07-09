@@ -163,9 +163,11 @@ public class LibraryTable extends MouseableTable {
         if(cachedTableSorting != null) {
             cachedTableSorting.uninstall();
         }
-        
-        setModel(newLibraryTableModel);
+
+		// setting the selection model first to ensure table doesn't
+		// try to select non-existent rows
         setSelectionModel(newEventSelectionModel);
+        setModel(newLibraryTableModel);
         newEventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         
         if (cachedPlayableList != null) {

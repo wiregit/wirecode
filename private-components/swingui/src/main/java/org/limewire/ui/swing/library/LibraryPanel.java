@@ -373,7 +373,6 @@ public class LibraryPanel extends JPanel {
         selectedCategory = category;
 
         if(category != Category.IMAGE) {
-            tableListLayout.show(tableListPanel, TABLE);
             setEventListOnTable(eventList);
             libraryTable.setupCellRenderers(category, libraryTableFormat);
             libraryTable.applySavedColumnSettings();
@@ -383,14 +382,15 @@ public class LibraryPanel extends JPanel {
             if(column != null) {
                 column.setVisible(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY);
             }
+            tableListLayout.show(tableListPanel, TABLE);
         } else {
             if(libraryImagePanel == null) {
                 createImageList();
             }
-            tableListLayout.show(tableListPanel, LIST);
             setEventListOnImages(eventList);
             // hide remove button for library
             libraryImagePanel.setShowButtons(libraryNavigatorPanel.getSelectedNavItem().getType() != NavType.LIBRARY);
+            tableListLayout.show(tableListPanel, LIST);
         }
     }
     
@@ -483,7 +483,6 @@ public class LibraryPanel extends JPanel {
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
-            
             LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
             if( navItem.getType() == NavType.PUBLIC_SHARED || (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0))
                 return !item.isShareable(); 
