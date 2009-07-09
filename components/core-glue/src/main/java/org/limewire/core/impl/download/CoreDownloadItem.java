@@ -102,7 +102,7 @@ class CoreDownloadItem implements DownloadItem {
                 downloader.stop();
                 downloader.deleteIncompleteFiles();
             }
-        }).start();
+        }, "CoreDownloadItem.cancel").start();
         // TODO there is a race condition with the delete action, the stop does
         // not happen right away. should revisit how this will be handled.
     }
