@@ -10,8 +10,8 @@ public class LimeMenuBar extends JMenuBar {
     LimeMenuBar(FileMenu fileMenu, FriendMenu friendMenu, ViewMenu viewMenu, HelpMenu helpMenu,
             ToolsMenu toolsMenu) {
         add(fileMenu);
-        add(friendMenu);
         add(viewMenu);
+        add(friendMenu);
         add(toolsMenu);
         add(helpMenu);
     }
