@@ -6,10 +6,10 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
