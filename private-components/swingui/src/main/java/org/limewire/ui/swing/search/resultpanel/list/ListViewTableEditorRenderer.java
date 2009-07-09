@@ -273,14 +273,14 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private void layoutEditorComponent(){
         searchResultTextPanel.setLayout(new MigLayout("nogrid, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         searchResultTextPanel.setOpaque(false);
-        searchResultTextPanel.add(heading, "top left, shrinkprio 200, growx, wmax pref, hidemode 3, wrap");
-        searchResultTextPanel.add(subheadingLabel, "top left, shrinkprio 200, growx, hidemode 3, wrap");
-        searchResultTextPanel.add(metadataLabel, "top left, shrinkprio 200, hidemode 3");
+        searchResultTextPanel.add(heading, "left, shrinkprio 200, growx, wmax pref, hidemode 3, wrap");
+        searchResultTextPanel.add(subheadingLabel, "left, shrinkprio 200, growx, hidemode 3, wrap");
+        searchResultTextPanel.add(metadataLabel, "left, shrinkprio 200, hidemode 3");
 
         editorComponent.setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         editorComponent.add(similarResultIndentation, "growy, hidemode 3, shrinkprio 0");
-        editorComponent.add(itemIconButton, "top left, gaptop 6, gapleft 4, shrinkprio 0");
-        editorComponent.add(searchResultTextPanel, "top left, gapleft 4, growy, growx, shrinkprio 200, growprio 200, push");
+        editorComponent.add(itemIconButton, "left, aligny 50%, gapleft 4, shrinkprio 0");
+        editorComponent.add(searchResultTextPanel, "left, , aligny 50%, gapleft 4, growx, shrinkprio 200, growprio 200, push");
         editorComponent.add(downloadSourceCount, "gapbottom 3, gapright 2, shrinkprio 0");
         editorComponent.add(new JLabel(dividerIcon), "shrinkprio 0");
         //TODO: better number for wmin
@@ -447,6 +447,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             html = html.replace(HTML, "").replace(CLOSING_HTML_TAG, "");
             html = HTML + pm.getKey() + ":" + html + CLOSING_HTML_TAG;
             metadataLabel.setText(html);
+            //prevent our little friend from dancing up and down on mouse over
+            metadataLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, metadataLabel.getPreferredSize().height));
         }
     }    
 
@@ -471,8 +473,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         heading.setContentType("text/html");
         heading.setEditable(false);
         heading.setCaretPosition(0);
-        heading.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);        
-        heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+        heading.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
         heading.setOpaque(false);
         heading.setFocusable(false);
         StyleSheet mainStyle = ((HTMLDocument)heading.getDocument()).getStyleSheet();
@@ -481,13 +482,18 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 "a { color: " + headingColor + "; }";
         StyleSheet newStyle = new StyleSheet();
         newStyle.addRule(rules);
-        mainStyle.addStyleSheet(newStyle);
+        mainStyle.addStyleSheet(newStyle); 
+        heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
 
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
+        subheadingLabel.setText(I18n.tr("This is sample text."));
+        subheadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, subheadingLabel.getPreferredSize().height));
 
         metadataLabel.setForeground(metadataLabelColor);
         metadataLabel.setFont(metadataFont);
+        //prevents strange movement on mouseover
+        metadataLabel.setVerticalAlignment(JLabel.TOP);
 
         downloadSourceCount.setForeground(downloadSourceCountColor);
         downloadSourceCount.setFont(downloadSourceCountFont);
