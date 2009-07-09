@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.BorderLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -11,8 +12,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -44,23 +43,28 @@ public class LabelTextField extends JPanel {
     private Provider<IconManager> iconManager;
     
     public LabelTextField(Provider<IconManager> iconManager) {
+        
         GuiUtils.assignResources(this);
         
         this.iconManager = iconManager;
         
-        label = new JLabel(folderIcon);
+        label = new JLabel();
         label.setOpaque(false);
         textField = new JTextField();
         textField.setEditable(false);
-        textField.setBorder(BorderFactory.createEmptyBorder());
+        textField.setBorder(BorderFactory.createEmptyBorder(0,2,0,0));
+        textField.setOpaque(false);
         
-        setLayout(new MigLayout("insets 2, gap 3, fillx"));
-        add(label);
-        add(textField, "growx");
+        setLayout(new BorderLayout());
+        add(label, BorderLayout.WEST);
+        add(textField, BorderLayout.CENTER);
         
         // use the colors from the textfield to paint the panel
         setBackground(UIManager.getColor("TextField.disabledBackground"));
-        setBorder(UIManager.getBorder("TextField.border"));
+        
+        
+        setBorder(BorderFactory.createCompoundBorder(UIManager.getBorder("TextField.border"),
+                BorderFactory.createEmptyBorder(2,2,2,2)));
     }
     
     @Override
