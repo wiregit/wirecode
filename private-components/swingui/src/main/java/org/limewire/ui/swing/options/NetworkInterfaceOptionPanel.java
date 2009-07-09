@@ -57,6 +57,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     @Inject
     public NetworkInterfaceOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setOpaque(false);
         
         add(getNetworkPanel(), "pushx, growx");
     }
@@ -65,9 +66,13 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout("gapy 10"));
+        p.setOpaque(false);
         
         limewireChooseRadioButton = new JRadioButton(I18n.tr("Let LimeWire choose my network interface (Recommended)"));
         meChooseRadioButton = new JRadioButton(I18n.tr("Let me choose a specific network interface"));
+        
+        limewireChooseRadioButton.setOpaque(false);
+        meChooseRadioButton.setOpaque(false);
         
         buttonGroup = new ButtonGroup();
         buttonGroup.add(limewireChooseRadioButton);

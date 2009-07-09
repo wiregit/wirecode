@@ -65,6 +65,7 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
         list.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setPreferredSize(new Dimension(150,500));
+        
         list.addListSelectionListener(new ListSelectionListener(){
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -78,6 +79,7 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel();
+        cardPanel.setOpaque(false);
 
         cardPanel.setLayout(cardLayout);
         createPanel(FIREWALL);

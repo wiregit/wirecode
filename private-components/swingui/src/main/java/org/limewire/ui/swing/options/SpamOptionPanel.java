@@ -31,6 +31,7 @@ public class SpamOptionPanel extends OptionPanel {
         this.spamManager = spamManager;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setOpaque(false);
         
         add(getClearPanel(), "pushx, growx");
     }
@@ -39,6 +40,7 @@ public class SpamOptionPanel extends OptionPanel {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout("gapy 10"));
+        p.setOpaque(false);
         
         clearSpamButton = new JButton(I18n.tr("Clear Filter"));
         clearSpamButton.addActionListener(new ActionListener(){

@@ -50,8 +50,10 @@ public class BitTorrentOptionPanel extends OptionPanel {
             @TorrentSettingsAnnotation TorrentSettings torrentSettings) {
         this.torrentManager = torrentManager;
         this.torrentSettings = torrentSettings;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
-
+        setOpaque(false);
+        
         add(getBitTorrentPanel(), "pushx, growx");
     }
 
@@ -59,6 +61,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout("gapy 10"));
+        p.setOpaque(false);
 
         limewireControl = new JRadioButton(I18n
                 .tr("Let LimeWire manage my BitTorrent settings (Recommended)"));
@@ -75,6 +78,9 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 updateState(limewireControl.isSelected());
             }
         });
+        
+        limewireControl.setOpaque(false);
+        myControl.setOpaque(false);
 
         buttonGroup = new ButtonGroup();
         buttonGroup.add(limewireControl);

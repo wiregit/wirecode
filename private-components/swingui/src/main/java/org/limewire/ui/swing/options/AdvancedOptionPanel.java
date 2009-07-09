@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +38,6 @@ public class AdvancedOptionPanel extends OptionPanel {
         setLayout(new MigLayout("insets 12 12 8 12, fill"));
         
         final JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setBackground(Color.WHITE);
         tabbedPane.addTab(I18n.tr("Files"), list[0]);
         tabbedPane.addTab(I18n.tr("Transfers"), new JPanel());
         tabbedPane.addTab(I18n.tr("System"), new JPanel());

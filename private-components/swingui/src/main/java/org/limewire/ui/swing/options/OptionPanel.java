@@ -16,7 +16,6 @@ import net.miginfocom.swing.MigLayout;
 public abstract class OptionPanel extends JPanel {
 
     public OptionPanel() {
-
     }
 
     public OptionPanel(String title) {

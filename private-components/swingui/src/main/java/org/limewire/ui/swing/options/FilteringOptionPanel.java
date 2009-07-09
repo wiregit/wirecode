@@ -52,6 +52,7 @@ public class FilteringOptionPanel extends OptionPanel {
         this.spamManager = spamManager;
         
         setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));
+        setOpaque(false);
         
         add(getBlockHostsPanel(), "pushx, growx");
         add(getAllowHostsPanel(), "pushx, growx");
@@ -107,6 +108,7 @@ public class FilteringOptionPanel extends OptionPanel {
             addButton = new JButton(I18n.tr("Add Address"));
             filterTable = new FilteringTable();
             backListCheckBox = new JCheckBox();
+            backListCheckBox.setOpaque(false);
             addButton.addActionListener(new AddAction(addressTextField, filterTable));
             
             add(new JLabel(I18n.tr("Block contact with specific people by adding their IP address")), "span, growx, wrap");
