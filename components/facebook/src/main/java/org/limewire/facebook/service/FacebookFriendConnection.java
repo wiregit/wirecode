@@ -469,6 +469,7 @@ public class FacebookFriendConnection implements FriendConnection {
     /**
      * Fetches all friends and adds them as known friends.
      */
+    @SuppressWarnings("null")
     private void fetchAllFriends() throws IOException {
         try {
             JSONArray friends = null;
@@ -878,8 +879,17 @@ public class FacebookFriendConnection implements FriendConnection {
      * Adds a friend to connection and friend manager.
      */
     void addKnownFriend(FacebookFriend friend) {
-        friends.put(friend.getId(), friend);
-        friendManager.addKnownFriend(friend);
+        String friendId = friend.getId();
+        boolean added = false;
+        synchronized (friends) {
+            if (!friends.containsKey(friendId)) {
+                friends.put(friend.getId(), friend);
+                added = true;
+            }
+        }
+        if (added) {
+            friendManager.addKnownFriend(friend);
+        }
     }
 
     /**
@@ -917,6 +927,8 @@ public class FacebookFriendConnection implements FriendConnection {
                     }
                     friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(newPresence, FriendPresenceEvent.Type.ADDED));
                 }
+            } else {
+                LOG.debugf("friend not known yet: {0}", presenceId);
             }
         }
     }
