@@ -69,19 +69,6 @@ public class FilterSettings extends LimeProps {
         FACTORY.createBooleanSetting("FILTER_GREEDY_QUERIES", true);
     
     /**
-     * Sets whether or not anomalous queries are filtered.
-     */
-    public static final BooleanSetting FILTER_ANOMALOUS_QUERIES =
-        FACTORY.createRemoteBooleanSetting("FILTER_ANOMALOUS_QUERIES",
-                true, "FilterSettings.filterAnomalousQueries");
-    
-    /**
-     * Local setting to override FILTER_ANOMALOUS_QUERIES for testing.
-     */
-    public static final BooleanSetting REALLY_FILTER_ANOMALOUS_QUERIES =
-        FACTORY.createBooleanSetting("REALLY_FILTER_ANOMALOUS_QUERIES", true);
-    
-    /**
      * An array of IP addresses that the user has banned.
      */    
     @InspectablePrimitive("blacklisted hosts")
