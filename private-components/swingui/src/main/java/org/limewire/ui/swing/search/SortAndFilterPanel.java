@@ -23,8 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.search.SearchCategory;
@@ -273,15 +271,10 @@ public class SortAndFilterPanel implements Disposable {
     /**
      * Adds the sorting and filtering components to the specified panel.
      */
-    public void layoutComponents(JPanel panel) {
-        //forces buttons to be the correct size on mac
-        listViewToggleButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, sortCombo.getPreferredSize().height));
-        tableViewToggleButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, sortCombo.getPreferredSize().height));
-        
-        panel.setLayout(new MigLayout("insets 0, gap 0!, novisualpadding, alignx 100%, aligny 50%"));
+    public void layoutComponents(JPanel panel) {        
         panel.add(sortLabel, "gapafter 5, gapbottom 2, hidemode 0");
         panel.add(sortCombo, "gapafter 10, hidemode 0");
-        panel.add(listViewToggleButton);
+        panel.add(listViewToggleButton, "right");
         panel.add(tableViewToggleButton, "gapafter 5");
     }
 
