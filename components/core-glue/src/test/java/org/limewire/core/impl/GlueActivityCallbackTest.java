@@ -236,7 +236,7 @@ public class GlueActivityCallbackTest extends BaseTestCase {
             will(throwException(e));
             
             exactly(1).of(guiCallback).handleDownloadException(with(actionCollector), with(same(e)), with(any(boolean.class)));
-            exactly(1).of(downloadManager).downloadTorrent(mockFile, null, true);
+            exactly(1).of(downloadManager).downloadTorrent(mockFile, goodFile, true);
         }});
         
         // Torrent that does not exist
@@ -251,7 +251,8 @@ public class GlueActivityCallbackTest extends BaseTestCase {
         // Good file, torrent download returns exception
         activityCallback.handleTorrent(mockFile);
         
-        // Try to redownload through the DownloadAction provided by through SLE handling
+        // Try to redownload through the DownloadAction provided by
+        // DownloadException handling
         actionCollector.getLastMatch().download(goodFile, true);
         
         context.assertIsSatisfied();
