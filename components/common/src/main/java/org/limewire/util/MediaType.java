@@ -70,7 +70,7 @@ public class MediaType implements Serializable {
                 "123", "abw", "accdb", "accde", "accdr", "accdt", "ans", "asc", "asp",
                 "bdr", "chm", "css", "csv", "dat", "db", "dif", "diz", "doc", "docm", "docx",
                 "dotm", "dotx", "dvi", "eml", "eps", "epsf", "fm", "grv", "gsa", "gts", "hlp",
-                "htm", "html", "idb", "idx", "iif", "info", "js", "jsp", "kfl", "kwd", "latex", "lif", 
+                "idb", "idx", "iif", "info", "js", "jsp", "kfl", "kwd", "latex", "lif", 
                 "lit", "log", "man", "mcw", "mdb", "mht", "mhtml", "mny", "msg", "obi", "odp", "ods", 
                 "odt", "ofx", "one", "onepkg", "ost", "pages", "pdf", "php", "pot", "potm", "potx", "pps", "ppsm",
                 "ppsx", "ppt", "pptm", "pptx", "ps", "pub", "qba", "qbb", "qdb", "qbi", "qbm", "qbw", "qbx", "qdf", 
@@ -102,7 +102,7 @@ public class MediaType implements Serializable {
             new String[] {
                 "exe", "zip", "jar", "cab", "msi", "msp",
                 "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", 
-                "iso", "jnlp", "bat", "lnk", "vbs"
+                "iso", "jnlp", "bat", "lnk"
             });            
         
     /**
@@ -122,7 +122,7 @@ public class MediaType implements Serializable {
             new String[] {
                 "mp3", "mpa", "mp1", "mpga", "mp2", 
                 "ra", "rm", "ram", "rmj",
-                "wma", "wav", "m4a", "m4p","mp4",
+                "wav", "m4a", "m4p","mp4",
                 "lqt", "ogg", "med",
                 "aif", "aiff", "aifc",
                 "au", "snd", "s3m", "aud", 
@@ -141,7 +141,7 @@ public class MediaType implements Serializable {
                 "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v", "mpgv", 
                 "vcd", "mp4", "dv", "dvd", "div", "divx", "dvx",
                 "smi", "smil", "rm", "ram", "rv", "rmm", "rmvb", 
-                "avi", "asf", "asx", "wmv", "qt", "mov",
+                "avi", "qt", "mov",
                 "fli", "flc", "flx", "flv", 
                 "wml", "vrml", "swf", "dcr", "jve", "nsv", 
                 "mkv", "ogm",
