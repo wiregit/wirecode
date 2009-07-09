@@ -36,6 +36,7 @@ class FriendMenu extends MnemonicMenu {
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     private final JSeparator addFriendSeperator;
     private final JSeparator statusSeperator;
+    private final JSeparator loginSeperator;
     private final AutoLoginService autoLoginService;
     
     @Inject
@@ -53,6 +54,7 @@ class FriendMenu extends MnemonicMenu {
         this.friendService = friendService;
         this.addFriendSeperator = new JSeparator();
         this.statusSeperator = new JSeparator();
+        this.loginSeperator = new JSeparator();
         this.autoLoginService = autoLoginService;
 
         add(friendService);
@@ -62,7 +64,7 @@ class FriendMenu extends MnemonicMenu {
         add(statusSeperator);
         add(statusActions.getAvailableMenuItem());
         add(statusActions.getDnDMenuItem());
-        addSeparator();
+        add(loginSeperator);
         add(loginMenuItem);
         add(logoutMenuItem);
 
