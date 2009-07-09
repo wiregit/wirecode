@@ -6,14 +6,16 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import net.miginfocom.swing.MigLayout;
-
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
@@ -35,29 +37,29 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.mozilla.browser.MozillaAutomation;
-import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
+import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
 import org.mozilla.interfaces.nsICookie;
 import org.mozilla.interfaces.nsICookieManager;
-import org.mozilla.interfaces.nsICookieService;
 import org.mozilla.interfaces.nsIDOMEvent;
 import org.mozilla.interfaces.nsIDOMEventListener;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMWindow2;
-import org.mozilla.interfaces.nsIIOService;
 import org.mozilla.interfaces.nsISimpleEnumerator;
 import org.mozilla.interfaces.nsISupports;
-import org.mozilla.interfaces.nsIURI;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
+import net.miginfocom.swing.MigLayout;
 
 public class FacebookLoginAction extends AbstractAction {
 
     private static final Log LOG = LogFactory.getLog(FacebookLoginAction.class);
 
-    @Resource private Font goBackFont;
+    @Resource
+    private Font goBackFont;
     @Resource private Color goBackBackground;
     
     private final FriendAccountConfiguration config;
@@ -126,16 +128,31 @@ public class FacebookLoginAction extends AbstractAction {
                     public void handleEvent(nsIDOMEvent event) {
                         String url = getUrl();
                         if (url.contains("desktopapp.php")) {
-                            nsICookieService cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookieService;1",
-                                    nsICookieService.class);
-                            nsIIOService ioService = XPCOMUtils.getServiceProxy("@mozilla.org/network/io-service;1", nsIIOService.class);
-                            nsIURI uri = ioService.newURI(url, null, null);
-                            String cookie = cookieService.getCookieStringFromHttp(uri, null, null);
-                            uri = ioService.newURI("http://facebook.com/", null, null);
-                            cookie = cookieService.getCookieStringFromHttp(uri, null, null);
-                            config.setAttribute("url", "http://facebook.com/");
-                            config.setAttribute("cookie", cookie);
-                            setUsername(config, cookie);
+                            nsICookieManager cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookiemanager;1",
+                            nsICookieManager.class);
+                            nsISimpleEnumerator enumerator = cookieService.getEnumerator();
+                            List<Cookie> cookiesCopy = new ArrayList<Cookie>();
+                            Cookie login_x = null;
+                            while(enumerator.hasMoreElements()) {                        
+                                nsICookie cookie = XPCOMUtils.proxy(enumerator.getNext(), nsICookie.class);
+                                BasicClientCookie copy = new BasicClientCookie(cookie.getName(), cookie.getValue());
+                                copy.setDomain(cookie.getHost());
+                                double expiry = cookie.getExpires();
+                                if(expiry != 0 && expiry != 1) {
+                                    long expiryMillis = (long) expiry * 1000;
+                                    copy.setExpiryDate(new Date(expiryMillis));
+                                }
+                                copy.setPath(cookie.getPath());
+                                copy.setSecure(cookie.getIsSecure());
+                                // TODO copy.setVersion();
+                                cookiesCopy.add(copy);
+                                if(copy.getName().equals("login_x")) {
+                                    login_x = copy;
+                                }
+                            }
+                            
+                            config.setAttribute("cookie", cookiesCopy);
+                            setUsername(config, login_x);
                             friendConnectionFactory.login(config);
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
@@ -205,31 +222,17 @@ public class FacebookLoginAction extends AbstractAction {
             }
         });
     }
-
-    private void setUsername(FriendAccountConfiguration config, String facebookCookies) {
-        if(facebookCookies != null) {
-            StringTokenizer allCookies = new StringTokenizer(facebookCookies, ";");
-            while(allCookies.hasMoreElements()) {
-                String cookieString = allCookies.nextToken().trim();
-                try {
-                    cookieString = URLDecoder.decode(cookieString, "UTF-8");
-                    StringTokenizer cookie = new StringTokenizer(cookieString, "=");
-                    if(cookie.hasMoreElements()) {
-                        String cookieName = cookie.nextToken();
-                        if(cookieName.equals("login_x")) {
-                            if(cookie.hasMoreElements()) {
-                                config.setUsername(extractEmail(cookie.nextToken()));
-                                return;
-                            }
-                        }
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    LOG.debugf(e, "failed to decode {0}", cookieString);
-                }
+    
+    private void setUsername(FriendAccountConfiguration config, Cookie login_x) {
+        if(login_x != null) {
+            try {
+                String value = URLDecoder.decode(login_x.getValue(), "UTF-8");
+                config.setUsername(extractEmail(value));
+            } catch (UnsupportedEncodingException e) {
+                LOG.debugf(e, "failed to decode {0}", login_x.getValue());
             }
-        
+        }
     }
-}
 
     private String extractEmail(String s) {
         int emailNameIndex = s.indexOf("\"email\"");

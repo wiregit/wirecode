@@ -1,8 +1,6 @@
 package org.limewire.facebook.service;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,19 +22,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.cookie.CookieOrigin;
-import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BestMatchSpec;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
@@ -90,7 +83,6 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SecurityUtils;
-import org.limewire.util.URIUtils;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -113,6 +105,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
     private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
+    private static final String FACEBOOK_RECONNECT_URL = "http://www.facebook.com/ajax/presence/reconnect.php?reason=3";
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
 
     private final FriendConnectionConfiguration configuration;
@@ -124,7 +117,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final AsynchronousEventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final Map<String, FacebookFriend> friends = Collections.synchronizedMap(new TreeMap<String, FacebookFriend>(String.CASE_INSENSITIVE_ORDER));
-    private final CookieStore cookieStore = new BasicCookieStore();
+    private final BasicCookieStore cookieStore = new BasicCookieStore();
     private final AtomicReference<String> postFormID = new AtomicReference<String>();
 
     /**
@@ -236,7 +229,7 @@ public class FacebookFriendConnection implements FriendConnection {
         return org.limewire.util.StringUtils.getUTF8String(Base64.encodeBase64(sessionId));
     }
 
-    void setPostFormID(String postFormID) {
+    private void setPostFormID(String postFormID) {
         this.postFormID.set(postFormID);
     }
 
@@ -287,6 +280,12 @@ public class FacebookFriendConnection implements FriendConnection {
         cleanUpConnection();
 
         LOG.debug("logged out from facebook.");
+    }
+    
+    public void reconnect() throws IOException {
+        LOG.debug("reconnecting...");
+        String response = httpGET(FACEBOOK_RECONNECT_URL + "&post_form_id=" + postFormID.get()); 
+        LOG.debugf("reconnect response: {0}", response);
     }
 
     /**
@@ -488,7 +487,7 @@ public class FacebookFriendConnection implements FriendConnection {
             for (int i = 0; i < friends.length(); i++) {
                 friendIds.add(friends.getLong(i));
             }
-            JSONArray users = null;
+            JSONArray users = new JSONArray();
             try {
                 users = (JSONArray) facebookClient.users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status")));
             } catch (RuntimeException re) {
@@ -665,7 +664,7 @@ public class FacebookFriendConnection implements FriendConnection {
      * @return null if there is no response data
      */
     public String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
-        LOG.debugf("facebook POST: {0} {1}", host, urlPostfix);
+        LOG.debugf("facebook POST: {0}", host + urlPostfix);
         HttpPost httpost = new HttpPost(host + urlPostfix);
         httpost.addHeader("Connection", "close");
         httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
@@ -871,6 +870,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private HttpClient createHttpClient() {
         DefaultHttpClient httpClient = new DefaultHttpClient(httpConnectionManager, null);
         httpClient.setCookieStore(cookieStore);
+        // TODO ?? cookieStore.clearExpired(new Date());
         return httpClient;
     }
 
@@ -991,21 +991,8 @@ public class FacebookFriendConnection implements FriendConnection {
         return chatManager.addMessageReader(friendId, reader);
     }
 
+    @SuppressWarnings("unchecked")
     private static List<Cookie> parseCookies(FriendConnectionConfiguration configuration) {
-        BestMatchSpec cookieParser = new BestMatchSpec();
-        try {
-            URI uri = URIUtils.toURI((String)configuration.getAttribute("url"));
-            int port = uri.getPort();
-            CookieOrigin cookieOrigin = new CookieOrigin(uri.getHost(), port == -1 ? 80 : port,
-                    uri.getPath(), uri.getScheme().endsWith("s"));
-            LOG.debugf("setting cookies for origin: {0}", cookieOrigin);
-            String cookie = (String)configuration.getAttribute("cookie");
-            cookie = cookie.replace(';', ',');
-            return cookieParser.parse(new BasicHeader("Set-Cookie", cookie), cookieOrigin);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        } catch (MalformedCookieException e) {
-            throw new RuntimeException(e);
-        }
+        return (List<Cookie>)configuration.getAttribute("cookie");
     }
 }

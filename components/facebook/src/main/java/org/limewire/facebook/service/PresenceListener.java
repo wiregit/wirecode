@@ -78,7 +78,11 @@ public class PresenceListener implements Runnable {
             throw new  RuntimeException(e);
         } catch (IOException e) {
             LOG.debug("POST error", e);
-            connection.logout();
+            try {
+                connection.reconnect();
+            } catch (IOException e1) {
+                connection.logout();
+            }
         }        
     }
  

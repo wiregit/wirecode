@@ -39,9 +39,9 @@ class BuddyListResponseDeserializer {
 		        LOG.debug("no payload");
 		    }
 		} else {
+            int errorCode = respObjs.getInt("error");
 		    String errorDescription = respObjs.getString("errorDescription");
-		    LOG.debugf("received error description: {0}", errorDescription);
-		    throw new IOException("error: " + errorDescription);
+		    throw new IOException("error: " + errorCode + ": " + errorDescription);
 		}
         return new HashSet<String>();
     }

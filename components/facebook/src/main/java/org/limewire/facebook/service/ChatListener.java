@@ -87,7 +87,7 @@ public class ChatListener implements Runnable {
                         if(response.getString("t").equals("msg")) {
                             dispatchMessage(response);
                         } else if(response.getString("t").equals("refresh")) {
-                            getPOSTFormID();        
+                            connection.reconnect();
                         }
                         //seq++;
                     }                        
@@ -184,24 +184,6 @@ public class ChatListener implements Runnable {
         }
     }
 
-    private void getPOSTFormID() throws IOException {
-        LOG.debug("refreshing post_form_id");
-        String homePage = connection.httpGET(HOME_PAGE);    
-        String post_form_id;
-        String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
-        int formIdBeginPos = homePage.indexOf(postFormIDPrefix)
-                + postFormIDPrefix.length();
-        if (formIdBeginPos < postFormIDPrefix.length()){
-            LOG.debugf("no post form id: {0}", homePage);
-            throw new IOException("can't find post form id");
-        }
-        else {
-            post_form_id = homePage.substring(formIdBeginPos,
-                    formIdBeginPos + 32);
-        }  
-        connection.setPostFormID(post_form_id);
-    }
-
     private int getSeq() throws IOException, JSONException {
         for (int i = 0; i < 3; i++) {
             String seqResponseBody = connection.httpGET(getMessageRequestingUrl(-1));
@@ -243,7 +225,7 @@ public class ChatListener implements Runnable {
             return body.getInt("seq");
         } else if(body.has("t") && body.getString("t").equals("refresh")) {
             LOG.debug("refreshing post form id");
-            getPOSTFormID();    
+            connection.reconnect(); 
             return -1;
         }
         else {
