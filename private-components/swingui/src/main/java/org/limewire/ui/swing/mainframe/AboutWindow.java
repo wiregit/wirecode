@@ -168,9 +168,9 @@ class AboutWindow {
                 "programmers and researchers from all over the world.  " +
                 "LimeWire is also, of course, the result of the countless hours of work by LimeWire\'s developers:"));
         sb.append("<ul>\n" + 
-                "  <li>Mario Aquino</li>" + 
                 "  <li>Felix Berger</li>" +
                 "  <li>Sam Berlin</li>" + 
+                "  <li>Wynne Chan</li>" +
                 "  <li>David Chen</li>" +
                 "  <li>Mike Everett</li>" +              
                 "  <li>Tim Julien</li>" +
@@ -190,7 +190,6 @@ class AboutWindow {
         sb.append("<ul>\n" +  
                 "  <li>Ari Amanatidis</li>" +
                 "  <li>Bobby Fonacier</li>" +                
-                "  <li>Catherine Herdlick</li>" +
                 "  <li>Akshay Kumar</li>" +
                 "  <li>Greg Maggioncalda</li>" +
                 "  <li>Dan Sullivan</li>" +
@@ -207,6 +206,7 @@ class AboutWindow {
         //  previous developers
         sb.append(I18n.tr("In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:"));
         sb.append("<ul>\n" +  
+        		"  <li>Mario Aquino</li>" + 
                 "  <li>Aubrey Arago</li>\n" +
                 "  <li>Zlatin Balevsky</li>\n" +
                 "  <li>Zenzele Bell</li>\n" +                  
