@@ -23,6 +23,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
@@ -98,7 +99,11 @@ public class LibrarySharingPanel {
                 if(!isLoggedIn()) {
                     showLoginView();
                 } else if(currentView == View.LOGIN) {
-                    showFriendListView();
+                    if(SwingUiSettings.SHOW_SHARING_OVERLAY_MESSAGE.getValue()) {
+                        showEditableView();
+                    } else {
+                        showFriendListView();
+                    }
                 }
             }
         });
@@ -173,7 +178,11 @@ public class LibrarySharingPanel {
             currentList = newList;
             currentList.getFriendIds().addListEventListener(friendsListener);
             if(isLoggedIn()) {
-                showFriendListView();
+                if(SwingUiSettings.SHOW_SHARING_OVERLAY_MESSAGE.getValue()) {
+                    showEditableView();
+                } else {
+                    showFriendListView();
+                }
             } else {
                 showLoginView();
             }
