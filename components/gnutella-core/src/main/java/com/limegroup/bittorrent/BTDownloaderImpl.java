@@ -167,9 +167,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * initializes this downloader from the given torrent file.
      */
     @Override
-    public void init(File torrentFile) throws IOException {
-        torrent.init(null, null, -1, null, null, null, torrentFile, SharingSettings
-                .getSaveDirectory(), null, null);
+    public void init(File torrentFile, File saveDirectory) throws IOException {
+        torrent.init(null, null, -1, null, null, null, torrentFile, saveDirectory, null, null);
         File completeFile = torrent.getCompleteFile();
         setDefaultFileName(completeFile.getName());
     }

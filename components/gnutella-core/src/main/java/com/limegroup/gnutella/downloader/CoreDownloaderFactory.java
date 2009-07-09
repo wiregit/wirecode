@@ -48,7 +48,7 @@ public interface CoreDownloaderFactory {
     public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, File saveDirectory,
             String fileName, boolean overwrite) throws DownloadException;
     
-    public BTDownloader createBTDownloader(File torrent) throws IOException;
+    public BTDownloader createBTDownloader(File torrent, File saveDirectory) throws IOException;
 
     /**
      * Creates the appropriate kind of downloader from a given DownloadMemento.

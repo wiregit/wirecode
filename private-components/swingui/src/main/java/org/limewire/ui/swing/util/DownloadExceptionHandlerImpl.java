@@ -174,12 +174,12 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
      * Downloads the given file using the supplied download action and handles
      * any possible DownloadExceptions.
      */
-    private void download(final DownloadAction downLoadAction, final boolean supportNewSaveDir,
+    private void download(final DownloadAction downLoadAction, final boolean supportNewSaveFileName,
             File saveFile, boolean overwrite) {
         try {
             downLoadAction.download(saveFile, overwrite);
         } catch (DownloadException e1) {
-            handleDownloadException(downLoadAction, e1, supportNewSaveDir);
+            handleDownloadException(downLoadAction, e1, supportNewSaveFileName);
         }
     }
 
@@ -223,6 +223,8 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
                 if (newSaveParent != null && new File(newSaveParent, oldSaveFile.getName()).exists()) {
                     createOverwriteDialogue(newSaveParent, downLoadAction, ex, supportNewSaveFileName);
                     return;
+                } else if(saveFile != null) {
+                    download(downLoadAction, supportNewSaveFileName, saveFile, false);
                 }
             }
         });

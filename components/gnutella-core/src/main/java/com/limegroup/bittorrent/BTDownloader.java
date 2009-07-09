@@ -10,7 +10,7 @@ public interface BTDownloader extends CoreDownloader {
     /**
      * Initializes the BTDownloader from a torrent file.
      */
-    void init(File torrent) throws IOException;
+    void init(File torrent, File saveDirectory) throws IOException;
 
     /**
      * Returns the incomplete file for this Downloader.

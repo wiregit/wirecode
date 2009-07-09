@@ -104,9 +104,10 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return sd;
     }
 
-    public BTDownloader createBTDownloader(File torrent) throws IOException {
+    @Override
+    public BTDownloader createBTDownloader(File torrent, File saveDirectory) throws IOException {
         BTDownloader bd = btDownloaderFactory.get();
-        bd.init(torrent);
+        bd.init(torrent, saveDirectory);
         return bd;
     }
     

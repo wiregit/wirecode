@@ -824,9 +824,13 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                     DownloadException.ErrorCode.TORRENT_FILE_TOO_LARGE, torrentFile);
         }
 
+        if(saveDirectory == null) {
+            saveDirectory = SharingSettings.getSaveDirectory();
+        }
+        
         BTDownloader ret;
         try {
-            ret = coreDownloaderFactory.createBTDownloader(torrentFile);
+            ret = coreDownloaderFactory.createBTDownloader(torrentFile, saveDirectory);
         } catch (IOException e) {
             if(e instanceof DownloadException) {
                 throw (DownloadException)e;
