@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 class FriendMenu extends MnemonicMenu {
 
     private final JMenuItem browseFriendMenuItem;
+
     private final StatusActions statusActions;
     private final JMenuItem loginMenuItem;
     private final JMenuItem logoutMenuItem;
@@ -38,7 +39,7 @@ class FriendMenu extends MnemonicMenu {
     private final JSeparator statusSeperator;
     private final JSeparator loginSeperator;
     private final AutoLoginService autoLoginService;
-    
+
     @Inject
     public FriendMenu(EventBean<FriendConnectionEvent> friendConnectionEventBean,
             BrowseFriendsAction browseFriendAction, StatusActions statusActions,
@@ -56,35 +57,23 @@ class FriendMenu extends MnemonicMenu {
         this.statusSeperator = new JSeparator();
         this.loginSeperator = new JSeparator();
         this.autoLoginService = autoLoginService;
-
-        add(friendService);
-        add(browseFriendMenuItem);
-        add(addFriendSeperator);
-        add(addFriendMenuItem);
-        add(statusSeperator);
-        add(statusActions.getAvailableMenuItem());
-        add(statusActions.getDnDMenuItem());
-        add(loginSeperator);
-        add(loginMenuItem);
-        add(logoutMenuItem);
-
         updateSignedInStatus();
     }
-    
+
     @Override
     public JMenuItem add(JMenuItem item) {
         if (item instanceof JCheckBoxMenuItem) {
             item.setUI(new PlainCheckBoxMenuItemUI());
         } else {
-            //done here instead of super class because this else statement 
-            //can effect a wide range of components poorly.
+            // done here instead of super class because this else statement
+            // can effect a wide range of components poorly.
             item.setUI(new PlainMenuItemUI());
         }
-        
+
         JMenuItem itemReturned = super.add(item);
         return itemReturned;
     }
-    
+
     @Inject
     void register(ListenerSupport<FriendConnectionEvent> event) {
         event.addListener(new EventListener<FriendConnectionEvent>() {
@@ -106,26 +95,44 @@ class FriendMenu extends MnemonicMenu {
     private void updateSignedInStatus() {
         FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
         boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
-        boolean supportsAddRemoveFriend = signedIn && friendConnection != null && friendConnection.supportsAddRemoveFriend();
-        boolean supportModeChanges = signedIn && friendConnection != null && friendConnection.supportsMode();
-        boolean loggingIn = autoLoginService.isAttemptingLogin() || (friendConnection != null && friendConnection.isLoggingIn());
-        
-        browseFriendMenuItem.setEnabled(signedIn);
-        addFriendMenuItem.setVisible(supportsAddRemoveFriend);
-        addFriendSeperator.setVisible(supportsAddRemoveFriend);
-        statusActions.updateSignedInStatus();
-        statusActions.getAvailableMenuItem().setVisible(supportModeChanges);
-        statusActions.getDnDMenuItem().setVisible(supportModeChanges);
-        statusSeperator.setVisible(supportModeChanges);
-        loginMenuItem.setVisible(!signedIn);
-        loginMenuItem.setEnabled(!loggingIn);
-        logoutMenuItem.setVisible(signedIn);
-        friendService.updateSignedInStatus();
-        friendService.setVisible(signedIn);
-        
-        //needed so that the menu does not stay squished after we add in all the new items.
+        boolean supportsAddRemoveFriend = signedIn && friendConnection != null
+                && friendConnection.supportsAddRemoveFriend();
+        boolean supportModeChanges = signedIn && friendConnection != null
+                && friendConnection.supportsMode();
+        boolean loggingIn = autoLoginService.isAttemptingLogin()
+                || (friendConnection != null && friendConnection.isLoggingIn());
+
         boolean popUpMenuVisible = isPopupMenuVisible();
         setPopupMenuVisible(false);
+
+        removeAll();
+        friendService.updateSignedInStatus();
+        if (signedIn) {
+            add(friendService);
+        }
+        add(browseFriendMenuItem);
+        browseFriendMenuItem.setEnabled(signedIn);
+        if (supportsAddRemoveFriend) {
+            add(addFriendSeperator);
+            add(addFriendMenuItem);
+        }
+        statusActions.updateSignedInStatus();
+
+        if (supportModeChanges) {
+            add(statusSeperator);
+            add(statusActions.getAvailableMenuItem());
+            add(statusActions.getDnDMenuItem());
+        }
+
+        loginMenuItem.setEnabled(!loggingIn);
+        add(loginSeperator);
+        if (!signedIn) {
+            add(loginMenuItem);
+        } else {
+            add(logoutMenuItem);
+        }
+        // needed so that the menu does not stay squished after we add in all
+        // the new items.
         setPopupMenuVisible(popUpMenuVisible);
     }
 
