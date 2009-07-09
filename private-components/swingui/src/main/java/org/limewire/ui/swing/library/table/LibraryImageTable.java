@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -27,6 +28,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.images.ImageCellEditor;
@@ -38,6 +41,7 @@ import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.Inject;
 
@@ -120,7 +124,8 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     }
     
     public void setEventList(EventList<LocalFileItem> localFileList) {
-        imageList.setModel(localFileList);
+        SortedList<LocalFileItem> sortedList = GlazedListsFactory.sortedList(localFileList, new LocationComparator());
+        imageList.setModel(sortedList);
     }
     
     public void setPopupHandler(TablePopupHandler popupHandler) {
@@ -253,5 +258,24 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     /** Returns all currently selected LocalFileItems. */
     public List<LocalFileItem> getSelection() {
         return imageList.getSelectedItems();
+    }
+    
+    /**
+     * Sorts images based on folder and then filename if they exist in the 
+     * same folder.
+     */
+    private class LocationComparator implements Comparator<LocalFileItem> {
+        @Override
+        public int compare(LocalFileItem item1, LocalFileItem item2) {
+            String location1 = item1.getPropertyString(FilePropertyKey.LOCATION);
+            String location2 = item2.getPropertyString(FilePropertyKey.LOCATION);
+            
+            int value = location1.compareToIgnoreCase(location2);
+            if(value == 0) {
+                return item1.getFileName().compareToIgnoreCase(item2.getFileName());
+            } else {
+                return value;
+            }
+        }
     }
 }
