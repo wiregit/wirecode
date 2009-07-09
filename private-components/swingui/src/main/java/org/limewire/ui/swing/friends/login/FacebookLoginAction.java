@@ -1,12 +1,19 @@
 package org.limewire.ui.swing.friends.login;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.StringTokenizer;
 
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -21,11 +28,14 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.LimeDomListener;
 import org.limewire.ui.swing.browser.UriAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
+import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.mozilla.browser.MozillaAutomation;
-import org.mozilla.browser.MozillaPanel.VisibilityMode;
 import org.mozilla.browser.XPCOMUtils;
+import org.mozilla.browser.MozillaPanel.VisibilityMode;
 import org.mozilla.browser.impl.ChromeAdapter;
 import org.mozilla.interfaces.nsICookie;
 import org.mozilla.interfaces.nsICookieManager;
@@ -45,6 +55,9 @@ import com.google.inject.assistedinject.Assisted;
 public class FacebookLoginAction extends AbstractAction {
 
     private static final Log LOG = LogFactory.getLog(FacebookLoginAction.class);
+
+    @Resource private Font goBackFont;
+    @Resource private Color goBackBackground;
     
     private final FriendAccountConfiguration config;
     private final FriendConnectionFactory friendConnectionFactory;
@@ -54,8 +67,12 @@ public class FacebookLoginAction extends AbstractAction {
     @Inject
     public FacebookLoginAction(@Assisted FriendAccountConfiguration config,
             FriendConnectionFactory friendConnectionFactory, LoginPopupPanel loginPanel,
-            Application application) { 
+            Application application) {
+        
         super(config.getLabel(), config.getLargeIcon());
+        
+        GuiUtils.assignResources(this);
+        
         this.config = config;
         this.friendConnectionFactory = friendConnectionFactory;
         this.loginPanel = loginPanel;
@@ -142,7 +159,25 @@ public class FacebookLoginAction extends AbstractAction {
                 }, true);
             }
         };
-        loginPanel.setLoginComponent(browser);
+        
+        JPanel facebookLoginPanel = new JPanel(new BorderLayout());
+        facebookLoginPanel.add(browser, BorderLayout.CENTER);
+        
+        HyperlinkButton goBackLink = new HyperlinkButton(new AbstractAction(I18n.tr("Choose another account")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginPanel.restart();
+            }
+        });
+        goBackLink.setFont(goBackFont);
+        
+        JPanel goBackPanel = new JPanel(new MigLayout("insets 1 0 2 0, gap 0, fill"));
+        goBackPanel.setBackground(goBackBackground);
+        goBackPanel.add(goBackLink, "align center");
+        
+        facebookLoginPanel.add(goBackPanel, BorderLayout.SOUTH);
+        
+        loginPanel.setLoginComponent(facebookLoginPanel);
         MozillaAutomation.blockingLoad(browser, "about:blank");
         // show a loading panel (but not immediately -- the blocking load finishing may hide it)
         SwingUtilities.invokeLater(new Runnable() {
