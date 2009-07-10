@@ -33,8 +33,10 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransactionList;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import ca.odell.glazedlists.util.concurrent.Lock;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
@@ -90,6 +92,15 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     /** Current sort option. */
     private SortOption sortOption;
+
+    /** Current matcher editor for filtered search results. */
+    private MatcherEditor<VisualSearchResult> filterEditor;
+
+    /** Listener for filter editor. */
+    private MatcherEditor.Listener<VisualSearchResult> filterEditorListener;
+
+    /** Matcher editor for visible search results. */
+    private final VisibleMatcherEditor visibleEditor = new VisibleMatcherEditor();
     
     private List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
     
@@ -280,7 +291,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         // Create visible and sorted lists if necessary.
         if (visibleResultList == null) {
             sortedResultList = GlazedListsFactory.sortedList(filteredResultList, sortOption != null ? SortFactory.getSortComparator(sortOption) : null);
-            visibleResultList = GlazedListsFactory.filterList(sortedResultList, new VisibleMatcher());
+            visibleResultList = GlazedListsFactory.filterList(sortedResultList, visibleEditor);
         }
     }
     
@@ -296,7 +307,35 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public void setFilterEditor(MatcherEditor<VisualSearchResult> editor) {
-        filteredResultList.setMatcherEditor(editor);
+        // Remove listener from existing filter editor.
+        if ((filterEditor != null) && (filterEditorListener != null)) {
+            filterEditor.removeMatcherEditorListener(filterEditorListener);
+        }
+        
+        // Create listener to handle changes to the filter.
+        if (filterEditorListener == null) {
+            filterEditorListener = new MatcherEditor.Listener<VisualSearchResult>() {
+                @Override
+                public void changedMatcher(Event<VisualSearchResult> matcherEvent) {
+                    // Post Runnable on event queue to update filtered list for
+                    // visible items.  This allows us to display child results
+                    // whose parents become hidden due to filtering.
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            visibleEditor.update();
+                        }
+                    });
+                }
+            };
+        }
+        
+        // Set filter editor and add listener.
+        filterEditor = editor;
+        filterEditor.addMatcherEditorListener(filterEditorListener);
+        
+        // Apply filter editor.
+        filteredResultList.setMatcherEditor(filterEditor);
     }
     
     public void addResultListener(VisualSearchResultStatusListener vsrChangeListener) {
@@ -460,14 +499,43 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         
         return buf.toString();
     }
+    
+    /**
+     * Returns true if the specified search result is allowed by the current
+     * filter editor.  This means the result is a member of the filtered list.
+     */
+    private boolean isFilterMatch(VisualSearchResult vsr) {
+        if (filterEditor != null) {
+            return filterEditor.getMatcher().matches(vsr);
+        }
+        return true;
+    }
 
     /**
-     * A matcher used to filter visible search results. 
+     * A matcher editor used to filter visible search results. 
      */
-    private static class VisibleMatcher implements Matcher<VisualSearchResult> {
-        @Override
-        public boolean matches(VisualSearchResult item) {
-            return item.isVisible();
+    private class VisibleMatcherEditor extends AbstractMatcherEditor<VisualSearchResult> {
+        
+        public VisibleMatcherEditor() {
+            currentMatcher = new Matcher<VisualSearchResult>() {
+                @Override
+                public boolean matches(VisualSearchResult item) {
+                    // Determine whether item has parent, and parent is hidden
+                    // due to filtering.  If so, we treat the item as visible.
+                    VisualSearchResult parent = item.getSimilarityParent();
+                    boolean parentHidden = (parent != null) && !isFilterMatch(parent);
+                    return item.isVisible() || parentHidden;
+                }
+            };
+        }
+        
+        /**
+         * Updates the list by firing a matcher change event to registered
+         * listeners.
+         */
+        public void update() {
+            fireChangedMatcher(new MatcherEditor.Event<VisualSearchResult>(
+                    this, Event.CHANGED, currentMatcher));
         }
     }
 
