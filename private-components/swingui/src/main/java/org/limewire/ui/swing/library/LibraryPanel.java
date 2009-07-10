@@ -133,12 +133,14 @@ public class LibraryPanel extends JPanel {
         this.buttonDecorator = buttonDecorator;
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
+        this.fileCountListener = new FileCountListener();
         
         GuiUtils.assignResources(this);
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction, libraryAction);
 
-        setEventListOnTable(new BasicEventList<LocalFileItem>());
+        eventList = new BasicEventList<LocalFileItem>();
+        selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
     }
     
     private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
@@ -201,8 +203,7 @@ public class LibraryPanel extends JPanel {
                 selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
                 configureEnclosingScrollPane(libraryScrollPane);
             }
-        });
-        
+        });        
         // listen for selection changes in the combo box and filter the table
         // replacing the table header as you do.
         libraryFilterPanel.addSearchTabListener(new LibraryCategoryListener(){
@@ -440,8 +441,6 @@ public class LibraryPanel extends JPanel {
         MatcherEditor<LocalFileItem> textMatcherEditor = new TextComponentMatcherEditor<LocalFileItem>(libraryFilterPanel.getFilterField(), new LocalFileItemFilterator(selectedCategory) );
         textFilterList = GlazedListsFactory.filterList(filteredList == null ? eventList : filteredList, textMatcherEditor);
         setFileCount(textFilterList.size(), eventList.size());
-        if(fileCountListener == null)
-            fileCountListener = new FileCountListener();
         textFilterList.addListEventListener(fileCountListener);
         
         return textFilterList;
