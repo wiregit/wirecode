@@ -60,9 +60,7 @@ class LibTorrentWrapper {
             init();
             loaded.set(true);
         } catch (Throwable e) {
-            if(BittorrentSettings.LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE.getValue()) {
-                ExceptionUtils.reportOrReturn(e);
-            }
+            ExceptionUtils.reportOrReturn(e);
             LOG.error("Failure loading the libtorrent libraries.", e);
         }
     }
