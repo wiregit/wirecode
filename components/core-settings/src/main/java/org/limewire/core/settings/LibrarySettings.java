@@ -1,28 +1,9 @@
 package org.limewire.core.settings;
 
 import org.limewire.setting.BooleanSetting;
-import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
-public class LibrarySettings extends LimeProps {
-    
-
-    /** The list used in LimeWire 5.0 & 5.1 of what friends have new image files always shared with them. */
-    @Deprecated
-    static StringArraySetting SHARE_NEW_IMAGES_ALWAYS =
-        (StringArraySetting)FACTORY.createStringArraySetting("SHARE_NEW_IMAGES_ALWAYS", new String[0]).setPrivate(true);
-    
-    /** The list used in LimeWire 5.0 & 5.1 of what friends have new audio files always shared with them. */
-    @Deprecated
-    static StringArraySetting SHARE_NEW_AUDIO_ALWAYS =
-        (StringArraySetting)FACTORY.createStringArraySetting("SHARE_NEW_AUDIO_ALWAYS", new String[0]).setPrivate(true);
-
-    /** The list used in LimeWire 5.0 & 5.1 of what friends have new video files always shared with them. */
-    @Deprecated
-    static StringArraySetting SHARE_NEW_VIDEO_ALWAYS =
-        (StringArraySetting)FACTORY.createStringArraySetting("SHARE_NEW_VIDEO_ALWAYS", new String[0]).setPrivate(true);
-
-    
+public class LibrarySettings extends LimeProps {    
     
     /**True, only takes a snapshot of your current files, false enables 
      * current and future files to be automatically shared. */
