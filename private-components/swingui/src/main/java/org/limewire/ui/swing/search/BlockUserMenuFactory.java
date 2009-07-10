@@ -4,13 +4,13 @@ import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.friend.api.Friend;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.YesNoCheckBoxDialog;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
