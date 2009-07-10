@@ -494,7 +494,7 @@ public class FileInfoPanel extends JPanel {
                 panel.add(createLabel(I18n.tr("Bitrate:")), "split 2");
                 String quality = FileInfoUtils.getQuality(propertiableFile);
                 if(quality != null)
-                    panel.add(createLabelField(bitrate + " kbps (" + FileInfoUtils.getQuality(propertiableFile) + ")"), "growx, wrap");
+                    panel.add(createLabelField(bitrate + " kbps (" + quality + ")"), "growx, wrap");
                 else
                     panel.add(createLabelField(bitrate + " kbps"), "growx, wrap");
             }
