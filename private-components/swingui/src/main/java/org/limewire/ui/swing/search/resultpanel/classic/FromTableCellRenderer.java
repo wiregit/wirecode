@@ -15,7 +15,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.components.RemoteHostWidget;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -36,9 +35,7 @@ public class FromTableCellRenderer extends JXPanel implements TableCellRenderer,
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {        
         if (value != null) {
-            if(value instanceof SearchResult) { 
-                fromWidget.setPeople(((SearchResult)value).getSources());
-            } else if(value instanceof DownloadItem) {
+            if(value instanceof DownloadItem) {
                 fromWidget.setPeople(((DownloadItem)value).getRemoteHosts());
             } else if(value instanceof VisualSearchResult) {
                 fromWidget.setPeople(((VisualSearchResult)value).getSources() );
@@ -58,9 +55,7 @@ public class FromTableCellRenderer extends JXPanel implements TableCellRenderer,
             setBackground(table.getSelectionBackground());
         
         if (value != null) {
-            if(value instanceof SearchResult) {
-                fromWidget.setPeople(((SearchResult)value).getSources());
-            } else if(value instanceof DownloadItem) {
+            if(value instanceof DownloadItem) {
                 fromWidget.setPeople(((DownloadItem)value).getRemoteHosts());
             } else if(value instanceof VisualSearchResult) {
                 fromWidget.setPeople(((VisualSearchResult)value).getSources() );
