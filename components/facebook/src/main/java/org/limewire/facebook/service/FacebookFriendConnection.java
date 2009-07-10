@@ -468,7 +468,6 @@ public class FacebookFriendConnection implements FriendConnection {
     /**
      * Fetches all friends and adds them as known friends.
      */
-    @SuppressWarnings("null")
     private void fetchAllFriends() throws IOException {
         try {
             JSONArray friends = null;
@@ -667,6 +666,7 @@ public class FacebookFriendConnection implements FriendConnection {
         LOG.debugf("facebook POST: {0}", host + urlPostfix);
         HttpPost httpost = new HttpPost(host + urlPostfix);
         httpost.addHeader("Connection", "close");
+        httpost.addHeader("User-Agent", USER_AGENT_HEADER);
         httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
         HttpClient httpClient = createHttpClient();
