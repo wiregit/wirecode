@@ -45,6 +45,7 @@ import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
+import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
@@ -492,7 +493,11 @@ public final class BugManager {
             }
         });
 
-
+        HyperlinkButton helpLink =
+            new HyperlinkButton(I18n.tr("Ask for help on the forums"));
+        helpLink.addActionListener(new UrlAction(
+                "http://forum.limewire.org/forumdisplay.php?f=75"));
+        
         // the "always use this answer" checkbox
         final JCheckBox alwaysuseThisAnswer = new JCheckBox(I18n.tr("Send bugs without asking me in the future"));
         alwaysuseThisAnswer.setSelected(false);
@@ -516,6 +521,7 @@ public final class BugManager {
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 0;
+        constraints.gridwidth = 2;
         mainPanel.add(labelPanel, constraints);
 
         constraints = new GridBagConstraints();
@@ -524,10 +530,18 @@ public final class BugManager {
         constraints.insets = new Insets(10, 0, 0, 0);
         constraints.anchor = GridBagConstraints.LINE_START;
         mainPanel.add(showHideBugLink, constraints);
+        
+        constraints = new GridBagConstraints();
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        constraints.insets = new Insets(10, 0, 0, 0);
+        constraints.anchor = GridBagConstraints.LINE_END;
+        mainPanel.add(helpLink, constraints);
 
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 2;
+        constraints.gridwidth = 2;
         constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
@@ -538,6 +552,7 @@ public final class BugManager {
             constraints = new GridBagConstraints();
             constraints.gridx = 0;
             constraints.gridy = 3;
+            constraints.gridwidth = 2;
             constraints.anchor = GridBagConstraints.LINE_START;
             constraints.insets = new Insets(10, 0, 0, 0);
             mainPanel.add(alwaysuseThisAnswer, constraints);
@@ -545,6 +560,7 @@ public final class BugManager {
             constraints = new GridBagConstraints();
             constraints.gridx = 0;
             constraints.gridy = 4;
+            constraints.gridwidth = 2;
             mainPanel.add(sendButton, constraints);
         }
         
