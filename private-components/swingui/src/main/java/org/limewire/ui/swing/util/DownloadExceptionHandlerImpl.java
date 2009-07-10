@@ -19,7 +19,9 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -122,7 +124,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
     }
 
     private void showErrorMessage(final DownloadException e) {
-        String message = null;
+        Object message = null;
 
         switch (e.getErrorCode()) {
         case FILE_ALREADY_DOWNLOADING:
@@ -135,7 +137,22 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
             message = I18n.tr("Sorry, you can't download files to this location.");
             break;
         case NO_TORRENT_MANAGER:
-            message = I18n.tr("Sorry, there is a problem with torrents.\nPlease try reinstalling LimeWire to solve this problem.");
+            MultiLineLabel label =
+                new MultiLineLabel(I18n.tr(
+                        "Sorry, there is a problem with torrents.\n" +
+                        "Please try reinstalling LimeWire to solve this problem."));
+            HyperlinkButton help =
+                new HyperlinkButton(I18n.tr(
+                        "You can also ask for help on the forums."));
+            help.addActionListener(new UrlAction(
+                    "http://forum.limewire.org/showthread.php?t=6607"));
+            JPanel panel = new JPanel();
+            panel.setOpaque(false);
+            panel.setLayout(new MigLayout("gapy 15"));
+            panel.add(label, "wrap");
+            panel.add(help, "wrap");
+            panel.validate();
+            message = panel;
             break;
         case FILES_STILL_RESUMING:
             message = I18n.tr("Sorry, we are still loading your old downloads.\nPlease wait to add a new download until we are done.");
