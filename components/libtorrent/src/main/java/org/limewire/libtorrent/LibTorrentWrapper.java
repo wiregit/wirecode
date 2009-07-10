@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -59,7 +60,10 @@ class LibTorrentWrapper {
             init();
             loaded.set(true);
         } catch (Throwable e) {
-            ExceptionUtils.reportOrReturn(e);
+            if(BittorrentSettings.LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE.getValue()) {
+                ExceptionUtils.reportOrReturn(e);
+            }
+            LOG.error("Failure loading the libtorrent libraries.", e);
         }
     }
 
