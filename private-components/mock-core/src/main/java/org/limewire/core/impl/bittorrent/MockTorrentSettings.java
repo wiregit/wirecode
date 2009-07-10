@@ -6,7 +6,7 @@ import org.limewire.bittorrent.TorrentSettings;
 
 public class MockTorrentSettings implements TorrentSettings {
 
-    private boolean reporintLibraryLoadFailure = false;
+    private boolean reportLibraryLoadFailure = false;
     
     @Override
     public int getMaxDownloadBandwidth() {
@@ -30,11 +30,11 @@ public class MockTorrentSettings implements TorrentSettings {
 
     @Override
     public boolean isReportingLibraryLoadFailture() {
-        return reporintLibraryLoadFailure;
+        return reportLibraryLoadFailure;
     }
 
     @Override
     public void setReportingLibraryLoadFailure(boolean reportingLibraryLoadFailure) {
-        this.reporintLibraryLoadFailure = reportingLibraryLoadFailure;
+        this.reportLibraryLoadFailure = reportingLibraryLoadFailure;
     }
 }
