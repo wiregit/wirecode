@@ -3,6 +3,7 @@ package org.limewire.util;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.text.Collator;
@@ -582,7 +583,7 @@ public class StringUtils {
                     field.setAccessible(true);
                     Object value = field.get(thiz);
                     field.setAccessible(accessible);
-                    if (!blacklist.contains(value)
+                    if (!Modifier.isStatic(field.getModifiers()) && !blacklist.contains(value)
                             && (whitelist.isEmpty() || whitelist.contains(value))) {
                         if (value == null) {
                             fields.put(field.getName(), String.valueOf(value));
