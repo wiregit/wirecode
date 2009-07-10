@@ -33,6 +33,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -50,7 +51,7 @@ import org.limewire.ui.swing.util.ResizeUtils;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-public class XMPPUserEntryLoginPanel extends JPanel {
+public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
     
     @Resource private Font headerTextFont;
     @Resource private Color headerTextForeground;
@@ -174,12 +175,6 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         
         connectionSupport.addListener(connectionListener);
     }
-    
-    private void unregisterListener() {
-        if (connectionSupport != null) {
-            connectionSupport.removeListener(connectionListener);
-        }
-    }
    
     private void initComponents(ButtonDecorator buttonDecorator,
             TextFieldDecorator textFieldDecorator) {
@@ -265,7 +260,6 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         HyperlinkButton goBackButton = new HyperlinkButton(new AbstractAction(I18n.tr("Choose another account")) {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                unregisterListener();
                 parent.restart();                
             }
         });
@@ -333,7 +327,6 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     }
 
     void connected(FriendConnectionConfiguration config) {
-        unregisterListener();
         parent.finished();
     }
 
@@ -398,5 +391,10 @@ public class XMPPUserEntryLoginPanel extends JPanel {
             accountManager.setAutoLoginConfig(null);
         }
         login(accountConfig);
+    }
+
+    @Override
+    public void dispose() {
+        connectionSupport.removeListener(connectionListener);
     }
 }

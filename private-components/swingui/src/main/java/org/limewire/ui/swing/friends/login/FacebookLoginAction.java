@@ -31,6 +31,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.LimeDomListener;
 import org.limewire.ui.swing.browser.UriAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -67,6 +68,9 @@ public class FacebookLoginAction extends AbstractAction {
     private final LoginPopupPanel loginPanel;
     private final Application application;
 
+    private ListenerSupport<FriendConnectionEvent> listenerSupport;
+    private EventListener<FriendConnectionEvent> listener;
+
     @Inject
     public FacebookLoginAction(@Assisted FriendAccountConfiguration config,
             FriendConnectionFactory friendConnectionFactory, LoginPopupPanel loginPanel,
@@ -84,7 +88,9 @@ public class FacebookLoginAction extends AbstractAction {
     
     @Inject 
     public void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
-        listenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
+        this.listenerSupport = listenerSupport;
+        
+        listener = new EventListener<FriendConnectionEvent>() {
             @Override
             public void handleEvent(FriendConnectionEvent event) {
                 if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED &&
@@ -100,7 +106,9 @@ public class FacebookLoginAction extends AbstractAction {
                     }
                 }
             }
-        });
+        };
+        
+        listenerSupport.addListener(listener);
     }
     
     @Override
@@ -178,7 +186,8 @@ public class FacebookLoginAction extends AbstractAction {
             }
         };
         
-        JPanel facebookLoginPanel = new JPanel(new BorderLayout());
+        JPanel facebookLoginPanel = new DisposablePanel();
+        facebookLoginPanel.setLayout(new BorderLayout());
         facebookLoginPanel.add(browser, BorderLayout.CENTER);
         
         HyperlinkButton goBackLink = new HyperlinkButton(new AbstractAction(I18n.tr("Choose another account")) {
@@ -242,5 +251,15 @@ public class FacebookLoginAction extends AbstractAction {
         int emailEndIndex = email.indexOf('"');
         email = email.substring(0, emailEndIndex);
         return email;
+    }
+    
+    // TODO: For some reason this class is an action not a panel.  In order for the listeners to be 
+    //  cleaned up properly the panel the action creates must be disposable.
+    // This does not make sense... This needs to be cleaned up.
+    private class DisposablePanel extends JPanel implements Disposable {
+        @Override
+        public void dispose() {
+            listenerSupport.removeListener(listener);
+        }   
     }
 }

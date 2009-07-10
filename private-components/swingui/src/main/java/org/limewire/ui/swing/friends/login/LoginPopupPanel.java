@@ -2,6 +2,7 @@ package org.limewire.ui.swing.friends.login;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Panel;
@@ -16,6 +17,7 @@ import javax.swing.border.MatteBorder;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -97,7 +99,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         } else if (visible && !isVisible()) {
             restart();
         } else if (!visible && contentPanel != null){
-            contentPanel.removeAll();
+            clearContentPanel();
         }
         super.setVisible(visible);
     }
@@ -107,7 +109,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
      }
     
     public void restart() {
-        contentPanel.removeAll();
+        clearContentPanel();
         start();
         contentPanel.repaint();
         contentPanel.validate();
@@ -121,11 +123,19 @@ public class LoginPopupPanel extends Panel implements Resizable {
      * Sets the login component for a given service.
      */
     public void setLoginComponent(JComponent loginPanel) {
-        contentPanel.removeAll();
+        clearContentPanel();
         contentPanel.add(loginPanel, BorderLayout.CENTER);
         loginPanel.requestFocusInWindow();
         contentPanel.repaint();
         contentPanel.validate();
     }
 
+    private void clearContentPanel() {
+        for ( Component component : contentPanel.getComponents() ) {
+            if (component instanceof Disposable) {
+                ((Disposable) component).dispose();
+            }
+        }
+        contentPanel.removeAll();
+    }
 }
