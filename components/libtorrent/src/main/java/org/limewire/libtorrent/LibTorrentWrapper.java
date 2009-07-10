@@ -38,7 +38,7 @@ class LibTorrentWrapper {
      * Initializes the LibTorrent library. Finding necessary dependencies first,
      * then loading the libtorrent library as a jna lib.
      */
-    void initialize() {
+    void initialize(TorrentSettings torrentSettings) {
         try {
             if (OSUtils.isWindows()) {
                 System.loadLibrary("libeay32");
@@ -59,7 +59,9 @@ class LibTorrentWrapper {
             init();
             loaded.set(true);
         } catch (Throwable e) {
-            ExceptionUtils.reportOrReturn(e);
+            if(torrentSettings.isReportingLibraryLoadFailture()) {
+                ExceptionUtils.reportOrReturn(e);
+            }
             LOG.error("Failure loading the libtorrent libraries.", e);
         }
     }

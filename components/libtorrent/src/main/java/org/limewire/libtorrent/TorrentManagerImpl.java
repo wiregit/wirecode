@@ -255,7 +255,7 @@ public class TorrentManagerImpl implements TorrentManager {
         if (torrentSettings.get().isTorrentsEnabled()) {
             lock.writeLock().lock();
             try {
-                libTorrent.initialize();
+                libTorrent.initialize(torrentSettings.get());
                 if (libTorrent.isLoaded()) {
                     updateSettings(torrentSettings.get());
                 }

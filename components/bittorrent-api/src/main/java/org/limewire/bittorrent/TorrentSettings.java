@@ -26,4 +26,16 @@ public interface TorrentSettings {
      */
     public File getTorrentDownloadFolder();
 
+    /**
+     * Returns true if the setting to report library load failures is turned on. 
+     */
+    boolean isReportingLibraryLoadFailture();
+
+    /**
+     * Updates the setting to report library load failures.
+     */
+    void setReportingLibraryLoadFailure(boolean reportingLibraryLoadFailure);
+    
+    
+
 }

@@ -120,9 +120,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
             BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(uploadBandWidth.getValue());
             BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(downloadBandWidth.getValue());
         }
-        // TODO this a little weird since we are jsut using the fact that the
-        // inject settings will be updated automatically by updating the
-        // BittorentSettings values.
+
         if (torrentManager.get().isValid()) {
             torrentManager.get().updateSettings(torrentSettings);
         }
