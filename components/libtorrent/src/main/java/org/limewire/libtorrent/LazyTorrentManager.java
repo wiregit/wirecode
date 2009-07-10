@@ -68,7 +68,9 @@ public class LazyTorrentManager implements TorrentManager {
 
     @Override
     public TorrentSettings getTorrentSettings() {
-        setupTorrentManager();
+        // not calling setup because we don't want to initialize the library
+        // here.
+        // settings can be gotten without initialization.
         return torrentManager.get().getTorrentSettings();
     }
 
@@ -85,12 +87,20 @@ public class LazyTorrentManager implements TorrentManager {
 
     @Override
     public boolean isManagedTorrent(File torrentFile) {
+        if (!initialized) {
+            return false;
+        }
+
         setupTorrentManager();
         return torrentManager.get().isManagedTorrent(torrentFile);
     }
 
     @Override
     public boolean isManagedTorrent(String sha1) {
+        if (!initialized) {
+            return false;
+        }
+
         setupTorrentManager();
         return torrentManager.get().isManagedTorrent(sha1);
     }

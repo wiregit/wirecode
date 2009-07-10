@@ -812,6 +812,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             throw new DownloadException(DownloadException.ErrorCode.FILES_STILL_RESUMING, null);
         }
         
+        if(!torrentManager.get().isValid()) {
+            throw new DownloadException(DownloadException.ErrorCode.NO_TORRENT_MANAGER, null);
+        }
+        
         final BTTorrentFileDownloader torrentDownloader = coreDownloaderFactory
                 .createTorrentFileDownloader(torrentURI, true);
         initializeDownload(torrentDownloader, false);
@@ -824,6 +828,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         
         if(!isSavedDownloadsLoaded()) {
             throw new DownloadException(DownloadException.ErrorCode.FILES_STILL_RESUMING, torrentFile);
+        }
+        
+        if(!torrentManager.get().isValid()) {
+            throw new DownloadException(DownloadException.ErrorCode.NO_TORRENT_MANAGER, torrentFile);
         }
         
         if (torrentFile.length() > 1024 * 1024 * 5) {

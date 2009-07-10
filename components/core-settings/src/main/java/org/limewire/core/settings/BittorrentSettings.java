@@ -13,7 +13,7 @@ public class BittorrentSettings extends LimeProps {
     }
 
     public static final BooleanSetting LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE = FACTORY
-            .createRemoteBooleanSetting("LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE", true,
+            .createRemoteBooleanSetting("LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE", false,
                     "libtorrent.reportLibraryLoadFailure");
 
     public static final BooleanSetting LIBTORRENT_ENABLED = FACTORY.createBooleanSetting(
