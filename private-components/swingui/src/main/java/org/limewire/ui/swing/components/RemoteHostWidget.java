@@ -130,8 +130,12 @@ public class RemoteHostWidget extends JPanel {
      * Returns an Action to block the specified remote host.
      */
     private Action getBlockUserAction(RemoteHost person) {
-        return blockUserMenuFactory.get().createBlockUserAction(
+        Action blockAction = blockUserMenuFactory.get().createBlockUserAction(
                 tr("Block User"), person.getFriendPresence().getFriend());
+        
+        blockAction.putValue(SINGULAR_ACTION_NAME, tr("Block User {0}", person.getFriendPresence().getFriend().getRenderName()));
+        
+        return blockAction;
     }
     
     private RemoteHostActions getRemoteHostAction() {
