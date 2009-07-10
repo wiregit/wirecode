@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
