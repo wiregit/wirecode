@@ -36,7 +36,7 @@ class SwingSearchListener implements SearchListener {
         this.searchNavItem = searchNavItem;
         
         // sync UI result count to real count.
-        searchResultsModel.getGroupedSearchResults().addListEventListener(new ListEventListener<VisualSearchResult>() {
+        searchResultsModel.getUnfilteredList().addListEventListener(new ListEventListener<VisualSearchResult>() {
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
                 SwingSearchListener.this.searchNavItem.sourceCountUpdated(
                         SwingSearchListener.this.searchResultsModel.getResultCount());

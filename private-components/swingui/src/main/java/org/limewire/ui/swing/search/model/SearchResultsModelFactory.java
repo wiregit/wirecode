@@ -6,10 +6,8 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.settings.SwingUiSettings;
-import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
-
-import ca.odell.glazedlists.EventList;
+import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -54,12 +52,9 @@ public class SearchResultsModelFactory {
      */
     public SearchResultsModel createSearchResultsModel(SearchInfo searchInfo, Search search) {
         // Create search result model.
-        SearchResultsModel searchResultsModel = new BasicSearchResultsModel(
+        BasicSearchResultsModel searchResultsModel = new BasicSearchResultsModel(
                 searchInfo, search, propertiableHeadings, downloadListManager, 
                 downloadExceptionHandler);
-
-        // Get list of visual search results.
-        EventList<VisualSearchResult> visualSearchResults = searchResultsModel.getGroupedSearchResults();
 
         // Create detector to find similar results.
         SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory.newSimilarResultsDetector();
@@ -70,18 +65,17 @@ public class SearchResultsModelFactory {
         // the AlreadyDownloaded listener.
         AlreadyDownloadedListEventListener alreadyDownloadedListEventListener = 
                 new AlreadyDownloadedListEventListener(libraryManager, downloadListManager);
-        visualSearchResults.addListEventListener(alreadyDownloadedListEventListener);
+        searchResultsModel.addResultListener(alreadyDownloadedListEventListener);
 
         // Add list listener to group similar results.
         if (SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()) {
-            GroupingListEventListener groupingListEventListener = 
-                new GroupingListEventListener(similarResultsDetector);
-            visualSearchResults.addListEventListener(groupingListEventListener);
+            GroupingListEventListener groupingListEventListener = new GroupingListEventListener(similarResultsDetector);
+            searchResultsModel.addResultListener(groupingListEventListener);
         }
 
         // Add list listener to handle spam results.
         SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager, similarResultsDetector);
-        visualSearchResults.addListEventListener(spamListEventListener);
+        searchResultsModel.addResultListener(spamListEventListener);
 
         return searchResultsModel;
     }

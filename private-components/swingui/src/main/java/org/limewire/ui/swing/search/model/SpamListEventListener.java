@@ -1,13 +1,6 @@
 package org.limewire.ui.swing.search.model;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import org.limewire.core.api.spam.SpamManager;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * A listener to handle updates to the list of visual search results.  This
@@ -17,12 +10,11 @@ import ca.odell.glazedlists.event.ListEventListener;
  * is notified about changes to the "spam-ui" property but not the "spam-core"
  * property, since it already knows about those changes.
  */
-class SpamListEventListener implements ListEventListener<VisualSearchResult>, PropertyChangeListener {
+class SpamListEventListener implements VisualSearchResultStatusListener {
 
     private final SpamManager spamManager;
-
     private final SimilarResultsDetector similarResultsDetector;
-
+    
     /**
      * Constructs a SpamListEventListener with the specified spam manager and
      * similar results detector.
@@ -32,32 +24,31 @@ class SpamListEventListener implements ListEventListener<VisualSearchResult>, Pr
         this.spamManager = spamManager;
         this.similarResultsDetector = similarResultsDetector;
     }
-
+    
     @Override
-    public void listChanged(ListEvent<VisualSearchResult> listChanges) {
-        final EventList<VisualSearchResult> eventList = listChanges.getSourceList();
-
-        while (listChanges.next()) {
-            if (listChanges.getType() == ListEvent.INSERT) {
-                eventList.get(listChanges.getIndex()).addPropertyChangeListener(this);
-            }
-        };
+    public void resultCreated(VisualSearchResult vsr) {
     }
-
+    
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        VisualSearchResult visualSearchResult = (VisualSearchResult)evt.getSource();
-        
-        if ("spam-ui".equals(evt.getPropertyName())) {
-            boolean oldSpam = (Boolean) evt.getOldValue();
-            boolean newSpam = (Boolean) evt.getNewValue();
-            if (oldSpam != newSpam)
+    public void resultsCleared() {
+    }
+    
+    
+    @Override
+    public void resultChanged(VisualSearchResult visualSearchResult, 
+            String propertyName, Object oldValue, Object newValue) {        
+        if ("spam-ui".equals(propertyName)) {
+            boolean oldSpam = (Boolean)oldValue;
+            boolean newSpam = (Boolean)newValue;
+            if (oldSpam != newSpam) {
                 spamChanged(visualSearchResult, newSpam, true);
-        } else if ("spam-core".equals(evt.getPropertyName())) {
-            boolean oldSpam = (Boolean) evt.getOldValue();
-            boolean newSpam = (Boolean) evt.getNewValue();
-            if (oldSpam != newSpam)
-                spamChanged(visualSearchResult, newSpam, false);                            
+            }
+        } else if ("spam-core".equals(propertyName)) {
+            boolean oldSpam = (Boolean)oldValue;
+            boolean newSpam = (Boolean)newValue;
+            if (oldSpam != newSpam) {
+                spamChanged(visualSearchResult, newSpam, false);
+            }
         }
     }
     

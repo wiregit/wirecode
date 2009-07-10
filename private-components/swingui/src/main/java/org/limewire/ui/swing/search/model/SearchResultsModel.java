@@ -16,7 +16,9 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 /**
  * Defines a data model containing the results of a search.
  */
-public interface SearchResultsModel extends FilterableSource<VisualSearchResult>, DownloadHandler, DisposalListenerList {
+public interface SearchResultsModel extends FilterableSource<VisualSearchResult>, 
+                                            DownloadHandler, 
+                                            DisposalListenerList {
 
     /**
      * Installs the specified search listener and starts the search.  The
@@ -44,18 +46,6 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      * Returns the total number of results in the search.
      */
     int getResultCount();
-
-    /**
-     * Returns a list of grouped results in the search.
-     */
-    EventList<VisualSearchResult> getGroupedSearchResults();
-
-    /**
-     * Returns an observable list of grouped results in the search.  The 
-     * observable list fires update events whenever a result is modified in 
-     * place. 
-     */
-    EventList<VisualSearchResult> getObservableSearchResults();
 
     /**
      * Returns a list of filtered results in the search.

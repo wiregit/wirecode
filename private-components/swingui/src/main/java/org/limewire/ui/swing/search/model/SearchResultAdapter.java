@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.model;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,17 +57,20 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     private int relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
-    private PropertyChangeSupport changeSupport;
+    
+    private final VisualSearchResultStatusListener changeListener;
 
     /**
      * Constructs a SearchResultAdapter with the specified List of core results
      * and property values.
      */
-    public SearchResultAdapter(SearchResult source, Provider<PropertiableHeadings> propertiableHeadings) {
+    public SearchResultAdapter(SearchResult source, Provider<PropertiableHeadings> propertiableHeadings,
+                               VisualSearchResultStatusListener changeListener) {
         this.propertiableHeadings = propertiableHeadings;
         this.remoteHosts = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
         this.visible = true;
         this.childrenVisible = false;
+        this.changeListener = changeListener;
         
         addNewSource(source);
     }
@@ -295,11 +296,13 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     
     @Override
     public void setChildrenVisible(boolean childrenVisible) {
+        boolean oldChildrenVisible = childrenVisible;
         this.childrenVisible = childrenVisible;
         for (VisualSearchResult similarResult : getSimilarResults()) {
             similarResult.setVisible(childrenVisible);
             similarResult.setChildrenVisible(false);
         }
+        firePropertyChange("childrenVisible", oldChildrenVisible, childrenVisible);
     }
 
     @Override
@@ -403,37 +406,16 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
         SearchResultAdapter sra = (SearchResultAdapter) o;
         return getHeading().compareTo(sra.getHeading());
     }
-    
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        if(changeSupport == null) {
-            changeSupport = new PropertyChangeSupport(this);
-        }
-        changeSupport.addPropertyChangeListener(listener);
-    }
-    
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        if(changeSupport != null) {
-            changeSupport.removePropertyChangeListener(listener);
+
+    private void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
+        if (oldValue != newValue) {
+            changeListener.resultChanged(this, propertyName, oldValue, newValue);
         }
     }
 
-    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
-        if(changeSupport != null) {
-            changeSupport.firePropertyChange(propertyName, oldValue, newValue);
-        }
-    }
-
-    public void firePropertyChange(String propertyName, int oldValue, int newValue) {
-        if(changeSupport != null) {
-            changeSupport.firePropertyChange(propertyName, oldValue, newValue);
-        }
-    }
-
-    public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-        if(changeSupport != null) {
-            changeSupport.firePropertyChange(propertyName, oldValue, newValue);
+    private void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+        if (!Objects.equalOrNull(oldValue, newValue)) {
+            changeListener.resultChanged(this, propertyName, oldValue, newValue);
         }
     }
     

@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.model;
 
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -130,18 +129,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public void setVisible(boolean visible) {
-        // TODO Auto-generated method stub
-        
-    }
-    
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
         // TODO Auto-generated method stub
         
     }

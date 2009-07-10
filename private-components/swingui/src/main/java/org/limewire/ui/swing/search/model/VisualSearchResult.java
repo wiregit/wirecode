@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.model;
 
-import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.List;
 
@@ -77,18 +76,6 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      * Sets an indicator that determines if the result is visible.
      */
     void setVisible(boolean visible);
-    
-    /**
-     * Adds the specified listener to the list that is notified when the 
-     * value of a bound property is changed.
-     */
-    void addPropertyChangeListener(PropertyChangeListener listener);
-    
-    /**
-     * Removes the specified listener from the list that is notified when the
-     * value of a bound property is changed.
-     */
-    void removePropertyChangeListener(PropertyChangeListener listener);
 
     /**
      * Returns an indicator that determines if similar results are visible.

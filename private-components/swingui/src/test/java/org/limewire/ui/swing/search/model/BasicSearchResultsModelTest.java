@@ -72,9 +72,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName2UrnsNameComesEarly() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("1", "other file");
@@ -87,7 +85,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         addResult(model, testResult3);
         addResult(model, testResult4);
 
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -108,9 +106,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName2UrnsNameComesLate() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -123,7 +119,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         addResult(model, testResult3);
         addResult(model, testResult4);
 
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -144,9 +140,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -166,7 +160,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         addResult(model, testResult3);
         addResult(model, testResult4);
 
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -187,9 +181,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupByName4Urns() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "other file");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -201,7 +193,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         addResult(model, testResult3);
         addResult(model, testResult4);
 
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(4, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -236,9 +228,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName3Urns() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "other file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -252,7 +242,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         addResult(model, testResult4);
         addResult(model, testResult5);
 
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -280,9 +270,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -298,7 +286,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         addResult(model, testResult5);
         addResult(model, testResult6);
 
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -326,9 +314,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -346,7 +332,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         addResult(model, testResult6);
         addResult(model, testResult7);
 
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -374,9 +360,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testVisibility() {
 
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
         
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
@@ -388,7 +372,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         
         addResult(model, testResult1);
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(1, results.size());
         VisualSearchResult result0 = results.get(0);
         assertTrue(result0.isVisible());
@@ -436,7 +420,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertTrue(child0.isVisible());
         assertTrue(child1.isVisible());
 
-        results = model.getGroupedSearchResults();
+        results = model.getUnfilteredList();
         assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -472,14 +456,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         properties2.put(FilePropertyKey.NAME, "test-foo-bar");
         SearchResult searchResult2 = new TestSearchResult("2", "test-foo-bar.mp3", properties2);
         
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        model.addResultListener(new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
         
         addResult(model, searchResult1);
         addResult(model, searchResult2);
         
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         
         VisualSearchResult group0 = results.get(0);
@@ -509,14 +491,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         properties2.put(FilePropertyKey.TITLE, "test");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        model.addResultListener(new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
         
         addResult(model, searchResult1);
         addResult(model, searchResult2);
         
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         
         VisualSearchResult group0 = results.get(0);
@@ -550,14 +530,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        model.addResultListener(new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
         
         addResult(model, searchResult1);
         addResult(model, searchResult2);
         
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         
         VisualSearchResult group0 = results.get(0);
@@ -588,14 +566,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         properties2.put(FilePropertyKey.TITLE, "blah");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        model.addResultListener(new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
         
         addResult(model, searchResult1);
         addResult(model, searchResult2);
         
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         
         VisualSearchResult group0 = results.get(0);
