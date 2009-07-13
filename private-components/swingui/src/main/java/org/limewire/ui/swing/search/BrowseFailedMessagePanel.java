@@ -6,14 +6,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.friend.api.Friend;
@@ -24,6 +26,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.MessageComponent.MessageBackground;
@@ -48,6 +51,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private final EventBean<FriendConnectionEvent> connectionEventBean;
     private EventListener<FriendConnectionEvent> connectionListener;
     private ListenerSupport<FriendConnectionEvent> connectionSupport;
+    private final RemoteLibraryManager remoteLibraryManager;
 
     private BrowseSearch browseSearch;
     
@@ -58,11 +62,13 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private List<Friend> friends;
 
     @Inject
-    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, ChatFrame chatFrame, @Assisted SearchResultsModel searchResultsModel) {
+    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, ChatFrame chatFrame, RemoteLibraryManager remoteLibraryManager, 
+            @Assisted SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
         this.connectionEventBean = connectionEventBean;
         this.chatFrame = chatFrame;
         this.searchResultsModel = searchResultsModel;
+        this.remoteLibraryManager = remoteLibraryManager;
     }
     
     public void update(BrowseState state, BrowseSearch browseSearch, List<Friend> friends){
@@ -155,24 +161,28 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     }
     
     private JComponent createBottomComponent(){
-        if(state == BrowseState.NO_FRIENDS_SHARING && !isUserOffline()){
-            JButton chat = new HyperlinkButton(I18n.tr("Chat"));
-            chat.setFont(chatFont);
-            chat.addActionListener(new ActionListener(){
+        if(state == BrowseState.NO_FRIENDS_SHARING && !isUserOffline()){  
+            String text;
+            if(areFriendsSignedOnToLimeWire()){
+                text = I18n.tr("<HTML><A href=\"\">Chat</A> and tell them to share.</HTML>");
+            } else {
+                text = I18n.tr("<HTML><A href=\"\">Chat</A> and tell them to sign on.</HTML>");
+            }
+            
+            HTMLLabel message = new HTMLLabel(text);           
+            message.setHtmlFont(chatFont);
+            message.setHtmlForeground(chatForeground);
+            message.addHyperlinkListener(new HyperlinkListener(){
                 @Override
-                public void actionPerformed(ActionEvent e) {
-                    chatFrame.setVisibility(true);
-                }                
+                public void hyperlinkUpdate(HyperlinkEvent e) {
+                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                        chatFrame.setVisibility(true);
+                    }
+                }
             });
             
-            JLabel message = new JLabel("and tell them to sign on.");
-            message.setFont(chatFont);
-            message.setForeground(chatForeground);
-            message.setVerticalTextPosition(JLabel.TOP);
-            
             JPanel panel = new JPanel(new MigLayout("insets 0, gap 0, novisualpadding"));
-            panel.add(chat, "gapleft 10, gapright 5");
-            panel.add(message);
+            panel.add(message, "gapright 5");
             return panel;
         }
         return new JLabel();
@@ -186,8 +196,10 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
         }
 
         if (state == BrowseState.NO_FRIENDS_SHARING) {
-            return I18n.tr("No friends are sharing with you");
-
+            if (areFriendsSignedOnToLimeWire()){
+                return I18n.tr("No friends are sharing with you");
+            } 
+            return I18n.tr("No friends are on LimeWire");
         }
         
         if (state == BrowseState.OFFLINE) {
@@ -213,6 +225,10 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private boolean isSingleBrowse(){
         return friends.size() == 1;
     }   
+    
+    public boolean areFriendsSignedOnToLimeWire(){
+        return remoteLibraryManager.getFriendLibraryList().size() != 0;
+    }
     
     
     private String getSingleFriendName(){
