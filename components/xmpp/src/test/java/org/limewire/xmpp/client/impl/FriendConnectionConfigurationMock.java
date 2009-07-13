@@ -1,12 +1,14 @@
 package org.limewire.xmpp.client.impl;
 
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
-import org.limewire.listener.EventListener;
+import javax.swing.Icon;
+
 import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.RosterEvent;
 import org.limewire.io.UnresolvedIpPort;
+import org.limewire.listener.EventListener;
 
 public class FriendConnectionConfigurationMock implements FriendConnectionConfiguration {
     private final String username;
@@ -55,6 +57,11 @@ public class FriendConnectionConfigurationMock implements FriendConnectionConfig
     @Override
     public String getNetworkName() {
         return getServiceName();
+    }
+    
+    @Override
+    public Icon getIcon() { 
+        return null;
     }
     
     @Override

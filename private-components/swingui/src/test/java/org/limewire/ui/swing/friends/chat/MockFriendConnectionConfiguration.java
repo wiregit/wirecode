@@ -3,6 +3,8 @@ package org.limewire.ui.swing.friends.chat;
 import java.util.List;
 import java.util.Collections;
 
+import javax.swing.Icon;
+
 import org.limewire.listener.EventListener;
 import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.Network;
@@ -84,5 +86,11 @@ public class MockFriendConnectionConfiguration implements FriendConnectionConfig
 
     @Override
     public void setAttribute(String key, Object property) {
+    }
+
+    @Override
+    public Icon getIcon() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

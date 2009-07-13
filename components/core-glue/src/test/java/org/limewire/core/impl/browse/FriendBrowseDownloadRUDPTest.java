@@ -12,13 +12,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.Icon;
+
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
@@ -110,6 +112,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
             @Override public String getNetworkName() { return getServiceName(); }
             @Override public List<UnresolvedIpPort> getDefaultServers() { return UnresolvedIpPort.EMPTY_LIST;}
             @Override public Type getType() { return Network.Type.XMPP;}
+            @Override public Icon getIcon() { return null;}
             @Override
             public Object getAttribute(String key) {
                 return null;

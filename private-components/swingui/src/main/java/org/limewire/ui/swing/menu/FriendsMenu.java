@@ -16,7 +16,6 @@ import org.limewire.ui.swing.components.PlainCheckBoxMenuItemUI;
 import org.limewire.ui.swing.components.PlainMenuItemUI;
 import org.limewire.ui.swing.friends.actions.AddFriendAction;
 import org.limewire.ui.swing.friends.actions.BrowseFriendsAction;
-import org.limewire.ui.swing.friends.actions.FriendService;
 import org.limewire.ui.swing.friends.actions.LoginAction;
 import org.limewire.ui.swing.friends.actions.LogoutAction;
 import org.limewire.ui.swing.friends.actions.StatusActions;
@@ -25,7 +24,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-class FriendMenu extends MnemonicMenu {
+class FriendsMenu extends MnemonicMenu {
 
     private final JMenuItem browseFriendMenuItem;
 
@@ -33,7 +32,6 @@ class FriendMenu extends MnemonicMenu {
     private final JMenuItem loginMenuItem;
     private final JMenuItem logoutMenuItem;
     private final JMenuItem addFriendMenuItem;
-    private final FriendService friendService;
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     private final JSeparator addFriendSeperator;
     private final JSeparator statusSeperator;
@@ -41,10 +39,10 @@ class FriendMenu extends MnemonicMenu {
     private final AutoLoginService autoLoginService;
 
     @Inject
-    public FriendMenu(EventBean<FriendConnectionEvent> friendConnectionEventBean,
+    public FriendsMenu(EventBean<FriendConnectionEvent> friendConnectionEventBean,
             BrowseFriendsAction browseFriendAction, StatusActions statusActions,
             AddFriendAction addFriendAction, LoginAction loginAction, LogoutAction logoutAction,
-            FriendService friendService, AutoLoginService autoLoginService) {
+            AutoLoginService autoLoginService) {
         super(I18n.tr("&Friends"));
         this.friendConnectionEventBean = friendConnectionEventBean;
         this.browseFriendMenuItem = new JMenuItem(browseFriendAction);
@@ -52,7 +50,6 @@ class FriendMenu extends MnemonicMenu {
         this.loginMenuItem = new JMenuItem(loginAction);
         this.logoutMenuItem = new JMenuItem(logoutAction);
         this.addFriendMenuItem = new JMenuItem(addFriendAction);
-        this.friendService = friendService;
         this.addFriendSeperator = new JSeparator();
         this.statusSeperator = new JSeparator();
         this.loginSeperator = new JSeparator();
@@ -106,10 +103,6 @@ class FriendMenu extends MnemonicMenu {
         setPopupMenuVisible(false);
 
         removeAll();
-        friendService.updateSignedInStatus();
-        if (signedIn) {
-            add(friendService);
-        }
         add(browseFriendMenuItem);
         browseFriendMenuItem.setEnabled(signedIn);
         if (supportsAddRemoveFriend) {

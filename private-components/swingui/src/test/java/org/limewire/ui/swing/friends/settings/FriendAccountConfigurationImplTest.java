@@ -14,7 +14,7 @@ public class FriendAccountConfigurationImplTest extends BaseTestCase {
     }
 
     public void testSetUsernameUpdatesCanonicalId() {
-        FriendAccountConfigurationImpl configuration = new FriendAccountConfigurationImpl("vmail.com", "GMail", "resource", Type.XMPP, null);
+        FriendAccountConfigurationImpl configuration = new FriendAccountConfigurationImpl("vmail.com", "GMail", "resource", Type.XMPP, null, null);
         assertEquals("", configuration.getCanonicalizedLocalID());
         configuration.setUsername("Julia");
         assertEquals("julia@vmail.com", configuration.getCanonicalizedLocalID());

@@ -8,7 +8,11 @@ import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.Timer;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -23,8 +27,13 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
-import org.limewire.ui.swing.friends.actions.BrowseOrLoginAction;
+import org.limewire.ui.swing.friends.actions.BrowseFriendsAction;
+import org.limewire.ui.swing.friends.actions.FriendServiceItem;
+import org.limewire.ui.swing.friends.actions.LoginAction;
+import org.limewire.ui.swing.friends.actions.LogoutAction;
+import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -33,8 +42,9 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
-public class FriendsButton extends JXButton {
+public class FriendsButton extends LimeComboBox {
     
     @Resource private Icon friendEnabledIcon;
     @Resource private Icon friendDisabledIcon;
@@ -46,7 +56,13 @@ public class FriendsButton extends JXButton {
     private Timer busy;
     
     @Inject
-    public FriendsButton(ComboBoxDecorator comboBoxDecorator, BrowseOrLoginAction browseOrLoginAction) {
+    public FriendsButton(ComboBoxDecorator comboBoxDecorator,
+            final Provider<FriendServiceItem> serviceItemProvider,
+            final Provider<BrowseFriendsAction> browseFriendsActionProvider,
+            final Provider<LoginAction> loginActionProvider,
+            final Provider<LogoutAction> logoutActionProvider,
+            final AutoLoginService autoLoginService,
+            final EventBean<FriendConnectionEvent> friendConnectionEventBean) {
         GuiUtils.assignResources(this);
         
         comboBoxDecorator.decorateIconComboBox(this);
@@ -84,8 +100,50 @@ public class FriendsButton extends JXButton {
             }
         };
         
-        addActionListener(browseOrLoginAction);
         addMouseListener(new ActionHandListener());
+        
+        final JPopupMenu menu = new JPopupMenu();
+        overrideMenuNoRestyle(menu);
+        menu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                menu.removeAll();
+            }
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                menu.removeAll();
+            }
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                menu.add(serviceItemProvider.get());
+
+                FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
+                boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
+                boolean loggingIn = autoLoginService.isAttemptingLogin()
+                        || (friendConnection != null && friendConnection.isLoggingIn());
+
+                JMenuItem browseFriendMenuItem = new JMenuItem(browseFriendsActionProvider.get());
+                menu.add(browseFriendMenuItem);
+                browseFriendMenuItem.setEnabled(signedIn);
+                
+                
+                if (signedIn) {
+                    menu.add(new JMenuItem(logoutActionProvider.get()));
+                } else {
+                    JMenuItem loginMenuItem;
+                    if (loggingIn) {
+                        loginMenuItem = new JMenuItem(I18n.tr(LoginAction.DISPLAY_TEXT));
+                        loginMenuItem.setEnabled(false);
+                    } 
+                    else {
+                        loginMenuItem = new JMenuItem(loginActionProvider.get());
+                    }
+                    menu.add(loginMenuItem);
+                }
+            }
+        });
+        
+        
     }
     
     private void setIconFromEvent(FriendConnectionEvent event) {

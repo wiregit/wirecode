@@ -36,13 +36,14 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
      */
     private boolean loaded = false;
     
-    @Resource private Icon gmailIcon;
-    @Resource private Icon ljIcon;    
-    @Resource private Icon facebookIcon;
     @Resource private Icon gmailIconLarge;
+    @Resource private Icon gmailIconSmall;
     @Resource private Icon ljIconLarge;
+    @Resource private Icon ljIconSmall;
     @Resource private Icon facebookIconLarge;
+    @Resource private Icon facebookIconSmall;
     @Resource private Icon otherIconLarge;
+    @Resource private Icon otherIconSmall;
     
     @Inject
     public FriendAccountConfigurationManagerImpl(PasswordManager passwordManager,
@@ -77,7 +78,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     private void loadCustomServer() {
         String custom = SwingUiSettings.USER_DEFINED_JABBER_SERVICENAME.get();
         FriendAccountConfigurationImpl customConfig =
-            new FriendAccountConfigurationImpl(custom, "Jabber", resource, Network.Type.XMPP, otherIconLarge);
+            new FriendAccountConfigurationImpl(custom, "Jabber", resource, Network.Type.XMPP, otherIconSmall, otherIconLarge);
         configs.put(customConfig.getLabel(), customConfig);
         String autoLogin = SwingUiSettings.XMPP_AUTO_LOGIN.get();
         if(!autoLogin.equals("")) {
@@ -104,13 +105,13 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
 
     private void loadWellKnownServers() {
         FriendAccountConfiguration facebook =
-            new FriendAccountConfigurationImpl(false, "facebook.com", "Facebook", facebookIcon, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK);
+            new FriendAccountConfigurationImpl(false, "facebook.com", "Facebook", facebookIconSmall, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK);
         configs.put(facebook.getLabel(), facebook);
         FriendAccountConfiguration gmail =
-            new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, gmailIconLarge, resource, getGTalkServers(), Network.Type.XMPP);
+            new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIconSmall, gmailIconLarge, resource, getGTalkServers(), Network.Type.XMPP);
         configs.put(gmail.getLabel(), gmail);
         FriendAccountConfiguration livejournal =
-            new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, ljIconLarge, resource, getLiveJournalServers(), Network.Type.XMPP);
+            new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIconSmall, ljIconLarge, resource, getLiveJournalServers(), Network.Type.XMPP);
         configs.put(livejournal.getLabel(), livejournal);
     }
 
