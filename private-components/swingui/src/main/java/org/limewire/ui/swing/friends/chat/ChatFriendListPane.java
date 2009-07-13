@@ -67,7 +67,7 @@ import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.ShareListIcons;
-import org.limewire.ui.swing.search.RemoteHostActions;
+import org.limewire.ui.swing.search.FriendPresenceActions;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -103,7 +103,7 @@ public class ChatFriendListPane extends JPanel {
     private final MouseableTable friendsTable;
     private final ChatModel chatModel;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
-    private final Provider<RemoteHostActions> remoteHostActions;
+    private final Provider<FriendPresenceActions> remoteHostActions;
     private final Provider<SharedFileListManager> sharedFileListManager;
     private final Provider<LibraryMediator> library;
 
@@ -125,7 +125,7 @@ public class ChatFriendListPane extends JPanel {
 
     @Inject
     public ChatFriendListPane(ChatModel chatModel, 
-            Provider<RemoteHostActions> remoteHostActions, 
+            Provider<FriendPresenceActions> remoteHostActions, 
             Provider<SharedFileListManager> sharedFileListManager,
             Provider<LibraryMediator> library) {
         super(new BorderLayout());
@@ -778,7 +778,7 @@ public class ChatFriendListPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-                remoteHostActions.get().viewLibraryOf(friend);
+                remoteHostActions.get().viewFriendLibrary(friend);
         }
     }
    

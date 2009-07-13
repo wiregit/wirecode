@@ -25,7 +25,7 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.search.BlockUserMenuFactory;
-import org.limewire.ui.swing.search.RemoteHostActions;
+import org.limewire.ui.swing.search.FriendPresenceActions;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -46,18 +46,18 @@ public class RemoteHostWidget extends JPanel {
     private final LimeComboBox comboBox;
     private final JPopupMenu comboBoxMenu;
     
-    private final Provider<RemoteHostActions> fromActions;
+    private final Provider<FriendPresenceActions> fromActions;
     private final Provider<BlockUserMenuFactory> blockUserMenuFactory;
     
     private List<RemoteHost> people = new ArrayList<RemoteHost>();
     private List<RemoteHost> poppedUpPeople = Collections.emptyList();
     
     private final RemoteWidgetType type;
-    private RemoteHostActions remoteHostActions;
+    private FriendPresenceActions remoteHostActions;
     
     @Inject
     RemoteHostWidget(ComboBoxDecorator comboBoxDecorator,
-                           Provider<RemoteHostActions> fromActions,
+                           Provider<FriendPresenceActions> fromActions,
                            Provider<BlockUserMenuFactory> blockUserMenuFactory,
                            @Assisted RemoteWidgetType type) {
         
@@ -108,7 +108,7 @@ public class RemoteHostWidget extends JPanel {
             
             @Override
             public void actionPerformed(ActionEvent e) {
-                getRemoteHostAction().chatWith(person);
+                getRemoteHostAction().chatWith(person.getFriendPresence().getFriend());
             }
         };
     }
@@ -121,7 +121,7 @@ public class RemoteHostWidget extends JPanel {
         
             @Override
             public void actionPerformed(ActionEvent e) {
-                getRemoteHostAction().viewLibraryOf(person);
+                getRemoteHostAction().viewLibrariesOf(Collections.singleton(person.getFriendPresence()));
             }
         };
     }
@@ -138,7 +138,7 @@ public class RemoteHostWidget extends JPanel {
         return blockAction;
     }
     
-    private RemoteHostActions getRemoteHostAction() {
+    private FriendPresenceActions getRemoteHostAction() {
         if(remoteHostActions == null)
             remoteHostActions = fromActions.get();
         return remoteHostActions;

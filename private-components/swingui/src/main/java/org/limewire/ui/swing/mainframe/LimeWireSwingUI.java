@@ -196,13 +196,13 @@ public class LimeWireSwingUI extends JPanel {
 
         return splitPane;
     }
-   
-   private class DownloadVisibilityHandler implements DownloadVisibilityListener {
-    @Override
-    public void updateVisibility(DownloadVisibilityEvent event) {
-        handleDownloadVisibiltyChange(event.getVisibility());
-    }       
-   }
+
+    private class DownloadVisibilityHandler implements DownloadVisibilityListener {
+        @Override
+        public void updateVisibility(DownloadVisibilityEvent event) {
+            handleDownloadVisibiltyChange(event.getVisibility());
+        }
+    }
    
     
    private void handleDownloadVisibiltyChange(boolean isVisible){

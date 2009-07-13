@@ -68,7 +68,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.painter.GenericBarPainter;
-import org.limewire.ui.swing.search.RemoteHostActions;
+import org.limewire.ui.swing.search.FriendPresenceActions;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
@@ -104,7 +104,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final ChatFriend chatFriend;
 //    private final ShareListManager shareListManager;
     private final Provider<IconManager> iconManager;
-    private final RemoteHostActions remoteHostActions;
+    private final FriendPresenceActions remoteHostActions;
 //    private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
     private HyperlinkButton nosaveLink;
@@ -130,7 +130,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     @Inject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend,
                             SharedFileListManager libraryManager, Provider<IconManager> iconManager,
-                            ChatHyperlinkListenerFactory chatHyperlinkListenerFactory, RemoteHostActions remoteHostActions,
+                            ChatHyperlinkListenerFactory chatHyperlinkListenerFactory, FriendPresenceActions remoteHostActions,
                             @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
         this.writer = writer;
         this.chatFriend = chatFriend;
@@ -530,7 +530,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            remoteHostActions.viewLibraryOf(chatFriend.getFriend());
+            remoteHostActions.viewFriendLibrary(chatFriend.getFriend());
         }
     }
 

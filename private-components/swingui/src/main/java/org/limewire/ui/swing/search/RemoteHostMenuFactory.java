@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search;
 
 import java.awt.event.ActionEvent;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -10,17 +11,20 @@ import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class RemoteHostMenuFactory {
     
-    private final Provider<RemoteHostActions> remoteHostActions;
+    private final Provider<FriendPresenceActions> remoteHostActions;
     
     @Inject
-    public RemoteHostMenuFactory(final Provider<RemoteHostActions> remoteHostActions){
+    public RemoteHostMenuFactory(final Provider<FriendPresenceActions> remoteHostActions){
         this.remoteHostActions = remoteHostActions;
     }
     
@@ -39,7 +43,12 @@ public class RemoteHostMenuFactory {
             browse.add(new AbstractAction("All Users") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    remoteHostActions.get().viewLibrariesOf(uniqueHosts);
+                    remoteHostActions.get().viewLibrariesOf(Collections2.transform(uniqueHosts, new Function<RemoteHost, FriendPresence>() {
+                        @Override
+                        public FriendPresence apply(RemoteHost from) {
+                            return from.getFriendPresence();
+                        }
+                    }));
                 }
             });
             browse.addSeparator();
@@ -53,15 +62,17 @@ public class RemoteHostMenuFactory {
     }
     
     private class BrowseAction extends AbstractAction {    
-        private RemoteHost host; 
+        private FriendPresence presence; 
+        
         public BrowseAction(RemoteHost host) {     
             super(host.getFriendPresence().getFriend().getRenderName());
-            this.host = host; 
+            this.presence = host.getFriendPresence(); 
             setEnabled(host.isBrowseHostEnabled());                
-        }                
+        }
+        
         @Override                
         public void actionPerformed(ActionEvent e) {                    
-            remoteHostActions.get().viewLibraryOf(host);               
+            remoteHostActions.get().viewLibrariesOf(Collections.singleton(presence));               
         }            
     }    
     

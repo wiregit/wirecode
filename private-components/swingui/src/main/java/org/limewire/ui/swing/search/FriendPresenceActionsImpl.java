@@ -1,12 +1,9 @@
 package org.limewire.ui.swing.search;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseSearchFactory;
@@ -24,12 +21,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-class RemoteHostActionsImpl implements RemoteHostActions {
-    private static final Log LOG = LogFactory.getLog(RemoteHostActionsImpl.class);
+class FriendPresenceActionsImpl implements FriendPresenceActions {
+    private static final Log LOG = LogFactory.getLog(FriendPresenceActionsImpl.class);
 
 
     private final ChatFrame chatFrame;
-//    private final LibraryNavigator libraryNavigator;
 
     //Provider prevents circular dependency
     private final Provider<SearchNavigator> searchNavigator;
@@ -45,21 +41,19 @@ class RemoteHostActionsImpl implements RemoteHostActions {
 
 
     @Inject
-    public RemoteHostActionsImpl(ChatFrame chatFrame,  
+    public FriendPresenceActionsImpl(ChatFrame chatFrame,  
             BrowsePanelFactory browsePanelFactory, Provider<SearchNavigator> searchNavigator,
             Navigator navigator, Provider<BrowseSearchFactory> browseSearchFactory) {
         this.chatFrame = chatFrame;
         this.browsePanelFactory = browsePanelFactory;
         this.searchNavigator = searchNavigator;
-//        this.libraryNavigator = libraryNavigator; 
         this.browseSearchFactory = browseSearchFactory;
     }
  
 
     @Override
-    public void chatWith(RemoteHost person) {
-        LOG.debugf("chatWith: {0}", person.getFriendPresence().getFriend());
-        Friend friend = person.getFriendPresence().getFriend();
+    public void chatWith(Friend friend) {
+        LOG.debugf("chatWith: {0}", friend);
         chatFrame.setVisibility(true);
         chatFrame.fireConversationStarted(friend.getId());
 
@@ -68,24 +62,9 @@ class RemoteHostActionsImpl implements RemoteHostActions {
         // weirdness because the search window is currently the active one, not
         // the chat
     }
-
     
     @Override
-    public void viewLibraryOf(RemoteHost person) {
-        assert(person != null);
-        LOG.debugf("viewLibraryOf: {0}", person);
-        
-        if (navigateIfTabExists(person.getFriendPresence().getFriend().getId())) {
-            return;
-        }
-        
-        browse(browseSearchFactory.get().createBrowseSearch(person.getFriendPresence()), 
-                DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
-                person.getFriendPresence().getFriend().getRenderName(), person.getFriendPresence().getFriend().getId());
-    }
-    
-    @Override
-    public void viewLibraryOf(Friend friend) {
+    public void viewFriendLibrary(Friend friend) {
         assert(friend != null && !friend.isAnonymous());
         LOG.debugf("viewLibraryOf: {0}", friend);
         
@@ -98,17 +77,21 @@ class RemoteHostActionsImpl implements RemoteHostActions {
                 friend.getRenderName(), friend.getId());
     }
 
-
     @Override
-    public void viewLibrariesOf(Collection<RemoteHost> people) {
-        List<FriendPresence> presences = new ArrayList<FriendPresence>(people.size());
-        for (RemoteHost host : people) {
-            presences.add(host.getFriendPresence());
+    public void viewLibrariesOf(Collection<FriendPresence> people) {
+        if(people.size() == 1) {
+            FriendPresence person = people.iterator().next();
+            if (!navigateIfTabExists(person.getFriend().getId())) {
+                browse(browseSearchFactory.get().createBrowseSearch(person), 
+                        DefaultSearchInfo.createBrowseSearch(SearchType.SINGLE_BROWSE),
+                        person.getFriend().getRenderName(), person.getFriend().getId());
+            }
+        } else if(!people.isEmpty()) {
+            browse(browseSearchFactory.get().createBrowseSearch(people), 
+                    DefaultSearchInfo.createBrowseSearch(SearchType.MULTIPLE_BROWSE),
+                    getTabTitle(people),
+                    null);
         }
-        browse(browseSearchFactory.get().createBrowseSearch(presences), 
-                DefaultSearchInfo.createBrowseSearch(SearchType.MULTIPLE_BROWSE),
-                getTabTitle(people),
-                null);
     }
     
     @Override
@@ -122,7 +105,7 @@ class RemoteHostActionsImpl implements RemoteHostActions {
                 I18n.tr("All Friends"), ALL_FRIENDS_KEY);
     }
     
-    private String getTabTitle(Collection<RemoteHost> people){
+    private String getTabTitle(Collection<FriendPresence> people){
         boolean hasP2P = hasP2P(people);
         boolean hasFriends = hasFriend(people);
         
@@ -138,18 +121,18 @@ class RemoteHostActionsImpl implements RemoteHostActions {
         return "";
     }
 
-    private boolean hasP2P(Collection<RemoteHost> people) {
-        for (RemoteHost host : people) {
-            if (host.getFriendPresence().getFriend().isAnonymous()) {
+    private boolean hasP2P(Collection<FriendPresence> people) {
+        for (FriendPresence host : people) {
+            if (host.getFriend().isAnonymous()) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean hasFriend(Collection<RemoteHost> people) {
-        for (RemoteHost host : people) {
-            if (!host.getFriendPresence().getFriend().isAnonymous()) {
+    private boolean hasFriend(Collection<FriendPresence> people) {
+        for (FriendPresence host : people) {
+            if (!host.getFriend().isAnonymous()) {
                 return true;
             }
         }
@@ -176,7 +159,8 @@ class RemoteHostActionsImpl implements RemoteHostActions {
     }
     
     /** 
-     * @return true if the tab exists
+     * Selects a tab in search results if there's already an open browse
+     * for the key.  Returns true if an existing tab was selected.
      */
     private boolean navigateIfTabExists(String key){
         if (key != null && browseNavItemCache.get(key) != null) {

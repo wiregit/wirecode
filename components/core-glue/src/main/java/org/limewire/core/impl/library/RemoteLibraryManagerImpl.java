@@ -116,6 +116,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     
     @Override
     public boolean addPresenceLibrary(FriendPresence presence) {
+        assert !presence.getFriend().isAnonymous();
+        
         lock.writeLock().lock();
         try {
             FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());

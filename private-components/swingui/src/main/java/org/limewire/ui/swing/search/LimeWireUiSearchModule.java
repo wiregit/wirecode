@@ -35,7 +35,6 @@ public class LimeWireUiSearchModule extends AbstractModule {
     protected void configure() {
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("searchHistory")).toInstance(new StringTrieSet(true));
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
-        bind(SearchHandler.class).annotatedWith(Names.named("p2p://")).to(P2PLinkSearchHandler.class);
         bind(SearchHandler.class).annotatedWith(Names.named("text")).to(TextSearchHandlerImpl.class);
         bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryImpl.class);
         
@@ -62,8 +61,8 @@ public class LimeWireUiSearchModule extends AbstractModule {
                 FactoryProvider.newFactory(
                         ListViewTableEditorRendererFactory.class, ListViewTableEditorRenderer.class));       
         
-        bind(RemoteHostActions.class).toProvider(LazyBinder.newLazyProvider(
-                RemoteHostActions.class, RemoteHostActionsImpl.class));
+        bind(FriendPresenceActions.class).toProvider(LazyBinder.newLazyProvider(
+                FriendPresenceActions.class, FriendPresenceActionsImpl.class));
         
         bind(SearchHeadingDocumentBuilder.class).toProvider(LazyBinder.newLazyProvider(
                 SearchHeadingDocumentBuilder.class, SearchHeadingDocumentBuilderImpl.class));
