@@ -26,7 +26,11 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
 
     @Override
     public String getDefaultFileName() {
-        return (String) serialObjects.get("defaultFileName");
+        String defaultFileName = (String) serialObjects.get("defaultFileName");
+        //Returning getName if defaultFileName is null. this is kind of backwards
+        //but we were not serializing defaultFileName in the past so this is needed
+        //to remain backwards compatible.
+        return defaultFileName != null ? defaultFileName : getName();
     }
 
     @Override
