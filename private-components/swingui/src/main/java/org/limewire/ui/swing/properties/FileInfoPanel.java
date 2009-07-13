@@ -292,9 +292,8 @@ public class FileInfoPanel extends JPanel {
                     new AbstractAction(I18n.tr("Locate on Disk")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            if( ((DownloadItem)propertiableFile).isLaunchable() &&
-                                    ((DownloadItem)propertiableFile).getLaunchableFile() != null) {
-                                NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getLaunchableFile());
+                            if( ((DownloadItem)propertiableFile).getDownloadingFile() != null) {
+                                NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getDownloadingFile());
                             }
                         }
                     });

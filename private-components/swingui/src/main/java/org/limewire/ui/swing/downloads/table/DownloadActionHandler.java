@@ -95,7 +95,9 @@ public class DownloadActionHandler {
                 DownloadItemUtils.launch(item);
             }
         } else if (actionCommmand == LOCATE_COMMAND){
-            NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
+            if(item.getDownloadingFile() != null) {
+                NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
+            }
         } else if (actionCommmand == PROPERTIES_COMMAND){
             if(item.getState() != DownloadState.DONE) {
                 fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
