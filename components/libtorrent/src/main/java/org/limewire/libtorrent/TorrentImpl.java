@@ -99,10 +99,6 @@ public class TorrentImpl implements Torrent {
             List<String> paths, File fastResumeFile, File torrentFile, File saveDir,
             File incompleteFile, Boolean isPrivate) throws IOException {
 
-        assert (name != null && sha1 != null && totalSize > 0 && trackerURL != null
-                && paths != null && saveDir != null)
-                || (torrentFile != null && torrentFile.exists() && saveDir != null);
-
         this.sha1 = sha1;
         this.trackerURL = trackerURL;
         if (paths != null) {
@@ -157,12 +153,9 @@ public class TorrentImpl implements Torrent {
             this.isPrivate = Boolean.TRUE;
         }
         
-        assert torrentDownloadFolder != null;
-        assert this.name != null;
-        assert this.trackerURL != null;
-        assert this.totalSize > 0;
-        assert this.sha1 != null;
-        assert this.isPrivate != null;
+        if(this.name == null || torrentDownloadFolder== null || this.totalSize <= 0 || this.sha1 == null) {
+            throw new IOException("There was an error initializing the torrent.");
+        }
 
         this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, this.name)
                 : incompleteFile;

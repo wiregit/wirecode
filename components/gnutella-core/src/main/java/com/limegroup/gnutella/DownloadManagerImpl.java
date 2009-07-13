@@ -849,6 +849,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         try {
             ret = coreDownloaderFactory.createBTDownloader(torrentFile, saveDirectory);
         } catch (IOException e) {
+            LOG.error("Error creating BTDownloader", e);
             if(e instanceof DownloadException) {
                 throw (DownloadException)e;
             } else {
