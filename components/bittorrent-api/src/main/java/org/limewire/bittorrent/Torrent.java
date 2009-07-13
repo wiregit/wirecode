@@ -14,7 +14,7 @@ public interface Torrent {
     /**
      * Initializes the torrent from the given fields. Either the torrentFile and
      * saveDir fields cannot be null. Or the name, sha1, long totalSize,
-     * trackerURL, paths, and saveDir fields must be set.
+     * paths, and saveDir fields must be set.
      * <p>
      * Otherwise if torrentFile is set and other fields are as well, the field
      * passed in will be used, and any missing field will be pulled from the
