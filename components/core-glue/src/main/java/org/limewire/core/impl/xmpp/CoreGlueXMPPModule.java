@@ -12,7 +12,7 @@ public class CoreGlueXMPPModule extends AbstractModule {
     @Override
     protected void configure() {
         binder().install(new LimeWireXMPPModule(SettingsBackedJabberSettings.class));
-        bind(XmppPresenceLibraryAdder.class);
+        
         
         bind(PasswordManager.class).to(PasswordManagerImpl.class);
         bind(XMPPResourceFactory.class).to(XMPPResourceFactoryImpl.class);

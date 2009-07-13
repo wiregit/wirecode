@@ -17,6 +17,7 @@ public class CoreGlueFriendModule extends AbstractModule {
         bind(CoreGlueFriendService.class);
         bind(FileMetaDataConverter.class).to(FileMetaDataConverterImpl.class);
         bind(FriendShareListRefresher.class);
+        bind(FriendPresenceLibraryAdder.class);
     }
 
 }

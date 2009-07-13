@@ -1,10 +1,11 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.impl.xmpp.XmppPresenceLibraryAdder.FeatureListener;
+import org.limewire.core.impl.friend.FriendPresenceLibraryAdder;
+import org.limewire.core.impl.friend.FriendPresenceLibraryAdder.FeatureListener;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.AuthTokenFeature;
@@ -14,10 +15,10 @@ import org.limewire.friend.api.feature.FeatureEvent.Type;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
 
-public class XmppPresenceLibraryAdderTest extends BaseTestCase {
+public class FriendPresenceLibraryAdderTest extends BaseTestCase {
 
 
-    public XmppPresenceLibraryAdderTest(String name) {
+    public FriendPresenceLibraryAdderTest(String name) {
         super(name);
     }
 
@@ -30,7 +31,7 @@ public class XmppPresenceLibraryAdderTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final ListenerSupport<FeatureEvent> featureSupport = context.mock(ListenerSupport.class);
-        final XmppPresenceLibraryAdder adder = new XmppPresenceLibraryAdder(null);
+        final FriendPresenceLibraryAdder adder = new FriendPresenceLibraryAdder(null);
         
         context.checking(new Expectations() {
             {  
@@ -52,7 +53,7 @@ public class XmppPresenceLibraryAdderTest extends BaseTestCase {
         
         final RemoteLibraryManager manager = context.mock(RemoteLibraryManager.class);
         
-        final XmppPresenceLibraryAdder adder = new XmppPresenceLibraryAdder(manager);
+        final FriendPresenceLibraryAdder adder = new FriendPresenceLibraryAdder(manager);
         final FeatureListener listener = adder.new FeatureListener();
         final FeatureEvent e1 = new FeatureEvent(presence1, Type.ADDED, new Feature<Object>(new Object(), null));
         final FeatureEvent e2 = new FeatureEvent(presence2, Type.ADDED, new Feature<Object>(new Object(), null));
@@ -83,7 +84,7 @@ public class XmppPresenceLibraryAdderTest extends BaseTestCase {
         
         final RemoteLibraryManager manager = context.mock(RemoteLibraryManager.class);
         
-        final XmppPresenceLibraryAdder adder = new XmppPresenceLibraryAdder(manager);
+        final FriendPresenceLibraryAdder adder = new FriendPresenceLibraryAdder(manager);
         final FeatureListener listener = adder.new FeatureListener();
         final FeatureEvent e1 = new FeatureEvent(presence1, Type.REMOVED, new Feature<Object>(new Object(), null));
         final FeatureEvent e2 = new FeatureEvent(presence2, Type.REMOVED, new Feature<Object>(new Object(), null));
@@ -118,7 +119,7 @@ public class XmppPresenceLibraryAdderTest extends BaseTestCase {
         
         final RemoteLibraryManager manager = context.mock(RemoteLibraryManager.class);
         
-        final XmppPresenceLibraryAdder adder = new XmppPresenceLibraryAdder(manager);
+        final FriendPresenceLibraryAdder adder = new FriendPresenceLibraryAdder(manager);
         final FeatureListener listener = adder.new FeatureListener();
         
                 
