@@ -96,13 +96,15 @@ public class LibrarySharingPanel {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
-                if(!isLoggedIn()) {
-                    showLoginView();
-                } else if(currentView == View.LOGIN) {
-                    if(SwingUiSettings.SHOW_SHARING_OVERLAY_MESSAGE.getValue()) {
-                        showEditableView();
-                    } else {
-                        showFriendListView();
+                if(component.isVisible()) {
+                    if(!isLoggedIn()) {
+                        showLoginView();
+                    } else if(currentView == View.LOGIN) {
+                        if(SwingUiSettings.SHOW_SHARING_OVERLAY_MESSAGE.getValue()) {
+                            showEditableView();
+                        } else {
+                            showFriendListView();
+                        }
                     }
                 }
             }
