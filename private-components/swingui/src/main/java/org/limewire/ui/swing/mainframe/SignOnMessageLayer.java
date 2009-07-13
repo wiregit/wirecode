@@ -251,7 +251,7 @@ class SignOnMessageLayer {
         if ((libraryItem == null) || !libraryItem.isSelected()) {
             // Library not selected so show message pointing to Library.
             if (showLibraryMsg) {
-                Point location = new Point(6, topPanel.getSize().height - 4);
+                Point location = new Point(16, topPanel.getSize().height - 4);
                 messageComponent = new LibraryMessagePanel(location, false);
                 messageType = Type.LIBRARY;
             }
