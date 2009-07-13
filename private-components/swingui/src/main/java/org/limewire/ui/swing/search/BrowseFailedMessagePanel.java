@@ -156,11 +156,6 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     
     private JComponent createBottomComponent(){
         if(state == BrowseState.NO_FRIENDS_SHARING && !isUserOffline()){
-            JLabel message = new JLabel("Chat and tell them to sign on.");
-            message.setFont(chatFont);
-            message.setForeground(chatForeground);
-            message.setVerticalTextPosition(JLabel.TOP);
-            
             JButton chat = new HyperlinkButton(I18n.tr("Chat"));
             chat.setFont(chatFont);
             chat.addActionListener(new ActionListener(){
@@ -170,9 +165,14 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
                 }                
             });
             
+            JLabel message = new JLabel("and tell them to sign on.");
+            message.setFont(chatFont);
+            message.setForeground(chatForeground);
+            message.setVerticalTextPosition(JLabel.TOP);
+            
             JPanel panel = new JPanel(new MigLayout("insets 0, gap 0, novisualpadding"));
+            panel.add(chat, "gapleft 10, gapright 5");
             panel.add(message);
-            panel.add(chat, "gapleft 10, gapright 10");
             return panel;
         }
         return new JLabel();
