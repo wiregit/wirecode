@@ -110,11 +110,12 @@ class ProNag extends JXPanel implements Resizable {
     
     
     public ListeningFuture<Void> loadContents(boolean firstLaunch) {
-        return editorPane.setPageAsynchronous(application.addClientInfoToUrl("http://client-data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch), createDefaultPage());
+        return editorPane.setPageAsynchronous(application.addClientInfoToUrl("http://client-data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch), createDefaultPage(firstLaunch));
     }
     
-    private String createDefaultPage() {
-        String outgoing = application.addClientInfoToUrl("http://www.limewire.com/clientpro?offline=true");
+    private String createDefaultPage(boolean firstLaunch) {
+        String outgoing = application.addClientInfoToUrl("http://www.limewire.com/clientpro?offline=true&fromFirstRun=" + firstLaunch);
+        outgoing = outgoing.replace("&", "&amp;"); // must HTML-encode, otherwise things get messed up
         return
          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">"
          + "<html>" 
