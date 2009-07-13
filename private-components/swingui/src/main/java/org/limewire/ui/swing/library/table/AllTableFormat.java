@@ -12,7 +12,6 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
@@ -23,13 +22,12 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     static final int PLAY_INDEX = 0;
     static final int NAME_INDEX = 1;
     static final int TYPE_INDEX = 2;
-    static final int CREATED_INDEX = 3;
-    static final int SIZE_INDEX = 4;
-    static final int HIT_INDEX = 5;
-    static final int UPLOADS_INDEX = 6;
-    static final int UPLOAD_ATTEMPTS_INDEX = 7;
-    static final int PATH_INDEX = 8;
-    static final int ACTION_INDEX = 9;
+    static final int SIZE_INDEX = 3;
+    static final int HIT_INDEX = 4;
+    static final int UPLOADS_INDEX = 5;
+    static final int UPLOAD_ATTEMPTS_INDEX = 6;
+    static final int PATH_INDEX = 7;
+    static final int ACTION_INDEX = 8;
     
     /** Icon manager used to find native file type information. */
     private IconManager iconManager;
@@ -40,7 +38,7 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_ALL_PLAY", "", 16, 16, true, false), 
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", "Name", 480, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 230, true, true),     
-                new ColumnStateInfo(CREATED_INDEX, "LIBRARY_ALL_CREATED", I18n.tr("Date Created"), 100, false, true), 
+
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_ALL_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_ALL_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_ALL_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
@@ -56,9 +54,6 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     public Object getColumnValue(T baseObject, int column) {
         switch(column) {
         case PLAY_INDEX: return baseObject;
-        case CREATED_INDEX:
-            long creationTime = baseObject.getCreationTime();
-            return (creationTime >= 0) ? GuiUtils.msec2DateTime(creationTime) : null;
         case NAME_INDEX: return baseObject;
         case SIZE_INDEX: return baseObject.getSize();
         case TYPE_INDEX:
