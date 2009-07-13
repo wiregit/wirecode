@@ -139,8 +139,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
         case NO_TORRENT_MANAGER:
             MultiLineLabel label =
                 new MultiLineLabel(I18n.tr(
-                        "Sorry, there is a problem with torrents.\n" +
-                        "Please try reinstalling LimeWire to solve this problem."));
+                        "Sorry, there is a problem with torrents.\nPlease try reinstalling LimeWire to solve this problem."));
             HyperlinkButton help =
                 new HyperlinkButton(I18n.tr(
                         "You can also ask for help on the forums."));
