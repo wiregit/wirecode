@@ -25,7 +25,6 @@ public class ChatListener implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(org.limewire.facebook.service.ChatListener.class);
     
-    private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private final FacebookFriendConnection connection;
     private final LiveMessageHandlerRegistry handlerRegistry;
     private final Provider<String> facebookAppID;
