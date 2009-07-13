@@ -9,14 +9,13 @@ import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-import org.limewire.util.StringUtils;
+import org.limewire.ui.swing.util.PropertiableFileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -73,18 +72,6 @@ class NameCategoryRenderer extends DefaultLibraryRenderer implements TableCellRe
     }
     
     private String getAudioName(LocalFileItem item) {
-        String name = item.getPropertyString(FilePropertyKey.NAME);
-        String title = item.getPropertyString(FilePropertyKey.TITLE);
-        
-        // For audio files, use non-blank title, prefixed by non-blank artist.
-        if (item.getCategory().equals(Category.AUDIO) && !StringUtils.isEmpty(title)) {
-            String artist = item.getPropertyString(FilePropertyKey.AUTHOR);
-            if (!StringUtils.isEmpty(artist)) {
-                name = artist + " - " + title;
-            } else {
-                name = title;
-            }
-        }
-        return name;
+        return PropertiableFileUtils.getNameProperty(item, true);
     }
 }
