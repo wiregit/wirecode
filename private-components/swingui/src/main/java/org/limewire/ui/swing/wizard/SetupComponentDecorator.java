@@ -41,7 +41,6 @@ public class SetupComponentDecorator {
     @Resource private Font  subHeadingFont;
     @Resource private Color subHeadingFontColor;
     @Resource private Font  linkFont;
-    @Resource private Color linkFontColor;
 
     @Resource private Color greenButtonForeground;
     @Resource private Font greenButtonFont;
@@ -108,7 +107,6 @@ public class SetupComponentDecorator {
     public void decorateLink(JComponent link) {
         link.setOpaque(false);
         link.setFont(linkFont);
-        link.setForeground(linkFontColor);
     }
     
     public void decoratePlainButton(JXButton button) {
