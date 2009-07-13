@@ -26,7 +26,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.listener.EventListener;
@@ -52,6 +51,11 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
+    
+    private static final String CUSTOM_SERVICE_NAME = "Jabber";
+    
+    // Used for hack to show email/username depending on if the service is gmail or not
+    private static final String GMAIL_SERVICE_NAME = "gmail.com";
     
     @Resource private Font headerTextFont;
     @Resource private Color headerTextForeground;
@@ -134,7 +138,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         add(headerPanel, BorderLayout.NORTH);
         
         initComponents(buttonDecorator, textFieldDecorator);
-        populateInputs();
+        initServiceField();
         setSignInComponentsEnabled(true);
     }
     
@@ -147,12 +151,16 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
+                
+                // Should only have logins from this panel and this account config.
+                assert event.getSource().getConfiguration() == accountConfig;
+                
                 switch(event.getType()) {
                 case CONNECTING:
-                    connecting(event.getSource().getConfiguration());
+                    connecting();
                     break;
                 case CONNECTED:
-                    connected(event.getSource().getConfiguration());
+                    connected();
                     break;
                 case CONNECT_FAILED:
                     
@@ -185,7 +193,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         serviceLabel = new JLabel(tr("Domain"));
         serviceLabel.setFont(descriptionTextFont);
         serviceLabel.setForeground(descriptionTextForeground);
-        JLabel usernameLabel = new JLabel("gmail.com".equals(accountConfig.getNetworkName()) ? tr("Email") : tr("Username"));
+        JLabel usernameLabel = new JLabel(GMAIL_SERVICE_NAME.equals(accountConfig.getNetworkName()) ? tr("Email") : tr("Username"));
         usernameLabel.setFont(descriptionTextFont);
         usernameLabel.setForeground(descriptionTextForeground);
         JLabel passwordLabel = new JLabel(tr("Password"));
@@ -238,7 +246,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    prepLogin();
+                    login();
                 }
             }
             
@@ -295,8 +303,8 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         autoLoginCheckBox.setEnabled(isEnabled);
     }
     
-    private void populateInputs() {
-        if(accountConfig.getLabel().equals("Jabber")) {
+    private void initServiceField() {
+        if(accountConfig.getLabel().equals(CUSTOM_SERVICE_NAME)) {
             serviceLabel.setVisible(true);
             serviceField.setVisible(true);
             serviceRecenter.setVisible(false);
@@ -305,71 +313,9 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
             serviceField.setVisible(false);
             serviceRecenter.setVisible(true);
         }
-        
-        if(accountConfig == accountManager.getAutoLoginConfig()) {
-            serviceField.setText(accountConfig.getServiceName());
-            usernameField.setText(accountConfig.getUserInputLocalID());
-            passwordField.setText(accountConfig.getPassword());
-        } else {
-            serviceField.setText("");
-            usernameField.setText("");
-            passwordField.setText("");
-        }
-        validate();
-        repaint();
     }
     
-    private void login(final FriendAccountConfiguration config) {
-        authFailedLabel.setVisible(false);
-        validate();
-        repaint();
-        friendConnectionFactory.login(config);         
-    }
-
-    void connected(FriendConnectionConfiguration config) {
-        parent.finished();
-    }
-
-    void disconnected(Exception reason) {
-        setSignInComponentsEnabled(true);
-        populateInputs();
-        if(reason !=null && reason.getMessage() != null && reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
-            authFailedLabel.setText(AUTHENTICATION_ERROR);
-            passwordField.setText("");
-        } else {
-            authFailedLabel.setText(NETWORK_ERROR);
-        }
-        authFailedLabel.setVisible(true);
-        validate();
-        repaint();
-    }
-    
-    public void connecting(FriendConnectionConfiguration config) {
-        connectionHasBeenInitiated = true;
-        setSignInComponentsEnabled(false);
-    }
-    
-    @Override
-    public boolean requestFocusInWindow() {
-        if (serviceField.isVisible()) {
-            return serviceField.requestFocusInWindow();
-        }
-        else {
-            return usernameField.requestFocusInWindow();
-        }
-    }
-    
-    class SignInAction extends AbstractAction {
-        public SignInAction() {
-            super();
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            prepLogin();
-        }
-    }
-    
-    private void prepLogin() {
+    private void login() {
         String user = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
         if(user.equals("") || password.equals("")) {
@@ -390,7 +336,51 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
             // If there was previously an auto-login account, delete it
             accountManager.setAutoLoginConfig(null);
         }
-        login(accountConfig);
+        
+        authFailedLabel.setVisible(false);
+        validate();
+        repaint();
+        friendConnectionFactory.login(accountConfig);         
+    }
+
+    void connected() {
+        parent.finished();
+    }
+
+    void disconnected(Exception reason) {
+        setSignInComponentsEnabled(true);
+        if(reason !=null && reason.getMessage() != null && reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
+            authFailedLabel.setText(AUTHENTICATION_ERROR);
+            passwordField.setText("");
+        } else {
+            authFailedLabel.setText(NETWORK_ERROR);
+        }
+        authFailedLabel.setVisible(true);
+    }
+    
+    public void connecting() {
+        connectionHasBeenInitiated = true;
+        setSignInComponentsEnabled(false);
+    }
+    
+    @Override
+    public boolean requestFocusInWindow() {
+        if (serviceField.isVisible()) {
+            return serviceField.requestFocusInWindow();
+        }
+        else {
+            return usernameField.requestFocusInWindow();
+        }
+    }
+    
+    class SignInAction extends AbstractAction {
+        public SignInAction() {
+            super();
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            login();
+        }
     }
 
     @Override
