@@ -25,6 +25,7 @@ import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.util.FileUtils;
+import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -98,7 +99,9 @@ public class TorrentImpl implements Torrent {
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
             List<String> paths, File fastResumeFile, File torrentFile, File saveDir,
             File incompleteFile, Boolean isPrivate) throws IOException {
-
+        
+        Objects.nonNull(saveDir, "saveDir");
+        
         this.sha1 = sha1;
         this.trackerURL = trackerURL;
         if (paths != null) {

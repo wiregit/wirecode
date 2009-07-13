@@ -99,6 +99,7 @@ public interface Torrent {
 
     /**
      * Returns the first tracker url to this torrent.
+     * Can be null.
      */
     public String getTrackerURL();
 
