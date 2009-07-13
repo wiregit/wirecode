@@ -1,7 +1,11 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +15,7 @@ import javax.swing.Icon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.Timer;
+import javax.swing.border.Border;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -37,6 +42,7 @@ import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.PainterUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -46,10 +52,19 @@ import com.google.inject.Provider;
 
 public class FriendsButton extends LimeComboBox {
     
-    @Resource private Icon friendEnabledIcon;
-    @Resource private Icon friendDisabledIcon;
+    
+    @Resource private Icon friendOnlineIcon;
+    @Resource private Icon friendOfflineIcon;
+    @Resource private Icon friendOnlineSelectedIcon;
+    @Resource private Icon friendOfflineSelectedIcon;
+
     @Resource private Icon friendLoadingIcon;
     @Resource private Icon friendNewFilesIcon;
+    
+    @Resource private Color borderForeground = PainterUtils.TRASPARENT;
+    @Resource private Color borderInsideRightForeground = PainterUtils.TRASPARENT;
+    @Resource private Color borderInsideBottomForeground = PainterUtils.TRASPARENT;
+    @Resource private Color dividerForeground = PainterUtils.TRASPARENT;
     
     private boolean newResultsAvailable = false;
     private final BusyPainter busyPainter;
@@ -143,7 +158,35 @@ public class FriendsButton extends LimeComboBox {
             }
         });
         
+        menu.setBorder(new Border() {
+            @Override
+            public Insets getBorderInsets(Component c) {
+                return new Insets(3,1,3,2);
+            }
+            @Override
+            public boolean isBorderOpaque() {
+                return false;
+            }
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                g.setColor(dividerForeground);
+                g.drawLine(0, 0, getPressedIcon().getIconWidth()-1, 0);                
+                g.setColor(borderForeground);
+                g.drawLine(0, 0, 0, height-1);
+                g.drawLine(0, height-1, width-1, height-1);
+                g.drawLine(width-1, height-1, width-1, 0);
+                g.drawLine(getPressedIcon().getIconWidth(), 0, width-1, 0);
+                g.setColor(borderInsideRightForeground);
+                g.drawLine(width-2, height-2, width-2, 1);
+                g.drawLine(width-1, height-1, width-1, height-1);
+                g.setColor(borderInsideBottomForeground);
+                g.drawLine(1, height-2, width-2, height-2);
+                g.drawLine(0, height-1, 0, height-1);
+                
+            }
+        });
         
+        setPopupPosition(new Point(0, -4));
     }
     
     private void setIconFromEvent(FriendConnectionEvent event) {
@@ -156,14 +199,16 @@ public class FriendsButton extends LimeComboBox {
         case CONNECT_FAILED:
         case DISCONNECTED:
             newResultsAvailable = false;
-            setIcon(friendDisabledIcon);
+            setIcon(friendOfflineIcon);
+            setPressedIcon(friendOfflineSelectedIcon);
             stopAnimation();
             break;
         case CONNECTED:
             if(newResultsAvailable) {
                setIcon(friendNewFilesIcon);
             } else { 
-                setIcon(friendEnabledIcon);
+                setIcon(friendOnlineIcon);
+                setPressedIcon(friendOnlineSelectedIcon);
             }
             stopAnimation();
             break;
@@ -176,6 +221,8 @@ public class FriendsButton extends LimeComboBox {
     
     @Inject
     void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport, RemoteLibraryManager remoteLibraryManager) {
+        
+
         setIconFromEvent(connectBean.getLastEvent());
         
         //update icon as connection events come in.
