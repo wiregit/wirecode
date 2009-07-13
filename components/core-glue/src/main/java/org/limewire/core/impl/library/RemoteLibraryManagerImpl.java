@@ -5,7 +5,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
@@ -60,8 +58,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     private final EventList<FriendLibrary> readOnlyFriendLibraries;
     private volatile EventList<FriendLibrary> swingFriendLibraries;
     private final ReadWriteLock lock;
-    
-    private static final SearchResultComparator COMPARATOR = new SearchResultComparator();
 
     @SuppressWarnings("unused")
     @InspectableContainer
@@ -222,38 +218,32 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     private static class AllFriendsLibraryImpl implements SearchResultList {
         private final CompositeList<SearchResult> compositeList;
         private final ReadOnlyList<SearchResult> readOnlyList;
-        private final UniqueList<SearchResult> threadSafeUniqueList;
+        private final EventList<SearchResult> threadSafeList;
         private volatile TransformedList<SearchResult, SearchResult> swingList;
         
         public AllFriendsLibraryImpl(ReadWriteLock lock) {
             compositeList = new CompositeList<SearchResult>(ListEventAssembler.createListEventPublisher(), lock);
             readOnlyList = GlazedListsFactory.readOnlyList(compositeList);
-            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(readOnlyList),
-                    new Comparator<SearchResult>() {
-                @Override
-                public int compare(SearchResult o1, SearchResult o2) {
-                    return o1.getUrn().compareTo(o2.getUrn());
-                }
-            });
+            threadSafeList = GlazedListsFactory.threadSafeList(readOnlyList);
         }
         
         @Override
         public EventList<SearchResult> getModel() {
-            return threadSafeUniqueList;
+            return threadSafeList;
         }
 
         @Override
         public EventList<SearchResult> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
-                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeList);
             }
             return swingList;
         }
 
         @Override
         public int size() {
-            return threadSafeUniqueList.size();
+            return threadSafeList.size();
         }
         
         ListEventPublisher getPublisher() {
@@ -297,7 +287,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         private final CompositeList<SearchResult> compositeList;
         private final ReadOnlyList<SearchResult> readOnlyList;
-        private final UniqueList<SearchResult> threadSafeUniqueList;
+        private final EventList<SearchResult> threadSafeList;
         private volatile TransformedList<SearchResult, SearchResult> swingList;
         
         private final ReadWriteLock lock;
@@ -310,8 +300,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             this.lock = lock;
             compositeList = new CompositeList<SearchResult>(allFriendsList.getPublisher(), lock);
             readOnlyList = GlazedListsFactory.readOnlyList(compositeList);
-            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(readOnlyList),
-                    COMPARATOR);
+            threadSafeList = GlazedListsFactory.threadSafeList(readOnlyList);
             
             changeSupport = new PropertyChangeSupport(this);
             
@@ -413,21 +402,21 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
         @Override
         public EventList<SearchResult> getModel() {
-            return threadSafeUniqueList;
+            return threadSafeList;
         }
 
         @Override
         public EventList<SearchResult> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
-                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeList);
             }
             return swingList;
         }
 
         @Override
         public int size() {
-            return threadSafeUniqueList.size();
+            return threadSafeList.size();
         }
 
         @Override
@@ -459,7 +448,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             }
             compositeList.dispose();
             readOnlyList.dispose();
-            threadSafeUniqueList.dispose();
+            threadSafeList.dispose();
             readOnlyPresenceLibraries.dispose();
             allPresenceLibraries.dispose();
         }
@@ -476,10 +465,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public String toString() {
             return StringUtils.toString(this);
         }
-        
-        //TODO: add new accessors appropriate for creating FileItems based on
-        //      lookups. May also need to subclass CoreFileItem appropriate for
-        //      friend library info.
     }
 
     private static class PresenceLibraryImpl implements PresenceLibrary {
@@ -580,13 +565,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         public void removePropertyChangeListener(PropertyChangeListener listener) {
             changeSupport.removePropertyChangeListener(listener);
-        }
-    }
-    
-    private static class SearchResultComparator implements Comparator<SearchResult> {
-        @Override
-            public int compare(SearchResult o1, SearchResult o2) {
-            return o1.getUrn().compareTo(o2.getUrn());
         }
     }
 }
