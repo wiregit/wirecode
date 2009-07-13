@@ -145,7 +145,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
                 new HyperlinkButton(I18n.tr(
                         "You can also ask for help on the forums."));
             help.addActionListener(new UrlAction(
-                    "http://forum.limewire.org/showthread.php?t=6607"));
+                    "http://www.limewire.com/client_redirect/?page=bitTorrentBugs"));
             JPanel panel = new JPanel();
             panel.setOpaque(false);
             panel.setLayout(new MigLayout("gapy 15"));
