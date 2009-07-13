@@ -103,7 +103,7 @@ class LibraryConverterHelper {
             }
         }
 
-        if (!LibraryUtils.isForcedShareDirectory(directory)) {
+        if (!LibraryUtils.isForcedShareDirectory(directory) && recurse) {
             File[] dirList = directory.listFiles(new FileFilter() {
                 @Override
                 public boolean accept(File folder) {
