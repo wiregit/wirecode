@@ -24,7 +24,11 @@ public class SearchResultAdapterTest extends TestCase {
         propertiableHeadings = new MockPropertiableHeadings();
         context = new Mockery();
         provider = context.mock(Provider.class);
-        adapter = new SearchResultAdapter(result, provider, null);
+        adapter = new SearchResultAdapter(result, provider, new VisualSearchResultStatusListener() {
+            @Override public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {}
+            @Override public void resultCreated(VisualSearchResult vsr) {}
+            @Override public void resultsCleared() {}
+        });
     }
 
     public void testHeadingAndSubHeadingCached() {
