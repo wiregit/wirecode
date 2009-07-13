@@ -121,40 +121,40 @@ public class MetaDataManagerImpl implements MetaDataManager {
         for (Map.Entry<String, String> entry : newDoc.getNameValueSet())
             map.put(entry.getKey(), entry);
 
-        return limeXMLDocumentFactory
-                .createLimeXMLDocument(map.values(), currentDoc.getSchemaURI());
+        return limeXMLDocumentFactory.createLimeXMLDocument(map.values(), currentDoc.getSchemaURI());
     }
 
     private String buildInput(FileDesc fileDesc, String limeXMLSchemaUri, LocalFileItem localFileItem, Map<FilePropertyKey, Object> newData) {
         List<NameValue<String>> nameValueList = new ArrayList<NameValue<String>>();
         Category category = localFileItem.getCategory();
         
-        for (FilePropertyKey filePropertyKey : FilePropertyKey.getEditableKeys()) {
+        // cycle through the list of editable fields that were displayed
+        for(FilePropertyKey filePropertyKey : newData.keySet()) {
             String limeXmlName = FilePropertyKeyPopulator.getLimeXmlName(category, filePropertyKey);
             if (limeXmlName != null) {
                 Object value = newData.get(filePropertyKey);
-                if(value != null) {
+                if(value != null)
                     value = FilePropertyKeyPopulator.sanitizeValue(filePropertyKey, value);
-                }
                 
-                if(value == null) {
-                    value = localFileItem.getPropertyString(filePropertyKey);
-                }
+                // must set null fields to empty string otherwise when merging new and old XML
+                // docs, this will be replaced by the old value
+                if(value == null)
+                    value = "";
                 
-                if(value != null) {
-                    nameValueList.add(new NameValue<String>(limeXmlName, value.toString()));
-                }
+                nameValueList.add(new NameValue<String>(limeXmlName, value.toString()));
             }
         }
 
-        return limeXMLDocumentFactory.createLimeXMLDocument(nameValueList, limeXMLSchemaUri)
-                .getXMLString();
+        // if there are no fields, don't try to create an XML doc
+        if(nameValueList.size() == 0)
+            return null;
+
+        return limeXMLDocumentFactory.createLimeXMLDocument(nameValueList, limeXMLSchemaUri).getXMLString();
     }
 
     private void removeMeta(FileDesc fileDesc, String limeXMLSchemaUri) throws MetaDataException {
 
-        LimeXMLReplyCollection collection = schemaReplyCollectionMapper
-                .getReplyCollection(limeXMLSchemaUri);
+        LimeXMLReplyCollection collection = schemaReplyCollectionMapper.getReplyCollection(limeXMLSchemaUri);
 
         if (!collection.removeDoc(fileDesc)) {
             throw new MetaDataException("Internal Document Error. Data could not be saved.");

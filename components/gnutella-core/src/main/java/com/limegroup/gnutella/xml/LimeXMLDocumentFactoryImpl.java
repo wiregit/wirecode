@@ -90,7 +90,7 @@ class LimeXMLDocumentFactoryImpl implements LimeXMLDocumentFactory {
         for(Map.Entry<String, String> next : nameValueList) {
             String key = next.getKey() == null ? null : next.getKey().trim().intern();
             String value = next.getValue() == null ? null : next.getValue().trim().intern();
-            if(!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
+            if(!StringUtils.isEmpty(key) && value != null) {
                 map.put(key, value);
             }
         }
