@@ -567,7 +567,7 @@ public class ChatFriendListPane extends JPanel {
             ChatFriend chatFriend = (ChatFriend) model.getElementAt(row);
             
             if (chatFriend.isChatting() && isOverCloseIcon(mousePoint)) {
-                return tr("Close conversation");
+                return tr("Close Conversation");
             }
             
             StringBuilder tooltip = new StringBuilder();
@@ -786,7 +786,7 @@ public class ChatFriendListPane extends JPanel {
         private ChatFriend chatFriend;
 
         public CloseChat(ChatFriend chatFriend) {
-            super(I18n.tr("Close conversation"));
+            super(I18n.tr("Close Conversation"));
             this.chatFriend = chatFriend;
         }
 
