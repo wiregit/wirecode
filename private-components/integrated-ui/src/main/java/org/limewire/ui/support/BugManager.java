@@ -495,8 +495,12 @@ public final class BugManager {
 
         HyperlinkButton helpLink =
             new HyperlinkButton(I18n.tr("Ask for help on the forums"));
-        helpLink.addActionListener(new UrlAction(
-                "http://www.limewire.com/client_redirect/?page=betaTesting"));
+        String url;
+        if(LimeWireUtils.isAlphaRelease() || LimeWireUtils.isBetaRelease())
+            url = "http://www.limewire.com/client_redirect/?page=betaTesting";
+        else
+            url = "http://www.limewire.com/client_redirect/?page=usingLimeWire5";
+        helpLink.addActionListener(new UrlAction(url));
         
         // the "always use this answer" checkbox
         final JCheckBox alwaysuseThisAnswer = new JCheckBox(I18n.tr("Send bugs without asking me in the future"));
