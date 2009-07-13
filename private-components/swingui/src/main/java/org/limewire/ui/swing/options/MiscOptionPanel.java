@@ -113,7 +113,7 @@ public class MiscOptionPanel extends OptionPanel {
         restart |= getFriendChatPanel().applyOptions();
         
         // if the language changed, always notify about a required restart
-        if(!currentLanguage.equals(selectedLocale)) {
+        if(selectedLocale != null && !currentLanguage.equals(selectedLocale)) {
             currentLanguage = selectedLocale;
             LanguageUtils.setLocale(selectedLocale);
             restart = true;
@@ -137,6 +137,13 @@ public class MiscOptionPanel extends OptionPanel {
         getNotificationsPanel().initOptions();
         getFriendChatPanel().initOptions();
         currentLanguage = LanguageUtils.getCurrentLocale();
+        // if language got corrupted somehow, resave it
+        // this shouldn't be possible but somehow currentLanguage can be 
+        // null on OSX.
+        if(currentLanguage == null) {
+            LanguageUtils.setLocale(Locale.ENGLISH);
+            currentLanguage = Locale.ENGLISH;
+        }
         languageDropDown.setSelectedItem(currentLanguage);
     }
 

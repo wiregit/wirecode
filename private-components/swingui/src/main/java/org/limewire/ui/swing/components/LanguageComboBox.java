@@ -29,6 +29,9 @@ public class LanguageComboBox extends JComboBox {
         setFont(font);
         
         Locale[] locales = LanguageUtils.getLocales(font);
+        // ensure that the combo box cannot be empty if something goes wrong.
+        if(locales.length == 0)
+           locales = new Locale[]{Locale.ENGLISH};
         setModel(new DefaultComboBoxModel(locales));
     }
     
