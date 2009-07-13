@@ -236,7 +236,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
                         .getParentFile()
                         : saveFile;
                 saveFile = FileChooser
-                        .getInputDirectory(GuiUtils.getMainFrame(), I18n.tr("Choose a new directory to save download."), I18n.tr("Select"), oldSaveFileParent);
+                        .getInputDirectory(GuiUtils.getMainFrame(), I18n.tr("Choose a new folder to save download."), I18n.tr("Select"), oldSaveFileParent);
                 
                 File newSaveParent = saveFile;
                 if (newSaveParent != null && new File(newSaveParent, oldSaveFile.getName()).exists()) {
