@@ -47,6 +47,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.decorator.BorderHighlighter;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -70,6 +71,7 @@ import org.limewire.ui.swing.library.ShareListIcons;
 import org.limewire.ui.swing.search.FriendPresenceActions;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -261,6 +263,11 @@ public class ChatFriendListPane extends JPanel {
         
         final MouseableTable table = new CustomTooltipLocationTable(new DefaultEventTableModel<ChatFriend>(friendsList, format)); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setEmptyRowsPainted(false);
+        TableColors colors = new TableColors();
+        table.setHighlighters(new ColorHighlighter(HighlightPredicate.ALWAYS, colors.evenColor,
+                colors.evenForeground, colors.selectionColor,
+                colors.selectionForeground));
         table.addMouseListener(new LaunchChatListener());
         //Add as mouse listener and motion listener because it cares about MouseExit and MouseMove events
         CloseChatListener closeChatListener = new CloseChatListener();
