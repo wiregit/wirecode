@@ -19,9 +19,9 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.Objects;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Provider;
 
@@ -129,23 +129,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
 
     @Override
     public String getNameProperty(boolean useAudioArtist) {
-        String name = getPropertyString(FilePropertyKey.NAME);
-        
-        // For audio files, use non-blank title, prefixed by non-blank artist.
-        if (getCategory().equals(Category.AUDIO)) {
-            String title = getPropertyString(FilePropertyKey.TITLE);
-            if(!StringUtils.isEmpty(title)) {
-                String artist = getPropertyString(FilePropertyKey.AUTHOR);
-                if (useAudioArtist && !StringUtils.isEmpty(artist)) {
-                    name = artist + " - " + title;
-                } else {
-                    name = title;
-                }
-            }
-        }
-        
-        // Return result.
-        return name;
+        return PropertiableFileUtils.getNameProperty(this, useAudioArtist);
     }
     
     @Override

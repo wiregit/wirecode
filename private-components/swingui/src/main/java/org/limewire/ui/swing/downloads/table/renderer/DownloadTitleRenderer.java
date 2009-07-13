@@ -13,6 +13,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.PropertiableFileUtils;
 
 import com.google.inject.Inject;
 
@@ -72,6 +73,6 @@ public class DownloadTitleRenderer extends JLabel implements TableCellRenderer {
     }
     
     private void updateTitle(DownloadItem item){
-        setText(item.getTitle());
+        setText(PropertiableFileUtils.getNameProperty(item, true));
     }
 }
