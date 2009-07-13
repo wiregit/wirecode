@@ -7,6 +7,7 @@ import org.limewire.friend.api.MessageWriter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 class MessageWriterImpl implements MessageWriter {
     private static final Log LOG = LogFactory.getLog(MessageWriterImpl.class);
@@ -21,7 +22,7 @@ class MessageWriterImpl implements MessageWriter {
 
     @Override
     public void writeMessage(final String message) throws FriendException {
-        
+        Message msg = new MessageTextImpl(I18n.tr("me"), chatFriend.getID(), Message.Type.SENT, message);
         if (chatFriend.isSignedIn()) {
             ThreadExecutor.startThread(new Runnable() {
                 @Override
@@ -34,29 +35,27 @@ class MessageWriterImpl implements MessageWriter {
                     }
                 }
             }, "send-message");
-            new MessageReceivedEvent(
-                newMessage(message, Message.Type.SENT)).publish();
+            new MessageReceivedEvent(msg).publish();
         } else {
-            new MessageReceivedEvent(
-                newMessage(message, Message.Type.SEND_FAILED_SIGNOUT)).publish();
+            String errorMsg = tr("Message not sent because friend signed off.");
+            Message error = new ErrorMessage(errorMsg, msg);
+            new MessageReceivedEvent(error).publish();
         }
-    }
-
-    private Message newMessage(String message, Message.Type type) {
-        return new MessageTextImpl(I18n.tr("me"), chatFriend.getID(), type, message);
     }
 
     @Override
     public void setChatState(final ChatState chatState) throws FriendException {
-        ThreadExecutor.startThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-        writer.setChatState(chatState);
-                } catch (FriendException e) {
-                    LOG.error("set chat state failed", e);
+        if (chatFriend.isSignedIn()) {
+            ThreadExecutor.startThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        writer.setChatState(chatState);
+                    } catch (FriendException e) {
+                        LOG.error("set chat state failed", e);
+                    }
                 }
-            }
-        }, "set-chat-state");
+            }, "set-chat-state");
+        }
     }
 }

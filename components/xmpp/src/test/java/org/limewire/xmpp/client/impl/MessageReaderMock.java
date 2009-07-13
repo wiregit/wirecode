@@ -17,4 +17,9 @@ class MessageReaderMock implements MessageReader {
     public void newChatState(ChatState chatState) {
         // TODO update the UI
     }
+    
+    @Override
+    public void error(String errorMessage) {
+        // todo: indicate error message
+    }
 }

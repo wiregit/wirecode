@@ -14,9 +14,8 @@ public interface Message {
      * SENT                == message sent with destination of friend
      * RECEIVED            == message received from friend
      * SERVER              == server chat status related message
-     * SEND_FAILED_SIGNOUT == send failed due to the friend signing out
      */
-    enum Type { SENT, RECEIVED, SERVER, SEND_FAILED_SIGNOUT };
+    enum Type { SENT, RECEIVED, SERVER };
 
     /**
      * @return the sender display name

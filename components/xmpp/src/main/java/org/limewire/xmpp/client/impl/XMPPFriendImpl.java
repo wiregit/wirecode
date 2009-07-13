@@ -12,6 +12,7 @@ import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ThreadExecutor;
@@ -386,7 +387,15 @@ public class XMPPFriendImpl extends AbstractFriend {
             if (!(getChatParticipantId().equals(msgFromJid))) {
                 setActivePresence(msgFromJid);
             }
-            reader.readMessage(message.getBody());
+            
+            if (message.getType() == Message.Type.error) {
+                String errorMsg = parseError(message);
+                if (errorMsg != null) {
+                    reader.error(parseError(message));
+                }
+            } else {
+                reader.readMessage(message.getBody());
+            }
         }
 
         @Override
@@ -394,6 +403,17 @@ public class XMPPFriendImpl extends AbstractFriend {
             if (isSignedIn()) {
                 reader.newChatState(ChatState.valueOf(state.toString()));
             }
+        }
+        
+        private String parseError(Message errorMessage) {
+            XMPPError error = errorMessage.getError();
+            if (error != null) {
+                String body = errorMessage.getBody();
+                if (body != null) {
+                    return "Error sending message: '" + body + "' : " + error.toString();
+                }
+            }
+            return null;
         }
     }
 }

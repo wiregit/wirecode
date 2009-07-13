@@ -59,13 +59,6 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
         
         fileOfferOutgoingMsg.append(tr("Sharing file with {0}", getFriendID()));
         fileOfferOutgoingMsg.append(formatButtonText(getFileOffer().getName(), false));
-        
-        if (getType() == Type.SEND_FAILED_SIGNOUT) {
-            fileOfferOutgoingMsg.append("<br/><b>").
-                append(tr("File offer not sent because friend signed off.")).
-                append("</b><br/>");
-        }
-        
         return fileOfferOutgoingMsg.toString();
     }
 

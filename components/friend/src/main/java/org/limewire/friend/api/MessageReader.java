@@ -17,4 +17,11 @@ public interface MessageReader {
      * @param chatState {@link ChatState} chat activity
      */
     public void newChatState(ChatState chatState);
+
+    /**
+     * Called when error message is received.
+     * 
+     * @param errorMessage end-user friendly error message
+     */
+    public void error(String errorMessage);
 }

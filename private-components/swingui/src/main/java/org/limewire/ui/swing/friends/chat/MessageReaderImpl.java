@@ -26,4 +26,11 @@ class MessageReaderImpl implements MessageReader {
     public void newChatState(ChatState chatState) {
         new ChatStateEvent(chatFriend, chatState).publish();
     }
+    
+    @Override
+    public void error(String errorMessage) {
+        ErrorMessage errMsg = new ErrorMessage(chatFriend.getID(), 
+            errorMessage, Message.Type.SERVER);
+        new MessageReceivedEvent(errMsg).publish();
+    }
 }

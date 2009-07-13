@@ -99,6 +99,11 @@ class ChatManager {
         public void newChatState(ChatState chatState) {
             getMessageReader().newChatState(chatState);
         }
+        
+        @Override
+        public void error(String errorMessage) {
+            getMessageReader().error(errorMessage);
+        }
 
         private MessageReader getMessageReader() {
             if (messagereader == null) {

@@ -580,8 +580,10 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                    
                    // do not send file offer if user not signed in.
                    if (!friend.isSignedIn()) {
-                        new MessageReceivedEvent(new MessageFileOfferImpl(I18n.tr("me"), 
-                                friendId, Message.Type.SEND_FAILED_SIGNOUT, metadata, null)).publish();
+                       String errorMsg = tr("File offer not sent because friend signed off.");
+                       Message msg = new MessageFileOfferImpl(I18n.tr("me"), friendId, 
+                           Message.Type.SENT, metadata, null);
+                       new MessageReceivedEvent(new ErrorMessage(errorMsg, msg)).publish();
                        return;
                    }
 
@@ -600,7 +602,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                         new MessageReceivedEvent(new MessageFileOfferImpl(I18n.tr("me"), 
                                 friendId, Message.Type.SENT, metadata, null)).publish();
                    } else {
-                       // TODO: Devise how to handle file offer sending failures, using tooltip perhaps?
+                       // TODO: handle file offer sending failures (consider using ErrorMessage)
                    }
                }
             }
