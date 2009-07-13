@@ -151,10 +151,6 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
-                
-                // Should only have logins from this panel and this account config.
-                assert event.getSource().getConfiguration() == accountConfig;
-                
                 switch(event.getType()) {
                 case CONNECTING:
                     connecting();
