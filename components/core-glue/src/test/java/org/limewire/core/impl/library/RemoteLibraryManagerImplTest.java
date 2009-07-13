@@ -28,6 +28,8 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
         final String friendId1 = "friend1";
         context.checking(new Expectations() {
             {
+                allowing(friend1).isAnonymous();
+                will(returnValue(false));
                 allowing(friendPresence1).getFriend();
                 will(returnValue(friend1));
                 allowing(friendPresence1).getPresenceId();
@@ -79,6 +81,11 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
         final String friendId2 = "friend2";
         context.checking(new Expectations() {
             {
+                allowing(friend1).isAnonymous();
+                will(returnValue(false));
+                allowing(friend2).isAnonymous();
+                will(returnValue(false));
+                
                 allowing(friendPresence1).getFriend();
                 will(returnValue(friend1));
                 allowing(friendPresence1).getPresenceId();
@@ -171,6 +178,11 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
+                allowing(friend1).isAnonymous();
+                will(returnValue(false));
+                allowing(friend2).isAnonymous();
+                will(returnValue(false));
+                
                 allowing(friendPresence1).getFriend();
                 will(returnValue(friend1));
                 allowing(friendPresence1).getPresenceId();
