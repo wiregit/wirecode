@@ -85,7 +85,7 @@ public class StripedJXTable extends GlazedJXTable {
             } else {
                 for (int i = rowCount; i <= clipViewableRows; ++i) {
                     g.setColor(getColorForRow(i));
-                    g.fillRect(clip.x, i * rowHeight, clip.x + clip.width, rowHeight);
+                    g.fillRect(clip.x, i * rowHeight, clip.width, rowHeight);
                     
                     // paint horizontal rows if they're shown
                     if(getShowHorizontalLines() && i > rowCount) {
