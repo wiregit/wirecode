@@ -70,9 +70,6 @@ public class StripedJXTable extends GlazedJXTable {
         int tableViewableRows = tableHeight / rowHeight;
         int startDrawingAt = rowCount * rowHeight;
         
-        System.out.println("clipX: " + clip.x + ", clipW: " + clip.width + ", visRect: " + getVisibleRect());
-        System.out.println("sda: " + startDrawingAt + ", th: " + tableHeight + ", cvr: " + clipViewableRows + ", tvr: " + tableViewableRows);
-        
         // paint rows and horizontal lines
         if (startDrawingAt < tableHeight) {
             if(clipViewableRows < tableViewableRows) {
