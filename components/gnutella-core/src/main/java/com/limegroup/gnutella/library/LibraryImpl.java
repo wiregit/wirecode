@@ -1091,7 +1091,20 @@ class LibraryImpl implements Library, FileCollection {
     
     @Override
     public boolean isDirectoryAllowed(File folder) {
-        return folder.isDirectory() && isFolderManageable(folder);
+        if(!folder.isDirectory()) {
+            return false;
+        }
+        
+        if(!isFolderManageable(folder)) {
+            return false;
+        }
+        
+        //reject OSX app folders when program managing is not allowed.
+        if(!isProgramManagingAllowed() && "app".equals(FileUtils.getFileExtension(folder))) {
+            return false;
+        }
+        
+        return true;
     }
     
     @Override
