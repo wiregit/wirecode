@@ -222,12 +222,14 @@ public class Wizard extends JPanel {
     }
     
     public void setCurrentPage(int step){
-        currentPage = step;
-        cardLayout.show(mainPanel, currentPage + "");
-        finishButton.setVisible(currentPage == pageList.size() - 1);
-        continueButton.setVisible(!finishButton.isVisible());
-        backButton.setVisible(currentPage != 0);
-        updateTitle(pageList.get(currentPage));
+        if(step >= 0 && step < pageList.size()) {
+            currentPage = step;
+            cardLayout.show(mainPanel, currentPage + "");
+            finishButton.setVisible(currentPage == pageList.size() - 1);
+            continueButton.setVisible(!finishButton.isVisible());
+            backButton.setVisible(currentPage != 0);
+            updateTitle(pageList.get(currentPage));
+        }
     }
  
     /**
