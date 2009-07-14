@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.limewire.core.api.connection.ConnectionItem;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.io.ConnectableImpl;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
 
@@ -72,7 +73,8 @@ public class CoreConnectionItem implements ConnectionItem {
     @Override
     public FriendPresence getFriendPresence() {
         String id = routedConnection.getAddress() + ":" + routedConnection.getPort();
-        return new GnutellaPresence.GnutellaPresenceWithString(routedConnection, id);
+        // copy construct connectable to give it full equals semantics
+        return new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(routedConnection), id);
     }
 
     @Override

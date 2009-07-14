@@ -15,12 +15,12 @@ public interface AddressFactory {
     public void registerSerializer(AddressSerializer serializer);
 
     /**
-     * @param addressClass cannot be null
+     * @param address cannot be null
      * @return the AddressSerializer for a particular class
      * @throws IllegalArgumentException if an AddressSerializer does not
-     * exist for the specified class
+     * exist for the specified address
      */
-    public AddressSerializer getSerializer(Class <? extends Address> addressClass) throws IllegalArgumentException;
+    public AddressSerializer getSerializer(Address address) throws IllegalArgumentException;
     /**
      * Looks up serializer by {@link AddressSerializer#getAddressType()}. 
      * @return null if no serializer is registered for that type

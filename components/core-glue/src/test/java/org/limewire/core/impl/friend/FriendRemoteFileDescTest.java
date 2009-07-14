@@ -364,7 +364,7 @@ public class FriendRemoteFileDescTest extends BaseTestCase{
         try {
             context.checking(new Expectations() {
                 {  
-                    allowing(addressFactory).getSerializer(address.getClass());
+                    allowing(addressFactory).getSerializer(address);
                     will(returnValue(serialer));
                     allowing(serialer).getAddressType();
                     will(returnValue("memento"));

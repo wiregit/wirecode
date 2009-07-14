@@ -24,9 +24,10 @@ public interface AddressSerializer {
     public String getAddressType();
 
     /**
-     * @return The Address class that this serializer handles
+     * @return true if this serializer can serialize <code>address</code>,
+     * false otherwise
      */
-    public Class<? extends Address> getAddressClass();
+    public boolean canSerialize(Address address);
 
     /**
      * Deserialize a byte [] representation of an Address, typically as

@@ -18,6 +18,7 @@ import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.friend.api.FriendManager;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
@@ -188,7 +189,8 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
              currentPresence = friendManager.getMostRelevantFriendPresence(id);
         }
         if (currentPresence == null) {
-            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(uploader, uploader.getHost());
+            // copy construct connectable to give it full equals semantics
+            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(uploader), uploader.getHost());
         }
         return currentPresence;
     }

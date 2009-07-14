@@ -28,8 +28,8 @@ public class FriendAddressSerializer implements AddressSerializer {
     }
     
     @Override
-    public Class<? extends Address> getAddressClass() {
-        return FriendAddress.class;
+    public boolean canSerialize(Address address) {
+        return address instanceof FriendAddress;
     }
 
     @Override

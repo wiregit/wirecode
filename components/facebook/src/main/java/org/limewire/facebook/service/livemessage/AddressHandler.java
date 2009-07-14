@@ -69,7 +69,7 @@ public class AddressHandler implements LiveMessageHandler, FeatureTransport<Addr
     @Override
     public void sendFeature(FriendPresence presence, Address localFeature) throws FriendException {
         Map<String, Object> message = new HashMap<String, Object>();
-        AddressSerializer serializer = addressFactory.getSerializer(localFeature.getClass());
+        AddressSerializer serializer = addressFactory.getSerializer(localFeature);
         message.put("address-type", serializer.getAddressType());
         try {
             message.put("address", StringUtils.toUTF8String(Base64.encodeBase64(serializer.serialize(localFeature))));
