@@ -24,6 +24,10 @@ class FixStalledDownloadsAction extends AbstractAction {
     public FixStalledDownloadsAction(DownloadMediator downloadMediator) {
         super(I18n.tr("Fix Stalled Downloads"));
         this.downloadMediator = downloadMediator;
+    }
+
+    @Inject
+    public void register(DownloadMediator downloadMediator) {
         EventList<DownloadItem> stalledList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
                 new DownloadStateMatcher(DownloadState.STALLED));
         stalledList.addListEventListener(new ListEventListener<DownloadItem>() {

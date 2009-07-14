@@ -3,9 +3,7 @@ package org.limewire.ui.swing.menu;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
-import javax.swing.JCheckBoxMenuItem;
 
-import org.limewire.core.settings.DownloadSettings;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
@@ -31,32 +29,14 @@ class ViewMenu extends MnemonicMenu {
     @Inject
     public ViewMenu(final ChatFrame chatFrame, Provider<LoginPopupPanel> friendsSignInPanel, 
             Provider<AutoLoginService> autoLoginServiceProvider,
-            EventBean<FriendConnectionEvent> friendConnectionEventBean) {
+            EventBean<FriendConnectionEvent> friendConnectionEventBean, ShowHideDownloadTrayAction showHideDownloadTrayAction) {
         super(I18n.tr("&View"));
         this.friendsSignInPanel = friendsSignInPanel;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
         this.friendConnectionEventBean = friendConnectionEventBean;
         add(buildShowHideAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
-        add(buildAlwaysShowDownloadTray(I18n.tr("Always Show Download Tray")));
+        add(showHideDownloadTrayAction);
     }
-
-    private JCheckBoxMenuItem buildAlwaysShowDownloadTray(String name) {
-        final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem();
-        
-        Action action = new AbstractAction(name) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.setValue(menuItem.isSelected());
-            }
-        };
-        
-        menuItem.setAction(action);
-        menuItem.setText(name);
-        
-        menuItem.setSelected(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue());
-        return menuItem;
-    }
-
     /**
      * @return if there is a connection that is either logged in, logging in or
      * aut login service provider is attempting to log in.
