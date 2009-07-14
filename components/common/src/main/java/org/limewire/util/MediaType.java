@@ -88,7 +88,7 @@ public class MediaType implements Serializable {
    private static final MediaType TYPE_LINUX_OSX_PROGRAMS =
         new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
-                "bin", "mdb", "sh", "csh", "awk", "pl",
+                "app", "bin", "mdb", "sh", "csh", "awk", "pl",
                 "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz",
                 "taz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg",
                 "cue", "iso", "jnlp", "rar", "sh"
