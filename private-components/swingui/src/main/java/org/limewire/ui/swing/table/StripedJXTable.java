@@ -69,7 +69,10 @@ public class StripedJXTable extends GlazedJXTable {
         int clipViewableRows = clipHeight / rowHeight;
         int tableViewableRows = tableHeight / rowHeight;
         int startDrawingAt = rowCount * rowHeight;
-
+        
+        System.out.println("clipX: " + clip.x + ", clipW: " + clip.width + ", visRect: " + getVisibleRect());
+        System.out.println("sda: " + startDrawingAt + ", th: " + tableHeight + ", cvr: " + clipViewableRows + ", tvr: " + tableViewableRows);
+        
         // paint rows and horizontal lines
         if (startDrawingAt < tableHeight) {
             if(clipViewableRows < tableViewableRows) {
@@ -85,12 +88,12 @@ public class StripedJXTable extends GlazedJXTable {
             } else {
                 for (int i = rowCount; i <= clipViewableRows; ++i) {
                     g.setColor(getColorForRow(i));
-                    g.fillRect(clip.x, i * rowHeight, clip.width, rowHeight);
+                    g.fillRect(clip.x, i * rowHeight, clip.x + clip.width, rowHeight);
                     
                     // paint horizontal rows if they're shown
                     if(getShowHorizontalLines() && i > rowCount) {
                         g.setColor(gridColor);
-                        g.drawLine(clip.x, i * rowHeight, clip.width, i * rowHeight);
+                        g.drawLine(clip.x, i * rowHeight, clip.x + clip.width, i * rowHeight);
                     }
                 }
                 
@@ -102,7 +105,7 @@ public class StripedJXTable extends GlazedJXTable {
                     for (int i = 0; i < columnModel.getColumnCount(); ++i) {
                         TableColumn column = columnModel.getColumn(i);
                         x += column.getWidth();
-                        g.drawLine(x - 1, rowCount * rowHeight, x - 1, clipHeight);
+                        g.drawLine(x - 1, rowCount * rowHeight, x - 1, rowCount * rowHeight + clipHeight);
                     }
                 }
             }
