@@ -3,6 +3,8 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -10,6 +12,7 @@ import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.listener.EventListener;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -21,6 +24,7 @@ import com.limegroup.gnutella.ActivityCallbackAdapter;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
+import com.limegroup.gnutella.downloader.DownloadStateEvent;
 
 /**
  * Test cases for the BTDownloader.
@@ -295,18 +299,18 @@ public class BTDownloaderImplTest extends LimeTestCase {
     }
 
     private void finishDownload(BTDownloader downloader) throws InterruptedException {
-        int maxIterations = 100;
-        int index = 0;
-        while (!downloader.isCompleted() && downloader.getState() != DownloadState.INVALID) {
-            if (index++ > maxIterations) {
-                AssertComparisons.fail("Failure downloading the file. Taking too long.");
-            }
-            Thread.sleep(1000);
-        }
-        
-        assertEquals(DownloadState.COMPLETE, downloader.getState());
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        // TODO use countdown latch.
+        downloader.addListener(new EventListener<DownloadStateEvent>() {
+           @Override
+            public void handleEvent(DownloadStateEvent event) {
+               if(DownloadState.COMPLETE == event.getType()) {
+                   countDownLatch.countDown();
+               }
+            } 
+        });
+        countDownLatch.await(20, TimeUnit.SECONDS);
+        assertEquals(DownloadState.COMPLETE, downloader.getState());
     }
 
     /**
