@@ -590,6 +590,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             browseFailedPanel.setVisible(false);
         }
 
+        filterPanel.setVisible(!browseFailedPanel.isVisible());
         scrollPane.setVisible(!browseFailedPanel.isVisible());
     }
 }
