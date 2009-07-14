@@ -6,7 +6,6 @@ import java.awt.Component;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JSplitPane;
-import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 /**
@@ -14,13 +13,11 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
  *
  */
 public class LimeSplitPane extends JSplitPane{
-    
-    private final BasicSplitPaneUI splitUI;
 
     public LimeSplitPane(int orientation, boolean continuousLayout, Component leftComponent, Component rightComponent, JComponent dividerComponent){
         super(orientation, continuousLayout, leftComponent, rightComponent);
         
-        splitUI = new BasicSplitPaneUI();        
+        BasicSplitPaneUI splitUI = new BasicSplitPaneUI();        
         setUI(splitUI);
 
         splitUI.getDivider().setBorder(BorderFactory.createEmptyBorder());
@@ -28,9 +25,5 @@ public class LimeSplitPane extends JSplitPane{
         splitUI.getDivider().removeAll();
         splitUI.getDivider().add(dividerComponent);  
         setDividerSize(dividerComponent.getPreferredSize().height);
-    }
-    
-    public BasicSplitPaneDivider getDivider() {
-        return splitUI.getDivider();
     }
 }
