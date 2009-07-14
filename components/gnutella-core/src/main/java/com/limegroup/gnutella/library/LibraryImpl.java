@@ -1100,7 +1100,7 @@ class LibraryImpl implements Library, FileCollection {
         }
         
         //reject OSX app folders when program managing is not allowed.
-        if(!isProgramManagingAllowed() && "app".equals(FileUtils.getFileExtension(folder))) {
+        if(!isProgramManagingAllowed() && "app".equalsIgnoreCase(FileUtils.getFileExtension(folder))) {
             return false;
         }
         
@@ -1238,7 +1238,7 @@ class LibraryImpl implements Library, FileCollection {
         }
         
         if(file.isDirectory()) {
-            return true;
+            return isDirectoryAllowed(file);
         }
         
         MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));

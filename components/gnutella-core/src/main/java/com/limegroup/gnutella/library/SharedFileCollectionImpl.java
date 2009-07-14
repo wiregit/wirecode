@@ -214,20 +214,12 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
 
     @Override
     public boolean isFileAddable(File file) {
-        if(file == null) {
-            return false;
-        }
-        
-        if(file.isDirectory()) {
-            return true;
-        }
-        
-        MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
-        if(MediaType.getProgramMediaType().equals(mediaType) && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+        if(!library.isFileAddable(file)) {
             return false;
         }
         
         if(isPublic()) {
+            MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
             if(MediaType.getDocumentMediaType().equals(mediaType) && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 return false;
             }
