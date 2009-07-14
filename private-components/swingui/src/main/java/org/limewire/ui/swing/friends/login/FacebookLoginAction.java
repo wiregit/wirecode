@@ -143,19 +143,24 @@ public class FacebookLoginAction extends AbstractAction {
                             Cookie login_x = null;
                             while(enumerator.hasMoreElements()) {                        
                                 nsICookie cookie = XPCOMUtils.proxy(enumerator.getNext(), nsICookie.class);
-                                BasicClientCookie copy = new BasicClientCookie(cookie.getName(), cookie.getValue());
-                                copy.setDomain(cookie.getHost());
-                                double expiry = cookie.getExpires();
-                                if(expiry != 0 && expiry != 1) {
-                                    long expiryMillis = (long) expiry * 1000;
-                                    copy.setExpiryDate(new Date(expiryMillis));
-                                }
-                                copy.setPath(cookie.getPath());
-                                copy.setSecure(cookie.getIsSecure());
-                                // TODO copy.setVersion();
-                                cookiesCopy.add(copy);
-                                if(copy.getName().equals("login_x")) {
-                                    login_x = copy;
+                                if(cookie.getHost() != null && cookie.getHost().endsWith(".facebook.com")) {
+                                    LOG.debugf("adding cookie {0} = {1} for host {2}", cookie.getName(), cookie.getValue(), cookie.getHost());
+                                    BasicClientCookie copy = new BasicClientCookie(cookie.getName(), cookie.getValue());
+                                    copy.setDomain(cookie.getHost());
+                                    double expiry = cookie.getExpires();
+                                    if(expiry != 0 && expiry != 1) {
+                                        long expiryMillis = (long) expiry * 1000;
+                                        copy.setExpiryDate(new Date(expiryMillis));
+                                    }
+                                    copy.setPath(cookie.getPath());
+                                    copy.setSecure(cookie.getIsSecure());
+                                    // TODO copy.setVersion();
+                                    cookiesCopy.add(copy);
+                                    if(copy.getName().equals("login_x")) {
+                                        login_x = copy;
+                                    }
+                                } else {
+                                    LOG.debugf("dropping cookie {0} = {1} for host {2}", cookie.getName(), cookie.getValue(), cookie.getHost());
                                 }
                             }
                             
