@@ -76,15 +76,30 @@ public class FriendsButton extends LimeComboBox {
     
     private Timer busy;
     private final Timer avalibilityUpdateScheduler;
+    private final JPopupMenu menu;
+    
+    private final Provider<FriendServiceItem> serviceItemProvider;
+    private final Provider<BrowseFriendsAction> browseFriendsActionProvider;
+    private final Provider<LoginAction> loginActionProvider;
+    private final Provider<LogoutAction> logoutActionProvider;
+    private final AutoLoginService autoLoginService;
+    private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     
     @Inject
     public FriendsButton(ComboBoxDecorator comboBoxDecorator,
-            final Provider<FriendServiceItem> serviceItemProvider,
-            final Provider<BrowseFriendsAction> browseFriendsActionProvider,
-            final Provider<LoginAction> loginActionProvider,
-            final Provider<LogoutAction> logoutActionProvider,
-            final AutoLoginService autoLoginService,
-            final EventBean<FriendConnectionEvent> friendConnectionEventBean) {
+            Provider<FriendServiceItem> serviceItemProvider,
+            Provider<BrowseFriendsAction> browseFriendsActionProvider,
+            Provider<LoginAction> loginActionProvider,
+            Provider<LogoutAction> logoutActionProvider,
+            AutoLoginService autoLoginService,
+            EventBean<FriendConnectionEvent> friendConnectionEventBean) {
+        
+        this.serviceItemProvider = serviceItemProvider;
+        this.browseFriendsActionProvider = browseFriendsActionProvider;
+        this.loginActionProvider = loginActionProvider;
+        this.logoutActionProvider = logoutActionProvider;
+        this.autoLoginService = autoLoginService;
+        this.friendConnectionEventBean = friendConnectionEventBean;
         
         GuiUtils.assignResources(this);
         
@@ -127,7 +142,7 @@ public class FriendsButton extends LimeComboBox {
         
         addMouseListener(new ActionHandListener());
         
-        final JPopupMenu menu = new JPopupMenu();
+        menu = new JPopupMenu();
         overrideMenuNoRestyle(menu);
         menu.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -140,38 +155,7 @@ public class FriendsButton extends LimeComboBox {
             }
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                menu.add(serviceItemProvider.get());
-
-                FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
-                boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
-                boolean loggingIn = autoLoginService.isAttemptingLogin()
-                        || (friendConnection != null && friendConnection.isLoggingIn());
-
-                JMenuItem browseFriendMenuItem; 
-                    
-                if (signedIn) {    
-                    browseFriendMenuItem = new JMenuItem(
-                        new AvalibilityActionWrapper(browseFriendsActionProvider.get()));
-                }
-                else {
-                    browseFriendMenuItem = new JMenuItem(BrowseFriendsAction.DISPLAY_TEXT);
-                    browseFriendMenuItem.setEnabled(false);
-                }
-                menu.add(decorateItem(browseFriendMenuItem));
-                
-                if (signedIn) {
-                    menu.add(decorateItem(new JMenuItem(logoutActionProvider.get())));
-                } else {
-                    JMenuItem loginMenuItem;
-                    if (loggingIn) {
-                        loginMenuItem = new JMenuItem(I18n.tr(LoginAction.DISPLAY_TEXT));
-                        loginMenuItem.setEnabled(false);
-                    } 
-                    else {
-                        loginMenuItem = new JMenuItem(loginActionProvider.get());
-                    }
-                    menu.add(decorateItem(loginMenuItem));
-                }
+               populateMenu();
             }
         });
         
@@ -210,6 +194,41 @@ public class FriendsButton extends LimeComboBox {
         });
         
         setPopupPosition(new Point(0, -4));
+    }
+    
+    private void populateMenu() {
+        menu.add(serviceItemProvider.get());
+
+        FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
+        boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
+        boolean loggingIn = autoLoginService.isAttemptingLogin()
+                || (friendConnection != null && friendConnection.isLoggingIn());
+
+        JMenuItem browseFriendMenuItem; 
+            
+        if (signedIn) {    
+            browseFriendMenuItem = new JMenuItem(
+                new AvalibilityActionWrapper(browseFriendsActionProvider.get()));
+        }
+        else {
+            browseFriendMenuItem = new JMenuItem(BrowseFriendsAction.DISPLAY_TEXT);
+            browseFriendMenuItem.setEnabled(false);
+        }
+        menu.add(decorateItem(browseFriendMenuItem));
+        
+        if (signedIn) {
+            menu.add(decorateItem(new JMenuItem(logoutActionProvider.get())));
+        } else {
+            JMenuItem loginMenuItem;
+            if (loggingIn) {
+                loginMenuItem = new JMenuItem(I18n.tr(LoginAction.DISPLAY_TEXT));
+                loginMenuItem.setEnabled(false);
+            } 
+            else {
+                loginMenuItem = new JMenuItem(loginActionProvider.get());
+            }
+            menu.add(decorateItem(loginMenuItem));
+        }
     }
     
     private JMenuItem decorateItem(JMenuItem comp) {
@@ -265,6 +284,10 @@ public class FriendsButton extends LimeComboBox {
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
                 setIconFromEvent(event);
+                if (menu.isVisible()) {
+                    menu.setVisible(false);
+                    menu.setVisible(true);
+                }
             }
         });
         
