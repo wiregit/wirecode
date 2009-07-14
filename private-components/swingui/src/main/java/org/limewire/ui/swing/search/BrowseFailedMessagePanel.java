@@ -145,7 +145,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
                     subText = I18n.tr("When you sign on to LimeWire, your friend's files will appear here.");
                 }
             } else {
-                subText = I18n.tr("When they sign on LimeWire and share with you, their files will appear here.");
+                subText = I18n.tr("When they sign on to LimeWire and share with you, their files will appear here.");
             }
                 
             JLabel subMessage = new JLabel(subText);
