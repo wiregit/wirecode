@@ -73,7 +73,9 @@ public class FriendsButton extends LimeComboBox {
     
     private boolean newResultsAvailable = false;
     private final BusyPainter busyPainter;
+    
     private Timer busy;
+    private final Timer avalibilityUpdateScheduler;
     
     @Inject
     public FriendsButton(ComboBoxDecorator comboBoxDecorator,
@@ -83,7 +85,10 @@ public class FriendsButton extends LimeComboBox {
             final Provider<LogoutAction> logoutActionProvider,
             final AutoLoginService autoLoginService,
             final EventBean<FriendConnectionEvent> friendConnectionEventBean) {
+        
         GuiUtils.assignResources(this);
+        
+        avalibilityUpdateScheduler = new AvalibilityUpdateScheduler();        
         
         comboBoxDecorator.decorateIconComboBox(this);
         setToolTipText(I18n.tr("Friends"));
@@ -252,7 +257,6 @@ public class FriendsButton extends LimeComboBox {
     @Inject
     void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport, RemoteLibraryManager remoteLibraryManager) {
         
-
         setIconFromEvent(connectBean.getLastEvent());
         
         //update icon as connection events come in.
@@ -267,13 +271,10 @@ public class FriendsButton extends LimeComboBox {
         //change to new files icon when inserts are detected
         remoteLibraryManager.getAllFriendsFileList().getSwingModel().addListEventListener(new ListEventListener<SearchResult>() {
             public void listChanged(ListEvent<SearchResult> listChanges) {
+                
                 while(listChanges.next()) {
                     if(listChanges.getType() == ListEvent.INSERT) {
-                        newResultsAvailable = true;
-                        FriendConnection friendConnection = EventUtils.getSource(connectBean);
-                        if(friendConnection != null && friendConnection.isLoggedIn()) {
-                            setIconFromEvent(new FriendConnectionEvent(friendConnection, FriendConnectionEvent.Type.CONNECTED));
-                        }
+                        avalibilityUpdateScheduler.start();
                         break;//breaking only need to run once.
                     }
                 }
@@ -307,6 +308,24 @@ public class FriendsButton extends LimeComboBox {
         }
     }
     
+
+    /**
+     * Used to collapse repeat update events and make the button a little more stable
+     */
+    private class AvalibilityUpdateScheduler extends Timer {
+
+        public AvalibilityUpdateScheduler() {
+            super(1000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    newResultsAvailable = true;
+                    updateIcons(FriendConnectionEvent.Type.CONNECTED);
+                }
+            });
+            
+            setRepeats(false);
+        }   
+    }
     
     /**
      * Action wrapper used to clear the friend status before a specfic action
@@ -321,6 +340,9 @@ public class FriendsButton extends LimeComboBox {
         
        @Override
        public void actionPerformed(ActionEvent e) {
+           // Stop any pending updates
+           avalibilityUpdateScheduler.stop();
+           
            newResultsAvailable = false;
            updateIcons(FriendConnectionEvent.Type.CONNECTED);
            wrappedAction.actionPerformed(e);
