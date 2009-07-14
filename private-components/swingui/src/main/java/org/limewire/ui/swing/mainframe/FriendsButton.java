@@ -2,6 +2,7 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -11,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -52,19 +54,22 @@ import com.google.inject.Provider;
 
 public class FriendsButton extends LimeComboBox {
     
-    
     @Resource private Icon friendOnlineIcon;
     @Resource private Icon friendOfflineIcon;
     @Resource private Icon friendOnlineSelectedIcon;
     @Resource private Icon friendOfflineSelectedIcon;
-
     @Resource private Icon friendLoadingIcon;
+    @Resource private Icon friendLoadingSelectedIcon;
     @Resource private Icon friendNewFilesIcon;
+    @Resource private Icon friendNewFilesSelectedIcon;
     
     @Resource private Color borderForeground = PainterUtils.TRASPARENT;
     @Resource private Color borderInsideRightForeground = PainterUtils.TRASPARENT;
     @Resource private Color borderInsideBottomForeground = PainterUtils.TRASPARENT;
     @Resource private Color dividerForeground = PainterUtils.TRASPARENT;
+    
+    @Resource private Font menuFont;
+    @Resource private Color menuForeground;
     
     private boolean newResultsAvailable = false;
     private final BusyPainter busyPainter;
@@ -137,13 +142,20 @@ public class FriendsButton extends LimeComboBox {
                 boolean loggingIn = autoLoginService.isAttemptingLogin()
                         || (friendConnection != null && friendConnection.isLoggingIn());
 
-                JMenuItem browseFriendMenuItem = new JMenuItem(browseFriendsActionProvider.get());
-                menu.add(browseFriendMenuItem);
-                browseFriendMenuItem.setEnabled(signedIn);
-                
+                JMenuItem browseFriendMenuItem; 
+                    
+                if (signedIn) {    
+                    browseFriendMenuItem = new JMenuItem(
+                        new AvalibilityActionWrapper(browseFriendsActionProvider.get()));
+                }
+                else {
+                    browseFriendMenuItem = new JMenuItem(BrowseFriendsAction.DISPLAY_TEXT);
+                    browseFriendMenuItem.setEnabled(false);
+                }
+                menu.add(decorateItem(browseFriendMenuItem));
                 
                 if (signedIn) {
-                    menu.add(new JMenuItem(logoutActionProvider.get()));
+                    menu.add(decorateItem(new JMenuItem(logoutActionProvider.get())));
                 } else {
                     JMenuItem loginMenuItem;
                     if (loggingIn) {
@@ -153,7 +165,7 @@ public class FriendsButton extends LimeComboBox {
                     else {
                         loginMenuItem = new JMenuItem(loginActionProvider.get());
                     }
-                    menu.add(loginMenuItem);
+                    menu.add(decorateItem(loginMenuItem));
                 }
             }
         });
@@ -161,7 +173,7 @@ public class FriendsButton extends LimeComboBox {
         menu.setBorder(new Border() {
             @Override
             public Insets getBorderInsets(Component c) {
-                return new Insets(3,1,3,2);
+                return new Insets(1,1,3,2);
             }
             @Override
             public boolean isBorderOpaque() {
@@ -169,13 +181,19 @@ public class FriendsButton extends LimeComboBox {
             }
             @Override
             public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-                g.setColor(dividerForeground);
-                g.drawLine(0, 0, getPressedIcon().getIconWidth()-1, 0);                
+                if (!menu.getComponent(0).isVisible()) {
+                    g.setColor(dividerForeground);
+                } 
+                else {
+                    g.setColor(menu.getComponent(0).getBackground());
+                }
+                g.drawLine(0, 0, getPressedIcon().getIconWidth()-2, 0);
+                
                 g.setColor(borderForeground);
                 g.drawLine(0, 0, 0, height-1);
                 g.drawLine(0, height-1, width-1, height-1);
                 g.drawLine(width-1, height-1, width-1, 0);
-                g.drawLine(getPressedIcon().getIconWidth(), 0, width-1, 0);
+                g.drawLine(getPressedIcon().getIconWidth()-1, 0, width-1, 0);
                 g.setColor(borderInsideRightForeground);
                 g.drawLine(width-2, height-2, width-2, 1);
                 g.drawLine(width-1, height-1, width-1, height-1);
@@ -189,12 +207,22 @@ public class FriendsButton extends LimeComboBox {
         setPopupPosition(new Point(0, -4));
     }
     
+    private JMenuItem decorateItem(JMenuItem comp) {
+        comp.setFont(menuFont);
+        comp.setForeground(menuForeground);
+        return comp;
+    }
+    
     private void setIconFromEvent(FriendConnectionEvent event) {
         FriendConnectionEvent.Type eventType = event == null ? null : event.getType();
         if(eventType == null) {
             eventType = FriendConnectionEvent.Type.DISCONNECTED;
         }
         
+        updateIcons(eventType);
+    }
+
+    private void updateIcons(FriendConnectionEvent.Type eventType) {
         switch(eventType) {
         case CONNECT_FAILED:
         case DISCONNECTED:
@@ -206,6 +234,7 @@ public class FriendsButton extends LimeComboBox {
         case CONNECTED:
             if(newResultsAvailable) {
                setIcon(friendNewFilesIcon);
+               setPressedIcon(friendNewFilesSelectedIcon);
             } else { 
                 setIcon(friendOnlineIcon);
                 setPressedIcon(friendOnlineSelectedIcon);
@@ -214,10 +243,11 @@ public class FriendsButton extends LimeComboBox {
             break;
         case CONNECTING:
             setIcon(friendLoadingIcon);
+            setPressedIcon(friendLoadingSelectedIcon);
             startAnimation();
         }
     }
-
+    
     
     @Inject
     void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport, RemoteLibraryManager remoteLibraryManager) {
@@ -249,18 +279,6 @@ public class FriendsButton extends LimeComboBox {
                 }
             }; 
          });
-        
-        //clear new files icon when button is clicked
-        addActionListener(new AbstractAction() {
-           @Override
-            public void actionPerformed(ActionEvent e) {
-               FriendConnection friendConnection = EventUtils.getSource(connectBean);
-               if(friendConnection != null && friendConnection.isLoggedIn()) {
-                   newResultsAvailable = false;
-                   setIconFromEvent(new FriendConnectionEvent(friendConnection, FriendConnectionEvent.Type.CONNECTED));
-               }
-            } 
-        });
     }
     
     // animation code ripped from JXBusyLabel
@@ -287,5 +305,35 @@ public class FriendsButton extends LimeComboBox {
             repaint();
             busy = null;
         }
+    }
+    
+    
+    /**
+     * Action wrapper used to clear the friend status before a specfic action
+     */
+    private class AvalibilityActionWrapper extends AbstractAction {
+       
+       private final Action wrappedAction;
+       
+       public AvalibilityActionWrapper(Action actionToWrap) {
+           wrappedAction = actionToWrap;
+       }
+        
+       @Override
+       public void actionPerformed(ActionEvent e) {
+           newResultsAvailable = false;
+           updateIcons(FriendConnectionEvent.Type.CONNECTED);
+           wrappedAction.actionPerformed(e);
+       }
+       
+       @Override
+       public Object getValue(String key) {
+           return wrappedAction.getValue(key);
+       }
+       
+       @Override
+       public void putValue(String key, Object value) {
+           throw new UnsupportedOperationException("Can't modify an action wrapper");
+       }
     }
 }
