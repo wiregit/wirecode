@@ -42,7 +42,7 @@ public class FriendServiceItem extends JLabel {
             setMaximumSize(new Dimension(9999,22));
             setPreferredSize(new Dimension(120,22));
             
-            setText(friendConnection.getConfiguration().getUserInputLocalID());
+            setText(friendConnection.getConfiguration().getCanonicalizedLocalID());
             setIcon(friendConnection.getConfiguration().getIcon());
         } else {
             setVisible(false);
