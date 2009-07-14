@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.awt.Font;
+
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
@@ -8,8 +10,10 @@ import javax.swing.event.HyperlinkEvent.EventType;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.friends.actions.LoginAction;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -20,6 +24,9 @@ import com.google.inject.Provider;
 /** Creates Login Panel for inner sharing Nav. */
 class LibrarySharingLoginPanel {
    
+    @Resource
+    private Font textFont;
+    
     private static final String SIGN_IN = "#signin";
     private static final String STOP_SHARING = "#stopsharing";
     
@@ -32,11 +39,14 @@ class LibrarySharingLoginPanel {
     @Inject
     public LibrarySharingLoginPanel(final Provider<LoginAction> loginAction,
             final Provider<StopSharingAction> stopSharing) {
+        GuiUtils.assignResources(this);
+        
         component = new JPanel(new MigLayout("", "134!", ""));
                 
         component.setOpaque(false);
         
         htmlLabel = new HTMLLabel("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list.", SIGN_IN) + "</html>");
+        htmlLabel.setHtmlFont(textFont);
         htmlLabel.setOpenUrlsNatively(false);
         htmlLabel.setOpaque(false);
         htmlLabel.addHyperlinkListener(new HyperlinkListener() {
