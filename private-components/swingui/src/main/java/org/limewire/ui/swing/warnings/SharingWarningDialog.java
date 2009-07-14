@@ -92,7 +92,7 @@ class SharingWarningDialog extends OverlayPopupPanel {
         
         contentPanel.add(messageLabel, "wrap");
         final JCheckBox warnMeCheckbox = new JCheckBox(I18n
-                .tr("Warn me before adding folders to a shared list"), true);
+                .tr("Warn me before adding folders to any shared list"), true);
         warnMeCheckbox.setFont(alwaysCheckBoxFont);
         warnMeCheckbox.setForeground(alwaysCheckBoxForeground);
         contentPanel.add(warnMeCheckbox, "wrap");
