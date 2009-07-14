@@ -82,6 +82,7 @@ class SignOnMessageLayer {
     private final TopPanel topPanel;
     private final Navigator navigator;
     private final Provider<LibraryNavigatorPanel> libraryNavProvider;
+    private final LibraryMediator libraryMediator;
     private final EventListenerList<LibrarySharingEvent> libraryListenerList;
     private final Provider<Rectangle> libraryTableRect;
     private final EventBean<FriendConnectionEvent> connectionEventBean;
@@ -107,6 +108,7 @@ class SignOnMessageLayer {
             TopPanel topPanel,
             Navigator navigator,
             Provider<LibraryNavigatorPanel> libraryNavProvider,
+            LibraryMediator libraryMediator,
             EventListenerList<LibrarySharingEvent> libraryListenerList,
             @LibraryTableRect Provider<Rectangle> libraryTableRect,
             EventBean<FriendConnectionEvent> connectionEventBean) {
@@ -114,6 +116,7 @@ class SignOnMessageLayer {
         this.layeredPane = limeWireLayeredPane;
         this.topPanel = topPanel;
         this.navigator = navigator;
+        this.libraryMediator = libraryMediator;
         this.libraryNavProvider = libraryNavProvider;
         this.libraryListenerList = libraryListenerList;
         this.libraryTableRect = libraryTableRect;
@@ -164,7 +167,7 @@ class SignOnMessageLayer {
                     break;
                 }
                 // If Private Shared selected and signed on, show message.
-                NavType navType = libraryNavProvider.get().getSelectedNavItem().getType();
+                NavType navType = libraryMediator.getSelectedNavItem().getType();
                 if ((category == NavCategory.LIBRARY) && 
                         (navType == NavType.LIST) && isSignedOn()) {
                     showMessage();
@@ -176,7 +179,7 @@ class SignOnMessageLayer {
         libraryNavProvider.get().addTableSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                NavType navType = libraryNavProvider.get().getSelectedNavItem().getType();
+                NavType navType = libraryMediator.getSelectedNavItem().getType();
                 switch (messageType) {
                 case LIBRARY:
                     // If library message showing and Private Shared selected, close message.
@@ -235,8 +238,13 @@ class SignOnMessageLayer {
         NavItem libraryItem = navigator.getNavItem(NavCategory.LIBRARY, LibraryMediator.NAME);
         
         // Get selected collection in library.
-        LibraryNavItem selectedItem = libraryNavProvider.get().getSelectedNavItem();
-        NavType selectedType = selectedItem.getType();
+        LibraryNavItem selectedItem = libraryMediator.getSelectedNavItem();
+        
+        NavType selectedType;
+        if(selectedItem == null)
+            selectedType = NavType.LIBRARY;
+        else
+            selectedType = selectedItem.getType();
         
         // Remove old message components.
         if (panelResizer != null) {

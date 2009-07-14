@@ -317,7 +317,7 @@ public class LibraryPanel extends JPanel {
     /**
      * Returns true if the specified category is playable.
      */
-    public boolean isPlayable(Category category) {
+    public static boolean isPlayable(Category category) {
         return (category == null) || (category == Category.AUDIO);
     }
     

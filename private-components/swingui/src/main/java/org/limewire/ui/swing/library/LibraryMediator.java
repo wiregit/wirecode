@@ -1,13 +1,17 @@
 package org.limewire.ui.swing.library;
 
 import java.io.File;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavMediator;
@@ -96,5 +100,31 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
      */
     public void clearFilters() {
         getComponent().clearFilters();
+    }
+
+    /**
+     * Returns the LibraryNavItem that is currently selected.
+     */
+    public LibraryNavItem getSelectedNavItem() {
+        return getComponent().getSelectedNavItem();
+    }
+
+    /**
+     * Returns the category that is currently selected within the
+     * currently selected LibraryNavItem.
+     */
+    public Category getSelectedCategory() {
+        return getComponent().getSelectedCategory();
+    }
+
+    public List<LocalFileItem> getPlayableList() {
+        return getComponent().getPlayableList();
+    }
+
+    /**
+     * Returns the items that are currently selected.
+     */
+    public List<LocalFileItem> getSelectedItems() {
+        return getComponent().getSelectedItems();
     }
 }

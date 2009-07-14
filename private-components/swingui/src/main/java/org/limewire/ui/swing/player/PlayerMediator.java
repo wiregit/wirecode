@@ -16,6 +16,7 @@ import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
@@ -44,7 +45,7 @@ public class PlayerMediator {
     private static final String WAVE = "wave";
     
     private final Provider<AudioPlayer> audioPlayerProvider;
-    private final Provider<LibraryPanel> libraryPanelProvider;
+    private final LibraryMediator libraryMediator;
     private final List<PlayerMediatorListener> listenerList;
     
     /** Current list of songs. */
@@ -79,9 +80,9 @@ public class PlayerMediator {
      */
     @Inject
     public PlayerMediator(Provider<AudioPlayer> audioPlayerProvider,
-            Provider<LibraryPanel> libraryPanelProvider) {
+            LibraryMediator libraryMediator) {
         this.audioPlayerProvider = audioPlayerProvider;
-        this.libraryPanelProvider = libraryPanelProvider;
+        this.libraryMediator = libraryMediator;
         
         this.listenerList = new ArrayList<PlayerMediatorListener>();
         this.playList = new ArrayList<LocalFileItem>();
@@ -187,8 +188,8 @@ public class PlayerMediator {
      */
     private List<LocalFileItem> getPlaylist() {
         // Get selected list and category.
-        LibraryNavItem selectedNavItem = libraryPanelProvider.get().getSelectedNavItem();
-        Category selectedCategory = libraryPanelProvider.get().getSelectedCategory();
+        LibraryNavItem selectedNavItem = libraryMediator.getSelectedNavItem();
+        Category selectedCategory = libraryMediator.getSelectedCategory();
         
         // No selected list so return internal playlist.
         if (selectedNavItem == null) {
@@ -198,9 +199,9 @@ public class PlayerMediator {
         // Compare selected list to playlist.
         PlaylistId selectedId = new PlaylistId(selectedNavItem);
         if (selectedId.equals(playlistId) && 
-                libraryPanelProvider.get().isPlayable(selectedCategory)) {
+                LibraryPanel.isPlayable(selectedCategory)) {
             // Selected list is same so return list from library.
-            List<LocalFileItem> libraryList = libraryPanelProvider.get().getPlayableList();
+            List<LocalFileItem> libraryList = libraryMediator.getPlayableList();
             if (libraryList == null) libraryList = Collections.emptyList();
             return libraryList;
         } else {
@@ -268,12 +269,12 @@ public class PlayerMediator {
         PlayerState status = getPlayer().getStatus();
         if ((status == PlayerState.STOPPED) || (status == PlayerState.UNKNOWN)) {
             // Get first selected item.
-            List<LocalFileItem> selectedItems = libraryPanelProvider.get().getSelectedItems();
+            List<LocalFileItem> selectedItems = libraryMediator.getSelectedItems();
             if (selectedItems.size() > 0) {
                 LocalFileItem selectedItem = selectedItems.get(0);
                 if (PlayerUtils.isPlayableFile(selectedItem.getFile())) {
                     // Set active playlist and play file item.
-                    setActivePlaylist(libraryPanelProvider.get().getSelectedNavItem());
+                    setActivePlaylist(libraryMediator.getSelectedNavItem());
                     play(selectedItem);
                 }
             }
