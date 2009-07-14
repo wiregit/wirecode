@@ -1,6 +1,7 @@
 package org.limewire.core.impl.connection;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
@@ -64,6 +65,10 @@ public class CoreConnectionItemTest extends BaseTestCase {
             will(returnValue(444));
             allowing(connection).getInetAddress();
             will(returnValue(InetAddress.getLocalHost()));
+            allowing(connection).getInetSocketAddress();
+            will(returnValue(new InetSocketAddress(InetAddress.getLocalHost(), 444)));
+            allowing(connection).isTLSCapable();
+            will(returnValue(true));
         }});
         
         CoreConnectionItem item = new CoreConnectionItem(connection);
