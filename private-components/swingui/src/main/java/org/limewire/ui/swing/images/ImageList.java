@@ -73,9 +73,9 @@ public class ImageList extends JXList implements Disposable {
     public void setModel(EventList<LocalFileItem> eventList) {
         DefaultEventListModel newEventListModel = new DefaultEventListModel<LocalFileItem>(eventList);
         DefaultEventSelectionModel<LocalFileItem> newEventSelectionModel = new DefaultEventSelectionModel<LocalFileItem>(eventList);
-        
-        setModel(newEventListModel);
+
         setSelectionModel(newEventSelectionModel);
+        setModel(newEventListModel);
         newEventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         
         if(cachedEventListModel != null) {
