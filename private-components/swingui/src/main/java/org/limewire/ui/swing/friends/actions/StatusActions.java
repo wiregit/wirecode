@@ -32,11 +32,8 @@ import com.google.inject.Inject;
  */
 public class StatusActions {
 
-    @Resource
-    private Icon available;
-
-    @Resource
-    private Icon doNotDisturb;
+    @Resource private Icon available;
+    @Resource private Icon doNotDisturb;
 
     private final Action availableAction;
 

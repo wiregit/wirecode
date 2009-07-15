@@ -34,7 +34,7 @@ class ViewMenu extends MnemonicMenu {
         this.friendsSignInPanel = friendsSignInPanel;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
         this.friendConnectionEventBean = friendConnectionEventBean;
-        add(buildShowHideAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
+        add(buildShowHideChatWindowAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
         add(showHideDownloadTrayAction);
     }
     /**
@@ -57,7 +57,7 @@ class ViewMenu extends MnemonicMenu {
         return friendConnection != null && friendConnection.isLoggingIn();
     }
 
-    private Action buildShowHideAction(final VisibleComponent component, final String visibleName,
+    private Action buildShowHideChatWindowAction(final ChatFrame component, final String visibleName,
             final String notVisibleName) {
         final Action action = new AbstractAction() {
             @Override

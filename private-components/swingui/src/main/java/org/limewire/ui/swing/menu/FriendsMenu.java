@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.menu;
 
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -12,8 +12,6 @@ import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.MnemonicMenu;
-import org.limewire.ui.swing.components.PlainCheckBoxMenuItemUI;
-import org.limewire.ui.swing.components.PlainMenuItemUI;
 import org.limewire.ui.swing.friends.actions.AddFriendAction;
 import org.limewire.ui.swing.friends.actions.BrowseFriendsAction;
 import org.limewire.ui.swing.friends.actions.LoginAction;
@@ -23,52 +21,53 @@ import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 class FriendsMenu extends MnemonicMenu {
-
-    private final JMenuItem browseFriendMenuItem;
-
-    private final StatusActions statusActions;
-    private final JMenuItem loginMenuItem;
-    private final JMenuItem logoutMenuItem;
-    private final JMenuItem addFriendMenuItem;
+   
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
-    private final JSeparator addFriendSeperator;
-    private final JSeparator statusSeperator;
-    private final JSeparator loginSeperator;
-    private final AutoLoginService autoLoginService;
-
+    private final Provider<AutoLoginService> autoLoginServiceProvider;
+    
+    private final Provider<BrowseFriendsAction> browseFriendsActionProvider;
+    private final Provider<StatusActions> statusActionsProvider;
+    private final Provider<AddFriendAction> addFriendActionProvider;
+    private final Provider<LoginAction> loginActionProvider;
+    private final Provider<LogoutAction> logoutActionProvider;
+    
     @Inject
     public FriendsMenu(EventBean<FriendConnectionEvent> friendConnectionEventBean,
-            BrowseFriendsAction browseFriendAction, StatusActions statusActions,
-            AddFriendAction addFriendAction, LoginAction loginAction, LogoutAction logoutAction,
-            AutoLoginService autoLoginService) {
+            Provider<AutoLoginService> autoLoginServiceProvider,
+            Provider<BrowseFriendsAction> browseFriendsActionProvider,
+            Provider<StatusActions> statusActionsProvider,
+            Provider<AddFriendAction> addFriendActionProvider,
+            Provider<LoginAction> loginActionProvider,
+            Provider<LogoutAction> logoutActionProvider) {
+        
         super(I18n.tr("&Friends"));
+
         this.friendConnectionEventBean = friendConnectionEventBean;
-        this.browseFriendMenuItem = new JMenuItem(browseFriendAction);
-        this.statusActions = statusActions;
-        this.loginMenuItem = new JMenuItem(loginAction);
-        this.logoutMenuItem = new JMenuItem(logoutAction);
-        this.addFriendMenuItem = new JMenuItem(addFriendAction);
-        this.addFriendSeperator = new JSeparator();
-        this.statusSeperator = new JSeparator();
-        this.loginSeperator = new JSeparator();
-        this.autoLoginService = autoLoginService;
-        updateSignedInStatus();
-    }
-
-    @Override
-    public JMenuItem add(JMenuItem item) {
-        if (item instanceof JCheckBoxMenuItem) {
-            item.setUI(new PlainCheckBoxMenuItemUI());
-        } else {
-            // done here instead of super class because this else statement
-            // can effect a wide range of components poorly.
-            item.setUI(new PlainMenuItemUI());
-        }
-
-        JMenuItem itemReturned = super.add(item);
-        return itemReturned;
+        this.autoLoginServiceProvider = autoLoginServiceProvider;
+        
+        this.browseFriendsActionProvider = browseFriendsActionProvider;
+        this.statusActionsProvider = statusActionsProvider;
+        this.addFriendActionProvider = addFriendActionProvider;
+        this.loginActionProvider = loginActionProvider;
+        this.logoutActionProvider = logoutActionProvider;
+        
+        addMenuListener(new MenuListener() {
+            @Override
+            public void menuCanceled(MenuEvent e) {
+                removeAll();
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {
+                removeAll();                
+            }
+            @Override
+            public void menuSelected(MenuEvent e) {
+                updateSignedInStatus();
+            }
+        });
     }
 
     @Inject
@@ -82,7 +81,10 @@ class FriendsMenu extends MnemonicMenu {
                 case CONNECTING:
                 case CONNECT_FAILED:
                 case DISCONNECTED:
-                    updateSignedInStatus();
+                    if (isPopupMenuVisible()) {
+                        removeAll();
+                        updateSignedInStatus();
+                    }
                     break;
                 }
             }
@@ -96,37 +98,34 @@ class FriendsMenu extends MnemonicMenu {
                 && friendConnection.supportsAddRemoveFriend();
         boolean supportModeChanges = signedIn && friendConnection != null
                 && friendConnection.supportsMode();
-        boolean loggingIn = autoLoginService.isAttemptingLogin()
+        boolean loggingIn = autoLoginServiceProvider.get().isAttemptingLogin()
                 || (friendConnection != null && friendConnection.isLoggingIn());
 
-        boolean popUpMenuVisible = isPopupMenuVisible();
         setPopupMenuVisible(false);
-
-        removeAll();
-        add(browseFriendMenuItem);
-        browseFriendMenuItem.setEnabled(signedIn);
+        
+        add(browseFriendsActionProvider.get()).setEnabled(signedIn);
+        
         if (supportsAddRemoveFriend) {
-            add(addFriendSeperator);
-            add(addFriendMenuItem);
+            add(new JSeparator());
+            add(addFriendActionProvider.get());
         }
-        statusActions.updateSignedInStatus();
-
+        
         if (supportModeChanges) {
-            add(statusSeperator);
+            add(new JSeparator());
+            StatusActions statusActions = statusActionsProvider.get();
             add(statusActions.getAvailableMenuItem());
             add(statusActions.getDnDMenuItem());
         }
 
-        loginMenuItem.setEnabled(!loggingIn);
-        add(loginSeperator);
+        add(new JSeparator());
         if (!signedIn) {
-            add(loginMenuItem);
+            add(loginActionProvider.get()).setEnabled(!loggingIn);
         } else {
-            add(logoutMenuItem);
+            add(logoutActionProvider.get());
         }
+        
         // needed so that the menu does not stay squished after we add in all
         // the new items.
-        setPopupMenuVisible(popUpMenuVisible);
+        setPopupMenuVisible(true);
     }
-
 }
