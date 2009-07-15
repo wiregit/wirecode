@@ -441,7 +441,7 @@ class SignOnMessageLayer {
             setOpaque(false);
             
             // Create message component.
-            messageComponent = new MessageComponent(5, 5, 14, 8, MessageBackground.GREEN);
+            messageComponent = new MessageComponent(5, 5, 18, 8, MessageBackground.GREEN);
             
             // Create message elements.
             closeButton = createCloseButton();
