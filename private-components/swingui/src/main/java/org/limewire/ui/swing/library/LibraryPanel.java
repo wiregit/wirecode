@@ -145,9 +145,9 @@ public class LibraryPanel extends JPanel {
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
         this.fileCountListener = new FileCountListener();
-        this.lockableUI = new LockedUI();
         
         GuiUtils.assignResources(this);
+        this.lockableUI = new LockedUI();
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction, libraryAction);
 
@@ -555,7 +555,7 @@ public class LibraryPanel extends JPanel {
             super(lockedEffects);
             
             panel = new JXPanel();
-            panel.setBackground(new Color(147,170,209,80));
+            panel.setBackground(tableOverlayColor);
             panel.setVisible(false);
         }
         
