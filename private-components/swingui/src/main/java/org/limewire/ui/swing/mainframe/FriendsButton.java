@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -70,6 +71,9 @@ public class FriendsButton extends LimeComboBox {
     
     @Resource private Font menuFont;
     @Resource private Color menuForeground;
+    
+    @Resource private Font browseNotificationFont;
+    @Resource private Icon browseNotificationIcon;
     
     private boolean newResultsAvailable = false;
     private final BusyPainter busyPainter;
@@ -162,7 +166,7 @@ public class FriendsButton extends LimeComboBox {
         menu.setBorder(new Border() {
             @Override
             public Insets getBorderInsets(Component c) {
-                return new Insets(1,1,3,2);
+                    return new Insets(1,1,3,2);
             }
             @Override
             public boolean isBorderOpaque() {
@@ -215,7 +219,12 @@ public class FriendsButton extends LimeComboBox {
             browseFriendMenuItem.setEnabled(false);
         }
         menu.add(decorateItem(browseFriendMenuItem));
-        
+        if (newResultsAvailable) {
+            browseFriendMenuItem.setFont(browseNotificationFont);
+            browseFriendMenuItem.setIcon(browseNotificationIcon);
+            browseFriendMenuItem.setIconTextGap(2);
+        }
+                
         if (signedIn) {
             menu.add(decorateItem(new JMenuItem(logoutActionProvider.get())));
         } else {
@@ -234,6 +243,9 @@ public class FriendsButton extends LimeComboBox {
     private JMenuItem decorateItem(JMenuItem comp) {
         comp.setFont(menuFont);
         comp.setForeground(menuForeground);
+        if (newResultsAvailable) {
+            comp.setBorder(BorderFactory.createEmptyBorder(0,8,0,0));
+        }
         return comp;
     }
     
@@ -284,10 +296,7 @@ public class FriendsButton extends LimeComboBox {
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
                 setIconFromEvent(event);
-                if (menu.isVisible()) {
-                    menu.setVisible(false);
-                    menu.setVisible(true);
-                }
+                refreshMenu();
             }
         });
         
@@ -331,6 +340,12 @@ public class FriendsButton extends LimeComboBox {
         }
     }
     
+    private void refreshMenu() {
+        if (menu.isVisible()) {
+            menu.setVisible(false);
+            menu.setVisible(true);
+        }
+    }
 
     /**
      * Used to collapse repeat update events and make the button a little more stable
@@ -343,6 +358,7 @@ public class FriendsButton extends LimeComboBox {
                 public void actionPerformed(ActionEvent e) {
                     newResultsAvailable = true;
                     updateIcons(FriendConnectionEvent.Type.CONNECTED);
+                    refreshMenu();
                 }
             });
             
