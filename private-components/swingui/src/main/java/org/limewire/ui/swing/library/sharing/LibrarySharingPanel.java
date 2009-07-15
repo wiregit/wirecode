@@ -200,6 +200,15 @@ public class LibrarySharingPanel {
         }
     }
     
+    /**
+	 * Enable the edit view if possible.
+	 */
+    public void showEditMode() {
+        if(isLoggedIn()) {
+            showEditableView();
+        }
+    }
+    
     public JComponent getComponent() {
         return component;
     }

@@ -536,6 +536,14 @@ public class LibraryPanel extends JPanel {
     }
     
     /**
+     * If the sharing panel is visible, try to show the edit mode.
+     */
+    public void showEditMode() {
+    	if(librarySharingPanel.getComponent().isVisible())
+        	librarySharingPanel.showEditMode();
+    }
+    
+    /**
      * Listens for changes on the current list and updates the 
      * file count label.
      */

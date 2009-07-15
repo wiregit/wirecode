@@ -96,8 +96,9 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         item.select();
         getComponent().selectLocalFileList(list);
         
+        // if sharedList can be edited, enable it
         if (showEditingMode) {
-            
+            getComponent().showEditMode();
         }
     }
 
