@@ -50,7 +50,7 @@
 	</target>
 	
 	<target name="test-package" depends="compile">
-	    <do.test-package package="${package}"/>
+	    <do.test-package/>
 	</target>
 	
 	<target name="test-all" depends="compile">
@@ -333,7 +333,6 @@
 	</macrodef>
 	
 	<macrodef name="do.test-package" description="Runs all tests in a single package.">
-	    <attribute name="package"/>
 	    <attribute name="path" default="${default.code.path}"/>
 	    <attribute name="forkmode" default="once"/>
 	    <sequential>
@@ -454,7 +453,7 @@
     </macrodef>
 	
 	<macrodef name="do.run-tests-batchunit">
-		<attribute name="exclude"/>
+		<attribute name="exclude" default=""/>
 	    <attribute name="unit"/>
 	    <attribute name="haltOnFailure"     default="false"/>
 	    <attribute name="haltOnError"	    default="false"/>
