@@ -19,6 +19,9 @@ import javax.swing.JTextField;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -56,6 +59,7 @@ class LibraryNavTableEditor extends JPanel implements TableCellEditor {
         textField.setPreferredSize(new Dimension(120, 22));
         textField.setFont(font);
         textField.setForeground(fontColor);
+        textField.setDocument(new TextFieldLimit(40));
         textField.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -163,5 +167,25 @@ class LibraryNavTableEditor extends JPanel implements TableCellEditor {
             }
         }
         return true;
+    }
+    
+    /**
+	 * Sets the max limit for a shared file list name.
+	 */
+    private class TextFieldLimit extends PlainDocument {
+        private int maxLength;
+        
+        TextFieldLimit(int maxLength) {
+            this.maxLength = maxLength;
+        }
+        
+        @Override
+        public void insertString(int offset, String str, AttributeSet attr) throws BadLocationException {
+            if(str == null)
+                return;
+            if((getLength() + str.length()) < maxLength) {
+                super.insertString(offset, str, attr);
+            }
+        }
     }
 }
