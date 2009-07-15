@@ -177,6 +177,7 @@ public class LibraryPanel extends JPanel {
         libraryTable.setTransferHandler(transferHandler);
         libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
+        configureEnclosingScrollPane(libraryScrollPane);
 
         JXLayer<JComponent> layer = new JXLayer<JComponent>(libraryScrollPane, lockableUI);
         tableListPanel.add(layer, TABLE);
