@@ -398,7 +398,7 @@ class SignOnMessageLayer {
             JLabel messageLabel = new JLabel();
             messageLabel.setFont(libraryFont);
             messageLabel.setForeground(messageForeground);
-            messageLabel.setText(I18n.tr("Go to Private Shared to share some of your files"));
+            messageLabel.setText(I18n.tr("Share with friends using your Private Shared list"));
             
             // Add components to container.
             if (librarySelected) {
@@ -455,7 +455,7 @@ class SignOnMessageLayer {
             leftMessageLabel.setFont(sharingFont);
             leftMessageLabel.setForeground(messageForeground);
             leftMessageLabel.setIcon(checkedIcon);
-            leftMessageLabel.setText(I18n.tr("Share this list"));
+            leftMessageLabel.setText(I18n.tr("Share this list with friends"));
             
             rightMessageLabel = new JLabel();
             rightMessageLabel.setFont(sharingFont);
