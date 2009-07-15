@@ -281,4 +281,9 @@ public class MockDownloadItem implements DownloadItem {
     public boolean isRelocatable() {
         return true;
     }
+
+    @Override
+    public Collection<File> getCompleteFiles() {
+        return Collections.singletonList(getDownloadingFile());
+    }
 }

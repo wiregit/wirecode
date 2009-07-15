@@ -178,4 +178,9 @@ public interface DownloadItem extends PropertiableFile {
     
     /** @return true if this can have its saveLocation changed. */
     public boolean isRelocatable();
+
+    /**
+     * Returns a list of the completed download files for this DownloadItem. 
+     */
+    public Collection<File> getCompleteFiles();
 }

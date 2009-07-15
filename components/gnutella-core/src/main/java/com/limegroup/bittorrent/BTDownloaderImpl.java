@@ -149,15 +149,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     return true;
                 }
             }; 
-            if(torrent.isPrivate() || !SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-                library.addFolder(completeFile, torrentFileFilter);
-            } else {
+            library.addFolder(completeFile, torrentFileFilter);
+            if(!torrent.isPrivate() && SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 gnutellaFileCollection.addFolder(completeFile, torrentFileFilter);
             }
         } else {
-            if(torrent.isPrivate() || !SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-                library.add(completeFile);
-            } else {
+            library.add(completeFile);
+            if(!torrent.isPrivate() && SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 gnutellaFileCollection.add(completeFile);
             }
         }
@@ -695,6 +693,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
     }
 
+    @Override
     public List<File> getCompleteFiles() {
         return torrent.getCompleteFiles();
     }

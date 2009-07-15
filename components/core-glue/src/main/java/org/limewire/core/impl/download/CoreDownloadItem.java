@@ -28,6 +28,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -465,5 +466,18 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public boolean isRelocatable() {
         return downloader.isRelocatable();
+    }
+
+
+    @Override
+    public Collection<File> getCompleteFiles() {
+        List<File> files = new ArrayList<File>();
+        if(downloader instanceof BTDownloader) {
+            BTDownloader btDownloader = (BTDownloader)downloader;
+            files.addAll(btDownloader.getCompleteFiles());
+        } else {
+            files.add(downloader.getSaveFile());
+        }
+        return files;
     }
 }

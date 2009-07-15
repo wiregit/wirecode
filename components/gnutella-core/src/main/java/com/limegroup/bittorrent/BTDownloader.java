@@ -2,6 +2,7 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
@@ -29,5 +30,10 @@ public interface BTDownloader extends CoreDownloader {
      * occurred.
      */
     boolean registerTorrentWithTorrentManager();
+    
+    /**
+     * Returns a collection of files representing where the completed files will be from this downloader. 
+     */
+    public Collection<File> getCompleteFiles();
 
 }
