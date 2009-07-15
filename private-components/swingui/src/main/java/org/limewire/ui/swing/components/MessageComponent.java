@@ -48,17 +48,16 @@ public class MessageComponent extends JPanel {
     }
     
     public MessageComponent(MessageBackground background) {
-        this(18, 22, 18, 22, background);
+        this(18, 22, 22, 18, background);
     }
         
         
-    // TODO: top, left, right, bottom does not seem to map correctly
-    public MessageComponent(int topInset, int leftInset, int rightInset, int bottomInset) {
-        this(topInset, leftInset, rightInset, bottomInset, MessageBackground.GREEN);
+    public MessageComponent(int topInset, int leftInset, int bottomInset, int rightInset) {
+        this(topInset, leftInset, bottomInset, rightInset, MessageBackground.GREEN);
     }
     
 
-    public MessageComponent(int topInset, int leftInset, int rightInset, int bottomInset, MessageBackground background) {
+    public MessageComponent(int topInset, int leftInset, int bottomInset, int rightInset, MessageBackground background) {
         GuiUtils.assignResources(this);
         
         Icon arrowIcon = background == MessageBackground.GREEN ? greenArrowIcon : grayArrowIcon;
@@ -66,7 +65,7 @@ public class MessageComponent extends JPanel {
         setLayout(new MigLayout("insets 0 0 " + (arrowIcon.getIconHeight()-2) + " 0, gap 0"));
         setOpaque(false);
         
-        messageContainer = new JXPanel(new MigLayout("insets " + topInset + " " + leftInset + " " + rightInset + " " + bottomInset + ", hidemode 3"));
+        messageContainer = new JXPanel(new MigLayout("insets " + topInset + " " + leftInset + " " + bottomInset + " " + rightInset + ", hidemode 3"));
         messageContainer.setOpaque(false);
         if(background == MessageBackground.GREEN){
         messageContainer.setBackgroundPainter(new MessagePainterFactory<JXPanel>().createGreenMessagePainter());

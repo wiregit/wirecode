@@ -15,7 +15,7 @@ public class ProgramsNotAllowedPanel extends JPanel {
     
         super(new MigLayout("fill"));
         
-        MessageComponent messageComponent = new MessageComponent(12, 22, 14, 4);
+        MessageComponent messageComponent = new MessageComponent(12, 22, 10, 14);
         
         JLabel title = new JLabel(I18n.tr("Downloading programs can result in viruses"));
         

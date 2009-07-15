@@ -431,17 +431,17 @@ class SignOnMessageLayer {
     private class SharingMessagePanel extends JPanel implements Resizable {
         private MessageComponent messageComponent;
         private JButton closeButton;
-        private JLabel titleLabel;
+//        private JLabel titleLabel;
         private JLabel leftMessageLabel;
         private JLabel rightMessageLabel;
-        private JLabel moreMessageLabel;
+//        private JLabel moreMessageLabel;
 
         public SharingMessagePanel() {
             setLayout(new MigLayout("insets 0 0 0 0"));
             setOpaque(false);
             
             // Create message component.
-            messageComponent = new MessageComponent(1, 5, 18, 8, MessageBackground.GREEN);
+            messageComponent = new MessageComponent(5, 5, 14, 8, MessageBackground.GREEN);
             
             // Create message elements.
             closeButton = createCloseButton();
