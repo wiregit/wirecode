@@ -441,39 +441,39 @@ class SignOnMessageLayer {
             setOpaque(false);
             
             // Create message component.
-            messageComponent = new MessageComponent(1, 0, 18, 3, MessageBackground.GREEN);
+            messageComponent = new MessageComponent(1, 5, 18, 8, MessageBackground.GREEN);
             
             // Create message elements.
             closeButton = createCloseButton();
             
-            titleLabel = new JLabel();
-            titleLabel.setFont(sharingTitleFont);
-            titleLabel.setForeground(messageForeground);
-            titleLabel.setText(I18n.tr("Share files here."));
+//            titleLabel = new JLabel();
+//            titleLabel.setFont(sharingTitleFont);
+//            titleLabel.setForeground(messageForeground);
+//            titleLabel.setText(I18n.tr("Share files here."));
             
             leftMessageLabel = new JLabel();
             leftMessageLabel.setFont(sharingFont);
             leftMessageLabel.setForeground(messageForeground);
             leftMessageLabel.setIcon(checkedIcon);
-            leftMessageLabel.setText(I18n.tr("Check some friends."));
+            leftMessageLabel.setText(I18n.tr("Share this list"));
             
             rightMessageLabel = new JLabel();
             rightMessageLabel.setFont(sharingFont);
             rightMessageLabel.setForeground(messageForeground);
             rightMessageLabel.setIcon(addFileIcon);
-            rightMessageLabel.setText(I18n.tr("Add some files."));
+            rightMessageLabel.setText(I18n.tr("Add files to it"));
             
-            moreMessageLabel = new JLabel();
-            moreMessageLabel.setFont(sharingFont);
-            moreMessageLabel.setForeground(messageForeground);
-            moreMessageLabel.setText(I18n.tr("Want more control? Choose Create List."));
+//            moreMessageLabel = new JLabel();
+//            moreMessageLabel.setFont(sharingFont);
+//            moreMessageLabel.setForeground(messageForeground);
+//            moreMessageLabel.setText(I18n.tr("Want more control? Choose Create List."));
             
             // Add message elements to component.
             messageComponent.addComponent(closeButton, "span 2, align right, push, wrap");
-            messageComponent.addComponent(titleLabel, "gap 15 15, span 2, align left, wrap");
-            messageComponent.addComponent(leftMessageLabel , "gap 15 6, align left");
-            messageComponent.addComponent(rightMessageLabel, "gap 0 15, align left, wrap");
-            messageComponent.addComponent(moreMessageLabel , "gap 15 15, span 2, align left");
+            //messageComponent.addComponent(titleLabel, "gap 15 15, span 2, align left, wrap");
+            messageComponent.addComponent(leftMessageLabel , "gap 18 6, align left, wrap");
+            messageComponent.addComponent(rightMessageLabel, "gap 15 15, align left");
+            //messageComponent.addComponent(moreMessageLabel , "gap 15 15, span 2, align left");
             
             // Add message component to container.
             add(messageComponent, "pos 0.5al 0.5al");
