@@ -4,18 +4,23 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -27,7 +32,11 @@ import javax.swing.table.JTableHeader;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.jxlayer.JXLayer;
+import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
+import org.jdesktop.jxlayer.plaf.ext.LockableUI;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -83,11 +92,13 @@ public class LibraryPanel extends JPanel {
     @Resource private Icon plusIcon;
     @Resource private Font fileCountFont;
     @Resource private Color fileCountColor;
+    @Resource private Color tableOverlayColor;
     
     private static final String TABLE = "TABLE";
     private static final String LIST = "LIST";
     
     private final HeaderBar headerBar = new HeaderBar();
+    private final LockableUI lockableUI;
     private final LibraryTable libraryTable;
     private final LibraryNavigatorPanel libraryNavigatorPanel;
     private final LibrarySharingPanel librarySharingPanel;
@@ -134,6 +145,7 @@ public class LibraryPanel extends JPanel {
         this.transferHandler = transferHandler;
         this.libraryImagePanelProvider = libraryImagePanelProvider;
         this.fileCountListener = new FileCountListener();
+        this.lockableUI = new LockedUI();
         
         GuiUtils.assignResources(this);
         
@@ -166,7 +178,8 @@ public class LibraryPanel extends JPanel {
         libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
 
-        tableListPanel.add(libraryScrollPane, TABLE);
+        JXLayer<JComponent> layer = new JXLayer<JComponent>(libraryScrollPane, lockableUI);
+        tableListPanel.add(layer, TABLE);
         
         setupHighlighters();
         
@@ -275,6 +288,24 @@ public class LibraryPanel extends JPanel {
                 }
             }
         });
+        
+        librarySharingPanel.getComponent().addPropertyChangeListener(new PropertyChangeListener(){
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals(LibrarySharingPanel.EDIT_MODE)) {
+                    setEditSharingModeEnabled((Boolean)evt.getNewValue());
+                }
+            }
+        });
+    }
+    
+    /**
+     * When editing users, disables components.
+     */
+    private void setEditSharingModeEnabled(boolean value) {
+        lockableUI.setLocked(value);
+        
+        addFilesButton.setEnabled(!value);
     }
     
     /**
@@ -510,6 +541,50 @@ public class LibraryPanel extends JPanel {
         @Override
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
             setFileCount(textFilterList.size(), filteredList == null ? eventList.size() : filteredList.size());
+        }
+    }
+    
+    /**
+     * Creates a locked layer over a table. This layer prevents the user from
+     * interacting with the contents underneath it.
+     */
+    private class LockedUI extends LockableUI {
+        private JXPanel panel;
+        
+        public LockedUI(LayerEffect... lockedEffects) {
+            super(lockedEffects);
+            
+            panel = new JXPanel();
+            panel.setBackground(new Color(147,170,209,80));
+            panel.setVisible(false);
+        }
+        
+        @SuppressWarnings("unchecked")
+        @Override
+        public void installUI(JComponent c) {
+            super.installUI(c);
+            JXLayer<JComponent> l = (JXLayer<JComponent>) c;
+            l.getGlassPane().setLayout(new BorderLayout());
+            l.getGlassPane().add(panel, BorderLayout.CENTER);
+        }
+        
+        @SuppressWarnings("unchecked")
+        public void uninstall(JComponent c) {
+            super.uninstallUI(c);
+            JXLayer<JComponent> l = (JXLayer<JComponent>) c;
+            l.getGlassPane().setLayout(new FlowLayout());
+            l.getGlassPane().remove(panel);
+        }
+        
+        @Override
+        public void setLocked(boolean isLocked) {
+            super.setLocked(isLocked);
+            panel.setVisible(isLocked);
+        }
+        
+        @Override
+        public Cursor getLockedCursor() {
+            return Cursor.getDefaultCursor();
         }
     }
 }

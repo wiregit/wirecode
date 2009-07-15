@@ -39,6 +39,12 @@ import com.google.inject.Provider;
 @LazySingleton
 public class LibrarySharingPanel {
 
+    /**
+     * Property string for whether the sharing panel is in edit
+     * mode or not.
+     */
+    public static final String EDIT_MODE = "EDIT_MODE";
+    
     @Resource private Color backgroundColor;
     @Resource private Color borderColor;
     
@@ -121,6 +127,7 @@ public class LibrarySharingPanel {
         currentView = View.LOGIN;
         loginPanel.setLoggingIn(isLoggingIn());
         sharesChanged();
+        getComponent().firePropertyChange(EDIT_MODE, true, false);
         layout.show(component, LOGIN_VIEW);
     }
     
@@ -133,6 +140,7 @@ public class LibrarySharingPanel {
         }         
         currentView = View.EDIT_LIST;
         editablePanel.editWithSelectedIds(currentList.getFriendIds());
+        getComponent().firePropertyChange(EDIT_MODE, false, true);
         layout.show(component, EDITABLE_VIEW);
     }
     
@@ -145,6 +153,7 @@ public class LibrarySharingPanel {
         }
         currentView = View.FRIEND_LIST;
         sharesChanged();
+        getComponent().firePropertyChange(EDIT_MODE, true, false);
         layout.show(component, FRIEND_LIST_VIEW);
     }
 
