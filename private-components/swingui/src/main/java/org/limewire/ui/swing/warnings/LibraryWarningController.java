@@ -34,7 +34,7 @@ public class LibraryWarningController {
 
         int directoryCount = 0;
         for (File file : files) {
-            if (file.isDirectory()) {
+            if (file.isDirectory() && fileList.isFileAddable(file)) {
                 directoryCount++;
                 if (directoryCount > 1) {
                     // short circuit just need to know if there is more than 1
