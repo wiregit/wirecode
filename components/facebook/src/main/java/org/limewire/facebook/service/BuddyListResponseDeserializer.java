@@ -15,7 +15,7 @@ class BuddyListResponseDeserializer {
     private static final Log LOG = LogFactory.getLog(BuddyListResponseDeserializer.class);
     
     /**
-     * @return set of friend ids that are online
+     * @return set of friend ids that are online, always returns mutable set
      */
     public Set<String> parseOnlineFriendIds(String response) throws JSONException, IOException {
         //for (;;);{"error":0,"errorSummary":"","errorDescription":"No error.","payload":{"buddy_list":{"listChanged":true,"availableCount":1,"nowAvailableList":{"UID1":{"i":false}},"wasAvailableIDs":[],"userInfos":{"UID1":{"name":"Buddy 1","firstName":"Buddy","thumbSrc":"http:\/\/static.ak.fbcdn.net\/pics\/q_default.gif","status":null,"statusTime":0,"statusTimeRel":""},"UID2":{"name":"Buddi 2","firstName":"Buddi","thumbSrc":"http:\/\/static.ak.fbcdn.net\/pics\/q_default.gif","status":null,"statusTime":0,"statusTimeRel":""}},"forcedRender":true},"time":1209560380000}}  
@@ -47,8 +47,11 @@ class BuddyListResponseDeserializer {
     }
     
     private Set<String> deserialize(JSONObject buddyList) throws JSONException {
-        JSONObject nowAvailableList = buddyList.getJSONObject("nowAvailableList");
+        JSONObject nowAvailableList = buddyList.optJSONObject("nowAvailableList");
 		LOG.debugf("nowAvailableList: {0}", nowAvailableList);
+		if (nowAvailableList == null) {
+		    return new HashSet<String>();
+		}
 		@SuppressWarnings("unchecked")
 		Iterator<String> it = nowAvailableList.keys();
 		Set<String> onlineIds = new HashSet<String>();  
