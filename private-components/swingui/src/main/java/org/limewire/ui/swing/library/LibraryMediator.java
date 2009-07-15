@@ -83,9 +83,22 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
     }
     
     public void showSharedFileList(SharedFileList list) {
+        showSharedFileList(list, false);
+    }
+    
+    /**
+     * Opens the My files view and selects the given share list.  
+     * 
+     * @param showEditingMode whether to open the panel up in friends editing mode.
+     */
+    public void showSharedFileList(SharedFileList list, boolean showEditingMode) {
         NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, NAME);
         item.select();
         getComponent().selectLocalFileList(list);
+        
+        if (showEditingMode) {
+            
+        }
     }
 
     /**

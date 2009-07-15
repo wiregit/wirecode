@@ -28,6 +28,8 @@ class FriendsMenu extends MnemonicMenu {
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     private final Provider<AutoLoginService> autoLoginServiceProvider;
     
+    private final Provider<ShareListMenu> shareMenuProvider;
+    
     private final Provider<BrowseFriendsAction> browseFriendsActionProvider;
     private final Provider<StatusActions> statusActionsProvider;
     private final Provider<AddFriendAction> addFriendActionProvider;
@@ -37,6 +39,7 @@ class FriendsMenu extends MnemonicMenu {
     @Inject
     public FriendsMenu(EventBean<FriendConnectionEvent> friendConnectionEventBean,
             Provider<AutoLoginService> autoLoginServiceProvider,
+            Provider<ShareListMenu> shareMenuProvider,
             Provider<BrowseFriendsAction> browseFriendsActionProvider,
             Provider<StatusActions> statusActionsProvider,
             Provider<AddFriendAction> addFriendActionProvider,
@@ -47,6 +50,8 @@ class FriendsMenu extends MnemonicMenu {
 
         this.friendConnectionEventBean = friendConnectionEventBean;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
+        
+        this.shareMenuProvider = shareMenuProvider;
         
         this.browseFriendsActionProvider = browseFriendsActionProvider;
         this.statusActionsProvider = statusActionsProvider;
@@ -65,7 +70,7 @@ class FriendsMenu extends MnemonicMenu {
             }
             @Override
             public void menuSelected(MenuEvent e) {
-                updateSignedInStatus();
+                createMenuItems();
             }
         });
     }
@@ -83,7 +88,7 @@ class FriendsMenu extends MnemonicMenu {
                 case DISCONNECTED:
                     if (isPopupMenuVisible()) {
                         removeAll();
-                        updateSignedInStatus();
+                        createMenuItems();
                     }
                     break;
                 }
@@ -91,7 +96,7 @@ class FriendsMenu extends MnemonicMenu {
         });
     }
 
-    private void updateSignedInStatus() {
+    private void createMenuItems() {
         FriendConnection friendConnection = EventUtils.getSource(friendConnectionEventBean);
         boolean signedIn = friendConnection != null && friendConnection.isLoggedIn();
         boolean supportsAddRemoveFriend = signedIn && friendConnection != null
@@ -104,6 +109,8 @@ class FriendsMenu extends MnemonicMenu {
         setPopupMenuVisible(false);
         
         add(browseFriendsActionProvider.get()).setEnabled(signedIn);
+        add(shareMenuProvider.get());
+       
         
         if (supportsAddRemoveFriend) {
             add(new JSeparator());
