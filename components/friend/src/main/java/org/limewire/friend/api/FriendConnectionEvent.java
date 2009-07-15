@@ -23,14 +23,6 @@ public class FriendConnectionEvent extends DefaultSourceTypeEvent<FriendConnecti
             assert !source.isLoggedIn();
             assert !source.isLoggingIn();
             break;
-        case CONNECTED:
-            assert source.isLoggedIn();
-            assert !source.isLoggingIn();
-            break;
-        case CONNECTING:
-            assert source.isLoggingIn();
-            assert !source.isLoggedIn();
-            break;
         }
     }
     
