@@ -274,11 +274,19 @@ public class FacebookFriendConnection implements FriendConnection {
         loggedIn.set(false);
         loggingIn.set(false);
 
+        // clean up data structures associated with this connection
+        cancelListeners();
+        
         // over-the-network logout activities
         endChatSession(shouldCleanUpFacebookClient);
-
-        // clean up data structures associated with this connection
-        cleanUpConnection();
+        
+        // remove all friends
+        synchronized (friends) {
+            for (FacebookFriend friend : friends.values()) {
+                removeAllPresences(friend);
+            }
+            friends.clear();
+        }
 
         LOG.debug("logged out from facebook.");
     }
@@ -318,19 +326,9 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     /**
-     * Performs all necessary steps to clean up this connection's dependent objects
-     * which were created and started during login.  Examples include the chat listener
-     * thread which listens for incoming messages, and any record of available friends
+     * Cancels presence listenting thread, chat listener, thread, and other listeners
      */
-    private void cleanUpConnection() {
-        // remove all friends
-        synchronized (friends) {
-            for (FacebookFriend friend : friends.values()) {
-                removeAllPresences(friend);
-            }
-            friends.clear();
-        }
-
+    private void cancelListeners() {
         // stop and remove essential listeners/handlers
         if (chatListener != null) {
             chatListener.setDone();
@@ -880,16 +878,18 @@ public class FacebookFriendConnection implements FriendConnection {
      * Adds a friend to connection and friend manager.
      */
     void addKnownFriend(FacebookFriend friend) {
-        String friendId = friend.getId();
-        boolean added = false;
-        synchronized (friends) {
-            if (!friends.containsKey(friendId)) {
-                friends.put(friend.getId(), friend);
-                added = true;
+        if(loggedIn.get() || loggingIn.get()) {
+            String friendId = friend.getId();
+            boolean added = false;
+            synchronized (friends) {
+                if (!friends.containsKey(friendId)) {
+                    friends.put(friend.getId(), friend);
+                    added = true;
+                }
             }
-        }
-        if (added) {
-            friendManager.addKnownFriend(friend);
+            if (added) {
+                friendManager.addKnownFriend(friend);
+            }
         }
     }
 
