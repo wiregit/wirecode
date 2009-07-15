@@ -182,10 +182,23 @@ class LibrarySharingEditablePanel {
         baseEventList.clear();
     }
     
+    void refreshSelectedList() {
+        Set<String> selectedIds = new HashSet<String>();
+        for(EditableSharingData data : baseEventList) {
+            if(data.isSelected()) {
+                selectedIds.addAll(data.getIds());
+            }
+        }
+        addItemsToList(selectedIds);
+    }
+    
     void editWithSelectedIds(List<String> selectedIds) {
         filterTextField.setText("");
+        addItemsToList(new HashSet<String>(selectedIds));
+    }
+    
+    private void addItemsToList(Set<String> setOfIds) {
         baseEventList.clear();
-        Set<String> setOfIds = new HashSet<String>(selectedIds);
         for(Friend friend : knownFriends.values()) {
             baseEventList.add(new EditableSharingData(friend, setOfIds.remove(friend.getId())));
         }

@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendEvent;
 import org.limewire.friend.api.FriendConnectionEvent.Type;
 import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventBean;
@@ -31,6 +32,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 /**
  * The panel in all shared lists that contains either the login view, the list
@@ -97,7 +99,8 @@ public class LibrarySharingPanel {
         component.setLayout(layout);
     }
     
-    @Inject void register(ListenerSupport<FriendConnectionEvent> connectionEvent) {
+    @Inject void register(ListenerSupport<FriendConnectionEvent> connectionEvent,
+                          @Named("known") ListenerSupport<FriendEvent> friendSupport) {
         connectionEvent.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
@@ -112,6 +115,16 @@ public class LibrarySharingPanel {
                             showFriendListView();
                         }
                     }
+                }
+            }
+        });
+        
+        friendSupport.addListener(new EventListener<FriendEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendEvent event) {
+                if(currentView == View.EDIT_LIST) {
+                    editablePanel.refreshSelectedList();
                 }
             }
         });
