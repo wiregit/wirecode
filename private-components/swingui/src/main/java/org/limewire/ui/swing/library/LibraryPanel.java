@@ -304,7 +304,6 @@ public class LibraryPanel extends JPanel {
      */
     private void setEditSharingModeEnabled(boolean value) {
         lockableUI.setLocked(value);
-        
         addFilesButton.setEnabled(!value);
     }
     
@@ -337,6 +336,9 @@ public class LibraryPanel extends JPanel {
             librarySharingPanel.setSharedFileList((SharedFileList)navItem.getLocalFileList());
         }
         librarySharingPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.LIST);
+        // if the sharing panel isn't visible, ensure everything is enabled.
+        if(!librarySharingPanel.getComponent().isVisible())
+            setEditSharingModeEnabled(false);
     }
     
     private void createImageList() {
