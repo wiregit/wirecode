@@ -27,6 +27,7 @@ import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
@@ -3262,5 +3263,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             incompleteFileManager.removeEntry(incompleteFile);
             FileUtils.delete(incompleteFile, false);
         }
+    }
+    
+    @Override
+    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
+            throws DownloadException {
+        //overriding to track down cause of https://www.limewire.org/jira/browse/LWC-3697 remove when fixed
+        super.setSaveFile(saveDirectory, fileName, overwrite);
     }
 }
