@@ -40,6 +40,7 @@ import org.json.JSONObject;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.facebook.service.Facebook;
 import org.limewire.facebook.service.livemessage.AddressHandler;
 import org.limewire.facebook.service.livemessage.AddressHandlerFactory;
 import org.limewire.facebook.service.livemessage.AuthTokenHandler;
@@ -193,7 +194,7 @@ public class FacebookFriendConnection implements FriendConnection {
                                     FacebookFriendFactory friendFactory,
                                     ChatListenerFactory chatListenerFactory,
                                     DiscoInfoHandlerFactory discoInfoHandlerFactory,
-                                    @Named("backgroundExecutor")ScheduledListeningExecutorService executorService,
+                                    @Facebook ScheduledListeningExecutorService executorService,
                                     @ChatChannel MutableProvider<String> chatChannel,
                                     @FacebookAuthServerUrls Provider<String[]> authUrls,
                                     @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager) {
@@ -416,7 +417,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 ThreadExecutor.startThread(chatListener, "chat-listener-thread");
                 setVisible();
                 PresenceListener presenceListener = presenceListenerFactory.createPresenceListener(this);
-                presenceListenerFuture = executorService.scheduleAtFixedRate(presenceListener, 0, 60, TimeUnit.SECONDS);
+                presenceListenerFuture = executorService.scheduleWithFixedDelay(presenceListener, 0, 60, TimeUnit.SECONDS);
                 loggedIn.set(true);
                 loggingIn.set(false);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));

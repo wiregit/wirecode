@@ -1,6 +1,11 @@
 package org.limewire.facebook.service.livemessage;
 
+import org.limewire.concurrent.ScheduledListeningExecutorService;
+import org.limewire.concurrent.SimpleTimer;
+import org.limewire.facebook.service.Facebook;
+
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryProvider;
 
 public class LimeWireFacebookLiveMessageModule extends AbstractModule {
@@ -17,4 +22,7 @@ public class LimeWireFacebookLiveMessageModule extends AbstractModule {
         bind(PresenceHandlerFactory.class).toProvider(FactoryProvider.newFactory(PresenceHandlerFactory.class, PresenceHandler.class));
     }
 
+    @Provides @Facebook ScheduledListeningExecutorService provideFacebookExecutor() {
+        return new SimpleTimer(true);
+    }
 }
