@@ -63,15 +63,16 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     public static final String MISC = I18n.tr("Misc");
     public static final String ADVANCED = I18n.tr("Advanced");
     
-    private Provider<LibraryOptionPanel> libraryOptionPanel;
-    private Provider<SearchOptionPanel> searchOptionPanel;
-    private Provider<DownloadOptionPanel> downloadOptionPanel;
-    private Provider<MiscOptionPanel> miscOptionPanel;
-    private Provider<AdvancedOptionPanel> advancedOptionPanel;
+    private final Provider<LibraryOptionPanel> libraryOptionPanel;
+    private final Provider<SearchOptionPanel> searchOptionPanel;
+    private final Provider<DownloadOptionPanel> downloadOptionPanel;
+    private final Provider<MiscOptionPanel> miscOptionPanel;
+    private final Provider<AdvancedOptionPanel> advancedOptionPanel;
+    private final UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager;
     
-    private Map<String, OptionTabItem> cards = new HashMap<String,OptionTabItem>();
-    private Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
-    private List<String> list = new ArrayList<String>();
+    private final Map<String, OptionTabItem> cards = new HashMap<String,OptionTabItem>();
+    private final Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
+    private final List<String> list = new ArrayList<String>();
     private OptionTabItem selectedItem;
     
     private JPanel cardPanel;
@@ -88,7 +89,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     public OptionsDialog(Provider<LibraryOptionPanel> libraryOptionPanel, Provider<SearchOptionPanel> searchOptionPanel,
             Provider<DownloadOptionPanel> downloadOptionPanel,
             Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel,
-            AppFrame appFrame, BarPainterFactory barPainterFactory) {
+            AppFrame appFrame, BarPainterFactory barPainterFactory, UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager) {
         super(appFrame.getMainFrame(), I18n.tr("Options"), true);
 
         GuiUtils.assignResources(this); 
@@ -98,7 +99,8 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         this.downloadOptionPanel = downloadOptionPanel;
         this.miscOptionPanel = miscOptionPanel;
         this.advancedOptionPanel = advancedOptionPanel;
-
+        this.unsafeTypeOptionPanelStateManager = unsafeTypeOptionPanelStateManager;
+        
         if (!OSUtils.isMacOSX()) {
             setSize(700, 656);
             setPreferredSize(getSize());
@@ -332,6 +334,8 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
      * Recalls init options on all created panels.
      */
     public void initOptions() {
+        unsafeTypeOptionPanelStateManager.initOptions();
+        
         for(OptionPanel optionPanel : panels.values()) {
             optionPanel.initOptions();
         }

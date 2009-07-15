@@ -104,4 +104,13 @@ public class OptionPanelStateManager {
             settingListeners.put(setting, settingListener);
         }
     }
+    
+    /**
+     * Reinitializes the settings map.
+     */
+    public void initOptions() {
+        for(Setting setting : activeSettingMap.keySet()) {
+            activeSettingMap.put(setting, null);
+        }
+    }
 }

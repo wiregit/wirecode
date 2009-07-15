@@ -82,9 +82,6 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
                 settingMap.get(setting).setSelected((Boolean)UnsafeTypeOptionPanel.this.manager.getValue(setting));
             }
         });
-        
-        manager.registerSettingListener(LibrarySettings.ALLOW_PROGRAMS);
-        manager.registerSettingListener(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING);
     }
         
     @Override
