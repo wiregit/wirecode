@@ -245,6 +245,9 @@ public class FriendsButton extends LimeComboBox {
         comp.setForeground(menuForeground);
         if (newResultsAvailable) {
             comp.setBorder(BorderFactory.createEmptyBorder(0,8,0,0));
+        } 
+        else {
+            comp.setBorder(BorderFactory.createEmptyBorder(2,0,2,0));
         }
         return comp;
     }
