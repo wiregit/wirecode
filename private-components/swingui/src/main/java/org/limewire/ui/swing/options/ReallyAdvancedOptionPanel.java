@@ -66,17 +66,6 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setPreferredSize(new Dimension(150,500));
         
-        list.addListSelectionListener(new ListSelectionListener(){
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                String name = (String) list.getModel().getElementAt(list.getSelectedIndex());
-                if(!panels.containsKey(name)) {
-                    createPanel(name);
-                }
-                cardLayout.show(cardPanel, name);
-            }
-        });
-        
         cardLayout = new CardLayout();
         cardPanel = new JPanel();
         cardPanel.setOpaque(false);
@@ -90,6 +79,20 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
         add(cardPanel, "grow");
         
         list.setSelectedIndex(0);
+    }
+    
+    @Inject
+    void register() {
+        list.addListSelectionListener(new ListSelectionListener(){
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                String name = (String) list.getModel().getElementAt(list.getSelectedIndex());
+                if(!panels.containsKey(name)) {
+                    createPanel(name);
+                }
+                cardLayout.show(cardPanel, name);
+            }
+        });
     }
     
     private void createPanel(String id) {
