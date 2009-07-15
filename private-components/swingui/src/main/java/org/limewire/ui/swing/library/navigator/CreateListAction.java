@@ -15,7 +15,7 @@ import com.google.inject.Provider;
  * Creates a new PlayList with the name "Untitled", selects
  * that PlayList and then enables editing on it.
  */
-class CreateListAction extends AbstractAction {
+public class CreateListAction extends AbstractAction {
 
     private final Provider<SharedFileListManager> shareManager;
     private final Provider<LibraryNavigatorTable> navTable;
@@ -23,6 +23,8 @@ class CreateListAction extends AbstractAction {
     @Inject
     public CreateListAction(Provider<SharedFileListManager> shareManager,
             Provider<LibraryNavigatorTable> navTable) {
+        super("Create New List");
+        
         this.shareManager = shareManager;
         this.navTable = navTable;
     }
