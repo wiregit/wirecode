@@ -339,7 +339,7 @@
 	    <sequential>
 	        <do.clean-testData     />
 	        <do.tests-init         />
-			<do.run-tests-batchunit unit="@{path}/@{package}/*Test.class"
+			<do.run-tests-batchunit unit="@{path}/*Test.class"
 			    					forkmode="@{forkmode}"
 			/>
 	    </sequential>
