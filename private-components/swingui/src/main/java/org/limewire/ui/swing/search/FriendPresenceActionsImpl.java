@@ -192,7 +192,9 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
         @Override
         public void itemRemoved() {
             browseNavItemCache.remove(key);
-            allFriendsRefreshManager.clearBrowseSearch();
+            if (key == ALL_FRIENDS_KEY) {
+                allFriendsRefreshManager.clearBrowseSearch();
+            }
         }
 
         @Override
