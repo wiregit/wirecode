@@ -70,7 +70,6 @@ class SignOnMessageLayer {
     @Resource private Color messageForeground;
     @Resource private Font libraryFont;
     @Resource private Font sharingFont;
-    @Resource private Font sharingTitleFont;
     @Resource private Icon addFileIcon;
     @Resource private Icon checkedIcon;
     @Resource private Icon closeIcon;
@@ -431,10 +430,8 @@ class SignOnMessageLayer {
     private class SharingMessagePanel extends JPanel implements Resizable {
         private MessageComponent messageComponent;
         private JButton closeButton;
-//        private JLabel titleLabel;
         private JLabel leftMessageLabel;
         private JLabel rightMessageLabel;
-//        private JLabel moreMessageLabel;
 
         public SharingMessagePanel() {
             setLayout(new MigLayout("insets 0 0 0 0"));
@@ -445,11 +442,6 @@ class SignOnMessageLayer {
             
             // Create message elements.
             closeButton = createCloseButton();
-            
-//            titleLabel = new JLabel();
-//            titleLabel.setFont(sharingTitleFont);
-//            titleLabel.setForeground(messageForeground);
-//            titleLabel.setText(I18n.tr("Share files here."));
             
             leftMessageLabel = new JLabel();
             leftMessageLabel.setFont(sharingFont);
@@ -462,11 +454,6 @@ class SignOnMessageLayer {
             rightMessageLabel.setForeground(messageForeground);
             rightMessageLabel.setIcon(addFileIcon);
             rightMessageLabel.setText(I18n.tr("Add files to it"));
-            
-//            moreMessageLabel = new JLabel();
-//            moreMessageLabel.setFont(sharingFont);
-//            moreMessageLabel.setForeground(messageForeground);
-//            moreMessageLabel.setText(I18n.tr("Want more control? Choose Create List."));
             
             // Add message elements to component.
             messageComponent.addComponent(closeButton, "span 2, align right, push, wrap");
