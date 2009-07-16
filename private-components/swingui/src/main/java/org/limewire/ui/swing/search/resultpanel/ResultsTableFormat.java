@@ -1,11 +1,13 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
+import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
@@ -149,12 +151,24 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
             int size1 = o1.getSources().size();
             int size2 = o2.getSources().size();
             
-            if(size1 == size2)
+            if(size1 == size2) {
+                // Special case: if each search result comes from one friend,
+                // use the friends' names to break the tie.
+                if(size1 == 1) {
+                    Collection<Friend> friends1 = o1.getFriends();
+                    Collection<Friend> friends2 = o2.getFriends();
+                    if(friends1.size() == 1 && friends2.size() == 1) {
+                        String name1 = friends1.iterator().next().getRenderName();
+                        String name2 = friends2.iterator().next().getRenderName();
+                        return name1.compareToIgnoreCase(name2);
+                    }
+                }
                 return 0;
-            else if(size1 > size2)
+            } else if(size1 > size2) {
                 return 1;
-            else 
+            } else { 
                 return -1;
+            }
         }
     }
     
