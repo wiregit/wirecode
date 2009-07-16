@@ -9,13 +9,16 @@ import java.util.Set;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
+import org.limewire.facebook.service.settings.FacebookReportBugs;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.ExceptionUtils;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class PresenceListener implements Runnable {
     
@@ -25,9 +28,13 @@ public class PresenceListener implements Runnable {
     private final BuddyListResponseDeserializer deserializer = new BuddyListResponseDeserializer();
     private Set<String> lastOnlineFriends = new HashSet<String>();
 
+    private final Provider<Boolean> reportBugs;
+
     @Inject
-    PresenceListener(@Assisted FacebookFriendConnection connection) {
+    PresenceListener(@Assisted FacebookFriendConnection connection,
+            @FacebookReportBugs Provider<Boolean> reportBugs) {
         this.connection = connection;
+        this.reportBugs = reportBugs;
     }
     
     public void run() {
@@ -73,14 +80,15 @@ public class PresenceListener implements Runnable {
             lastOnlineFriends = onlineFriendIds;
         } catch (JSONException e) {
             LOG.debug("error deserializing JSON response", e);
-            // TODO remove after beta
-            connection.logout();
-            throw new  RuntimeException(e);
+            if (reportBugs.get()) {
+                ExceptionUtils.reportOrReturn(e);
+            }
         } catch (IOException e) {
             LOG.debug("POST error", e);
             try {
                 connection.reconnect();
             } catch (IOException e1) {
+                LOG.debug("error reconnecting", e1);
                 connection.logout();
             }
         }        

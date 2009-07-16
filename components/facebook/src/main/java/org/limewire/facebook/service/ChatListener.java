@@ -8,10 +8,12 @@ import org.json.JSONObject;
 import org.limewire.facebook.service.livemessage.LiveMessageHandler;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
 import org.limewire.facebook.service.settings.FacebookAppID;
+import org.limewire.facebook.service.settings.FacebookReportBugs;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.MessageReader;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.ExceptionUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -36,13 +38,17 @@ public class ChatListener implements Runnable {
     
     private volatile boolean done;
 
+    private final Provider<Boolean> reportBugs;
+
     @Inject
     ChatListener(@Assisted FacebookFriendConnection connection,
                  LiveMessageHandlerRegistry handlerRegistry,
-                 @FacebookAppID Provider<String> facebookAppID) {
+                 @FacebookAppID Provider<String> facebookAppID,
+                 @FacebookReportBugs Provider<Boolean> reportBugs) {
         this.connection = connection;
         this.handlerRegistry = handlerRegistry;
         this.facebookAppID = facebookAppID;
+        this.reportBugs = reportBugs;
         this.seq = -1;
         this.uid = connection.getUID();
         this.channel = connection.getChannel();
@@ -100,10 +106,10 @@ public class ChatListener implements Runnable {
                 return;
             } catch (JSONException e) {
                 LOG.debug("error parsing chat message", e);
-                if(!done) {
-                    throw new RuntimeException(e);
+                // only report exceptions if thread is not done yet
+                if (!done && reportBugs.get()) {
+                    ExceptionUtils.reportOrReturn(e);
                 }
-                return;
             }
         }
         LOG.debug("chat listener is done");

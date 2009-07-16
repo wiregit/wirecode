@@ -38,4 +38,10 @@ public class FacebookSettings extends LimeProps {
      */
     public static final StringSetting APP_ID = 
         FACTORY.createRemoteStringSetting("FACEBOOK_APP_ID", "93767281887", "Facebook.appId");
+    
+    /**
+     * Remote setting to turn on bug reporting for facebook related bugs.
+     */
+    public static final BooleanSetting REPORT_BUGS = 
+        FACTORY.createRemoteBooleanSetting("FACEBOOK_REPORT_BUGS", true, "Facebook.reportBugs");
 }
