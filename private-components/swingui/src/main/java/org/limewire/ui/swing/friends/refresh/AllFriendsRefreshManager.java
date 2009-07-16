@@ -90,7 +90,7 @@ public class AllFriendsRefreshManager implements SearchRepeater{
         
         private void fireCurrentStatusNow() {
         // we only have an insert if there is currently something in the library
-        hasInsert = hasInsert && remoteLibraryManager.getAllFriendsFileList().getSwingModel().size() > 0;
+        hasInsert = hasInsert && hasSharedFiles();
 
         if (hasInsert && hasDelete) {
             fireRefreshStatusChange(BrowseRefreshStatus.CHANGED);
@@ -137,6 +137,10 @@ public class AllFriendsRefreshManager implements SearchRepeater{
 
     public boolean needsRefresh() {
         return hasInsert || hasDelete;
+    }
+    
+    public boolean hasSharedFiles(){
+        return remoteLibraryManager.getAllFriendsFileList().getSwingModel().size() > 0;
     }
     
     

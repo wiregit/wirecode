@@ -306,10 +306,20 @@ public class FriendsButton extends LimeComboBox {
                     newResultsAvailable = true;
                     updateIcons(FriendConnectionEvent.Type.CONNECTED);
                     refreshMenu();
-                } else if (status == BrowseRefreshStatus.REFRESHED){                 
-                    // Stop any pending updates
+                } else if (status == BrowseRefreshStatus.REFRESHED){  
                     newResultsAvailable = false;
-                    updateIcons(FriendConnectionEvent.Type.CONNECTED);
+                    if (connectBean.getLastEvent().getType() == FriendConnectionEvent.Type.CONNECTED) {
+                        //Possible to refresh when offline.
+                        updateIcons(FriendConnectionEvent.Type.CONNECTED);
+                    }
+                } else if (status == BrowseRefreshStatus.REMOVED){
+                    if(!allFriendsRefreshManager.hasSharedFiles()){
+                        newResultsAvailable = false;
+                        if(connectBean.getLastEvent().getType() == FriendConnectionEvent.Type.CONNECTED){
+                            //Only update if we are still online.  Removal may have been triggered by logging off.
+                            updateIcons(FriendConnectionEvent.Type.CONNECTED);
+                        }
+                    }
                 }
             }            
         });
