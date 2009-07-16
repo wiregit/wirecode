@@ -246,7 +246,7 @@ public final class SwingUiSettings extends LimeProps {
     
     /** If the Library filters are displayed or not. */
     public static final BooleanSetting SHOW_LIBRARY_FILTERS =
-        FACTORY.createBooleanSetting("SHOW_LIBRARY_FILTERS", false);
+        FACTORY.createBooleanSetting("SHOW_LIBRARY_FILTERS", true);
 
     /** Setting for whether or not to resolve host names in Advanced Tools. */
     public static final BooleanSetting RESOLVE_CONNECTION_HOSTNAMES =
