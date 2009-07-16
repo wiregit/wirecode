@@ -14,6 +14,7 @@ import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.table.QualityComparator;
 import org.limewire.ui.swing.util.EventListTableSortFormat;
+import org.limewire.ui.swing.util.I18n;
 
 /**
  * This class is the base class for each of the TableFormat classes
@@ -146,22 +147,25 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
      * Compares the number of files being shared. 
      */
     public static class FromComparator implements Comparator<VisualSearchResult> {
+        final static String p2pName = I18n.tr("1 P2P User");
         @Override
         public int compare(VisualSearchResult o1, VisualSearchResult o2) {
             int size1 = o1.getSources().size();
             int size2 = o2.getSources().size();
             
             if(size1 == size2) {
-                // Special case: if each search result comes from one friend,
-                // use the friends' names to break the tie.
+                // Special case: if each search result comes from one source,
+                // use alphabetical order to break the tie.
                 if(size1 == 1) {
                     Collection<Friend> friends1 = o1.getFriends();
+                    String name1 = p2pName;
+                    if(friends1.size() == 1)
+                        name1 = friends1.iterator().next().getRenderName();
                     Collection<Friend> friends2 = o2.getFriends();
-                    if(friends1.size() == 1 && friends2.size() == 1) {
-                        String name1 = friends1.iterator().next().getRenderName();
-                        String name2 = friends2.iterator().next().getRenderName();
-                        return name1.compareToIgnoreCase(name2);
-                    }
+                    String name2 = p2pName;
+                    if(friends2.size() == 1)
+                        name2 = friends2.iterator().next().getRenderName();
+                    return name1.compareToIgnoreCase(name2);
                 }
                 return 0;
             } else if(size1 > size2) {
