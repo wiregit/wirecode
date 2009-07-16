@@ -15,20 +15,27 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimePopupDialog;
+import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
+import org.limewire.ui.swing.friends.refresh.BrowseRefreshStatus;
+import org.limewire.ui.swing.friends.refresh.BrowseRefreshStatusListener;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-public class BrowseStatusPanel extends JXPanel {
+/**
+ * Shows status updates for browses.  Must be disposed.
+ */
+public class BrowseStatusPanel extends JXPanel implements Disposable{
 
     private BrowseStatus status;
 
@@ -53,25 +60,46 @@ public class BrowseStatusPanel extends JXPanel {
     @Resource private Font headerFont;
 
 
-    private SearchResultsModel searchResultsModel;
+    private final SearchResultsModel searchResultsModel;
+
+    private final AllFriendsRefreshManager allFriendsRefreshManager;
     
-    public BrowseStatusPanel(SearchResultsModel searchResultsModel){
+    
+    private BrowseRefreshStatusListener browseRefreshStatusListener;
+    
+    public BrowseStatusPanel(SearchResultsModel searchResultsModel, AllFriendsRefreshManager allFriendsRefreshManager){
         GuiUtils.assignResources(this);
         this.searchResultsModel = searchResultsModel;
+        this.allFriendsRefreshManager = allFriendsRefreshManager;
         
         setOpaque(false);        
-        initializeComponents();        
+        initializeComponents();      
+        if(isAllFriendsBrowse()){
+            initializeAllFriendsListener();
+        }
         layoutComponents();
         update();
+    }
+    
+    private void initializeAllFriendsListener(){
+        browseRefreshStatusListener = new BrowseRefreshStatusListener(){
+            @Override
+            public void statusChanged(BrowseRefreshStatus status) {
+                refreshPanel.setVisible(status != BrowseRefreshStatus.REFRESHED);
+            }            
+        };
+        allFriendsRefreshManager.addBrowseRefreshStatusListener(browseRefreshStatusListener);        
     }
 
     private void initializeComponents() {        
         warningButton = new IconButton(warningIcon);
         warningButton.addActionListener(new WarningAction());
+        warningButton.setVisible(false);
         
         refreshPanel = new JXPanel();
         refreshPanel.setOpaque(false);
         refreshPanel.setBackgroundPainter(createRefreshBackgroundPainter());
+        refreshPanel.setVisible(false);
         
         updatesLabel = new JLabel(I18n.tr("There are updates!"));
         updatesLabel.setFont(font);
@@ -98,8 +126,10 @@ public class BrowseStatusPanel extends JXPanel {
     }
 
     private void update() {
-        warningButton.setVisible(status != null && status.getState() == BrowseState.PARTIAL_FAIL);
-        refreshPanel.setVisible(status != null && status.getState() == BrowseState.UPDATED);
+        if (!isAllFriendsBrowse()) {
+            warningButton.setVisible(status != null && status.getState() == BrowseState.PARTIAL_FAIL);
+            refreshPanel.setVisible(status != null && status.getState() == BrowseState.UPDATED);
+        }
     }
     
     private void showFailedBrowses(){
@@ -153,6 +183,10 @@ public class BrowseStatusPanel extends JXPanel {
                 bevelTop2, bevelRight,bevelBottom, arcWidth, arcHeight,
                 AccentType.NONE);
     }
+    
+    private boolean isAllFriendsBrowse(){
+        return searchResultsModel.getSearchType() == SearchType.ALL_FRIENDS_BROWSE;
+    }
         
     private class RefreshAction extends AbstractAction {
         public RefreshAction(){
@@ -161,7 +195,11 @@ public class BrowseStatusPanel extends JXPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            new SearchRepeater(status.getBrowseSearch(), searchResultsModel).refresh();
+            if(isAllFriendsBrowse()){
+                allFriendsRefreshManager.refresh();
+            } else {            
+                new DefaultSearchRepeater(status.getBrowseSearch(), searchResultsModel).refresh();
+            }
         }        
     }
   
@@ -172,5 +210,14 @@ public class BrowseStatusPanel extends JXPanel {
         public void actionPerformed(ActionEvent e) {
             showFailedBrowses();
         }        
+    }
+
+
+    @Override
+    public void dispose() {
+        if(browseRefreshStatusListener != null){        
+            allFriendsRefreshManager.removeBrowseRefreshStatusListener(browseRefreshStatusListener);  
+            browseRefreshStatusListener = null;
+        }
     }
 }

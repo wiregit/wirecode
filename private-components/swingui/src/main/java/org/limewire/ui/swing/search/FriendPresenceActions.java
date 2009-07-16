@@ -24,6 +24,9 @@ public interface FriendPresenceActions {
      */
     void viewLibrariesOf(Collection<FriendPresence> people);
 
-    /** Spawns the 'All Friends' tab for viewing all friend's libraries. */
-    void browseAllFriends();
+    /** Spawns the 'All Friends' tab for viewing all friend's libraries. 
+     * @param forceRefresh Refreshes the list of available files if the panel already exists in a tab 
+     * and updates are available.
+     */
+    void browseAllFriends(boolean forceRefresh);
 }

@@ -39,6 +39,7 @@ import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
+import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
@@ -141,7 +142,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             SponsoredResultsPanel sponsoredResultsPanel,
             HeaderBarDecorator headerBarDecorator,
             CategoryIconManager categoryIconManager, 
-            BrowseFailedMessagePanelFactory browseFailedMessagePanelFactory) {
+            BrowseFailedMessagePanelFactory browseFailedMessagePanelFactory,
+            AllFriendsRefreshManager allFriendsRefreshManager) {
 
         GuiUtils.assignResources(this);
         
@@ -221,7 +223,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         messagePanel.add(messageLabel);
         messagePanel.setVisible(false);
         
-        browseStatusPanel = new BrowseStatusPanel(searchResultsModel);
+        browseStatusPanel = new BrowseStatusPanel(searchResultsModel, allFriendsRefreshManager);
         
         classicSearchReminderPanel = new ClassicSearchWarningPanel();
         layoutComponents();
@@ -241,6 +243,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         classicSearchReminderPanel.dispose();
         browseFailedPanel.dispose();
         searchResultsModel.dispose();
+        browseStatusPanel.dispose();
     }
     
     /**

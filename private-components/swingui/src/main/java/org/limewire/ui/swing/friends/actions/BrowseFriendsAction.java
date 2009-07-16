@@ -23,6 +23,6 @@ public class BrowseFriendsAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {        
-        remoteHostActions.browseAllFriends();
+        remoteHostActions.browseAllFriends(true);
     }
 }

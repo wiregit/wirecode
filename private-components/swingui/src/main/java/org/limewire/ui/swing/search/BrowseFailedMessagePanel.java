@@ -129,7 +129,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     BrowseFailedMessagePanel.this.setVisible(false);
-                    new SearchRepeater(browseSearch, searchResultsModel).refresh();
+                    new DefaultSearchRepeater(browseSearch, searchResultsModel).refresh();
                 }
             });
             messageComponent.decorateHeaderLink(refresh);

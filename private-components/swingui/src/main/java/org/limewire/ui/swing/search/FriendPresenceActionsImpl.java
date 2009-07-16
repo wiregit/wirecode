@@ -13,6 +13,7 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
+import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
@@ -36,18 +37,21 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
 
     private final BrowsePanelFactory browsePanelFactory;
     
-    private Map<String,SearchNavItem> browseNavItemCache = new HashMap<String, SearchNavItem>();
+    private final Map<String,SearchNavItem> browseNavItemCache = new HashMap<String, SearchNavItem>();
+    private final AllFriendsRefreshManager allFriendsRefreshManager;
+    
     private static final String ALL_FRIENDS_KEY = "ALL_FRIENDS";
 
 
     @Inject
     public FriendPresenceActionsImpl(ChatFrame chatFrame,  
             BrowsePanelFactory browsePanelFactory, Provider<SearchNavigator> searchNavigator,
-            Navigator navigator, Provider<BrowseSearchFactory> browseSearchFactory) {
+            Navigator navigator, Provider<BrowseSearchFactory> browseSearchFactory, AllFriendsRefreshManager allFriendsRefreshManager) {
         this.chatFrame = chatFrame;
         this.browsePanelFactory = browsePanelFactory;
         this.searchNavigator = searchNavigator;
         this.browseSearchFactory = browseSearchFactory;
+        this.allFriendsRefreshManager = allFriendsRefreshManager;
     }
  
 
@@ -95,8 +99,11 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
     }
     
     @Override
-    public void browseAllFriends() {
+    public void browseAllFriends(boolean forceRefresh) {
         if(navigateIfTabExists(ALL_FRIENDS_KEY)){
+            if (forceRefresh) {
+                allFriendsRefreshManager.refresh();
+            }
             return;
         }
         
@@ -156,6 +163,10 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
             item.addNavItemListener(new ItemRemovalListener(key));
         }
         
+        if(key == ALL_FRIENDS_KEY){
+            allFriendsRefreshManager.registerBrowseSearch(search, searchPanel.getModel());
+        }
+        
     }
     
     /** 
@@ -181,6 +192,7 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
         @Override
         public void itemRemoved() {
             browseNavItemCache.remove(key);
+            allFriendsRefreshManager.clearBrowseSearch();
         }
 
         @Override

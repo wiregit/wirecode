@@ -27,6 +27,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.Disposable;
@@ -35,6 +36,7 @@ import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -54,7 +56,7 @@ import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
-import org.limewire.ui.swing.search.SearchRepeater;
+import org.limewire.ui.swing.search.DefaultSearchRepeater;
 import org.limewire.ui.swing.search.SearchResultMediator;
 import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
@@ -86,6 +88,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     private final String repeatSearchTitle = I18n.tr("Repeat Search");
     private final String refreshBrowseTitle = I18n.tr("Refresh");
+
+    private final AllFriendsRefreshManager allFriendsRefreshManager;
         
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -99,7 +103,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final LibraryMediator myLibraryMediator,
                     KeywordAssistedSearchBuilder keywordAssistedSearchBuilder,
                     Provider<AdvancedSearchPanel> advancedSearchPanel,
-                    Provider<FriendsButton> friendsButtonProvider) {        
+                    Provider<FriendsButton> friendsButtonProvider,
+                    AllFriendsRefreshManager allFriendsRefreshManager) {        
         GuiUtils.assignResources(this);
         this.searchHandler = searchHandler;
         this.searchBar = searchBar;
@@ -108,6 +113,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
         this.advancedSearchPanel = advancedSearchPanel;
         this.homeMediator = homeMediator;
+        this.allFriendsRefreshManager = allFriendsRefreshManager;
         
         setName("WireframeTop");
         
@@ -564,7 +570,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     /**
      * Clears the current search results and repeats the search
      */
-    private static class RepeatSearchAction extends SearchListenerAction {
+    private class RepeatSearchAction extends SearchListenerAction {
         private SearchResultsModel model;
 
         RepeatSearchAction(String title, Search search, SearchResultsModel model) {
@@ -575,7 +581,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            new SearchRepeater(search, model).refresh();
+            if(model.getSearchType() == SearchType.ALL_FRIENDS_BROWSE){
+                allFriendsRefreshManager.refresh();
+            } else {            
+                new DefaultSearchRepeater(search, model).refresh();
+            }
         }
         
         @Override

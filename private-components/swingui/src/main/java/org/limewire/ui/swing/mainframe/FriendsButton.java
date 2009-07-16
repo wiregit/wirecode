@@ -11,8 +11,6 @@ import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
@@ -26,8 +24,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.BusyPainter;
-import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
@@ -42,13 +38,13 @@ import org.limewire.ui.swing.friends.actions.FriendServiceItem;
 import org.limewire.ui.swing.friends.actions.LoginAction;
 import org.limewire.ui.swing.friends.actions.LogoutAction;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
+import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
+import org.limewire.ui.swing.friends.refresh.BrowseRefreshStatus;
+import org.limewire.ui.swing.friends.refresh.BrowseRefreshStatusListener;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -88,6 +84,7 @@ public class FriendsButton extends LimeComboBox {
     private final Provider<LogoutAction> logoutActionProvider;
     private final AutoLoginService autoLoginService;
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
+    private final AllFriendsRefreshManager allFriendsRefreshManager;
     
     @Inject
     public FriendsButton(ComboBoxDecorator comboBoxDecorator,
@@ -96,7 +93,8 @@ public class FriendsButton extends LimeComboBox {
             Provider<LoginAction> loginActionProvider,
             Provider<LogoutAction> logoutActionProvider,
             AutoLoginService autoLoginService,
-            EventBean<FriendConnectionEvent> friendConnectionEventBean) {
+            EventBean<FriendConnectionEvent> friendConnectionEventBean,
+            AllFriendsRefreshManager allFriendsRefreshManager) {
         
         this.serviceItemProvider = serviceItemProvider;
         this.browseFriendsActionProvider = browseFriendsActionProvider;
@@ -104,6 +102,7 @@ public class FriendsButton extends LimeComboBox {
         this.logoutActionProvider = logoutActionProvider;
         this.autoLoginService = autoLoginService;
         this.friendConnectionEventBean = friendConnectionEventBean;
+        this.allFriendsRefreshManager = allFriendsRefreshManager;
         
         GuiUtils.assignResources(this);
         
@@ -211,8 +210,7 @@ public class FriendsButton extends LimeComboBox {
         JMenuItem browseFriendMenuItem; 
             
         if (signedIn) {    
-            browseFriendMenuItem = new JMenuItem(
-                new AvalibilityActionWrapper(browseFriendsActionProvider.get()));
+            browseFriendMenuItem = new JMenuItem(browseFriendsActionProvider.get());
         }
         else {
             browseFriendMenuItem = new JMenuItem(BrowseFriendsAction.DISPLAY_TEXT);
@@ -289,7 +287,7 @@ public class FriendsButton extends LimeComboBox {
     
     
     @Inject
-    void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport, RemoteLibraryManager remoteLibraryManager) {
+    void register(final EventBean<FriendConnectionEvent> connectBean, ListenerSupport<FriendConnectionEvent> connectionSupport) {
         
         setIconFromEvent(connectBean.getLastEvent());
         
@@ -302,19 +300,21 @@ public class FriendsButton extends LimeComboBox {
                 refreshMenu();
             }
         });
-        
+
         //change to new files icon when inserts are detected
-        remoteLibraryManager.getAllFriendsFileList().getSwingModel().addListEventListener(new ListEventListener<SearchResult>() {
-            public void listChanged(ListEvent<SearchResult> listChanges) {
-                
-                while(listChanges.next()) {
-                    if(listChanges.getType() == ListEvent.INSERT) {
-                        avalibilityUpdateScheduler.start();
-                        break;//breaking only need to run once.
-                    }
+        allFriendsRefreshManager.addBrowseRefreshStatusListener(new BrowseRefreshStatusListener(){
+            @Override
+            public void statusChanged(BrowseRefreshStatus status) {
+                if (status == BrowseRefreshStatus.ADDED || status == BrowseRefreshStatus.CHANGED){
+                    avalibilityUpdateScheduler.start();
+                } else if (status == BrowseRefreshStatus.REFRESHED){                 
+                    // Stop any pending updates
+                    avalibilityUpdateScheduler.stop();
+                    newResultsAvailable = false;
+                    updateIcons(FriendConnectionEvent.Type.CONNECTED);
                 }
-            }; 
-         });
+            }            
+        });
     }
     
     // animation code ripped from JXBusyLabel
@@ -367,37 +367,6 @@ public class FriendsButton extends LimeComboBox {
             
             setRepeats(false);
         }   
-    }
-    
-    /**
-     * Action wrapper used to clear the friend status before a specfic action
-     */
-    private class AvalibilityActionWrapper extends AbstractAction {
-       
-       private final Action wrappedAction;
-       
-       public AvalibilityActionWrapper(Action actionToWrap) {
-           wrappedAction = actionToWrap;
-       }
-        
-       @Override
-       public void actionPerformed(ActionEvent e) {
-           // Stop any pending updates
-           avalibilityUpdateScheduler.stop();
-           
-           newResultsAvailable = false;
-           updateIcons(FriendConnectionEvent.Type.CONNECTED);
-           wrappedAction.actionPerformed(e);
-       }
-       
-       @Override
-       public Object getValue(String key) {
-           return wrappedAction.getValue(key);
-       }
-       
-       @Override
-       public void putValue(String key, Object value) {
-           throw new UnsupportedOperationException("Can't modify an action wrapper");
-       }
-    }
+    }    
+
 }
