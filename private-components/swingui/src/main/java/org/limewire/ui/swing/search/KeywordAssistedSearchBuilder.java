@@ -166,15 +166,17 @@ public class KeywordAssistedSearchBuilder {
             }
            
             // Make sure the last key corresponds to a valid key/value pair
-            //  and if not merge it with the value of the second last key
+            //  and if not merge it with the value of the second last key            
             KeyPacket currentPacket = foundKeys.get(foundKeys.size()-1);
             if (currentPacket.getEndIndex() != query.length()) {
                 attemptToParseValue(query, map, currentPacket, query.length());
             } 
             else {
-                KeyPacket secondLastPacket = foundKeys.get(foundKeys.size()-2);
-                map.remove(secondLastPacket);
-                attemptToParseValue(query, map, secondLastPacket, query.length());
+                if(foundKeys.size() >= 2) {
+                    KeyPacket secondLastPacket = foundKeys.get(foundKeys.size()-2);
+                    map.remove(secondLastPacket);
+                    attemptToParseValue(query, map, secondLastPacket, query.length());
+                }
             }
             
             // If no values were successfully parsed then do not attempt to create an
