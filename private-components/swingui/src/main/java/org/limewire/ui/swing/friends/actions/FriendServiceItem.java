@@ -44,8 +44,6 @@ public class FriendServiceItem extends JLabel {
                 insets = 18;
             }
             
-            setBounds(30, 0, 120, 22);
-            
             setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0,0,1,0, separatorForeground), 
                     BorderFactory.createEmptyBorder(0,insets,0,0)));
             setIconTextGap(4);
