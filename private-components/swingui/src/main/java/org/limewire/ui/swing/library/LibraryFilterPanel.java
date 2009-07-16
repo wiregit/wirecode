@@ -204,7 +204,7 @@ public class LibraryFilterPanel {
             setRoundWidth(10);
             setRounded(true);
             setPaintStretched(true);
-            setInsets(new Insets(2,0,0,0));
+            setInsets(new Insets(2,0,1,0));
                     
             setAntialiasing(true);
             setCacheable(true);
