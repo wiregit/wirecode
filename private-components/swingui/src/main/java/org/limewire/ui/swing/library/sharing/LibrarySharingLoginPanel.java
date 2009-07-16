@@ -61,7 +61,7 @@ class LibrarySharingLoginPanel {
                 }
             }
         });
-        component.add(htmlLabel);
+        component.add(htmlLabel, "width 94%");
     }
     
     public JComponent getComponent() {
