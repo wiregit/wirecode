@@ -172,7 +172,9 @@ public class KeywordAssistedSearchBuilder {
                 attemptToParseValue(query, map, currentPacket, query.length());
             } 
             else {
-                if(foundKeys.size() >= 2) {
+                if(foundKeys.size() < 2) {
+                    return null;
+                } else {
                     KeyPacket secondLastPacket = foundKeys.get(foundKeys.size()-2);
                     map.remove(secondLastPacket);
                     attemptToParseValue(query, map, secondLastPacket, query.length());
