@@ -135,7 +135,7 @@ abstract class AdvancedPanel extends JPanel {
         Map<FilePropertyKey, String> searchData = new EnumMap<FilePropertyKey, String>(FilePropertyKey.class);
         for(Map.Entry<FilePropertyKey, JComponent> entry : componentMap.entrySet()) {
             String value = getData(entry.getValue());
-            if(value != null && !value.equals("")) {
+            if(value != null && !value.trim().equals("")) {
                 searchData.put(entry.getKey(), value);
             }
         }
