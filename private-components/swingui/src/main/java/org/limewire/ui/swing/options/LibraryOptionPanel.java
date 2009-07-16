@@ -318,10 +318,10 @@ public class LibraryOptionPanel extends OptionPanel {
         private void updateUnsafeMessage() {
             if (((Boolean)unsafeTypeOptionPanelStateManagerProvider.get().getValue(LibrarySettings.ALLOW_PROGRAMS)).booleanValue()
                     || ((Boolean)unsafeTypeOptionPanelStateManagerProvider.get().getValue(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING)).booleanValue()) {
-                unsafeMessageLabel.setText("You have enabled some unsafe file sharing options.");
+                unsafeMessageLabel.setText(I18n.tr("You have enabled some unsafe file sharing options."));
             }
             else {
-                unsafeMessageLabel.setText("LimeWire is preventing you from unsafe searching and sharing.");
+                unsafeMessageLabel.setText(I18n.tr("LimeWire is preventing you from unsafe searching and sharing."));
             }
         }
         
