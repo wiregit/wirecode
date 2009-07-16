@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.navigator;
 
 import java.awt.event.ActionEvent;
 
+import org.limewire.core.api.library.SharedFileList;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.I18n;
 
@@ -10,18 +11,18 @@ import com.google.inject.Provider;
 
 class RenameAction extends AbstractAction {
 
-    private final Provider<LibraryNavigatorTable> libraryNavigatorTable;
+    private final Provider<LibraryNavigatorPanel> libraryNavigatorPanel;
     
     @Inject
-    public RenameAction(Provider<LibraryNavigatorTable> libraryNavigatorTable) {
+    public RenameAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel) {
         super(I18n.tr("Rename"));
 
-        this.libraryNavigatorTable = libraryNavigatorTable;
+        this.libraryNavigatorPanel = libraryNavigatorPanel;
     }
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        libraryNavigatorTable.get().setEditable(true);
-        libraryNavigatorTable.get().editCellAt(libraryNavigatorTable.get().getSelectedRow(), 0);
+        SharedFileList sharedFileList = (SharedFileList)libraryNavigatorPanel.get().getSelectedNavItem().getLocalFileList();
+        libraryNavigatorPanel.get().editSharedListName(sharedFileList);
     }
 }
