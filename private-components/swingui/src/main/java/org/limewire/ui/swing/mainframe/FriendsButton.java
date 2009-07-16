@@ -75,7 +75,6 @@ public class FriendsButton extends LimeComboBox {
     private final BusyPainter busyPainter;
     
     private Timer busy;
-    private final Timer avalibilityUpdateScheduler;
     private final JPopupMenu menu;
     
     private final Provider<FriendServiceItem> serviceItemProvider;
@@ -104,9 +103,7 @@ public class FriendsButton extends LimeComboBox {
         this.friendConnectionEventBean = friendConnectionEventBean;
         this.allFriendsRefreshManager = allFriendsRefreshManager;
         
-        GuiUtils.assignResources(this);
-        
-        avalibilityUpdateScheduler = new AvalibilityUpdateScheduler();        
+        GuiUtils.assignResources(this);                
         
         comboBoxDecorator.decorateIconComboBox(this);
         setToolTipText(I18n.tr("Friends"));
@@ -306,10 +303,11 @@ public class FriendsButton extends LimeComboBox {
             @Override
             public void statusChanged(BrowseRefreshStatus status) {
                 if (status == BrowseRefreshStatus.ADDED || status == BrowseRefreshStatus.CHANGED){
-                    avalibilityUpdateScheduler.start();
+                    newResultsAvailable = true;
+                    updateIcons(FriendConnectionEvent.Type.CONNECTED);
+                    refreshMenu();
                 } else if (status == BrowseRefreshStatus.REFRESHED){                 
                     // Stop any pending updates
-                    avalibilityUpdateScheduler.stop();
                     newResultsAvailable = false;
                     updateIcons(FriendConnectionEvent.Type.CONNECTED);
                 }
@@ -349,24 +347,5 @@ public class FriendsButton extends LimeComboBox {
             menu.setVisible(true);
         }
     }
-
-    /**
-     * Used to collapse repeat update events and make the button a little more stable
-     */
-    private class AvalibilityUpdateScheduler extends Timer {
-
-        public AvalibilityUpdateScheduler() {
-            super(1000, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    newResultsAvailable = true;
-                    updateIcons(FriendConnectionEvent.Type.CONNECTED);
-                    refreshMenu();
-                }
-            });
-            
-            setRepeats(false);
-        }   
-    }    
 
 }
