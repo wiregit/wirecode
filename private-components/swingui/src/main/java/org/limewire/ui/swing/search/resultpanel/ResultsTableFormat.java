@@ -14,7 +14,6 @@ import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.table.QualityComparator;
 import org.limewire.ui.swing.util.EventListTableSortFormat;
-import org.limewire.ui.swing.util.I18n;
 
 /**
  * This class is the base class for each of the TableFormat classes
@@ -147,7 +146,6 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
      * Compares the number of files being shared. 
      */
     public static class FromComparator implements Comparator<VisualSearchResult> {
-        final static String p2pName = I18n.tr("1 P2P User");
         @Override
         public int compare(VisualSearchResult o1, VisualSearchResult o2) {
             int size1 = o1.getSources().size();
@@ -158,13 +156,17 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
                 // use alphabetical order to break the tie.
                 if(size1 == 1) {
                     Collection<Friend> friends1 = o1.getFriends();
-                    String name1 = p2pName;
+                    String name1 = null;
                     if(friends1.size() == 1)
                         name1 = friends1.iterator().next().getRenderName();
+                    else
+                        return 1; // Keep P2P results together 
                     Collection<Friend> friends2 = o2.getFriends();
-                    String name2 = p2pName;
+                    String name2 = null;
                     if(friends2.size() == 1)
                         name2 = friends2.iterator().next().getRenderName();
+                    else
+                        return -1; // Keep P2P results together
                     return name1.compareToIgnoreCase(name2);
                 }
                 return 0;
