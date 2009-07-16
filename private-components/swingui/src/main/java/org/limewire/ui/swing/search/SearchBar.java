@@ -111,7 +111,7 @@ public class SearchBar extends JXPanel {
         comboBox.setName("SearchBar.comboBox");
         addAdvancedSearch(comboBox);
                 
-        searchField = new PromptTextField(I18n.tr("Search"));
+        searchField = new PromptTextField(I18n.tr("Search..."));
         textFieldDecorator.decoratePromptField(searchField, AccentType.BUBBLE, searchBorder);
         searchField.setName("SearchBar.searchField");
         searchField.setDocument(new SearchFieldDocument());

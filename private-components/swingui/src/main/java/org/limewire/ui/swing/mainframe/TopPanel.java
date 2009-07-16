@@ -64,6 +64,7 @@ import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.StringUtils;
 import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
@@ -183,7 +184,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
             @Override public void categoryAdded(NavCategory category) {}
             @Override public void itemAdded(NavCategory category, NavItem navItem) {}
             @Override public void itemRemoved(NavCategory category, NavItem navItem) {}
-            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {}
+            
+            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {
+                if(category != NavCategory.SEARCH_RESULTS) {
+                    TopPanel.this.searchBar.setText("");
+                }
+            }
       });
     };
     
@@ -206,30 +212,24 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @Override
     public SearchNavItem addAdvancedSearch() {
         String title = I18n.tr("Advanced Search");
-        final AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
+        AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
         advancedPanel.addSearchListener(new UiSearchListener() {
             @Override
             public void searchTriggered(SearchInfo searchInfo) {
                 searchHandler.doSearch(searchInfo);
             }
         });
-        final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(advancedPanel));
-        final SearchAction action = new SearchAction(item);
+        NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(advancedPanel));
+        SearchAction action = new SearchAction(item);
         action.putValue(Action.LONG_DESCRIPTION, action.getValue(Action.NAME));
         
-        final Action moreTextAction = new NoOpAction();
-        final TabActionMap actionMap = new TabActionMap(
-                action, action, moreTextAction, new ArrayList<Action>());
-            
-            searchList.addTabActionMapAt(actionMap, 0);
-            
-            item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, item, advancedPanel) {
-                @Override
-                protected SearchCategory getCategory() {
-                    return SearchCategory.ALL;
-                }
-            });
-            
+        Action moreTextAction = new NoOpAction();
+        TabActionMap actionMap = new TabActionMap(action, action, moreTextAction, new ArrayList<Action>());
+        
+        searchList.addTabActionMapAt(actionMap, 0);
+        
+        item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, advancedPanel, "", SearchCategory.ALL));
+        
         final SearchNavItem searchNavItem =  new SearchNavItemImpl(item, action, true);
         
         advancedPanel.addSearchListener(new UiSearchListener() {
@@ -244,25 +244,22 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, 
             List<Action> contextActions, Icon icon, boolean stopSpinnerAfter50Results) {
-        final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
-        final SearchAction action = new SearchAction(item);
+        NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
+        SearchAction action = new SearchAction(item);
         action.putValue(Action.LARGE_ICON_KEY, icon);
         search.addSearchListener(action);
 
-        final Action moreTextAction = new NoOpAction();
+        Action moreTextAction = new NoOpAction();
         action.putValue(Action.LONG_DESCRIPTION, action.getValue(Action.NAME));      
 
-        final TabActionMap actionMap = new TabActionMap(
-            action, action, moreTextAction, contextActions);
-       
+        TabActionMap actionMap = new TabActionMap(action, action, moreTextAction, contextActions);       
         searchList.addTabActionMapAt(actionMap, 0);
         
-        item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, item, (Disposable)searchPanel) {
-           @Override
-           protected SearchCategory getCategory() {
-                return search.getCategory();
-            } 
-        });
+        String searchText = "";
+        if(model.getSearchType() == SearchType.KEYWORD) {
+            searchText = title;
+        }
+        item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, (Disposable)searchPanel, searchText, search.getCategory()));
         
         return new SearchNavItemImpl(item, action, stopSpinnerAfter50Results);
     }
@@ -290,21 +287,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
      * removes the panel from the search list. and updates the search bar text and category when a 
      * new search tab is selected. 
      */
-    private abstract class SearchTabNavItemListener implements NavItemListener {
+    private class SearchTabNavItemListener implements NavItemListener {
         private final SearchAction action;
-
         private final TabActionMap actionMap;
-
-        private final NavItem item;
-
+        private final String searchText;
         private final Disposable panel;
+        private final SearchCategory category;
 
-        private SearchTabNavItemListener(SearchAction action, TabActionMap actionMap, NavItem item,
-                Disposable panel) {
+        private SearchTabNavItemListener(SearchAction action, TabActionMap actionMap, Disposable panel, String searchText, SearchCategory category) {
             this.action = action;
             this.actionMap = actionMap;
-            this.item = item;
+            this.searchText = searchText;
             this.panel = panel;
+            this.category = category;
         }
 
         @Override
@@ -318,21 +313,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
         @Override
         public void itemSelected(boolean selected) {
-            searchBar.setText(item.getId());
-            searchBar.setCategory(getCategory());
+            searchBar.setText(searchText);
+            searchBar.setCategory(category);
             action.putValue(Action.SELECTED_KEY, selected);
         }
-        /**
-         * Returns the category for this search tab. 
-         */
-        abstract protected SearchCategory getCategory();
     }
 
     private final class SearchNavItemImpl implements SearchNavItem {
         private final NavItem item;
-
         private final SearchAction action;
-
         private final boolean stopSpinnerAfter50Results;
 
         private SearchNavItemImpl(NavItem item, SearchAction action, boolean stopSpinnerAfter50Results) {
@@ -461,7 +450,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand().equals(TabActionMap.SELECT_COMMAND)) {
                 item.select();
-                searchBar.requestSearchFocus();
+                if(!StringUtils.isEmpty(searchBar.getSearchText())) {
+                        searchBar.requestSearchFocus();
+                }
             } else if (e.getActionCommand().equals(TabActionMap.REMOVE_COMMAND)) {
                 item.remove();
             }
