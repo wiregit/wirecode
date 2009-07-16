@@ -41,20 +41,20 @@ class LibTorrentWrapper {
     void initialize(TorrentSettings torrentSettings) {
         try {
             if (OSUtils.isWindows()) {
-                loadLibrary("libeay32");
-                loadLibrary("ssleay32");
-                loadLibrary("boost_date_time-vc90-mt-1_39");
-                loadLibrary("boost_system-vc90-mt-1_39");
-                loadLibrary("boost_filesystem-vc90-mt-1_39");
-                loadLibrary("boost_thread-vc90-mt-1_39");
-                loadLibrary("torrent");
+                System.loadLibrary("libeay32");
+                System.loadLibrary("ssleay32");
+                System.loadLibrary("boost_date_time-vc90-mt-1_39");
+                System.loadLibrary("boost_system-vc90-mt-1_39");
+                System.loadLibrary("boost_filesystem-vc90-mt-1_39");
+                System.loadLibrary("boost_thread-vc90-mt-1_39");
+                System.loadLibrary("torrent");
             } else if (OSUtils.isLinux()) {
                 // everything compiled into libtorrent-wrapper.so
             } else if (OSUtils.isMacOSX()) {
                 // everything compiled into libtorrent-wrapper.dylib
             }
 
-            this.libTorrent = (LibTorrent) loadNativeLibrary("torrent-wrapper", LibTorrent.class);
+            this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
 
             init();
             loaded.set(true);
@@ -63,42 +63,6 @@ class LibTorrentWrapper {
                 ExceptionUtils.reportOrReturn(e);
             }
             LOG.error("Failure loading the libtorrent libraries.", e);
-        }
-    }
-    
-    private String absoluteLibraryName(String name) {
-        String workingDir = System.getProperty("user.dir");
-        if(workingDir == null)
-            return null;
-        if(OSUtils.isWindows())
-            return workingDir + "\\lib\\native\\windows\\" + name + ".dll";
-        else if(OSUtils.isMacOSX())
-            return workingDir + "/lib/native/osx/lib" + name + ".dylib";
-        else if(OSUtils.isLinux())
-            return workingDir + "/lib/native/linux/lib" + name + ".so";
-        else
-            return null;
-    }
-    
-    private void loadLibrary(String name) {
-        try {
-            System.loadLibrary(name);
-        } catch(UnsatisfiedLinkError e) {
-            name = absoluteLibraryName(name);
-            if(name == null)
-                throw e;
-            System.load(name);
-        }
-    }
-    
-    private Object loadNativeLibrary(String name, Class clazz) {
-        try {
-            return Native.loadLibrary(name, clazz);
-        } catch(UnsatisfiedLinkError e) {
-            name = absoluteLibraryName(name);
-            if(name == null)
-                throw e;
-            return Native.loadLibrary(name, clazz);
         }
     }
 
