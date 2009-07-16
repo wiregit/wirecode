@@ -309,7 +309,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
                }
             } 
         });
-        countDownLatch.await(20, TimeUnit.SECONDS);
+        countDownLatch.await(100, TimeUnit.SECONDS);
         assertEquals(DownloadState.COMPLETE, downloader.getState());
     }
 
