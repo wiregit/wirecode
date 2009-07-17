@@ -89,6 +89,9 @@ class FriendsMenu extends MnemonicMenu {
                     if (isPopupMenuVisible()) {
                         removeAll();
                         createMenuItems();
+                        
+                        // needed so that the menu does not stay squished after we add in all
+                        // the new items.
                         setPopupMenuVisible(false);
                         setPopupMenuVisible(true);
                     }
@@ -130,8 +133,5 @@ class FriendsMenu extends MnemonicMenu {
         } else {
             add(logoutActionProvider.get());
         }
-        
-        // needed so that the menu does not stay squished after we add in all
-        // the new items.
     }
 }
