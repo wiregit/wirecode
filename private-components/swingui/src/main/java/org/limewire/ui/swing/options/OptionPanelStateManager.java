@@ -108,9 +108,7 @@ public class OptionPanelStateManager {
     /**
      * Reinitializes the settings map.
      */
-    public void initOptions() {
-        for(Setting setting : activeSettingMap.keySet()) {
-            activeSettingMap.put(setting, null);
-        }
+    public void resetState() {
+        activeSettingMap.clear();
     }
 }
