@@ -115,6 +115,11 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     /** Comparator that searches through the list of results & finds them based on URN. */
     private final UrnResultFinder resultFinder = new UrnResultFinder();
+    
+    //TODO Using this to fix a case where events are coming in for items no longer in the list after a clear.
+    //We should remove this after the release and fix the root cause, that DownloadListeners for visual search results 
+    //are not being removed from the downloaders after search tabs are removed or refreshed. 
+    private boolean cleared = false;
 
     /**
      * Constructs a BasicSearchResultsModel with the specified search details,
@@ -355,11 +360,19 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         // Scan through the list & find the item.
         URN urn = vsr.getUrn();
         int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
-        assert idx >= 0;
-        VisualSearchResult existing = groupedUrnResults.set(idx, vsr);
-        assert existing == vsr;
-        for(VisualSearchResultStatusListener listener : changeListeners) {
-            listener.resultChanged(vsr, propertyName, oldValue, newValue);
+        //TODO clean up, see comment about cleared variable, and why it should be removed.
+        assert cleared || idx >= 0;
+
+        if(idx >=0) {
+        
+            VisualSearchResult existing = groupedUrnResults.get(idx);
+            VisualSearchResult replaced = groupedUrnResults.set(idx, existing);
+            assert cleared || replaced == vsr;
+            if(existing == vsr) {
+                for(VisualSearchResultStatusListener listener : changeListeners) {
+                    listener.resultChanged(vsr, propertyName, oldValue, newValue);
+                }
+            }
         }
     }
     
@@ -611,6 +624,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
+                        cleared = true;
                         groupedUrnResults.clear();
                         for(VisualSearchResultStatusListener listener : changeListeners) {
                             listener.resultsCleared();
