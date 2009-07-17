@@ -251,8 +251,7 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public String getPropertyString(FilePropertyKey filePropertyKey) {
-        // TODO Auto-generated method stub
-        return null;
+        return title;
     }
 
     @Override
