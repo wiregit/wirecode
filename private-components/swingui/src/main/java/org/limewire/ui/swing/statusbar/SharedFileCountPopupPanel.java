@@ -160,7 +160,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private void initContent() {
         
         frame = new JXPanel(new BorderLayout());
-        frame.setPreferredSize(new Dimension(220, 160));
+        frame.setPreferredSize(new Dimension(225, 160));
         
         JPanel topBarPanel = new PopupHeaderBar(I18n.tr("Lists I'm Sharing"), closeAction);
             
@@ -221,7 +221,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                             return null;
                         }
                         else {
-                            return I18n.trn("{0} file", "{0} files", baseObject.size());
+                            return I18n.trn("{0} file", "{0} files", 10000);
                         }
                     }
         }));
