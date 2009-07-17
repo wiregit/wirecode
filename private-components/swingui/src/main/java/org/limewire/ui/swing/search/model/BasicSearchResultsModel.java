@@ -368,7 +368,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             VisualSearchResult existing = groupedUrnResults.get(idx);
             VisualSearchResult replaced = groupedUrnResults.set(idx, existing);
             assert cleared || replaced == vsr;
-            if(existing == vsr) {
+            if(replaced == vsr) {
                 for(VisualSearchResultStatusListener listener : changeListeners) {
                     listener.resultChanged(vsr, propertyName, oldValue, newValue);
                 }
