@@ -43,7 +43,8 @@ public class OptionPanelStateManager {
     }
     
     public void setValue(Setting setting, Object value) {
-        if (!value.equals(activeSettingMap.get(setting))) {
+        Object savedValue = activeSettingMap.get(setting); 
+        if (savedValue == null || !savedValue.equals(value)) {
             activeSettingMap.put(setting, value);
             fireChanges(setting);
         }
@@ -52,13 +53,17 @@ public class OptionPanelStateManager {
     @SuppressWarnings("unchecked")
     public void saveSettings() {
         for ( Setting key : activeSettingMap.keySet() ) {
-            key.set(activeSettingMap.get(key));
+            Object value = activeSettingMap.get(key);
+            if(value != null) {
+                key.set(value);
+            }
         }
     }
     
     public boolean hasPendingChanges() {
         for ( Setting key : activeSettingMap.keySet() ) {
-            if (!activeSettingMap.get(key).equals(key.get())) {
+            Object savedValue = activeSettingMap.get(key); 
+            if (savedValue != null && !savedValue.equals(key.get())) {
                 return true;
             }
         }
@@ -110,7 +115,7 @@ public class OptionPanelStateManager {
      */
     public void initOptions() {
         for(Setting setting : activeSettingMap.keySet()) {
-            activeSettingMap.put(setting, null);
+            activeSettingMap.put(setting, setting.get());
         }
     }
 }
