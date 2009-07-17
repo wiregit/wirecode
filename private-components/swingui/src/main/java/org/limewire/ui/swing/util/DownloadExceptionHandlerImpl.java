@@ -93,6 +93,13 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
             downLoadAction.downloadCanceled(e);
             showErrorMessage(e);
             return;
+        } else if (e.getErrorCode() == DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO
+                && !supportNewSaveFileName) {
+            // prevents infinite loop case where for bit torrent files we can't
+            // change the save file at the moment
+            downLoadAction.downloadCanceled(e);
+            showErrorMessage(e);
+            return;
         }
 
         // select a save file name
@@ -194,14 +201,17 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
      */
     private void download(final DownloadAction downLoadAction, final boolean supportNewSaveFileName,
             File saveFile, boolean overwrite) {
+        
+        File newSaveFile = supportNewSaveFileName ? saveFile : saveFile.getParentFile();
+        
         try {
-            downLoadAction.download(saveFile, overwrite);
+            downLoadAction.download(newSaveFile, overwrite);
         } catch (DownloadException e1) {
             handleDownloadException(downLoadAction, e1, supportNewSaveFileName);
         }
     }
 
-    private void createOverwriteDialogue(final File saveFile, final DownloadAction downLoadAction,
+    private void createOverwriteDialogue(final File overwriteFile, final DownloadAction downLoadAction,
             final DownloadException ex, final boolean supportNewSaveFileName) {
 
         final JDialog dialog = new LimeJDialog(GuiUtils.getMainFrame());
@@ -212,7 +222,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
 
         final JTextField filePathField = new JTextField(25);
         filePathField.setEnabled(false);
-        filePathField.setText(saveFile.getAbsolutePath());
+        filePathField.setText(overwriteFile.getAbsolutePath());
 
         JToggleButton overwriteButton = null;
         overwriteButton = new JToggleButton(I18n.tr("Overwrite"));
@@ -220,7 +230,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
             @Override
             public void actionPerformed(ActionEvent event) {
                 dialog.dispose();
-                download(downLoadAction, supportNewSaveFileName, saveFile, true);
+                download(downLoadAction, supportNewSaveFileName, overwriteFile, true);
             }
         });
 
@@ -229,19 +239,17 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dialog.dispose();
-                File saveFile = ex.getFile();
-                File oldSaveFile = saveFile;
-                File oldSaveFileParent = saveFile != null && saveFile.getParentFile() != null ? saveFile
-                        .getParentFile()
-                        : saveFile;
-                saveFile = FileChooser
-                        .getInputDirectory(GuiUtils.getMainFrame(), I18n.tr("Choose a new folder to save download."), I18n.tr("Select"), oldSaveFileParent);
+                File oldSaveFile = overwriteFile;
+                File oldSaveFileParent = overwriteFile.getParentFile() != null ? overwriteFile.getParentFile() : overwriteFile;
+
+                File newSaveParent = FileChooser.getInputDirectory(GuiUtils.getMainFrame(), I18n.tr("Choose a new folder to save download."), I18n.tr("Select"), oldSaveFileParent);
                 
-                File newSaveParent = saveFile;
                 if (newSaveParent != null && new File(newSaveParent, oldSaveFile.getName()).exists()) {
-                    createOverwriteDialogue(newSaveParent, downLoadAction, ex, supportNewSaveFileName);
+                    File saveFile = new File(newSaveParent, oldSaveFile.getName());
+                    createOverwriteDialogue(saveFile, downLoadAction, ex, supportNewSaveFileName);
                     return;
-                } else if(saveFile != null) {
+                } else if(newSaveParent != null) {
+                    File saveFile = new File(newSaveParent, oldSaveFile.getName());
                     download(downLoadAction, supportNewSaveFileName, saveFile, false);
                 }
             }

@@ -400,6 +400,7 @@ class CoreDownloadItem implements DownloadItem {
         if (saveFile != null) {
             if (saveFile.isDirectory()) {
                 saveDir = saveFile;
+                fileName = getFileName();
             } else {
                 saveDir = saveFile.getParentFile();
                 fileName = saveFile.getName();
