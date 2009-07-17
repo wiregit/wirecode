@@ -166,9 +166,9 @@ class SignOnMessageLayer {
                     break;
                 }
                 // If Private Shared selected and signed on, show message.
-                NavType navType = libraryMediator.getSelectedNavItem().getType();
+                NavType selectedType = getSelectedNavType();
                 if ((category == NavCategory.LIBRARY) && 
-                        (navType == NavType.LIST) && isSignedOn()) {
+                        (selectedType == NavType.LIST) && isSignedOn()) {
                     showMessage();
                 }
             }
@@ -178,7 +178,7 @@ class SignOnMessageLayer {
         libraryNavProvider.get().addTableSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                NavType navType = libraryMediator.getSelectedNavItem().getType();
+                NavType navType = getSelectedNavType();
                 switch (messageType) {
                 case LIBRARY:
                     // If library message showing and Private Shared selected, close message.
@@ -237,13 +237,7 @@ class SignOnMessageLayer {
         NavItem libraryItem = navigator.getNavItem(NavCategory.LIBRARY, LibraryMediator.NAME);
         
         // Get selected collection in library.
-        LibraryNavItem selectedItem = libraryMediator.getSelectedNavItem();
-        
-        NavType selectedType;
-        if(selectedItem == null)
-            selectedType = NavType.LIBRARY;
-        else
-            selectedType = selectedItem.getType();
+        NavType selectedType = getSelectedNavType();
         
         // Remove old message components.
         if (panelResizer != null) {
@@ -307,6 +301,18 @@ class SignOnMessageLayer {
         // Show message.
         messageComponent.setVisible(true);
         ((Resizable) messageComponent).resize();
+    }
+    
+    private NavType getSelectedNavType() {
+        // Get selected collection in library.
+        LibraryNavItem selectedItem = libraryMediator.getSelectedNavItem();
+        
+        NavType selectedType;
+        if(selectedItem == null)
+            selectedType = NavType.LIBRARY;
+        else
+            selectedType = selectedItem.getType();
+        return selectedType;
     }
     
     /**
