@@ -221,7 +221,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                             return null;
                         }
                         else {
-                            return I18n.trn("{0} file", "{0} files", 10000);
+                            return I18n.trn("{0} file", "{0} files", baseObject.size());
                         }
                     }
         }));
