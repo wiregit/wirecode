@@ -51,7 +51,9 @@ public class FriendServiceItem extends JLabel {
             setMaximumSize(new Dimension(9999,22));
             setPreferredSize(new Dimension(120,22));
             
-            setText(friendConnection.getConfiguration().getCanonicalizedLocalID());
+            String name = friendConnection.getConfiguration().getCanonicalizedLocalID();
+            setText(name);
+            setToolTipText(name);
             setIcon(friendConnection.getConfiguration().getIcon());
         } else {
             setVisible(false);
