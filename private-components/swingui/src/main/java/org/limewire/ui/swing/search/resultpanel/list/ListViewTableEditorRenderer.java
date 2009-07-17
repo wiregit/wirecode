@@ -71,6 +71,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthR
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.table.TransparentCellTableRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -143,7 +144,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new NoDancingHtmlLabel();
     private JLabel metadataLabel = new NoDancingHtmlLabel();
-    private JLabel downloadSourceCount = new JLabel();
+    private JLabel downloadSourceCount = new TransparentCellTableRenderer();
     private JXPanel editorComponent;
 
     private VisualSearchResult vsr;
@@ -636,7 +637,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      * when the label is used in a table renderer or editor, it has weird mouse over behavior where the lines dance up and down.  
      * NoDancingHtmlLabel prevents this behavior.
      */
-    private static class NoDancingHtmlLabel extends JLabel {
+    private static class NoDancingHtmlLabel extends TransparentCellTableRenderer {
         public NoDancingHtmlLabel(){
             //prevents strange movement on mouseover
             setVerticalAlignment(JLabel.TOP);
