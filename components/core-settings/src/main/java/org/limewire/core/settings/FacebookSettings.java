@@ -16,7 +16,7 @@ public class FacebookSettings extends LimeProps {
      * Whether Facebook is enabled.
      */
     public static final BooleanSetting FACEBOOK_ENABLED =
-        FACTORY.createBooleanSetting("FACEBOOK_ENABLED", true);
+        FACTORY.createRemoteBooleanSetting("FACEBOOK_ENABLED", true, "Facebook.facebookEnabled");
     
     /**
      * Facebook auth server urls.
