@@ -27,6 +27,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -104,6 +105,12 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private static final Log LOG = LogFactory.getLog(FacebookFriendConnection.class);
 
+    /**
+     * Maximum number of consecutive HTTP GET and POST tries before IOException
+     * is thrown.
+     */
+    private static final int MAX_TRIES = 2;
+    
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
     private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
@@ -355,9 +362,9 @@ public class FacebookFriendConnection implements FriendConnection {
                     try {
                         sendLiveMessageDirect(presence, "presence", message);
                     } catch (FacebookException e) {
-                        LOG.debug("error sending offline presence notification");
+                        LOG.debug("error sending offline presence notification", e);
                     } catch (IOException e) {
-                        LOG.debug("error sending offline presence notification");
+                        LOG.debug("error sending offline presence notification", e);
                     }
                 }
             }
@@ -559,11 +566,6 @@ public class FacebookFriendConnection implements FriendConnection {
         uid = json.getString("uid");
         LOG.debugf("received session {0}, secret {1}, uid: {2}", session, secret, uid);
         facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
-        if(LOG.isDebugEnabled()) {
-            for(Cookie cookie : cookieStore.getCookies()) {
-                LOG.debugf(cookie.getName() + " = " + cookie.getValue());
-            }
-        }
     }
 
     public void readMetadataFromPages() throws IOException {
@@ -643,42 +645,58 @@ public class FacebookFriendConnection implements FriendConnection {
 
     public String httpGET(String url) throws IOException {
         LOG.debugf("facebook GET: {0}", url);
-        HttpGet loginGet = new HttpGet(url);
-        loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
-        loginGet.addHeader("Connection", "close");
-        HttpClient httpClient = createHttpClient();
-        HttpResponse response = httpClient.execute(loginGet);
-        HttpEntity entity = response.getEntity();
-
-        String responseStr = null;
-        if (entity != null) {
-            responseStr = EntityUtils.toString(entity);
-            HttpClientUtils.releaseConnection(response);
-        }
-        return responseStr;
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.addHeader("User-Agent", USER_AGENT_HEADER);
+        httpGet.addHeader("Connection", "close");
+        return executeRequest(httpGet);
     }
 
+    /**
+     * Executes the http request potentially several times catching any 
+     * {@link IOException} occurring and sleeping between requests to make
+     * failure less likely the next time.
+     */
+    private String executeRequest(HttpUriRequest request) throws IOException {
+        for (int i = 0; i < MAX_TRIES; i++) {
+            HttpClient httpClient = createHttpClient();
+            try {
+                HttpResponse postResponse = httpClient.execute(request);
+                HttpEntity entity = postResponse.getEntity();
+                if (entity != null) {
+                    String responseStr = EntityUtils.toString(entity);
+                    HttpClientUtils.releaseConnection(postResponse);
+                    return responseStr;
+                } else {
+                    return null;
+                }
+            } catch (IOException ie) {
+                // throw exception if max tries have been done
+                if (i == MAX_TRIES - 1) {
+                    LOG.debug("all tries failed", ie);
+                    throw ie;
+                } else {
+                    LOG.debug("ignoring intermittent error", ie);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
     /**
      *
      * @return null if there is no response data
      */
     public String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
         LOG.debugf("facebook POST: {0}", host + urlPostfix);
-        HttpPost httpost = new HttpPost(host + urlPostfix);
-        httpost.addHeader("Connection", "close");
-        httpost.addHeader("User-Agent", USER_AGENT_HEADER);
-        httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
-
-        HttpClient httpClient = createHttpClient();
-        HttpResponse postResponse = httpClient.execute(httpost);
-        HttpEntity entity = postResponse.getEntity();
-
-        if (entity != null) {
-            String responseStr = EntityUtils.toString(entity);
-            HttpClientUtils.releaseConnection(postResponse);
-            return responseStr;
-        }
-        return null;
+        HttpPost httpPost = new HttpPost(host + urlPostfix);
+        httpPost.addHeader("Connection", "close");
+        httpPost.addHeader("User-Agent", USER_AGENT_HEADER);
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+        return executeRequest(httpPost);
     }
 
     @Override
@@ -745,7 +763,7 @@ public class FacebookFriendConnection implements FriendConnection {
                         sendLiveMessageDirect(presence, type, messageMap);
                     }
                     catch (FacebookException e) {
-                        LOG.debug("Error sending live message: {0}", e);
+                        LOG.debug("Error sending live message:", e);
 
                         if (loggedIn.get()) {
                             closeConnection(false);
@@ -755,7 +773,7 @@ public class FacebookFriendConnection implements FriendConnection {
                                     FacebookFriendConnection.this, FriendConnectionEvent.Type.DISCONNECTED, fe));
                         }
                     } catch (IOException e) {
-                        LOG.debug("Error sending live message: {0}", e);
+                        LOG.debug("Error sending live message:", e);
                         // TODO logout?
                     }
                 }
@@ -884,7 +902,7 @@ public class FacebookFriendConnection implements FriendConnection {
             boolean added = false;
             synchronized (friends) {
                 if (!friends.containsKey(friendId)) {
-                    friends.put(friend.getId(), friend);
+                    friends.put(friendId, friend);
                     added = true;
                 }
             }
