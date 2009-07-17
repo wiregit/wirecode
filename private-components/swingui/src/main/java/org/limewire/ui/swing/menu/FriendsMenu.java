@@ -89,6 +89,11 @@ class FriendsMenu extends MnemonicMenu {
                     if (isPopupMenuVisible()) {
                         removeAll();
                         createMenuItems();
+                        
+                        // needed so that the menu does not stay squished after we add in all
+                        // the new items.
+                        setPopupMenuVisible(false);
+                        setPopupMenuVisible(true);
                     }
                     break;
                 }
@@ -106,8 +111,6 @@ class FriendsMenu extends MnemonicMenu {
         boolean loggingIn = autoLoginServiceProvider.get().isAttemptingLogin()
                 || (friendConnection != null && friendConnection.isLoggingIn());
 
-        setPopupMenuVisible(false);
-        
         add(browseFriendsActionProvider.get()).setEnabled(signedIn);
         add(shareMenuProvider.get());
        
@@ -130,9 +133,5 @@ class FriendsMenu extends MnemonicMenu {
         } else {
             add(logoutActionProvider.get());
         }
-        
-        // needed so that the menu does not stay squished after we add in all
-        // the new items.
-        setPopupMenuVisible(true);
     }
 }
