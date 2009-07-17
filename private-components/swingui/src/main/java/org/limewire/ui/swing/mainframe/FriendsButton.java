@@ -237,7 +237,12 @@ public class FriendsButton extends LimeComboBox {
     
     private JMenuItem decorateItem(JMenuItem comp) {
         comp.setFont(menuFont);
-        comp.setForeground(menuForeground);
+        
+        // Vista uses overriden foreground even in disabled state
+        if (comp.isEnabled()) {
+            comp.setForeground(menuForeground);
+        }
+        
         if (newResultsAvailable) {
             comp.setBorder(BorderFactory.createEmptyBorder(0,8,0,0));
         } 
