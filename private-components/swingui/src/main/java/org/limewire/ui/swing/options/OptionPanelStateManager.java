@@ -115,7 +115,7 @@ public class OptionPanelStateManager {
      */
     public void initOptions() {
         for(Setting setting : activeSettingMap.keySet()) {
-            activeSettingMap.put(setting, setting.get());
+            setValue(setting, setting.get());
         }
     }
 }
