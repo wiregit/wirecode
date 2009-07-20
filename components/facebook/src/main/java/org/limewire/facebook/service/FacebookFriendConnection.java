@@ -108,8 +108,9 @@ public class FacebookFriendConnection implements FriendConnection {
     /**
      * Maximum number of consecutive HTTP GET and POST tries before IOException
      * is thrown.
+     * The value will be changed to 1, once n tries failed consecutively.
      */
-    private static final int MAX_TRIES = 2;
+    private volatile int maxTries = 2;
     
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
@@ -657,7 +658,7 @@ public class FacebookFriendConnection implements FriendConnection {
      * failure less likely the next time.
      */
     private String executeRequest(HttpUriRequest request) throws IOException {
-        for (int i = 0; i < MAX_TRIES; i++) {
+        for (int i = 0; i < maxTries; i++) {
             HttpClient httpClient = createHttpClient();
             try {
                 HttpResponse postResponse = httpClient.execute(request);
@@ -671,7 +672,8 @@ public class FacebookFriendConnection implements FriendConnection {
                 }
             } catch (IOException ie) {
                 // throw exception if max tries have been done
-                if (i == MAX_TRIES - 1) {
+                if (i == maxTries - 1) {
+                    maxTries = 1;
                     LOG.debug("all tries failed", ie);
                     throw ie;
                 } else {
