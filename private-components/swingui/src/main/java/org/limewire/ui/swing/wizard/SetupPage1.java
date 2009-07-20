@@ -70,10 +70,13 @@ public class SetupPage1 extends WizardPage {
      * Adds header for Anonymous Data collection, checkbox, and associated text
      */
     private void addImproving() {
+        //TODO: re-enable this code once the setting does something
+        /*
         add(createAndDecorateHeader(I18n.tr("Improve LimeWire")), "gaptop 20, span, wrap");
         add(shareUsageDataCheckBox, "gaptop 5, gapleft 26");
         add(createAndDecorateMultiLine(I18n.tr("Help improve LimeWire by sending us anonymous usage data"), shareUsageDataCheckBox), "gapleft 5, gaptop 5");
         add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=anonymousDataCollection"), "gapleft 10, wrap");
+        */
     }
     
     /**
