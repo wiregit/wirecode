@@ -14,8 +14,6 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.ui.swing.util.I18n;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -38,21 +36,22 @@ public class RemoteHostMenuFactory {
         uniqueHosts.addAll(allHosts);
         
         JMenu browse = new JMenu(I18n.tr("Browse Files"));
-        
-        if(uniqueHosts.size() > 1){
-            browse.add(new AbstractAction("All Users") {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    remoteHostActions.get().viewLibrariesOf(Collections2.transform(uniqueHosts, new Function<RemoteHost, FriendPresence>() {
-                        @Override
-                        public FriendPresence apply(RemoteHost from) {
-                            return from.getFriendPresence();
-                        }
-                    }));
-                }
-            });
-            browse.addSeparator();
-        }
+
+        //hiding browse all users until memory issues are cleared up
+//        if(uniqueHosts.size() > 1){
+//            browse.add(new AbstractAction("All Users") {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    remoteHostActions.get().viewLibrariesOf(Collections2.transform(uniqueHosts, new Function<RemoteHost, FriendPresence>() {
+//                        @Override
+//                        public FriendPresence apply(RemoteHost from) {
+//                            return from.getFriendPresence();
+//                        }
+//                    }));
+//                }
+//            });
+//            browse.addSeparator();
+//        }
         
         for (RemoteHost host : uniqueHosts) {
             browse.add(new BrowseAction(host));
