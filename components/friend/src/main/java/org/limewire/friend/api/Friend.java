@@ -25,7 +25,10 @@ public interface Friend {
      * */
     public String getName();
     
-    /** Returns the best possible name this can be rendered with. */
+    /** Returns the best possible name this can be rendered with.
+     *  
+     *  NOTE: must not return null. 
+     */
     public String getRenderName();
     
     /** If getRenderName returns something other than email, will return subString using the first ' ' delimeter*/
