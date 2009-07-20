@@ -139,11 +139,14 @@ public class SetupPage1 extends WizardPage {
             StartupSettings.RUN_ON_STARTUP.setValue(launchAtStartupCheckBox.isSelected());
         } else
             StartupSettings.RUN_ON_STARTUP.setValue(false);
-            InstallSettings.START_STARTUP.setValue(true);
+        InstallSettings.START_STARTUP.setValue(true);
         
+        //TODO: re-enable this code once the setting does something
+        /*
         //Anonymous Usage statics
         ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.setValue(shareUsageDataCheckBox.isSelected());
         InstallSettings.ANONYMOUS_DATA_COLLECTION.setValue(true);
+        */
         
         //Content Filters
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(contentFilterCheckBox.isSelected());
