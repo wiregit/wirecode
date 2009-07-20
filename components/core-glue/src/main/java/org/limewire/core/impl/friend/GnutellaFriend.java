@@ -116,7 +116,7 @@ class GnutellaFriend implements Friend {
             IpPort ipp = (IpPort)address;
             InetAddress inetAddr = ipp.getInetAddress();
             if(inetAddr == null) {
-                return null;
+                return UNKNOWN_ADDRESS_DESCRIPTION;
             }
             byte[] addr = inetAddr.getAddress();
             
