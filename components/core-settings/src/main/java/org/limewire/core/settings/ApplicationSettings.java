@@ -154,6 +154,7 @@ public class ApplicationSettings extends LimeProps {
      * Returns true if the user has agreed to allow LimeWire to anonymously
      * gather statics.
      */
+    @InspectablePrimitive("anonymous usage statistics")
     public static final BooleanSetting ALLOW_ANONYMOUS_STATISTICS_GATHERING =
         FACTORY.createBooleanSetting("ALLOW_ANONYMOUS_STATISTICS_GATHERING", true);
     

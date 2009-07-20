@@ -56,7 +56,7 @@ public final class InstallSettings extends LimeWireSettings {
     public static final BooleanSetting AUTO_SHARING_OPTION =
         FACTORY.createBooleanSetting("AUTO_SHARING_OPTION", false);
     
-    /** Whether to allow Anonymous data collection. */
+    /** Whether the anonymous data collection option has been asked. */
     public static final BooleanSetting ANONYMOUS_DATA_COLLECTION =
         FACTORY.createBooleanSetting("ANONYMOUS_DATA_COLLECTION", false);
     
