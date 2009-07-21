@@ -149,44 +149,7 @@ public class MainDownloadPanel extends JPanel {
     private void initializeDownloadListeners(final DownloadListManager downloadListManager) {
         // handle individual completed downloads
         downloadListManager.addPropertyChangeListener(new DownloadPropertyListener());
-
-        downloadListManager.getSwingThreadSafeDownloads().addListEventListener(
-                new ListEventListener<DownloadItem>() {
-                    @Override
-                    public void listChanged(ListEvent<DownloadItem> listChanges) {
-                        // only show the notification messages if the download panel is not invisible
-                        if (!shouldShowNotification()) {
-                            return;
-                        }
-
-                        while (listChanges.next()) {
-                            if (listChanges.getType() == ListEvent.INSERT) {
-                                int index = listChanges.getIndex();
-                                final DownloadItem downloadItem = listChanges.getSourceList().get(index);
-                                notifier.showMessage(createInsertNotification(downloadItem));
-                            }
-                        }
-                        
-                    }
-                });
     }
-    
-    private Notification createInsertNotification(final DownloadItem downloadItem){
-        return new Notification(I18n.tr("Download Started"),
-                downloadItem.getFileName(), new AbstractAction(I18n.tr("Show")) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        setSize(getPreferredSize().width, preferredHeight);
-                        table.selectAndScrollTo(downloadItem.getUrn());
-                    }
-                });
-    }
-    
-    private boolean shouldShowNotification(){
-        return !isShowing() || getVisibleRect().height < table.getRowHeight();
-    }
-    
-
 
     private class DownloadPropertyListener implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
