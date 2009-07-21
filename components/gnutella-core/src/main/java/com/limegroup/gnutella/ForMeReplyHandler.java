@@ -74,6 +74,7 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
     private final ConnectionServices connectionServices;
     private final LimeXMLDocumentHelper limeXMLDocumentHelper;
     private final Provider<IPFilter> ipFilterProvider;
+    private final SpamServices spamServices;
 
     @Inject
     ForMeReplyHandler(NetworkManager networkManager,
@@ -85,7 +86,8 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
             ApplicationServices applicationServices,
             ConnectionServices connectionServices,
             LimeXMLDocumentHelper limeXMLDocumentHelper,
-            Provider<IPFilter> ipFilterProvider) {
+            Provider<IPFilter> ipFilterProvider,
+            SpamServices spamServices) {
         this.networkManager = networkManager;
         this.secureMessageVerifier = secureMessageVerifier;
         this.connectionManager = connectionManager;
@@ -96,6 +98,7 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
         this.connectionServices = connectionServices;
         this.limeXMLDocumentHelper = limeXMLDocumentHelper;
         this.ipFilterProvider = ipFilterProvider;
+        this.spamServices = spamServices;
     }
     
     @Inject
@@ -167,7 +170,7 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
         }
 
         // check for unwanted results after xml has been constructed
-        if(handler != null && handler.isPersonalSpam(reply)) {
+        if(spamServices.isPersonalSpam(reply)) {
             LOG.trace("Dropping spam reply");
             return;
         }
@@ -269,7 +272,7 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
 	    }
 	    
         //Ignore push request from banned hosts.
-        if (handler.isPersonalSpam(pushRequest)) {
+        if (spamServices.isPersonalSpam(pushRequest)) {
             LOG.debug("discarded as personal spam");
             return;
         }

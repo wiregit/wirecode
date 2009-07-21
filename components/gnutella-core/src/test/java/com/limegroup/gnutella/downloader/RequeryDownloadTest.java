@@ -57,6 +57,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.ResponseFactoryImpl;
 import com.limegroup.gnutella.RouteTable;
+import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPReplyHandlerCache;
 import com.limegroup.gnutella.UDPService;
@@ -366,7 +367,8 @@ public class RequeryDownloadTest extends LimeTestCase {
                 Provider<LimeACKHandler> limeACKHandler,
                 OutgoingQueryReplyFactory outgoingQueryReplyFactory,
                 SharedFilesKeywordIndex sharedFilesKeywordIndex,
-                QRPUpdater qrpUpdater, URNFilter urnFilter) {
+                QRPUpdater qrpUpdater, URNFilter urnFilter,
+                SpamServices spamServices) {
             super(networkManager, queryRequestFactory, queryHandlerFactory,
                     onDemandUnicaster, headPongFactory, pingReplyFactory,
                     connectionManager, forMeReplyHandler, queryUnicaster,
@@ -382,7 +384,8 @@ public class RequeryDownloadTest extends LimeTestCase {
                     replyNumberVendorMessageFactory, pingRequestFactory,
                     messageHandlerBinder, oobHandlerFactory, macManager,
                     limeACKHandler, outgoingQueryReplyFactory,
-                    sharedFilesKeywordIndex, qrpUpdater, urnFilter);
+                    sharedFilesKeywordIndex, qrpUpdater, urnFilter,
+                    spamServices);
         } 
         
         @Override

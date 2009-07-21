@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.filters;
+package com.limegroup.gnutella.filters.response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -16,6 +16,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
+import com.limegroup.gnutella.filters.response.XMLDocFilter;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -56,48 +57,48 @@ public class XMLDocFilterTest extends LimeTestCase {
         queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
     }
     
-    public void testDisallowAdultXML() throws Exception {
-        XMLDocFilter filter = new XMLDocFilter();
-        
-        
-        // test filter switched off
+    public void testDisallowAdultXMLResponses() throws Exception {
+        // Test filter switched off
+        ResponseFilter filter = new XMLDocFilter(false);
+
         QueryReply qr = createXMLReply(LimeXMLNames.VIDEO_TYPE, "Adult");
-        assertTrue(filter.allow(qr));
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "R");
-        assertTrue(filter.allow(qr));
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "NC-17");
-        assertTrue(filter.allow(qr));
-        
-        filter.disallowAdult();
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
+
+        // Test filter switched on
+        filter = new XMLDocFilter(true);
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "R");
-        assertFalse(filter.allow(qr));
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "NC-17");
-        assertFalse(filter.allow(qr));
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_TYPE, "Adult");
-        assertFalse(filter.allow(qr));
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
 
         qr = createXMLReply(LimeXMLNames.VIDEO_TYPE, "Adult Film");
-        assertFalse(filter.allow(qr));
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
 
         qr = createXMLReply(LimeXMLNames.VIDEO_TYPE, "Adult Film Clip");
-        assertFalse(filter.allow(qr));
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_TYPE, "adul");
-        assertTrue(filter.allow(qr));
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "NR");
-        assertTrue(filter.allow(qr));
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createReply("Adult Film", responseFactory);
-        assertFalse(filter.allow(qr));
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "Adults Only");
-        assertFalse(filter.allow(qr));
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
     }
     
     private QueryReply createXMLReply(String field, String values) throws Exception {

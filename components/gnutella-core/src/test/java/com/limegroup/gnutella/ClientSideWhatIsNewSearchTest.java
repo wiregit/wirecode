@@ -16,7 +16,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
-import com.limegroup.gnutella.filters.XMLDocFilterTest;
+import com.limegroup.gnutella.filters.response.XMLDocFilterTest;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;

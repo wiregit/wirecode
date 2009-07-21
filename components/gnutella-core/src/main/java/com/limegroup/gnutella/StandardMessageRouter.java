@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -119,7 +118,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
             Provider<LimeACKHandler> limeACKHandler,
             OutgoingQueryReplyFactory outgoingQueryReplyFactory,
             SharedFilesKeywordIndex sharedFilesKeywordIndex,
-            QRPUpdater qrpUpdater, URNFilter urnFilter) {
+            QRPUpdater qrpUpdater, URNFilter urnFilter,
+            SpamServices spamServices) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -133,7 +133,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, 
                 pingRequestFactory, messageHandlerBinder, oobHandlerFactory, 
                 MACCalculatorRepositoryManager, limeACKHandler,
-                outgoingQueryReplyFactory, qrpUpdater, urnFilter);
+                outgoingQueryReplyFactory, qrpUpdater, urnFilter,
+                spamServices);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
         this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;

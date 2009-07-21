@@ -1085,8 +1085,6 @@ public class AltLocUploadTest extends LimeTestCase {
                 will(returnValue(true));
                 allowing(request).getNetwork();
                 will(returnValue(Network.TCP));
-                allowing(handler).isPersonalSpam(request);
-                will(returnValue(false));
                 allowing(handler).getAddress();
                 will(returnValue(null));
                 allowing(handler).getPort();

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.filters;
+package com.limegroup.gnutella.filters.response;
 
 import junit.framework.Test;
 
@@ -7,9 +7,9 @@ import org.jmock.Mockery;
 import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.filters.KeywordFilter;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
 
 public class MutableGUIDFilterTest extends BaseTestCase {
 
@@ -18,8 +18,8 @@ public class MutableGUIDFilterTest extends BaseTestCase {
     MutableGUIDFilter filter;
     final KeywordFilterStub filterKeyword = new KeywordFilterStub();
         
-    QueryReply queryReplyMock;  
-    QueryRequest queryRequestMock;
+    QueryReply queryReplyMock;
+    Response responseMock;
     
     public MutableGUIDFilterTest(String name) {
         super(name);
@@ -31,7 +31,7 @@ public class MutableGUIDFilterTest extends BaseTestCase {
         filter = new MutableGUIDFilter(filterKeyword);
         
         queryReplyMock = context.mock(QueryReply.class);
-        queryRequestMock = context.mock(QueryRequest.class);
+        responseMock = context.mock(Response.class);
     }
     
     public static Test suite() {
@@ -51,12 +51,6 @@ public class MutableGUIDFilterTest extends BaseTestCase {
         
         final GUID guid = new GUID();
         final GUID guid2 = new GUID();
-        Message msg = null;
-        
-        /*
-         * check if filter allows messages
-         */
-        assertTrue(filter.allow(msg));
         
         /*
          * add guid to filter
@@ -70,8 +64,8 @@ public class MutableGUIDFilterTest extends BaseTestCase {
             will(returnValue(guid2.bytes()));
         }});
         
-        assertFalse(filter.allow(queryReplyMock));
-        assertTrue(filter.allow(queryReplyMock));
+        assertFalse(filter.allow(queryReplyMock, responseMock));
+        assertTrue(filter.allow(queryReplyMock, responseMock));
         
         /*
          * remove guid from filter
@@ -85,26 +79,20 @@ public class MutableGUIDFilterTest extends BaseTestCase {
             will(returnValue(guid2.bytes()));
         }});
         
-        assertTrue(filter.allow(queryReplyMock));
-        assertTrue(filter.allow(queryReplyMock));
-        
-        context.assertIsSatisfied();
-    }
-    
-    public void testOtherMessagesAreIgnored() throws Exception{
-        context.checking(new Expectations()
-        {{ never(queryRequestMock);
-        }});
-        
-        assertTrue(filter.allow(queryRequestMock));
+        assertTrue(filter.allow(queryReplyMock, responseMock));
+        assertTrue(filter.allow(queryReplyMock, responseMock));
         
         context.assertIsSatisfied();
     }
     
     private class KeywordFilterStub extends KeywordFilter {
-                               
+        
+        KeywordFilterStub() {
+            super(false);
+        }
+        
         @Override
-        boolean allow(QueryReply qr){
+        public boolean allow(QueryReply qr, Response response){
             return false;
         }
     }

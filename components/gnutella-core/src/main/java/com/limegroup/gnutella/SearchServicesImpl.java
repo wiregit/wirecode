@@ -15,7 +15,7 @@ import org.limewire.util.MediaType;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.filters.MutableGUIDFilter;
+import com.limegroup.gnutella.filters.response.MutableGUIDFilter;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
