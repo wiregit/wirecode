@@ -1,7 +1,9 @@
 package org.limewire.facebook.service;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.FriendException;
@@ -21,7 +23,7 @@ import org.limewire.friend.api.MessageWriter;
 class ChatManager {
 
     private final Map<String, MessageReader> readers =
-            new ConcurrentHashMap<String, MessageReader>();
+            new HashMap<String, MessageReader>();
 
     private final FacebookFriendConnection facebookFriendConnection;
 
@@ -38,7 +40,7 @@ class ChatManager {
      * @return MessageWriter interface to use for sending chat messages.
      */
     MessageWriter addMessageReader(String friendId, MessageReader reader) {
-        readers.put(friendId, reader);
+        addMessageReaderAndProcess(friendId, reader);       
         return new MessageWriterImpl(friendId);
     }
 
@@ -50,7 +52,17 @@ class ChatManager {
      * @return MessageReader message reader associated with friend.
      */
     MessageReader getMessageReader(String friendId) {
-        return readers.get(friendId);
+        if (this.facebookFriendConnection.isLoggedIn()) {
+            synchronized (readers) {
+                MessageReader messageReader = readers.get(friendId);
+                if (messageReader == null) {
+                    messageReader = new MessageReaderQueued();
+                    readers.put(friendId, messageReader);
+                }
+                return messageReader;
+            }
+        }
+        return null;
     }
 
     /**
@@ -61,7 +73,9 @@ class ChatManager {
      * @param listener {@link IncomingChatListener} used to create message readers.
      */
     void setIncomingChatListener(String friendId, IncomingChatListener listener) {
-        readers.put(friendId, new MessageReaderIncomingListenerWrapper(friendId, listener));
+        MessageReaderIncomingListenerWrapper wrapperReader = 
+                new MessageReaderIncomingListenerWrapper(friendId, listener);
+        addMessageReaderAndProcess(friendId, wrapperReader);               
     }
 
     /**
@@ -70,7 +84,27 @@ class ChatManager {
      * @param friendId ID of friend
      */
     void removeChat(String friendId) {
-        readers.remove(friendId);
+        synchronized (readers) {
+            readers.remove(friendId);
+        }
+    }
+
+    /**
+     * Add a MessageReader to readers map.  If a previous MessageReader was in the map,
+     * read in the queued up messages (if it is a {@link MessageReaderQueued}).
+     * 
+     * @param friendId friend id
+     * @param reader MessageReader
+     */
+    private void addMessageReaderAndProcess(String friendId, MessageReader reader) {        
+        synchronized (readers) {
+            MessageReader prevReader = readers.put(friendId, reader);
+
+            if (prevReader instanceof MessageReaderQueued) {
+                MessageReaderQueued msgQ = (MessageReaderQueued) prevReader;
+                msgQ.processQueuedMessages(reader);
+            }
+        } 
     }
 
     /**
@@ -112,6 +146,64 @@ class ChatManager {
             return messagereader;
         }
     }
+
+    /**
+     * A {@link MessageReader} impl that keeps a record of 
+     * what is read in, chat states, etc.  The messages will be
+     * read in (for example, into the chat window) at a later point in time.
+     */
+    private class MessageReaderQueued implements MessageReader {
+        private List<ChatActivity> queuedActivities = new ArrayList<ChatActivity>();
+        
+        @Override
+        public void readMessage(String message) {
+            queuedActivities.add(new ChatActivity(ChatActivityType.MESSAGE, message));
+        }
+
+        @Override
+        public void newChatState(ChatState chatState) {
+            queuedActivities.add(new ChatActivity(ChatActivityType.CHATSTATE, chatState.toString()));
+        }
+
+        @Override
+        public void error(String errorMessage) {
+            queuedActivities.add(new ChatActivity(ChatActivityType.ERROR, errorMessage));
+        }
+
+        public void processQueuedMessages(MessageReader reader) {
+            for (ChatActivity msg : queuedActivities) {
+                msg.type.processActivity(reader, msg);
+            }
+        }
+    }
+    
+    private enum ChatActivityType {
+        MESSAGE {
+            @Override
+            void processActivity(MessageReader reader, ChatActivity activity) {
+                reader.readMessage(activity.text);
+            }},
+        CHATSTATE {
+            @Override
+            void processActivity(MessageReader reader, ChatActivity activity) {
+                reader.newChatState(ChatState.valueOf(activity.text));
+            }}, 
+        ERROR {
+            @Override
+            void processActivity(MessageReader reader, ChatActivity activity) {
+                reader.error(activity.text);
+            }};
+        abstract void processActivity(MessageReader reader, ChatActivity activity);
+    }
+    
+    private class ChatActivity {
+        ChatActivity(ChatActivityType type, String text) {
+            this.type = type;
+            this.text = text;
+        }
+        final ChatActivityType type;
+        final String text;
+    }    
 
     /**
      * {@link MessageWriter} impl that delegates to the facebook connection

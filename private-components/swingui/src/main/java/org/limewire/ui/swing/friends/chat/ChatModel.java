@@ -16,6 +16,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.Message.Type;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -170,14 +171,20 @@ public class ChatModel {
 
         final ChatFriend chatFriendForIncomingChat = chatFriend;
         IncomingChatListener incomingChatListener = new IncomingChatListener() {
-            public MessageReader incomingChat(MessageWriter writer) {
-                chatFramePanel.createChatPanel();
-                MessageWriter writerWrapper = new MessageWriterImpl(chatFriendForIncomingChat, writer);
-                ConversationSelectedEvent event =
-                        new ConversationSelectedEvent(chatFriendForIncomingChat, writerWrapper, false);
-                event.publish();
-                //Hang out until a responder has processed this event
-                event.await();
+            public MessageReader incomingChat(final MessageWriter writer) {
+                SwingUtils.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        chatFramePanel.createChatPanel();
+                        MessageWriter writerWrapper = new MessageWriterImpl(chatFriendForIncomingChat, writer);
+                        ConversationSelectedEvent event =
+                                new ConversationSelectedEvent(chatFriendForIncomingChat, writerWrapper, false);
+                        event.publish();
+                        
+                        //Hang out until a responder has processed this event
+                        event.await();
+                    }
+                });
                 return new MessageReaderImpl(chatFriendForIncomingChat);
             }
         };
