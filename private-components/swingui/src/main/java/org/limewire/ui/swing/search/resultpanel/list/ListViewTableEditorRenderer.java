@@ -607,7 +607,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             
             // Update the selection.  We also prepare the editor to apply
             // the selection colors to the current editor component.
-            if (editRow > -1) {
+            if (editRow > -1 && editRow < table.getRowCount()) {
                 table.changeSelection(editRow, editCol, e.isControlDown(), e.isShiftDown());
                 table.prepareEditor(ListViewTableEditorRenderer.this, editRow, editCol);
             }
