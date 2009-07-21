@@ -31,8 +31,12 @@ public class ActionLabel extends JXLabel  {
     private final List<ActionListener> actionListeners = new CopyOnWriteArrayList<ActionListener>();
    
 
+    public ActionLabel(Action action) {
+        this(action, false);
+    }
+    
     /**
-     * Constructs a new clickable label whose text is in the hex color described.
+     * Constructs a new clickable label.
      */
     public ActionLabel(Action action, boolean showHand) {
         setAction(action, showHand);
