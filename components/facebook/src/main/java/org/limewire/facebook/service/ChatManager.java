@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Collections;
 
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.FriendException;
@@ -153,57 +154,69 @@ class ChatManager {
      * read in (for example, into the chat window) at a later point in time.
      */
     private class MessageReaderQueued implements MessageReader {
-        private List<ChatActivity> queuedActivities = new ArrayList<ChatActivity>();
+        private final List<ChatActivity> queuedActivities = 
+                Collections.synchronizedList(new ArrayList<ChatActivity>());
         
         @Override
         public void readMessage(String message) {
-            queuedActivities.add(new ChatActivity(ChatActivityType.MESSAGE, message));
+            queuedActivities.add(new MessageActivity(message));
         }
 
         @Override
         public void newChatState(ChatState chatState) {
-            queuedActivities.add(new ChatActivity(ChatActivityType.CHATSTATE, chatState.toString()));
+            queuedActivities.add(new ChatStateActivity(chatState.toString()));
         }
 
         @Override
         public void error(String errorMessage) {
-            queuedActivities.add(new ChatActivity(ChatActivityType.ERROR, errorMessage));
+            queuedActivities.add(new ErrorActivity(errorMessage));
         }
 
         public void processQueuedMessages(MessageReader reader) {
-            for (ChatActivity msg : queuedActivities) {
-                msg.type.processActivity(reader, msg);
+            synchronized (queuedActivities) {
+                for (ChatActivity msg : queuedActivities) {
+                    msg.processActivity(reader);
+                }
             }
         }
     }
     
-    private enum ChatActivityType {
-        MESSAGE {
-            @Override
-            void processActivity(MessageReader reader, ChatActivity activity) {
-                reader.readMessage(activity.text);
-            }},
-        CHATSTATE {
-            @Override
-            void processActivity(MessageReader reader, ChatActivity activity) {
-                reader.newChatState(ChatState.valueOf(activity.text));
-            }}, 
-        ERROR {
-            @Override
-            void processActivity(MessageReader reader, ChatActivity activity) {
-                reader.error(activity.text);
-            }};
-        abstract void processActivity(MessageReader reader, ChatActivity activity);
-    }
-    
-    private class ChatActivity {
-        ChatActivity(ChatActivityType type, String text) {
-            this.type = type;
+    private abstract class ChatActivity {
+        ChatActivity(String text) {
             this.text = text;
         }
-        final ChatActivityType type;
         final String text;
-    }    
+        
+        abstract void processActivity(MessageReader reader);
+    }
+    
+    private class MessageActivity extends ChatActivity {
+        MessageActivity(String text) {
+            super(text);
+        }
+        @Override
+        void processActivity(MessageReader reader) {
+            reader.readMessage(text);
+        }
+    }
+    private class ChatStateActivity extends ChatActivity {
+        ChatStateActivity(String text) {
+            super(text);
+        }
+        @Override
+        void processActivity(MessageReader reader) {
+            reader.newChatState(ChatState.valueOf(text));
+        }
+    }
+    private class ErrorActivity extends ChatActivity {
+        ErrorActivity(String text) {
+            super(text);
+        }
+        @Override
+        void processActivity(MessageReader reader) {
+            reader.error(text);
+        }
+    }  
 
     /**
      * {@link MessageWriter} impl that delegates to the facebook connection
