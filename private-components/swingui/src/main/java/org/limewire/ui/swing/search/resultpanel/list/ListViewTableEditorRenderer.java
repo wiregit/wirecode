@@ -226,6 +226,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         propertiesButton.setIcon(propertiesIcon);
         propertiesButton.setPressedIcon(propertiesPressedIcon);
         propertiesButton.setRolloverIcon(propertiesHoverIcon);
+        propertiesButton.setToolTipText(I18n.tr("View File Info"));
         
         itemIconButton.addActionListener(new ActionListener() {
             @Override
