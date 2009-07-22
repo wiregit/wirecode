@@ -223,6 +223,14 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             }
         });
+    }
+    
+    /**
+     * Registers listeners for player events.
+     */
+    @Inject
+    void register() {
+        getPlayerMediator().addMediatorListener(this);
         
         // Stop player if disabled, and show/hide player.
         SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
@@ -239,14 +247,6 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
                 });
             }
         });
-    }
-    
-    /**
-     * Registers listeners for player events.
-     */
-    @Inject
-    void register() {
-        getPlayerMediator().addMediatorListener(this);
     }
     
     /**
@@ -298,7 +298,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     /**
      * Returns the mediator component that controls the player.
      */
-    public PlayerMediator getPlayerMediator() {
+    private PlayerMediator getPlayerMediator() {
         return playerProvider.get();
     }
     

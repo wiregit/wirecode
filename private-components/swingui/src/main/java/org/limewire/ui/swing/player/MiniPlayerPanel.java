@@ -27,6 +27,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class MiniPlayerPanel extends JPanel {
   
@@ -51,46 +52,58 @@ public class MiniPlayerPanel extends JPanel {
 
     private MarqueeButton statusButton;
     
-    private final PlayerMediator playerMediator;
+    private final Provider<PlayerMediator> playerMediator;
     private final LibraryMediator libraryMediator;
+    private boolean isInitialized = false;
 
     @Inject
-    public MiniPlayerPanel(PlayerMediator playerMediator, LibraryMediator libraryMediator) {
-        GuiUtils.assignResources(this);
-        
+    public MiniPlayerPanel(Provider<PlayerMediator> playerMediator, LibraryMediator libraryMediator) {
+        super(new MigLayout("insets 0", "4[][]", "0[]0"));
+
         this.playerMediator = playerMediator;
         this.libraryMediator = libraryMediator;
-        
-        setLayout(new MigLayout("insets 0", "4[][]", "0[]0"));
-        setOpaque(false);
+    }
+    
+    private void initialize() {
+        if(!isInitialized) {
+            isInitialized = true;
+            
+            GuiUtils.assignResources(this);
+            
+            setOpaque(false);
 
-        playPauseButton = new JXButton();
-        playPauseButton.setMargin(new Insets(0, 0, 0, 0));
-        playPauseButton.setBorderPainted(false);
-        playPauseButton.setContentAreaFilled(false);
-        playPauseButton.setFocusPainted(false);
-        playPauseButton.setRolloverEnabled(true);
-        playPauseButton.setIcon(playIcon);
-        Dimension playPauseDimensions = new Dimension(playIcon.getIconWidth(), playIcon.getIconHeight());
-        playPauseButton.setMaximumSize(playPauseDimensions);
-        playPauseButton.setPreferredSize(playPauseDimensions);
-        playPauseButton.setRolloverIcon(playIconRollover);
-        playPauseButton.setPressedIcon(playIconPressed);
-        playPauseButton.setHideActionText(true);
-        playPauseButton.addActionListener(new PlayListener());
+            playPauseButton = new JXButton();
+            playPauseButton.setMargin(new Insets(0, 0, 0, 0));
+            playPauseButton.setBorderPainted(false);
+            playPauseButton.setContentAreaFilled(false);
+            playPauseButton.setFocusPainted(false);
+            playPauseButton.setRolloverEnabled(true);
+            playPauseButton.setIcon(playIcon);
+            Dimension playPauseDimensions = new Dimension(playIcon.getIconWidth(), playIcon.getIconHeight());
+            playPauseButton.setMaximumSize(playPauseDimensions);
+            playPauseButton.setPreferredSize(playPauseDimensions);
+            playPauseButton.setRolloverIcon(playIconRollover);
+            playPauseButton.setPressedIcon(playIconPressed);
+            playPauseButton.setHideActionText(true);
+            playPauseButton.addActionListener(new PlayListener());
 
-        statusButton = new MarqueeButton(I18n.tr("Nothing selected"), 16);
-        Dimension statusButtonDimensions = new Dimension(Integer.MAX_VALUE, playIcon.getIconHeight());
-        statusButton.setMaximumSize(statusButtonDimensions);
-        statusButton.setFont(font);
-        statusButton.setForeground(foregroundColor);    
-        statusButton.addActionListener(new ShowPlayerListener());
+            statusButton = new MarqueeButton(I18n.tr("Nothing selected"), 16);
+            Dimension statusButtonDimensions = new Dimension(Integer.MAX_VALUE, playIcon.getIconHeight());
+            statusButton.setMaximumSize(statusButtonDimensions);
+            statusButton.setFont(font);
+            statusButton.setForeground(foregroundColor);    
+            statusButton.addActionListener(new ShowPlayerListener());
 
-        add(playPauseButton, "gapbottom 0, gaptop 0");
-        add(statusButton, "gapbottom 0, gaptop 0");
-     
-        setMaximumSize(getPreferredSize());
-        playerMediator.addMediatorListener(new PlayerListener());
+            add(playPauseButton, "gapbottom 0, gaptop 0");
+            add(statusButton, "gapbottom 0, gaptop 0");
+         
+            setMaximumSize(getPreferredSize());
+        }
+    }
+    
+    @Inject
+    void register() {
+        playerMediator.get().addMediatorListener(new PlayerListener());
         
         //hide the player if setting is disabled
         SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
@@ -108,7 +121,7 @@ public class MiniPlayerPanel extends JPanel {
     private class ShowPlayerListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            File currentFile = playerMediator.getCurrentSongFile();
+            File currentFile = playerMediator.get().getCurrentSongFile();
             
             if (currentFile != null) { 
                 libraryMediator.selectInLibrary(currentFile);
@@ -125,15 +138,15 @@ public class MiniPlayerPanel extends JPanel {
     }
     
     private boolean isPlaying(){
-        return playerMediator.getStatus() == PlayerState.PLAYING || 
-                playerMediator.getStatus() == PlayerState.SEEKING_PLAY ;
+        return playerMediator.get().getStatus() == PlayerState.PLAYING || 
+                playerMediator.get().getStatus() == PlayerState.SEEKING_PLAY ;
     }
     
     private void setPlaying(boolean playing){
         if (playing){
-            playerMediator.resume();
+            playerMediator.get().resume();
         } else {
-            playerMediator.pause();
+            playerMediator.get().pause();
         }
     }
     
@@ -144,6 +157,7 @@ public class MiniPlayerPanel extends JPanel {
 
         @Override
         public void songChanged(String name) {
+            initialize();
             //Show MiniPlayer when song is opened
             statusButton.setText(name);
             statusButton.getToolTip().setTipText(name);
@@ -154,6 +168,7 @@ public class MiniPlayerPanel extends JPanel {
 
         @Override
         public void stateChanged(PlayerState state) {
+            initialize();
             if (state == PlayerState.PLAYING || state == PlayerState.RESUMED){
                 playPauseButton.setIcon(pauseIcon);
                 playPauseButton.setRolloverIcon(pauseIconRollover);
