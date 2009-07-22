@@ -7,7 +7,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -18,10 +17,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.limewire.player.api.AudioPlayer;
-import org.limewire.player.api.AudioPlayerEvent;
-import org.limewire.player.api.AudioPlayerListener;
-import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -30,7 +25,6 @@ import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 
@@ -57,14 +51,14 @@ public class MiniPlayerPanel extends JPanel {
 
     private MarqueeButton statusButton;
     
-    private final AudioPlayer player;
+    private final PlayerMediator playerMediator;
     private final LibraryMediator libraryMediator;
 
     @Inject
-    public MiniPlayerPanel(AudioPlayer player, LibraryMediator libraryMediator) {
+    public MiniPlayerPanel(PlayerMediator playerMediator, LibraryMediator libraryMediator) {
         GuiUtils.assignResources(this);
         
-        this.player = player;
+        this.playerMediator = playerMediator;
         this.libraryMediator = libraryMediator;
         
         setLayout(new MigLayout("insets 0", "4[][]", "0[]0"));
@@ -96,7 +90,7 @@ public class MiniPlayerPanel extends JPanel {
         add(statusButton, "gapbottom 0, gaptop 0");
      
         setMaximumSize(getPreferredSize());
-        player.addAudioPlayerListener(new PlayerListener());
+        playerMediator.addMediatorListener(new PlayerListener());
         
         //hide the player if setting is disabled
         SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
@@ -114,10 +108,10 @@ public class MiniPlayerPanel extends JPanel {
     private class ShowPlayerListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            AudioSource currentSource = player.getCurrentSong();
+            File currentFile = playerMediator.getCurrentSongFile();
             
-            if (currentSource != null) { 
-                libraryMediator.selectInLibrary(currentSource.getFile());
+            if (currentFile != null) { 
+                libraryMediator.selectInLibrary(currentFile);
             }
         }
     }
@@ -131,96 +125,44 @@ public class MiniPlayerPanel extends JPanel {
     }
     
     private boolean isPlaying(){
-        return player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY ;
+        return playerMediator.getStatus() == PlayerState.PLAYING || 
+                playerMediator.getStatus() == PlayerState.SEEKING_PLAY ;
     }
     
     private void setPlaying(boolean playing){
         if (playing){
-            player.unpause();
+            playerMediator.resume();
         } else {
-            player.pause();
+            playerMediator.pause();
         }
     }
     
-    private class PlayerListener implements AudioPlayerListener{
-        //duration in seconds
-        private int durationSecs;
-        private int byteLength;
-        private int currentSecs;
-        private String title;
-        private String artist;
-
-        @Override
-        public void progressChange(int bytesread) {
-            if (byteLength != 0) {
-               currentSecs = durationSecs * bytesread / byteLength;
-               statusButton.setToolTipText(artist + " - " + title + 
-                       " (" + CommonUtils.seconds2time(currentSecs) + 
-                       "/" + CommonUtils.seconds2time(durationSecs) + ")");
-            }
-            if (statusButton.getToolTip().isVisible()) {
-                statusButton.getToolTip().setTipText(statusButton.getToolTipText());
-                statusButton.getToolTip().repaint();
-            }
+    private class PlayerListener implements PlayerMediatorListener {
+         @Override
+        public void progressUpdated(float progress) {
         }
 
         @Override
-        public void songOpened(Map<String, Object> properties) {
+        public void songChanged(String name) {
             //Show MiniPlayer when song is opened
+            statusButton.setText(name);
+            statusButton.getToolTip().setTipText(name);
             if(!isVisible())
                 setVisible(true);
-            
-            title = (String) properties.get("title");
-            artist = (String) properties.get("author");
-            
-            if (title != null && artist != null) {
-                statusButton.setText(artist + " - " + title);
-            } 
-            else {
-                String text = null;
-                AudioSource currentSource = player.getCurrentSong();
-                if (currentSource != null) {
-                    File file = currentSource.getFile();
-                    if (file !=null) {
-                        text = file.getName();
-                    }
-                }
-                if (text == null) {
-                    text = I18n.tr("Unknown");
-                }
-                statusButton.setText(text);
-            }
-            
             statusButton.start();
-            
-            Object duration = properties.get("duration");
-            if (duration != null) {
-                durationSecs = (int)(((Long)duration).longValue()/1000/1000);
-            } 
-            else {
-                durationSecs = 0;
-            }
-            
-            if (properties.get("audio.length.bytes") != null) {
-                byteLength = (Integer)properties.get("audio.length.bytes");
-            } 
-            else {
-                byteLength = 0;
-            }
         }
 
         @Override
-        public void stateChange(AudioPlayerEvent event) {
-            if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
+        public void stateChanged(PlayerState state) {
+            if (state == PlayerState.PLAYING || state == PlayerState.RESUMED){
                 playPauseButton.setIcon(pauseIcon);
                 playPauseButton.setRolloverIcon(pauseIconRollover);
                 playPauseButton.setPressedIcon(pauseIconPressed);
-                statusButton.start();
-                
-            } else if (player.getStatus() == PlayerState.STOPPED) {
+                statusButton.start(); 
+            } else if (state == PlayerState.STOPPED || state == PlayerState.EOM || state == PlayerState.UNKNOWN) {
                 setVisible(false);
-                
-            } else {
+                statusButton.stop();
+            } else if(state == PlayerState.PAUSED){
                 playPauseButton.setIcon(playIcon);
                 playPauseButton.setRolloverIcon(playIconRollover);
                 playPauseButton.setPressedIcon(playIconPressed);
@@ -229,6 +171,4 @@ public class MiniPlayerPanel extends JPanel {
         }
         
     }
-    
-    
 }
