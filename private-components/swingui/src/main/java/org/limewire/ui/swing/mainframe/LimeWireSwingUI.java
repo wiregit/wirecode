@@ -77,7 +77,7 @@ public class LimeWireSwingUI extends JPanel {
         this.mainDownloadPanel = mainDownloadPanel;
         this.downloadHeaderPanel = downloadHeaderPanel;
     	
-    	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanel);
+    	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanel.getComponent());
     	mainDownloadPanel.setVisible(false);
 
         setLayout(new BorderLayout());
@@ -212,7 +212,7 @@ public class LimeWireSwingUI extends JPanel {
        assert(SwingUtilities.isEventDispatchThread());
        splitPane.getBottomComponent().setVisible(isVisible);
        if (isVisible) {
-           splitPane.setDividerSize(downloadHeaderPanel.getPreferredSize().height);           
+           splitPane.setDividerSize(downloadHeaderPanel.getComponent().getPreferredSize().height);           
            int preferredDividerPosition = splitPane.getSize().height - splitPane.getInsets().bottom
            - splitPane.getDividerSize()
            - splitPane.getBottomComponent().getPreferredSize().height;

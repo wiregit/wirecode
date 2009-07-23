@@ -8,6 +8,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.util.FileUtils;
 
@@ -15,9 +16,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
+@LazySingleton
 public class DownloadMediator {
     
     public static enum SortOrder {ORDER_ADDED, NAME, PROGRESS, TIME_REMAINING, SPEED, STATUS, FILE_TYPE, EXTENSION};
@@ -27,16 +27,28 @@ public class DownloadMediator {
 	 */
     private final SortedList<DownloadItem> commonBaseList;
 	private DownloadListManager downloadListManager;
+	private boolean isAscending = true;
+	private SortOrder sortOrder = SortOrder.ORDER_ADDED;
 	
 	@Inject
 	public DownloadMediator(DownloadListManager downloadManager) {
 	    this.downloadListManager = downloadManager;
 	    EventList<DownloadItem> baseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
 	    commonBaseList = GlazedListsFactory.sortedList(baseList, new DescendingComparator(new OrderAddedComparator()));
-	    
+	}
+	
+	public boolean isSortAscending() {
+	    return isAscending;
+	}
+	
+	public SortOrder getSortOrder() {
+	    return sortOrder;
 	}
 	
 	public void setSortOrder(SortOrder order, boolean isAscending){
+	    this.isAscending = isAscending;
+	    this.sortOrder = order;
+	    
 	    Comparator<DownloadItem> comparator;
 	    switch (order) {
         case ORDER_ADDED:
@@ -127,6 +139,36 @@ public class DownloadMediator {
         cancelMatchingDownloadItems(null);
     }
     
+    public boolean hasResumable() {
+        commonBaseList.getReadWriteLock().writeLock().lock();
+        try {
+            for (DownloadItem item : commonBaseList) {
+                if(item.getState().isResumable())
+                    return true;
+            }
+        } finally {
+            commonBaseList.getReadWriteLock().writeLock().unlock();
+        }
+        return false;
+    }
+    
+    public boolean hasPausable() {
+        commonBaseList.getReadWriteLock().writeLock().lock();
+        try {
+            for (DownloadItem item : commonBaseList) {
+                if(item.getState().isPausable())
+                    return true;
+            }
+        } finally {
+            commonBaseList.getReadWriteLock().writeLock().unlock();
+        }
+        return false;
+    }
+    
+    public boolean containsState(DownloadState state) {
+        return getMatchingDownloadItems(state).size() > 0;
+    }
+    
     /**
      * 
      * @param state The state of the DownloadItems to be canceled.  Null will cancel all.
@@ -158,7 +200,7 @@ public class DownloadMediator {
         return matchingItems;
     }
     
-    private static class StateComparator implements Comparator<DownloadItem>{
+    private class StateComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -190,7 +232,7 @@ public class DownloadMediator {
         }
     }
     
-    private static class OrderAddedComparator implements Comparator<DownloadItem>{
+    private class OrderAddedComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) { 
@@ -201,7 +243,7 @@ public class DownloadMediator {
         }      
     }
     
-    private static class NameComparator implements Comparator<DownloadItem>{
+    private class NameComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -214,7 +256,7 @@ public class DownloadMediator {
      
     } 
   
-    private static class ProgressComparator implements Comparator<DownloadItem>{
+    private class ProgressComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -227,7 +269,7 @@ public class DownloadMediator {
      
     } 
     
-    private static class TimeRemainingComparator implements Comparator<DownloadItem>{
+    private class TimeRemainingComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -241,7 +283,7 @@ public class DownloadMediator {
     }
     
     
-    private static class SpeedComparator implements Comparator<DownloadItem>{
+    private class SpeedComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -255,7 +297,7 @@ public class DownloadMediator {
     }
     
     
-    private static class FileTypeComparator implements Comparator<DownloadItem>{
+    private class FileTypeComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -269,7 +311,7 @@ public class DownloadMediator {
     } 
 
     
-    private static class FileExtensionComparator implements Comparator<DownloadItem> {
+    private class FileExtensionComparator implements Comparator<DownloadItem> {
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -282,7 +324,7 @@ public class DownloadMediator {
      
     }
     
-    private static class DescendingComparator implements Comparator<DownloadItem>{
+    private class DescendingComparator implements Comparator<DownloadItem>{
         private Comparator<DownloadItem> delegate;
 
         public DescendingComparator(Comparator<DownloadItem> delegate){
