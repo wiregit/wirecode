@@ -90,7 +90,7 @@ public class AppFrame extends SingleFrameApplication {
     
     @Inject private Application application;
     @Inject private LimeWireSwingUI ui;
-    @Inject private SetupWizard setupWizard;
+    @Inject private Provider<SetupWizard> setupWizardProvider;
     @Inject private Provider<OptionsDialog> options;
     @Inject private FramePositioner framePositioner;
     @Inject private TrayNotifier trayNotifier;
@@ -193,7 +193,7 @@ public class AppFrame extends SingleFrameApplication {
     
     @Override
     protected void ready() {
-        if (setupWizard.shouldShowWizard()) {
+        if (SetupWizard.shouldShowWizard(application)) {
             JXPanel glassPane = new JXPanel();
             glassPane.setOpaque(false);
             glassPane.setBackgroundPainter(new AbstractPainter<JComponent>() {
@@ -207,10 +207,11 @@ public class AppFrame extends SingleFrameApplication {
 
             ui.hideMainPanel();
             glassPane.setVisible(true);
-            setupWizard.showDialogIfNeeded(getMainFrame());
+            setupWizardProvider.get().showDialog(getMainFrame(), application);
             glassPane.setVisible(false);
             ui.showMainPanel();
         }
+        
         // Make absolutely positively certain that we've set this to true.
         InstallSettings.UPGRADED_TO_5.setValue(true);
         
