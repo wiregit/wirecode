@@ -17,18 +17,38 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 class HelpMenu extends MnemonicMenu {
 
+    private final Application application;
+    
+    private final Provider<TrayNotifier> trayNotifierProvider;
+    private final Provider<Navigator> navigatorProvider;
+    private final Provider<HomeMediator> homeMediatorProvider;
+    
     @Inject
-    public HelpMenu(Application application, final TrayNotifier trayNotifier, final Navigator navigator, final HomeMediator homeMediator) {
+    public HelpMenu(Application application, 
+            Provider<TrayNotifier> trayNotifierProvider,
+            Provider<Navigator> navigatorProvider, 
+            Provider<HomeMediator> homeMediatorProvider) {
+        
         super(I18n.tr("&Help"));
 
+        this.application = application;
+        
+        this.trayNotifierProvider = trayNotifierProvider;
+        this.navigatorProvider = navigatorProvider;
+        this.homeMediatorProvider = homeMediatorProvider;
+    }
+
+    @Override
+    public void createMenuItems() {
         add(new AbstractAction(I18n.tr("&Home Screen")) {
             @Override
            public void actionPerformed(ActionEvent e) {
-                navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
-                homeMediator.getComponent().loadDefaultUrl();
+                navigatorProvider.get().getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
+                homeMediatorProvider.get().getComponent().loadDefaultUrl();
            }
         });
         
@@ -67,15 +87,15 @@ class HelpMenu extends MnemonicMenu {
                         Notification notification = new Notification("This is a not tooo long message title",
                                 "This is a super looooooooooooooooooooooooooooooooong message.",
                                 this);
-                        trayNotifier.showMessage(notification);
+                        trayNotifierProvider.get().showMessage(notification);
                     } else if (new Random().nextBoolean()) {
                         Notification notification = new Notification("Long super loooooooooooooong loooon loooong message title",
                                 "This is a another very loooong  loooong loooong loooong loooong loooong loooong loooong loooong message.",
                                 this);
-                        trayNotifier.showMessage(notification);
+                        trayNotifierProvider.get().showMessage(notification);
                     } else {
                         Notification notification = new Notification("Short Title", "Short message.", this);
-                        trayNotifier.showMessage(notification);
+                        trayNotifierProvider.get().showMessage(notification);
                     }
                 }
             });

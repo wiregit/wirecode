@@ -7,8 +7,8 @@ import java.awt.event.WindowListener;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
+import javax.swing.event.MenuListener;
 
-import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
@@ -34,22 +34,44 @@ import com.google.inject.Provider;
  */
 class ToolsMenu extends MnemonicMenu {
 
-    /** Currently displayed Advanced Tools content panel. */
-    private AdvancedToolsPanel advancedTools;
+    private final JMenu whatsNewSubmenu;
+    
+    private final Provider<AdvancedToolsPanel> advancedToolsPanelProvider; 
+    private final Provider<Navigator> navigatorProvider;
+    private final Provider<UploadMediator> uploadMediatorProvider;
+    private final Provider<SearchHandler> searchHandlerProvider;
+    private final Provider<SearchNavigator> searchNavigatorProvider;
+    
+    private AdvancedToolsPanel advancedTools = null;
     
     @Inject
-    public ToolsMenu(final Provider<AdvancedToolsPanel> advancedProvider, 
-            final Navigator navigator, final UploadMediator uploadMediator,
-            final SearchHandler searchHandler, final LibraryManager libraryManager, final SearchNavigator searchNavigator) {
+    public ToolsMenu(
+            Provider<AdvancedToolsPanel> advancedToolsPanelProvider, 
+            Provider<Navigator> navigatorProvider, 
+            Provider<UploadMediator> uploadMediatorProvider,
+            Provider<SearchHandler> searchHandlerProvider, 
+            Provider<SearchNavigator> searchNavigatorProvider) {
+        
         super(I18n.tr("&Tools"));
+        
+        this.advancedToolsPanelProvider = advancedToolsPanelProvider;
+        this.navigatorProvider = navigatorProvider;
+        this.uploadMediatorProvider = uploadMediatorProvider;
+        this.searchHandlerProvider = searchHandlerProvider;
+        this.searchNavigatorProvider = searchNavigatorProvider;
 
+        whatsNewSubmenu = createWhatsNewSubmenu();
+    }
+    
+    @Override
+    public void createMenuItems() {
         add(new AbstractAction(I18n.tr("&Uploads")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 
-                NavItem navItem = navigator.getNavItem(NavCategory.UPLOAD, UploadMediator.NAME);
+                NavItem navItem = navigatorProvider.get().getNavItem(NavCategory.UPLOAD, UploadMediator.NAME);
                 if (navItem == null) {
-                    navItem = navigator.createNavItem(NavCategory.UPLOAD, UploadMediator.NAME, uploadMediator);
+                    navItem = navigatorProvider.get().createNavItem(NavCategory.UPLOAD, UploadMediator.NAME, uploadMediatorProvider.get());
                 }
                 navItem.select();
             }
@@ -59,12 +81,12 @@ class ToolsMenu extends MnemonicMenu {
         add(new AbstractAction(I18n.tr("Advanced &Search")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SearchNavItem item = searchNavigator.addAdvancedSearch();
+                SearchNavItem item = searchNavigatorProvider.get().addAdvancedSearch();
                 item.select();
             }
         });
         
-        add(createWhatsNewSubmenu(searchHandler));
+        add(whatsNewSubmenu);
         addSeparator();
         
         add(new AbstractAction(I18n.tr("&Advanced Tools...")) {
@@ -75,7 +97,7 @@ class ToolsMenu extends MnemonicMenu {
                 // the window is closed.
                 WindowListener closeListener = null;
                 if (advancedTools == null) {
-                    advancedTools = advancedProvider.get();
+                    advancedTools = advancedToolsPanelProvider.get();
                     closeListener = new WindowAdapter() {
                         @Override
                         public void windowClosing(WindowEvent e) {
@@ -94,24 +116,35 @@ class ToolsMenu extends MnemonicMenu {
                     new OptionsDisplayEvent().publish();
                 }
             });
-        }
+        }   
+    }
+    
+    @Override
+    public void addMenuListener(MenuListener listener) {
+        super.addMenuListener(listener);
+        whatsNewSubmenu.addMenuListener(listener);
     }
 
-    private JMenu createWhatsNewSubmenu(final SearchHandler searchHandler) {
-        JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search"));
-        for (final SearchCategory category : SearchCategory.values()) {
-            if (category == SearchCategory.OTHER) {
-                continue;
-            }
+    private JMenu createWhatsNewSubmenu() {
+        JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search")) {
+            @Override
+            public void createMenuItems() {
+                for (final SearchCategory category : SearchCategory.values()) {
+                    if (category == SearchCategory.OTHER) {
+                        continue;
+                    }
 
-            Action action = new AbstractAction(SearchCategoryUtils.getWhatsNewMenuName(category)) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    searchHandler.doSearch(DefaultSearchInfo.createWhatsNewSearch(category));
+                    Action action = new AbstractAction(SearchCategoryUtils.getWhatsNewMenuName(category)) {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            searchHandlerProvider.get().doSearch(DefaultSearchInfo.createWhatsNewSearch(category));
+                        }
+                    };
+                    add(action);
                 }
-            };
-            menu.add(action);
-        }
+            }
+        };
+            
         return menu;
     }
 }
