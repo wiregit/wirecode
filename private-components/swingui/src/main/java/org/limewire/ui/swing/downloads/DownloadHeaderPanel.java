@@ -76,8 +76,6 @@ public class DownloadHeaderPanel {
         ResizeUtils.forceHeight(component, 20);
         
         initialize();
-        
-        System.exit(1);
     }
     
     public JComponent getComponent() {
