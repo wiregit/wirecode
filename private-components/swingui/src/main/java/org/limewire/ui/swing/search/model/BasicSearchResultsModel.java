@@ -19,6 +19,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.StoreResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -27,6 +28,7 @@ import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -418,6 +420,29 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         }        
         
         listQueuer.addAll(results);
+    }
+    
+    @Override
+    public void addStoreResult(final StoreResult storeResult) {
+        // TODO REMOVE
+        System.out.println("addStoreResult: isEDT=" + SwingUtilities.isEventDispatchThread());
+        
+        SwingUtils.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                // Find URN in results list.
+                URN urn = storeResult.getUrn();
+                int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
+                
+                // Add store result if not in list.
+                if (idx < 0) {
+                    idx = -(idx + 1);
+                    VisualSearchResult vsr = new StoreResultAdapter(storeResult, propertiableHeadings);
+                    groupedUrnResults.add(idx, vsr);
+                }
+                
+            }
+        });
     }
     
     /**
