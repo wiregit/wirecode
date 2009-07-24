@@ -62,12 +62,16 @@ public class LimeWireBittorrentModule extends AbstractModule {
                 public boolean isReportingLibraryLoadFailture() {
                     return BittorrentSettings.LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE.getValue();
                 }
-                
+
                 @Override
-                public void setReportingLibraryLoadFailure(boolean reportingLibraryLoadFailure) {
-                    BittorrentSettings.LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE.setValue(reportingLibraryLoadFailure);
+                public int getListenStartPort() {
+                    return BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue();
                 }
                 
+                @Override
+                public int getListenEndPort() {
+                    return BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue();
+                }
                };
            }
         });

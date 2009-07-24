@@ -1,8 +1,5 @@
 package org.limewire.libtorrent;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.TorrentException;
@@ -16,6 +13,7 @@ import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import com.sun.jna.WString;
 
 /**
@@ -25,8 +23,6 @@ import com.sun.jna.WString;
 class LibTorrentWrapper {
 
     private static final char MAX_LENGTH_DIGITS = 4;
-
-    private static final int IP_SIZE = 16;
 
     private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
 
@@ -56,13 +52,13 @@ class LibTorrentWrapper {
 
             this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
 
-            init();
+            init(torrentSettings);
             loaded.set(true);
         } catch (Throwable e) {
-            if(torrentSettings.isReportingLibraryLoadFailture()) {
+            LOG.error("Failure loading the libtorrent libraries.", e);
+            if (torrentSettings.isReportingLibraryLoadFailture()) {
                 ExceptionUtils.reportOrReturn(e);
             }
-            LOG.error("Failure loading the libtorrent libraries.", e);
         }
     }
 
@@ -70,9 +66,9 @@ class LibTorrentWrapper {
         return loaded.get();
     }
 
-    private void init() {
+    private void init(TorrentSettings torrentSettings) {
         LOG.debugf("before init");
-        catchWrapperException(libTorrent.init());
+        catchWrapperException(libTorrent.init(new LibTorrentSettings(torrentSettings)));
         LOG.debugf("after init");
     }
 
@@ -122,7 +118,7 @@ class LibTorrentWrapper {
         LOG.debugf("after remove_torrent: {0}", id);
     }
 
-    public List<String> get_peers(String id) {
+    public LibTorrentPeer[] get_peers(String id) {
         Memory numPeersMemory = new Memory(MAX_LENGTH_DIGITS);
         int numUnfilteredPeers = numPeersMemory.getInt(0);
 
@@ -136,18 +132,34 @@ class LibTorrentWrapper {
         LOG.debugf("after get_num_peers: {0} - {1}", id, numUnfilteredPeers);
 
         if (numUnfilteredPeers == 0) {
-            return Collections.emptyList();
+            return new LibTorrentPeer[0];
         }
 
-        Memory memory = new Memory(numUnfilteredPeers * IP_SIZE);
-
+        LibTorrentPeer[] torrentPeers = new LibTorrentPeer[numUnfilteredPeers];
+        Pointer[] torrentPeersPointers = new Pointer[numUnfilteredPeers];
+        for(int i = 0; i < torrentPeersPointers.length; i++) {
+            LibTorrentPeer torrentPeer = new LibTorrentPeer();
+            torrentPeers[i] = torrentPeer;
+            torrentPeersPointers[i] = torrentPeer.getPointer();
+        }
+        
         LOG.debugf("before get_peers: {0}", id);
-        catchWrapperException(libTorrent.get_peers(id, (int) memory.getSize(), memory));
+        catchWrapperException(libTorrent.get_peers(id, torrentPeersPointers, torrentPeersPointers.length));
+        
+        
+        for(int i = 0; i < torrentPeers.length; i++) {
+            torrentPeers[i].read();
+        }
+        
+        free_peers(id, torrentPeersPointers, torrentPeersPointers.length);
         LOG.debugf("after get_peers: {0}", id);
+        return torrentPeers;
+    }
 
-        List<String> peers = Arrays.asList(memory.getString(0).split(";"));
-
-        return peers;
+    private void free_peers(String id, Pointer[] torrentPeersPointers, int length) {
+        LOG.debugf("before free_peers: {0}", id);
+        catchWrapperException(libTorrent.free_peers(torrentPeersPointers, torrentPeersPointers.length));
+        LOG.debugf("after free_peers: {0}", id);
     }
 
     public void signal_fast_resume_data_request(String id) {
@@ -190,6 +202,53 @@ class LibTorrentWrapper {
         LOG.debugf("before update_settings: {0}", torrentSettings);
         catchWrapperException(libTorrent.update_settings(new LibTorrentSettings(torrentSettings)));
         LOG.debugf("after update_settings: {0}", torrentSettings);
+    }
 
+    public void start_dht() {
+        LOG.debugf("before start_dht");
+        catchWrapperException(libTorrent.start_dht());
+        LOG.debugf("after start_dht");
+    }
+
+    public void stop_dht() {
+        LOG.debugf("before stop_dht");
+        catchWrapperException(libTorrent.stop_dht());
+        LOG.debugf("after stop_dht");
+    }
+
+    public void start_upnp() {
+        LOG.debugf("before start_upnp");
+        catchWrapperException(libTorrent.start_upnp());
+        LOG.debugf("after start_upnp");
+    }
+
+    public void stop_upnp() {
+        LOG.debugf("before stop_upnp");
+        catchWrapperException(libTorrent.stop_upnp());
+        LOG.debugf("after stop_upnp");
+    }
+
+    public void start_lsd() {
+        LOG.debugf("before start_lsd");
+        catchWrapperException(libTorrent.start_lsd());
+        LOG.debugf("after start_lsd");
+    }
+
+    public void stop_lsd() {
+        LOG.debugf("before stop_lsd");
+        catchWrapperException(libTorrent.stop_lsd());
+        LOG.debugf("after stop_lsd");
+    }
+
+    public void start_natpmp() {
+        LOG.debugf("before start_natpmp");
+        catchWrapperException(libTorrent.start_natpmp());
+        LOG.debugf("after start_natpmp");
+    }
+
+    public void stop_natpmp() {
+        LOG.debugf("before stop_natpmp");
+        catchWrapperException(libTorrent.stop_natpmp());
+        LOG.debugf("after stop_natpmp");
     }
 }

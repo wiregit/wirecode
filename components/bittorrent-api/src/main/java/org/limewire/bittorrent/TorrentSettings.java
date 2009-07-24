@@ -32,10 +32,13 @@ public interface TorrentSettings {
     boolean isReportingLibraryLoadFailture();
 
     /**
-     * Updates the setting to report library load failures.
+     * Returns the listening start port. 
      */
-    void setReportingLibraryLoadFailure(boolean reportingLibraryLoadFailure);
-    
-    
+    public int getListenStartPort();
+
+    /**
+     * Returns the listening end port. 
+     */
+    public int getListenEndPort();
 
 }

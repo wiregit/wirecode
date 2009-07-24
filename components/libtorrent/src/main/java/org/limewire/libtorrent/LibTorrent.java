@@ -4,7 +4,6 @@ import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.libtorrent.callback.AlertCallback;
 
 import com.sun.jna.Library;
-import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
 
@@ -17,7 +16,7 @@ interface LibTorrent extends Library {
      * Inititalizes the libtorrent session to use the given path as the default
      * download location.
      */
-    public WrapperStatus init();
+    public WrapperStatus init(LibTorrentSettings libTorrentSettings);
 
     /**
      * Adds a torrent to the libtorrent session. This can be done with only a
@@ -62,7 +61,7 @@ interface LibTorrent extends Library {
     /**
      * Retrieves the peers for the torrent with the given sha1
      */
-    public WrapperStatus get_peers(String id, int len, Memory memory);
+    public WrapperStatus get_peers(String id, Pointer[] torrentPeers, int numPeers);
 
     /**
      * Tells the session to save the fast resume data for the torrent with the
@@ -100,5 +99,51 @@ interface LibTorrent extends Library {
      * Updates the sessions settings using the provided settings structure.
      */
     public WrapperStatus update_settings(LibTorrentSettings libTorrentSettings);
+    
+    /**
+     * Starts the dht 
+     */
+    public WrapperStatus start_dht();
+
+    /**
+     * Stops the dht 
+     */
+    public WrapperStatus stop_dht();
+
+    /**
+     * Starts the upnp service. 
+     */
+    public WrapperStatus start_upnp();
+
+    /**
+     * Stops the upnp service. 
+     */
+    public WrapperStatus stop_upnp();
+
+    /**
+     * Starts the local service discovery service 
+     */
+    public WrapperStatus start_lsd();
+
+    /**
+     * Stops the local service discovery service 
+     */
+    public WrapperStatus stop_lsd();
+
+    /**
+     * Starts the natpmp service. 
+     */
+
+    public WrapperStatus start_natpmp();
+
+    /**
+     * Stops the natpmp service. 
+     */
+    public WrapperStatus stop_natpmp();
+
+    /**
+     * Frees the peers from memory. 
+     */
+    public WrapperStatus free_peers(Pointer[] torrentPeersPointers, int length);
 
 }

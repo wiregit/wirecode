@@ -18,9 +18,16 @@ public class LibTorrentSettings extends Structure {
      * it is unlimited.
      */
     public int max_download_bandwidth = 0;
+    
+    int listen_start_port = 6881;
+    
+    int listen_end_port = 6889;
 
     public LibTorrentSettings(TorrentSettings torrentSettings) {
         this.max_upload_bandwidth = torrentSettings.getMaxUploadBandwidth();
         this.max_download_bandwidth = torrentSettings.getMaxDownloadBandwidth();
+        this.listen_start_port = torrentSettings.getListenStartPort();
+        this.listen_end_port = torrentSettings.getListenEndPort();
+        
     }
 }

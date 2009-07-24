@@ -34,7 +34,12 @@ public class MockTorrentSettings implements TorrentSettings {
     }
 
     @Override
-    public void setReportingLibraryLoadFailure(boolean reportingLibraryLoadFailure) {
-        this.reportLibraryLoadFailure = reportingLibraryLoadFailure;
+    public int getListenEndPort() {
+        return 0;
+    }
+
+    @Override
+    public int getListenStartPort() {
+        return 0;
     }
 }

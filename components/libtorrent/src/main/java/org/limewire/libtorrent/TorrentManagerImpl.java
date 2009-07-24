@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -158,7 +159,13 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public List<String> getPeers(Torrent torrent) {
         validateLibrary();
-        return libTorrent.get_peers(torrent.getSha1());
+        
+        List<String> peers = new ArrayList<String>();
+        LibTorrentPeer[] torrentPeers = libTorrent.get_peers(torrent.getSha1()); 
+        for(int i = 0; i < torrentPeers.length; i++) {
+            peers.add(torrentPeers[i].ip);
+        }
+        return peers;
     }
 
     @Override
@@ -258,6 +265,11 @@ public class TorrentManagerImpl implements TorrentManager {
                 libTorrent.initialize(torrentSettings.get());
                 if (libTorrent.isLoaded()) {
                     updateSettings(torrentSettings.get());
+                    if(!OSUtils.isLinux()) {
+                        //turning off upnp until libtorrent fixes crash
+                        libTorrent.start_upnp();
+                        libTorrent.start_natpmp();
+                    }
                 }
             } finally {
                 lock.writeLock().unlock();
