@@ -22,5 +22,8 @@ public interface SearchListener {
     
     /** Notification that sponsored results have been received for the search. */
     void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults);
+    
+    /** Notification when a new store result is received for the search. */
+    void handleStoreResult(Search search, StoreResult storeResult);
 
 }
