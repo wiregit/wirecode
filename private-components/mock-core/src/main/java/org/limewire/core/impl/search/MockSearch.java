@@ -7,13 +7,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.StoreResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.impl.MockURN;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
@@ -86,6 +89,12 @@ public class MockSearch implements Search {
         }
     }
     
+    private void handleStoreResult(StoreResult storeResult) {
+        for (SearchListener listener : listeners) {
+            listener.handleStoreResult(this, storeResult);
+        }
+    }
+    
     @Override
     public void repeat() {
         for (SearchListener listener : listeners) {
@@ -108,6 +117,7 @@ public class MockSearch implements Search {
             addRecordsWedding(i);
         }
         if(query.indexOf("monkey") > -1){
+            addStoreRecord(i);
             addRecordsWedding(i);
             addRecordsMonkey(i);
         }
@@ -1189,6 +1199,20 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.NAME, name);
         handleSearchResult(msr);
     }
+    
+    private void addStoreRecord(int i) {
+        URN urn = new MockURN("www.store.limewire.com" + i);
+        
+        MockStoreResult msr = new MockStoreResult(urn, Category.AUDIO);
+        msr.setFileExtension("mp3");
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setSize(15 * 1024 * 1024);
+        
+        handleStoreResult(msr);
+    }
+    
     static class MockRemoteHost implements RemoteHost {
         private final String description;
         
