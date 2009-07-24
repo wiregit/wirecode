@@ -159,4 +159,8 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      */
     boolean isLicensed();
 
+    /**
+     * Returns true if the result is from the Lime Store.
+     */
+    boolean isStore();
 }
