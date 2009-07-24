@@ -183,7 +183,7 @@ public class MockSearchResult implements Cloneable, SearchResult {
     }
 
     public int getRelevance() {
-        return 0;
+        return sources.size();
     }
 
     public boolean isLicensed() {
