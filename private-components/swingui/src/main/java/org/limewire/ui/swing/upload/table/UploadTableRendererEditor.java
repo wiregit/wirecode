@@ -12,6 +12,7 @@ import java.text.NumberFormat;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -19,7 +20,6 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
@@ -47,7 +47,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private JLabel nameLabel;
     private JLabel iconLabel;
     private RemoteHostWidget browseNameLabel;
-    private JXButton cancelButton;
+    private JButton cancelButton;
     private JXHyperlink removeLink;
     private WeakReference<UploadItem> editItemReference;
     private LimeProgressBar progressBar;

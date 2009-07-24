@@ -25,6 +25,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -42,7 +43,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.border.DropShadowBorder;
@@ -488,15 +488,15 @@ public class ChatFriendListPane extends JPanel {
     }
 
     private class FriendCellRenderer implements TableCellRenderer {
-        private final JXPanel cell; 
-        private final JXLabel friendName;
-        private final JXLabel chatStatus;
+        private final JPanel cell; 
+        private final JLabel friendName;
+        private final JLabel chatStatus;
         
         public FriendCellRenderer() {
             cell = new JXPanel(new MigLayout("insets 2 2 0 0", "[]4[]"));
             
-            this.friendName = new JXLabel();
-            this.chatStatus = new JXLabel();
+            this.friendName = new JLabel();
+            this.chatStatus = new JLabel();
 
             friendName.setFont(friendFont);
             friendName.setForeground(friendColor);
@@ -507,7 +507,6 @@ public class ChatFriendListPane extends JPanel {
         public final Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
             cell.removeAll();
-            cell.setBackgroundPainter(null);
             
             ChatFriend chatFriend = getFriend(table, row);
             

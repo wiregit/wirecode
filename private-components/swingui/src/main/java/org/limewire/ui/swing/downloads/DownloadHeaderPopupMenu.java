@@ -61,7 +61,7 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
         GuiUtils.assignResources(this);
     }
     
-    public void init() {
+    public void populate() {
         removeAll();
         
         final JCheckBoxMenuItem clearFinishedCheckBox = new JCheckBoxMenuItem(I18n.tr("Clear When Finished"));

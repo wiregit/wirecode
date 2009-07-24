@@ -16,7 +16,6 @@ import javax.swing.SwingUtilities;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXButton;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -72,7 +71,7 @@ public class MiniPlayerPanel extends JPanel {
             
             setOpaque(false);
 
-            playPauseButton = new JXButton();
+            playPauseButton = new JButton();
             playPauseButton.setMargin(new Insets(0, 0, 0, 0));
             playPauseButton.setBorderPainted(false);
             playPauseButton.setContentAreaFilled(false);
