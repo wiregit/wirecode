@@ -233,6 +233,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
+    public boolean isStore() {
+        return false;
+    }
+
+    @Override
     public void toggleChildrenVisibility() {
         // TODO Auto-generated method stub
         

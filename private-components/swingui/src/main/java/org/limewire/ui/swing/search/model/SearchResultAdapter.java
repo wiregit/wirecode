@@ -373,6 +373,11 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     }
 
     @Override
+    public boolean isStore() {
+        return false;
+    }
+    
+    @Override
     public boolean isPreExistingDownload() {
         return preExistingDownload;
     }
