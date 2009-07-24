@@ -155,6 +155,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private JXPanel searchResultTextPanel;
 
     private JLabel lastRowMessage;
+    
+    private final ListViewStoreRenderer storeRenderer;
 
     private DownloadHandler downloadHandler;
     
@@ -176,7 +178,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
-        SearchResultMenuFactory searchResultMenuFactory) {
+        SearchResultMenuFactory searchResultMenuFactory,
+        ListViewStoreRenderer storeRenderer) {
 
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
@@ -186,6 +189,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
+        this.storeRenderer = storeRenderer;
         
         GuiUtils.assignResources(this);
 
@@ -320,6 +324,15 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
           return lastRowPanel;
         } 
 
+        if (vsr.isStore()) {
+            storeRenderer.setBackground(Color.LIGHT_GRAY);
+            storeRenderer.setOpaque(true); // TODO why no effect?
+            
+            RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
+            storeRenderer.update(vsr, result);
+            return storeRenderer;
+        }
+        
         update(vsr);
         return editorComponent;
     }  
@@ -638,7 +651,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      * when the label is used in a table renderer or editor, it has weird mouse over behavior where the lines dance up and down.  
      * NoDancingHtmlLabel prevents this behavior.
      */
-    private static class NoDancingHtmlLabel extends TransparentCellTableRenderer {
+    public static class NoDancingHtmlLabel extends TransparentCellTableRenderer {
         public NoDancingHtmlLabel(){
             //prevents strange movement on mouseover
             setVerticalAlignment(JLabel.TOP);
