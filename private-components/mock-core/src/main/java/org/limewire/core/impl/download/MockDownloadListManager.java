@@ -37,7 +37,7 @@ public class MockDownloadListManager implements DownloadListManager {
 	    downloadItems = GlazedLists.threadSafeList(
 	        new ObservableElementList<DownloadItem>(
             new BasicEventList<DownloadItem>(), downloadConnector));
-		initializeMockData();
+		//initializeMockData();
 	}
 
 	@Override
