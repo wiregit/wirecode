@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.StoreResult;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseSearchFactory;
 import org.limewire.core.api.search.browse.BrowseStatus;
@@ -131,6 +132,11 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
             for (SearchListener listener : searchListeners) {
                 listener.handleSponsoredResults(MultipleBrowseSearch.this, sponsoredResults);
             }
+        }
+        
+        @Override
+        public void handleStoreResult(Search search, StoreResult storeResult) {
+            // Do nothing.
         }
 
         @Override

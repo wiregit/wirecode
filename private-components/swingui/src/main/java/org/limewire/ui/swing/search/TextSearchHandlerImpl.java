@@ -15,6 +15,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.StoreResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
@@ -224,6 +225,7 @@ class TextSearchHandlerImpl implements SearchHandler {
             }
 
             @Override public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
+            @Override public void handleStoreResult(Search search, StoreResult storeResult) {}
             @Override public void searchStarted(Search search) {}
             @Override public void searchStopped(Search search) {}                
         });
