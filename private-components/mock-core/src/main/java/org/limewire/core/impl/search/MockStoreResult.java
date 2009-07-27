@@ -1,5 +1,6 @@
 package org.limewire.core.impl.search;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.StoreResult;
 
 /**
@@ -19,6 +21,7 @@ public class MockStoreResult implements StoreResult {
     private final URN urn;
     private final Map<FilePropertyKey, Object> propertyMap = 
         new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+    private final List<SearchResult> fileList;
     
     private String fileExtension;
     private long size;
@@ -29,6 +32,7 @@ public class MockStoreResult implements StoreResult {
     public MockStoreResult(URN urn, Category category) {
         this.urn = urn;
         this.category = category;
+        this.fileList = new ArrayList<SearchResult>();
     }
     
     @Override
@@ -38,7 +42,7 @@ public class MockStoreResult implements StoreResult {
     
     @Override
     public boolean isCollection() {
-        return false;
+        return (fileList.size() > 1);
     }
 
     @Override
@@ -47,8 +51,8 @@ public class MockStoreResult implements StoreResult {
     }
     
     @Override
-    public List<Object> getFileList() {
-        return Collections.emptyList();
+    public List<SearchResult> getFileList() {
+        return fileList;
     }
 
     @Override
@@ -64,6 +68,10 @@ public class MockStoreResult implements StoreResult {
     @Override
     public URN getUrn() {
         return urn;
+    }
+    
+    void addFile(SearchResult searchResult) {
+        fileList.add(searchResult);
     }
     
     void setFileExtension(String extension) {

@@ -1203,14 +1203,34 @@ public class MockSearch implements Search {
     private void addStoreRecord(int i) {
         URN urn = new MockURN("www.store.limewire.com" + i);
         
-        MockStoreResult msr = new MockStoreResult(urn, Category.AUDIO);
-        msr.setFileExtension("mp3");
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setSize(15 * 1024 * 1024);
+        MockStoreResult mstr = new MockStoreResult(urn, Category.AUDIO);
+        mstr.setFileExtension("mp3");
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        mstr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
+        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        mstr.setSize(6 * 1024 * 1024);
         
-        handleStoreResult(msr);
+        MockSearchResult msr = new MockSearchResult();
+        msr.setExtension("mp3");
+        msr.setUrn("www.store.limewire.com" + (i + 10));
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.NAME, "Heh?");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setResultType(Category.AUDIO);
+        msr.setSize(3 * 1024 * 1024);
+        mstr.addFile(msr);
+        
+        msr = new MockSearchResult();
+        msr.setExtension("mp3");
+        msr.setUrn("www.store.limewire.com" + (i + 11));
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.NAME, "Take Me To Space (Man)");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setResultType(Category.AUDIO);
+        msr.setSize(3 * 1024 * 1024);
+        mstr.addFile(msr);
+        
+        handleStoreResult(mstr);
     }
     
     static class MockRemoteHost implements RemoteHost {
