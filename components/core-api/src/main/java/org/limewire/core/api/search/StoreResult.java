@@ -27,10 +27,9 @@ public interface StoreResult {
     String getFileExtension();
     
     /**
-     * Returns a List of audio files associated with the result.
-     * TODO change Object to something else, perhaps SearchResult
+     * Returns a List of media files associated with the result.
      */
-    List<Object> getFileList();
+    List<SearchResult> getFileList();
     
     /**
      * Returns a property value for the specified property key.
