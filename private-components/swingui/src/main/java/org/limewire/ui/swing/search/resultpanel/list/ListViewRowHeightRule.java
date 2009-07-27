@@ -25,6 +25,12 @@ public interface ListViewRowHeightRule {
      */
     RowDisplayResult getDisplayResult(VisualSearchResult vsr);
     
+    /**
+     * Returns the applicable row height for the specified VisualSearchResult
+     * and RowDisplayResult.
+     */
+    int getRowHeight(VisualSearchResult vsr, RowDisplayResult rdr);
+    
     public static interface RowDisplayResult {
         String getHeading();
         String getSubheading();

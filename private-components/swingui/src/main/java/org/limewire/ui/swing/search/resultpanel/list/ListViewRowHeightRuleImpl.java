@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.search.StoreResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
@@ -95,6 +96,20 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         default:
             throw new UnsupportedOperationException("Unhandled download state: " + vsr.getDownloadState());
         }
+    }
+    
+    @Override
+    public int getRowHeight(VisualSearchResult vsr, RowDisplayResult rdr) {
+        if (vsr.isStore()) {
+            StoreResult storeResult = vsr.getStoreResult();
+            if (storeResult.isCollection()) {
+                int count = storeResult.getFileList().size();
+                return 60 + (count * 29);
+            } else {
+                return 60;
+            }
+        }
+        return rdr.getConfig().getRowHeight();
     }
 
     private RowDisplayResultImpl newResult(RowDisplayConfig config, VisualSearchResult vsr, String heading,
