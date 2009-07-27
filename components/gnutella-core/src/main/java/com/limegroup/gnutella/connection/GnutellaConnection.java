@@ -1175,7 +1175,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
             if (Arrays.equals(ack.getGUID(), applicationServices.getMyGUID())) {
                 myPushProxy = true;
-                fireEvent(new GnutellaConnectionEvent(this, EventType.IS_PUSH_PROXY, new GUID(applicationServices.getMyGUID())));
+                fireEvent(new GnutellaConnectionEvent(this, EventType.IS_PUSH_PROXY));
             }
             // else mistake on the server side - the guid should be my client
             // guid - not really necessary but whatever
