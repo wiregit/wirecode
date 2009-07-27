@@ -308,7 +308,7 @@ public class BaseResultPanel extends JXPanel {
                                 result = rowHeightRule.getDisplayResult(vsr);
                                 vsrToRowDisplayResultMap.put(vsr, result);
                             } 
-                            int newRowHeight = result.getConfig().getRowHeight();
+                            int newRowHeight = rowHeightRule.getRowHeight(vsr, result);
                             if(vsr.getSimilarityParent() == null) {
                                 //only resize rows that belong to parent visual results.
                                 //this will prevent the jumping when expanding child results as mentioned in
