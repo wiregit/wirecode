@@ -7,6 +7,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.StoreResult;
 import org.limewire.ui.swing.filter.FilterableItem;
 import org.limewire.ui.swing.nav.NavSelectable;
 
@@ -163,4 +164,9 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      * Returns true if the result is from the Lime Store.
      */
     boolean isStore();
+    
+    /**
+     * Returns the Lime Store result associated with this result.
+     */
+    StoreResult getStoreResult();
 }

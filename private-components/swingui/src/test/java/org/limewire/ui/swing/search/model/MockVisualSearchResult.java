@@ -12,6 +12,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.StoreResult;
 import org.limewire.friend.api.Friend;
 
 public class MockVisualSearchResult implements VisualSearchResult {
@@ -235,6 +236,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
     @Override
     public boolean isStore() {
         return false;
+    }
+
+    @Override
+    public StoreResult getStoreResult() {
+        return null;
     }
 
     @Override

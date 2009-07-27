@@ -150,6 +150,11 @@ public class StoreResultAdapter implements VisualSearchResult {
     public boolean isStore() {
         return true;
     }
+    
+    @Override
+    public StoreResult getStoreResult() {
+        return storeResult;
+    }
 
     @Override
     public void setChildrenVisible(boolean childrenVisible) {
