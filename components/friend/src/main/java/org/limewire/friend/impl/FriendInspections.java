@@ -1,21 +1,23 @@
 package org.limewire.friend.impl;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-import com.google.inject.Inject;
-import org.limewire.listener.EventBean;
-import org.limewire.listener.EventUtils;
-import org.limewire.friend.api.FriendConnectionEvent;
-import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendConnection;
+import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
-import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectionPoint;
-import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inject.LazySingleton;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionHistogram;
+import org.limewire.inspection.InspectionPoint;
+import org.limewire.listener.EventBean;
+import org.limewire.listener.EventUtils;
+
+import com.google.inject.Inject;
 
 /**
  * Friend feature uasge inspections.
@@ -33,7 +35,7 @@ public class FriendInspections {
     private class LazyInspectableContainer {
         
         // keeping previous inspection point name for backward compatibility
-        @InspectionPoint("xmpp service")
+        @InspectionPoint(value = "xmpp service", category = DataCategory.USAGE)
         private final Inspectable inspectable = new Inspectable() {
             @Override
             public Object inspect() {

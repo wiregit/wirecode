@@ -5,6 +5,7 @@ import java.io.File;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.DataCategory;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileArraySetting;
 import org.limewire.setting.FileSetting;
@@ -129,21 +130,21 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("BT_AUTOMATIC_SETTINGS", true);
 
     /** True if any positions have been set. */
-    @InspectablePrimitive("application positions set")
+    @InspectablePrimitive(value = "application positions set", category = DataCategory.USAGE)
     public static final BooleanSetting POSITIONS_SET =
         FACTORY.createBooleanSetting("POSITIONS_SET", false);
 
     /**
      * The width that the application should be.
      */
-    @InspectablePrimitive("application width")
+    @InspectablePrimitive(value = "application width", category = DataCategory.USAGE)
     public static final IntSetting APP_WIDTH =
         FACTORY.createIntSetting("APP_WIDTH_V5", 1024);
 
     /**
      * The height that the application should be.
      */
-    @InspectablePrimitive("application height")
+    @InspectablePrimitive(value = "application height", category = DataCategory.USAGE)
     public static final IntSetting APP_HEIGHT =
         FACTORY.createIntSetting("APP_HEIGHT_V5", 768);
 
@@ -162,7 +163,7 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createIntSetting("WINDOW_Y_V5", 0).setAlwaysSave(true);
 
     /** Setting for whether or not LW should start maximized. */
-    @InspectablePrimitive("is application maximized")
+    @InspectablePrimitive(value = "is application maximized", category = DataCategory.USAGE)
     public static final BooleanSetting MAXIMIZE_WINDOW =
         FACTORY.createBooleanSetting("MAXIMIZE_WINDOW_V5", false);
 
@@ -232,7 +233,7 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("ONLINE_CONTACTS_COLLAPSED", false);
     
     /** If the LimeWire media player is enabled. */
-    @InspectablePrimitive("player enabled")
+    @InspectablePrimitive(value = "player enabled", category = DataCategory.USAGE)
     public static final BooleanSetting PLAYER_ENABLED =
         FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
     

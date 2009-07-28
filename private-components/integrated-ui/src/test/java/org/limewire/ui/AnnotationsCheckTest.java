@@ -90,7 +90,7 @@ public class AnnotationsCheckTest extends BaseTestCase {
         Inspector inspector = injectorRef.get().getInstance(Inspector.class);
         for(String key : results.keySet()) {
             try {
-                inspector.inspect(results.get(key));
+                inspector.inspect(results.get(key), true);
             } catch(InspectionException ie) {
                 boolean validFailure = false;
                 if(OSUtils.isLinux()) {

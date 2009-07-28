@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.DataCategory;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.Clock;
@@ -25,7 +26,7 @@ import com.limegroup.gnutella.Statistics;
 final class UptimeStatTimer implements Service {
 
     /** Current uptime in seconds. */
-    @InspectablePrimitive("currentUptime")
+    @InspectablePrimitive(value = "currentUptime", category = DataCategory.USAGE)
     private volatile long currentUptime = 0;
 
     /** How often to update the uptime settings, in seconds. */

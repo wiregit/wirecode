@@ -7,6 +7,7 @@ import org.limewire.core.settings.MessageSettings;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.DataCategory;
 import org.limewire.io.GUID;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.I18NConvert;
@@ -40,7 +41,7 @@ public class SearchServicesImpl implements SearchServices {
     private final BrowseHostHandlerManager browseHostHandlerManager;
     private final OutOfBandStatistics outOfBandStatistics;
 
-    @InspectionPoint("searches by type")
+    @InspectionPoint(value = "searches by type", category = DataCategory.USAGE)
     private final InspectionHistogram<String> searchesByType = new InspectionHistogram<String>();
     
     @Inject

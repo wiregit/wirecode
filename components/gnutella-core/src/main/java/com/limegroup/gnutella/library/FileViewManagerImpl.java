@@ -19,6 +19,7 @@ import org.limewire.collection.IntSet.IntSetIterator;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.filter.Filter;
 import org.limewire.friend.api.Friend;
+import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -957,7 +958,7 @@ class FileViewManagerImpl implements FileViewManager {
     }    
     
     /** An inspectable that counts how many shared fds match a custom criteria */
-    @InspectionPoint("FileManager custom criteria")
+    @InspectionPoint(value = "FileManager custom criteria", category = DataCategory.USAGE)
     public final Inspectable CUSTOM = new Inspectable() {
         @Override
         public Object inspect() {
@@ -999,13 +1000,13 @@ class FileViewManagerImpl implements FileViewManager {
         private static final int VERSION = 2;
 
         /** An inspectable that returns stats about hits, uploads & alts */
-        @InspectionPoint("FileManager h/u/a stats")
+        @InspectionPoint(value = "FileManager h/u/a stats", category = DataCategory.USAGE)
         public final Inspectable FDS = new FDInspectable(false);
         /** An inspectable that returns stats about hits, uploads & alts > 0 */
-        @InspectionPoint("FileManager h/u/a stats > 0")
+        @InspectionPoint(value = "FileManager h/u/a stats > 0", category = DataCategory.USAGE)
         public final Inspectable FDSNZ = new FDInspectable(true);
         
-        @InspectionPoint("friend file views")
+        @InspectionPoint(value = "friend file views", category = DataCategory.USAGE)
         public final Inspectable FRIEND = new Inspectable() {
             @Override
             public Object inspect() {

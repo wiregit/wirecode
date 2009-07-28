@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.DataCategory;
 import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.util.CommonUtils;
@@ -321,7 +322,7 @@ public class RatingTable implements Service {
     }
 
     /** Inspectable that returns a hash and rating of the tokens */
-    @InspectionPoint("spam rating table token hashes")
+    @InspectionPoint(value = "spam rating table token hashes", category = DataCategory.USAGE)
     @SuppressWarnings("unused")
     private final Inspectable TOKEN_HASH = new Inspectable() {
         @Override

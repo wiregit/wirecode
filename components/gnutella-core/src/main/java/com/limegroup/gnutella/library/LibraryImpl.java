@@ -38,6 +38,7 @@ import org.limewire.filter.Filter;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.DataCategory;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
@@ -129,7 +130,7 @@ class LibraryImpl implements Library, FileCollection {
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
-        @InspectionPoint("managed files")
+        @InspectionPoint(value = "managed files", category = DataCategory.USAGE)
         private final Inspectable inspectable = new Inspectable() {
             @Override
             public Object inspect() {

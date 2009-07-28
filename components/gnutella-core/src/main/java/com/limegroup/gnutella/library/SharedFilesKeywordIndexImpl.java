@@ -17,6 +17,7 @@ import org.limewire.collection.StringTrie;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inspection.InspectableForSize;
+import org.limewire.inspection.DataCategory;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -61,7 +62,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * 
      * Not threadsafe, hold lock on field.
      */
-    @InspectableForSize("size of keyword trie")
+    @InspectableForSize(value = "size of keyword trie", category = DataCategory.USAGE)
     private final StringTrie<IntSet> keywordTrie = new StringTrie<IntSet>(true);
 
     /**
@@ -70,7 +71,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * 
      * Not threadsafe, hold lock on field.
      */
-    @InspectableForSize("size of incomplete keyword trie")
+    @InspectableForSize(value = "size of incomplete keyword trie", category = DataCategory.USAGE)
     private final StringTrie<IntSet> incompleteKeywordTrie = new StringTrie<IntSet>(true);
 
     private final Provider<CreationTimeCache> creationTimeCache;
