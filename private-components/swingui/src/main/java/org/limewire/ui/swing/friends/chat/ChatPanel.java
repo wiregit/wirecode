@@ -14,18 +14,25 @@ import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.StyleSheet;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.facebook.service.FacebookFriendConnection;
+import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,7 +48,10 @@ public class ChatPanel extends JXPanel implements Displayable {
     private final ConversationPaneFactory conversationFactory;
     private final JPanel conversationPanel;
     private final ChatFriendListPane friendsPanel;
+    private JComponent facebookPanel;
     private final Map<String, ConversationPane> chats;
+    
+    private boolean isFacebook = false;
     
     @Resource private Color border;
     
@@ -59,7 +69,7 @@ public class ChatPanel extends JXPanel implements Displayable {
 
         setPreferredSize(new Dimension(400, 240));
         add(chatTopPanel, "dock north");
-        add(friendsPanel, "dock west");
+        add(friendsPanel, "dock west, hidemode 3");
 
         conversationPanel = new JPanel(new BorderLayout());
         setConversationPanel(buildMessagesPane());
@@ -76,7 +86,14 @@ public class ChatPanel extends JXPanel implements Displayable {
             public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECTED:
-                    handleSignon();
+                    FriendConnection connection = event.getSource();
+                    isFacebook = connection instanceof FacebookFriendConnection;
+                    
+                    if(isFacebook){
+                        handleFacebook();
+                    } else {
+                        handleSignon();
+                    }
                     break;
                 case DISCONNECTED:
                     handleSignoff();
@@ -116,7 +133,9 @@ public class ChatPanel extends JXPanel implements Displayable {
      * Starts a conversation chat with this friend.
      */
     public void fireConversationStarted(String friendId) {
-        friendsPanel.fireConversationStarted(friendId);
+       if(!isFacebook){
+           friendsPanel.fireConversationStarted(friendId);
+       }
     }
     
     @EventSubscriber
@@ -146,6 +165,7 @@ public class ChatPanel extends JXPanel implements Displayable {
     }
     
     private void handleSignon() {
+        friendsPanel.setVisible(true);
         setConversationPanel(buildMessagesPane());
     }
     
@@ -156,6 +176,14 @@ public class ChatPanel extends JXPanel implements Displayable {
             closeChat(key);
         }
         setConversationPanel(new JPanel());
+    }
+    
+    private void handleFacebook(){
+        friendsPanel.setVisible(false);
+        if(facebookPanel == null){
+            facebookPanel = createFacebookPanel();
+        }
+        setConversationPanel(facebookPanel);
     }
 
     @EventSubscriber
@@ -183,5 +211,43 @@ public class ChatPanel extends JXPanel implements Displayable {
 
     public void markActiveConversationRead() {
         friendsPanel.markActiveConversationRead();
+    }
+    
+    private JComponent createFacebookPanel(){
+        JPanel panel = new JPanel(new MigLayout("gap 10! 10!"));
+        panel.setBorder(BorderFactory.createMatteBorder(1,1,0,1, Color.BLACK));
+        JEditorPane editorPane = new JEditorPane();
+        editorPane.setContentType("text/html");
+        editorPane.setEditable(false);
+        editorPane.setCaretPosition(0);
+        editorPane.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
+        editorPane.setOpaque(false);
+        editorPane.setFocusable(false);
+        String titleText = "<H1>" + I18n.tr("In this version of LimeWire, Facebook prefers that all chat activity happens at <A href=\"http://www.facebook.com\">www.facebook.com</A> only.") + "</H1>";
+        String paragraph1 = "<p>" + I18n.tr("We at Lime Wire are actively looking into remedies.  In the meantime, you will still be able to share with and browse friends.") + "</p>";
+        String paragraph2 = "<p>" + I18n.tr("Thank you for your patience.") + "</p>";
+        
+        editorPane.setText("<HTML>" + titleText + paragraph1 + paragraph2 + "</HTML>");
+        
+    
+        StyleSheet mainStyle = ((HTMLDocument)editorPane.getDocument()).getStyleSheet();
+        String rules = "h1 { font-family: dialog; color:  #313131; font-size: 12; font-weight: bold}" +
+                "p {font-family: dialog; color: #313131; font-size: 11; }" ;
+        StyleSheet newStyle = new StyleSheet();
+        newStyle.addRule(rules);
+        mainStyle.addStyleSheet(newStyle); 
+        editorPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == EventType.ACTIVATED) {
+                    NativeLaunchUtils.openURL("http://www.facebook.com");
+                }
+            }
+        });        
+     
+        panel.add(editorPane);
+        
+        
+        return panel;
     }
 }
