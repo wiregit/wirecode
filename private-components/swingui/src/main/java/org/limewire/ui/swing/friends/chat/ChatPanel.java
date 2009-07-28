@@ -12,17 +12,19 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.facebook.service.FacebookFriendConnection;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.Network.Type;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -36,8 +38,6 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import net.miginfocom.swing.MigLayout;
 
 /**
  * Main Chat window. This is the parent container for the chat window.
@@ -87,7 +87,7 @@ public class ChatPanel extends JXPanel implements Displayable {
                 switch(event.getType()) {
                 case CONNECTED:
                     FriendConnection connection = event.getSource();
-                    isFacebook = connection instanceof FacebookFriendConnection;
+                    isFacebook = connection != null && connection.getConfiguration().getType() == Type.FACEBOOK;
                     
                     if(isFacebook){
                         handleFacebook();
