@@ -7,7 +7,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.StoreResult;
+import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.ui.swing.filter.FilterableItem;
 import org.limewire.ui.swing.nav.NavSelectable;
 

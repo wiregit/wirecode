@@ -1,5 +1,6 @@
 package org.limewire.core.impl.search;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -13,13 +14,15 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.core.api.search.StoreResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.impl.MockURN;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
+import org.limewire.core.impl.search.store.MockStoreResult;
+import org.limewire.core.impl.search.store.MockStoreResult.MockAlbumIcon;
 import org.limewire.friend.api.FriendPresence;
 
 
@@ -117,7 +120,7 @@ public class MockSearch implements Search {
             addRecordsWedding(i);
         }
         if(query.indexOf("monkey") > -1){
-            addStoreRecord(i);
+            addStoreRecords(i);
             addRecordsWedding(i);
             addRecordsMonkey(i);
         }
@@ -1200,35 +1203,68 @@ public class MockSearch implements Search {
         handleSearchResult(msr);
     }
     
-    private void addStoreRecord(int i) {
+    private void addStoreRecords(int i) {
+        // Create album with multiple tracks.
         URN urn = new MockURN("www.store.limewire.com" + i);
-        
         MockStoreResult mstr = new MockStoreResult(urn, Category.AUDIO);
+        mstr.setFileExtension("mp3");
+        mstr.setAlbumIcon(new MockAlbumIcon(Color.ORANGE, 50));
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        mstr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
+        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        mstr.setSize(9 * 1024 * 1024);
+        
+        MockSearchResult msr = new MockSearchResult();
+        msr.setExtension("mp3");
+        msr.setUrn("www.store.limewire.com" + (i + 1));
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.NAME, "Heh?");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setResultType(Category.AUDIO);
+        msr.setSize(3 * 1024 * 1024);
+        mstr.addAlbumResult(msr);
+        
+        msr = new MockSearchResult();
+        msr.setExtension("mp3");
+        msr.setUrn("www.store.limewire.com" + (i + 2));
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.NAME, "Take Me To Space (Man)");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setResultType(Category.AUDIO);
+        msr.setSize(3 * 1024 * 1024);
+        mstr.addAlbumResult(msr);
+        
+        msr = new MockSearchResult();
+        msr.setExtension("mp3");
+        msr.setUrn("www.store.limewire.com" + (i + 3));
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.NAME, "Crush");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setResultType(Category.AUDIO);
+        msr.setSize(3 * 1024 * 1024);
+        mstr.addAlbumResult(msr);
+        
+        handleStoreResult(mstr);
+        
+        // Create single file result.
+        urn = new MockURN("www.store.limewire.com" + (i + 10));
+        mstr = new MockStoreResult(urn, Category.AUDIO);
         mstr.setFileExtension("mp3");
         mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
         mstr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         mstr.setSize(6 * 1024 * 1024);
         
-        MockSearchResult msr = new MockSearchResult();
-        msr.setExtension("mp3");
-        msr.setUrn("www.store.limewire.com" + (i + 10));
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.NAME, "Heh?");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setResultType(Category.AUDIO);
-        msr.setSize(3 * 1024 * 1024);
-        mstr.addFile(msr);
-        
         msr = new MockSearchResult();
         msr.setExtension("mp3");
         msr.setUrn("www.store.limewire.com" + (i + 11));
         msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.NAME, "Take Me To Space (Man)");
+        msr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
+        msr.setProperty(FilePropertyKey.NAME, "Chomp");
         msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         msr.setResultType(Category.AUDIO);
         msr.setSize(3 * 1024 * 1024);
-        mstr.addFile(msr);
+        mstr.addAlbumResult(msr);
         
         handleStoreResult(mstr);
     }

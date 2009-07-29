@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.api.search.store.StoreResult;
 
 /** A listener for a search. */
 public interface SearchListener {

@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.search.StoreResult;
+import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
@@ -102,11 +102,11 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     public int getRowHeight(VisualSearchResult vsr, RowDisplayResult rdr) {
         if (vsr.isStore()) {
             StoreResult storeResult = vsr.getStoreResult();
-            if (storeResult.isCollection()) {
-                int count = storeResult.getFileList().size();
-                return 60 + (count * 29);
+            if (storeResult.isAlbum()) {
+                int count = storeResult.getAlbumResults().size();
+                return 72 + (count * 29);
             } else {
-                return 60;
+                return 56;
             }
         }
         return rdr.getConfig().getRowHeight();

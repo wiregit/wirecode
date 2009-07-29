@@ -9,7 +9,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.StoreResult;
+import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
