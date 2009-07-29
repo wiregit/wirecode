@@ -99,7 +99,7 @@ class ListViewStoreRenderer extends JXPanel {
     private void layoutComponents() {
         setBackground(Color.LIGHT_GRAY);
         setOpaque(true); // TODO does not work
-        setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));
+        setLayout(new MigLayout("insets 6 6 0 0, gap 0! 0!, novisualpadding"));
         
         searchResultTextPanel.setLayout(new MigLayout("nogrid, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         searchResultTextPanel.setOpaque(false);
@@ -111,7 +111,7 @@ class ListViewStoreRenderer extends JXPanel {
         trackResultPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, fill, novisualpadding"));
 
         //add(similarResultIndentation, "growy, hidemode 3, shrinkprio 0");
-        add(itemIconButton, "alignx left, aligny 50%, gapleft 4, shrinkprio 0, growprio 0");
+        add(itemIconButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0");
         add(searchResultTextPanel, "alignx left, aligny 50%, gapleft 4, growx, shrinkprio 200, growprio 200, pushx 200, wrap");
         //add(downloadSourceCount, "gapbottom 3, gapright 2, shrinkprio 0");
         //add(new JLabel(dividerIcon), "shrinkprio 0");
@@ -127,7 +127,11 @@ class ListViewStoreRenderer extends JXPanel {
     public void update(VisualSearchResult vsr, RowDisplayResult result) {
         System.out.println("storeRenderer update...");
         
-        itemIconButton.setIcon(categoryIconManager.getIcon(vsr));
+        if (vsr.isStore() && vsr.getStoreResult().isAlbum()) {
+            itemIconButton.setIcon(vsr.getStoreResult().getAlbumIcon());
+        } else {
+            itemIconButton.setIcon(categoryIconManager.getIcon(vsr));
+        }
         
         updateLabelVisibility(result.getConfig());
         updateHeading(result);
@@ -170,15 +174,22 @@ class ListViewStoreRenderer extends JXPanel {
         
     }
     
+    /**
+     * Adds display panels when multiple tracks are available.
+     */
     private void updateTracks(VisualSearchResult vsr) {
         trackResultPanel.removeAll();
         
-        if (vsr.isStore() && (vsr.getStoreResult().getFileList().size() > 0)) {
-            List<SearchResult> fileList = vsr.getStoreResult().getFileList();
+        if (vsr.isStore() && (vsr.getStoreResult().getAlbumResults().size() > 1)) {
+            trackResultPanel.setVisible(true);
+            List<SearchResult> fileList = vsr.getStoreResult().getAlbumResults();
             for (SearchResult result : fileList) {
                 Component comp = createTrackComponent(result);
                 trackResultPanel.add(comp, "align left, growx, wrap");
             }
+            
+        } else {
+            trackResultPanel.setVisible(false);
         }
     }
     
