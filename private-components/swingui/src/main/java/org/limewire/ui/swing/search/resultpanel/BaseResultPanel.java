@@ -598,7 +598,15 @@ public class BaseResultPanel extends JXPanel {
                         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
                             VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
                             return vsr != null && vsr.isChildrenVisible();
-                        }}, similarResultParentBackgroundColor, null, getTableColors().selectionColor, null));
+                        }
+                    }, similarResultParentBackgroundColor, null, getTableColors().selectionColor, null),
+                    new ColorHighlighter(new HighlightPredicate() {
+                        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+                            VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
+                            return vsr != null && vsr.isStore();
+                        }
+                    }, new Color(245,245,245), null, getTableColors().selectionColor, null));
+            // TODO replace Store color using service manager
         }
         
         @Override
