@@ -384,11 +384,12 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
 
     @Override
     public int compareTo(Object o) {
-        if(!(o instanceof SearchResultAdapter)) 
+        if(!(o instanceof VisualSearchResult)) {
             return -1;
+        }
         
-        SearchResultAdapter sra = (SearchResultAdapter) o;
-        return getHeading().compareTo(sra.getHeading());
+        VisualSearchResult vsr = (VisualSearchResult) o;
+        return getHeading().compareTo(vsr.getHeading());
     }
 
     private void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
