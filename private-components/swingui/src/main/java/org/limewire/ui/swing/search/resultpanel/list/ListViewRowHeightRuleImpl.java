@@ -17,6 +17,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.VisualStoreResult;
 
 public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     private static final Log LOG = LogFactory.getLog(ListViewRowHeightRuleImpl.class);
@@ -100,11 +101,16 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     
     @Override
     public int getRowHeight(VisualSearchResult vsr, RowDisplayResult rdr) {
-        if (vsr.isStore()) {
-            StoreResult storeResult = vsr.getStoreResult();
+        if (vsr instanceof VisualStoreResult) {
+            StoreResult storeResult = ((VisualStoreResult) vsr).getStoreResult();
+            boolean showTracks = ((VisualStoreResult) vsr).isShowTracks();
             if (storeResult.isAlbum()) {
-                int count = storeResult.getAlbumResults().size();
-                return 72 + (count * 29);
+                if (showTracks) {
+                    int count = storeResult.getAlbumResults().size();
+                    return 72 + (count * 29);
+                } else {
+                    return 72;
+                }
             } else {
                 return 56;
             }
