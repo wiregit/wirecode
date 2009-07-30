@@ -60,6 +60,7 @@ import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
 import org.limewire.ui.swing.search.resultpanel.ResultsTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
@@ -172,14 +173,14 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetFactory,
         Navigator navigator, 
-        final @Assisted DownloadHandler downloadHandler,
+        @Assisted DownloadHandler downloadHandler,
         Provider<SearchHeadingDocumentBuilder> headingBuilder,
         @Assisted ListViewRowHeightRule rowHeightRule,
-        final @Assisted ListViewDisplayedRowsLimit displayLimit,
+        @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
         SearchResultMenuFactory searchResultMenuFactory,
-        ListViewStoreRenderer storeRenderer) {
+        ListViewStoreRendererFactory storeRendererFactory) {
 
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
@@ -189,10 +190,10 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
-        this.storeRenderer = storeRenderer;
         
         GuiUtils.assignResources(this);
 
+        storeRenderer = storeRendererFactory.create();
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
        
@@ -308,13 +309,22 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     @Override
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, final int col) {
+        
         vsr = (VisualSearchResult) value;
         this.table = table;        
-        editorComponent.setBackground(table.getBackground());
         
         if (value == null) {
             return emptyPanel;
         }
+        
+        // Use renderer for store result.
+        if (vsr instanceof VisualStoreResult) {
+            RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
+            storeRenderer.update(table, (VisualStoreResult) vsr, result);
+            return storeRenderer;
+        }
+        
+        editorComponent.setBackground(table.getBackground());
                 
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
@@ -323,15 +333,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                     (displayLimit.getTotalResultsReturned() - displayLimit.getLastDisplayedRow())));
           return lastRowPanel;
         } 
-
-        if (vsr.isStore()) {
-            storeRenderer.setBackground(Color.LIGHT_GRAY);
-            storeRenderer.setOpaque(true); // TODO why no effect?
-            
-            RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
-            storeRenderer.update(vsr, result);
-            return storeRenderer;
-        }
         
         update(vsr);
         return editorComponent;
