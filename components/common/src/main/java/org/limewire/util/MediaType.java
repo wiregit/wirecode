@@ -80,7 +80,7 @@ public class MediaType implements Serializable {
                 "tex", "texi", "toc", "tsv", "tvl", "txf", "txt", "wk1", "wk3", "wk4", "wks", "wp", "wp5", "wpd", 
                 "wps", "wri", "xhtml", "xlam", "xls", "xlsb", "xlsm", "xlsx", "xltm", "xltx", "xml", 
                 "xsf", "xsn", "qfx", "qif", "bud", "ofc", "pst", "mbf", "mn1", "mn2", "mn3", "mn4", "mn5",
-                "mn6", "mn7", "mn8", "mn9", "mn10", "mn11", "mn12", "mn13", "mn14", "mn15", "mn16", "pst",
+                "mn6", "mn7", "mn8", "mn9", "m10", "m11", "m12", "m13", "m14", "m15", "m16", 
                 "boe", "box", "bri", "cnm", "dbx", "eml", "emlx", "idb", "idx", "maildb", "mbg", "mbs", "mbx",
                 "mht", "msb", "msf", "msg", "nws", "pmi", "pmm", "pmx", "tbb", "toc", "vfb", "zmc", 
                 "stw", "odm", "ott", "wpt"
