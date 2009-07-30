@@ -1251,7 +1251,8 @@ public class MockSearch implements Search {
         mstr = new MockStoreResult(urn, Category.AUDIO);
         mstr.setFileExtension("mp3");
         mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
+        mstr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
+        mstr.setProperty(FilePropertyKey.NAME, "Chomp");
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         mstr.setSize(6 * 1024 * 1024);
         
