@@ -37,8 +37,6 @@ public interface StoreStyle {
     
     Icon getInfoIcon();
     
-    Icon getInfoHoverIcon();
-    
     Font getPriceFont();
     
     Color getPriceForeground();
@@ -52,8 +50,6 @@ public interface StoreStyle {
     Color getQualityForeground();
 
     Icon getShowTracksIcon();
-
-    Icon getShowTracksHoverIcon();
     
     Icon getStreamIcon();
     
@@ -75,8 +71,11 @@ public interface StoreStyle {
     
     boolean isDownloadTrackVisible();
     
+    boolean isInfoOnHover();
+    
     boolean isPriceVisible();
 
     boolean isPriceButtonVisible();
     
+    boolean isShowTracksOnHover();
 }
