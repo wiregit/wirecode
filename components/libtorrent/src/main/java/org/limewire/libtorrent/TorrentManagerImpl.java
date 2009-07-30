@@ -144,11 +144,11 @@ public class TorrentManagerImpl implements TorrentManager {
         String trackerURI = torrent.getTrackerURL();
         String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath() : null;
         String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
-
+        String saveDirectory = torrent.getTorrentDataFile().getParentFile().getAbsolutePath();
+        
         lock.writeLock().lock();
         try {
-            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, torrent
-                    .getIncompleteDownloadPath(), fastResumePath);
+            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, saveDirectory, fastResumePath);
             updateStatus(torrent);
             torrents.put(torrent.getSha1(), torrent);
         } finally {
@@ -428,7 +428,7 @@ public class TorrentManagerImpl implements TorrentManager {
                 String sha1 = torrentIterator.next();
                 Torrent torrent = torrents.get(sha1);
 
-                if (torrent != null && !torrent.isFinished()) {
+                if (torrent != null) {
                     libTorrent.signal_fast_resume_data_request(sha1);
                 }
             } finally {

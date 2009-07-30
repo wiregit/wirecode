@@ -54,8 +54,8 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTUploaderFactory;
-import com.limegroup.bittorrent.BTUploaderFactoryImpl;
 import com.limegroup.bittorrent.LimeWireBittorrentModule;
+import com.limegroup.bittorrent.TorrentUploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
@@ -279,7 +279,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LicenseFactory.class).to(LicenseFactoryImpl.class);
         bind(MetaDataFactory.class).to(MetaDataFactoryImpl.class);
         bind(SaveLocationManager.class).to(DownloadManager.class);
-        bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
+        bind(BTUploaderFactory.class).to(TorrentUploadManager.class);
         bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
         bind(IpPortContentAuthorityFactory.class).to(IpPortContentAuthorityFactoryImpl.class);
         bind(UpdateCollectionFactory.class).to(UpdateCollectionFactoryImpl.class);

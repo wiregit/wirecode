@@ -72,6 +72,11 @@ public class LimeWireBittorrentModule extends AbstractModule {
                 public int getListenEndPort() {
                     return BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue();
                 }
+                
+                @Override
+                public File getTorrentUploadsFolder() {
+                    return BittorrentSettings.LIBTORRENT_UPLOADS_FOLDER.get();
+                }
                };
            }
         });

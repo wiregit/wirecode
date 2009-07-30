@@ -42,4 +42,9 @@ public class MockTorrentSettings implements TorrentSettings {
     public int getListenStartPort() {
         return 0;
     }
+
+    @Override
+    public File getTorrentUploadsFolder() {
+        return null;
+    }
 }

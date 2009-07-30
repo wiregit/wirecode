@@ -33,10 +33,13 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private volatile URN urn = null;
+    
+    private final TorrentUploadManager torrentUploadManager;
 
-    public BTUploader(Torrent torrent, ActivityCallback activityCallback) {
+    public BTUploader(Torrent torrent, ActivityCallback activityCallback, TorrentUploadManager torrentUploadManager) {
         this.torrent = torrent;
         this.activityCallback = activityCallback;
+        this.torrentUploadManager = torrentUploadManager;
     }
     
     public void registerTorrentListener() {
@@ -68,6 +71,7 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
     private void finish() {
         cancelled.set(true);
         activityCallback.removeUpload(this);
+        torrentUploadManager.removeMemento(torrent);
     }
 
     @Override
@@ -241,11 +245,7 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
 
     @Override
     public File getFile() {
-        if (torrent.isFinished()) {
-            return torrent.getCompleteFile();
-        } else {
-            return torrent.getIncompleteFile();
-        }
+        return torrent.getTorrentDataFile();
     }
 
     @Override

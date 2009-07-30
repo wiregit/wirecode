@@ -1,7 +1,11 @@
 package org.limewire.core.settings;
 
+import java.io.File;
+
 import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.util.CommonUtils;
 
 /**
  * BitTorrent settings.
@@ -32,6 +36,8 @@ public class BittorrentSettings extends LimeProps {
     
     public static final IntSetting LIBTORRENT_LISTEN_END_PORT = FACTORY.createIntSetting(
             "LIBTORRENT_LISTEN_END_PORT", 6889);
+    
+    public static FileSetting LIBTORRENT_UPLOADS_FOLDER = FACTORY.createFileSetting("LIBTORRENT_UPLOADS_FOLDER", new File(CommonUtils.getUserSettingsDir(), "uploads.dat/"));
     
     
 }

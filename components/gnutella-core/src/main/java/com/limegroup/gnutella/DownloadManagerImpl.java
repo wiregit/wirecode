@@ -47,6 +47,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
+import com.limegroup.bittorrent.TorrentUploadManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;
@@ -150,6 +151,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     private final PushEndpointFactory pushEndpointFactory;
 
     private final Provider<TorrentManager> torrentManager;
+    
+    private final Provider<TorrentUploadManager> torrentUploadManager;
 
     @Inject
     public DownloadManagerImpl(@Named("inNetwork") DownloadCallback innetworkCallback,
@@ -159,7 +162,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             CoreDownloaderFactory coreDownloaderFactory, DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
             RemoteFileDescFactory remoteFileDescFactory, PushEndpointFactory pushEndpointFactory,
-            Provider<TorrentManager> torrentManager) {
+            Provider<TorrentManager> torrentManager, Provider<TorrentUploadManager> torrentUploadManager) {
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
@@ -171,6 +174,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.pushEndpointFactory = pushEndpointFactory;
         this.torrentManager = torrentManager;
+        this.torrentUploadManager = torrentUploadManager;
     }
 
     /* (non-Javadoc)
@@ -202,6 +206,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
             public void start() {
                 loadSavedDownloadsAndScheduleWriting();
+                //TODO load uploads from somewhere else?
+                torrentUploadManager.get().loadSavedUploads();
             }
 
             public void stop() {

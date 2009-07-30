@@ -20,12 +20,14 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
+import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
-import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -38,6 +40,8 @@ import com.google.inject.name.Named;
  * back to the TorrentManager.
  */
 public class TorrentImpl implements Torrent {
+    private static final Log LOG = LogFactory.getLog(TorrentImpl.class);
+
     private final EventMulticaster<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;
@@ -46,19 +50,11 @@ public class TorrentImpl implements Torrent {
 
     private final List<String> paths;
 
-    private File incompleteFile = null;
+    private AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
 
-    private AtomicReference<File> completeFile = new AtomicReference<File>(null);
+    private AtomicReference<File> torrentFile = new AtomicReference<File>(null);
 
-    private File torrentFile = null;
-
-    // TODO can't think of a way of keeping the incomplete folder
-    // clean before the download starts other than keeping a reference
-    // to the file that we want to start the download with.
-    //probably should copy to our own temporary directory that gets cleaned up at program start
-    private File initialTorrentFile = null;
-
-    private volatile File fastResumeFile = null;
+    private AtomicReference<File> fastResumeFile = new AtomicReference<File>(null);
 
     private String sha1 = null;
 
@@ -73,9 +69,9 @@ public class TorrentImpl implements Torrent {
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private final AtomicBoolean complete = new AtomicBoolean(false);
-    
+
     private Boolean isPrivate = null;
-    
+
     @Inject
     public TorrentImpl(TorrentManager torrentManager,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
@@ -97,11 +93,9 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File saveDir,
-            File incompleteFile, Boolean isPrivate) throws IOException {
-        
-        Objects.nonNull(saveDir, "saveDir");
-        
+            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile,
+            Boolean isPrivate) throws IOException {
+
         this.sha1 = sha1;
         this.trackerURL = trackerURL;
         if (paths != null) {
@@ -113,8 +107,8 @@ public class TorrentImpl implements Torrent {
         if (name != null) {
             this.name = name;
         }
-        
-        if(isPrivate != null) {
+
+        if (isPrivate != null) {
             this.isPrivate = isPrivate.booleanValue();
         }
 
@@ -140,8 +134,8 @@ public class TorrentImpl implements Torrent {
                 if (this.sha1 == null) {
                     this.sha1 = StringUtils.toHexString(btData.getInfoHash());
                 }
-                
-                if(this.isPrivate == null) {
+
+                if (this.isPrivate == null) {
                     this.isPrivate = btData.isPrivate();
                 }
 
@@ -150,23 +144,23 @@ public class TorrentImpl implements Torrent {
                 IOUtils.close(fis);
             }
         }
-        
-        if(this.isPrivate == null) {
-            //private by default if unknown
+
+        if (this.isPrivate == null) {
+            // private by default if unknown
             this.isPrivate = Boolean.TRUE;
         }
-        
-        if(this.name == null || torrentDownloadFolder== null || this.totalSize <= 0 || this.sha1 == null) {
+
+        if (this.name == null || torrentDownloadFolder == null || this.totalSize <= 0
+                || this.sha1 == null) {
             throw new IOException("There was an error initializing the torrent.");
         }
 
-        this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, this.name)
-                : incompleteFile;
-        this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder, this.name
-                + ".fastresume") : fastResumeFile;
-        this.completeFile.set(new File(saveDir, this.name));
-        this.torrentFile = new File(torrentDownloadFolder, this.name + ".torrent");
-        this.initialTorrentFile = torrentFile;
+        this.fastResumeFile.set(fastResumeFile == null ? new File(torrentDownloadFolder, this.name
+                + ".fastresume") : fastResumeFile);
+        this.torrentDataFile.set(torrentDataFile == null ? new File(torrentDownloadFolder,
+                this.name) : torrentDataFile);
+        this.torrentFile.set(torrentFile == null ? new File(torrentDownloadFolder, this.name
+                + ".torrent") : torrentFile);
     }
 
     private void buildPaths(BTData btData) {
@@ -207,12 +201,12 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public File getTorrentFile() {
-        return torrentFile;
+        return torrentFile.get();
     }
 
     @Override
     public File getFastResumeFile() {
-        return fastResumeFile;
+        return fastResumeFile.get();
     }
 
     @Override
@@ -221,8 +215,22 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public void moveTorrent(File directory) {
+    public synchronized void moveTorrent(File directory) {
+        assert complete.get();
         torrentManager.moveTorrent(this, directory);
+        torrentDataFile.set(new File(directory, torrentDataFile.get().getName()));
+
+        // TODO would be nice to move the following logic to something outside of
+        // the torrent code, since it is not really the torrent codes
+        // responsibility.
+        File oldFastResumeFile = fastResumeFile.get();
+        File oldTorrentFile = torrentFile.get();
+        fastResumeFile.set(new File(torrentManager.getTorrentSettings().getTorrentUploadsFolder(),
+                oldFastResumeFile.getName()));
+        torrentFile.set(new File(torrentManager.getTorrentSettings().getTorrentUploadsFolder(),
+                oldTorrentFile.getName()));
+        FileUtils.forceRename(oldTorrentFile, torrentFile.get());
+        FileUtils.forceRename(oldFastResumeFile, fastResumeFile.get());
     }
 
     @Override
@@ -302,37 +310,9 @@ public class TorrentImpl implements Torrent {
         return paths;
     }
 
-    private List<File> collectFiles(File rootFile) {
-        List<File> files = new ArrayList<File>();
-        if (paths.size() > 0) {
-            for (String path : paths) {
-                File file = new File(rootFile, path);
-                files.add(file);
-            }
-        } else {
-            files.add(rootFile);
-        }
-        return files;
-    }
-
     @Override
-    public List<File> getCompleteFiles() {
-        return collectFiles(getCompleteFile());
-    }
-
-    @Override
-    public List<File> getIncompleteFiles() {
-        return collectFiles(getIncompleteFile());
-    }
-
-    @Override
-    public File getIncompleteFile() {
-        return incompleteFile;
-    }
-
-    @Override
-    public File getCompleteFile() {
-        return completeFile.get();
+    public File getTorrentDataFile() {
+        return torrentDataFile.get();
     }
 
     @Override
@@ -420,28 +400,41 @@ public class TorrentImpl implements Torrent {
         }
     }
 
-    @Override
-    public String getIncompleteDownloadPath() {
-        return incompleteFile.getParentFile().getAbsolutePath();
+    private List<File> getTorrentDataFiles() {
+        return TorrentUtil.buildTorrentFiles(this, getTorrentDataFile());
     }
 
     @Override
     public boolean registerWithTorrentManager() {
-        if(!torrentManager.isValid())
+        if (!torrentManager.isValid()) {
             return false;
-        for (File file : getIncompleteFiles()) {
+        }
+
+        for (File file : getTorrentDataFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
                 try {
                     file.createNewFile();
                 } catch (Throwable e) {
                     // non-fatal libtorrent will create them
+                    LOG.error("Error touching file: " + file, e);
                 }
             }
         }
 
-        if (initialTorrentFile != null && !initialTorrentFile.equals(torrentFile)) {
-            FileUtils.copy(initialTorrentFile, torrentFile);
+        File torrent = torrentFile.get();
+        File torrentParent = torrent.getParentFile();
+        File torrentDownloadFolder = torrentManager.getTorrentSettings().getTorrentDownloadFolder();
+        File torrentUploadFolder = torrentManager.getTorrentSettings().getTorrentUploadsFolder();
+        if (!torrentParent.equals(torrentDownloadFolder)
+                && !torrentParent.equals(torrentUploadFolder)) {
+            // if the torrent file is not located in the incomplete or upload
+            // directories it should be copied to the directory the torrent is
+            // being downloaded to. This is to prevent the user from deleting
+            // the torrent which we need to initiate a download properly.
+            File newTorrentFile = new File(torrentDownloadFolder, getName() + ".torrent");
+            FileUtils.copy(torrentFile.get(), newTorrentFile);
+            torrentFile.set(newTorrentFile);
         }
         torrentManager.registerTorrent(this);
         return true;
@@ -450,15 +443,10 @@ public class TorrentImpl implements Torrent {
     @Override
     public int getNumConnections() {
         TorrentStatus status = getStatus();
-        if(status != null) {
+        if (status != null) {
             return status.getNumConnections();
         }
-        return 0; 
-    }
-
-    @Override
-    public void updateSaveDirectory(File saveDirectory) {
-        this.completeFile.set(new File(saveDirectory, name));
+        return 0;
     }
 
     @Override

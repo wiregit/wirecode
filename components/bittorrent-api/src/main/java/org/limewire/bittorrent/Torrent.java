@@ -21,8 +21,7 @@ public interface Torrent {
      * torrent file.
      */
     public void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File saveDir,
-            File incompleteFile, Boolean isPrivate) throws IOException;
+            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile, Boolean isPrivate) throws IOException;
 
     /**
      * Returns the name of this torrent.
@@ -124,25 +123,9 @@ public interface Torrent {
     public List<String> getPaths();
 
     /**
-     * Returns a list of where all files in the torrent where be when completed.
+     * Returns the root data file for this torrent.
      */
-    public List<File> getCompleteFiles();
-
-    /**
-     * Returns a list of where all files in the torrent where be when
-     * incomplete.
-     */
-    public List<File> getIncompleteFiles();
-
-    /**
-     * Returns the root incompelteFile for this torrent.
-     */
-    public File getIncompleteFile();
-
-    /**
-     * Returns the root compelete file for this torrent.
-     */
-    public File getCompleteFile();
+    public File getTorrentDataFile();
 
     /**
      * Returns true if this is a single file torrent, false otherwise.
@@ -196,11 +179,6 @@ public interface Torrent {
     public void alert(TorrentAlert alert);
 
     /**
-     * Returns the path where incomplete torrents are downloaded to.
-     */
-    public String getIncompleteDownloadPath();
-
-    /**
      * Registers the torrent with the torrent manager.
      * @returns true if the torrent was registered, or false if an error
      * occurred.
@@ -222,11 +200,6 @@ public interface Torrent {
      * Returns the number of connections this torrent has. 
      */
     public int getNumConnections();
-
-    /**
-     * Changes the saveDirectory for the torrent. 
-     */
-    public void updateSaveDirectory(File saveDirectory);
 
     /**
      * Returns true if this is a private torrent. 
