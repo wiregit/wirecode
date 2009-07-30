@@ -1,9 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +16,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
@@ -59,7 +56,6 @@ import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
-import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
@@ -103,9 +99,9 @@ public class BaseResultPanel extends JXPanel {
     /** The currently filtered SearchCategory. */
     private SearchCategory currentCategory;
     
-    /** cache for RowDisplayResult which could be expensive to generate with large search result sets */
-    private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
-        new HashMap<VisualSearchResult, RowDisplayResult>();
+//    /** cache for RowDisplayResult which could be expensive to generate with large search result sets */
+//    private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
+//        new HashMap<VisualSearchResult, RowDisplayResult>();
     
     /** Data model containing search results. */
     private final SearchResultsModel searchResultsModel;
@@ -180,7 +176,7 @@ public class BaseResultPanel extends JXPanel {
      * Creates a new List view table.
      */
     private ListViewTable createList() {
-        ListViewTable listTable = new ListViewTable();
+        ListViewTable listTable = new ListViewTable(rowHeightRule);
         
         // Set list table fields that do not change with search category.
         listTable.setShowGrid(true, false);
@@ -297,36 +293,37 @@ public class BaseResultPanel extends JXPanel {
                 Runnable runner = new Runnable() {
                     @Override
                     public void run() {
-                        DefaultEventTableModel model = resultsList.getEventTableModel();
-                        
-                        resultsList.setIgnoreRepaints(true);
-                        boolean setRowSize = false;
-                        for(int row = 0; row < model.getRowCount(); row++) {
-                            VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
-                            RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
-                            if (result == null || result.isStale(vsr)) {
-                                result = rowHeightRule.getDisplayResult(vsr);
-                                vsrToRowDisplayResultMap.put(vsr, result);
-                            } 
-                            int newRowHeight = rowHeightRule.getRowHeight(vsr, result);
-                            if(vsr.getSimilarityParent() == null) {
-                                //only resize rows that belong to parent visual results.
-                                //this will prevent the jumping when expanding child results as mentioned in
-                                //https://www.limewire.org/jira/browse/LWC-2545
-                                if (resultsList.getRowHeight(row) != newRowHeight) {
-                                    resultsList.setRowHeight(row, newRowHeight);
-                                    setRowSize = true;
-                                }
-                            }
-                        }
-                        resultsList.setIgnoreRepaints(false);
-                        if (setRowSize) {
-                            if (resultsList.isEditing()) {
-                                resultsList.editingCanceled(new ChangeEvent(resultsList));
-                            }
-                            resultsList.updateViewSizeSequence();
-                            resultsList.resizeAndRepaint();
-                        }
+//                        DefaultEventTableModel model = resultsList.getEventTableModel();
+//                        
+//                        resultsList.setIgnoreRepaints(true);
+//                        boolean setRowSize = false;
+//                        for(int row = 0; row < model.getRowCount(); row++) {
+//                            VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
+//                            RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
+//                            if (result == null || result.isStale(vsr)) {
+//                                result = rowHeightRule.getDisplayResult(vsr);
+//                                vsrToRowDisplayResultMap.put(vsr, result);
+//                            } 
+//                            int newRowHeight = rowHeightRule.getRowHeight(vsr, result);
+//                            if(vsr.getSimilarityParent() == null) {
+//                                //only resize rows that belong to parent visual results.
+//                                //this will prevent the jumping when expanding child results as mentioned in
+//                                //https://www.limewire.org/jira/browse/LWC-2545
+//                                if (resultsList.getRowHeight(row) != newRowHeight) {
+//                                    resultsList.setRowHeight(row, newRowHeight);
+//                                    setRowSize = true;
+//                                }
+//                            }
+//                        }
+//                        resultsList.setIgnoreRepaints(false);
+//                        if (setRowSize) {
+//                            if (resultsList.isEditing()) {
+//                                resultsList.editingCanceled(new ChangeEvent(resultsList));
+//                            }
+//                            resultsList.updateViewSizeSequence();
+//                            resultsList.resizeAndRepaint();
+//                        }
+                        resultsList.updateRowSizes();
                     }
                 };
                 
@@ -577,61 +574,5 @@ public class BaseResultPanel extends JXPanel {
             VisualSearchResult result = eventList.get(adapter.row);
             return result.isSpam();
         }       
-    }
-
-    /**
-     * Table component to display search results in a vertical list.
-     */
-    public static class ListViewTable extends ResultsTable<VisualSearchResult> {
-        @Resource private Color similarResultParentBackgroundColor;        
-        private boolean ignoreRepaints;
-        
-        public ListViewTable() {
-            super();
-            
-            GuiUtils.assignResources(this);
-            
-            setGridColor(Color.decode("#EBEBEB"));
-            setHighlighters(
-                    new ColorHighlighter(getBackground(), null, getTableColors().selectionColor, null),                    
-                    new ColorHighlighter(new HighlightPredicate() {
-                        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-                            VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
-                            return vsr != null && vsr.isChildrenVisible();
-                        }
-                    }, similarResultParentBackgroundColor, null, getTableColors().selectionColor, null),
-                    new ColorHighlighter(new HighlightPredicate() {
-                        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-                            VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
-                            return vsr != null && vsr.isStore();
-                        }
-                    }, new Color(245,245,245), null, getTableColors().selectionColor, null));
-            // TODO replace Store color using service manager
-        }
-        
-        @Override
-        protected void paintEmptyRows(Graphics g) {
-            // do nothing.
-        }
-        
-        private void setIgnoreRepaints(boolean ignore) {
-            this.ignoreRepaints = ignore;
-        }
-        
-        @Override
-        protected void updateViewSizeSequence() {
-            if (ignoreRepaints) {
-                return;
-            }
-            super.updateViewSizeSequence();
-        }
-
-        @Override
-        protected void resizeAndRepaint() {
-            if (ignoreRepaints) {
-                return;
-            }
-            super.resizeAndRepaint();
-        }
     }
 }
