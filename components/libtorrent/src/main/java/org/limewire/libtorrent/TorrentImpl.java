@@ -229,8 +229,11 @@ public class TorrentImpl implements Torrent {
                 oldFastResumeFile.getName()));
         torrentFile.set(new File(torrentManager.getTorrentSettings().getTorrentUploadsFolder(),
                 oldTorrentFile.getName()));
-        FileUtils.forceRename(oldTorrentFile, torrentFile.get());
-        FileUtils.forceRename(oldFastResumeFile, fastResumeFile.get());
+        
+        FileUtils.copy(oldTorrentFile, torrentFile.get());
+        FileUtils.copy(oldFastResumeFile, fastResumeFile.get());
+        FileUtils.forceDelete(oldTorrentFile);
+        FileUtils.forceDelete(oldFastResumeFile);
     }
 
     @Override
