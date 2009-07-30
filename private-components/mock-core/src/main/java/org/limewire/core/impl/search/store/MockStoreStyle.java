@@ -14,39 +14,39 @@ public class MockStoreStyle implements StoreStyle {
 
     private final Type type;
     
-    Font albumFont;
-    Color albumForeground;
-    Font albumLengthFont;
-    Color albumLengthForeground;
-    Font artistFont;
-    Color artistForeground;
+    Font albumFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    Color albumForeground = Color.decode("#313131");
+    Font albumLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    Color albumLengthForeground = Color.decode("#313131");
+    Font artistFont = new Font(Font.DIALOG, Font.PLAIN, 13);
+    Color artistForeground = Color.decode("#2152a6");
     Color background;
     Icon buyAlbumIcon;
     Icon buyTrackIcon;
     Icon downloadAlbumIcon;
     Icon downloadTrackIcon;
-    Icon infoHoverIcon;
     Icon infoIcon;
     Color priceBackground;
     Color priceBorderColor;
     Font priceFont;
     Color priceForeground;
-    Font qualityFont;
-    Color qualityForeground;
-    Icon showTracksHoverIcon;
+    Font qualityFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    Color qualityForeground = Color.decode("#313131");
     Icon showTracksIcon;
     Icon streamIcon;
-    Font trackFont;
-    Color trackForeground;
-    Font trackLengthFont;
-    Color trackLengthForeground;
+    Font trackFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    Color trackForeground = Color.decode("#313131");
+    Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    Color trackLengthForeground = Color.decode("#313131");
     
     boolean buyAlbumVisible;
     boolean buyTrackVisible;
     boolean downloadAlbumVisible;
     boolean downloadTrackVisible;
+    boolean infoOnHover;
     boolean priceButtonVisible;
     boolean priceVisible;
+    boolean showTracksOnHover;
     
     /**
      * Constructs a StoreStyle with the specified type.
@@ -111,11 +111,6 @@ public class MockStoreStyle implements StoreStyle {
     }
 
     @Override
-    public Icon getInfoHoverIcon() {
-        return infoHoverIcon;
-    }
-
-    @Override
     public Icon getInfoIcon() {
         return infoIcon;
     }
@@ -148,11 +143,6 @@ public class MockStoreStyle implements StoreStyle {
     @Override
     public Color getQualityForeground() {
         return qualityForeground;
-    }
-
-    @Override
-    public Icon getShowTracksHoverIcon() {
-        return showTracksHoverIcon;
     }
 
     @Override
@@ -211,6 +201,11 @@ public class MockStoreStyle implements StoreStyle {
     }
 
     @Override
+    public boolean isInfoOnHover() {
+        return infoOnHover;
+    }
+    
+    @Override
     public boolean isPriceButtonVisible() {
         return priceButtonVisible;
     }
@@ -218,5 +213,10 @@ public class MockStoreStyle implements StoreStyle {
     @Override
     public boolean isPriceVisible() {
         return priceVisible;
+    }
+
+    @Override
+    public boolean isShowTracksOnHover() {
+        return showTracksOnHover;
     }
 }
