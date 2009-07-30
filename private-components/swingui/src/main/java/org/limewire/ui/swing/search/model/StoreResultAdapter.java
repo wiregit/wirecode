@@ -19,7 +19,7 @@ import com.google.inject.Provider;
 /**
  * An implementation of VisualSearchResult for results from the Lime Store.
  */
-public class StoreResultAdapter implements VisualSearchResult {
+public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     private final StoreResult storeResult;
     private final Provider<PropertiableHeadings> propertiableHeadings;
@@ -28,6 +28,7 @@ public class StoreResultAdapter implements VisualSearchResult {
     private int relevance = 999;
     private String heading;
     private String subHeading;
+    private boolean showTracks = true;
     
     public StoreResultAdapter(StoreResult storeResult,
             Provider<PropertiableHeadings> propertiableHeadings) {
@@ -147,8 +148,13 @@ public class StoreResultAdapter implements VisualSearchResult {
     }
     
     @Override
-    public boolean isStore() {
-        return true;
+    public boolean isShowTracks() {
+        return showTracks;
+    }
+    
+    @Override
+    public void setShowTracks(boolean showTracks) {
+        this.showTracks = showTracks;
     }
     
     @Override
@@ -226,6 +232,16 @@ public class StoreResultAdapter implements VisualSearchResult {
     @Override
     public boolean isAnonymous() {
         return false;
+    }
+    
+    @Override
+    public int compareTo(Object o) {
+        if(!(o instanceof VisualSearchResult)) {
+            return -1;
+        }
+        
+        VisualSearchResult vsr = (VisualSearchResult) o;
+        return getHeading().compareTo(vsr.getHeading());
     }
 
 }
