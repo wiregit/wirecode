@@ -12,12 +12,10 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
@@ -38,6 +36,8 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Main Chat window. This is the parent container for the chat window.
@@ -223,7 +223,7 @@ public class ChatPanel extends JXPanel implements Displayable {
         editorPane.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
         editorPane.setOpaque(false);
         editorPane.setFocusable(false);
-        String titleText = "<H1>" + I18n.tr("In this version of LimeWire, Facebook prefers that all chat activity happens at <A href=\"http://www.facebook.com\">www.facebook.com</A> only.") + "</H1>";
+        String titleText = "<H1>" + I18n.tr("In this version of LimeWire, Facebook chat is not supported at this this time.") + "</H1>";
         String paragraph1 = "<p>" + I18n.tr("We at Lime Wire are actively looking into remedies.  In the meantime, you will still be able to share with and browse friends.") + "</p>";
         String paragraph2 = "<p>" + I18n.tr("Thank you for your patience.") + "</p>";
         
