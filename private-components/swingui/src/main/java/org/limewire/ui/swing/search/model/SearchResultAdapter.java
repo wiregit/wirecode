@@ -16,7 +16,6 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -373,16 +372,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
         return false;
     }
 
-    @Override
-    public boolean isStore() {
-        return false;
-    }
-    
-    @Override
-    public StoreResult getStoreResult() {
-        return null;
-    }
-    
     @Override
     public boolean isPreExistingDownload() {
         return preExistingDownload;
