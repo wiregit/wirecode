@@ -150,8 +150,7 @@ public class TorrentImpl implements Torrent {
             this.isPrivate = Boolean.TRUE;
         }
 
-        if (this.name == null || torrentDownloadFolder == null || this.totalSize <= 0
-                || this.sha1 == null) {
+        if (this.name == null || torrentDownloadFolder == null || this.sha1 == null) {
             throw new IOException("There was an error initializing the torrent.");
         }
 

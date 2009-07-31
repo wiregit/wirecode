@@ -62,14 +62,16 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         if (memento != null) {
                             Torrent torrent = torrentProvider.get();
 
-                            // TODO might want to serialize sha1 and tracker as
-                            // well.
                             File torrentFile = (File) memento.get("torrentFile");
                             File fastResumeFile = (File) memento.get("fastResumeFile");
                             File torrentDataFile = (File) memento.get("torrentDataFile");
+                            String sha1 = (String)memento.get("sha1");
+                            String trackerURL = (String)memento.get("trackerURL");
+                            String name = (String)memento.get("name");
+                            
                             if (torrentDataFile.exists()) {
                                 if (!torrentManager.get().isDownloadingTorrent(mementoFile)) {
-                                    torrent.init(null, null, 0, null, null, fastResumeFile,
+                                    torrent.init(name, sha1, -1, trackerURL, null, fastResumeFile,
                                             torrentFile, torrentDataFile, null);
                                     torrentManager.get().registerTorrent(torrent);
                                     createBTUploader(torrent);
@@ -108,6 +110,9 @@ public class TorrentUploadManager implements BTUploaderFactory {
         map.put("torrentDataFile", torrent.getTorrentDataFile().getAbsoluteFile());
         map.put("torrentFile", torrent.getTorrentFile().getAbsoluteFile());
         map.put("fastResumeFile", torrent.getFastResumeFile().getAbsoluteFile());
+        map.put("sha1", torrent.getSha1());
+        map.put("trackerURL", torrent.getTrackerURL());
+        map.put("name", torrent.getName());
 
         FileUtils.writeObject(torrentMomento, map);
     }
