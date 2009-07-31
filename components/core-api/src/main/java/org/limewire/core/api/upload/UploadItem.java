@@ -86,4 +86,6 @@ public interface UploadItem extends PropertiableFile {
     public int getNumUploadConnections();
 
     BrowseType getBrowseType();
+    
+    public float getSeedRatio();
 }

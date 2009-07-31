@@ -253,7 +253,7 @@ public class TorrentImpl implements Torrent {
     @Override
     public float getDownloadRate() {
         TorrentStatus status = this.status.get();
-        return status == null ? 0 : status.getDownloadRate();
+        return status == null ? 0 : status.getDownloadPayloadRate();
     }
 
     @Override
@@ -337,7 +337,7 @@ public class TorrentImpl implements Torrent {
         if (status == null) {
             return 0;
         } else {
-            return status.getTotalUpload();
+            return status.getAllTimePayloadUpload();
         }
     }
 
@@ -354,14 +354,14 @@ public class TorrentImpl implements Torrent {
     @Override
     public float getUploadRate() {
         TorrentStatus status = this.status.get();
-        return status == null ? 0 : status.getUploadRate();
+        return status == null ? 0 : status.getUploadPayloadRate();
     }
 
     @Override
     public float getSeedRatio() {
         TorrentStatus status = this.status.get();
-        if (status != null && status.getTotalDownload() != 0) {
-            return (status.getTotalUpload() / getTotalSize());
+        if (status != null) {
+            return status.getSeedRatio();
         }
         return 0;
     }

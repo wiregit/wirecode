@@ -273,4 +273,9 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
     public String getPresenceId() {
         return null;
     }
+
+    @Override
+    public float getSeedRatio() {
+        return torrent.getSeedRatio();
+    }
 }

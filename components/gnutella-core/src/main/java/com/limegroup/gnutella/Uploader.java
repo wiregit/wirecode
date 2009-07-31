@@ -166,6 +166,9 @@ public interface Uploader extends BandwidthTracker, Connectable {
      */
     public int getNumUploadConnections();
     
+    
+    public float getSeedRatio();
+    
 
 }
 

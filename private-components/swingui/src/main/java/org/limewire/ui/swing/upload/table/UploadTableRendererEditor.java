@@ -251,9 +251,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
             
             if(UploadItemType.BITTORRENT == item.getUploadItemType()) {
                 int numConnections = item.getNumUploadConnections();
-                
-                long fileSize = item.getFileSize() == 0 ? 1 : item.getFileSize();
-                String ratio = formatter.format(item.getTotalAmountUploaded()/(double)fileSize);
+
+                String ratio = formatter.format(item.getSeedRatio());
                 if(numConnections == 1) {
                     return I18n.tr("Connected to {0} P2P user, uploading at {1} - Ratio {2}", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
                 } else {
