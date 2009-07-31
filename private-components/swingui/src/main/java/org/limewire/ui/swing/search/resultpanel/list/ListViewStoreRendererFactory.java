@@ -31,12 +31,12 @@ class ListViewStoreRendererFactory {
     public ListViewStoreRenderer create() {
         StoreStyle storeStyle = storeManager.getStoreStyle();
         
-        // TODO creates renderer based on style type
+        // TODO create renderers based on style type
         switch (storeStyle.getType()) {
-        case A: case B:
-        case C: case D:
+        case STYLE_A: case STYLE_B:
+        case STYLE_C: case STYLE_D:
         default:
-            return new ListViewStoreRenderer(categoryIconManager, storeStyle);
+            return new ListViewStoreRendererA(categoryIconManager, storeStyle);
         }
     }
 }
