@@ -15,5 +15,5 @@ public class ChatSettings extends LimeProps {
     }
     
     public static final StringSetting FACEBOOK_CHAT_DISABLED_TEXT =
-        (StringSetting)FACTORY.createRemoteStringSetting("FACEBOOK_CHAT_DISABLED_TEXT", titleText + paragraph1 + paragraph2, "ChatSettings.FacebookChatDisabledText");
+        FACTORY.createRemoteStringSetting("FACEBOOK_CHAT_DISABLED_TEXT", titleText + paragraph1 + paragraph2, "ChatSettings.FacebookChatDisabledText");
 }
