@@ -1208,7 +1208,7 @@ public class MockSearch implements Search {
         URN urn = new MockURN("www.store.limewire.com" + i);
         MockStoreResult mstr = new MockStoreResult(urn, Category.AUDIO);
         mstr.setFileExtension("mp3");
-        mstr.setAlbumIcon(new MockAlbumIcon(Color.ORANGE, 50));
+        mstr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
         mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
         mstr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
