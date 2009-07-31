@@ -31,7 +31,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
@@ -223,11 +222,7 @@ public class ChatPanel extends JXPanel implements Displayable {
         editorPane.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
         editorPane.setOpaque(false);
         editorPane.setFocusable(false);
-        String titleText = "<H1>" + I18n.tr("Facebook chat is not supported in this version of LimeWire.") + "</H1>";
-        String paragraph1 = "<p>" + I18n.tr("We at Lime Wire are actively looking into remedies.  In the meantime, you will still be able to share with and browse friends.") + "</p>";
-        String paragraph2 = "<p>" + I18n.tr("Thank you for your patience.") + "</p>";
-        
-        editorPane.setText("<HTML>" + titleText + paragraph1 + paragraph2 + "</HTML>");
+        editorPane.setText("<HTML>" + ChatSettings.FACEBOOK_CHAT_DISABLED_TEXT.get() + "</HTML>");
         
     
         StyleSheet mainStyle = ((HTMLDocument)editorPane.getDocument()).getStyleSheet();
