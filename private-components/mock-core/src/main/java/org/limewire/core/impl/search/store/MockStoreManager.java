@@ -9,7 +9,7 @@ import org.limewire.core.api.search.store.StoreStyle.Type;
  */
 public class MockStoreManager implements StoreManager {
 
-    private StoreStyle storeStyle = new MockStoreStyle(Type.A);
+    private StoreStyle storeStyle = new MockStoreStyle(Type.STYLE_A);
     
     @Override
     public StoreStyle getStoreStyle() {

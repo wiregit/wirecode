@@ -10,7 +10,7 @@ import javax.swing.Icon;
  */
 public interface StoreStyle {
     public enum Type {
-        A, B, C, D
+        STYLE_A, STYLE_B, STYLE_C, STYLE_D
     }
     
     Font getAlbumFont();

@@ -7,7 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.geom.Line2D;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -123,12 +123,12 @@ public class MockStoreResult implements StoreResult {
 
         @Override
         public int getIconHeight() {
-            return this.size;
+            return size;
         }
 
         @Override
         public int getIconWidth() {
-            return this.size;
+            return size;
         }
 
         @Override
@@ -140,19 +140,21 @@ public class MockStoreResult implements StoreResult {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
             
+            // Fill background color.
+            g2d.setColor(Color.ORANGE);
+            g2d.fillRect(x, y, size, size);
+            
             // Set line color and thickness.
-            float thickness = Math.max(this.size / SIZE_TO_THICKNESS, 1.0f);
-            g2d.setColor(this.color);
+            float thickness = Math.max(size / SIZE_TO_THICKNESS, 1.0f);
+            g2d.setColor(color);
             g2d.setStroke(new BasicStroke(thickness));
 
             // Create shape.
-            Shape backSlash = new Line2D.Double(0, 0, this.size, this.size);
-            Shape slash = new Line2D.Double(0, this.size, this.size, 0);
+            Shape circle = new Ellipse2D.Double(0, 0, size / 2, size / 2);
             
-            // Draw shape at specified position.
-            g2d.translate(x, y);
-            g2d.draw(backSlash);
-            g2d.draw(slash);
+            // Draw shape centered in icon.
+            g2d.translate(x + size / 4, y + size / 4);
+            g2d.draw(circle);
 
             // Dispose graphics.
             g2d.dispose();
