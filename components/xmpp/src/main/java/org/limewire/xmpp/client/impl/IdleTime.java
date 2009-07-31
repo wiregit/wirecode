@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.xmpp.client.impl;
 
 public interface IdleTime {
     boolean supportsIdleTime();

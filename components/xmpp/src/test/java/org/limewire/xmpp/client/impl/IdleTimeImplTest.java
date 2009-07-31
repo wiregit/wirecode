@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.xmpp.client.impl;
 
 import org.limewire.util.BaseTestCase;
 

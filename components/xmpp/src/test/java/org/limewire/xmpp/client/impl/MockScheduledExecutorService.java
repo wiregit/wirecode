@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.limewire.core.impl.xmpp;
+package org.limewire.xmpp.client.impl;
 
 import java.util.Collection;
 import java.util.List;

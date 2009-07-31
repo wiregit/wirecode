@@ -1,19 +1,16 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.xmpp.client.impl;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Future;
 
 import org.limewire.friend.api.FriendConnectionEvent;
-import org.limewire.lifecycle.Service;
-import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.activity.XmppActivityEvent.ActivityState;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 public class IdleStatusMonitor {

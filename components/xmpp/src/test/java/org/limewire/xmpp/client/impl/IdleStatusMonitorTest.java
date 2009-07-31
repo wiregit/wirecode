@@ -1,11 +1,10 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.xmpp.client.impl;
 
 
 import junit.framework.TestCase;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.lifecycle.Service;
 import org.limewire.listener.BroadcastPolicy;
 import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventListener;

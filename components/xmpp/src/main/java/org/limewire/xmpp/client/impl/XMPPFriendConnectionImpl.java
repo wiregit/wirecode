@@ -73,8 +73,6 @@ import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListenerFa
 import org.limewire.xmpp.client.impl.messages.nosave.NoSaveIQ;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
-import org.limewire.core.impl.xmpp.IdleStatusMonitorFactory;
-import org.limewire.core.impl.xmpp.IdleStatusMonitor;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;

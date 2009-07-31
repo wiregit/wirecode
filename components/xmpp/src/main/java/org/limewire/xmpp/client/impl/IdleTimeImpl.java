@@ -1,11 +1,11 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.xmpp.client.impl;
 
 import org.limewire.util.SystemUtils;
 
 import com.google.inject.Singleton;
 
 @Singleton
-class IdleTimeImpl implements IdleTime {
+public class IdleTimeImpl implements IdleTime {
 
     @Override
     public long getIdleTime() {
