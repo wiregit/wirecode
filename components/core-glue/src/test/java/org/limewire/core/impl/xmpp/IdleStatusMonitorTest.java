@@ -34,15 +34,10 @@ public class IdleStatusMonitorTest extends TestCase {
         listener = new TestXmppActivityListener();
         activityBroadcaster.addListener(listener);
         connectionSupport = new CachingEventMulticasterImpl<FriendConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS);
-        IdleStatusMonitor monitor = new IdleStatusMonitor(backgroundExecutor, idleTime, activityBroadcaster);
-        MockServiceRegistry registry = new MockServiceRegistry();
+        IdleStatusMonitor monitor = new IdleStatusMonitor(backgroundExecutor, idleTime, activityBroadcaster, connectionSupport);
         
         //trigger the monitoring code
-        monitor.register(registry);
-        monitor.register(connectionSupport);
-        Service service = registry.registeredService;
-        assertNotNull(service.getServiceName());
-        service.start();
+        monitor.start();
         
         monitorRunnable = backgroundExecutor.scheduleAtFixedRateCommand;
     }
