@@ -18,8 +18,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -36,6 +34,8 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Main Dialog for the Options.
@@ -115,9 +115,6 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         createComponents(barPainterFactory);
         
         pack();
-        
-        getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "closeAction");
-        getRootPane().getActionMap().put("closeAction", new CancelOptionAction(this));
     }
     
     public void applyOptions() {
