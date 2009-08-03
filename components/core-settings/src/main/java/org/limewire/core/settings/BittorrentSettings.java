@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
+import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.util.CommonUtils;
 
@@ -30,14 +31,18 @@ public class BittorrentSettings extends LimeProps {
     // TODO integrate with DownloadSettings.UPLOAD_SPEED
     public static final IntSetting LIBTORRENT_UPLOAD_SPEED = FACTORY.createIntSetting(
             "LIBTORRENT_UPLOAD_SPEED", 100);
-    
+
     public static final IntSetting LIBTORRENT_LISTEN_START_PORT = FACTORY.createIntSetting(
             "LIBTORRENT_LISTEN_START_PORT", 6881);
-    
+
     public static final IntSetting LIBTORRENT_LISTEN_END_PORT = FACTORY.createIntSetting(
             "LIBTORRENT_LISTEN_END_PORT", 6889);
-    
-    public static FileSetting LIBTORRENT_UPLOADS_FOLDER = FACTORY.createFileSetting("LIBTORRENT_UPLOADS_FOLDER", new File(CommonUtils.getUserSettingsDir(), "uploads.dat/"));
-    
-    
+
+    public static FileSetting LIBTORRENT_UPLOADS_FOLDER = FACTORY
+            .createFileSetting("LIBTORRENT_UPLOADS_FOLDER", new File(CommonUtils
+                    .getUserSettingsDir(), "uploads.dat/"));
+
+    public static final FloatSetting LIBTORRENT_TARGET_SEED_RATIO = FACTORY.createFloatSetting(
+            "LIBTORRENT_TARGET_SEED_RATIO", 1.5f);
+
 }

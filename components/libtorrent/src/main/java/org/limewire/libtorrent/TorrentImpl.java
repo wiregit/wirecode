@@ -48,6 +48,7 @@ public class TorrentImpl implements Torrent {
 
     private final AtomicReference<TorrentStatus> status;
 
+    //TODO eventually remove this field and jsut delegate to libtorrent
     private final List<String> paths;
 
     private AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);

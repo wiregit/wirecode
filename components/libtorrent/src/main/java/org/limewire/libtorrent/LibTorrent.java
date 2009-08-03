@@ -6,6 +6,7 @@ import org.limewire.libtorrent.callback.AlertCallback;
 import com.sun.jna.Library;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
+import com.sun.jna.ptr.IntByReference;
 
 /**
  * Interface definition for accessing the C LibTorrentWrapper library.
@@ -56,7 +57,7 @@ interface LibTorrent extends Library {
     /**
      * Returns the number of peers for the torrent with the given sha1
      */
-    public WrapperStatus get_num_viewable_peers(String id, Pointer num_peers);
+    public WrapperStatus get_num_viewable_peers(String id, IntByReference numUnfilteredPeers);
 
     /**
      * Retrieves the peers for the torrent with the given sha1
@@ -145,5 +146,30 @@ interface LibTorrent extends Library {
      * Frees the peers from memory. 
      */
     public WrapperStatus free_peers(Pointer[] torrentPeersPointers, int length);
+    
+    /**
+     * Set the target seed ratio for this torrent.
+     */
+    public WrapperStatus set_seed_ratio(String id, float seed_ratio);
+    
+    /**
+     * Returns the file priority for the given index.
+     */
+    public WrapperStatus get_file_priority(String id, int fileIndex, IntByReference priority);
+    
+    /**
+     * Sets the file priority for the given index.
+     */
+    public WrapperStatus set_file_priority(String id, int fileIndex, int priority);
+
+    /**
+     * Returns the number of files for the given torrent. 
+     */
+    public WrapperStatus get_num_files(String id, IntByReference numFiles);
+    
+    /**
+     * Returns the files for the given torrent. 
+     */
+    public WrapperStatus get_files(String id, Pointer[] filePointers);
 
 }

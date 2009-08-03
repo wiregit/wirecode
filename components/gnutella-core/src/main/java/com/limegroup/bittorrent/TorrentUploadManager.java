@@ -13,6 +13,8 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
+import org.limewire.util.GenericsUtils;
+import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -28,7 +30,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
     private static final Log LOG = LogFactory.getLog(TorrentUploadManager.class);
 
     private final Provider<ActivityCallback> activityCallback;
-    
+
     private final Provider<TorrentManager> torrentManager;
 
     private final Provider<Torrent> torrentProvider;
@@ -57,45 +59,50 @@ public class TorrentUploadManager implements BTUploaderFactory {
 
             if (uploadMementos != null) {
                 for (File mementoFile : uploadMementos) {
+                    Map<String, Object> memento = null;
                     try {
-                        Map<String, Object> memento = readMemento(mementoFile);
-                        if (memento != null) {
-                            Torrent torrent = torrentProvider.get();
+                        memento = readMemento(mementoFile);
+                    } catch (IllegalArgumentException e) {
+                        LOG.error("Error reading memento for: " + mementoFile, e);
+                    } catch (IOException e) {
+                        LOG.error("Error reading memento for: " + mementoFile, e);
+                    } catch (ClassNotFoundException e) {
+                        LOG.error("Error reading memento for: " + mementoFile, e);
+                    }
+                    if (memento != null) {
+                        Torrent torrent = torrentProvider.get();
 
-                            File torrentFile = (File) memento.get("torrentFile");
-                            File fastResumeFile = (File) memento.get("fastResumeFile");
-                            File torrentDataFile = (File) memento.get("torrentDataFile");
-                            String sha1 = (String)memento.get("sha1");
-                            String trackerURL = (String)memento.get("trackerURL");
-                            String name = (String)memento.get("name");
-                            
-                            if (torrentDataFile.exists()) {
-                                if (!torrentManager.get().isDownloadingTorrent(mementoFile)) {
+                        File torrentFile = (File) memento.get("torrentFile");
+                        File fastResumeFile = (File) memento.get("fastResumeFile");
+                        File torrentDataFile = (File) memento.get("torrentDataFile");
+                        String sha1 = (String) memento.get("sha1");
+                        String trackerURL = (String) memento.get("trackerURL");
+                        String name = (String) memento.get("name");
+
+                        if (torrentDataFile.exists()) {
+                            if (!torrentManager.get().isDownloadingTorrent(mementoFile)) {
+                                try {
                                     torrent.init(name, sha1, -1, trackerURL, null, fastResumeFile,
                                             torrentFile, torrentDataFile, null);
-                                    torrentManager.get().registerTorrent(torrent);
-                                    createBTUploader(torrent);
-                                    torrent.start();
+                                } catch (IOException e) {
+                                    LOG.error("Error initializing memento from: " + mementoFile, e);
                                 }
+                                torrentManager.get().registerTorrent(torrent);
+                                createBTUploader(torrent);
+                                torrent.start();
                             }
                         }
-                    } catch (Exception e) {
-                        LOG.error("Error resuming upload for: " + mementoFile, e);
-
                     }
                 }
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Map<String, Object> readMemento(File mementoFile) throws IOException,
-            ClassNotFoundException {
+            ClassNotFoundException, IllegalArgumentException {
         Object mementoObject = FileUtils.readObject(mementoFile);
-        Map<String, Object> memento = null;
-        if (mementoObject instanceof Map) {
-            memento = (Map<String, Object>) mementoObject;
-        }
+        Map<String, Object> memento = GenericsUtils.scanForMap(mementoObject, String.class,
+                Object.class, ScanMode.EXCEPTION);
         return memento;
     }
 
@@ -103,7 +110,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
      * Creates an upload memento from the Torrent and writes it to disk.
      */
     public void writeMemento(Torrent torrent) throws IOException {
-        //TODO use database instead of writing to file?
+        // TODO use database instead of writing to file?
         File torrentMomento = getMementoFile(torrent);
         torrentMomento.getParentFile().mkdirs();
 
@@ -134,7 +141,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
         FileUtils.forceDelete(torrent.getTorrentFile());
         FileUtils.forceDelete(torrent.getFastResumeFile());
     }
-    
+
     @Override
     public BTUploader createBTUploader(Torrent torrent) {
         BTUploader btUploader = new BTUploader(torrent, activityCallback.get(), this);

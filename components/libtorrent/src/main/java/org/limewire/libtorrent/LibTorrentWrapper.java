@@ -11,18 +11,16 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
 
-import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
+import com.sun.jna.ptr.IntByReference;
 
 /**
  * Wrapper class for the LibTorrent c interface. Provides library loading logic,
  * and handles rethrowing c++ exceptions as java exceptions.
  */
 class LibTorrentWrapper {
-
-    private static final char MAX_LENGTH_DIGITS = 4;
 
     private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
 
@@ -119,38 +117,32 @@ class LibTorrentWrapper {
     }
 
     public LibTorrentPeer[] get_peers(String id) {
-        Memory numPeersMemory = new Memory(MAX_LENGTH_DIGITS);
-        int numUnfilteredPeers = numPeersMemory.getInt(0);
 
         LOG.debugf("before get_num_peers: {0}", id);
-        catchWrapperException(libTorrent.get_num_viewable_peers(id, numPeersMemory));
-        try {
-            numUnfilteredPeers = Integer.parseInt(numPeersMemory.getString(0));
-        } catch (NumberFormatException e) {
-            numUnfilteredPeers = 0;
-        }
+        IntByReference numUnfilteredPeers = new IntByReference();
+        catchWrapperException(libTorrent.get_num_viewable_peers(id, numUnfilteredPeers));
         LOG.debugf("after get_num_peers: {0} - {1}", id, numUnfilteredPeers);
 
-        if (numUnfilteredPeers == 0) {
+        if (numUnfilteredPeers.getValue() == 0) {
             return new LibTorrentPeer[0];
         }
 
-        LibTorrentPeer[] torrentPeers = new LibTorrentPeer[numUnfilteredPeers];
-        Pointer[] torrentPeersPointers = new Pointer[numUnfilteredPeers];
-        for(int i = 0; i < torrentPeersPointers.length; i++) {
+        LibTorrentPeer[] torrentPeers = new LibTorrentPeer[numUnfilteredPeers.getValue()];
+        Pointer[] torrentPeersPointers = new Pointer[numUnfilteredPeers.getValue()];
+        for (int i = 0; i < torrentPeersPointers.length; i++) {
             LibTorrentPeer torrentPeer = new LibTorrentPeer();
             torrentPeers[i] = torrentPeer;
             torrentPeersPointers[i] = torrentPeer.getPointer();
         }
-        
+
         LOG.debugf("before get_peers: {0}", id);
-        catchWrapperException(libTorrent.get_peers(id, torrentPeersPointers, torrentPeersPointers.length));
-        
-        
-        for(int i = 0; i < torrentPeers.length; i++) {
+        catchWrapperException(libTorrent.get_peers(id, torrentPeersPointers,
+                torrentPeersPointers.length));
+
+        for (int i = 0; i < torrentPeers.length; i++) {
             torrentPeers[i].read();
         }
-        
+
         free_peers(id, torrentPeersPointers, torrentPeersPointers.length);
         LOG.debugf("after get_peers: {0}", id);
         return torrentPeers;
@@ -158,7 +150,8 @@ class LibTorrentWrapper {
 
     private void free_peers(String id, Pointer[] torrentPeersPointers, int length) {
         LOG.debugf("before free_peers: {0}", id);
-        catchWrapperException(libTorrent.free_peers(torrentPeersPointers, torrentPeersPointers.length));
+        catchWrapperException(libTorrent.free_peers(torrentPeersPointers,
+                torrentPeersPointers.length));
         LOG.debugf("after free_peers: {0}", id);
     }
 
@@ -250,5 +243,69 @@ class LibTorrentWrapper {
         LOG.debugf("before stop_natpmp");
         catchWrapperException(libTorrent.stop_natpmp());
         LOG.debugf("after stop_natpmp");
+    }
+
+    /**
+     * Set the target seed ratio for this torrent.
+     */
+    public void set_seed_ratio(String id, float seed_ratio) {
+        LOG.debugf("before set_seed_ratio");
+        catchWrapperException(libTorrent.set_seed_ratio(id, seed_ratio));
+        LOG.debugf("after set_seed_ratio");
+    }
+
+    /**
+     * Returns the file priority for the given index.
+     */
+    public int get_file_priority(String id, int fileIndex) {
+        LOG.debugf("before get_file_priority");
+        IntByReference priority = new IntByReference();
+        catchWrapperException(libTorrent.get_file_priority(id, fileIndex, priority));
+        LOG.debugf("after get_file_priority");
+        return priority.getValue();
+    }
+
+    /**
+     * Sets the file priority for the given index.
+     */
+    public void set_file_priority(String id, int fileIndex, int priority) {
+        LOG.debugf("before set_file_priority");
+        catchWrapperException(libTorrent.set_file_priority(id, fileIndex, priority));
+        LOG.debugf("after set_file_priority");
+    }
+    
+    /**
+     * Returns the number of files for the given torrent. 
+     */
+    public int get_num_files(String id) {
+        LOG.debugf("before get_num_files");
+        IntByReference numFiles = new IntByReference();
+        catchWrapperException(libTorrent.get_num_files(id, numFiles));
+        LOG.debugf("after get_num_files");
+        return numFiles.getValue();
+    }
+    
+    /**
+     * Returns the files for the given torrent. 
+     */
+    public LibTorrentFileEntry[] get_files(String id) {
+        LOG.debugf("before get_files");
+        int numFiles = get_num_files(id);
+        LibTorrentFileEntry[] fileEntries = new LibTorrentFileEntry[numFiles];
+        Pointer[] filePointers = new Pointer[numFiles];
+        for (int i = 0; i < fileEntries.length; i++) {
+            LibTorrentFileEntry fileEntry = new LibTorrentFileEntry();
+            fileEntries[i] = fileEntry;
+            filePointers[i] = fileEntry.getPointer();
+        }
+
+        catchWrapperException(libTorrent.get_files(id, filePointers));
+        
+        for (int i = 0; i < fileEntries.length; i++) {
+            fileEntries[i].read();
+        }
+        
+        LOG.debugf("after get_files");
+        return fileEntries;
     }
 }
