@@ -51,7 +51,7 @@ public class BandWidthSlider extends JComponent {
      * Changes the label for the download throttling slider based on the
      * slider's current value.
      */
-    private class ThrottleChangeListener implements ChangeListener {
+    private static class ThrottleChangeListener implements ChangeListener {
 
         private JSlider slider;
 

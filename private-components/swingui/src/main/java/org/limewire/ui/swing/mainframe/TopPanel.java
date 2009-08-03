@@ -319,7 +319,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
     }
 
-    private final class SearchNavItemImpl implements SearchNavItem {
+    private final static class SearchNavItemImpl implements SearchNavItem {
         private final NavItem item;
         private final SearchAction action;
         private final boolean stopSpinnerAfter50Results;

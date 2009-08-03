@@ -135,7 +135,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
      * Forwards events from the underlying protocol layer to acceptor event
      * listeners.
      */
-    private class ConnectionEventListener implements HttpAcceptorListener {
+    private static class ConnectionEventListener implements HttpAcceptorListener {
 
         public void connectionOpen(NHttpConnection conn) {
         }
@@ -164,7 +164,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
     /**
      * Tracks the bandwidth used when sending a response.
      */
-    private class HeaderStatisticTracker implements HttpResponseInterceptor {
+    private static class HeaderStatisticTracker implements HttpResponseInterceptor {
         private final Statistic headerUpstream;
         
         HeaderStatisticTracker(TcpBandwidthStatistics tcpBandwidthStatistics) {

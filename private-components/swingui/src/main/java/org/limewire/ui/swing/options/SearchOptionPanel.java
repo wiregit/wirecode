@@ -179,7 +179,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
     }
     
-    private class CategoryCellRenderer extends DefaultListCellRenderer {
+    private static class CategoryCellRenderer extends DefaultListCellRenderer {
         public CategoryCellRenderer() {
             setOpaque(true);
         }

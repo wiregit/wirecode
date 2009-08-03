@@ -165,7 +165,7 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
         }
     }; 
     
-    private class UsefulButtonGroup extends ButtonGroup {
+    private static class UsefulButtonGroup extends ButtonGroup {
         public AbstractButton getSelectedButton(){
             ButtonModel selectedModel = getSelection();
             for (AbstractButton button : buttons){

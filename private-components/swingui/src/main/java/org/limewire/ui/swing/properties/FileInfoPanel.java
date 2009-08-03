@@ -769,7 +769,7 @@ public class FileInfoPanel extends JPanel {
         return panel;
     }
     
-    private class ReadOnlyTableModel extends DefaultTableModel {
+    private static class ReadOnlyTableModel extends DefaultTableModel {
         @Override
         public boolean isCellEditable(int row, int column) {
             return false;

@@ -370,7 +370,7 @@ public class FilteringOptionPanel extends OptionPanel {
         }
     }
     
-    public class AddAction implements ActionListener {
+    public static class AddAction implements ActionListener {
 
         private JTextField textField;
         private FilteringTable table;

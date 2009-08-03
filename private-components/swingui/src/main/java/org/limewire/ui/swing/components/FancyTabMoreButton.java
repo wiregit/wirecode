@@ -93,7 +93,7 @@ class FancyTabMoreButton extends LimeComboBox {
         return jp;
     }
     
-    private class Highlighter extends MouseAdapter {
+    private static class Highlighter extends MouseAdapter {
         private final JXPanel panel;
         private final AbstractButton selectButton;
         

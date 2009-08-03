@@ -28,7 +28,7 @@ public class ConnectBackRequestFeatureTransportHandler implements FeatureTranspo
         connectBackRequestedEventBroadcaster.broadcast(new ConnectBackRequestedEvent(connectBackRequest));
     }
 
-    private class ConnectBackRequestIQFeatureInitializer implements FeatureInitializer {
+    private static class ConnectBackRequestIQFeatureInitializer implements FeatureInitializer {
         @Override
         public void register(FeatureRegistry registry) {
             registry.registerPublicInitializer(ConnectBackRequestFeature.ID, this);

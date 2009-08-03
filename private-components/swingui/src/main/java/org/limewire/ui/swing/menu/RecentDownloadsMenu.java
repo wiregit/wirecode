@@ -90,7 +90,7 @@ class RecentDownloadsMenu extends MnemonicMenu {
     /**
      * Orders files from most to least recent.
      */
-    private class FileDateMostToLeastRecentComparator implements Comparator<File> {
+    private static class FileDateMostToLeastRecentComparator implements Comparator<File> {
         @Override
         public int compare(File o1, File o2) {
             return -1 * Long.valueOf(o1.lastModified()).compareTo(Long.valueOf(o2.lastModified()));

@@ -720,7 +720,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     }
     
     /** A struct-like container storing push information. */
-    private class PushData {
+    private static class PushData {
         private final MultiShutdownable observer;
         private final RemoteFileDesc file;
         private final byte [] guid;

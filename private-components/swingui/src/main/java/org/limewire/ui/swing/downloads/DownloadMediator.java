@@ -200,7 +200,7 @@ public class DownloadMediator {
         return matchingItems;
     }
     
-    private class StateComparator implements Comparator<DownloadItem>{
+    private static class StateComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -232,7 +232,7 @@ public class DownloadMediator {
         }
     }
     
-    private class OrderAddedComparator implements Comparator<DownloadItem>{
+    private static class OrderAddedComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) { 
@@ -243,7 +243,7 @@ public class DownloadMediator {
         }      
     }
     
-    private class NameComparator implements Comparator<DownloadItem>{
+    private static class NameComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -256,7 +256,7 @@ public class DownloadMediator {
      
     } 
   
-    private class ProgressComparator implements Comparator<DownloadItem>{
+    private static class ProgressComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -269,7 +269,7 @@ public class DownloadMediator {
      
     } 
     
-    private class TimeRemainingComparator implements Comparator<DownloadItem>{
+    private static class TimeRemainingComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -283,7 +283,7 @@ public class DownloadMediator {
     }
     
     
-    private class SpeedComparator implements Comparator<DownloadItem>{
+    private static class SpeedComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -297,7 +297,7 @@ public class DownloadMediator {
     }
     
     
-    private class FileTypeComparator implements Comparator<DownloadItem>{
+    private static class FileTypeComparator implements Comparator<DownloadItem>{
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -311,7 +311,7 @@ public class DownloadMediator {
     } 
 
     
-    private class FileExtensionComparator implements Comparator<DownloadItem> {
+    private static class FileExtensionComparator implements Comparator<DownloadItem> {
         
         @Override
         public int compare(DownloadItem o1, DownloadItem o2) {
@@ -324,7 +324,7 @@ public class DownloadMediator {
      
     }
     
-    private class DescendingComparator implements Comparator<DownloadItem>{
+    private static class DescendingComparator implements Comparator<DownloadItem>{
         private Comparator<DownloadItem> delegate;
 
         public DescendingComparator(Comparator<DownloadItem> delegate){

@@ -119,7 +119,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
         }
     }
 
-    private class MagnetDetailRequestHandler extends SimpleNHttpRequestHandler {
+    private static class MagnetDetailRequestHandler extends SimpleNHttpRequestHandler {
         public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
                 HttpContext context) throws HttpException, IOException {
             return null;

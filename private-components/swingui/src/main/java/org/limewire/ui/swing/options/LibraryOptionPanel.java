@@ -218,7 +218,7 @@ public class LibraryOptionPanel extends OptionPanel {
 
     
     /** Do you want to use the LW player? */
-    private class UsePlayerPanel extends OptionPanel {
+    private static class UsePlayerPanel extends OptionPanel {
 
         private JCheckBox useLimeWirePlayer;
 

@@ -85,7 +85,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         getUploadPanel().initOptions();
     }
     
-    private class ConnectionSpeedPanel extends OptionPanel {
+    private static class ConnectionSpeedPanel extends OptionPanel {
 
         private ButtonGroup buttonGroup;
         
@@ -138,7 +138,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
     }
     
-    private class DownloadsPanel extends OptionPanel {
+    private static class DownloadsPanel extends OptionPanel {
 
         private static final int MIN_DOWNLOADS = 1;
         private static final int MAX_DOWNLOADS = 999;
@@ -194,7 +194,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
     }
     
-    private class UploadsPanel extends OptionPanel {
+    private static class UploadsPanel extends OptionPanel {
 
         private static final int MIN_UPLOADS = 0;
         private static final int MAX_UPLOADS = 50;
@@ -260,7 +260,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
     }
     
-    private class CheckBoxListener implements ItemListener {
+    private static class CheckBoxListener implements ItemListener {
 
         private BandWidthSlider slider;
         private JCheckBox checkBox;

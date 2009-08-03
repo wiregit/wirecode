@@ -869,7 +869,7 @@ public class DaapManager {
     /**
      * Handles the audio stream.
      */
-    private final class LimeStreamSource implements DaapStreamSource {
+    private final static class LimeStreamSource implements DaapStreamSource {
         
         public Object getSource(Song song) throws IOException {
             FileDesc fileDesc = (FileDesc)song.getAttachment();
@@ -884,7 +884,7 @@ public class DaapManager {
     /**
      * Implements the DaapAuthenticator.
      */
-    private final class LimeAuthenticator implements DaapAuthenticator {
+    private final static class LimeAuthenticator implements DaapAuthenticator {
         
         /**
          * Returns true if username and password are correct.<p>
@@ -948,7 +948,7 @@ public class DaapManager {
     /**
      * A LimeWire specific implementation of DaapConfig.
      */
-    private final class LimeConfig extends DaapConfig {
+    private final static class LimeConfig extends DaapConfig {
 
         private InetAddress addr;
 
@@ -990,7 +990,7 @@ public class DaapManager {
     /**
      * Helps us to publicize and update the DAAP Service via mDNS.
      */
-    private final class BonjourService {
+    private final static class BonjourService {
 
         private static final String VERSION = "Version";
 

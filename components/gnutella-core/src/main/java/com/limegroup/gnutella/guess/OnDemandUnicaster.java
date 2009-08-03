@@ -194,7 +194,7 @@ public class OnDemandUnicaster {
         udpService.send(query, ipp.getInetAddress(), ipp.getPort());
     }
 
-    private class SendLaterBundle {
+    private static class SendLaterBundle {
 
         private static final int MAX_LIFETIME = 60 * 1000;
 

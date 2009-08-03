@@ -862,7 +862,7 @@ public class DHTManagerImpl implements DHTManager, Service {
     /**
      * Inspection point that tells us how long did the last bootstrap take.
      */
-    private class BootstrapTimer implements DHTEventListener, Inspectable {
+    private static class BootstrapTimer implements DHTEventListener, Inspectable {
         private long start, stop;
 
         @Override

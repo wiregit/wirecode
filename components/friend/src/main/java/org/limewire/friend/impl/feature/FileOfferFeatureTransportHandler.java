@@ -34,7 +34,7 @@ public class FileOfferFeatureTransportHandler implements FeatureTransport.Handle
 
     }
 
-    private class FileOfferInitializer implements FeatureInitializer {
+    private static class FileOfferInitializer implements FeatureInitializer {
 
         @Override
         public void register(FeatureRegistry registry) {

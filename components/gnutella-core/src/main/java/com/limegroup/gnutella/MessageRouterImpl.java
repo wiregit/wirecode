@@ -2848,7 +2848,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
     
-    public class VendorMessageHandler implements MessageHandler {
+    public static class VendorMessageHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             Connection c = (Connection)handler;
             c.handleVendorMessage((VendorMessage)msg);

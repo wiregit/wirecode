@@ -324,7 +324,7 @@ public class ChatFriendListPane extends JPanel {
         return table;
     }
     
-    private class ChattingUnderlineHighlightPredicate implements HighlightPredicate {
+    private static class ChattingUnderlineHighlightPredicate implements HighlightPredicate {
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             //Clear the border on the renderer because the same panel is being reused for every cell
