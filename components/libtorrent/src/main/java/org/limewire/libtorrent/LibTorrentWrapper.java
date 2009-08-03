@@ -119,16 +119,18 @@ class LibTorrentWrapper {
     public LibTorrentPeer[] get_peers(String id) {
 
         LOG.debugf("before get_num_peers: {0}", id);
-        IntByReference numUnfilteredPeers = new IntByReference();
-        catchWrapperException(libTorrent.get_num_viewable_peers(id, numUnfilteredPeers));
-        LOG.debugf("after get_num_peers: {0} - {1}", id, numUnfilteredPeers);
+        IntByReference numPeersReference = new IntByReference();
+        catchWrapperException(libTorrent.get_num_peers(id, numPeersReference));
+        LOG.debugf("after get_num_peers: {0} - {1}", id, numPeersReference);
 
-        if (numUnfilteredPeers.getValue() == 0) {
+        int numPeers = numPeersReference.getValue();
+        
+        if (numPeers == 0) {
             return new LibTorrentPeer[0];
         }
-
-        LibTorrentPeer[] torrentPeers = new LibTorrentPeer[numUnfilteredPeers.getValue()];
-        Pointer[] torrentPeersPointers = new Pointer[numUnfilteredPeers.getValue()];
+        
+        LibTorrentPeer[] torrentPeers = new LibTorrentPeer[numPeers];
+        Pointer[] torrentPeersPointers = new Pointer[numPeers];
         for (int i = 0; i < torrentPeersPointers.length; i++) {
             LibTorrentPeer torrentPeer = new LibTorrentPeer();
             torrentPeers[i] = torrentPeer;
