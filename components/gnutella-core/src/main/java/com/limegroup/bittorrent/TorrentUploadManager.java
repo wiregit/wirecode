@@ -103,6 +103,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
      * Creates an upload memento from the Torrent and writes it to disk.
      */
     public void writeMemento(Torrent torrent) throws IOException {
+        //TODO use database instead of writing to file?
         File torrentMomento = getMementoFile(torrent);
         torrentMomento.getParentFile().mkdirs();
 
