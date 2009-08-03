@@ -467,12 +467,10 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public float getTotalDownloadRate() {
         float rate = 0;
-        synchronized (torrents) {
-            for (Torrent torrent : torrents.values()) {
-                TorrentStatus torrentStatus = torrent.getStatus();
-                if(torrentStatus != null) {
-                    rate += torrentStatus.getDownloadRate();
-                }
+        for (Torrent torrent : torrents.values()) {
+            TorrentStatus torrentStatus = torrent.getStatus();
+            if(torrentStatus != null) {
+                rate += torrentStatus.getDownloadRate();
             }
         }
         return rate;
@@ -481,12 +479,10 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public float getTotalUploadRate() {
         float rate = 0;
-        synchronized (torrents) {
-            for (Torrent torrent : torrents.values()) {
-                TorrentStatus torrentStatus = torrent.getStatus();
-                if(torrentStatus != null) {
-                    rate += torrentStatus.getUploadRate();
-                }
+        for (Torrent torrent : torrents.values()) {
+            TorrentStatus torrentStatus = torrent.getStatus();
+            if(torrentStatus != null) {
+                rate += torrentStatus.getUploadRate();
             }
         }
         return rate;
