@@ -3,6 +3,18 @@ package org.limewire.bittorrent;
 public interface TorrentStatus {
 
     /**
+     * Returns the rate in bytes/second that data is being downloaded for this
+     * torrent. This includes payload and protocol overhead.
+     */
+    public float getDownloadRate();
+
+    /**
+     * Returns the rate in byte/second that data is being uploaded for this
+     * torrent. This includes payload and protocol overhead. 
+     */
+    public float getUploadRate();
+    
+    /**
      * Returns the rate in bytes/second that payload data is being downloaded for this
      * torrent.
      */

@@ -171,4 +171,21 @@ public class LazyTorrentManager implements TorrentManager {
         torrentManager.get().updateSettings(settings);
     }
 
+    @Override
+    public float getTotalDownloadRate() {
+        if (!initialized) {
+            return 0;
+        }
+        
+        return torrentManager.get().getTotalDownloadRate();
+    }
+
+    @Override
+    public float getTotalUploadRate() {
+        if (!initialized) {
+            return 0;
+        }
+        return torrentManager.get().getTotalUploadRate();
+    }
+
 }

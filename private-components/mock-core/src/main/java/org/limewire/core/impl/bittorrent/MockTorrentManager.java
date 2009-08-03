@@ -104,4 +104,14 @@ public class MockTorrentManager implements TorrentManager {
     public void stop() {
         
     }
+
+    @Override
+    public float getTotalDownloadRate() {
+        return 0;
+    }
+
+    @Override
+    public float getTotalUploadRate() {
+        return 0;
+    }
 }

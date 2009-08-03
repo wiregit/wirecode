@@ -82,5 +82,15 @@ public interface TorrentManager extends Service {
      * Returns the current TorrentSettings object set on the torrent session.
      */
     public TorrentSettings getTorrentSettings();
+    
+    /**
+     * Returns the total upload rate used by libtorrent. This includes payload and protocol overhead. 
+     */
+    public float getTotalUploadRate();
+    
+    /**
+     * Returns the total download rate used by libtorrent. This includes payload and protocol overhead.
+     */
+    public float getTotalDownloadRate();
 
 }

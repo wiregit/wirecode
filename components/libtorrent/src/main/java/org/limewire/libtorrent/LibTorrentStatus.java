@@ -232,4 +232,14 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
         float seedRatio = getAllTimePayloadUpload() / (float)getAllTimePayloadDownload(); 
         return seedRatio;
     }
+
+    @Override
+    public float getDownloadRate() {
+        return download_rate;
+    }
+
+    @Override
+    public float getUploadRate() {
+        return upload_rate;
+    }
 }
