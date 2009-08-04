@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: EFW 2\n"
 "Report-Msgid-Bugs-To: locales@endian.com\n"
-"POT-Creation-Date: 2009-07-27 11:30-0400\n"
-"PO-Revision-Date: 2009-07-27 21:21+0000\n"
+"POT-Creation-Date: 2009-08-03 11:30-0400\n"
+"PO-Revision-Date: 2009-07-28 11:23+0000\n"
 "Last-Translator: tinatee <Unknown>\n"
 "Language-Team: Finnish <locales@endian.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-07-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-08-04 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -210,15 +210,15 @@ msgstr "Eri peruspalvelut"
 msgid "Gnutella Connections"
 msgstr "Gnutella-yhteydet"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:197
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:201
 msgid "Old Downloads"
 msgstr "Vanhat lataukset"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:220
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:226
 msgid "Download Management"
 msgstr "Lataustenhallinta"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:271
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:277
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
@@ -228,7 +228,7 @@ msgstr ""
 "käynnistää ne uudelleen klikkaamalla \"Yritä uudelleen\" latausvalikossa. "
 "Tiedostojen lataus jatkuu keskeytyneestä kohdasta, kun niille löytyy lähde."
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:273
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:279
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
@@ -341,11 +341,11 @@ msgstr "QRP-päivittäjä"
 msgid "RUDP Message Routing"
 msgstr "RUPD-viestien reititys"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:100
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:101
 msgid "Spam Management"
 msgstr "Spam-hallinta"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:61
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:62
 msgid "Uptime Statistics"
 msgstr "Päälläolotilastot"
 
@@ -783,7 +783,7 @@ msgstr "Kopioi raportti"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:640
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:216
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:115
 msgid "OK"
 msgstr "OK"
@@ -922,7 +922,7 @@ msgstr "Liitä"
 #. * The select all action.
 #. 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/SelectAllAction.java:10
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:639
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:623
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
 msgid "Select All"
 msgstr "Valitse kaikki"
@@ -1108,7 +1108,7 @@ msgstr "Lisää asetuksia..."
 #. * String for connecting status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:63
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:122
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:118
 msgid "Connecting..."
 msgstr "Muodostetaan yhteyttä..."
 
@@ -1257,15 +1257,15 @@ msgstr "Vaarallinen lataus peruttu"
 msgid "remove"
 msgstr "poista"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:641
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:625
 msgid "Marks all Items as Selected"
 msgstr "Merkitse kaikki kohteet valituiksi"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:659
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
 msgid "Deselect All"
 msgstr "Poista kaikki valinnat"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:661
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:645
 msgid "Deselects all Items in the List"
 msgstr "Poista koko luettelo valinnoista"
 
@@ -1375,7 +1375,7 @@ msgstr "Peru"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CancelSharingAction.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:219
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:25
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:131
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:58
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:83
@@ -1439,7 +1439,7 @@ msgid "Resume"
 msgstr "Jatka"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:253
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:166
 msgid "Try Again"
 msgstr "Yritä uudelleen"
 
@@ -1571,7 +1571,7 @@ msgid "Add Friend"
 msgstr "Lisää ystävä"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:37
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:258
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:247
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:93
 msgid "Username:"
 msgstr "Käyttäjätunnus:"
@@ -1916,7 +1916,7 @@ msgid "New Version Available!"
 msgstr "Uudempi versio on saatavilla!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:143
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:131
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:138
 msgid "LimeWire Store"
 msgstr "LimeWire-kauppa"
 
@@ -2069,19 +2069,19 @@ msgstr "Näytä &keskusteluikkuna"
 msgid "&View"
 msgstr "&Näytä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:39
 msgid "Files"
 msgstr "Tiedostoa"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:40
 msgid "Transfers"
 msgstr "Siirtoja"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:41
 msgid "System"
 msgstr "Järjestelmä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:42
 msgid "Super Really Advanced"
 msgstr "Hypersuper-edistynyt"
 
@@ -2166,61 +2166,61 @@ msgid "Could not save download directory, reverted to old directory"
 msgstr "Lataushakemistoa ei voitu tallentaa, palattiin vanhaan hakemistoon"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:192
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:167
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:174
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:80
 msgid "Save Folder Error"
 msgstr "Kansion tallennusvirhe"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:85
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:86
 msgid "Add New Extension"
 msgstr "Lisää uusi tarkenne"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:247
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:266
 msgid "File Extension:"
 msgstr "Tiedoston tarkenne:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:287
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:306
 msgid "The extension name was not valid, could not add."
 msgstr "Tarkenne ei käynyt, ei voitu lisätä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:93
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:94
 msgid "File Extensions"
 msgstr "Tiedostotarkenteet"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:98
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:99
 msgid "Manage File Extensions"
 msgstr "Hallinnoi tiedostotarkenteita"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:99
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:100
 msgid "Manage..."
 msgstr "Hallinnoi..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:99
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:100
 msgid "Manage file extensions to load"
 msgstr "Hallinnoi ladattavia tiedostotarkenteita"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:101
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:108
 msgid "Choose the file extensions that belong in each category"
 msgstr "Valitse kuhunkin luokkaan kuuluvat tiedostotarkenteet"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:142
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:149
 msgid "Store File Organization"
 msgstr "Tallenna tiedostojen järjestys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:143
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:150
 msgid "Configure File Organization..."
 msgstr "Konfiguroi tiedostojen järjestys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:143
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:150
 msgid "Configure how files downloaded from the LimeWire Store are organized"
 msgstr "Määritä, miten LimeWire Shopista ladatut tiedostot järjestetään"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:145
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:152
 msgid "Save Store downloads to:"
 msgstr "Tallenna Store-lataukset:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:166
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:173
 msgid "Could not save Store download directory, reverted to old directory"
 msgstr ""
 "Store-lataushakemistoa ei voitu tallentaa, palattiin vanhaan hakemistoon"
@@ -2396,7 +2396,7 @@ msgstr "Lue lisää"
 msgid "Sharing"
 msgstr "Jaetaan"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:60
 msgid "Select which file extensions belong in each category"
 msgstr "Valitse, mitkä tiedostotarkenteet kuuluvat kuhunkin luokkaan"
 
@@ -2408,35 +2408,35 @@ msgstr "Valitse minne tietyntyyppiset tiedostot tallennetaan"
 msgid "Revert directories to the default"
 msgstr "Palauta hakemistot oletusarvoihin"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:74
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:73
 msgid "Language:"
 msgstr "Kieli:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:77
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:76
 msgid "Help translate LimeWire!"
 msgstr "Auta kääntämään LimeWire!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:169
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:158
 msgid "Show popup system notifications"
 msgstr "Näytä järjestelmän ponnahdusikkunat"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:160
 msgid "Play notification sounds"
 msgstr "Käytä heräteääniä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:216
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:205
 msgid "Friends and Chat"
 msgstr "Ystävät ja keskustelu"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:220
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:209
 msgid "Sign into Friends when LimeWire starts"
 msgstr "Kirjaudu ystäviin LimeWaren käynnistyessä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:242
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:231
 msgid "Jabber Server:"
 msgstr "Jabber-palvelin:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:261
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:250
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:94
 msgid "Password:"
 msgstr "Salasana:"
@@ -2722,7 +2722,7 @@ msgstr "Selaa..."
 msgid "Choose a different Save Location"
 msgstr "Valitse toinen tallennuspaikka"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:26
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:17
 msgid "Undo any changes made"
 msgstr "Peru muutokset"
 
@@ -2734,7 +2734,7 @@ msgstr "Opaste"
 msgid "Learn more..."
 msgstr "Lue lisää..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:17
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
 msgid "Keep any changes made"
 msgstr "Säilytä muutokset"
 
@@ -2890,7 +2890,7 @@ msgstr "LimeWire käynnistää hakusi heti latauksen valmistuttua."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:585
 msgid "You might not receive many results until LimeWire finishes loading..."
 msgstr ""
-"Et ehkä saa montaa tulosta ennenkuin LimeWire saa latauksen valmiiksi..."
+"Et ehkä saa monia tuloksia, ennen kuin LimeWire saa latauksen valmiiksi..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:69
 msgid "Sort by:"
@@ -2974,44 +2974,44 @@ msgstr "Näytä samanlaiset tiedostot"
 msgid "Extension"
 msgstr "Pääte"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
 msgid "For Turbo-Charged searches get LimeWire PRO."
 msgstr "Osta LimeWire Pro niin latauksesi nopeutuvat!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:54
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
 msgstr "Tue LimeWiren vertaisverkkokehitystä. Hanki Pro!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:58
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
 msgid "Purchase LimeWire PRO to help us make downloads faster."
 msgstr "Hanki LimeWire Pro, niin voimme nopeuttaa latauksia."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:61
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
 msgid "For Turbo-Charged downloads get LimeWire PRO."
 msgstr "Osta LimeWire Pro nopeuttaaksesi latauksia!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:64
 msgid "Support open networks. Get LimeWire PRO."
 msgstr "Tue avoimia verkkoja. Hanki LimeWire Pro."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:68
 msgid "Support open source and open protocols. Get LimeWire PRO."
 msgstr "Tue avointa lähdekoodia ja avoimia protokollia. Hanki LimeWire Pro."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:71
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
 msgid "For Turbo-Charged performance get LimeWire PRO."
 msgstr "LimeWire Pro tehostaa suorituskykyä."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
 msgid "Keep the Internet open. Get LimeWire PRO."
 msgstr "Pidä Internet avoimena. Hanki LimeWire Pro."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:77
 msgid "Developing LimeWire costs real money. Get PRO."
 msgstr "LimeWiren kehittäminen maksaa. Hanki Pro."
 
@@ -3047,62 +3047,62 @@ msgstr ""
 "Magnet-linkkejä ei ole enää assosioitu LimeWireen. Haluatko että ne "
 "liitetään uudelleen LimeWireen?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:110
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:106
 msgid "No internet connection"
 msgstr "Ei Internet-yhteyttä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:107
 msgid "You have no internet connection"
 msgstr "Sinulla ei ole Internet-yhteyttä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:115
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:111
 msgid "Couldn't connect"
 msgstr "Ei saatu yhteyttä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:116
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 msgid "You couldn't connect to LimeWire"
 msgstr "Et saanut yhteyttä LimeWireen"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:127
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:132
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:123
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:128
 msgid "Weak connection"
 msgstr "Heikko yhteys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:128
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:133
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:124
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:129
 msgid "You have a weak connection"
 msgstr "Sinulla on heikko yhteys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:137
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:142
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:133
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:138
 msgid "Medium connection"
 msgstr "Keskinkertainen yhteys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:138
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:143
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:134
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:139
 msgid "You have a medium connection"
 msgstr "Sinulla on keskinkertainen yhteys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:148
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 msgid "Full connection"
 msgstr "Täysi yhteys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:149
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:145
 msgid "You are fully connected"
 msgstr "Sinulla on täysi yhteys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:154
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 msgid "Turbo-charged connection"
 msgstr "Turboyhteys"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:155
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:151
 msgid "You have a turbo-charged connection"
 msgstr "Sinulla on turboyhteys"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:162
 #, java-format
 msgid "Chat ({0})"
-msgstr "Kekustele ({0})"
+msgstr "Keskustele ({0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:37
 msgid "Want faster downloads?  Get LimeWire PRO."
@@ -3172,8 +3172,7 @@ msgid ""
 "like to update now?"
 msgstr ""
 "LimeWiren pitää käynnistyä uudelleen asentaakseen päivityksen. Jos et "
-"päivitä nyt, päivittyy LimeWire päivittyy kun lopetat. Haluatko päivittää "
-"nyt?"
+"päivitä nyt, päivittyy LimeWire kun lopetat. Haluatko päivittää nyt?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:174
 msgid "Update Ready"
@@ -3192,26 +3191,26 @@ msgid "Done uploading"
 msgstr "Lähetys on valmis"
 
 #. {0}: number of uploads before this upload that have to finish
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:269
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:268
 #, java-format
 msgid "Waiting for {0} upload to finish"
 msgid_plural "Waiting for {0} uploads to finish"
 msgstr[0] "Odotan {0} lähetyksen valmistumista"
 msgstr[1] "Odotan {0} lähetyksen valmistumista"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:271
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:270
 msgid "Waiting for connections..."
 msgstr "Odotan yhteyksiä..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:281
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:280
 msgid "Unable to upload: file error"
 msgstr "Ei voida lähettää: tiedostovirhe"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:283
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:282
 msgid "Unable to upload: transfer interrupted"
 msgstr "Ei voida lähettää: siirto keskeytettiin"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:285
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:284
 msgid "Unable to upload: upload limit reached"
 msgstr "Ei voida lähettää: lähetysraja saavutettu"
 
@@ -3243,7 +3242,7 @@ msgstr "Valitse hakemisto"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:370
 msgid "All Folders"
-msgstr "Kaikki hakemistot"
+msgstr "Kaikki kansiot"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:508
 msgid "File already exists.  Do you want to replace it?"
@@ -3382,11 +3381,11 @@ msgstr "Tiedostoassosiaatiot ja käynnistys"
 msgid "Associate .magnet and .torrent files with LimeWire"
 msgstr "Assosioi .magnet- ja .torrent-tiedostot LimeWireen"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:86
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:83
 msgid "Content Filters"
 msgstr "Sisältösuodattimet"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:101
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:98
 msgid "Please take a minute to configure these options before moving on."
 msgstr "Käytä hetki seuraavien asetusten määrittämiseen ennen jatkamista."
 
@@ -4280,19 +4279,25 @@ msgstr "Olet sallinut joitain epäturvallisia tiedostojakoasetuksia."
 msgid "LimeWire is preventing you from unsafe searching and sharing."
 msgstr "LimeWire estää sinua epäturvallisesta hausta ja jakamisesta."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:167
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:85
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:75
+msgid "Help improve LimeWire by sending us anonymous usage data"
+msgstr ""
+"Auta parantamaan LimeWireä lähettämällä meille käyttötietoja nimettömästi"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:156
 msgid "Notifications and Warnings"
 msgstr "Huomautukset ja varoitukset"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:173
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:162
 msgid "Reset"
 msgstr "Palauta oletusarvot"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:182
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:171
 msgid "Reset warning messages"
 msgstr "Poista varoitusviestit"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:252
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:241
 msgid "Using:"
 msgstr "Käytetään:"
 
@@ -4626,7 +4631,7 @@ msgid ""
 msgstr ""
 "LimeWire ei löydä tämän tiedoston lisenssiä. Ladataanko se silti?\n"
 "\n"
-"LimeWire ei voi valvoa tai kontsolloida P2P-verkon sisältöä, joten ole hyvä "
+"LimeWire ei voi valvoa tai kontrolloida P2P-verkon sisältöä, joten ole hyvä "
 "ja kunnioita paikallisia tekijänoikeuslakeja."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:58
@@ -4683,19 +4688,17 @@ msgstr[1] "{0} tiedostoa"
 msgid "Library was browsed"
 msgstr "Kirjastoa selattiin"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:258
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:257
 #, java-format
-msgid "Connected to {0} P2P users, uploading at {1} - Ratio ({2})"
+msgid "Connected to {0} P2P user, uploading at {1} - Ratio {2}"
 msgstr ""
-"Yhdistyneenä {0} P2P-käyttäjään, lähetetään nopeudella {1} - jakosuhde ({2})"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:260
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:259
 #, java-format
-msgid "Connected to {0} P2P user, uploading at {1} - Ratio ({2})"
+msgid "Connected to {0} P2P users, uploading at {1} - Ratio {2}"
 msgstr ""
-"Yhdistyneenä {0} P2P-käyttäjään, lähetetään nopeudella {1} - jasosuhde ({2})"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:263
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:262
 #, java-format
 msgid "Uploading - {0} of {1}({2})"
 msgstr "Lähetetään - {0}/{1}({2})"
@@ -4880,20 +4883,24 @@ msgstr "Käyttöäsi säätelevät säännöt:"
 msgid "Launch LimeWire at system startup"
 msgstr "Käynnistä LimeWire järjestelmän käynnistyessä"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:88
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:73
+msgid "Improve LimeWire"
+msgstr "Paranna LimeWireä"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:85
 msgid ""
 "Don't let me download or upload files copyright owners request not be shared"
 msgstr ""
-"Älä anna minun ladata tai lähettää tiedostoja, joita niiden tekijänoikeudet "
-"omistavat ovat pyytäneet olemaan jakamatta."
+"Älä anna minun ladata tai lähettää tiedostoja, joita niiden "
+"tekijänoikeuksien omistajat ovat pyytäneet olemaan jakamatta."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:108
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:124
 msgid "All settings can be changed later from LimeWire > Preferences"
 msgstr ""
 "Kaikki asetukset voidaan muuttaa myöhemmin valinnasta LimeWire > Asetukset"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:109
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:125
 msgid "All settings can be changed later in Tools > Options"
 msgstr ""
