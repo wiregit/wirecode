@@ -161,8 +161,8 @@
 	<classpathentry kind="lib" path="lib/jars/fb-java-api-schema-2.1.1.jar" sourcepath="lib/sources/facebook-java-api-2.1.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/glazedlists-snapshot20090628_java15.jar" sourcepath="lib/sources/glazedlists-snapshot20090628-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-1.0.jar" sourcepath="lib/sources/swingx-1.0-src.zip"/>
-	<classpathentry kind="lib" path="/fmj/lib/jspeex.jar"/>
 	<classpathentry kind="lib" path="lib/jars/fmj.jar"/>
 	<classpathentry kind="lib" path="lib/jars/ffmpeg-java.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jspeex.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
