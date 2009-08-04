@@ -35,7 +35,9 @@ public interface StoreStyle {
     
     Icon getDownloadTrackIcon();
     
-    Icon getInfoIcon();
+    Font getInfoFont();
+    
+    Color getInfoForeground();
     
     Font getPriceFont();
     
@@ -49,7 +51,9 @@ public interface StoreStyle {
     
     Color getQualityForeground();
 
-    Icon getShowTracksIcon();
+    Font getShowTracksFont();
+
+    Color getShowTracksForeground();
     
     Icon getStreamIcon();
     
