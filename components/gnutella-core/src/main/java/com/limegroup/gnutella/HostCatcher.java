@@ -741,8 +741,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         // If the pong came from a UHC, just add it as that
         if(endpoint.isUDPHostCache()) {
             LOG.trace("Adding host as UHC");
-            bootstrapper.addUDPHostCache(endpoint);
-            return addedPacked;
+            return bootstrapper.addUDPHostCache(endpoint) || addedPacked;
         }
 
         // If the pong came from a DHT node, pass it to the DHT manager
