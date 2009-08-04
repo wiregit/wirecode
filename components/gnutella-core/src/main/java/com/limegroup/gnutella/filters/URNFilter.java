@@ -76,6 +76,8 @@ public class URNFilter implements SpamFilter {
      * Returns true if any response in the query reply matches the blacklist.
      */
     public boolean isSpam(QueryReply q) {
+        if(blacklist == null)
+            return false;
         try {
             for(Response r : q.getResultsArray()) {
                 for(URN u : r.getUrns()) {
