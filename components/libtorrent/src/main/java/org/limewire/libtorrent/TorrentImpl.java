@@ -48,7 +48,7 @@ public class TorrentImpl implements Torrent {
 
     private final AtomicReference<TorrentStatus> status;
 
-    //TODO eventually remove this field and jsut delegate to libtorrent
+    // TODO eventually remove this field and jsut delegate to libtorrent
     private final List<String> paths;
 
     private AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
@@ -216,11 +216,15 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public synchronized void moveTorrent(File directory) {
+        // TODO potentially rename the method, or at least put in another
+        // parameter to use as the directory to move the torrent file and fast
+        // resume files to.
         assert complete.get();
         torrentManager.moveTorrent(this, directory);
         torrentDataFile.set(new File(directory, torrentDataFile.get().getName()));
 
-        // TODO would be nice to move the following logic to something outside of
+        // TODO would be nice to move the following logic to something outside
+        // of
         // the torrent code, since it is not really the torrent codes
         // responsibility.
         File oldFastResumeFile = fastResumeFile.get();
@@ -229,7 +233,7 @@ public class TorrentImpl implements Torrent {
                 oldFastResumeFile.getName()));
         torrentFile.set(new File(torrentManager.getTorrentSettings().getTorrentUploadsFolder(),
                 oldTorrentFile.getName()));
-        
+
         FileUtils.copy(oldTorrentFile, torrentFile.get());
         FileUtils.copy(oldFastResumeFile, fastResumeFile.get());
         FileUtils.forceDelete(oldTorrentFile);
