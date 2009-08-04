@@ -2,6 +2,8 @@ package org.limewire.ui.swing;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.SplashScreen;
 import java.awt.Toolkit;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -24,14 +26,34 @@ public class Main {
             }        
         
         
+            SplashScreen splashScreen = SplashScreen.getSplashScreen();
             Frame splash = null;
-            Image splashImage = getSplashImage();
-            
+            Image splashImage = null;;
+
             // show initial splash screen only if there are no arguments
             if (args == null || args.length == 0) {
+                Rectangle bounds;
+                
+                if(splashScreen != null && splashScreen.isVisible()) {
+                    bounds = splashScreen.getBounds();
+                    splashImage = Toolkit.getDefaultToolkit().createImage(splashScreen.getImageURL());    
+                } else {
+                    bounds = null;
+                    splashImage = getSplashImage();
+                } 
+                
                 if(splashImage != null) {
-                    splash = AWTSplashWindow.splash(splashImage);
+                    splash = AWTSplashWindow.splash(splashImage, bounds);
+                } else if (splashScreen != null && splashScreen.isVisible()) {
+                    splashScreen.close();
+                    
                 }
+            } else {
+                // Hide the built-in splash if it was shown, since we don't want a splash
+                // right now..
+                if(splashScreen != null && splashScreen.isVisible()) {
+                    splashScreen.close();
+                }                
             }
             
             // load the GUI through reflection so that we don't reference classes here,
