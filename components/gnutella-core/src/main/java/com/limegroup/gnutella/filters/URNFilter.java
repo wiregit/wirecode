@@ -23,7 +23,7 @@ import com.limegroup.gnutella.spam.SpamManager;
  */
 @Singleton
 public class URNFilter implements SpamFilter {
-    
+
     private static final Log LOG = LogFactory.getLog(URNFilter.class);
     private ImmutableSet<URN> blacklist = null;
     private final SpamManager spamManager;
@@ -32,7 +32,7 @@ public class URNFilter implements SpamFilter {
     URNFilter(SpamManager spamManager) {
         this.spamManager = spamManager;
     }
-    
+
     /**
      * Reloads the local and remote blacklists. Called when the spam service
      * starts and on SIMPP updates.
@@ -51,10 +51,11 @@ public class URNFilter implements SpamFilter {
         }
         blacklist = builder.build();
     }
-    
+
     /**
-     * Returns false if the message is a query response with a URN
-     * matching either of the blacklists; otherwise returns true.
+     * Returns false if the message is a query reply with a URN that matches
+     * the blacklist; matching query replies are passed to the spam filter.
+     * Returns true for all other messages.
      */
     @Override
     public boolean allow(Message m) {
@@ -62,23 +63,32 @@ public class URNFilter implements SpamFilter {
             return true;
         if(m instanceof QueryReply) {
             QueryReply q = (QueryReply)m;
-            try {
-                for(Response r : q.getResultsArray()) {
-                    for(URN u : r.getUrns()) {
-                        if(blacklist.contains(u)) {
-                            if(LOG.isDebugEnabled())
-                                LOG.debug("Filtering response with URN " + u);
-                            if(FilterSettings.FILTERED_URNS_ARE_SPAM.getValue())
-                                spamManager.handleSpamQueryReply(q);
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            } catch (BadPacketException bpe) {
-                return true;
+            if(isSpam(q)) {
+                if(FilterSettings.FILTERED_URNS_ARE_SPAM.getValue())
+                    spamManager.handleSpamQueryReply(q);
+                return false;
             }
         }
-        return true; // Don't block other kinds of messages
+        return true;
+    }
+
+    /**
+     * Returns true if any response in the query reply matches the blacklist.
+     */
+    public boolean isSpam(QueryReply q) {
+        try {
+            for(Response r : q.getResultsArray()) {
+                for(URN u : r.getUrns()) {
+                    if(blacklist.contains(u)) {
+                        if(LOG.isDebugEnabled())
+                            LOG.debug(u + " is spam");
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch(BadPacketException bpe) {
+            return true;
+        }
     }
 }

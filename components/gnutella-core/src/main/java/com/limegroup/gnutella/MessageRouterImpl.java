@@ -1912,10 +1912,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
         int classC = ByteUtils.beb2int(queryReply.getIPBytes(), 0);
         RouteTable.ReplyRoutePair rrp =
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
-                                             queryReply.getTotalLength(),
-											 queryReply.getUniqueResultCount(),
-											 queryReply.getPartialResultCount(),
-                                             classC, urnFilter.allow(queryReply));
+                                        queryReply.getTotalLength(),
+                                        queryReply.getUniqueResultCount(),
+                                        queryReply.getPartialResultCount(),
+                                        classC, !urnFilter.isSpam(queryReply));
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
