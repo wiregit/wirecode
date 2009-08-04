@@ -417,6 +417,7 @@ public class TorrentImpl implements Torrent {
             return false;
         }
 
+        //TODO might need to remove the touch logic here when the user can select the notion of only downloading a subset of the torrents files.
         for (File file : getTorrentDataFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
