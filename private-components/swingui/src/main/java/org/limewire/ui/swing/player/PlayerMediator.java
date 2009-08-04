@@ -1,14 +1,20 @@
 package org.limewire.ui.swing.player;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.logging.Level;
+
+import javax.media.MediaLocator;
+import javax.media.NoPlayerException;
 
 import net.sf.fmj.apps.play.FmjPlay;
+import net.sf.fmj.ejmf.toolkit.util.Utility;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
@@ -18,11 +24,13 @@ import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.settings.MediaPlayerSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
@@ -321,11 +329,15 @@ public class PlayerMediator {
     }
     
     private void loadAndPlay(File fileToPlay) {
-        FmjPlay.main(new String[]{fileToPlay.getAbsolutePath()});
-//        AudioPlayer player = getPlayer();
-//        player.loadSong(fileToPlay);
-//        player.playSong();
-//        inspectable.started(fileToPlay);
+
+        MediaLocator locator = Utility.appArgToMediaLocator(fileToPlay.getAbsolutePath());
+        try {
+            new FmjPlay().initialize(locator);
+        } catch (NoPlayerException e) {
+            NativeLaunchUtils.safeLaunchFile(fileToPlay);
+        } catch (IOException e) {
+            NativeLaunchUtils.safeLaunchFile(fileToPlay);
+        }
     }
     
     /**
