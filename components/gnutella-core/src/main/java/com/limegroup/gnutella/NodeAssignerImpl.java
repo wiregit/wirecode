@@ -14,9 +14,13 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
+import org.limewire.statistic.BasicKilobytesStatistic;
+import org.limewire.statistic.Statistic;
+import org.limewire.statistic.StatisticAccumulator;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -119,6 +123,16 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
     private final NetworkInstanceUtils networkInstanceUtils;
     
+    
+    // these two inspections include:
+    // gnutella downloads and uploads, torrents,
+    // gnutella messaging and mozilla downloads.
+    // 200 measurements are saved for each, 1 per second.
+    @InspectionPoint("upstream bandwidth history")
+    private final Statistic uploadStat;   
+    @InspectionPoint("downstream bandwidth history")
+    private final Statistic downloadStat;
+    
 
     /** 
      * Creates a new <tt>NodeAssigner</tt>. 
@@ -140,7 +154,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
                         @Named("unlimitedExecutor") Executor unlimitedExecutor,
                         ConnectionServices connectionServices,
                         TcpBandwidthStatistics tcpBandwidthStatistics,
-                        NetworkInstanceUtils networkInstanceUtils) {
+                        NetworkInstanceUtils networkInstanceUtils,
+                        StatisticAccumulator statisticAccumulator) {
         this.uploadTracker = uploadTracker;
         this.downloadTracker = downloadTracker;  
         this.connectionManager = connectionManager;
@@ -152,6 +167,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         this.unlimitedExecutor = unlimitedExecutor;
         this.tcpBandwidthStatistics = tcpBandwidthStatistics;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.uploadStat = new BandwidthStat(statisticAccumulator);
+        this.downloadStat = new BandwidthStat(statisticAccumulator);
     }
     
     /* (non-Javadoc)
@@ -212,6 +229,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         int newUpstreamBytesPerSec = 
             (int)bandwidth
            +(int)connectionManager.get().getMeasuredUpstreamBandwidth();
+        uploadStat.addData(newUpstreamBytesPerSec);
         bandwidth = 0;
         try {
             bandwidth = downloadTracker.get().getMeasuredBandwidth();
@@ -221,6 +239,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         int newDownstreamBytesPerSec = 
             (int)bandwidth
            +(int)connectionManager.get().getMeasuredDownstreamBandwidth();
+        downloadStat.addData(newDownstreamBytesPerSec);
         if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
             _maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
             UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
@@ -599,5 +618,11 @@ class NodeAssignerImpl implements NodeAssigner, Service {
      */
     private boolean acceptUltrapeer() {
         return (Math.random() < DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.getValue());
+    }
+
+    private class BandwidthStat extends BasicKilobytesStatistic {
+        public BandwidthStat(StatisticAccumulator statisticAccumulator) {
+            super(statisticAccumulator);
+        }
     }
 }
