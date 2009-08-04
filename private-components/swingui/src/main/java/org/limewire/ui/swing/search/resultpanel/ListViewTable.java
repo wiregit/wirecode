@@ -12,6 +12,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
@@ -39,9 +40,10 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
     private boolean ignoreRepaints;
     
     /**
-     * Constructs a ListViewTable using the specified row height rule.
+     * Constructs a ListViewTable using the specified row height rule and
+     * store style.
      */
-    public ListViewTable(ListViewRowHeightRule rowHeightRule) {
+    public ListViewTable(ListViewRowHeightRule rowHeightRule, StoreStyle storeStyle) {
         super();
         this.rowHeightRule = rowHeightRule;
         
@@ -61,8 +63,7 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
                         Object value = getValueAt(adapter.row, 0);
                         return (value instanceof VisualStoreResult);
                     }
-                }, new Color(245,245,245), null, getTableColors().selectionColor, null));
-        // TODO replace Store color using service manager
+                }, storeStyle.getBackground(), null, getTableColors().selectionColor, null));
     }
     
     @Override

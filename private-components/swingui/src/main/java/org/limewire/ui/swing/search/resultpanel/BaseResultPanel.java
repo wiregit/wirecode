@@ -22,6 +22,8 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.store.StoreManager;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.Disposable;
@@ -145,7 +147,8 @@ public class BaseResultPanel extends JXPanel {
             Provider<CalendarRenderer> calendarRenderer,
             LibraryMediator libraryMediator,
             Provider<QualityRenderer> qualityRenderer, 
-            DefaultTableCellRenderer defaultTableCellRenderer) {
+            DefaultTableCellRenderer defaultTableCellRenderer,
+            StoreManager storeManager) {
         
         this.searchResultsModel = searchResultsModel;
         this.tableFormatFactory = tableFormatFactory;
@@ -164,7 +167,7 @@ public class BaseResultPanel extends JXPanel {
         rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery());
 
         // Create tables.
-        this.resultsList = createList();
+        this.resultsList = createList(storeManager.getStoreStyle());
         this.resultsTable = createTable();
         
         searchResultsModel.addDisposalListener(new ResultModelDisposalListener());
@@ -175,8 +178,8 @@ public class BaseResultPanel extends JXPanel {
     /**
      * Creates a new List view table.
      */
-    private ListViewTable createList() {
-        ListViewTable listTable = new ListViewTable(rowHeightRule);
+    private ListViewTable createList(StoreStyle storeStyle) {
+        ListViewTable listTable = new ListViewTable(rowHeightRule, storeStyle);
         
         // Set list table fields that do not change with search category.
         listTable.setShowGrid(true, false);
