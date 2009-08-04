@@ -297,33 +297,41 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
 
     @Override
-    public Component getTableCellRendererComponent(
-        JTable table, Object value,
-        boolean isSelected, boolean hasFocus,
-        int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value,
+        boolean isSelected, boolean hasFocus, int row, int column) {
 
-        return getTableCellEditorComponent(
-            table, value, isSelected, row, column);
+        return getEditorRenderer(table, value, false, row, column);
     }
 
     @Override
-    public Component getTableCellEditorComponent(
-        final JTable table, Object value, boolean isSelected, int row, final int col) {
+    public Component getTableCellEditorComponent(JTable table, Object value,
+            boolean isSelected, int row, int column) {
         
-        vsr = (VisualSearchResult) value;
+        return getEditorRenderer(table, value, true, row, column);
+    }  
+
+    /**
+     * Returns the component used to edit and render the specified table cell 
+     * value.
+     */
+    private Component getEditorRenderer(JTable table, Object value,
+            boolean editing, int row, int col) {
+        
+        this.vsr = (VisualSearchResult) value;
         this.table = table;        
         
         if (value == null) {
             return emptyPanel;
         }
         
-        // Use renderer for store result.
+        // Use component for store result.
         if (vsr instanceof VisualStoreResult) {
             RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
-            storeRenderer.update(table, (VisualStoreResult) vsr, result);
+            storeRenderer.update(table, (VisualStoreResult) vsr, result, editing, row);
             return storeRenderer;
         }
         
+        // Use component for search result.
         editorComponent.setBackground(table.getBackground());
                 
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
@@ -336,9 +344,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         update(vsr);
         return editorComponent;
-    }  
-
-
+    }
 
     private void update(VisualSearchResult vsr) {
         fromWidget.setPeople(vsr.getSources());

@@ -24,7 +24,7 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 /**
  * Implementation of ListViewStoreRenderer for style A.
  */
-class ListViewStoreRendererA extends ListViewStoreRenderer {
+class ListViewStoreRendererCD extends ListViewStoreRenderer {
 
     private JButton albumIconButton;
     private JXPanel albumTextPanel;
@@ -41,7 +41,7 @@ class ListViewStoreRendererA extends ListViewStoreRenderer {
      * Constructs a store renderer with the specified icon manager and store
      * style.
      */
-    public ListViewStoreRendererA(CategoryIconManager categoryIconManager, StoreStyle storeStyle) {
+    public ListViewStoreRendererCD(CategoryIconManager categoryIconManager, StoreStyle storeStyle) {
         super(categoryIconManager, storeStyle);
     }
 
@@ -133,7 +133,7 @@ class ListViewStoreRendererA extends ListViewStoreRenderer {
         mediaPanel.add(mediaIconButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0");
         mediaPanel.add(mediaTextPanel, "alignx left, aligny 50%, gapleft 4, growx, shrinkprio 200, growprio 200, pushx 200");
     }
-    
+
     @Override
     protected Component createTrackComponent(SearchResult result) {
         JXPanel trackPanel = new JXPanel();
@@ -154,9 +154,9 @@ class ListViewStoreRendererA extends ListViewStoreRenderer {
         
         return trackPanel;
     }
-    
+
     @Override
-    protected void updateAlbum(VisualStoreResult vsr, RowDisplayResult result) {
+    protected void updateAlbum(VisualStoreResult vsr, RowDisplayResult result, boolean editing) {
         albumIconButton.setIcon(vsr.getStoreResult().getAlbumIcon());
         
         switch (result.getConfig()) {
@@ -180,9 +180,9 @@ class ListViewStoreRendererA extends ListViewStoreRenderer {
         
         showTracksButton.setVisible(vsr.getStoreResult().isAlbum());
     }
-    
+
     @Override
-    protected void updateMedia(VisualStoreResult vsr, RowDisplayResult result) {
+    protected void updateMedia(VisualStoreResult vsr, RowDisplayResult result, boolean editing) {
         mediaIconButton.setIcon(categoryIconManager.getIcon(vsr));
         
         switch (result.getConfig()) {

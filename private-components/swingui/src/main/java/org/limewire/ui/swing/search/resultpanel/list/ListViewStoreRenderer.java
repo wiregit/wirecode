@@ -1,13 +1,11 @@
 package org.limewire.ui.swing.search.resultpanel.list;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
@@ -36,10 +34,14 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final JXPanel mediaPanel;
     protected final JXPanel albumTrackPanel;
     
+    protected final Action downloadAction;
+    protected final Action streamAction;
+    protected final Action showInfoAction;
     protected final Action showTracksAction;
     
     private JTable table;
     private VisualStoreResult vsr;
+    private int row;
 
     /**
      * Constructs a ListViewStoreRenderer.
@@ -53,6 +55,9 @@ abstract class ListViewStoreRenderer extends JXPanel {
         this.albumPanel = new JXPanel();
         this.mediaPanel = new JXPanel();
         this.albumTrackPanel = new JXPanel();
+        this.downloadAction = new DownloadAction();
+        this.streamAction = new StreamAction();
+        this.showInfoAction = new ShowInfoAction();
         this.showTracksAction = new ShowTracksAction();
         
         initComponents();
@@ -67,14 +72,15 @@ abstract class ListViewStoreRenderer extends JXPanel {
         initMediaComponent();
         
         // Initialize album track container.
-        albumTrackPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+//        albumTrackPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         albumTrackPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, fill, novisualpadding"));
+        albumTrackPanel.setOpaque(false);
         
         // Layout renderer components.
         setLayout(new MigLayout("insets 6 6 0 6, gap 0! 0!, novisualpadding, hidemode 3"));
         add(albumPanel, "alignx left, aligny 50%, growx, shrinkprio 200, growprio 200, pushx 200, wrap");
         add(mediaPanel, "alignx left, aligny 50%, growx, shrinkprio 200, growprio 200, pushx 200, wrap");
-        add(albumTrackPanel, "span 3, left, aligny top, gap 16 16 6 0, grow");
+        add(albumTrackPanel, "span 3, left, aligny top, gap 30 30 6 0, grow");
     }
     
     /**
@@ -95,35 +101,38 @@ abstract class ListViewStoreRenderer extends JXPanel {
     /**
      * Updates the renderer to display the specified VisualStoreResult.
      */
-    public void update(JTable table, VisualStoreResult vsr, RowDisplayResult result) {
+    public void update(JTable table, VisualStoreResult vsr, RowDisplayResult result,
+            boolean editing, int row) {
         // Save table and store result.
         this.table = table;
         this.vsr = vsr;
+        this.row = row;
         
         if (vsr.getStoreResult().isAlbum()) {
             albumPanel.setVisible(true);
             mediaPanel.setVisible(false);
-            showTracksAction.putValue(Action.NAME, vsr.isShowTracks() ? I18n.tr("Hide Tracks") : I18n.tr("Show Tracks"));
-            updateAlbum(vsr, result);
+            showTracksAction.putValue(Action.NAME, vsr.isShowTracks() ? 
+                    I18n.tr("Hide Tracks").toUpperCase() : I18n.tr("Show Tracks").toUpperCase());
+            updateAlbum(vsr, result, editing);
             updateAlbumTracks(vsr);
             
         } else {
             albumPanel.setVisible(false);
             mediaPanel.setVisible(true);
             albumTrackPanel.setVisible(false);
-            updateMedia(vsr, result);
+            updateMedia(vsr, result, editing);
         }
     }
     
     /**
      * Updates album content for specified VisualStoreResult.
      */
-    protected abstract void updateAlbum(VisualStoreResult vsr, RowDisplayResult result);
+    protected abstract void updateAlbum(VisualStoreResult vsr, RowDisplayResult result, boolean editing);
     
     /**
      * Updates media content for specified VisualStoreResult.
      */
-    protected abstract void updateMedia(VisualStoreResult vsr, RowDisplayResult result);
+    protected abstract void updateMedia(VisualStoreResult vsr, RowDisplayResult result, boolean editing);
     
     /**
      * Adds display panels when multiple tracks are available.
@@ -137,7 +146,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
                 List<SearchResult> fileList = vsr.getStoreResult().getAlbumResults();
                 for (SearchResult result : fileList) {
                     Component comp = createTrackComponent(result);
-                    albumTrackPanel.add(comp, "align left, growx, wrap");
+                    albumTrackPanel.add(comp, "align left, gapbottom 1, growx, wrap");
                 }
             } else {
                 albumTrackPanel.setVisible(false);
@@ -145,6 +154,46 @@ abstract class ListViewStoreRenderer extends JXPanel {
             
         } else {
             albumTrackPanel.setVisible(false);
+        }
+    }
+    
+    /**
+     * Action to download store result.
+     */
+    private class DownloadAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO implement
+        }
+    }
+    
+    /**
+     * Action to stream store result.
+     */
+    private class StreamAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO implement
+        }
+    }
+    
+    /**
+     * Action to show album or media information.
+     */
+    private class ShowInfoAction extends AbstractAction {
+        
+        public ShowInfoAction() {
+            putValue(Action.NAME, I18n.tr("Info").toUpperCase());
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (vsr != null) {
+                System.out.println("showInfo.actionPerformed");
+                // TODO implement
+            }
         }
     }
     
@@ -160,7 +209,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
                 vsr.setShowTracks(!vsr.isShowTracks());
                 
                 // Adjust action text.
-                putValue(Action.NAME, vsr.isShowTracks() ? I18n.tr("Hide Tracks") : I18n.tr("Show Tracks"));
+                putValue(Action.NAME, vsr.isShowTracks() ? 
+                        I18n.tr("Hide Tracks").toUpperCase() : I18n.tr("Show Tracks").toUpperCase());
                 
                 // Post event to update row heights.
                 if (table instanceof ListViewTable) {
@@ -168,6 +218,9 @@ abstract class ListViewStoreRenderer extends JXPanel {
                         @Override
                         public void run() {
                             ((ListViewTable) table).updateRowSizes();
+                            if (row >= 0) {
+                                table.editCellAt(row, 0);
+                            }
                         }
                     });
                 }

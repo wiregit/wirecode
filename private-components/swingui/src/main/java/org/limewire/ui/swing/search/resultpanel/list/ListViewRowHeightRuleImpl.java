@@ -107,7 +107,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             if (storeResult.isAlbum()) {
                 if (showTracks) {
                     int count = storeResult.getAlbumResults().size();
-                    return 72 + (count * 29);
+                    return 72 + (count * 33);
                 } else {
                     return 72;
                 }
