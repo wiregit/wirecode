@@ -153,7 +153,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         connectionA.addNewFriend(USERNAME_B, USERNAME_B).get();
 
         // sleep to wait for friend6 to deny
-        Thread.sleep(SLEEP);
+        waitForFriendRequest(false);
 
         connectionA.logout().get();
         connectionB.logout().get();
@@ -196,10 +196,10 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         // automatedtestfriend5* requests automatedtestfriendb
         connectionA.addNewFriend(USERNAME_B, USERNAME_B).get();
 
-        // sleep to wait for automatedtestfriendb to confirm, friends to exchange roster packets, etc
+        // wait for automatedtestfriends to confirm, friends to exchange roster packets, etc
         waitForFriendRequest(true);
 
-        // check that both automatedtestfrienda and automatedtestfriendb have each other on their roster
+        // check that both automatedtestfriends have each other on their roster
         assertEquals(1, autoFriendARosterListener.getRosterSize());
         assertEquals(1, autoFriendBRosterListener.getRosterSize());
         assertEquals(USERNAME_B, autoFriendARosterListener.getFirstRosterEntry());
@@ -260,8 +260,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
                 addListener(new RosterEventListener(USERNAME_A));
         injectors[0].getInstance(Key.get(new TypeLiteral<ListenerSupport<RosterEvent>>(){})).
                 addListener(new RosterEventListener(USERNAME_B));
-        assertTrue(latch.await(MAX_WAIT_FRIEND_REQUEST, TimeUnit.SECONDS));
-        
+        latch.await(MAX_WAIT_FRIEND_REQUEST, TimeUnit.SECONDS);
     }
     
     private void waitForConnection() throws Exception {
