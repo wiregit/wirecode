@@ -34,6 +34,7 @@ public class MockStoreResult implements StoreResult {
     
     private Icon albumIcon;
     private String fileExtension;
+    private String price;
     private long size;
     
     /**
@@ -71,6 +72,11 @@ public class MockStoreResult implements StoreResult {
     }
 
     @Override
+    public String getPrice() {
+        return price;
+    }
+    
+    @Override
     public Object getProperty(FilePropertyKey key) {
         return propertyMap.get(key);
     }
@@ -100,6 +106,10 @@ public class MockStoreResult implements StoreResult {
     
     public void setFileExtension(String extension) {
         this.fileExtension = extension;
+    }
+    
+    public void setPrice(String price) {
+        this.price = price;
     }
     
     public void setProperty(FilePropertyKey key, Object value) {

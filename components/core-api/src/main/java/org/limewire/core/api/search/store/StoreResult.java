@@ -44,6 +44,11 @@ public interface StoreResult {
     String getFileExtension();
     
     /**
+     * Returns the price for the result.
+     */
+    String getPrice();
+    
+    /**
      * Returns a property value for the specified property key.
      */
     Object getProperty(FilePropertyKey key);

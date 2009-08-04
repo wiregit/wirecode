@@ -1209,6 +1209,7 @@ public class MockSearch implements Search {
         MockStoreResult mstr = new MockStoreResult(urn, Category.AUDIO);
         mstr.setFileExtension("mp3");
         mstr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
+        mstr.setPrice("4 Credits");
         mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
         mstr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
@@ -1250,6 +1251,7 @@ public class MockSearch implements Search {
         urn = new MockURN("www.store.limewire.com" + (i + 10));
         mstr = new MockStoreResult(urn, Category.AUDIO);
         mstr.setFileExtension("mp3");
+        mstr.setPrice("1 Credit");
         mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
         mstr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
         mstr.setProperty(FilePropertyKey.NAME, "Chomp");
