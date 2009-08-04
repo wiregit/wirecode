@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
 
+import net.sf.fmj.apps.play.FmjPlay;
+
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
@@ -319,10 +321,11 @@ public class PlayerMediator {
     }
     
     private void loadAndPlay(File fileToPlay) {
-        AudioPlayer player = getPlayer();
-        player.loadSong(fileToPlay);
-        player.playSong();
-        inspectable.started(fileToPlay);
+        FmjPlay.main(new String[]{fileToPlay.getAbsolutePath()});
+//        AudioPlayer player = getPlayer();
+//        player.loadSong(fileToPlay);
+//        player.playSong();
+//        inspectable.started(fileToPlay);
     }
     
     /**

@@ -161,5 +161,22 @@
 	<classpathentry kind="lib" path="lib/jars/fb-java-api-schema-2.1.1.jar" sourcepath="lib/sources/facebook-java-api-2.1.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/glazedlists-snapshot20090628_java15.jar" sourcepath="lib/sources/glazedlists-snapshot20090628-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-1.0.jar" sourcepath="lib/sources/swingx-1.0-src.zip"/>
+	<classpathentry kind="lib" path="/fmj/lib/jspeex.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/ffmpeg-java.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/gstreamer-java.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/jdom.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/jheora-patch.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/jl1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/jna.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/jogg-0.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/jorbis-0.0.15.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/jspeex.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/junit.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/lti-civil-no_s_w_t.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/mp3spi1.9.4.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/theora-java.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/tritonus_share.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj/vorbisspi1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,11 +3,13 @@ package org.limewire.ui.swing.player;
 import java.io.File;
 import java.util.Locale;
 
+import org.limewire.core.api.Category;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.limegroup.gnutella.CategoryConverter;
 
 /**
  * Utility methods to access the audio player.  PlayerUtils accesses the player
@@ -29,6 +31,9 @@ public class PlayerUtils {
     }
     
     public static boolean isPlayableFile(File file) {
+        if(CategoryConverter.categoryForFile(file) == Category.VIDEO){
+            return true;
+        }
         String name = file.getName().toLowerCase(Locale.US);
         return name.endsWith(".mp3") || name.endsWith(".ogg") || name.endsWith(".wav");
     }
