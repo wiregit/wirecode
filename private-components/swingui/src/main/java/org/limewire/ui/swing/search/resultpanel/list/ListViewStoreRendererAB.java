@@ -3,10 +3,14 @@ package org.limewire.ui.swing.search.resultpanel.list;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -18,9 +22,12 @@ import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
+import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer.NoDancingHtmlLabel;
 import org.limewire.ui.swing.util.CategoryIconManager;
+
+import com.google.inject.Provider;
 
 /**
  * Implementation of ListViewStoreRenderer for styles A and B.
@@ -56,8 +63,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
      * Constructs a store renderer with the specified icon manager and store
      * style.
      */
-    public ListViewStoreRendererAB(CategoryIconManager categoryIconManager, StoreStyle storeStyle) {
-        super(categoryIconManager, storeStyle);
+    public ListViewStoreRendererAB(CategoryIconManager categoryIconManager,
+            Provider<SearchHeadingDocumentBuilder> headingBuilder,
+            StoreStyle storeStyle) {
+        super(categoryIconManager, headingBuilder, storeStyle);
     }
 
     @Override
@@ -67,24 +76,28 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumCoverButton = new IconButton();
         
         albumTextPanel = new JXPanel();
-        albumTextPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         albumTextPanel.setOpaque(false);
         
         albumHeadingLabel = new HTMLLabel();
         albumHeadingLabel.setOpenUrlsNatively(false);
         albumHeadingLabel.setOpaque(false);
         albumHeadingLabel.setFocusable(false);
-        albumHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
-//        StyleSheet mainStyle = ((HTMLDocument) albumHeadingLabel.getDocument()).getStyleSheet();
-//        String rules = "body { font-family: " + storeStyle.getArtistFont().getFamily() + "; }" +
-//            ".title { color: " + headingColor + "; font-size: " + storeStyle.getArtistFont().getSize() + "; }" +
-//            "a { color: " + headingColor + "; }";
-//        StyleSheet newStyle = new StyleSheet();
-//        newStyle.addRule(rules);
-//        mainStyle.addStyleSheet(newStyle);
         albumHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
         albumHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         albumHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
+        albumHeadingLabel.setMargin(new Insets(3, 0, 3, 3));
+        albumHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == EventType.ACTIVATED) {
+                    if (e.getDescription().equals("#download")) {
+                        downloadAction.actionPerformed(new ActionEvent(
+                                albumHeadingLabel, ActionEvent.ACTION_PERFORMED, e.getDescription()));
+                    }
+                }
+            }
+        });
         
         albumSubHeadingLabel = new NoDancingHtmlLabel();
         albumSubHeadingLabel.setFont(storeStyle.getAlbumFont());
@@ -93,17 +106,15 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumInfoPanel = new JXPanel();
         albumInfoPanel.setOpaque(false);
         
-        albumTracksButton = new IconButton();
+        albumTracksButton = new IconButton(showTracksAction);
         albumTracksButton.setFont(storeStyle.getShowTracksFont());
         albumTracksButton.setForeground(storeStyle.getShowTracksForeground());
         albumTracksButton.setHideActionText(false);
-        albumTracksButton.setAction(showTracksAction);
         
-        albumInfoButton = new IconButton();
+        albumInfoButton = new IconButton(showInfoAction);
         albumInfoButton.setFont(storeStyle.getInfoFont());
         albumInfoButton.setForeground(storeStyle.getInfoForeground());
         albumInfoButton.setHideActionText(false);
-        albumInfoButton.setAction(showInfoAction);
         
         albumDownloadPanel = new JXPanel();
         albumDownloadPanel.setOpaque(false);
@@ -112,10 +123,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumPriceLabel.setFont(storeStyle.getPriceFont());
         albumPriceLabel.setForeground(storeStyle.getPriceForeground());
         
-        albumStreamButton = new IconButton();
+        albumStreamButton = new IconButton(streamAction);
         albumStreamButton.setIcon(storeStyle.getStreamIcon());
         
-        albumDownloadButton = new IconButton();
+        albumDownloadButton = new IconButton(downloadAction);
         albumDownloadButton.setIcon(storeStyle.getDownloadAlbumIcon());
         
         albumTextPanel.setLayout(new MigLayout("nogrid, insets 0 0 0 0, gap 0! 0!, novisualpadding"));
@@ -152,24 +163,28 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         mediaIconButton = new IconButton();
         
         mediaTextPanel = new JXPanel();
-        mediaTextPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         mediaTextPanel.setOpaque(false);
         
         mediaHeadingLabel = new HTMLLabel();
         mediaHeadingLabel.setOpenUrlsNatively(false);
         mediaHeadingLabel.setOpaque(false);
         mediaHeadingLabel.setFocusable(false);
-        mediaHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
-//        StyleSheet mainStyle = ((HTMLDocument) mediaHeadingLabel.getDocument()).getStyleSheet();
-//        String rules = "body { font-family: " + storeStyle.getArtistFont().getFamily() + "; }" +
-//            ".title { color: " + headingColor + "; font-size: " + storeStyle.getArtistFont().getSize() + "; }" +
-//            "a { color: " + headingColor + "; }";
-//        StyleSheet newStyle = new StyleSheet();
-//        newStyle.addRule(rules);
-//        mainStyle.addStyleSheet(newStyle);
         mediaHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
         mediaHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
+        mediaHeadingLabel.setMargin(new Insets(3, 0, 3, 3));
+        mediaHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == EventType.ACTIVATED) {
+                    if (e.getDescription().equals("#download")) {
+                        downloadAction.actionPerformed(new ActionEvent(
+                                mediaHeadingLabel, ActionEvent.ACTION_PERFORMED, e.getDescription()));
+                    }
+                }
+            }
+        });
         
         mediaSubHeadingLabel = new NoDancingHtmlLabel();
         mediaSubHeadingLabel.setFont(storeStyle.getAlbumFont());
@@ -179,17 +194,16 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         mediaPriceLabel.setFont(storeStyle.getPriceFont());
         mediaPriceLabel.setForeground(storeStyle.getPriceForeground());
         
-        mediaStreamButton = new IconButton();
+        mediaStreamButton = new IconButton(streamAction);
         mediaStreamButton.setIcon(storeStyle.getStreamIcon());
         
-        mediaDownloadButton = new IconButton();
+        mediaDownloadButton = new IconButton(downloadAction);
         mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         
-        mediaInfoButton = new IconButton();
+        mediaInfoButton = new IconButton(showInfoAction);
         mediaInfoButton.setFont(storeStyle.getInfoFont());
         mediaInfoButton.setForeground(storeStyle.getInfoForeground());
         mediaInfoButton.setHideActionText(false);
-        mediaInfoButton.setAction(showInfoAction);
         
         mediaTextPanel.setLayout(new MigLayout("nogrid, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         mediaTextPanel.add(mediaHeadingLabel, "left, shrinkprio 200, growx, wmax pref, hidemode 3, wrap");
@@ -218,10 +232,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         trackPanel.setOpaque(true);
         trackPanel.setBackground(Color.WHITE);
         
-        JButton streamButton = new IconButton();
+        JButton streamButton = new IconButton(new StreamTrackAction(result));
         streamButton.setIcon(storeStyle.getStreamIcon());
         
-        JButton downloadButton = new IconButton();
+        JButton downloadButton = new IconButton(new DownloadTrackAction(result));
         downloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         
         JLabel trackLabel = new JLabel();
@@ -272,7 +286,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
             break;
         }
         
-        albumHeadingLabel.setText(result.getHeading());
+        albumHeadingLabel.setText(getHeadingHtml(editing));
         albumSubHeadingLabel.setText(result.getSubheading());
         
         albumPriceLabel.setText(vsr.getStoreResult().getPrice());
@@ -301,7 +315,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
             break;
         }
         
-        mediaHeadingLabel.setText(result.getHeading());
+        mediaHeadingLabel.setText(getHeadingHtml(editing));
         mediaSubHeadingLabel.setText(result.getSubheading());
         
         mediaPriceLabel.setText(vsr.getStoreResult().getPrice());

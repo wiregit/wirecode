@@ -12,13 +12,18 @@ import javax.swing.SwingUtilities;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewTable;
+import org.limewire.ui.swing.search.resultpanel.SearchHeading;
+import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
+
+import com.google.inject.Provider;
 
 /**
  * Renderer component for store results.  ListViewStoreRenderer handles both
@@ -28,6 +33,7 @@ import org.limewire.ui.swing.util.I18n;
 abstract class ListViewStoreRenderer extends JXPanel {
 
     protected final CategoryIconManager categoryIconManager;
+    protected final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     protected final StoreStyle storeStyle;
 
     protected final JXPanel albumPanel;
@@ -41,16 +47,20 @@ abstract class ListViewStoreRenderer extends JXPanel {
     
     private JTable table;
     private VisualStoreResult vsr;
+    private RowDisplayResult rowResult;
     private int row;
+    private int col;
 
     /**
      * Constructs a ListViewStoreRenderer.
      */
     public ListViewStoreRenderer(
             CategoryIconManager categoryIconManager,
+            Provider<SearchHeadingDocumentBuilder> headingBuilder,
             StoreStyle storeStyle) {
         
         this.categoryIconManager = categoryIconManager;
+        this.headingBuilder = headingBuilder;
         this.storeStyle = storeStyle;
         this.albumPanel = new JXPanel();
         this.mediaPanel = new JXPanel();
@@ -99,14 +109,42 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected abstract Component createTrackComponent(SearchResult result);
 
     /**
+     * Returns the heading as an HTML document.
+     */
+    protected String getHeadingHtml(boolean editing) {
+        // Create heading text.
+        SearchHeading searchHeading = new SearchHeading() {
+            @Override
+            public String getText() {
+                return rowResult.getHeading();
+            }
+
+            @Override
+            public String getText(String adjoiningFragment) {
+                return rowResult.getHeading();
+            }
+        };
+        
+        // Build HTML document and return.
+        if (editing) {
+            return headingBuilder.get().getHeadingDocument(searchHeading, vsr.getDownloadState(), rowResult.isSpam());
+        } else {
+            // TODO enhance heading builder to return heading without underline
+            return "<span class=\"title\">" + searchHeading.getText() + "</span>";
+        }
+    }
+    
+    /**
      * Updates the renderer to display the specified VisualStoreResult.
      */
     public void update(JTable table, VisualStoreResult vsr, RowDisplayResult result,
-            boolean editing, int row) {
+            boolean editing, int row, int col) {
         // Save table and store result.
         this.table = table;
         this.vsr = vsr;
+        this.rowResult = result;
         this.row = row;
+        this.col = col;
         
         if (vsr.getStoreResult().isAlbum()) {
             albumPanel.setVisible(true);
@@ -164,8 +202,26 @@ abstract class ListViewStoreRenderer extends JXPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO implement
+            if (vsr != null) {
+                System.out.println("download.actionPerformed: " + vsr.getHeading());
+                // TODO implement
+            }
         }
+    }
+    
+    protected class DownloadTrackAction extends AbstractAction {
+        private final SearchResult trackResult;
+
+        public DownloadTrackAction(SearchResult trackResult) {
+            this.trackResult = trackResult;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("downloadTrack.actionPerformed: " + trackResult.getProperty(FilePropertyKey.NAME));
+            // TODO Auto-generated method stub
+        }
+        
     }
     
     /**
@@ -175,8 +231,26 @@ abstract class ListViewStoreRenderer extends JXPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO implement
+            if (vsr != null) {
+                System.out.println("stream.actionPerformed: " + vsr.getHeading());
+                // TODO implement
+            }
         }
+    }
+    
+    protected class StreamTrackAction extends AbstractAction {
+        private final SearchResult trackResult;
+
+        public StreamTrackAction(SearchResult trackResult) {
+            this.trackResult = trackResult;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("streamTrack.actionPerformed: " + trackResult.getProperty(FilePropertyKey.NAME));
+            // TODO Auto-generated method stub
+        }
+        
     }
     
     /**
@@ -191,7 +265,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (vsr != null) {
-                System.out.println("showInfo.actionPerformed");
+                System.out.println("showInfo.actionPerformed: " + vsr.getHeading());
                 // TODO implement
             }
         }
@@ -219,7 +293,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
                         public void run() {
                             ((ListViewTable) table).updateRowSizes();
                             if (row >= 0) {
-                                table.editCellAt(row, 0);
+                                table.editCellAt(row, col);
                             }
                         }
                     });

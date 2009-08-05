@@ -327,7 +327,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         // Use component for store result.
         if (vsr instanceof VisualStoreResult) {
             RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
-            storeRenderer.update(table, (VisualStoreResult) vsr, result, editing, row);
+            storeRenderer.update(table, (VisualStoreResult) vsr, result, editing, row, col);
             return storeRenderer;
         }
         
