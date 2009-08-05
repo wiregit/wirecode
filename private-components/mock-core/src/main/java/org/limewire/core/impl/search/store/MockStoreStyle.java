@@ -27,16 +27,16 @@ public class MockStoreStyle implements StoreStyle {
     Color albumLengthForeground = Color.decode("#313131");
     Font artistFont = new Font(Font.DIALOG, Font.PLAIN, 13);
     Color artistForeground = Color.decode("#2152a6");
-    Color background = Color.decode("#f5f5f5");
+    Color background = Color.decode("#e8f2f6");
     Icon buyAlbumIcon;
     Icon buyTrackIcon;
-    Icon downloadAlbumIcon = new DownloadAlbumIcon();
-    Icon downloadTrackIcon = new DownloadTrackIcon();
+    Icon downloadAlbumIcon;
+    Icon downloadTrackIcon;
     Font infoFont = new Font(Font.DIALOG, Font.BOLD, 8);
     Color infoForeground = Color.decode("#2152a6");
-    Color priceBackground;
-    Color priceBorderColor;
-    Font priceFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    Color priceBackground = Color.decode("#f5f5f5");
+    Color priceBorderColor = Color.decode("#9e9b9b");
+    Font priceFont = new Font(Font.DIALOG, Font.PLAIN, 10);
     Color priceForeground = Color.decode("#2152a6");
     Font qualityFont = new Font(Font.DIALOG, Font.PLAIN, 11);
     Color qualityForeground = Color.decode("#313131");
@@ -62,6 +62,14 @@ public class MockStoreStyle implements StoreStyle {
      */
     public MockStoreStyle(Type type) {
         this.type = type;
+        
+        if ((type == Type.STYLE_A) || (type == Type.STYLE_B)) {
+            downloadAlbumIcon = new DownloadAlbumIcon(32);
+            downloadTrackIcon = new DownloadTrackIcon(24);
+        } else {
+            downloadAlbumIcon = new DownloadAlbumIcon(20);
+            downloadTrackIcon = new DownloadTrackIcon(20);
+        }
     }
     
     @Override
@@ -277,8 +285,12 @@ public class MockStoreStyle implements StoreStyle {
     }
     
     public static class DownloadAlbumIcon implements Icon {
-        private final int size = 32;
+        private final int size;
 
+        public DownloadAlbumIcon(int size) {
+            this.size = size;
+        }
+        
         @Override
         public int getIconHeight() {
             return size;
@@ -314,7 +326,11 @@ public class MockStoreStyle implements StoreStyle {
     }
     
     public static class DownloadTrackIcon implements Icon {
-        private final int size = 24;
+        private final int size;
+
+        public DownloadTrackIcon(int size) {
+            this.size = size;
+        }
 
         @Override
         public int getIconHeight() {
