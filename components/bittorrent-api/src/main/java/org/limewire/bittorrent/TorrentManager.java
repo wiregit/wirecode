@@ -29,12 +29,6 @@ public interface TorrentManager extends Service {
     public void recoverTorrent(Torrent torrent);
 
     /**
-     * Returns a list of ip addresses for the peers connected to the specified
-     * torrent.
-     */
-    public List<String> getPeers(Torrent torrent);
-
-    /**
      * Moves the underlying storage of the torrent to the specified directory.
      * Currently this is used to move an a completed torrent from the incomplete
      * directory to the complete directory, without interrupting any seeding
@@ -92,5 +86,9 @@ public interface TorrentManager extends Service {
      * Returns the total download rate used by libtorrent. This includes payload and protocol overhead.
      */
     public float getTotalDownloadRate();
+
+    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent);
+
+    public List<TorrentPeer> getTorrentPeers(Torrent torrent);
 
 }

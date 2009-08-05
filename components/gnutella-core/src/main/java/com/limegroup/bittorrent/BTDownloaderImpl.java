@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
@@ -485,7 +486,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         List<Address> list = new LinkedList<Address>();
 
-        for (String ip : torrent.getPeers()) {
+        List<TorrentPeer> peers = torrent.getTorrentPeers();
+        for (TorrentPeer peer : peers) {
+            String ip = peer.getIPAddress();
             try {
                 list.add(new ConnectableImpl(new IpPortImpl(ip), false));
             } catch (UnknownHostException e) {

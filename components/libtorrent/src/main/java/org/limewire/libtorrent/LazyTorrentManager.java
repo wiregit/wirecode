@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.lifecycle.ServiceRegistry;
 
@@ -53,12 +55,6 @@ public class LazyTorrentManager implements TorrentManager {
                 }
             }
         }
-    }
-
-    @Override
-    public List<String> getPeers(Torrent torrent) {
-        setupTorrentManager();
-        return torrentManager.get().getPeers(torrent);
     }
 
     @Override
@@ -186,6 +182,18 @@ public class LazyTorrentManager implements TorrentManager {
             return 0;
         }
         return torrentManager.get().getTotalUploadRate();
+    }
+
+    @Override
+    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent) {
+        setupTorrentManager();
+        return torrentManager.get().getTorrentFileEntries(torrent);
+    }
+
+    @Override
+    public List<TorrentPeer> getTorrentPeers(Torrent torrent) {
+        setupTorrentManager();
+        return torrentManager.get().getTorrentPeers(torrent);
     }
 
 }

@@ -46,11 +46,6 @@ public interface Torrent {
     public File getFastResumeFile();
 
     /**
-     * Returns a list of peers connected to this torrent.
-     */
-    public List<String> getPeers();
-
-    /**
      * Moves the torrent to the specified directory.
      */
     public void moveTorrent(File directory);
@@ -205,5 +200,10 @@ public interface Torrent {
      * Returns true if this is a private torrent. 
      */
     public boolean isPrivate();
+    
+    public List<TorrentFileEntry> getTorrentFileEntries();
+    
+    public List<TorrentPeer> getTorrentPeers();
+    
 
 }

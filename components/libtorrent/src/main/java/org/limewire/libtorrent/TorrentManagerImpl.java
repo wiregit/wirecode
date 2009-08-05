@@ -1,7 +1,7 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,7 +16,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentException;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
@@ -155,18 +157,6 @@ public class TorrentManagerImpl implements TorrentManager {
         } finally {
             lock.writeLock().unlock();
         }
-    }
-
-    @Override
-    public List<String> getPeers(Torrent torrent) {
-        validateLibrary();
-        
-        List<String> peers = new ArrayList<String>();
-        LibTorrentPeer[] torrentPeers = libTorrent.get_peers(torrent.getSha1()); 
-        for(int i = 0; i < torrentPeers.length; i++) {
-            peers.add(torrentPeers[i].ip);
-        }
-        return peers;
     }
 
     @Override
@@ -486,5 +476,19 @@ public class TorrentManagerImpl implements TorrentManager {
             }
         }
         return rate;
+    }
+
+    @Override
+    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent) {
+        validateLibrary();
+        TorrentFileEntry[] files = libTorrent.get_files(torrent.getSha1());
+        return Arrays.asList(files);
+    }
+
+    @Override
+    public List<TorrentPeer> getTorrentPeers(Torrent torrent) {
+        validateLibrary();
+        TorrentPeer[] peers = libTorrent.get_peers(torrent.getSha1());
+        return Arrays.asList(peers);
     }
 }

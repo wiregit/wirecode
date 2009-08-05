@@ -16,7 +16,9 @@ import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentAlert;
 import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
@@ -207,11 +209,6 @@ public class TorrentImpl implements Torrent {
     @Override
     public File getFastResumeFile() {
         return fastResumeFile.get();
-    }
-
-    @Override
-    public List<String> getPeers() {
-        return torrentManager.getPeers(this);
     }
 
     @Override
@@ -460,5 +457,15 @@ public class TorrentImpl implements Torrent {
     @Override
     public boolean isPrivate() {
         return isPrivate;
+    }
+
+    @Override
+    public List<TorrentFileEntry> getTorrentFileEntries() {
+        return torrentManager.getTorrentFileEntries(this);
+    }
+
+    @Override
+    public List<TorrentPeer> getTorrentPeers() {
+        return torrentManager.getTorrentPeers(this);
     }
 }

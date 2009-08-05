@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 
@@ -20,11 +22,6 @@ public class MockTorrentManager implements TorrentManager {
         this.torrentSettings = torrentSettings;
     }
     
-    @Override
-    public List<String> getPeers(Torrent torrent) {
-        return Collections.emptyList();
-    }
-
     @Override
     public TorrentSettings getTorrentSettings() {
         return torrentSettings;
@@ -113,5 +110,15 @@ public class MockTorrentManager implements TorrentManager {
     @Override
     public float getTotalUploadRate() {
         return 0;
+    }
+
+    @Override
+    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<TorrentPeer> getTorrentPeers(Torrent torrent) {
+        return Collections.emptyList();
     }
 }
