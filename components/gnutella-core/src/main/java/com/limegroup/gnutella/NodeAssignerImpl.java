@@ -14,6 +14,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
@@ -124,14 +125,18 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private final NetworkInstanceUtils networkInstanceUtils;
     
     
-    // these two inspections include:
+    // these inspections include:
     // gnutella downloads and uploads, torrents,
-    // gnutella messaging and mozilla downloads.
-    // 200 measurements are saved for each, 1 per second.
+    // gnutella messaging and mozilla downloads.    
+    
     @InspectionPoint("upstream bandwidth history")
-    private final Statistic uploadStat;   
+    private final Statistic uploadStat;  // 200 measurements are saved, 1 per second.  
     @InspectionPoint("downstream bandwidth history")
-    private final Statistic downloadStat;
+    private final Statistic downloadStat; // 200 measurements are saved, 1 per second.
+    @InspectionPoint("upload bandwidth histogram")
+    private final InspectionHistogram<Integer> uploadHistogram;
+    @InspectionPoint("download bandwidth histogram")
+    private final InspectionHistogram<Integer> downloadHistogram;
     
 
     /** 
@@ -169,6 +174,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         this.networkInstanceUtils = networkInstanceUtils;
         this.uploadStat = new BandwidthStat(statisticAccumulator);
         this.downloadStat = new BandwidthStat(statisticAccumulator);
+        this.downloadHistogram = new InspectionHistogram<Integer>();
+        this.uploadHistogram = new InspectionHistogram<Integer>();
     }
     
     /* (non-Javadoc)
@@ -220,7 +227,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         uploadTracker.get().measureBandwidth();
         downloadTracker.get().measureBandwidth();
         connectionManager.get().measureBandwidth();
-        float bandwidth = 0;
+        float bandwidth;
         try {
             bandwidth = uploadTracker.get().getMeasuredBandwidth();
         }catch(InsufficientDataException ide) {
@@ -230,7 +237,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
             (int)bandwidth
            +(int)connectionManager.get().getMeasuredUpstreamBandwidth();
         uploadStat.addData(newUpstreamBytesPerSec);
-        bandwidth = 0;
+        uploadHistogram.count(newUpstreamBytesPerSec);
         try {
             bandwidth = downloadTracker.get().getMeasuredBandwidth();
         } catch (InsufficientDataException ide) {
@@ -240,6 +247,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
             (int)bandwidth
            +(int)connectionManager.get().getMeasuredDownstreamBandwidth();
         downloadStat.addData(newDownstreamBytesPerSec);
+        downloadHistogram.count(newDownstreamBytesPerSec);
         if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
             _maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
             UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
