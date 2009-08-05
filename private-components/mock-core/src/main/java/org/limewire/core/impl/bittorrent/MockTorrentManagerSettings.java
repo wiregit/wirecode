@@ -2,9 +2,9 @@ package org.limewire.core.impl.bittorrent;
 
 import java.io.File;
 
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 
-public class MockTorrentSettings implements TorrentSettings {
+public class MockTorrentManagerSettings implements TorrentManagerSettings {
 
     private boolean reportLibraryLoadFailure = false;
     
@@ -46,5 +46,20 @@ public class MockTorrentSettings implements TorrentSettings {
     @Override
     public File getTorrentUploadsFolder() {
         return null;
+    }
+
+    @Override
+    public float getSeedRatioLimit() {
+        return 0;
+    }
+
+    @Override
+    public int getSeedTimeLimit() {
+        return 0;
+    }
+
+    @Override
+    public float getSeedTimeRatioLimit() {
+        return 0;
     }
 }

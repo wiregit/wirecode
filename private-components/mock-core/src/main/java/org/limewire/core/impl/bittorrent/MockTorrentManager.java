@@ -8,22 +8,22 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentPeer;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 
 import com.google.inject.Inject;
 
 public class MockTorrentManager implements TorrentManager {
 
-    private final TorrentSettings torrentSettings;
+    private final TorrentManagerSettings torrentSettings;
     
     @Inject
-    public MockTorrentManager(@TorrentSettingsAnnotation TorrentSettings torrentSettings) {
+    public MockTorrentManager(@TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.torrentSettings = torrentSettings;
     }
     
     @Override
-    public TorrentSettings getTorrentSettings() {
+    public TorrentManagerSettings getTorrentManagerSettings() {
         return torrentSettings;
     }
 
@@ -78,7 +78,7 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public void updateSettings(TorrentSettings settings) {
+    public void setTorrentManagerSettings(TorrentManagerSettings settings) {
         
     }
 

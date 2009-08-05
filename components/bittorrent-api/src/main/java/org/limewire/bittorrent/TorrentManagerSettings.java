@@ -2,7 +2,7 @@ package org.limewire.bittorrent;
 
 import java.io.File;
 
-public interface TorrentSettings {
+public interface TorrentManagerSettings {
 
     /**
      * Returns the upload rate limit for libtorrent in bytes/second. A value of
@@ -46,5 +46,22 @@ public interface TorrentSettings {
      * stored for torrent uploads.
      */
     public File getTorrentUploadsFolder();
-    
+
+    /**
+     * Default seed ratio to have considered met seeding criteria.
+     */
+    public float getSeedRatioLimit();
+
+    /**
+     * Default seed time over download time to have considered met seeding
+     * criteria.
+     */
+    public float getSeedTimeRatioLimit();
+
+    /**
+     * Default amount of seed time to have considered having met seeding
+     * criteria.
+     */
+    public int getSeedTimeLimit();
+
 }

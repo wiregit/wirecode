@@ -19,7 +19,7 @@ import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentPeer;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.inject.LazySingleton;
@@ -47,7 +47,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final Map<String, Torrent> torrents;
 
-    private final AtomicReference<TorrentSettings> torrentSettings = new AtomicReference<TorrentSettings>(
+    private final AtomicReference<TorrentManagerSettings> torrentSettings = new AtomicReference<TorrentManagerSettings>(
             null);
 
     /**
@@ -111,7 +111,7 @@ public class TorrentManagerImpl implements TorrentManager {
     @Inject
     public TorrentManagerImpl(LibTorrentWrapper torrentWrapper,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor,
-            @TorrentSettingsAnnotation TorrentSettings torrentSettings) {
+            @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.fastExecutor = fastExecutor;
         this.libTorrent = torrentWrapper;
         this.torrents = new ConcurrentHashMap<String, Torrent>();
@@ -255,7 +255,7 @@ public class TorrentManagerImpl implements TorrentManager {
             try {
                 libTorrent.initialize(torrentSettings.get());
                 if (libTorrent.isLoaded()) {
-                    updateSettings(torrentSettings.get());
+                    setTorrentManagerSettings(torrentSettings.get());
                     if(!OSUtils.isLinux()) {
                         //turning off upnp until libtorrent fixes crash
                         libTorrent.start_upnp();
@@ -443,14 +443,14 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public void updateSettings(TorrentSettings settings) {
+    public void setTorrentManagerSettings(TorrentManagerSettings settings) {
         validateLibrary();
         torrentSettings.set(settings);
         libTorrent.update_settings(settings);
     }
 
     @Override
-    public TorrentSettings getTorrentSettings() {
+    public TorrentManagerSettings getTorrentManagerSettings() {
         return torrentSettings.get();
     }
 

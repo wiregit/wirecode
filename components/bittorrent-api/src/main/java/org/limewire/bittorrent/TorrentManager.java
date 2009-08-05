@@ -70,12 +70,12 @@ public interface TorrentManager extends Service {
     /**
      * Updates the torrent manager with any new setting values.
      */
-    void updateSettings(TorrentSettings settings);
+    void setTorrentManagerSettings(TorrentManagerSettings settings);
 
     /**
      * Returns the current TorrentSettings object set on the torrent session.
      */
-    public TorrentSettings getTorrentSettings();
+    public TorrentManagerSettings getTorrentManagerSettings();
     
     /**
      * Returns the total upload rate used by libtorrent. This includes payload and protocol overhead. 
@@ -90,5 +90,4 @@ public interface TorrentManager extends Service {
     public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent);
 
     public List<TorrentPeer> getTorrentPeers(Torrent torrent);
-
 }

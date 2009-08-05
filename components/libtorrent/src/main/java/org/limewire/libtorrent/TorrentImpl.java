@@ -105,7 +105,7 @@ public class TorrentImpl implements Torrent {
             this.paths.addAll(paths);
         }
         this.totalSize = totalSize;
-        File torrentDownloadFolder = torrentManager.getTorrentSettings().getTorrentDownloadFolder();
+        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings().getTorrentDownloadFolder();
 
         if (name != null) {
             this.name = name;
@@ -226,9 +226,9 @@ public class TorrentImpl implements Torrent {
         // responsibility.
         File oldFastResumeFile = fastResumeFile.get();
         File oldTorrentFile = torrentFile.get();
-        fastResumeFile.set(new File(torrentManager.getTorrentSettings().getTorrentUploadsFolder(),
+        fastResumeFile.set(new File(torrentManager.getTorrentManagerSettings().getTorrentUploadsFolder(),
                 oldFastResumeFile.getName()));
-        torrentFile.set(new File(torrentManager.getTorrentSettings().getTorrentUploadsFolder(),
+        torrentFile.set(new File(torrentManager.getTorrentManagerSettings().getTorrentUploadsFolder(),
                 oldTorrentFile.getName()));
 
         FileUtils.copy(oldTorrentFile, torrentFile.get());
@@ -429,8 +429,8 @@ public class TorrentImpl implements Torrent {
 
         File torrent = torrentFile.get();
         File torrentParent = torrent.getParentFile();
-        File torrentDownloadFolder = torrentManager.getTorrentSettings().getTorrentDownloadFolder();
-        File torrentUploadFolder = torrentManager.getTorrentSettings().getTorrentUploadsFolder();
+        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings().getTorrentDownloadFolder();
+        File torrentUploadFolder = torrentManager.getTorrentManagerSettings().getTorrentUploadsFolder();
         if (!torrentParent.equals(torrentDownloadFolder)
                 && !torrentParent.equals(torrentUploadFolder)) {
             // if the torrent file is not located in the incomplete or upload

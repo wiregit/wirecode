@@ -12,7 +12,7 @@ import javax.swing.JRadioButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
@@ -43,11 +43,11 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     private final Provider<TorrentManager> torrentManager;
 
-    private final TorrentSettings torrentSettings;
+    private final TorrentManagerSettings torrentSettings;
 
     @Inject
     public BitTorrentOptionPanel(Provider<TorrentManager> torrentManager,
-            @TorrentSettingsAnnotation TorrentSettings torrentSettings) {
+            @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.torrentManager = torrentManager;
         this.torrentSettings = torrentSettings;
         
@@ -122,7 +122,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         }
 
         if (torrentManager.get().isValid()) {
-            torrentManager.get().updateSettings(torrentSettings);
+            torrentManager.get().setTorrentManagerSettings(torrentSettings);
         }
         return false;
     }

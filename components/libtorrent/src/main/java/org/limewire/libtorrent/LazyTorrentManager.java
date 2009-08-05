@@ -7,7 +7,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentPeer;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.Inject;
@@ -63,11 +63,11 @@ public class LazyTorrentManager implements TorrentManager {
     }
 
     @Override
-    public TorrentSettings getTorrentSettings() {
+    public TorrentManagerSettings getTorrentManagerSettings() {
         // not calling setup because we don't want to initialize the library
         // here.
         // settings can be gotten without initialization.
-        return torrentManager.get().getTorrentSettings();
+        return torrentManager.get().getTorrentManagerSettings();
     }
 
     @Override
@@ -162,9 +162,9 @@ public class LazyTorrentManager implements TorrentManager {
     }
 
     @Override
-    public void updateSettings(TorrentSettings settings) {
+    public void setTorrentManagerSettings(TorrentManagerSettings settings) {
         setupTorrentManager();
-        torrentManager.get().updateSettings(settings);
+        torrentManager.get().setTorrentManagerSettings(settings);
     }
 
     @Override
@@ -195,5 +195,4 @@ public class LazyTorrentManager implements TorrentManager {
         setupTorrentManager();
         return torrentManager.get().getTorrentPeers(torrent);
     }
-
 }

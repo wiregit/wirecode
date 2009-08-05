@@ -3,7 +3,7 @@ package org.limewire.libtorrent;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.TorrentException;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
@@ -32,7 +32,7 @@ class LibTorrentWrapper {
      * Initializes the LibTorrent library. Finding necessary dependencies first,
      * then loading the libtorrent library as a jna lib.
      */
-    void initialize(TorrentSettings torrentSettings) {
+    void initialize(TorrentManagerSettings torrentSettings) {
         try {
             if (OSUtils.isWindows()) {
                 System.loadLibrary("libeay32");
@@ -64,7 +64,7 @@ class LibTorrentWrapper {
         return loaded.get();
     }
 
-    private void init(TorrentSettings torrentSettings) {
+    private void init(TorrentManagerSettings torrentSettings) {
         LOG.debugf("before init");
         catchWrapperException(libTorrent.init(new LibTorrentSettings(torrentSettings)));
         LOG.debugf("after init");
@@ -193,7 +193,7 @@ class LibTorrentWrapper {
         }
     }
 
-    public void update_settings(TorrentSettings torrentSettings) {
+    public void update_settings(TorrentManagerSettings torrentSettings) {
         LOG.debugf("before update_settings: {0}", torrentSettings);
         catchWrapperException(libTorrent.update_settings(new LibTorrentSettings(torrentSettings)));
         LOG.debugf("after update_settings: {0}", torrentSettings);

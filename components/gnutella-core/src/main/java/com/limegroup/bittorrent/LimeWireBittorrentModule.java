@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
@@ -23,10 +23,10 @@ public class LimeWireBittorrentModule extends AbstractModule {
         // bound eagerly so it registers itself with MetaDataFactory
         bind(TorrentMetaReader.class).asEagerSingleton();
         bind(Torrent.class).to(TorrentImpl.class);
-        bind(TorrentSettings.class).annotatedWith(TorrentSettingsAnnotation.class).toProvider(new Provider<TorrentSettings>() {
+        bind(TorrentManagerSettings.class).annotatedWith(TorrentSettingsAnnotation.class).toProvider(new Provider<TorrentManagerSettings>() {
            @Override
-            public TorrentSettings get() {
-               return new TorrentSettings() {
+            public TorrentManagerSettings get() {
+               return new TorrentManagerSettings() {
 
                 @Override
                 public int getMaxDownloadBandwidth() {
@@ -76,6 +76,21 @@ public class LimeWireBittorrentModule extends AbstractModule {
                 @Override
                 public File getTorrentUploadsFolder() {
                     return BittorrentSettings.LIBTORRENT_UPLOADS_FOLDER.get();
+                }
+
+                @Override
+                public float getSeedRatioLimit() {
+                    return BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue();
+                }
+
+                @Override
+                public int getSeedTimeLimit() {
+                    return BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue();
+                }
+
+                @Override
+                public float getSeedTimeRatioLimit() {
+                    return BittorrentSettings.LIBTORRENT_SEED_TIME_RATIO_LIMIT.getValue();
                 }
                };
            }

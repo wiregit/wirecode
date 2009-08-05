@@ -204,6 +204,4 @@ public interface Torrent {
     public List<TorrentFileEntry> getTorrentFileEntries();
     
     public List<TorrentPeer> getTorrentPeers();
-    
-
 }

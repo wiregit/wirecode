@@ -126,7 +126,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
     }
 
     private File getMementoFile(Torrent torrent) {
-        File torrentMomento = new File(torrentManager.get().getTorrentSettings()
+        File torrentMomento = new File(torrentManager.get().getTorrentManagerSettings()
                 .getTorrentUploadsFolder(), torrent.getName() + ".memento");
         return torrentMomento;
     }
