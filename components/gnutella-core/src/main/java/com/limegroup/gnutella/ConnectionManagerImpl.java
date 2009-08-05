@@ -2382,17 +2382,18 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         
         /** Callback that handshaking has succeeded and we're all connected and ready. */
         public void handleConnect() {
-            boolean stillOpen = completeConnectionInitialization(connection, true);
-            processConnectionHeaders(connection);
-            _lastSuccessfulConnect = System.currentTimeMillis();
-            hostCatcher.get().doneWithConnect(endpoint, true);
-            if(_pref)
-                _needPref = false;
-            
-            try {
-                if(stillOpen)
+            if(completeConnectionInitialization(connection, true)) {
+                processConnectionHeaders(connection);
+                _lastSuccessfulConnect = System.currentTimeMillis();
+                hostCatcher.get().doneWithConnect(endpoint, true);
+                if(_pref)
+                    _needPref = false;
+                try {
                     startConnection(connection);
-            } catch(IOException ignored) {}
+                } catch(IOException ignored) {}
+            } else {
+                hostCatcher.get().doneWithConnect(endpoint, false);
+            }
         }
         
         /** Callback that a connect failed. */
