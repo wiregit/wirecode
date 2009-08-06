@@ -482,6 +482,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     LOG.warn("BANNED: " + session.getHost() + " (hammering)");
                 return QueueStatus.BANNED;
             }
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("friend asking: " + serverAuthState.getCredentials().getUserPrincipal().getName());
+            }
         }
 
         FileDesc fd = session.getUploader().getFileDesc();
@@ -741,10 +745,18 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         
         HTTPUploadSession session = getOrCreateSession(context);
         HTTPUploader uploader = session.getUploader();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("uploader: " + uploader);
+        }
         if (uploader != null) {
             if (!uploader.getFileName().equals(filename)
                     || !uploader.getMethod().equals(
                             request.getRequestLine().getMethod())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("uploader filename: " + uploader.getFileName() + " vs filename:" + filename);
+                    LOG.debug("uploader method: " + uploader.getMethod() + " vs method: " + request.getRequestLine().getMethod());
+                    LOG.debug("request line: " + request.getRequestLine());
+                }
                 // start new file
                 slotManager.requestDone(session);
 
@@ -843,7 +855,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 HTTPUploader uploader = session.getUploader();
                 if (uploader != null) {
                     if (LOG.isDebugEnabled())
-                        LOG.debug("Closing session for " + session.getHost());
+                        LOG.debug("Closing session: " + session);
 
                     boolean stillInQueue = slotManager.positionInQueue(session) > -1;
                     slotManager.cancelRequest(session);
