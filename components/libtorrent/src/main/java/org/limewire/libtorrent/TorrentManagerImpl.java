@@ -276,18 +276,11 @@ public class TorrentManagerImpl implements TorrentManager {
                 torrentFuture = fastExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500,
                         TimeUnit.MILLISECONDS);
 
-                if (!OSUtils.isMacOSX()) {
-                    // TODO disabling for now on the mac, on osx there is an
-                    // error
-                    // calling the alert callback, need toi investigate.
-                    // but disabling for now so that it does not crash the jvm.
-
-                    if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-                        alertFuture = fastExecutor.scheduleAtFixedRate(new AlertPoller(), 1000,
-                                500, TimeUnit.MILLISECONDS);
-                        resumeFileFuture = fastExecutor.scheduleAtFixedRate(
-                                new ResumeDataScheduler(), 10000, 10000, TimeUnit.MILLISECONDS);
-                    }
+                if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
+                    alertFuture = fastExecutor.scheduleAtFixedRate(new AlertPoller(), 1000,
+                            500, TimeUnit.MILLISECONDS);
+                    resumeFileFuture = fastExecutor.scheduleAtFixedRate(
+                            new ResumeDataScheduler(), 10000, 10000, TimeUnit.MILLISECONDS);
                 }
 
             } finally {
@@ -312,13 +305,7 @@ public class TorrentManagerImpl implements TorrentManager {
             }
 
             if (isValid()) {
-                if (!OSUtils.isMacOSX()) {
-                    // TODO disabling for now on the mac, on osx there is an
-                    // error
-                    // calling the alert callback, need to investigate.
-                    // but disabling for now so that it does not crash the jvm.
-                    libTorrent.freeze_and_save_all_fast_resume_data(new BasicAlertCallback());
-                }
+                libTorrent.freeze_and_save_all_fast_resume_data(new BasicAlertCallback());
                 libTorrent.abort_torrents();
             }
             torrents.clear();

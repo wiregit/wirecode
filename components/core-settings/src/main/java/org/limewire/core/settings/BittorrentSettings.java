@@ -43,12 +43,12 @@ public class BittorrentSettings extends LimeProps {
                     .getUserSettingsDir(), "uploads.dat/"));
 
     public static final FloatSetting LIBTORRENT_SEED_RATIO_LIMIT = FACTORY.createFloatSetting(
-            "LIBTORRENT_SEED_RATIO_LIMIT", 1.5f);
+            "LIBTORRENT_SEED_RATIO_LIMIT", 2.0f);
     
     public static final FloatSetting LIBTORRENT_SEED_TIME_RATIO_LIMIT = FACTORY.createFloatSetting(
-            "LIBTORRENT_SEED_TIME_RATIO_LIMIT", 10f);
+            "LIBTORRENT_SEED_TIME_RATIO_LIMIT", 7f);
 
     public static final IntSetting LIBTORRENT_SEED_TIME_LIMIT = FACTORY.createIntSetting(
-            "LIBTORRENT_SEED_TIME_LIMIT", 60 * 60 * 24 * 7);//1 week
+            "LIBTORRENT_SEED_TIME_LIMIT", 60 * 60 * 24);//24 hours
 
 }

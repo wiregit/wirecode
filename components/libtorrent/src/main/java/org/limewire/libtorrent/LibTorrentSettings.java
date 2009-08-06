@@ -28,6 +28,10 @@ public class LibTorrentSettings extends Structure {
     
     public float seed_ratio_limit;
     
+    public float seed_time_ratio_limit;
+    
+    public int seed_time_limit;
+    
     public LibTorrentSettings(TorrentManagerSettings torrentSettings) {
         this.max_upload_bandwidth = torrentSettings.getMaxUploadBandwidth();
         this.max_download_bandwidth = torrentSettings.getMaxDownloadBandwidth();
@@ -35,5 +39,7 @@ public class LibTorrentSettings extends Structure {
         this.listen_end_port = torrentSettings.getListenEndPort();
         this.uploads_directory = new WString(torrentSettings.getTorrentUploadsFolder().getAbsolutePath());
         this.seed_ratio_limit = torrentSettings.getSeedRatioLimit();
+        this.seed_time_ratio_limit = torrentSettings.getSeedTimeRatioLimit();
+        this.seed_time_limit = torrentSettings.getSeedTimeLimit();
     }
 }
