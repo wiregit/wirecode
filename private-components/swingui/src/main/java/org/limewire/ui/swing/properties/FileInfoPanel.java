@@ -635,6 +635,7 @@ public class FileInfoPanel extends JPanel {
     
     private JTextField createLabelField(String text) {
         JTextField field = new JTextField(text);
+        field.setCaretPosition(0);
         field.setEditable(false);
         field.setOpaque(false);
         field.setFont(smallFont);
@@ -644,6 +645,7 @@ public class FileInfoPanel extends JPanel {
     
     private JTextField createEditableTextField(String text, FilePropertyKey key) {
         JTextField field = new JTextField(text);
+        field.setCaretPosition(0);
         if(type != FileInfoType.LOCAL_FILE)
             field.setEditable(false);
         else
