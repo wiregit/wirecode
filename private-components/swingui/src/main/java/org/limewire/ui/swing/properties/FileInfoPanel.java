@@ -584,8 +584,8 @@ public class FileInfoPanel extends JPanel {
             panel.add(descriptionScrollPane, "growx, hmin 42");
             break;
         case PROGRAM:
-            panel.add(createPlainLabel(I18n.tr("Author")), "wrap");
-            panel.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.AUTHOR), FilePropertyKey.AUTHOR), "growx, span, wrap");
+            panel.add(createPlainLabel(I18n.tr("Title")), "wrap");
+            panel.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TITLE), FilePropertyKey.TITLE), "growx, span, wrap");
             panel.add(createPlainLabel(I18n.tr("Platform")), "growx 30");
             panel.add(createPlainLabel(I18n.tr("Company")), "growx 70, wrap");
             panel.add(createEditableComboBox(propertiableFile.getPropertyString(FilePropertyKey.PLATFORM), getPlatforms(propertiableFile), FilePropertyKey.PLATFORM), "growx 30, gapright 5");
