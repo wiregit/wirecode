@@ -661,11 +661,17 @@ public class FacebookFriendConnection implements FriendConnection {
         for (int i = 0; i < maxTries; i++) {
             HttpClient httpClient = createHttpClient();
             try {
-                HttpResponse postResponse = httpClient.execute(request);
-                HttpEntity entity = postResponse.getEntity();
+                HttpResponse response = httpClient.execute(request);
+                int statusCode = response.getStatusLine().getStatusCode();
+                HttpEntity entity = response.getEntity();
+                if (statusCode != 200) {
+                    // turn this off after the next beta and the then just throw IOException to trigger
+                    // the retry code
+                    throw new RuntimeException("status code: " + statusCode + ", content: " + entity != null ? EntityUtils.toString(entity) : "none");
+                }
                 if (entity != null) {
                     String responseStr = EntityUtils.toString(entity);
-                    HttpClientUtils.releaseConnection(postResponse);
+                    HttpClientUtils.releaseConnection(response);
                     return responseStr;
                 } else {
                     return null;
