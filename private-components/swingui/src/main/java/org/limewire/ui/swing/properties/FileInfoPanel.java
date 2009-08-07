@@ -635,6 +635,7 @@ public class FileInfoPanel extends JPanel {
     
     private JTextField createLabelField(String text) {
         JTextField field = new JTextField(text);
+        field.setEditable(false);
         field.setOpaque(false);
         field.setFont(smallFont);
         field.setBorder(BorderFactory.createEmptyBorder(0,1,0,1));
