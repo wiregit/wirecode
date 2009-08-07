@@ -16,8 +16,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
@@ -227,7 +227,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
     }
     
     @Override
-    protected Component createTrackComponent(SearchResult result) {
+    protected Component createTrackComponent(StoreTrackResult result) {
         JXPanel trackPanel = new JXPanel();
         trackPanel.setOpaque(true);
         trackPanel.setBackground(Color.WHITE);
@@ -246,7 +246,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         JLabel priceLabel = new JLabel();
         priceLabel.setFont(storeStyle.getPriceFont());
         priceLabel.setForeground(storeStyle.getPriceForeground());
-        priceLabel.setText("1 Credit"); // TODO replace with result price
+        priceLabel.setText(result.getPrice());
         
         // Layout components in container.
         trackPanel.setLayout(new MigLayout("insets 4 6 4 6, gap 0! 0!, novisualpadding"));

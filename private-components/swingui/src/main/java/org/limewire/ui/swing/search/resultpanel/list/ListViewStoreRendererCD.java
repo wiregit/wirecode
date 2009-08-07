@@ -20,8 +20,8 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
@@ -188,7 +188,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     }
 
     @Override
-    protected Component createTrackComponent(SearchResult result) {
+    protected Component createTrackComponent(StoreTrackResult result) {
         JXPanel trackPanel = new JXPanel();
         trackPanel.setOpaque(true);
         trackPanel.setBackground(Color.WHITE);
@@ -200,7 +200,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         downloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         
         JButton priceButton = new PriceButton(new DownloadTrackAction(result));
-        priceButton.setText("1 Credit"); // TODO replace with result price
+        priceButton.setText(result.getPrice());
         
         JLabel trackLabel = new JLabel();
         trackLabel.setFont(storeStyle.getTrackFont());

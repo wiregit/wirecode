@@ -7,7 +7,6 @@ import javax.swing.Icon;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.search.SearchResult;
 
 /**
  * Defines a Lime Store result.
@@ -31,7 +30,7 @@ public interface StoreResult {
     /**
      * Returns a List of media files associated with the result.
      */
-    List<SearchResult> getAlbumResults();
+    List<StoreTrackResult> getAlbumResults();
     
     /**
      * Returns the category for the result.

@@ -22,6 +22,7 @@ import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 import org.limewire.core.impl.search.store.MockStoreResult;
+import org.limewire.core.impl.search.store.MockStoreTrackResult;
 import org.limewire.core.impl.search.store.MockStoreResult.MockAlbumIcon;
 import org.limewire.friend.api.FriendPresence;
 
@@ -1206,70 +1207,70 @@ public class MockSearch implements Search {
     private void addStoreRecords(int i) {
         // Create album with multiple tracks.
         URN urn = new MockURN("www.store.limewire.com" + i);
-        MockStoreResult mstr = new MockStoreResult(urn, Category.AUDIO);
-        mstr.setFileExtension("mp3");
-        mstr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
-        mstr.setPrice("4 Credits");
+        MockStoreResult msr = new MockStoreResult(urn, Category.AUDIO);
+        msr.setFileExtension("mp3");
+        msr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
+        msr.setPrice("4 Credits");
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setSize(9 * 1024 * 1024);
+        
+        MockStoreTrackResult mstr = new MockStoreTrackResult();
+        mstr.setExtension("mp3");
+        mstr.setUrn("www.store.limewire.com" + (i + 1));
+        mstr.setPrice("1 Credit");
         mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
+        mstr.setProperty(FilePropertyKey.NAME, "Heh?");
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(9 * 1024 * 1024);
+        mstr.setSize(3 * 1024 * 1024);
+        msr.addAlbumResult(mstr);
         
-        MockSearchResult msr = new MockSearchResult();
-        msr.setExtension("mp3");
-        msr.setUrn("www.store.limewire.com" + (i + 1));
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.NAME, "Heh?");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setResultType(Category.AUDIO);
-        msr.setSize(3 * 1024 * 1024);
-        mstr.addAlbumResult(msr);
+        mstr = new MockStoreTrackResult();
+        mstr.setExtension("mp3");
+        mstr.setUrn("www.store.limewire.com" + (i + 2));
+        mstr.setPrice("1 Credit");
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        mstr.setProperty(FilePropertyKey.NAME, "Take Me To Space (Man)");
+        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        mstr.setSize(3 * 1024 * 1024);
+        msr.addAlbumResult(mstr);
         
-        msr = new MockSearchResult();
-        msr.setExtension("mp3");
-        msr.setUrn("www.store.limewire.com" + (i + 2));
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.NAME, "Take Me To Space (Man)");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setResultType(Category.AUDIO);
-        msr.setSize(3 * 1024 * 1024);
-        mstr.addAlbumResult(msr);
+        mstr = new MockStoreTrackResult();
+        mstr.setExtension("mp3");
+        mstr.setUrn("www.store.limewire.com" + (i + 3));
+        mstr.setPrice("1 Credit");
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        mstr.setProperty(FilePropertyKey.NAME, "Crush");
+        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        mstr.setSize(3 * 1024 * 1024);
+        msr.addAlbumResult(mstr);
         
-        msr = new MockSearchResult();
-        msr.setExtension("mp3");
-        msr.setUrn("www.store.limewire.com" + (i + 3));
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.NAME, "Crush");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setResultType(Category.AUDIO);
-        msr.setSize(3 * 1024 * 1024);
-        mstr.addAlbumResult(msr);
-        
-        handleStoreResult(mstr);
+        handleStoreResult(msr);
         
         // Create single file result.
         urn = new MockURN("www.store.limewire.com" + (i + 10));
-        mstr = new MockStoreResult(urn, Category.AUDIO);
-        mstr.setFileExtension("mp3");
+        msr = new MockStoreResult(urn, Category.AUDIO);
+        msr.setFileExtension("mp3");
+        msr.setPrice("1 Credit");
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
+        msr.setProperty(FilePropertyKey.NAME, "Chomp");
+        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+        msr.setSize(6 * 1024 * 1024);
+        
+        mstr = new MockStoreTrackResult();
+        mstr.setExtension("mp3");
+        mstr.setUrn("www.store.limewire.com" + (i + 11));
         mstr.setPrice("1 Credit");
         mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
         mstr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
         mstr.setProperty(FilePropertyKey.NAME, "Chomp");
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(6 * 1024 * 1024);
+        mstr.setSize(3 * 1024 * 1024);
+        msr.addAlbumResult(mstr);
         
-        msr = new MockSearchResult();
-        msr.setExtension("mp3");
-        msr.setUrn("www.store.limewire.com" + (i + 11));
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
-        msr.setProperty(FilePropertyKey.NAME, "Chomp");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setResultType(Category.AUDIO);
-        msr.setSize(3 * 1024 * 1024);
-        mstr.addAlbumResult(msr);
-        
-        handleStoreResult(mstr);
+        handleStoreResult(msr);
     }
     
     static class MockRemoteHost implements RemoteHost {

@@ -18,8 +18,8 @@ import javax.swing.Icon;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreTrackResult;
 
 /**
  * Implementation of StoreResult for the mock core.
@@ -30,7 +30,7 @@ public class MockStoreResult implements StoreResult {
     private final URN urn;
     private final Map<FilePropertyKey, Object> propertyMap = 
         new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
-    private final List<SearchResult> resultList;
+    private final List<StoreTrackResult> resultList;
     
     private Icon albumIcon;
     private String fileExtension;
@@ -43,7 +43,7 @@ public class MockStoreResult implements StoreResult {
     public MockStoreResult(URN urn, Category category) {
         this.urn = urn;
         this.category = category;
-        this.resultList = new ArrayList<SearchResult>();
+        this.resultList = new ArrayList<StoreTrackResult>();
     }
     
     @Override
@@ -57,7 +57,7 @@ public class MockStoreResult implements StoreResult {
     }
     
     @Override
-    public List<SearchResult> getAlbumResults() {
+    public List<StoreTrackResult> getAlbumResults() {
         return resultList;
     }
     
@@ -96,8 +96,8 @@ public class MockStoreResult implements StoreResult {
         return urn;
     }
     
-    public void addAlbumResult(SearchResult searchResult) {
-        resultList.add(searchResult);
+    public void addAlbumResult(StoreTrackResult trackResult) {
+        resultList.add(trackResult);
     }
     
     public void setAlbumIcon(Icon icon) {
