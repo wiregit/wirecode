@@ -22,6 +22,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
@@ -44,6 +45,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ResultEnterAction;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
+import org.limewire.ui.swing.search.resultpanel.list.DefaultListStoreStyle;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
@@ -58,6 +60,7 @@ import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
@@ -79,7 +82,7 @@ import com.google.inject.assistedinject.Assisted;
  * the display category is selected by calling the <code>showCategory()</code>
  * method.
  */
-public class BaseResultPanel extends JXPanel {
+public class BaseResultPanel extends JXPanel implements Disposable {
     
     private static final int MAX_DISPLAYED_RESULT_SIZE = 500;
     private static final int TABLE_ROW_HEIGHT = 23;
@@ -111,6 +114,7 @@ public class BaseResultPanel extends JXPanel {
     private final ResultsTableFormatFactory tableFormatFactory;
     private final ListViewRowHeightRule rowHeightRule;
     private final RemoteHostWidgetFactory fromWidgetfactory;
+    private final SearchResultMenuFactory menuFactory;
     private final Provider<IconLabelRendererFactory> iconLabelRendererFactory;
     private final DownloadHandler downloadHandler;
     private final Provider<TimeRenderer> timeRenderer;
@@ -118,6 +122,7 @@ public class BaseResultPanel extends JXPanel {
     private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
     private final DefaultTableCellRenderer defaultTableCellRenderer;
+    private final StoreManager storeManager;
     
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
@@ -128,7 +133,8 @@ public class BaseResultPanel extends JXPanel {
     private DefaultEventSelectionModel<VisualSearchResult> selectionModel;
     private ColorHighlighter resultsColorHighlighter;
     private Scrollable visibleComponent;
-    private final SearchResultMenuFactory menuFactory;
+    
+    private StoreListener storeListener;
 
     /**
      * Constructs a BaseResultPanel with the specified components.
@@ -163,11 +169,12 @@ public class BaseResultPanel extends JXPanel {
         this.qualityRenderer = qualityRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
+        this.storeManager = storeManager;
         
         rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery());
 
         // Create tables.
-        this.resultsList = createList(storeManager.getStoreStyle());
+        this.resultsList = createList();
         this.resultsTable = createTable();
         
         searchResultsModel.addDisposalListener(new ResultModelDisposalListener());
@@ -176,15 +183,40 @@ public class BaseResultPanel extends JXPanel {
     }
     
     /**
+     * Registers listener to handle store style update.
+     */
+    @Inject
+    void register() {
+        storeListener = new StoreListener() {
+            @Override
+            public void styleUpdated(final StoreStyle storeStyle) {
+                SwingUtils.invokeLater(new Runnable() {
+                    public void run() {
+                        resultsList.setStoreStyle(storeStyle);
+                    }
+                });
+            }
+        };
+        storeManager.addStoreListener(storeListener);
+        
+        // Request current style from store.
+        storeManager.loadStoreStyle();
+    }
+    
+    /**
      * Creates a new List view table.
      */
-    private ListViewTable createList(StoreStyle storeStyle) {
-        ListViewTable listTable = new ListViewTable(rowHeightRule, storeStyle);
+    private ListViewTable createList() {
+        ListViewTable listTable = new ListViewTable(rowHeightRule);
         
         // Set list table fields that do not change with search category.
         listTable.setShowGrid(true, false);
         listTable.setRowHeightEnabled(true);
         listTable.setEmptyRowsPainted(false);
+        
+        // Set store style.
+        StoreStyle storeStyle = storeManager.getStoreStyle();
+        listTable.setStoreStyle((storeStyle != null) ? storeStyle : new DefaultListStoreStyle());
         
         return listTable;
     }
@@ -267,15 +299,18 @@ public class BaseResultPanel extends JXPanel {
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 downloadHandler, rowHeightRule, displayLimit);
         
-        TableColumnModel tcm = resultsList.getColumnModel();
-        int columnCount = tableFormat.getColumnCount();
-        for (int i = 0; i < columnCount; i++) {
-            TableColumn tc = tcm.getColumn(i);
-            tc.setCellRenderer(renderer);
-            tc.setCellEditor(editor);
-        }
-        
-        resultsList.setDefaultEditor(VisualSearchResult.class, editor);
+//        // TODO REMOVE DEAD CODE
+//        TableColumnModel tcm = resultsList.getColumnModel();
+//        int columnCount = tableFormat.getColumnCount();
+//        for (int i = 0; i < columnCount; i++) {
+//            TableColumn tc = tcm.getColumn(i);
+//            tc.setCellRenderer(renderer);
+//            tc.setCellEditor(editor);
+//        }
+//        
+//        resultsList.setDefaultEditor(VisualSearchResult.class, editor);
+        resultsList.setListRenderer(renderer);
+        resultsList.setListEditor(editor);
 
         // Set default width of all visible columns.
         for (int i = 0; i < tableFormat.getColumnCount(); i++) {
@@ -479,6 +514,13 @@ public class BaseResultPanel extends JXPanel {
         tc.setHeaderRenderer(headerRenderer);
     }
 
+    /**
+     * Disposes of resources used by the container.
+     */
+    public void dispose() {
+        storeManager.removeStoreListener(storeListener);
+    }
+    
     /**
      * Displays search results for the specified search category.
      */
