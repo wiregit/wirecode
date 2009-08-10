@@ -31,11 +31,22 @@ class ListViewStoreRendererFactory {
     }
     
     /**
-     * Creates a List view renderer for store results.
+     * Creates a List view renderer using the current store style.  If the
+     * current style is not available, then the default style is used.
      */
     public ListViewStoreRenderer create() {
         StoreStyle storeStyle = storeManager.getStoreStyle();
+        if (storeStyle == null) {
+            storeStyle = new DefaultListStoreStyle();
+        }
         
+        return create(storeStyle);
+    }
+    
+    /**
+     * Creates a List view renderer for the specified store style.
+     */
+    public ListViewStoreRenderer create(StoreStyle storeStyle) {
         // Create renderer based on style type.
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
