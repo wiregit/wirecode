@@ -241,6 +241,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         sortAndFilterPanel.dispose();
         filterPanel.dispose();
         classicSearchReminderPanel.dispose();
+        resultsContainer.dispose();
         browseFailedPanel.dispose();
         searchResultsModel.dispose();
         browseStatusPanel.dispose();
