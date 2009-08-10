@@ -37,10 +37,10 @@ class LibTorrentWrapper {
             if (OSUtils.isWindows()) {
                 System.loadLibrary("libeay32");
                 System.loadLibrary("ssleay32");
-                System.loadLibrary("boost_date_time-vc90-mt-1_39");
-                System.loadLibrary("boost_system-vc90-mt-1_39");
-                System.loadLibrary("boost_filesystem-vc90-mt-1_39");
-                System.loadLibrary("boost_thread-vc90-mt-1_39");
+                System.loadLibrary("boost_date_time-vc80-mt-1_39");
+                System.loadLibrary("boost_system-vc80-mt-1_39");
+                System.loadLibrary("boost_filesystem-vc80-mt-1_39");
+                System.loadLibrary("boost_thread-vc80-mt-1_39");
                 System.loadLibrary("torrent");
             } else if (OSUtils.isLinux()) {
                 // everything compiled into libtorrent-wrapper.so
