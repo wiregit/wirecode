@@ -45,6 +45,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.HTMLLabel;
@@ -157,7 +158,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
 
     private JLabel lastRowMessage;
     
-    private final ListViewStoreRenderer storeRenderer;
+    private ListViewStoreRenderer storeRenderer;
 
     private DownloadHandler downloadHandler;
     
@@ -167,6 +168,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private int textPanelWidth;
 
     private final SearchResultMenuFactory searchResultMenuFactory;
+    private final ListViewStoreRendererFactory storeRendererFactory;
     
     @Inject
     ListViewTableEditorRenderer(
@@ -190,6 +192,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
+        this.storeRendererFactory = storeRendererFactory;
         
         GuiUtils.assignResources(this);
 
@@ -630,6 +633,19 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         // Request focus so Enter key can be handled.
         e.getComponent().requestFocusInWindow();
+    }
+    
+    /**
+     * Applies the specified store style to the store renderer.
+     */
+    public void setStoreStyle(StoreStyle storeStyle) {
+        // Update store renderer using new style.
+        storeRenderer = storeRendererFactory.create(storeStyle);
+        
+        // Request table repaint.
+        if (table != null) {
+            table.repaint();
+        }
     }
     
     private class HeadingFontWidthResolver implements FontWidthResolver {
