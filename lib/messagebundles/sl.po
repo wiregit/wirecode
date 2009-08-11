@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-03 11:30-0400\n"
-"PO-Revision-Date: 2009-07-22 13:34+0000\n"
-"Last-Translator: Kekec <Unknown>\n"
+"POT-Creation-Date: 2009-08-10 11:30-0400\n"
+"PO-Revision-Date: 2009-08-09 08:41+0000\n"
+"Last-Translator: Biswarup Bhattacharya <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || "
 "n%100==4 ? 3 : 0);\n"
-"X-Launchpad-Export-Date: 2009-08-04 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-08-11 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -203,7 +203,7 @@ msgstr "Usmerjanje Sporočil"
 msgid "Network Management"
 msgstr "Upravitelj Omrežja"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:186
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:210
 msgid "Ultrapeer/DHT Management"
 msgstr "Upravitelj Ultrapeer/DHT"
 
@@ -236,11 +236,11 @@ msgstr "Avtor"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:547
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:565
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:30
 msgid "Genre"
 msgstr "Zvrst"
@@ -270,10 +270,10 @@ msgstr "Vrsta"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/LengthFilterFormat.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:52
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:355
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:46
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:32
 msgid "Length"
 msgstr "Dolžina"
@@ -281,12 +281,12 @@ msgstr "Dolžina"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:58
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:548
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:567
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:352
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:51
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:41
 msgid "Year"
 msgstr "Leto"
@@ -326,7 +326,7 @@ msgstr "Širina"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:40
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:571
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:577
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:583
@@ -334,7 +334,7 @@ msgstr "Širina"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:39
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:39
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:50
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:26
 msgid "Description"
 msgstr "Opis"
@@ -353,7 +353,6 @@ msgstr "Tema"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:581
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:587
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:23
 msgid "Author"
@@ -451,7 +450,7 @@ msgid "Copy Report"
 msgstr "Kopiraj poročilo"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:640
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:216
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:213
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:115
 msgid "OK"
@@ -611,8 +610,8 @@ msgstr "Razveljavi"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:88
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CancelSharingAction.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:81
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:219
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:79
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:216
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:131
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:58
@@ -637,7 +636,7 @@ msgstr "Zrusit download"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/QualityFilterFormat.java:24
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:351
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:47
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:46
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:35
 msgid "Quality"
 msgstr "Kvalita"
@@ -665,7 +664,7 @@ msgstr "Izberite"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:46
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:42
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:50
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:208
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:80
 msgid "Uploads"
@@ -676,7 +675,7 @@ msgstr "Uploady"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:52
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:213
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:40
 msgid "Location"
@@ -790,7 +789,7 @@ msgstr "Zablokuj Hosta"
 msgid "Advanced"
 msgstr "Rozsirene"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:134
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:131
 msgid ""
 "One or more options will take effect the next time LimeWire is restarted."
 msgstr ""
@@ -928,7 +927,7 @@ msgstr "Program"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
 msgid "There is a disk problem"
-msgstr ""
+msgstr "obstaja disk problem"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:30
 msgid "This file is not shareable"
@@ -941,6 +940,10 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
+"<html><b>Vaš limewire je bil lahko poškodovan jih virus ali "
+"trojanski!</b><br><br>Prosim Obiščite<a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a>in prenesete "
+"najnovejšo različico uradne limewire.</html>"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:277
 msgid ""
@@ -948,6 +951,9 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
+"Oprosti, limewire ne more prebrati vaše stare datoteke. Lahko jih znova s "
+"klikom na \"Try Again\" na Učitano. Ko limewire najde vir datoteke, prenesi "
+"bo pobrala, če je prekinjeno."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:279
 msgid ""
@@ -955,22 +961,25 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
+"Žal limewire ni mogla berejo nekaterih vaših starih Učitano. Lahko jih znova "
+"s klikom na \"Try Again\" na Učitano. Ko limewire najde vir datoteke, "
+"prenesi bo pobrala, če je prekinjeno."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/PromotionServicesImpl.java:35
 msgid "Promotion System"
-msgstr ""
+msgstr "Promocija sistema"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
 msgid "Directed Querier"
-msgstr ""
+msgstr "Usmerjeni Querier"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
-msgstr ""
+msgstr "Lokalno Socket Slušalac"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
-msgstr ""
+msgstr "Magnetni procesor"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:123
 msgid ""
@@ -978,77 +987,83 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
+"Limewire je mogla začeti Digital Audio Access Protocol Service (za izmenjavo "
+"datotek v iTunes). Ta funkcija bo izklopljen. Tu lahko vključite nazaj v "
+"opcije, pod Advanced -> Files -> iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:178
 msgid "Creative Commons"
-msgstr ""
+msgstr "Creative Commons"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:141
 msgid "Mojito DHT"
-msgstr ""
+msgstr "Mojito DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:178
 msgid "LimeWire Store Integration"
-msgstr ""
+msgstr "Limewire Shranjujte Integration"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
-msgstr ""
+msgstr "Prenesti Nadgradnja Naloga"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:57
 msgid "Shared Files"
-msgstr ""
+msgstr "Deljeno Datoteke"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
 msgid "OOB Query Handler"
-msgstr ""
+msgstr "OOB Query Handler"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
-msgstr ""
+msgstr "Statična Sporočila"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:194
 msgid "QRP Updater"
-msgstr ""
+msgstr "QRP Posodobitever"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
 msgid "RUDP Message Routing"
-msgstr ""
+msgstr "RUDP Usmerjanje sporočil"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/settings/SettingsSaverService.java:37
 msgid "Settings Saver"
-msgstr ""
+msgstr "Nastav Štediša"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:101
 msgid "Spam Management"
-msgstr ""
+msgstr "Spam Vodstvo"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:62
 msgid "Uptime Statistics"
-msgstr ""
+msgstr "Čas Statistika"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:72
 msgid "Browse"
-msgstr ""
+msgstr "Brskanje"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:987
 msgid "Update Checks"
-msgstr ""
+msgstr "Posodobitev Pregledi"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:104
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:124
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:131
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:541
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:563
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:575
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:587
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:354
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:17
 msgid "Title"
-msgstr ""
+msgstr "Naslov"
 
 #. second line
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:90
@@ -1059,27 +1074,27 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:38
 msgid "Album"
-msgstr ""
+msgstr "Album"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Language"
-msgstr ""
+msgstr "Jezik"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 msgid "Comments"
-msgstr ""
+msgstr "Komentarji"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
-msgstr ""
+msgstr "Akcija"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 msgid "Copyright"
-msgstr ""
+msgstr "Avtorske pravice"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -1087,27 +1102,27 @@ msgstr ""
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
-msgstr ""
+msgstr "Vrsta licence"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 msgid "Studio"
-msgstr ""
+msgstr "Studio"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr ""
+msgstr "Zvezde"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:114
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:47
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:566
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:36
 msgid "Rating"
-msgstr ""
+msgstr "Ocena"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 msgid "Application"
-msgstr ""
+msgstr "Aplikacija"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:101
@@ -1115,7 +1130,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:38
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:36
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:201
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:246
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:361
@@ -1125,26 +1140,26 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:35
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:31
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:34
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:33
 msgid "Name"
-msgstr ""
+msgstr "Ime"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Založba"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:81
 msgid "Metadata Loader"
-msgstr ""
+msgstr "Metadata Nakladalnik"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "Oops!"
-msgstr ""
+msgstr "Oops!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "A problem occurred..."
-msgstr ""
+msgstr "Problem zgodila ..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
 msgid ""
@@ -1153,6 +1168,10 @@ msgid ""
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
+"Oops! Naredil si nekaj, kar ne pisne še. Oprostite o to. Limewire je še "
+"vedno teči v redu, vendar vas prosimo, kliknite na gumb \"Pošlji Bug 'do nas "
+"opominjajo na to pisanje. Če želite, lahko kliknete na 'Prikaži Bug "
+"\"osredotočiti na informacije, ki bo poslano. Hvala!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
@@ -1160,12 +1179,17 @@ msgid ""
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
+"Oops! Naredil si nekaj, kar ne pisne še. Sorry about that. Limewire je še "
+"vedno teči v redu, tako da ne skrbite. Če želite, lahko kliknete na 'Prikaži "
+"Bug \"osredotočiti na podatke o napaki."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:412
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
+"Žalost, limewire zašel v težave. Limewire je še vedno teči le globe, ampak "
+"naj bi nam pošljite bug, da bomo lahko popravili."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:414
 msgid ""
@@ -1174,36 +1198,40 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
+"Limewire je naletel na notranjo napako. Možno je za limewire za izterjavo in "
+"še naprej normalno teče. Če želite nadaljevati z uporabo limewire, zaprite "
+"to okno. Če želite, lahko kliknete na 'Prikaži Bug \"osredotočiti na podatke "
+"o napaki."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:450
 msgid "Tell us what you were doing before LimeWire ran into this problem."
-msgstr ""
+msgstr "Povejte nam, kaj si delal, preden limewire zašel v ta problem."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:477
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
 msgid "Show Bug"
-msgstr ""
+msgstr "kažejo, bug"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:489
 msgid "Hide Bug"
-msgstr ""
+msgstr "skrij bug"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:497
 msgid "Ask for help on the forums"
-msgstr ""
+msgstr "Zaprosi za pomoč na forumih"
 
 #. the "always use this answer" checkbox
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:506
 msgid "Send bugs without asking me in the future"
-msgstr ""
+msgstr "Pošlji bugova ne sprašuješ mene v prihodnje"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:509
 msgid "Send Bug"
-msgstr ""
+msgstr "pošlji bug"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:594
 msgid "Internal Error"
-msgstr ""
+msgstr "Notranja napaka"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:603
 msgid ""
@@ -1211,24 +1239,27 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
+"Limewire ni mogel povezati s strežnikom bug, da bi pošlje pod bug report. Za "
+"dodatno pomoč in pomoč z debugging, obiščite www.limewire.com ter kliknite "
+"na gumb \"Podpora\". Hvala."
 
 #. Load up the HTML engine.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:512
 msgid "Muddling Mint..."
-msgstr ""
+msgstr "Vstavljanje HTML motorja ..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:529
 msgid "Scouring NYC for Limes..."
-msgstr ""
+msgstr "Razmaščevanje NYC za Limete ..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:563
 msgid "Squeezing Limes..."
-msgstr ""
+msgstr "Cijeđenje Limete ..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:599
 msgid "Prepping Mojitos..."
-msgstr ""
+msgstr "Priprava Mojitos ..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:649
 msgid ""
@@ -1237,6 +1268,10 @@ msgid ""
 "connections on the local machine. Please allow LimeWire access to the "
 "internet and restart LimeWire."
 msgstr ""
+"Limewire ni mogel inicializirati in začeti. To je večinoma posledica "
+"požarnega zidu programa limewire blokiranje dostopa do interneta ali "
+"povratne zanke, povezave na lokalne stroj. Prosimo, limewire omogočajo "
+"dostop do interneta in znova limewire."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:654
 msgid ""
@@ -1249,6 +1284,14 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"LimeWire could not create a temporary preferences folder.\n"
+"\n"
+"To je na splošno zaradi pomanjkanja dovoljenj. Prosimo, poskrbite, da "
+"limewire (vi) ima dostop za ustvarjanje datoteke / mape na vašem "
+"računalniku. Če se težava ponavlja, obiščite www.limewire.com in kliknite na "
+"povezavo \"Podpora\" povezavo.\n"
+"\n"
+"Limewire bo zdaj izstopa. Hvala."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:664
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
@@ -1256,7 +1299,7 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:88
 msgid "Error"
-msgstr ""
+msgstr "Napaka"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:680
 msgid ""
@@ -1264,38 +1307,45 @@ msgid ""
 "down all other instances of LimeWire before continuing. If this problem "
 "persists, please restart your computer."
 msgstr ""
+"Drug primer limewire Zdi se, da je zagnan. Prosimo popolnoma zapreti vse "
+"druge primere limewire, preden nadaljujete. Če se težava ponavlja, vas "
+"prosimo, da ponovno zaženete računalnik."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:689
 msgid "LimeWire is already running"
-msgstr ""
+msgstr "Limewire je že."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:99
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:112
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:135
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:132
 msgid "Message"
-msgstr ""
+msgstr "Sporočilo"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:20
 msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"Limewire je sposobna ustvariti nastavitve mape in se uporabljajo začasno "
+"mapo. Vaše nastavitve lahko izbriše, ko zaprete limewire. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:32
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
+"Limewire je imela nekaj težav pri urejanju nastavitev. Tvoje spremembe "
+"nastavitev morda ne bodo shranjene na shutdown."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 msgid "More File Info"
-msgstr ""
+msgstr "Več Datoteka Informacije"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAllAction.java:10
 msgid "Copy All"
-msgstr ""
+msgstr "Kopiraj vse"
 
 #. *
 #. * The select all action.
@@ -1304,65 +1354,65 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:623
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
 msgid "Select All"
-msgstr ""
+msgstr "Izberi Vse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 msgid "View connections to other P2P clients"
-msgstr ""
+msgstr "Prikaži povezave do drugih P2P strank"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "View console messages"
-msgstr ""
+msgstr "Ogled sporočil console"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "Mojito"
-msgstr ""
+msgstr "Mojito"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "View incoming and outgoing DHT messages"
-msgstr ""
+msgstr "Prikaži dohodnih in odhodnih sporočil DHT"
 
 #. * Identifier for Advanced Tools window.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:74
 msgid "Advanced Tools"
-msgstr ""
+msgstr "Napredno Orodje"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:203
 msgid "Save"
-msgstr ""
+msgstr "shraniti"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:644
 msgid "Save As"
-msgstr ""
+msgstr "Shrani kot ..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:60
 msgid "Add a Connection"
-msgstr ""
+msgstr "Dodaj povezavo"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:62
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:68
 msgid "Host"
-msgstr ""
+msgstr "Gostitelj"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:68
 msgid "Port"
-msgstr ""
+msgstr "Pristanišča"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:81
 msgid "Use TLS"
-msgstr ""
+msgstr "Uporabiti TLS"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:84
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:148
 msgid "Add"
-msgstr ""
+msgstr "Dodati"
 
 #. * Action to remove connection.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:47
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ImageTableFormat.java:23
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:147
 msgid "Remove"
-msgstr ""
+msgstr "Odstraniti"
 
 #. * Action to view files on host.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:50
@@ -1371,142 +1421,148 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/RemoteHostMenuFactory.java:38
 msgid "Browse Files"
-msgstr ""
+msgstr "Brskanje Datoteke"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:185
 msgid "Unable to view files - not yet connected to host"
 msgstr ""
+"Ne morem, če si želite ogledati datoteke - ki še niso priključeni na "
+"gostitelja"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:51
 msgid "You are an Ultrapeer node"
-msgstr ""
+msgstr "Vi ste Ultrapeer Vozel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:52
 msgid "You are a Leaf node"
-msgstr ""
+msgstr "Ste Leaf Vozel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:53
 msgid "You are not behind a firewall"
-msgstr ""
+msgstr "Niste izza Firewall"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:54
 msgid "You are behind a firewall and support firewall transfers"
-msgstr ""
+msgstr "Niste izza Firewall in podporo firewall transferji"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:55
 msgid "You are behind a firewall and do not support firewall transfers"
-msgstr ""
+msgstr "Niste izza Firewall in ne podpirajo firewall transferji"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:56
 msgid "why"
-msgstr ""
+msgstr "zakaj"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:57
 msgid "Connected to:"
-msgstr ""
+msgstr "Povezani s:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:58
 msgid "Show hostnames of connected peers"
-msgstr ""
+msgstr "Prikaži gostiteljskega povezanih vrstnikov"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:60
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:28
 msgid "Connecting"
-msgstr ""
+msgstr "Povezovanju"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:61
 msgid "Leaves"
-msgstr ""
+msgstr "Zapusti"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:62
 msgid "Peers"
-msgstr ""
+msgstr "Vrstniki"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:64
 msgid "Ultrapeers"
-msgstr ""
+msgstr "Ultrapeers"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:234
 msgid ""
 "LimeWire has not been able to determine the external IP address of your NAT "
 "or firewall"
 msgstr ""
+"Limewire ni bil sposoben ugotoviti, zunanji IP naslov vašega NAT ali firewall"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:236
 msgid "LimeWire has not received any incoming UDP messages"
-msgstr ""
+msgstr "Limewire ni prejela nobenih dohodnih UDP sporočil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:238
 msgid ""
 "LimeWire was not able to support firewall transfers in a previous session"
 msgstr ""
+"Limewire ni bila sposobna podpreti firewall transferji v prejšnjem zasedanju"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:240
 msgid ""
 "LimeWire is behind a NAT or firewall that assigns a different external port "
 "to each connection"
 msgstr ""
+"Limewire je izza NAT ali firewall da določi različne zunanje pristanišče za "
+"vsako povezavo"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:243
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerMediator.java:507
 msgid "Unknown"
-msgstr ""
+msgstr "Neznano"
 
 #. Set up table header to display context menu to configure visible
 #. columns.  As recommended in the API Javadoc for isPopupTrigger(),
 #. we check both the mousePressed and mouseReleased events.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:76
 msgid "Right-click to select columns to display"
-msgstr ""
+msgstr "Kliknite z desno miškino tipko, da izberete stolpce za prikaz"
 
 #. * String for connecting status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:63
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:118
 msgid "Connecting..."
-msgstr ""
+msgstr "povezovalni ..."
 
 #. * String for outgoing status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:32
 msgid "Outgoing"
-msgstr ""
+msgstr "Odhodnih"
 
 #. * String for incoming status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:34
 msgid "Incoming"
-msgstr ""
+msgstr "Dolaženje"
 
 #. * String for 'Connected on' tooltip
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:36
 msgid "Connected on"
-msgstr ""
+msgstr "Priključen na"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:38
 msgid "Leaf"
-msgstr ""
+msgstr "Leaf"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:39
 msgid "Ultrapeer"
-msgstr ""
+msgstr "Ultrapeer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:40
 msgid "Peer"
-msgstr ""
+msgstr "Vrstnik"
 
 #. string parameter ensures proper sizing
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:105
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:139
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:74
 msgid "Messages In"
-msgstr ""
+msgstr "Sporočil v"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:76
 msgid "Messages Out"
-msgstr ""
+msgstr "Sporočila iz"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:80
 msgid "Bandwidth In"
@@ -1575,7 +1631,7 @@ msgstr ""
 
 #. lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:56
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AbstractFilterOptionPanel.java:82
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AbstractFilterOptionPanel.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:259
 msgid "remove"
 msgstr ""
@@ -1670,7 +1726,7 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:115
 msgid "Loading LimeWire..."
-msgstr ""
+msgstr "Limewire Nalagam ..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:23
 msgid "All Downloads"
@@ -1973,14 +2029,14 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ImageTableFormat.java:22
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:37
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:46
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:38
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:35
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:47
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:29
 msgid "Size"
 msgstr ""
@@ -2042,7 +2098,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:33
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:41
 msgid "From"
 msgstr ""
 
@@ -2481,7 +2537,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:41
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:51
 msgid "Hits"
 msgstr ""
 
@@ -2490,7 +2546,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:47
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:43
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:53
 msgid "Upload attempts"
 msgstr ""
 
@@ -2499,7 +2555,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:45
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:55
 msgid " "
 msgstr ""
 
@@ -2527,11 +2583,11 @@ msgstr ""
 msgid "Play/Open"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:354
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:369
 msgid "This file is still processing."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:356
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:371
 msgid "This file cannot be shared."
 msgstr ""
 
@@ -2615,14 +2671,14 @@ msgstr ""
 msgid "empty"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:63
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:46
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:48
 msgid "Misc"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:46
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:50
 msgid "Resolution"
 msgstr ""
 
@@ -2630,12 +2686,12 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:72
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
 msgid "LimeWire"
-msgstr ""
+msgstr "LimeWire"
 
 #. set up close button
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:97
 msgid "Close"
-msgstr ""
+msgstr "Blizu"
 
 #. introduction
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:166
@@ -2795,12 +2851,12 @@ msgstr ""
 msgid "Invalid Link"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:72
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:46
 msgid "Open"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:89
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:87
 msgid "Enter a magnet or torrent link below:"
 msgstr ""
 
@@ -3742,7 +3798,7 @@ msgstr ""
 msgid "Hash:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:794
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPanel.java:797
 #, java-format
 msgid "{0}% complete"
 msgstr ""
@@ -4154,7 +4210,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:36
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:44
 msgid "Extension"
 msgstr ""
 
@@ -4443,7 +4499,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:73
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:94
 msgid "Select Folder"
-msgstr ""
+msgstr "Izberite mape"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:508
 msgid "File already exists.  Do you want to replace it?"
