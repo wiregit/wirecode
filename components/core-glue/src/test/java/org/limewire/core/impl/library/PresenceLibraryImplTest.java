@@ -106,7 +106,7 @@ public class PresenceLibraryImplTest extends BaseTestCase {
         assertFalse(iterator.hasNext());
     }
     
-    private static class RemoteLibraryEventMatcher extends TypeSafeMatcher<RemoteLibraryEvent> {
+    static class RemoteLibraryEventMatcher extends TypeSafeMatcher<RemoteLibraryEvent> {
 
         private final RemoteLibraryEvent expectedEvent;
 

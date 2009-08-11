@@ -1,5 +1,6 @@
 package org.limewire.core.impl.library;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,10 +11,14 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibrary;
+import org.limewire.core.api.library.RemoteLibraryEvent;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
+import static org.limewire.core.impl.library.PresenceLibraryImplTest.RemoteLibraryEventMatcher;
 
 public class RemoteLibraryManagerImplTest extends BaseTestCase {
 
@@ -239,6 +244,52 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
         assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem2);
         assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem3);
                 
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Ensures that events from a presence library
+     * are propagated to the all friends library.
+     */
+    @SuppressWarnings("unchecked")
+    public void testAddEventsArePropagated() {
+        
+        final RemoteLibraryManagerImpl remoteLibraryManager = new RemoteLibraryManagerImpl();
+        
+        Mockery context = new Mockery();
+        final EventListener<RemoteLibraryEvent> listener = context.mock(EventListener.class);
+        final SearchResult searchResult = context.mock(SearchResult.class);
+        final FriendPresence friendPresence = context.mock(FriendPresence.class);
+        final Friend friend = context.mock(Friend.class);
+    
+        context.checking(new Expectations() {{
+            // actual check
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesAddedEvent(remoteLibraryManager.getAllFriendsLibrary(), Collections.singleton(searchResult)))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesClearedEvent(remoteLibraryManager.getAllFriendsLibrary()))));
+            ignoring(listener);
+            // stubs
+            allowing(friendPresence).getPresenceId();
+            will(returnValue("friend-presence-id"));
+            allowing(friendPresence).getFriend();
+            will(returnValue(friend));
+            ignoring(friend);
+        }});
+        
+        remoteLibraryManager.getAllFriendsLibrary().addListener(listener);
+        boolean added = remoteLibraryManager.addPresenceLibrary(friendPresence);
+        assertTrue(added);
+        PresenceLibrary presenceLibrary = remoteLibraryManager.getPresenceLibrary(friendPresence);
+        assertNotNull(presenceLibrary);
+        presenceLibrary.addNewResult(searchResult);
+        
+        presenceLibrary.clear();
+        
+        presenceLibrary.setState(RemoteLibraryState.LOADED);
+        assertEquals(RemoteLibraryState.LOADED, remoteLibraryManager.getAllFriendsLibrary().getState());
+        
+        presenceLibrary.setState(RemoteLibraryState.LOADING);
+        assertEquals(RemoteLibraryState.LOADING, remoteLibraryManager.getAllFriendsLibrary().getState());
+        
         context.assertIsSatisfied();
     }
 
