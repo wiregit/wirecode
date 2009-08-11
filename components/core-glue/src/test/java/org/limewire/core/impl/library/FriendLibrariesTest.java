@@ -37,6 +37,7 @@ public class FriendLibrariesTest extends BaseTestCase {
      * Tests search for remote file items in the friends library by name. Using
      * a single friend and presence in this instance.
      */
+    @SuppressWarnings("unchecked")
     public void testIndexing1FriendLibraryAndFileByFileNameOnly() {
 
         Mockery context = new Mockery();
@@ -143,6 +144,13 @@ public class FriendLibrariesTest extends BaseTestCase {
                 SearchCategory.ALL));
         assertEquals(1, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
+        
+        // now clear presence library and assert that no suggestions are found
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesClearedEvent(presenceLibrary1));
+        
+        suggestions = friendLibraries.getSuggestions("name", SearchCategory.AUDIO);
+        assertEquals(0, suggestions.size());
+                
         context.assertIsSatisfied();
     }
 
@@ -150,6 +158,7 @@ public class FriendLibrariesTest extends BaseTestCase {
      * Tests search for remote file items in the friends library by name. Using
      * a single friend and presence in this instance.
      */
+    @SuppressWarnings("unchecked")
     public void testIndexing1FriendLibraryAndMultipleFilesByFileNameOnly() {
 
         Mockery context = new Mockery();
@@ -192,6 +201,7 @@ public class FriendLibrariesTest extends BaseTestCase {
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
+                one(presenceLibrary1).removeListener(with(any(EventListener.class)));
                 
                 allowing(remoteFileItem1).getFileNameWithoutExtension();
                 will(returnValue(name1));
@@ -296,6 +306,15 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertEquals(2, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
         assertContains(matchingItems, remoteFileItem2);
+        
+        // now remove presence library to ensure completion items are gone too
+        presenceLibraryList1.remove(presenceLibrary1);
+        
+        suggestions = friendLibraries.getSuggestions("name", SearchCategory.AUDIO);
+        assertEquals(0, suggestions.size());
+        suggestions = friendLibraries.getSuggestions("bl", SearchCategory.AUDIO);
+        assertEquals(0, suggestions.size());
+        
         context.assertIsSatisfied();
     }
 
@@ -303,6 +322,7 @@ public class FriendLibrariesTest extends BaseTestCase {
      * Tests search for remote file items in the friends library by name. Using
      * a multiple friends and presences.
      */
+    @SuppressWarnings("unchecked")
     public void testIndexingMultipleFriendLibraryAndMultipleFilesByFileNameOnly() {
 
         Mockery context = new Mockery();
@@ -480,6 +500,7 @@ public class FriendLibrariesTest extends BaseTestCase {
     /**
      * Testing search for friends files by metadata.
      */
+    @SuppressWarnings("unchecked")
     public void testIndexingFileMetaData() {
 
         Mockery context = new Mockery();
@@ -633,6 +654,7 @@ public class FriendLibrariesTest extends BaseTestCase {
     /**
      * Testing search for friends files with advancedDetails.
      */
+    @SuppressWarnings("unchecked")
     public void testAdvancedSearch() {
 
         Mockery context = new Mockery();
@@ -794,6 +816,7 @@ public class FriendLibrariesTest extends BaseTestCase {
      * Testing indexing phrases. Suggestions only index the phrase, while the
      * matches are found based on indexing all of the parts of the phrase.
      */
+    @SuppressWarnings("unchecked")
     public void testIndexingPhrases() {
 
         Mockery context = new Mockery();
