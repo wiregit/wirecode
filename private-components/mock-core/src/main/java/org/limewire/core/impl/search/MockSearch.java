@@ -1212,7 +1212,8 @@ public class MockSearch implements Search {
         msr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
         msr.setPrice("4 Credits");
         msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.NAME, "Premonitions, Echoes & Science");
+        //msr.setProperty(FilePropertyKey.NAME, "Premonitions, Monkeys & Science");
+        msr.setProperty(FilePropertyKey.NAME, "When Everyone has a Sweet Party and you're invited! I was at this totally swinging hepcat party last weekend. Oh man, that joint was jumpin!");
         msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         msr.setSize(9 * 1024 * 1024);
         
