@@ -49,13 +49,10 @@ public class DefaultListStoreStyle implements StoreStyle {
     Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
     Color trackLengthForeground = Color.decode("#313131");
     
-    boolean buyAlbumVisible;
-    boolean buyTrackVisible;
-    boolean downloadAlbumVisible;
-    boolean downloadTrackVisible;
-    boolean infoOnHover;
+    boolean downloadButtonVisible;
     boolean priceButtonVisible;
     boolean priceVisible;
+    boolean showInfoOnHover;
     boolean showTracksOnHover;
     
     /**
@@ -209,28 +206,8 @@ public class DefaultListStoreStyle implements StoreStyle {
     }
 
     @Override
-    public boolean isBuyAlbumVisible() {
-        return buyAlbumVisible;
-    }
-
-    @Override
-    public boolean isBuyTrackVisible() {
-        return buyTrackVisible;
-    }
-
-    @Override
-    public boolean isDownloadAlbumVisible() {
-        return downloadAlbumVisible;
-    }
-
-    @Override
-    public boolean isDownloadTrackVisible() {
-        return downloadTrackVisible;
-    }
-
-    @Override
-    public boolean isInfoOnHover() {
-        return infoOnHover;
+    public boolean isDownloadButtonVisible() {
+        return downloadButtonVisible;
     }
     
     @Override
@@ -241,6 +218,11 @@ public class DefaultListStoreStyle implements StoreStyle {
     @Override
     public boolean isPriceVisible() {
         return priceVisible;
+    }
+
+    @Override
+    public boolean isShowInfoOnHover() {
+        return showInfoOnHover;
     }
 
     @Override

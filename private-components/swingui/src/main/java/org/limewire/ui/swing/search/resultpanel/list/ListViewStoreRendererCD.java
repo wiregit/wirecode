@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.resultpanel.list;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
@@ -27,7 +28,10 @@ import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
+import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
+import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
+import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer.NoDancingHtmlLabel;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -41,17 +45,21 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
 
     private JButton albumCoverButton;
     
-    private JXPanel albumTextPanel;
     private HTMLLabel albumHeadingLabel;
     private JLabel albumSubHeadingLabel;
+    private FontWidthResolver albumWidthResolver;
+    private int albumHeadingWidth;
+    
     private JButton albumTracksButton;
     private JButton albumStreamButton;
     private JButton albumDownloadButton;
     private JButton albumPriceButton;
     
-    private JXPanel mediaTextPanel;
     private HTMLLabel mediaHeadingLabel;
     private JLabel mediaSubHeadingLabel;
+    private FontWidthResolver mediaWidthResolver;
+    private int mediaHeadingWidth;
+    
     private JButton mediaStreamButton;
     private JButton mediaDownloadButton;
     private JButton mediaPriceButton;
@@ -62,8 +70,9 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
      */
     public ListViewStoreRendererCD(CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
+            Provider<SearchResultTruncator> headingTruncator,
             StoreStyle storeStyle) {
-        super(categoryIconManager, headingBuilder, storeStyle);
+        super(categoryIconManager, headingBuilder, headingTruncator, storeStyle);
     }
 
     @Override
@@ -72,9 +81,21 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         albumCoverButton = new IconButton();
         
-        albumTextPanel = new JXPanel();
-        albumTextPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        JXPanel albumTextPanel = new JXPanel() {
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                if (albumDownloadButton.isVisible()) {
+                    albumHeadingWidth = getSize().width - albumDownloadButton.getSize().width;
+                } else {
+                    albumHeadingWidth = getSize().width - albumPriceButton.getSize().width;
+                }
+            }
+        };
         albumTextPanel.setOpaque(false);
+        
+        JXPanel albumHeadingPanel = new JXPanel();
+        albumHeadingPanel.setOpaque(false);
         
         albumHeadingLabel = new HTMLLabel();
         albumHeadingLabel.setOpenUrlsNatively(false);
@@ -101,6 +122,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumSubHeadingLabel.setFont(storeStyle.getAlbumFont());
         albumSubHeadingLabel.setForeground(storeStyle.getAlbumForeground());
         
+        albumWidthResolver = new HeadingFontWidthResolver(albumHeadingLabel, storeStyle.getArtistFont());
+        
         albumTracksButton = new IconButton(showTracksAction);
         albumTracksButton.setFont(storeStyle.getShowTracksFont());
         albumTracksButton.setForeground(storeStyle.getShowTracksForeground());
@@ -115,14 +138,17 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumPriceButton = new PriceButton(downloadAction);
         
         // Layout components in container.
-        albumTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
-        albumTextPanel.add(albumHeadingLabel, "left, aligny 50%, growx, wmax pref, hidemode 3");
+        albumHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
+        albumHeadingPanel.add(albumHeadingLabel, "left, aligny 50%, growx, hidemode 3"); 
         if (storeStyle.getType() == Type.STYLE_C) {
-            albumTextPanel.add(albumDownloadButton, "left, aligny 50%, hidemode 3, wrap");
+            albumHeadingPanel.add(albumDownloadButton, "left, aligny 50%, hidemode 3");
         } else {
-            albumTextPanel.add(albumPriceButton, "left, aligny 75%, hidemode 3, wrap");
+            albumHeadingPanel.add(albumPriceButton, "left, aligny 75%, hidemode 3");
         }
-        albumTextPanel.add(albumSubHeadingLabel, "left, aligny 50%, span 2, growx, shrinkprio 200, hidemode 3, wrap");
+        
+        albumTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
+        albumTextPanel.add(albumHeadingPanel, "left, aligny 50%, growx, hidemode 3, wrap");
+        albumTextPanel.add(albumSubHeadingLabel, "left, aligny 50%, growx, shrinkprio 200, hidemode 3, wrap");
         albumTextPanel.add(albumStreamButton, "left, aligny 50%, gaptop 3, hidemode 3");
         albumTextPanel.add(albumTracksButton, "left, aligny 50%, gaptop 3, gapleft 6, hidemode 3");
         
@@ -135,9 +161,21 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     protected void initMediaComponent() {
         mediaPanel.setOpaque(false);
         
-        mediaTextPanel = new JXPanel();
-        mediaTextPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        JXPanel mediaTextPanel = new JXPanel() {
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                if (mediaDownloadButton.isVisible()) {
+                    mediaHeadingWidth = getSize().width - mediaDownloadButton.getSize().width;
+                } else {
+                    mediaHeadingWidth = getSize().width - mediaPriceButton.getSize().width;
+                }
+            }
+        };
         mediaTextPanel.setOpaque(false);
+        
+        JXPanel mediaHeadingPanel = new JXPanel();
+        mediaHeadingPanel.setOpaque(false);
         
         mediaHeadingLabel = new HTMLLabel();
         mediaHeadingLabel.setOpenUrlsNatively(false);
@@ -164,6 +202,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaSubHeadingLabel.setFont(storeStyle.getAlbumFont());
         mediaSubHeadingLabel.setForeground(storeStyle.getAlbumForeground());
         
+        mediaWidthResolver = new HeadingFontWidthResolver(mediaHeadingLabel, storeStyle.getArtistFont());
+        
         mediaStreamButton = new IconButton(streamAction);
         mediaStreamButton.setIcon(storeStyle.getStreamIcon());
         
@@ -173,14 +213,17 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaPriceButton = new PriceButton(downloadAction);
         
         // Layout components in container.
-        mediaTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
-        mediaTextPanel.add(mediaHeadingLabel, "left, aligny 50%, growx, wmax pref, hidemode 3");
+        mediaHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
+        mediaHeadingPanel.add(mediaHeadingLabel, "left, aligny 50%, growx, wmax pref, hidemode 3");
         if (storeStyle.getType() == Type.STYLE_C) {
-            mediaTextPanel.add(mediaDownloadButton, "left, aligny 50%, hidemode 3, wrap");
+            mediaHeadingPanel.add(mediaDownloadButton, "left, aligny 50%, hidemode 3");
         } else {
-            mediaTextPanel.add(mediaPriceButton, "left, aligny 75%, hidemode 3, wrap");
+            mediaHeadingPanel.add(mediaPriceButton, "left, aligny 75%, hidemode 3");
         }
-        mediaTextPanel.add(mediaSubHeadingLabel, "left, aligny 50%, span 2, growx, shrinkprio 200, hidemode 3");
+        
+        mediaTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
+        mediaTextPanel.add(mediaHeadingPanel, "left, aligny 50%, growx, hidemode 3, wrap");
+        mediaTextPanel.add(mediaSubHeadingLabel, "left, aligny 50%, growx, hidemode 3");
         
         mediaPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding"));
         mediaPanel.add(mediaStreamButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0");
@@ -217,13 +260,17 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         trackPanel.add(streamButton, "alignx left, gapright 6, growprio 0, shrinkprio 0");
         trackPanel.add(trackLabel, "alignx left, growx, growprio 200, shrinkprio 200");
         if (storeStyle.getType() == Type.STYLE_C) {
-            trackPanel.add(downloadButton, "alignx left, gapleft 6, growprio 0, shrinkprio 0, pushx 200");
+            trackPanel.add(downloadButton, "alignx left, gapleft 6, growprio 0, shrinkprio 0");
         } else {
-            trackPanel.add(priceButton, "alignx left, gapleft 6, growprio 0, shrinkprio 0, pushx 200");
+            trackPanel.add(priceButton, "alignx left, gapleft 6, growprio 0, shrinkprio 0");
         }
-        trackPanel.add(lengthLabel, "alignx right, growprio 0, shrinkprio 0");
+        trackPanel.add(lengthLabel, "alignx right, growprio 0, shrinkprio 0, pushx 200");
         
-        System.out.println("prefSize=" + trackPanel.getPreferredSize()); // TODO REMOVE
+        //System.out.println("prefSize=" + trackPanel.getPreferredSize()); // TODO REMOVE
+        
+        // Apply style to show/hide components.
+        downloadButton.setVisible(storeStyle.isDownloadButtonVisible());
+        priceButton.setVisible(storeStyle.isPriceVisible());
         
         return trackPanel;
     }
@@ -248,10 +295,16 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             break;
         }
         
-        albumHeadingLabel.setText(getHeadingHtml(editing));
+        albumHeadingLabel.setText(getHeadingHtml(albumWidthResolver, getAlbumHeadingWidth(), editing));
+        albumHeadingLabel.setToolTipText(result.getHeading());
         albumSubHeadingLabel.setText(result.getSubheading());
         
         albumPriceButton.setText(vsr.getStoreResult().getPrice());
+        
+        // Apply style to show/hide components.
+        albumTracksButton.setVisible(!storeStyle.isShowTracksOnHover() || editing);
+        albumDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
+        albumPriceButton.setVisible(storeStyle.isPriceVisible());
     }
 
     @Override
@@ -273,10 +326,53 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             break;
         }
         
-        mediaHeadingLabel.setText(getHeadingHtml(editing));
+        mediaHeadingLabel.setText(getHeadingHtml(mediaWidthResolver, getMediaHeadingWidth(), editing));
+        mediaHeadingLabel.setToolTipText(result.getHeading());
         mediaSubHeadingLabel.setText(result.getSubheading());
         
         mediaPriceButton.setText(vsr.getStoreResult().getPrice());
+        
+        // Apply style to show/hide components.
+        mediaDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
+        mediaPriceButton.setVisible(storeStyle.isPriceVisible());
+    }
+    
+    /**
+     * Returns the estimated album heading width.
+     */
+    private int getAlbumHeadingWidth() {
+        if (albumHeadingWidth > 0) {
+            return albumHeadingWidth;
+            
+        } else {
+            // Estimate heading width based on column width.
+            int columnWidth = getColumnWidth();
+            int coverWidth = albumCoverButton.getIcon().getIconWidth();
+            if (albumDownloadButton.isVisible()) {
+                return columnWidth - 21 - coverWidth - albumDownloadButton.getSize().width;
+            } else {
+                return columnWidth - 21 - coverWidth - albumPriceButton.getSize().width;
+            }
+        }
+    }
+    
+    /**
+     * Returns the estimated media heading width.
+     */
+    private int getMediaHeadingWidth() {
+        if (mediaHeadingWidth > 0) {
+            return mediaHeadingWidth;
+            
+        } else {
+            // Estimate heading width based on column width.
+            int columnWidth = getColumnWidth();
+            int streamWidth = mediaStreamButton.getSize().width;
+            if (mediaDownloadButton.isVisible()) {
+                return columnWidth - 18 - streamWidth - mediaDownloadButton.getSize().width;
+            } else {
+                return columnWidth - 18 - streamWidth - mediaPriceButton.getSize().width;
+            }
+        }
     }
     
     /**
@@ -288,11 +384,17 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             super(action);
             
             setBorder(BorderFactory.createEmptyBorder(1, 6, 1, 6));
-            setBackgroundPainter(new RectanglePainter<JXButton>(0, 0, 0, 0, 15, 15, true,
-                    storeStyle.getPriceBackground(), 1.0f, storeStyle.getPriceBorderColor()));
             setFocusPainted(false);
             setFont(storeStyle.getPriceFont());
             setForeground(storeStyle.getPriceForeground());
+            
+            if (storeStyle.isPriceButtonVisible()) {
+                setContentAreaFilled(true);
+                setBackgroundPainter(new RectanglePainter<JXButton>(0, 0, 0, 0, 15, 15, true,
+                        storeStyle.getPriceBackground(), 1.0f, storeStyle.getPriceBorderColor()));
+            } else {
+                setContentAreaFilled(false);
+            }
             
             // Install listener to show hand cursor.
             new RolloverCursorListener().install(this);
