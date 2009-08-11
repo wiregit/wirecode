@@ -30,12 +30,13 @@ import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.MessageComponent.MessageBackground;
-import org.limewire.ui.swing.friends.chat.ChatFrame;
+import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -47,7 +48,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     @Resource private Color chatForeground;
 
     private final SearchResultsModel searchResultsModel;
-    private final ChatFrame chatFrame;
+    private final Provider<ChatMediator> chatMediator;
     private final EventBean<FriendConnectionEvent> connectionEventBean;
     private EventListener<FriendConnectionEvent> connectionListener;
     private ListenerSupport<FriendConnectionEvent> connectionSupport;
@@ -62,11 +63,11 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private List<Friend> friends;
 
     @Inject
-    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, ChatFrame chatFrame, RemoteLibraryManager remoteLibraryManager, 
+    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, Provider<ChatMediator> chatMediator, RemoteLibraryManager remoteLibraryManager, 
             @Assisted SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
         this.connectionEventBean = connectionEventBean;
-        this.chatFrame = chatFrame;
+        this.chatMediator = chatMediator;
         this.searchResultsModel = searchResultsModel;
         this.remoteLibraryManager = remoteLibraryManager;
     }
@@ -176,7 +177,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
                 @Override
                 public void hyperlinkUpdate(HyperlinkEvent e) {
                     if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                        chatFrame.setVisibility(true);
+                        chatMediator.get().setVisible(true);
                     }
                 }
             });

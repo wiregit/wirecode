@@ -149,7 +149,6 @@ public class MiscOptionPanel extends OptionPanel {
     private class NotificationsPanel extends OptionPanel {
 
         private JCheckBox showNotificationsCheckBox;
-        private JCheckBox playNotificationsCheckBox;
         private JButton resetWarningsButton;
 
         public NotificationsPanel() {
@@ -157,8 +156,6 @@ public class MiscOptionPanel extends OptionPanel {
 
             showNotificationsCheckBox = new JCheckBox(tr("Show popup system notifications"));
             showNotificationsCheckBox.setContentAreaFilled(false);
-            playNotificationsCheckBox = new JCheckBox(tr("Play notification sounds"));
-            playNotificationsCheckBox.setContentAreaFilled(false);
             resetWarningsButton = new JButton(new AbstractAction(I18n.tr("Reset")){
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -167,7 +164,6 @@ public class MiscOptionPanel extends OptionPanel {
             });
             
             add(showNotificationsCheckBox, "wrap");
-            add(playNotificationsCheckBox, "wrap");
             add(new JLabel(I18n.tr("Reset warning messages")));
             add(resetWarningsButton, "wrap");
         }
@@ -175,19 +171,16 @@ public class MiscOptionPanel extends OptionPanel {
         @Override
         boolean applyOptions() {
             SwingUiSettings.SHOW_NOTIFICATIONS.setValue(showNotificationsCheckBox.isSelected());
-            SwingUiSettings.PLAY_NOTIFICATION_SOUND.setValue(playNotificationsCheckBox.isSelected());
             return false;
         }
 
         @Override
         boolean hasChanged() {
-            return showNotificationsCheckBox.isSelected() != SwingUiSettings.SHOW_NOTIFICATIONS.getValue() ||
-            playNotificationsCheckBox.isSelected() != SwingUiSettings.PLAY_NOTIFICATION_SOUND.getValue(); 
+            return showNotificationsCheckBox.isSelected() != SwingUiSettings.SHOW_NOTIFICATIONS.getValue();
         }
 
         @Override
         public void initOptions() {
-            playNotificationsCheckBox.setSelected(SwingUiSettings.PLAY_NOTIFICATION_SOUND.getValue());
             showNotificationsCheckBox.setSelected(SwingUiSettings.SHOW_NOTIFICATIONS.getValue());
         }
     }

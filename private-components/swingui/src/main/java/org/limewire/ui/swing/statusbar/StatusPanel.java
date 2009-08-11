@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.statusbar;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -13,6 +12,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
+import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -30,9 +30,8 @@ public class StatusPanel extends JXPanel {
     
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, MiniPlayerPanel miniPlayerPanel, 
-            FriendStatusPanel friendStatusPanel, 
-            ConnectionStatusPanel connectionStatus, ProStatusPanel proStatusPanel,
-            SharedFileCountPanel sharedFileCountPanel, 
+            ChatMediator chatMediator, ConnectionStatusPanel connectionStatus, 
+            ProStatusPanel proStatusPanel, SharedFileCountPanel sharedFileCountPanel, 
             BarPainterFactory barPainterFactory, FileProcessingPanel fileProcessingPanel) {
         
         GuiUtils.assignResources(this);
@@ -45,9 +44,6 @@ public class StatusPanel extends JXPanel {
         setBackgroundPainter(barPainterFactory.createStatusBarPainter());
  
         miniPlayerPanel.setVisible(false);
-        
-        Component chatButton = friendStatusPanel.getComponent();
-        chatButton.setVisible(false);
         
         JPanel leftPanel = new JPanel(new MigLayout("insets 0, gap 0, filly, nogrid, hidemode 3"));
         JPanel centerPanel = new JPanel(new MigLayout("insets 0, gap 0, filly, nogrid, alignx 40%, hidemode 3"));
@@ -63,7 +59,7 @@ public class StatusPanel extends JXPanel {
         
         centerPanel.add(proStatusPanel, "growy, gaptop 2");
         rightPanel.add(miniPlayerPanel, "gapafter 4");
-        rightPanel.add(chatButton, "growy");
+        rightPanel.add(chatMediator.getChatButton(), "growy");
         
         add(leftPanel, BorderLayout.WEST);
         add(centerPanel, BorderLayout.CENTER);
@@ -81,25 +77,19 @@ public class StatusPanel extends JXPanel {
     }
     
     private void updateComponents(ConnectionStrength strength) {
-        
         boolean sharingVisible = false;
         
         switch(strength) {
-            
-        case DISCONNECTED:
-        case CONNECTING:
-        case NO_INTERNET:
-            
-            sharingVisible = false;
-            break;
-            
-        default:
-
-            sharingVisible = true;
-            break;
+            case DISCONNECTED:
+            case CONNECTING:
+            case NO_INTERNET:
+                sharingVisible = false;
+                break;
+            default:
+                sharingVisible = true;
+                break;
         }
         
         this.sharedFileCountPanel.setVisible(sharingVisible);
-        
     }
 }
