@@ -92,7 +92,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -146,7 +146,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertContains(matchingItems, remoteFileItem1);
         
         // now clear presence library and assert that no suggestions are found
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesClearedEvent(presenceLibrary1));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsClearedEvent(presenceLibrary1));
         
         suggestions = friendLibraries.getSuggestions("name", SearchCategory.AUDIO);
         assertEquals(0, suggestions.size());
@@ -236,8 +236,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -424,8 +424,8 @@ public class FriendLibrariesTest extends BaseTestCase {
         friendLibraryList.add(friendLibrary2);
         presenceLibraryList2.add(presenceLibrary2);
 
-        indexListener1.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
-        indexListener2.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3)));
+        indexListener1.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener2.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -562,7 +562,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -737,8 +737,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2)));
 
         Map<FilePropertyKey, String> advancedDetails1 = new HashMap<FilePropertyKey, String>();
         advancedDetails1.put(FilePropertyKey.AUTHOR, "n");
@@ -899,8 +899,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
-        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("", SearchCategory.ALL);
         assertEquals(4, suggestions.size());

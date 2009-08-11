@@ -401,14 +401,14 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         @Override
         public void addNewResult(SearchResult file) {
             results.add(file);
-            listeners.broadcast(RemoteLibraryEvent.createFilesAddedEvent(this, Collections.singleton(file)));
+            listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(this, Collections.singleton(file)));
         }
 
         @Override
         public void setNewResults(Collection<SearchResult> files) {
             clear();
             results.addAll(files);
-            listeners.broadcast(RemoteLibraryEvent.createFilesAddedEvent(this, files));
+            listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(this, files));
         }
         
         @Override
@@ -420,7 +420,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 }
                 iterators.clear();
             }
-            listeners.broadcast(RemoteLibraryEvent.createFilesClearedEvent(this));
+            listeners.broadcast(RemoteLibraryEvent.createResultsClearedEvent(this));
         }
 
         @Override
@@ -550,12 +550,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             case STATE_CHANGED:
                 parent.updateState();
                 break;
-            case FILES_ADDED:
-                listeners.broadcast(RemoteLibraryEvent.createFilesAddedEvent(parent, event.getAddedFiles()));
+            case RESULTS_ADDED:
+                listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(parent, event.getAddedResults()));
                 break;
-            case FILES_CLEARED:
+            case RESULTS_CLEARED:
                 if (parent.size() == 0) {
-                    listeners.broadcast(RemoteLibraryEvent.createFilesClearedEvent(parent));
+                    listeners.broadcast(RemoteLibraryEvent.createResultsClearedEvent(parent));
                 } else {
                     // TODO: strictly, a FILES_CLEARED event from a presence library would have to be forwarded
                     // as a FILES_REMOVED event in this case

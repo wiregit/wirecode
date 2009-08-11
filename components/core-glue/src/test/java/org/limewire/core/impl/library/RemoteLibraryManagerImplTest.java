@@ -264,8 +264,8 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
     
         context.checking(new Expectations() {{
             // actual check
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesAddedEvent(remoteLibraryManager.getAllFriendsLibrary(), Collections.singleton(searchResult)))));
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesClearedEvent(remoteLibraryManager.getAllFriendsLibrary()))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsAddedEvent(remoteLibraryManager.getAllFriendsLibrary(), Collections.singleton(searchResult)))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsClearedEvent(remoteLibraryManager.getAllFriendsLibrary()))));
             ignoring(listener);
             // stubs
             allowing(friendPresence).getPresenceId();

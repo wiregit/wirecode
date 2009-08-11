@@ -177,8 +177,8 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
                     }
                 }
                 break;
-            case FILES_ADDED:
-            case FILES_CLEARED:
+            case RESULTS_ADDED:
+            case RESULTS_CLEARED:
                 fireBrowseStatusChanged(BrowseState.UPDATED);
                 break;
             }

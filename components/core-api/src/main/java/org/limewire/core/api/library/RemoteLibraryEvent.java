@@ -6,36 +6,47 @@ import java.util.Collections;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.DefaultSourceTypeEvent;
 
+/**
+ * Event fired by {@link RemoteLibrary} when either its state changes, it is cleared
+ * or results are added to it.
+ */
 public class RemoteLibraryEvent extends DefaultSourceTypeEvent<RemoteLibrary, RemoteLibraryEvent.Type> {
 
     private final RemoteLibraryState state;
-    private final Collection<SearchResult> addedFiles;
+    private final Collection<SearchResult> addedResults;
 
-    public static enum Type { FILES_CLEARED, FILES_ADDED, STATE_CHANGED }
+    public static enum Type { RESULTS_CLEARED, RESULTS_ADDED, STATE_CHANGED }
     
-    private RemoteLibraryEvent(RemoteLibrary source, Type type, Collection<SearchResult> addedFiles) { 
+    private RemoteLibraryEvent(RemoteLibrary source, Type type, Collection<SearchResult> addedResults) { 
         super(source, type);
         this.state = source.getState();
-        this.addedFiles = addedFiles;
+        this.addedResults = addedResults;
     }
     
     public static RemoteLibraryEvent createStateChangedEvent(RemoteLibrary remoteLibrary) {
         return new RemoteLibraryEvent(remoteLibrary, Type.STATE_CHANGED, Collections.<SearchResult>emptyList());
     }
     
-    public static RemoteLibraryEvent createFilesClearedEvent(RemoteLibrary remoteLibrary) {
-        return new RemoteLibraryEvent(remoteLibrary, Type.FILES_CLEARED, Collections.<SearchResult>emptyList());
+    public static RemoteLibraryEvent createResultsClearedEvent(RemoteLibrary remoteLibrary) {
+        return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_CLEARED, Collections.<SearchResult>emptyList());
     }
     
-    public static RemoteLibraryEvent createFilesAddedEvent(RemoteLibrary remoteLibrary, Collection<SearchResult> addedFiles) {
-        return new RemoteLibraryEvent(remoteLibrary, Type.FILES_ADDED, addedFiles);
+    public static RemoteLibraryEvent createResultsAddedEvent(RemoteLibrary remoteLibrary, Collection<SearchResult> addedResults) {
+        return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_ADDED, addedResults);
     }
     
+    /**
+     * @return the state of the remote library at creation of this event
+     */
     public RemoteLibraryState getState() {
         return state;
     }
     
-    public Collection<SearchResult> getAddedFiles() {
-        return addedFiles;
+    /**
+     * @return the added results if the event is of type {@link Type#RESULTS_ADDED}
+     * otherwise empty collection.
+     */
+    public Collection<SearchResult> getAddedResults() {
+        return addedResults;
     }
 }

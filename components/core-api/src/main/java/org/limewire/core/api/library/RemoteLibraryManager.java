@@ -38,7 +38,7 @@ public interface RemoteLibraryManager {
      */
     boolean hasFriendLibrary(Friend friend);
 
-    /** Returns a SearchResultList that is a concatenation of all friends libraries. */
+    /** Returns a remote library that is an aggregate of all friends libraries. */
     RemoteLibrary getAllFriendsLibrary();
     
     /** 

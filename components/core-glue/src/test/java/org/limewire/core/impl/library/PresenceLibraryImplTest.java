@@ -36,7 +36,7 @@ public class PresenceLibraryImplTest extends BaseTestCase {
     
     public void testAddNewResult() {
         context.checking(new Expectations() {{
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary, Collections.singleton(searchResult1)))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary, Collections.singleton(searchResult1)))));
         }});
         presenceLibrary.addNewResult(searchResult1);
         assertEquals(1, presenceLibrary.size());
@@ -45,8 +45,8 @@ public class PresenceLibraryImplTest extends BaseTestCase {
     
     public void testSetNewResults() {
         context.checking(new Expectations() {{
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesClearedEvent(presenceLibrary))));
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary, Arrays.asList(searchResult1, searchResult2)))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsClearedEvent(presenceLibrary))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary, Arrays.asList(searchResult1, searchResult2)))));
         }});
         presenceLibrary.setNewResults(Arrays.asList(searchResult1, searchResult2));
         assertEquals(2, presenceLibrary.size());
@@ -55,7 +55,7 @@ public class PresenceLibraryImplTest extends BaseTestCase {
     
     public void testClear() {
         context.checking(new Expectations() {{
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createFilesClearedEvent(presenceLibrary))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsClearedEvent(presenceLibrary))));
         }});
         presenceLibrary.clear();
         assertEquals(0, presenceLibrary.size());
@@ -119,7 +119,7 @@ public class PresenceLibraryImplTest extends BaseTestCase {
             return expectedEvent.getSource() == event.getSource() &&
                 expectedEvent.getType() == event.getType() && 
                 expectedEvent.getState() == event.getState() &&
-                expectedEvent.getAddedFiles().equals(event.getAddedFiles());
+                expectedEvent.getAddedResults().equals(event.getAddedResults());
         }   
 
         @Override

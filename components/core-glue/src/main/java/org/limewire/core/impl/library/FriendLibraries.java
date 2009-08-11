@@ -569,12 +569,12 @@ public class FriendLibraries {
             switch (event.getType()) {
             case STATE_CHANGED:
                 break;
-            case FILES_ADDED:
-                for (SearchResult newFile : event.getAddedFiles()) {
-                    index(newFile);
+            case RESULTS_ADDED:
+                for (SearchResult result : event.getAddedResults()) {
+                    index(result);
                 }
                 break;
-            case FILES_CLEARED:
+            case RESULTS_CLEARED:
                 library.clear();
                 break;
             }
