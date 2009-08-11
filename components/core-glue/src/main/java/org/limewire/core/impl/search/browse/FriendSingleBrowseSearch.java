@@ -1,21 +1,21 @@
 package org.limewire.core.impl.search.browse;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.core.api.library.FriendLibrary;
-import org.limewire.core.api.library.LibraryState;
+import org.limewire.core.api.library.RemoteLibraryEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.friend.api.Friend;
+import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -26,8 +26,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     private final RemoteLibraryManager remoteLibraryManager;
     private final ExecutorService executorService;
     private final ListEventListener<FriendLibrary> friendLibraryListEventListener = new FriendLibraryListEventListener();
-    private final FriendLibraryModelListener friendLibraryModelListener = new FriendLibraryModelListener();
-    private final PropertyChangeListener libraryPropertyChangeListener = new LibraryPropertyChangeListener();
+    private final EventListener<RemoteLibraryEvent> eventAdapter = new RemoteLibraryToBrowseEventAdapter();
     
     private final AtomicReference<FriendLibrary> currentLibrary = new AtomicReference<FriendLibrary>();
 
@@ -77,8 +76,8 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
             
         } else {
             setLibrary(library);
-            if(library.getState() == LibraryState.LOADING){
-                library.addPropertyChangeListener(libraryPropertyChangeListener);                
+            if(library.getState() == RemoteLibraryState.LOADING){
+                library.addListener(eventAdapter);                
             } else {
                 loadLibrary();
             }
@@ -89,18 +88,15 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     /**Loads a snapshot of the available files, alerts BrowseStatusListeners that we have loaded, 
      * and SearchListeners that the search has stopped.*/
     private void loadLibrary(){
-        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>();
-        
-        remoteLibraryManager.getFriendLibrary(friend).getModel().getReadWriteLock().readLock().lock();
-        try {        
-            remoteFileItems.addAll(remoteLibraryManager.getFriendLibrary(friend).getModel());
-        } finally {
-            remoteLibraryManager.getFriendLibrary(friend).getModel().getReadWriteLock().readLock().unlock();
+        FriendLibrary friendLibrary = remoteLibraryManager.getFriendLibrary(friend);
+        List<SearchResult> searchResults = new ArrayList<SearchResult>(friendLibrary.size());
+        for (SearchResult result : friendLibrary) {
+            searchResults.add(result);
         }
         
         // add all files
         for (SearchListener listener : searchListeners) {
-            listener.handleSearchResults(this, remoteFileItems);
+            listener.handleSearchResults(this, searchResults);
         }
         
         fireBrowseStatusChanged(BrowseState.LOADED);
@@ -118,29 +114,24 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     /**Removes friendLibraryListEventListener from the FriendLibraryList.  
      * Removes libraryPropertyChangeLister from the friend library if necessary.*/
     private void removeListener(){
-        remoteLibraryManager.getFriendLibraryList().removeListEventListener(friendLibraryListEventListener);  
-        if (currentLibrary.get() != null) {
-            currentLibrary.get().removePropertyChangeListener(libraryPropertyChangeListener);
-            currentLibrary.get().getModel().removeListEventListener(friendLibraryModelListener);
-            currentLibrary.set(null);
-        }
+        remoteLibraryManager.getFriendLibraryList().removeListEventListener(friendLibraryListEventListener);
+        setLibrary(null);
     }
     
-    private synchronized void setLibrary(FriendLibrary newLibrary){
-        FriendLibrary oldLibrary = currentLibrary.get();
+    private void setLibrary(FriendLibrary newLibrary){
+        FriendLibrary oldLibrary = currentLibrary.getAndSet(newLibrary);
         if(newLibrary == oldLibrary){
             return;
         }
         if(oldLibrary != null){
-            oldLibrary.getModel().removeListEventListener(friendLibraryModelListener);            
+            oldLibrary.removeListener(eventAdapter);
         }
-        
-        //Add a property change listener to the new library and keep a reference to the library so we can remove the listener later.
-        newLibrary.getModel().addListEventListener(friendLibraryModelListener);
-        newLibrary.addPropertyChangeListener(libraryPropertyChangeListener);
-        currentLibrary.set(newLibrary);
-        
-        if(currentLibrary.get().getState() == LibraryState.LOADED){
+        if (newLibrary == null) {
+            return;
+        }
+
+        newLibrary.addListener(eventAdapter);
+        if(newLibrary.getState() == RemoteLibraryState.LOADED){
             fireBrowseStatusChanged(BrowseState.UPDATED);
         }
         
@@ -164,33 +155,32 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
                     }
                 } else if (listChanges.getType() == ListEvent.DELETE && remoteLibraryManager.getFriendLibrary(friend) == null){   
                     //our friend has logged off
-                    currentLibrary.set(null);
+                    setLibrary(null);
                     fireBrowseStatusChanged(BrowseState.OFFLINE, friend);
                 }
             }
         }
     }
     
-    private class FriendLibraryModelListener implements ListEventListener<SearchResult>{
+    private class RemoteLibraryToBrowseEventAdapter implements EventListener<RemoteLibraryEvent> {
         @Override
-        public void listChanged(ListEvent<SearchResult> listChanges) {
-            fireBrowseStatusChanged(BrowseState.UPDATED);
-        }        
-    }
-    
-    private class LibraryPropertyChangeListener implements PropertyChangeListener {
-        
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            LibraryState state = (LibraryState)evt.getNewValue();
-            if (state != LibraryState.LOADING) {
-                // The list has changed - tell the listeners
-                if (state == LibraryState.LOADED) {
-                    fireBrowseStatusChanged(BrowseState.UPDATED);
-                } else {
-                    fireBrowseStatusChanged(BrowseState.FAILED, friend);
+        public void handleEvent(RemoteLibraryEvent event) {
+            switch (event.getType()) {
+            case STATE_CHANGED:
+                RemoteLibraryState state = event.getState();
+                if (state != RemoteLibraryState.LOADING) {
+                    // The list has changed - tell the listeners
+                    if (state == RemoteLibraryState.LOADED) {
+                        fireBrowseStatusChanged(BrowseState.UPDATED);
+                    } else {
+                        fireBrowseStatusChanged(BrowseState.FAILED, friend);
+                    }
                 }
-
+                break;
+            case FILES_ADDED:
+            case FILES_CLEARED:
+                fireBrowseStatusChanged(BrowseState.UPDATED);
+                break;
             }
         }
     }

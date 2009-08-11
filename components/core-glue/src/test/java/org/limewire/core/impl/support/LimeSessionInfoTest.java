@@ -4,7 +4,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.api.library.SearchResultList;
+import org.limewire.core.api.library.RemoteLibrary;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
@@ -420,8 +420,8 @@ public class LimeSessionInfoTest extends BaseTestCase {
                 null, null, null, null, null, null, null, null, null, null, null, null, null, remoteLibraryManager, null);
 
         context.checking(new Expectations() {{
-            SearchResultList allFriendsList = context.mock(SearchResultList.class);            
-            allowing(remoteLibraryManager).getAllFriendsFileList();
+            RemoteLibrary allFriendsList = context.mock(RemoteLibrary.class);            
+            allowing(remoteLibraryManager).getAllFriendsLibrary();
             will(returnValue(allFriendsList));
             allowing(allFriendsList).size();
             will(returnValue(222));

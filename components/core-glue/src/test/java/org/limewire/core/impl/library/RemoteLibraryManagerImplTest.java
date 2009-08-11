@@ -8,7 +8,7 @@ import org.jmock.Mockery;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
-import org.limewire.core.api.library.SearchResultList;
+import org.limewire.core.api.library.RemoteLibrary;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
@@ -208,7 +208,7 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
 
         RemoteLibraryManagerImpl remoteLibraryManagerImpl = new RemoteLibraryManagerImpl();
 
-        SearchResultList allFriendFiles = remoteLibraryManagerImpl.getAllFriendsFileList();
+        RemoteLibrary allFriendFiles = remoteLibraryManagerImpl.getAllFriendsLibrary();
         assertEmpty(allFriendFiles.getModel());
 
         remoteLibraryManagerImpl.addPresenceLibrary(friendPresence1);

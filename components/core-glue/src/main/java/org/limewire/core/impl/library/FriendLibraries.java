@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -22,10 +21,12 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
+import org.limewire.core.api.library.RemoteLibraryEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -222,7 +223,7 @@ public class FriendLibraries {
                                         libraries.put(item.getPresence().getPresenceId(), library);
                                         LibraryListener listener = new LibraryListener(library);
                                         listeners.put(item.getPresence().getPresenceId(), listener);
-                                        item.getModel().addListEventListener(listener);
+                                        item.addListener(listener);
                                     }
 
                                     @Override
@@ -233,7 +234,7 @@ public class FriendLibraries {
                                         libraries.remove(item.getPresence().getPresenceId());
                                         LibraryListener listener = listeners.remove(item
                                                 .getPresence().getPresenceId());
-                                        item.getModel().removeListEventListener(listener);
+                                        item.removeListener(listener);
                                     }
 
                                     @Override
@@ -555,43 +556,30 @@ public class FriendLibraries {
      * Listens to events on a specific presence and updates the library index
      * based on these events.
      */
-    private static class LibraryListener implements ListEventListener<SearchResult> {
+    private static class LibraryListener implements EventListener<RemoteLibraryEvent> {
+        
         private final Library library;
 
         LibraryListener(Library library) {
             this.library = library;
         }
 
-        public void listChanged(ListEvent<SearchResult> listChanges) {
-            // optimization:  if we know the ultimate list is size 0, clear & exit
-            if(listChanges.getSourceList().size() == 0) {
-                library.clear();
-            } else {
-                while (listChanges.next()) {
-                    switch(listChanges.getType()) {
-                    case ListEvent.INSERT:
-                        SearchResult newFile = listChanges.getSourceList().get(listChanges.getIndex());
-                        index(newFile);                    
-                        break;
-                    case ListEvent.DELETE:
-                    case ListEvent.UPDATE:
-                        // TODO: if glazedlists supported retrieving the removed items,
-                        //       we could just update the one element -- instead,
-                        //       we need to rebuild the whole thing.
-                        rebuild(listChanges.getSourceList());
-                        return;
-                    }
+        @Override
+        public void handleEvent(RemoteLibraryEvent event) {
+            switch (event.getType()) {
+            case STATE_CHANGED:
+                break;
+            case FILES_ADDED:
+                for (SearchResult newFile : event.getAddedFiles()) {
+                    index(newFile);
                 }
+                break;
+            case FILES_CLEARED:
+                library.clear();
+                break;
             }
         }
         
-        private void rebuild(List<SearchResult> files) {
-            library.clear();
-            for(SearchResult item : files) {
-                index(item);
-            }
-        }
-
         /**
          * Indexes the files properties and name.
          */
@@ -606,5 +594,6 @@ public class FriendLibraries {
                 }
             }
         }
+
     }
 }

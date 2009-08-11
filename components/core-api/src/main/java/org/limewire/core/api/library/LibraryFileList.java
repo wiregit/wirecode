@@ -8,7 +8,7 @@ import org.limewire.listener.EventListener;
 public interface LibraryFileList extends LocalFileList {
 
     /** Returns the current state of the library. */
-    LibraryState getState();
+    RemoteLibraryState getState();
  
     
     void addPropertyChangeListener(PropertyChangeListener listener);

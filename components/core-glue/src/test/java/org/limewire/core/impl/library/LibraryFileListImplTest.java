@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.api.library.LibraryState;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
@@ -43,16 +43,16 @@ public class LibraryFileListImplTest extends BaseTestCase {
         LibraryFileListImpl libraryFileListImpl = new LibraryFileListImpl(managedList,
                 coreLocalFileItemFactory);
 
-        assertEquals(LibraryState.LOADING, libraryFileListImpl.getState());
+        assertEquals(RemoteLibraryState.LOADING, libraryFileListImpl.getState());
         propertyChangeListener.get().propertyChange(
                 new PropertyChangeEvent("", "ignoreproperty", Boolean.TRUE, Boolean.FALSE));
-        assertEquals(LibraryState.LOADING, libraryFileListImpl.getState());
+        assertEquals(RemoteLibraryState.LOADING, libraryFileListImpl.getState());
         propertyChangeListener.get().propertyChange(
                 new PropertyChangeEvent("", "hasPending", Boolean.TRUE, Boolean.FALSE));
-        assertEquals(LibraryState.LOADED, libraryFileListImpl.getState());
+        assertEquals(RemoteLibraryState.LOADED, libraryFileListImpl.getState());
         propertyChangeListener.get().propertyChange(
                 new PropertyChangeEvent("", "hasPending", Boolean.FALSE, Boolean.TRUE));
-        assertEquals(LibraryState.LOADING, libraryFileListImpl.getState());
+        assertEquals(RemoteLibraryState.LOADING, libraryFileListImpl.getState());
         context.assertIsSatisfied();
     }
 }

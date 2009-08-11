@@ -12,7 +12,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
-import org.limewire.core.api.library.LibraryState;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.filter.Filter;
@@ -44,8 +44,8 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
     
     @Override
-    public LibraryState getState() {
-        return LibraryState.LOADED;
+    public RemoteLibraryState getState() {
+        return RemoteLibraryState.LOADED;
     }
     
     @Override
