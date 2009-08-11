@@ -21,7 +21,7 @@ public interface Inspector {
     
     /**
      * @param key human readable key or actual path to inspect.
-     * @param collectUsageData whether DatgaCategory.USAGE inspection points should be collected
+     * @param collectUsageData whether DataCategory.USAGE inspection points should be collected
      * @return the Object from the inspection
      * @throws InspectionException if something goes wrong 
      */
