@@ -1,11 +1,12 @@
 package org.limewire.core.api.library;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.ListenerSupport;
 
-/** A collection of files from a remote host */
+/** An iterable collection of files from a remote host */
 public interface RemoteLibrary extends Iterable<SearchResult>, ListenerSupport<RemoteLibraryEvent> {
         
     /**
@@ -27,4 +28,13 @@ public interface RemoteLibrary extends Iterable<SearchResult>, ListenerSupport<R
     
     /** Clears all items out of the remote library. */
     void clear();
+    
+    /**
+     * The iterator that is returned is inherently thread safe without locking.
+     * It returns the search results in the order they were added. If the remote
+     * library is cleared while an iterator is active, it will return false for
+     * the next call of {@link Iterator#hasNext()}.
+     */
+    @Override
+    public Iterator<SearchResult> iterator();
 }

@@ -20,6 +20,10 @@ public class AssignParameterAction<T> extends CustomAction {
         this.param = param;
     }
     
+    /**
+     * Constructor to assign the first parameter of the invoation 
+     * to <code>reference</code>. 
+     */
     public AssignParameterAction(AtomicReference<T> reference) {
         this(reference, 0);
     }

@@ -522,8 +522,15 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
     }
     
-    
+    /**
+     * Helper interface used by {@link PropagatingEventListener} and 
+     * implemented by remote libraries that contain other remote libraries.
+     */
     static interface ParentRemoteLibrary extends RemoteLibrary {
+        /**
+         * Called when the state of one of the contained remote libraries
+         * changed to allow the parent to recalculate its compound state.
+         */
         void updateState();
     }
     
