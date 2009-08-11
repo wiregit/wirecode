@@ -147,7 +147,7 @@ public class ChatMediator {
         buttonDecorator.decorateStatusPopupButton(chatButton, new PopupVisibilityChecker() {
             @Override
             public boolean isPopupVisible() {
-                return getChatFrame().isVisible();
+                return isVisible();
             }
         }, background, border, DrawMode.RIGHT_CONNECTING);
     }
