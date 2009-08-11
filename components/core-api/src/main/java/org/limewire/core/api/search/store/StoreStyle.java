@@ -66,20 +66,14 @@ public interface StoreStyle {
     Color getTrackLengthForeground();
 
     Type getType();
-
-    boolean isBuyAlbumVisible();
     
-    boolean isBuyTrackVisible();
-
-    boolean isDownloadAlbumVisible();
-    
-    boolean isDownloadTrackVisible();
-    
-    boolean isInfoOnHover();
+    boolean isDownloadButtonVisible();
     
     boolean isPriceVisible();
 
     boolean isPriceButtonVisible();
+    
+    boolean isShowInfoOnHover();
     
     boolean isShowTracksOnHover();
 }

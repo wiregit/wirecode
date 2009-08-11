@@ -41,7 +41,7 @@ public class MockStoreManager implements StoreManager {
             new Thread(new Runnable() {
                 public void run() {
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {}
 
                     storeStyle = new MockStoreStyle(Type.STYLE_A);

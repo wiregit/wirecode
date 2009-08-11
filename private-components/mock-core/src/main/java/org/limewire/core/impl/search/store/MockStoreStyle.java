@@ -48,14 +48,11 @@ public class MockStoreStyle implements StoreStyle {
     Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
     Color trackLengthForeground = Color.decode("#313131");
     
-    boolean buyAlbumVisible;
-    boolean buyTrackVisible;
-    boolean downloadAlbumVisible;
-    boolean downloadTrackVisible;
-    boolean infoOnHover;
-    boolean priceButtonVisible;
-    boolean priceVisible;
-    boolean showTracksOnHover;
+    boolean downloadButtonVisible = true;
+    boolean priceButtonVisible = true;
+    boolean priceVisible = true;
+    boolean showInfoOnHover = true;
+    boolean showTracksOnHover = true;
     
     /**
      * Constructs a StoreStyle with the specified type.
@@ -208,28 +205,8 @@ public class MockStoreStyle implements StoreStyle {
     }
 
     @Override
-    public boolean isBuyAlbumVisible() {
-        return buyAlbumVisible;
-    }
-
-    @Override
-    public boolean isBuyTrackVisible() {
-        return buyTrackVisible;
-    }
-
-    @Override
-    public boolean isDownloadAlbumVisible() {
-        return downloadAlbumVisible;
-    }
-
-    @Override
-    public boolean isDownloadTrackVisible() {
-        return downloadTrackVisible;
-    }
-
-    @Override
-    public boolean isInfoOnHover() {
-        return infoOnHover;
+    public boolean isDownloadButtonVisible() {
+        return downloadButtonVisible;
     }
     
     @Override
@@ -240,6 +217,11 @@ public class MockStoreStyle implements StoreStyle {
     @Override
     public boolean isPriceVisible() {
         return priceVisible;
+    }
+
+    @Override
+    public boolean isShowInfoOnHover() {
+        return showInfoOnHover;
     }
 
     @Override
