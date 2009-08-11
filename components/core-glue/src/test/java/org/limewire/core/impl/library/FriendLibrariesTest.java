@@ -1,8 +1,11 @@
 package org.limewire.core.impl.library;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -10,12 +13,16 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
+import org.limewire.core.api.library.RemoteLibraryEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -36,7 +43,6 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -48,6 +54,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -56,13 +63,15 @@ public class FriendLibrariesTest extends BaseTestCase {
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
+                
                 allowing(remoteFileItem1).getFileNameWithoutExtension();
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
@@ -82,7 +91,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -147,7 +156,6 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -167,6 +175,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -174,14 +183,16 @@ public class FriendLibrariesTest extends BaseTestCase {
                 will(returnValue(presenceLibraryList1));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
-
+                
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
+                
                 allowing(remoteFileItem1).getFileNameWithoutExtension();
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
@@ -215,9 +226,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList1.add(remoteFileItem2);
-        remoteFileItemList1.add(remoteFileItem3);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -299,10 +309,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final EventList<PresenceLibrary> presenceLibraryList2 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList2 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -328,6 +336,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence2 = context.mock(FriendPresence.class);
         final String presenceId2 = "2";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener1 = new AtomicReference<EventListener<RemoteLibraryEvent>>();
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener2 = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -336,25 +346,29 @@ public class FriendLibrariesTest extends BaseTestCase {
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener1));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
+                
                 allowing(friendLibrary2).getPresenceLibraryList();
                 will(returnValue(presenceLibraryList2));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary2).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener2));
+                allowing(presenceLibrary2).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary2).getPresence();
                 will(returnValue(presence2));
                 allowing(presence2).getPresenceId();
                 will(returnValue(presenceId2));
-                allowing(presenceLibrary2).getModel();
-                will(returnValue(remoteFileItemList2));
-
+                
                 allowing(remoteFileItem1).getFileNameWithoutExtension();
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
@@ -390,9 +404,8 @@ public class FriendLibrariesTest extends BaseTestCase {
         friendLibraryList.add(friendLibrary2);
         presenceLibraryList2.add(presenceLibrary2);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList2.add(remoteFileItem2);
-        remoteFileItemList2.add(remoteFileItem3);
+        indexListener1.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener2.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -473,7 +486,6 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -488,6 +500,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -495,14 +508,16 @@ public class FriendLibrariesTest extends BaseTestCase {
                 will(returnValue(presenceLibraryList1));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
-
+                
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
+                
                 allowing(remoteFileItem1).getFileNameWithoutExtension();
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
@@ -526,7 +541,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -624,7 +639,6 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -646,6 +660,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -653,13 +668,15 @@ public class FriendLibrariesTest extends BaseTestCase {
                 will(returnValue(presenceLibraryList1));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
-
+                
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
 
                 allowing(remoteFileItem1).getFileNameWithoutExtension();
                 will(returnValue(name1));
@@ -698,8 +715,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList1.add(remoteFileItem2);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2)));
 
         Map<FilePropertyKey, String> advancedDetails1 = new HashMap<FilePropertyKey, String>();
         advancedDetails1.put(FilePropertyKey.AUTHOR, "n");
@@ -783,8 +800,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
-
+     
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
         final PresenceLibrary presenceLibrary1 = context.mock(PresenceLibrary.class);
@@ -805,6 +821,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -813,12 +830,14 @@ public class FriendLibrariesTest extends BaseTestCase {
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
 
                 allowing(remoteFileItem1).getFileNameWithoutExtension();
                 will(returnValue(name1));
@@ -857,8 +876,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList1.add(remoteFileItem2);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1)));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createFilesAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2)));
 
         Collection<String> suggestions = friendLibraries.getSuggestions("", SearchCategory.ALL);
         assertEquals(4, suggestions.size());

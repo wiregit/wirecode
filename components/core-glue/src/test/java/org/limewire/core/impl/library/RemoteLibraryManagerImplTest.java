@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
@@ -124,7 +125,8 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
         assertTrue(remoteLibraryManagerImpl.hasFriendLibrary(friend1));
         assertEquals(1, friendLibraries.size());
 
-        remoteLibraryManagerImpl.removeFriendLibrary(friend1);
+        // test that removal of all presence libraries removes friend library
+        remoteLibraryManagerImpl.removePresenceLibrary(friendPresence1);
         assertFalse(remoteLibraryManagerImpl.hasFriendLibrary(friend1));
         assertEmpty(friendLibraries);
 
@@ -209,7 +211,7 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
         RemoteLibraryManagerImpl remoteLibraryManagerImpl = new RemoteLibraryManagerImpl();
 
         RemoteLibrary allFriendFiles = remoteLibraryManagerImpl.getAllFriendsLibrary();
-        assertEmpty(allFriendFiles.getModel());
+        assertEquals(0, allFriendFiles.size());
 
         remoteLibraryManagerImpl.addPresenceLibrary(friendPresence1);
         PresenceLibrary presenceLibrary1 = remoteLibraryManagerImpl.getPresenceLibrary(friendPresence1);
@@ -217,25 +219,26 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
         remoteLibraryManagerImpl.addPresenceLibrary(friendPresence2);
         PresenceLibrary presenceLibrary2 = remoteLibraryManagerImpl.getPresenceLibrary(friendPresence2);
 
-        assertEmpty(allFriendFiles.getModel());
+        assertEquals(0, allFriendFiles.size());
 
         presenceLibrary1.addNewResult(remoteFileItem1);
 
-        assertEquals(1, allFriendFiles.getModel().size());
-        assertContains(allFriendFiles.getModel(), remoteFileItem1);
+        assertEquals(1, allFriendFiles.size());
+        
+        assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem1);
 
         presenceLibrary2.addNewResult(remoteFileItem2);
 
-        assertEquals(2, allFriendFiles.getModel().size());
-        assertContains(allFriendFiles.getModel(), remoteFileItem1);
-        assertContains(allFriendFiles.getModel(), remoteFileItem2);
+        assertEquals(2, allFriendFiles.size());
+        assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem1);
+        assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem2);
 
         presenceLibrary2.addNewResult(remoteFileItem3);
-        assertEquals(3, allFriendFiles.getModel().size());
-        assertContains(allFriendFiles.getModel(), remoteFileItem1);
-        assertContains(allFriendFiles.getModel(), remoteFileItem2);
-        assertContains(allFriendFiles.getModel(), remoteFileItem2);
-        
+        assertEquals(3, allFriendFiles.size());
+        assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem1);
+        assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem2);
+        assertContains(CollectionUtils.listOf(allFriendFiles), remoteFileItem3);
+                
         context.assertIsSatisfied();
     }
 

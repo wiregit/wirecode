@@ -19,6 +19,10 @@ public class AssignParameterAction<T> extends CustomAction {
         this.reference = reference;
         this.param = param;
     }
+    
+    public AssignParameterAction(AtomicReference<T> reference) {
+        this(reference, 0);
+    }
 
     @SuppressWarnings("unchecked")
     @Override
