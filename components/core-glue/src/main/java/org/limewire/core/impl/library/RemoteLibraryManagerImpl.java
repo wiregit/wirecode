@@ -377,7 +377,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
     }
 
-    private static class PresenceLibraryImpl implements PresenceLibrary {
+    static class PresenceLibraryImpl implements PresenceLibrary {
 
         private final FriendPresence presence;
         private volatile RemoteLibraryState state = RemoteLibraryState.LOADING;
