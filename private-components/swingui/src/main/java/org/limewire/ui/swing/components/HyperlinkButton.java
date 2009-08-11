@@ -18,8 +18,6 @@ import org.limewire.ui.swing.util.GuiUtils;
  * is expected for a hyperlink.
  */
 public class HyperlinkButton extends JButton implements MouseListener {
-
-    private static final CustomHyperlinkUI ui = new CustomHyperlinkUI();
     
     private final HyperlinkButtonResources r = new HyperlinkButtonResources();
     
@@ -45,7 +43,7 @@ public class HyperlinkButton extends JButton implements MouseListener {
     }
     
     private void initialize() {
-        this.setUI(ui);
+        this.setUI(new CustomHyperlinkUI());
         addMouseListener(this);
         FontUtils.underline(this);
     }
