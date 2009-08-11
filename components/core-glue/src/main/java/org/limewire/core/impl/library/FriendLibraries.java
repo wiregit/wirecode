@@ -41,13 +41,13 @@ import com.google.inject.Singleton;
 public class FriendLibraries {
     private static final Log LOG = LogFactory.getLog(FriendLibraries.class);
 
-    private final Map<String, Library> libraries;
+    private final Map<String, LibraryIndex> libraries;
 
     FriendLibraries() {
-        this.libraries = new ConcurrentHashMap<String, Library>();
+        this.libraries = new ConcurrentHashMap<String, LibraryIndex>();
     }
 
-    private static class Library {
+    private static class LibraryIndex {
         private final String presenceId;
 
         private final SearchResultTrie suggestionsIndex;
@@ -58,7 +58,7 @@ public class FriendLibraries {
 
         private final Map<FilePropertyKey, SearchResultTrie> suggestionPropertiesIndexes;
 
-        public Library(String presenceId) {
+        public LibraryIndex(String presenceId) {
             this.presenceId = presenceId;
             suggestionsIndex = new SearchResultTrie();
             fileNameIndex = new SearchResultTrie();
@@ -218,7 +218,7 @@ public class FriendLibraries {
                                     protected void itemAdded(PresenceLibrary item, int idx,
                                             EventList<PresenceLibrary> source) {
                                         String presenceId = item.getPresence().getPresenceId();
-                                        Library library = new Library(presenceId);
+                                        LibraryIndex library = new LibraryIndex(presenceId);
                                         LOG.debugf("adding library for presence {0} to index", presenceId);
                                         libraries.put(item.getPresence().getPresenceId(), library);
                                         LibraryListener listener = new LibraryListener(library);
@@ -252,7 +252,7 @@ public class FriendLibraries {
     /** Returns all suggestions for search terms based on the given prefix. */
     public Collection<String> getSuggestions(String prefix, SearchCategory category) {
         Set<String> matches = new HashSet<String>();
-        for (Library library : libraries.values()) {
+        for (LibraryIndex library : libraries.values()) {
             library.getSuggestionsIndex().lock.readLock().lock();
             try {
                 insertMatchingKeysInto(library.getSuggestionsIndex().getPrefixedBy(prefix),
@@ -267,7 +267,7 @@ public class FriendLibraries {
     public Collection<String> getSuggestions(String prefix, SearchCategory category,
             FilePropertyKey filePropertyKey) {
         Set<String> matches = new HashSet<String>();
-        for (Library library : libraries.values()) {
+        for (LibraryIndex library : libraries.values()) {
             SearchResultTrie propertyStringTree = library
                     .getSuggestionPropertyIndex(filePropertyKey);
 
@@ -338,7 +338,7 @@ public class FriendLibraries {
                 while (st.hasMoreElements()) {
                     Set<SearchResult> keywordMatches = new HashSet<SearchResult>();
                     String keyword = st.nextToken();
-                    for (Library library : libraries.values()) {
+                    for (LibraryIndex library : libraries.values()) {
                         SearchResultTrie propertyStringTrie = library
                                 .getFilePropertyIndex(filePropertyKey);
                         if (propertyStringTrie != null) {
@@ -385,7 +385,7 @@ public class FriendLibraries {
         while (st.hasMoreElements()) {
             Set<SearchResult> keywordMatches = new HashSet<SearchResult>();
             String keyword = st.nextToken();
-            for (Library library : libraries.values()) {
+            for (LibraryIndex library : libraries.values()) {
                 library.fileNameIndex.lock.readLock().lock();
                 try {
                     insertMatchingItemsInto(library.fileNameIndex.getPrefixedBy(keyword).values(),
@@ -558,9 +558,9 @@ public class FriendLibraries {
      */
     private static class LibraryListener implements EventListener<RemoteLibraryEvent> {
         
-        private final Library library;
+        private final LibraryIndex library;
 
-        LibraryListener(Library library) {
+        LibraryListener(LibraryIndex library) {
             this.library = library;
         }
 
