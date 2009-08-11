@@ -38,6 +38,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
+
 public class UploadTableRendererEditor extends TableRendererEditor {
     
     private NumberFormat formatter = new DecimalFormat("0.00");
@@ -64,7 +66,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     @Resource private Icon friendBrowseHostIcon;
     @Resource private Icon p2pBrowseHostIcon;
     
-
+    @Inject
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, ProgressBarDecorator progressBarFactory,
             RemoteHostWidgetFactory remoteHostWidgetFactory){
         GuiUtils.assignResources(this);
