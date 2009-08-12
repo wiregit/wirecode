@@ -93,6 +93,7 @@ public class ChatMediator {
             chatFrame = chatFrameProvider.get();
             panel = new Frame(layeredPane);
             panel.add(chatFrame, BorderLayout.CENTER);
+            chatFrame.revalidate();
         }
         return panel;
     }
