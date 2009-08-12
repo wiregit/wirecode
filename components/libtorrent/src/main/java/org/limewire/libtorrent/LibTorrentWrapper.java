@@ -53,7 +53,6 @@ class LibTorrentWrapper {
             init(torrentSettings);
             loaded.set(true);
         } catch (Throwable e) {
-            e.printStackTrace();
             LOG.error("Failure loading the libtorrent libraries.", e);
             if (torrentSettings.isReportingLibraryLoadFailture()) {
                 ExceptionUtils.reportOrReturn(e);
