@@ -33,15 +33,18 @@ class ChatFrame extends JPanel {
     private final ChatHeader chatHeader;
     private final ChatFriendList chatList;
     private final ConversationPanel conversationPanel;
+    private final ChatMediator chatMediator;
     
     @Inject
     public ChatFrame(ChatHeader chatHeader, ChatFriendList chatList, 
-            ConversationPanel conversationPanel, ChatPopupHandler popupHandler) {
+            ConversationPanel conversationPanel, ChatPopupHandler popupHandler,
+            ChatMediator chatMediator) {
         super(new MigLayout("gap 0, insets 0, fill"));
         
         this.chatHeader = chatHeader;
         this.chatList = chatList;
         this.conversationPanel = conversationPanel;
+        this.chatMediator = chatMediator;           
         
         GuiUtils.assignResources(this);
         
@@ -101,6 +104,8 @@ class ChatFrame extends JPanel {
             // underline the currently selected friend, need to repaint all the chats
             chatList.repaint();
         }
+        
+        chatMediator.getChatButton().repaint();
     }
     
     /**
@@ -140,6 +145,7 @@ class ChatFrame extends JPanel {
         chatHeader.clearFriend();
         conversationPanel.removeAllConversations();
         chatList.repaint();
+        chatMediator.getChatButton().repaint();
     }
     
     /**
@@ -149,5 +155,6 @@ class ChatFrame extends JPanel {
         chatHeader.clearFriend();
         conversationPanel.removeConversation(chatFriend);
         chatList.repaint();
+        chatMediator.getChatButton().repaint();
     }
 }

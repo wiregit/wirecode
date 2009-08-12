@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -16,12 +17,14 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLayeredPane;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.MessageWriter;
 import org.limewire.inject.LazySingleton;
@@ -33,12 +36,11 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
-import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.DrawMode;
-import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.PopupVisibilityChecker;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
@@ -56,12 +58,11 @@ public class ChatMediator {
     
     @Resource private Font font;
     @Resource private Color foreground;
-    @Resource private Color background;
-    @Resource private Color border;
-    @Resource private Icon chatButtonIcon;
+
+    @Resource private Icon unviewedChatIcon;
+    @Resource private Icon normalChatIcon;
     
     private final JLayeredPane layeredPane;
-    private final ButtonDecorator buttonDecorator;
     private final Provider<ChatModel> chatModel;
     private final Provider<ChatFrame> chatFrameProvider;
     private ChatFrame chatFrame;
@@ -76,7 +77,6 @@ public class ChatMediator {
     public ChatMediator(Provider<ChatFrame> chatFrameProvider, ButtonDecorator buttonDecorator, TrayNotifier trayNotifier,
             Provider<ChatModel> chatModel, @GlobalLayeredPane JLayeredPane layeredPane) {
         this.chatFrameProvider = chatFrameProvider;
-        this.buttonDecorator = buttonDecorator;
         this.layeredPane = layeredPane;
         this.trayNotifier = trayNotifier;
         this.chatModel = chatModel;
@@ -140,17 +140,20 @@ public class ChatMediator {
     private void initChatButton() {
         GuiUtils.assignResources(this);
         
+        chatButton.setFocusPainted(false);
+        chatButton.setOpaque(false);        
+        chatButton.setBorder(null);
+        chatButton.setContentAreaFilled(false);
+        chatButton.setFocusable(false);
+        chatButton.setBorder(BorderFactory.createEmptyBorder(2, 10, 0, 10));
+        chatButton.setPaintBorderInsets(true);
+        
         chatButton.setFont(font);
         chatButton.setForeground(foreground);
         chatButton.setVisible(false);
         chatButton.setText(I18n.tr("Chat"));
-        chatButton.setIcon(chatButtonIcon);
-        buttonDecorator.decorateStatusPopupButton(chatButton, new PopupVisibilityChecker() {
-            @Override
-            public boolean isPopupVisible() {
-                return isVisible();
-            }
-        }, background, border, DrawMode.RIGHT_CONNECTING);
+        chatButton.setIcon(normalChatIcon);
+        chatButton.setBackgroundPainter(new ChatButtonPainter());
     }
     
     @Inject void register(ListenerSupport<FriendConnectionEvent> connectionSupport) {
@@ -256,6 +259,7 @@ public class ChatMediator {
      */
     private void setUnseenMessageCount(int count) {
         chatButton.setText(count > 0 ? I18n.tr("Chat ({0})", count) : I18n.tr("Chat"));
+        chatButton.setIcon(count > 0 ? unviewedChatIcon : normalChatIcon);
     }
     
     /**
@@ -279,6 +283,44 @@ public class ChatMediator {
             int w = getPreferredSize().width;
             int h = getPreferredSize().height;
             setLocation(parentBounds.width - w, parentBounds.height - h);
+        }
+    }
+    
+    private class ChatButtonPainter extends AbstractPainter<JXButton> {
+
+        @Resource private Color rolloverBackground = PainterUtils.TRASPARENT;
+        @Resource private Color activeBackground = PainterUtils.TRASPARENT;
+        @Resource private Color activeBorder = PainterUtils.TRASPARENT;
+        @Resource private Color border = PainterUtils.TRASPARENT;
+        
+        public ChatButtonPainter() {
+            GuiUtils.assignResources(this);
+            
+            setCacheable(false);
+            setAntialiasing(true);
+        }
+        
+        @Override
+        protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
+            
+            if (panel != null && panel.isVisible()) {
+                g.setPaint(activeBackground);
+                g.fillRect(0, 0, width, height);
+                g.setPaint(border);
+                g.drawLine(0, 0, 0, height-1);
+                g.drawLine(0, height-1, width-1, height-1);
+                g.drawLine(width-1, 0, width-1, height-1);
+                
+                if (chatFrame.getSelectedConversation() != null) {
+                    g.setPaint(activeBorder);
+                    g.drawLine(0,0,width-2,0);
+                }
+            } else if (object.getModel().isRollover()) {
+                g.setPaint(rolloverBackground);
+                g.fillRect(0, 2, width-1, height-2);
+                g.setPaint(activeBorder);
+                g.drawLine(0, 1, 0, height-1);
+            }
         }
     }
 }
