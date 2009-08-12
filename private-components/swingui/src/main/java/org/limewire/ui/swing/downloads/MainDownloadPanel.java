@@ -14,9 +14,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.settings.DownloadSettings;
@@ -26,8 +26,6 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.event.SelectAndScrollDownloadEvent;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -79,10 +77,9 @@ public class MainDownloadPanel extends JPanel {
         int height = savedHeight == 0 ? preferredHeight : savedHeight;
         setPreferredSize(new Dimension(getPreferredSize().width, height));
     }
-
-    @EventSubscriber
-	public void handleSelectAndScroll(SelectAndScrollDownloadEvent event) {
-        table.selectAndScrollTo(event.getSelectedURN());
+    
+    public void selectAndScrollTo(URN urn) {
+        table.selectAndScrollTo(urn);
         if(getVisibleRect().height < table.getRowHeight()){
             alertDownloadVisibilityListeners(true);
         }
@@ -133,8 +130,6 @@ public class MainDownloadPanel extends JPanel {
 
         // handle individual completed downloads
         initializeDownloadListeners(downloadListManager);
-        
-        EventAnnotationProcessor.subscribe(this);
     }
     
     public List<DownloadItem> getSelectedDownloadItems(){
