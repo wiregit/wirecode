@@ -18,11 +18,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeJDialog;
-import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.HelpAction;
@@ -34,8 +35,6 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import net.miginfocom.swing.MigLayout;
 
 /**
  * Main Dialog for the Options.
@@ -89,8 +88,8 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     public OptionsDialog(Provider<LibraryOptionPanel> libraryOptionPanel, Provider<SearchOptionPanel> searchOptionPanel,
             Provider<DownloadOptionPanel> downloadOptionPanel,
             Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel,
-            AppFrame appFrame, BarPainterFactory barPainterFactory, UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager) {
-        super(appFrame.getMainFrame(), I18n.tr("Options"), true);
+            BarPainterFactory barPainterFactory, UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager) {
+        super(GuiUtils.getMainFrame(), I18n.tr("Options"), true);
 
         GuiUtils.assignResources(this); 
         

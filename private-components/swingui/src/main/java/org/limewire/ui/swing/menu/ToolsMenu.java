@@ -13,7 +13,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
-import org.limewire.ui.swing.event.OptionsDisplayEvent;
+import org.limewire.ui.swing.mainframe.OptionsAction;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
@@ -41,6 +41,7 @@ class ToolsMenu extends MnemonicMenu {
     private final Provider<UploadMediator> uploadMediatorProvider;
     private final Provider<SearchHandler> searchHandlerProvider;
     private final Provider<SearchNavigator> searchNavigatorProvider;
+    private final Provider<OptionsAction> optionsAction;
     
     private AdvancedToolsPanel advancedTools = null;
     
@@ -50,7 +51,8 @@ class ToolsMenu extends MnemonicMenu {
             Provider<Navigator> navigatorProvider, 
             Provider<UploadMediator> uploadMediatorProvider,
             Provider<SearchHandler> searchHandlerProvider, 
-            Provider<SearchNavigator> searchNavigatorProvider) {
+            Provider<SearchNavigator> searchNavigatorProvider,
+            Provider<OptionsAction> optionsAction) {
         
         super(I18n.tr("&Tools"));
         
@@ -59,6 +61,7 @@ class ToolsMenu extends MnemonicMenu {
         this.uploadMediatorProvider = uploadMediatorProvider;
         this.searchHandlerProvider = searchHandlerProvider;
         this.searchNavigatorProvider = searchNavigatorProvider;
+        this.optionsAction = optionsAction;
 
         whatsNewSubmenu = createWhatsNewSubmenu();
     }
@@ -110,12 +113,7 @@ class ToolsMenu extends MnemonicMenu {
         });
         if (!OSUtils.isMacOSX()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("&Options...")) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    new OptionsDisplayEvent().publish();
-                }
-            });
+            add(optionsAction.get());
         }   
     }
     

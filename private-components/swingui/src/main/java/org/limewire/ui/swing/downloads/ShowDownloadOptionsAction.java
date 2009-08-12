@@ -3,8 +3,9 @@ package org.limewire.ui.swing.downloads;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 
-import org.limewire.ui.swing.event.OptionsDisplayEvent;
+import org.jdesktop.application.Application;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.util.I18n;
 
@@ -14,7 +15,6 @@ import com.google.inject.Inject;
  * Opens the Options menu and shows the Download tab.
  */
 class ShowDownloadOptionsAction extends AbstractAction {
-
     @Inject
     public ShowDownloadOptionsAction() {
         super(I18n.tr("Download Options..."));
@@ -22,6 +22,7 @@ class ShowDownloadOptionsAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        new OptionsDisplayEvent(OptionsDialog.DOWNLOADS).publish();
+        ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
+        map.get("showOptionsDialog").actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, OptionsDialog.DOWNLOADS));
     }
 }

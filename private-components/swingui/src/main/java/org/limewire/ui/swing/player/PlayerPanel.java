@@ -33,7 +33,6 @@ import org.limewire.ui.swing.components.LimeSliderBar;
 import org.limewire.ui.swing.components.MarqueeButton;
 import org.limewire.ui.swing.components.VolumeSlider;
 import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -204,8 +203,6 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         
         innerPanel.setVisible(SwingUiSettings.PLAYER_ENABLED.getValue());
         add(innerPanel, "gaptop 2, gapbottom 2");
-                
-        EventAnnotationProcessor.subscribe(this);
 
         VolumeController volumeController = new VolumeController();
         volumeSlider.addChangeListener(volumeController);

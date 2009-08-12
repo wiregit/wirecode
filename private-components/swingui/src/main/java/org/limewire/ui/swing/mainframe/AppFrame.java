@@ -3,6 +3,7 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.EventObject;
@@ -17,7 +18,6 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.Resource;
@@ -37,11 +37,6 @@ import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.components.PlainCheckBoxMenuItemUI;
 import org.limewire.ui.swing.components.PlainMenuItemUI;
-import org.limewire.ui.swing.event.AboutDisplayEvent;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.event.ExitApplicationEvent;
-import org.limewire.ui.swing.event.OptionsDisplayEvent;
-import org.limewire.ui.swing.event.RestoreViewEvent;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.settings.InstallSettings;
@@ -217,8 +212,6 @@ public class AppFrame extends SingleFrameApplication {
         
         validateSaveDirectory();
 
-        EventAnnotationProcessor.subscribe(this);
-
         // Now that the UI is ready to use, update it's priority a bit.
         Thread eventThread = Thread.currentThread();
         eventThread.setPriority(eventThread.getPriority() + 1);
@@ -227,14 +220,9 @@ public class AppFrame extends SingleFrameApplication {
 
         ui.loadProNag();
     }
-
-    @EventSubscriber
-    public void handleShowAboutWindow(AboutDisplayEvent event) {
-        new AboutWindow(getMainFrame(), application).showDialog();
-    }
-    
-    @EventSubscriber
-    public void handleShowOptionsDialog(OptionsDisplayEvent event) {
+   
+    @Action
+    public void showOptionsDialog(ActionEvent actionEvent) { // DO NOT CHANGE THIS METHOD NAME!  
         if(lastOptionsDialog == null) {
             lastOptionsDialog = options.get();
         }
@@ -242,31 +230,16 @@ public class AppFrame extends SingleFrameApplication {
         if (!lastOptionsDialog.isVisible()) {
             lastOptionsDialog.initOptions();
             lastOptionsDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
-            if(event.getSelectedPanel() != null){
-                lastOptionsDialog.select(event.getSelectedPanel());
+            if(actionEvent.getID() == ActionEvent.ACTION_PERFORMED && actionEvent.getActionCommand() != null){
+                lastOptionsDialog.select(actionEvent.getActionCommand());
             }
             lastOptionsDialog.setVisible(true);
         }
     }
     
-    @EventSubscriber
-    public void handleExitApplication(ExitApplicationEvent event) {
-        exit(event.getActionEvent());
-    }
-    
-    @EventSubscriber
-    public void handleRestoreView(RestoreViewEvent event) {
-        if(!SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
-            trayNotifier.hideTrayIcon();
-        }
-        getMainFrame().setVisible(true);
-        getMainFrame().setState(Frame.NORMAL);
-        getMainFrame().toFront();
-    }
-    
     @Action
-    public void showAboutWindow() { // DO NOT CHANGE THIS METHOD NAME!  
-        handleShowAboutWindow(null);
+    public void exitApplication(ActionEvent actionEvent) { // DO NOT CHANGE THIS METHOD NAME!  
+        exit(actionEvent);
     }
     
     @Action
@@ -276,8 +249,13 @@ public class AppFrame extends SingleFrameApplication {
     }    
 
     @Action
-    public void restoreView() { // DO NOT CHANGE THIS METHOD NAME!
-        handleRestoreView(null);
+    public void restoreView() { // DO NOT CHANGE THIS METHOD NAME! 
+        if(!SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
+            trayNotifier.hideTrayIcon();
+        }
+        getMainFrame().setVisible(true);
+        getMainFrame().setState(Frame.NORMAL);
+        getMainFrame().toFront();
     }
 
     /**

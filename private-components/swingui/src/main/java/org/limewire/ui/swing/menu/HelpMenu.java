@@ -7,8 +7,8 @@ import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.UrlAction;
-import org.limewire.ui.swing.event.AboutDisplayEvent;
 import org.limewire.ui.swing.home.HomeMediator;
+import org.limewire.ui.swing.mainframe.AboutAction;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.tray.Notification;
@@ -26,12 +26,14 @@ class HelpMenu extends MnemonicMenu {
     private final Provider<TrayNotifier> trayNotifierProvider;
     private final Provider<Navigator> navigatorProvider;
     private final Provider<HomeMediator> homeMediatorProvider;
+    private final Provider<AboutAction> aboutAction;
     
     @Inject
     public HelpMenu(Application application, 
             Provider<TrayNotifier> trayNotifierProvider,
             Provider<Navigator> navigatorProvider, 
-            Provider<HomeMediator> homeMediatorProvider) {
+            Provider<HomeMediator> homeMediatorProvider,
+            Provider<AboutAction> aboutAction) {
         
         super(I18n.tr("&Help"));
 
@@ -40,6 +42,7 @@ class HelpMenu extends MnemonicMenu {
         this.trayNotifierProvider = trayNotifierProvider;
         this.navigatorProvider = navigatorProvider;
         this.homeMediatorProvider = homeMediatorProvider;
+        this.aboutAction = aboutAction;
     }
 
     @Override
@@ -63,12 +66,7 @@ class HelpMenu extends MnemonicMenu {
         
         if (!OSUtils.isMacOSX()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("&About LimeWire...")) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    new AboutDisplayEvent().publish();
-                }
-            });
+            add(aboutAction.get());
         }
 
         if (application.isTestingVersion()) {
