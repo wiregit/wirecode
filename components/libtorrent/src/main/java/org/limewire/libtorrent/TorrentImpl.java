@@ -192,7 +192,6 @@ public class TorrentImpl implements Torrent {
     @Override
     public void start() {
         if (!started.getAndSet(true)) {
-            torrentManager.initialize(this);
             resume();
         }
     }
@@ -421,6 +420,9 @@ public class TorrentImpl implements Torrent {
             torrentFile.set(newTorrentFile);
         }
         torrentManager.registerTorrent(this);
+        //TODO need to comment why this is done in this method, and that we only want 
+        //to do to do it for downloading torrents, not seeding torrents.
+        torrentManager.initialize(this);
         return true;
     }
 

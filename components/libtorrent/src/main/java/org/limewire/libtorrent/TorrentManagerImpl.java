@@ -18,8 +18,8 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.inject.LazySingleton;
@@ -29,7 +29,6 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -256,11 +255,8 @@ public class TorrentManagerImpl implements TorrentManager {
                 libTorrent.initialize(torrentSettings.get());
                 if (libTorrent.isLoaded()) {
                     setTorrentManagerSettings(torrentSettings.get());
-                    if(!OSUtils.isLinux()) {
-                        //turning off upnp until libtorrent fixes crash
-                        libTorrent.start_upnp();
-                        libTorrent.start_natpmp();
-                    }
+                    libTorrent.start_upnp();
+                    libTorrent.start_natpmp();
                 }
             } finally {
                 lock.writeLock().unlock();
@@ -481,6 +477,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void initialize(Torrent torrent) {
-        libTorrent.init_torrent(torrent.getSha1());
+        if(!torrent.isFinished()) {
+            libTorrent.init_torrent(torrent.getSha1());
+        }
     }
 }
