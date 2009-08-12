@@ -37,10 +37,10 @@ class LibTorrentWrapper {
             if (OSUtils.isWindows()) {
                 System.loadLibrary("libeay32");
                 System.loadLibrary("ssleay32");
-                System.loadLibrary("boost_date_time-vc80-mt-1_39");
-                System.loadLibrary("boost_system-vc80-mt-1_39");
-                System.loadLibrary("boost_filesystem-vc80-mt-1_39");
-                System.loadLibrary("boost_thread-vc80-mt-1_39");
+                System.loadLibrary("boost_date_time-vc71-mt-1_39");
+                System.loadLibrary("boost_system-vc71-mt-1_39");
+                System.loadLibrary("boost_filesystem-vc71-mt-1_39");
+                System.loadLibrary("boost_thread-vc71-mt-1_39");
                 System.loadLibrary("torrent");
             } else if (OSUtils.isLinux()) {
                 // everything compiled into libtorrent-wrapper.so
@@ -53,6 +53,7 @@ class LibTorrentWrapper {
             init(torrentSettings);
             loaded.set(true);
         } catch (Throwable e) {
+            e.printStackTrace();
             LOG.error("Failure loading the libtorrent libraries.", e);
             if (torrentSettings.isReportingLibraryLoadFailture()) {
                 ExceptionUtils.reportOrReturn(e);
