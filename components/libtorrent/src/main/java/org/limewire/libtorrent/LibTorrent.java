@@ -158,9 +158,9 @@ interface LibTorrent extends Library {
     public WrapperStatus get_file_priority(String id, int fileIndex, IntByReference priority);
     
     /**
-     * Sets the file priority for the given index.
+     * Sets the file priorities for the given torrent.
      */
-    public WrapperStatus set_file_priority(String id, int fileIndex, int priority);
+    public WrapperStatus set_file_priorities(String id, int[] priorities, int num_priorities);
 
     /**
      * Returns the number of files for the given torrent. 
@@ -171,5 +171,10 @@ interface LibTorrent extends Library {
      * Returns the files for the given torrent. 
      */
     public WrapperStatus get_files(String id, Pointer[] filePointers);
+
+    /**
+     * Initializes the given torrents storage. 
+     */
+    public void init_torrent(String sha1);
 
 }

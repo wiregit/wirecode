@@ -270,10 +270,10 @@ class LibTorrentWrapper {
     /**
      * Sets the file priority for the given index.
      */
-    public void set_file_priority(String id, int fileIndex, int priority) {
-        LOG.debugf("before set_file_priority");
-        catchWrapperException(libTorrent.set_file_priority(id, fileIndex, priority));
-        LOG.debugf("after set_file_priority");
+    public void set_file_priorities(String id, int[] priorities) {
+        LOG.debugf("before set_file_priorities");
+        catchWrapperException(libTorrent.set_file_priorities(id, priorities, priorities.length));
+        LOG.debugf("after set_file_priorities");
     }
     
     /**
@@ -309,5 +309,11 @@ class LibTorrentWrapper {
         
         LOG.debugf("after get_files");
         return fileEntries;
+    }
+
+    public void init_torrent(String sha1) {
+        LOG.debugf("before init_torrent: " + sha1);
+        libTorrent.init_torrent(sha1);
+        LOG.debugf("after init_torrent: " + sha1);
     }
 }

@@ -22,13 +22,10 @@ import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
@@ -42,15 +39,13 @@ import com.google.inject.name.Named;
  * back to the TorrentManager.
  */
 public class TorrentImpl implements Torrent {
-    private static final Log LOG = LogFactory.getLog(TorrentImpl.class);
-
     private final EventMulticaster<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;
 
     private final AtomicReference<TorrentStatus> status;
 
-    // TODO eventually remove this field and jsut delegate to libtorrent
+    // TODO eventually remove this field and just delegate to libtorrent
     private final List<String> paths;
 
     private AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
@@ -197,6 +192,7 @@ public class TorrentImpl implements Torrent {
     @Override
     public void start() {
         if (!started.getAndSet(true)) {
+            torrentManager.initialize(this);
             resume();
         }
     }
@@ -404,27 +400,10 @@ public class TorrentImpl implements Torrent {
         }
     }
 
-    private List<File> getTorrentDataFiles() {
-        return TorrentUtil.buildTorrentFiles(this, getTorrentDataFile());
-    }
-
     @Override
     public boolean registerWithTorrentManager() {
         if (!torrentManager.isValid()) {
             return false;
-        }
-
-        //TODO might need to remove the touch logic here when the user can select the notion of only downloading a subset of the torrents files.
-        for (File file : getTorrentDataFiles()) {
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                try {
-                    file.createNewFile();
-                } catch (Throwable e) {
-                    // non-fatal libtorrent will create them
-                    LOG.error("Error touching file: " + file, e);
-                }
-            }
         }
 
         File torrent = torrentFile.get();

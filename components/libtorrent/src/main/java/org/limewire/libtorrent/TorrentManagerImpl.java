@@ -478,4 +478,9 @@ public class TorrentManagerImpl implements TorrentManager {
         TorrentPeer[] peers = libTorrent.get_peers(torrent.getSha1());
         return Arrays.asList(peers);
     }
+
+    @Override
+    public void initialize(Torrent torrent) {
+        libTorrent.init_torrent(torrent.getSha1());
+    }
 }

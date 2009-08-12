@@ -121,4 +121,9 @@ public class MockTorrentManager implements TorrentManager {
     public List<TorrentPeer> getTorrentPeers(Torrent torrent) {
         return Collections.emptyList();
     }
+
+    @Override
+    public void initialize(Torrent torrent) {
+        
+    }
 }
