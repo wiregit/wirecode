@@ -3,8 +3,6 @@ package org.limewire.ui.swing.search.resultpanel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableColumn;
@@ -34,13 +32,6 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
     private final ListViewRowHeightRule rowHeightRule;
     
     private final ColorHighlighter storeHighlighter;
-    
-    /**
-     * Cache for RowDisplayResult which could be expensive to generate with
-     * large search result sets.
-     */
-    private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
-        new HashMap<VisualSearchResult, RowDisplayResult>();
     
     private boolean ignoreRepaints;
     
@@ -139,13 +130,33 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
         // Update background color.
         storeHighlighter.setBackground(storeStyle.getBackground());
         
-        // Set style in editor and renderer.
+        // Set style in editor/renderer components.
         if (listEditor != null) {
             listEditor.setStoreStyle(storeStyle);
         }
         if (listRenderer != null) {
             listRenderer.setStoreStyle(storeStyle);
         }
+        
+        // Update store row heights and repaint.
+        updateStoreRowSizes();
+    }
+    
+    /**
+     * Calculates the display height for the specified search result by 
+     * preparing the list renderer.
+     */
+    public int calculateRowHeight(VisualSearchResult vsr) {
+        // Determine row height by preparing renderer to use the search 
+        // result, and retrieving its preferred height.
+        if (listRenderer != null) {
+            Component renderer = listRenderer.getTableCellRendererComponent(this, vsr, false, false, 0, 0);
+            renderer.validate();
+            return renderer.getPreferredSize().height;
+        }
+        
+        // Return -1 if renderer not yet defined.
+        return -1;
     }
     
     /**
@@ -153,19 +164,25 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
      */
     public void updateRowSizes() {
         DefaultEventTableModel model = getEventTableModel();
+//        System.out.println("updateRowSizes: rows=" + model.getRowCount()); // TODO REMOVE
         
         setIgnoreRepaints(true);
         
         boolean setRowSize = false;
-        for(int row = 0; row < model.getRowCount(); row++) {
+        for (int row = 0; row < model.getRowCount(); row++) {
             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
-            RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
+            RowDisplayResult result = vsr.getRowDisplayResult();
             if (result == null || result.isStale(vsr)) {
-                result = rowHeightRule.getDisplayResult(vsr);
-                vsrToRowDisplayResultMap.put(vsr, result);
-            } 
-            int newRowHeight = rowHeightRule.getRowHeight(vsr, result);
-            if(vsr.getSimilarityParent() == null) {
+                if (vsr instanceof VisualStoreResult) {
+                    result = rowHeightRule.createDisplayResult(vsr, calculateRowHeight(vsr));
+                } else {
+                    result = rowHeightRule.createDisplayResult(vsr);
+                }
+                vsr.setRowDisplayResult(result);
+            }
+            
+            int newRowHeight = result.getRowHeight();
+            if (vsr.getSimilarityParent() == null) {
                 //only resize rows that belong to parent visual results.
                 //this will prevent the jumping when expanding child results as mentioned in
                 //https://www.limewire.org/jira/browse/LWC-2545
@@ -185,5 +202,51 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
             updateViewSizeSequence();
             resizeAndRepaint();
         }
+    }
+    
+    /**
+     * Updates row heights for store results, and repaints the list.
+     */
+    private void updateStoreRowSizes() {
+        // Get table model
+        DefaultEventTableModel<VisualSearchResult> model = getEventTableModel();
+        if (model == null) return;
+        
+        // Ignore repaint requests.
+        setIgnoreRepaints(true);
+        
+        // Process all store result rows.  This is a little inefficient, but
+        // I think we're okay because this is only called when the style is
+        // updated, which happens when we first receive store results.
+        boolean setRowSize = false;
+        for (int row = 0; row < model.getRowCount(); row++) {
+            VisualSearchResult vsr = model.getElementAt(row);
+            if (vsr instanceof VisualStoreResult) {
+                // Create new RowDisplayResult for store result.
+                RowDisplayResult result = rowHeightRule.createDisplayResult(vsr, calculateRowHeight(vsr));
+                vsr.setRowDisplayResult(result);
+
+                // Set row height if changed.
+                int newRowHeight = result.getRowHeight();
+                if (getRowHeight(row) != newRowHeight) {
+                    setRowHeight(row, newRowHeight);
+                    setRowSize = true;
+                }
+            }
+        }
+
+        // Restore repaint requests.
+        setIgnoreRepaints(false);
+        
+        // Update size sequence if any row heights changed.
+        if (setRowSize) {
+            if (isEditing()) {
+                editingCanceled(new ChangeEvent(this));
+            }
+            updateViewSizeSequence();
+        }
+        
+        // Repaint list.
+        resizeAndRepaint();
     }
 }
