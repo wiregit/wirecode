@@ -23,78 +23,88 @@ public class LimeWireBittorrentModule extends AbstractModule {
         // bound eagerly so it registers itself with MetaDataFactory
         bind(TorrentMetaReader.class).asEagerSingleton();
         bind(Torrent.class).to(TorrentImpl.class);
-        bind(TorrentManagerSettings.class).annotatedWith(TorrentSettingsAnnotation.class).toProvider(new Provider<TorrentManagerSettings>() {
-           @Override
-            public TorrentManagerSettings get() {
-               return new TorrentManagerSettings() {
+        bind(TorrentManagerSettings.class).annotatedWith(TorrentSettingsAnnotation.class)
+                .toProvider(new Provider<TorrentManagerSettings>() {
+                    @Override
+                    public TorrentManagerSettings get() {
+                        return new TorrentManagerSettings() {
 
-                @Override
-                public int getMaxDownloadBandwidth() {
-                    int download_speed = BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.getValue();
-                    if (download_speed >= 100) {
-                        return 0;
+                            @Override
+                            public int getMaxDownloadBandwidth() {
+                                int download_speed = BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED
+                                        .getValue();
+                                if (download_speed >= 100) {
+                                    return 0;
+                                }
+                                int limit = (ConnectionSettings.CONNECTION_SPEED.getValue() / 8)
+                                        * 1024 * download_speed / 100;
+                                return limit;
+                            }
+
+                            @Override
+                            public int getMaxUploadBandwidth() {
+                                int upload_speed = BittorrentSettings.LIBTORRENT_UPLOAD_SPEED
+                                        .getValue();
+                                if (upload_speed >= 100) {
+                                    return 0;
+                                }
+                                int limit = (ConnectionSettings.CONNECTION_SPEED.getValue() / 8)
+                                        * 1024 * upload_speed / 100;
+                                return limit;
+                            }
+
+                            @Override
+                            public File getTorrentDownloadFolder() {
+                                return SharingSettings.INCOMPLETE_DIRECTORY.get();
+                            }
+
+                            @Override
+                            public boolean isTorrentsEnabled() {
+                                return BittorrentSettings.LIBTORRENT_ENABLED.getValue();
+                            }
+
+                            @Override
+                            public boolean isReportingLibraryLoadFailture() {
+                                return BittorrentSettings.LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE
+                                        .getValue();
+                            }
+
+                            @Override
+                            public int getListenStartPort() {
+                                return BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue();
+                            }
+
+                            @Override
+                            public int getListenEndPort() {
+                                return BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue();
+                            }
+
+                            @Override
+                            public File getTorrentUploadsFolder() {
+                                return BittorrentSettings.LIBTORRENT_UPLOADS_FOLDER.get();
+                            }
+
+                            @Override
+                            public float getSeedRatioLimit() {
+                                return BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue();
+                            }
+
+                            @Override
+                            public int getSeedTimeLimit() {
+                                return BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue();
+                            }
+
+                            @Override
+                            public float getSeedTimeRatioLimit() {
+                                if (BittorrentSettings.LIBTORRENT_SEED_TIME_RATIO_LIMIT.getValue() >= 10f) {
+                                    return 0;
+                                }
+                                return BittorrentSettings.LIBTORRENT_SEED_TIME_RATIO_LIMIT
+                                        .getValue();
+                            }
+                        };
                     }
-                    int limit = (ConnectionSettings.CONNECTION_SPEED.getValue() / 8) * 1024 * download_speed / 100;
-                    return limit;
-                }
-
-                @Override
-                public int getMaxUploadBandwidth() {
-                    int upload_speed = BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.getValue();
-                    if (upload_speed >= 100) {
-                        return 0;
-                    }
-                    int limit = (ConnectionSettings.CONNECTION_SPEED.getValue() / 8) * 1024 * upload_speed / 100;
-                    return limit;
-                }
-
-                @Override
-                public File getTorrentDownloadFolder() {
-                    return SharingSettings.INCOMPLETE_DIRECTORY.get();
-                }
-
-                @Override
-                public boolean isTorrentsEnabled() {
-                    return BittorrentSettings.LIBTORRENT_ENABLED.getValue();
-                }
-                
-                @Override
-                public boolean isReportingLibraryLoadFailture() {
-                    return BittorrentSettings.LIBTORRENT_REPORT_LIBRARY_LOAD_FAILURE.getValue();
-                }
-
-                @Override
-                public int getListenStartPort() {
-                    return BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue();
-                }
-                
-                @Override
-                public int getListenEndPort() {
-                    return BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue();
-                }
-                
-                @Override
-                public File getTorrentUploadsFolder() {
-                    return BittorrentSettings.LIBTORRENT_UPLOADS_FOLDER.get();
-                }
-
-                @Override
-                public float getSeedRatioLimit() {
-                    return BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue();
-                }
-
-                @Override
-                public int getSeedTimeLimit() {
-                    return BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue();
-                }
-
-                @Override
-                public float getSeedTimeRatioLimit() {
-                    return BittorrentSettings.LIBTORRENT_SEED_TIME_RATIO_LIMIT.getValue();
-                }
-               };
-           }
-        });
+                });
         bind(TorrentManager.class).to(LazyTorrentManager.class);
     }
 }

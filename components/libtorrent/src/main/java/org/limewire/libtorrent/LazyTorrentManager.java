@@ -208,4 +208,10 @@ public class LazyTorrentManager implements TorrentManager {
         setupTorrentManager();
         torrentManager.get().initialize(torrent);
     }
+
+    @Override
+    public void setAutoManaged(Torrent torrent, boolean autoManaged) {
+        setupTorrentManager();
+        torrentManager.get().setAutoManaged(torrent, autoManaged);
+    }
 }

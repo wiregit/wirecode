@@ -90,6 +90,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                                 }
                                 torrentManager.get().registerTorrent(torrent);
                                 createBTUploader(torrent);
+                                torrent.setAutoManaged(true);
                                 torrent.start();
                             }
                         }

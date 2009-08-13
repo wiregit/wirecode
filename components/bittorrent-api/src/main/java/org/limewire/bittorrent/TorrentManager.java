@@ -92,4 +92,6 @@ public interface TorrentManager extends Service {
     public List<TorrentPeer> getTorrentPeers(Torrent torrent);
 
     public void initialize(Torrent torrent);
+
+    public void setAutoManaged(Torrent torrent, boolean autoManaged);
 }

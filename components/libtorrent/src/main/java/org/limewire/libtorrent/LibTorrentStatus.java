@@ -128,6 +128,12 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
      * boolean of whether this torrent is valid.
      */
     public int valid;
+    
+    /**
+     * boolean of whether this torrent is auto managed.
+     */
+    public int auto_managed;
+
 
     /**
      * String containing the error message for the torrent. Null/empty if there
@@ -241,5 +247,10 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     @Override
     public float getUploadRate() {
         return upload_rate;
+    }
+
+    @Override
+    public boolean isAutoManaged() {
+        return false;
     }
 }

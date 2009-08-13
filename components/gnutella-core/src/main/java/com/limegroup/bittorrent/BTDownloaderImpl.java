@@ -128,6 +128,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             try {
                 torrentUploadManager.get().writeMemento(torrent);
+                torrent.setAutoManaged(true);
             } catch (IOException e) {
                 LOG.error("Error saving torrent upload menento for torrent: " + torrent.getName(), e);
                 //non-fatal, upload will just not be loaded on application restart

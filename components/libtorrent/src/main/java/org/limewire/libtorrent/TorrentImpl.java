@@ -449,4 +449,15 @@ public class TorrentImpl implements Torrent {
     public List<TorrentPeer> getTorrentPeers() {
         return torrentManager.getTorrentPeers(this);
     }
+
+    @Override
+    public boolean isAutoManaged() {
+        TorrentStatus status = this.status.get();
+        return status == null ? false : status.isAutoManaged();
+    }
+
+    @Override
+    public void setAutoManaged(boolean autoManaged) {
+        torrentManager.setAutoManaged(this, autoManaged);
+    }
 }

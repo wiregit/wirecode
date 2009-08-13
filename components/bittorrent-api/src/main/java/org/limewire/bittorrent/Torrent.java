@@ -13,15 +13,16 @@ public interface Torrent {
 
     /**
      * Initializes the torrent from the given fields. Either the torrentFile and
-     * saveDir fields cannot be null. Or the name, sha1, long totalSize,
-     * paths, and saveDir fields must be set.
+     * saveDir fields cannot be null. Or the name, sha1, long totalSize, paths,
+     * and saveDir fields must be set.
      * <p>
      * Otherwise if torrentFile is set and other fields are as well, the field
      * passed in will be used, and any missing field will be pulled from the
      * torrent file.
      */
     public void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile, Boolean isPrivate) throws IOException;
+            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile,
+            Boolean isPrivate) throws IOException;
 
     /**
      * Returns the name of this torrent.
@@ -92,8 +93,7 @@ public interface Torrent {
     public boolean isStarted();
 
     /**
-     * Returns the first tracker url to this torrent.
-     * Can be null.
+     * Returns the first tracker url to this torrent. Can be null.
      */
     public String getTrackerURL();
 
@@ -175,8 +175,9 @@ public interface Torrent {
 
     /**
      * Registers the torrent with the torrent manager.
+     * 
      * @returns true if the torrent was registered, or false if an error
-     * occurred.
+     *          occurred.
      */
     public boolean registerWithTorrentManager();
 
@@ -187,21 +188,26 @@ public interface Torrent {
     boolean removeListener(EventListener<TorrentEvent> listener);
 
     /**
-     * Adds a listener to this torrent. 
+     * Adds a listener to this torrent.
      */
     void addListener(EventListener<TorrentEvent> listener);
 
     /**
-     * Returns the number of connections this torrent has. 
+     * Returns the number of connections this torrent has.
      */
     public int getNumConnections();
 
     /**
-     * Returns true if this is a private torrent. 
+     * Returns true if this is a private torrent.
      */
     public boolean isPrivate();
-    
+
     public List<TorrentFileEntry> getTorrentFileEntries();
-    
+
     public List<TorrentPeer> getTorrentPeers();
+
+    public boolean isAutoManaged();
+
+    public void setAutoManaged(boolean autoManaged);
+
 }

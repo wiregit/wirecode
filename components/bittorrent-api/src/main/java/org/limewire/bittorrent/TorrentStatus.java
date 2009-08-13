@@ -92,4 +92,6 @@ public interface TorrentStatus {
      */
     public float getSeedRatio();
 
+    public boolean isAutoManaged();
+
 }
