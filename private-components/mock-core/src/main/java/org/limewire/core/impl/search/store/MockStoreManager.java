@@ -44,7 +44,7 @@ public class MockStoreManager implements StoreManager {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {}
 
-                    storeStyle = new MockStoreStyle(Type.STYLE_A);
+                    storeStyle = new MockStoreStyle(Type.STYLE_C);
                     
                     fireStyleUpdated(storeStyle);
                 }

@@ -51,8 +51,8 @@ public class MockStoreStyle implements StoreStyle {
     boolean downloadButtonVisible = true;
     boolean priceButtonVisible = true;
     boolean priceVisible = true;
-    boolean showInfoOnHover = true;
-    boolean showTracksOnHover = true;
+    boolean showInfoOnHover = false;
+    boolean showTracksOnHover = false;
     
     /**
      * Constructs a StoreStyle with the specified type.

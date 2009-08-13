@@ -361,7 +361,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.AUTHOR, "San Diego Zoo");
         msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
         msr.setProperty(FilePropertyKey.DESCRIPTION,
-            "Who knew they could do that?");
+            "Monkey's best friend");
         msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
