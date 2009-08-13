@@ -96,9 +96,6 @@ public class LimeWireBittorrentModule extends AbstractModule {
 
                             @Override
                             public float getSeedTimeRatioLimit() {
-                                if (BittorrentSettings.LIBTORRENT_SEED_TIME_RATIO_LIMIT.getValue() >= 10f) {
-                                    return 0;
-                                }
                                 return BittorrentSettings.LIBTORRENT_SEED_TIME_RATIO_LIMIT
                                         .getValue();
                             }
