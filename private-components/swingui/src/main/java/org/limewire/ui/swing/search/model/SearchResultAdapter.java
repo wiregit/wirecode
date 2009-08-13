@@ -19,6 +19,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.Objects;
@@ -57,6 +58,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     private int relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
+    private RowDisplayResult rowDisplayResult;
     
     private final VisualSearchResultStatusListener changeListener;
 
@@ -380,6 +382,16 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     @Override
     public void setPreExistingDownload(boolean preExistingDownload) {
         this.preExistingDownload = preExistingDownload;
+    }
+    
+    @Override
+    public RowDisplayResult getRowDisplayResult() {
+        return rowDisplayResult;
+    }
+    
+    @Override
+    public void setRowDisplayResult(RowDisplayResult rowDisplayResult) {
+        this.rowDisplayResult = rowDisplayResult;
     }
 
     @Override

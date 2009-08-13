@@ -11,6 +11,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.friend.api.Friend;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
@@ -29,6 +30,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     private String heading;
     private String subHeading;
     private boolean showTracks = true;
+    private RowDisplayResult rowDisplayResult;
     
     public StoreResultAdapter(StoreResult storeResult,
             Provider<PropertiableHeadings> propertiableHeadings) {
@@ -90,6 +92,11 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     @Override
     public int getRelevance() {
         return relevance;
+    }
+    
+    @Override
+    public RowDisplayResult getRowDisplayResult() {
+        return rowDisplayResult;
     }
 
     @Override
@@ -154,7 +161,10 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     
     @Override
     public void setShowTracks(boolean showTracks) {
-        this.showTracks = showTracks;
+        if (this.showTracks != showTracks) {
+            this.showTracks = showTracks;
+            this.rowDisplayResult = null;
+        }
     }
     
     @Override
@@ -175,6 +185,11 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     @Override
     public void setPreExistingDownload(boolean preExistingDownload) {
         // TODO Auto-generated method stub
+    }
+    
+    @Override
+    public void setRowDisplayResult(RowDisplayResult rowDisplayResult) {
+        this.rowDisplayResult = rowDisplayResult;
     }
 
     @Override
