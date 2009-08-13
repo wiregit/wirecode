@@ -64,4 +64,9 @@ public interface TorrentManagerSettings {
      */
     public int getSeedTimeLimit();
 
+    public int getActiveDownloadsLimit();
+
+    public int getActiveSeedsLimit();
+
+    public int getActiveLimit();
 }

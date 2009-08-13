@@ -102,6 +102,22 @@ public class LimeWireBittorrentModule extends AbstractModule {
                                 return BittorrentSettings.LIBTORRENT_SEED_TIME_RATIO_LIMIT
                                         .getValue();
                             }
+
+                            @Override
+                            public int getActiveDownloadsLimit() {
+                                return BittorrentSettings.LIBTORRENT_ACTIVE_DOWNLOADS_LIMIT
+                                        .getValue();
+                            }
+
+                            @Override
+                            public int getActiveLimit() {
+                                return BittorrentSettings.LIBTORRENT_ACTIVE_LIMIT.getValue();
+                            }
+
+                            @Override
+                            public int getActiveSeedsLimit() {
+                                return BittorrentSettings.LIBTORRENT_ACTIVE_SEEDS_LIMIT.getValue();
+                            }
                         };
                     }
                 });

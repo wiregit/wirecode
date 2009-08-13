@@ -32,6 +32,10 @@ public class LibTorrentSettings extends Structure {
     
     public int seed_time_limit;
     
+    public int active_downloads_limit;
+    public int active_seeds_limit;
+    public int active_limit;
+    
     public LibTorrentSettings(TorrentManagerSettings torrentSettings) {
         this.max_upload_bandwidth = torrentSettings.getMaxUploadBandwidth();
         this.max_download_bandwidth = torrentSettings.getMaxDownloadBandwidth();
@@ -41,5 +45,8 @@ public class LibTorrentSettings extends Structure {
         this.seed_ratio_limit = torrentSettings.getSeedRatioLimit();
         this.seed_time_ratio_limit = torrentSettings.getSeedTimeRatioLimit();
         this.seed_time_limit = torrentSettings.getSeedTimeLimit();
+        this.active_downloads_limit = torrentSettings.getActiveDownloadsLimit();
+        this.active_seeds_limit = torrentSettings.getActiveSeedsLimit();
+        this.active_limit = torrentSettings.getActiveLimit();
     }
 }

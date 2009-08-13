@@ -62,4 +62,19 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     public float getSeedTimeRatioLimit() {
         return 0;
     }
+
+    @Override
+    public int getActiveDownloadsLimit() {
+        return 0;
+    }
+
+    @Override
+    public int getActiveLimit() {
+        return 0;
+    }
+
+    @Override
+    public int getActiveSeedsLimit() {
+        return 0;
+    }
 }
