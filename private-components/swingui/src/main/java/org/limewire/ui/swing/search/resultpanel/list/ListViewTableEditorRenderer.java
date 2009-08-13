@@ -9,8 +9,8 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -19,8 +19,6 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -38,7 +36,6 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import net.miginfocom.swing.MigLayout;
@@ -63,13 +60,13 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
+import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.ResultsTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
-import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
@@ -137,7 +134,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private final ListViewRowHeightRule rowHeightRule;
     private final ListViewDisplayedRowsLimit displayLimit;
     private final Provider<SearchResultTruncator> truncator;
-    private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
+    private final HeadingFontWidthResolver headingFontWidthResolver;
     private final FileInfoDialogFactory fileInfoFactory;
     private RemoteHostWidget fromWidget;
     private JButton itemIconButton;
@@ -196,6 +193,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         GuiUtils.assignResources(this);
 
+        headingFontWidthResolver = new HeadingFontWidthResolver(heading, headingFont);
+        
         storeRenderer = storeRendererFactory.create();
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
@@ -289,7 +288,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         editorComponent.setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         editorComponent.add(similarResultIndentation, "growy, hidemode 3, shrinkprio 0");
         editorComponent.add(itemIconButton, "left, aligny 50%, gapleft 4, shrinkprio 0");
-        editorComponent.add(searchResultTextPanel, "left, , aligny 50%, gapleft 4, growx, shrinkprio 200, growprio 200, push");
+        editorComponent.add(searchResultTextPanel, "left, , aligny 50%, gapleft 6, growx, shrinkprio 200, growprio 200, push");
         editorComponent.add(downloadSourceCount, "gapbottom 3, gapright 2, shrinkprio 0");
         editorComponent.add(new JLabel(dividerIcon), "shrinkprio 0");
         //TODO: better number for wmin
@@ -327,9 +326,11 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             return emptyPanel;
         }
         
-        // Use component for store result.
+        // Use component for store result.  If the RowDisplayResult is not yet
+        // available, create a temporary one for rendering.
         if (vsr instanceof VisualStoreResult) {
-            RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
+            RowDisplayResult result = vsr.getRowDisplayResult();
+            if (result == null) result = rowHeightRule.createDisplayResult(vsr);
             storeRenderer.update(table, (VisualStoreResult) vsr, result, editing, row, col);
             return storeRenderer;
         }
@@ -362,7 +363,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconButton.setIcon(getIcon(vsr));
         itemIconButton.setCursor(getIconCursor(vsr));
 
-        RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
+        RowDisplayResult result = vsr.getRowDisplayResult();
+        if (result == null) result = rowHeightRule.createDisplayResult(vsr);
 
         setLabelVisibility(result.getConfig());
 
@@ -498,6 +500,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         heading.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
         heading.setOpaque(false);
         heading.setFocusable(false);
+        heading.setMargin(new Insets(3, 0, 3, 3));
         StyleSheet mainStyle = ((HTMLDocument)heading.getDocument()).getStyleSheet();
         String rules = "body { font-family: " + headingFont.getFamily() + "; }" +
                 ".title { color: " + headingColor + "; font-size: " + headingFont.getSize() + "; }" +
@@ -641,31 +644,26 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     public void setStoreStyle(StoreStyle storeStyle) {
         // Update store renderer using new style.
         storeRenderer = storeRendererFactory.create(storeStyle);
-        
-        // Request table repaint.
-        if (table != null) {
-            table.repaint();
-        }
     }
     
-    private class HeadingFontWidthResolver implements FontWidthResolver {
-        private static final String EMPTY_STRING = "";
-        //finds <b>foo</b> or <a href="#foo"> or {1} patterns
-        //**NOTE** This does not account for all HTML sanitizing, just for HTML
-        //**NOTE** that would have been added by search result display code
-        private final Pattern findHTMLTagsOrReplacementTokens = Pattern.compile("([<][/]?[\\w =\"#]*[>])|([{][\\d]*[}])");
-        private final Matcher matcher = findHTMLTagsOrReplacementTokens.matcher("");
-        
-        @Override
-        public int getPixelWidth(String text) {
-            HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
-            StyleSheet css = editorKit.getStyleSheet();
-            FontMetrics fontMetrics = css.getFontMetrics(headingFont);
-            matcher.reset(text);
-            text = matcher.replaceAll(EMPTY_STRING);
-            return fontMetrics.stringWidth(text);
-        }
-    }
+//    private class HeadingFontWidthResolver implements FontWidthResolver {
+//        private static final String EMPTY_STRING = "";
+//        //finds <b>foo</b> or <a href="#foo"> or {1} patterns
+//        //**NOTE** This does not account for all HTML sanitizing, just for HTML
+//        //**NOTE** that would have been added by search result display code
+//        private final Pattern findHTMLTagsOrReplacementTokens = Pattern.compile("([<][/]?[\\w =\"#]*[>])|([{][\\d]*[}])");
+//        private final Matcher matcher = findHTMLTagsOrReplacementTokens.matcher("");
+//        
+//        @Override
+//        public int getPixelWidth(String text) {
+//            HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
+//            StyleSheet css = editorKit.getStyleSheet();
+//            FontMetrics fontMetrics = css.getFontMetrics(headingFont);
+//            matcher.reset(text);
+//            text = matcher.replaceAll(EMPTY_STRING);
+//            return fontMetrics.stringWidth(text);
+//        }
+//    }
     
     /**
      * A label that does not appear to dance up and down when displaying HTML in a table.
