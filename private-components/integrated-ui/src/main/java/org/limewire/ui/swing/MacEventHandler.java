@@ -56,10 +56,6 @@ public class MacEventHandler {
     @Inject
     public MacEventHandler() {
 
-        MRJAdapter.addAboutListener(aboutAction);
-
-        MRJAdapter.addQuitApplicationListener(exitAction);
-
         MRJAdapter.addOpenDocumentListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 File file = ((ApplicationEvent) evt).getFile();
@@ -91,6 +87,10 @@ public class MacEventHandler {
         MRJAdapter.setPreferencesEnabled(true);
 
         MRJAdapter.addPreferencesListener(optionsAction);
+        
+        MRJAdapter.addAboutListener(aboutAction);
+
+        MRJAdapter.addQuitApplicationListener(exitAction);
     }
 
     /**
