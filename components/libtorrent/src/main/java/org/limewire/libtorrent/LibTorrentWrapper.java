@@ -35,6 +35,8 @@ class LibTorrentWrapper {
     void initialize(TorrentManagerSettings torrentSettings) {
         try {
             if (OSUtils.isWindows()) {
+                System.loadLibrary("msvcr71");
+                System.loadLibrary("msvcp71");
                 System.loadLibrary("libeay32");
                 System.loadLibrary("ssleay32");
                 System.loadLibrary("boost_date_time-vc71-mt-1_39");
