@@ -193,6 +193,12 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 SwingUtils.invokeLater(new Runnable() {
                     public void run() {
                         resultsList.setStoreStyle(storeStyle);
+                        // Post event to force repaint using updated renderer.
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                resultsList.repaint();
+                            }
+                        });
                     }
                 });
             }
@@ -331,6 +337,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 Runnable runner = new Runnable() {
                     @Override
                     public void run() {
+//                        // TODO REMOVE DEAD CODE
 //                        DefaultEventTableModel model = resultsList.getEventTableModel();
 //                        
 //                        resultsList.setIgnoreRepaints(true);
