@@ -2,7 +2,6 @@ package org.limewire.ui.swing.options;
 
 import java.text.NumberFormat;
 
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -11,14 +10,15 @@ import org.limewire.ui.swing.util.I18n;
  * bandwidth for use. It displays the expected bandwidth as a label after the
  * slider.
  */
-public class BandWidthSlider extends LimeSlider {
+public class SeedRatioSlider extends LimeSlider {
 
-    public static final int MIN_SLIDER = 25;
-    public static final int MAX_SLIDER = 100;
-    public static final int DEFAULT_SLIDER = MAX_SLIDER;
+    public static final int DEAFULT_SLIDER = 2;
+    
+    public static final int MIN_SLIDER = 1;
+    public static final int MAX_SLIDER = 10;
 
-    public BandWidthSlider() {
-        super(MIN_SLIDER, MAX_SLIDER);
+    public SeedRatioSlider() {
+        super(MIN_SLIDER*10, MAX_SLIDER*10);
     }
 
     @Override
@@ -27,11 +27,10 @@ public class BandWidthSlider extends LimeSlider {
         if (value == 100)
             labelText = I18n.tr("Unlimited");
         else {
-            Float f = new Float(((value / 100.0)) * ConnectionSettings.CONNECTION_SPEED.getValue()
-                    / 8);
+            Float f = new Float(value/(float)10);
             NumberFormat formatter = NumberFormat.getInstance();
             formatter.setMaximumFractionDigits(2);
-            labelText = String.valueOf(formatter.format(f)) + " KB/s";
+            labelText = String.valueOf(formatter.format(f));
         }
         return labelText;
     }

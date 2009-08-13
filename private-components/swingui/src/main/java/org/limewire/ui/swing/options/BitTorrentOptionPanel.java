@@ -41,6 +41,10 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     private BandWidthSlider downloadBandWidth;
 
+    private JLabel seedRatioLabel;
+
+    private SeedRatioSlider seedRatio;
+
     private final Provider<TorrentManager> torrentManager;
 
     private final TorrentManagerSettings torrentSettings;
@@ -50,10 +54,10 @@ public class BitTorrentOptionPanel extends OptionPanel {
             @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.torrentManager = torrentManager;
         this.torrentSettings = torrentSettings;
-        
+
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         setOpaque(false);
-        
+
         add(getBitTorrentPanel(), "pushx, growx");
     }
 
@@ -78,7 +82,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 updateState(limewireControl.isSelected());
             }
         });
-        
+
         limewireControl.setOpaque(false);
         myControl.setOpaque(false);
 
@@ -88,9 +92,12 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
         downloadBandWidthLabel = new JLabel(I18n.tr("Download bandwidth"));
         uploadBandWidthLabel = new JLabel(I18n.tr("Upload bandwidth"));
+        seedRatioLabel = new JLabel(I18n.tr("Seed Ratio"));
 
         uploadBandWidth = new BandWidthSlider();
         downloadBandWidth = new BandWidthSlider();
+
+        seedRatio = new SeedRatioSlider();
 
         if (torrentManager.get().isValid()) {
             p.add(limewireControl, "wrap");
@@ -100,12 +107,17 @@ public class BitTorrentOptionPanel extends OptionPanel {
             p.add(downloadBandWidth, "alignx right, wrap");
             p.add(uploadBandWidthLabel, "split");
             p.add(uploadBandWidth, "alignx right, wrap");
+            p.add(seedRatioLabel, "split");
+            p.add(seedRatio, "alignx right, wrap");
+
         } else {
-            //TODO updating text after we get the new error message from mike s.
+            // TODO updating text after we get the new error message from mike
+            // s.
             p
                     .add(new MultiLineLabel(
                             I18n
-                                    .tr("There was an error loading bittorrent. You will not be use bittorrent capabilities until this is resolved."), 500));
+                                    .tr("There was an error loading bittorrent. You will not be use bittorrent capabilities until this is resolved."),
+                            500));
         }
         return p;
     }
@@ -114,11 +126,13 @@ public class BitTorrentOptionPanel extends OptionPanel {
     boolean applyOptions() {
         SwingUiSettings.AUTOMATIC_SETTINGS.setValue(limewireControl.isSelected());
         if (limewireControl.isSelected()) {
-            BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(BandWidthSlider.MAX_SLIDER);
-            BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(BandWidthSlider.MAX_SLIDER);
+            BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(BandWidthSlider.DEFAULT_SLIDER);
+            BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(BandWidthSlider.DEFAULT_SLIDER);
+            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(SeedRatioSlider.DEAFULT_SLIDER);
         } else {
             BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(uploadBandWidth.getValue());
             BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(downloadBandWidth.getValue());
+            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatio.getValue()/(float)10);
         }
 
         if (torrentManager.get().isValid()) {
@@ -133,6 +147,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 || uploadBandWidth.getValue() != BittorrentSettings.LIBTORRENT_UPLOAD_SPEED
                         .getValue()
                 || downloadBandWidth.getValue() != BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED
+                        .getValue()
+                || seedRatio.getValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                         .getValue();
     }
 
@@ -147,6 +163,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
         uploadBandWidth.setValue(BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.getValue());
         downloadBandWidth.setValue(BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.getValue());
+        seedRatio.setValue((int) (BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue() * 10));
 
         updateState(auto);
     }
@@ -166,9 +183,14 @@ public class BitTorrentOptionPanel extends OptionPanel {
         uploadBandWidthLabel.setVisible(!limewireControlled);
         uploadBandWidth.setVisible(!limewireControlled);
         uploadBandWidth.setEnabled(!limewireControlled);
+        
         downloadBandWidthLabel.setVisible(!limewireControlled);
         downloadBandWidth.setVisible(!limewireControlled);
         downloadBandWidth.setEnabled(!limewireControlled);
+        
+        seedRatioLabel.setVisible(!limewireControlled);
+        seedRatio.setVisible(!limewireControlled);
+        seedRatio.setEnabled(!limewireControlled);
     }
 
 }
