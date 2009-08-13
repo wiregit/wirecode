@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -19,7 +17,13 @@ import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JEditorPane;
 import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.StyleSheet;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
@@ -27,10 +31,12 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
 import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.OverlayPopupPanel;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -40,11 +46,15 @@ import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.PainterUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Mediator for the chat window and chat button in the status bar. Listens for
@@ -72,7 +82,8 @@ public class ChatMediator {
     private IncomingListener incomingChatListener;
     
     private Set<String> unseenMessages = new HashSet<String>();
-    
+    private volatile FriendConnectionEvent lastEvent;
+
     @Inject
     public ChatMediator(Provider<ChatFrame> chatFrameProvider, ButtonDecorator buttonDecorator, TrayNotifier trayNotifier,
             Provider<ChatModel> chatModel, @GlobalLayeredPane JLayeredPane layeredPane) {
@@ -90,14 +101,24 @@ public class ChatMediator {
 	 */
     private Panel getChatFrame() {
         if(panel == null) {
-            chatFrame = chatFrameProvider.get();
             panel = new Frame(layeredPane);
-            panel.add(chatFrame, BorderLayout.CENTER);
-            chatFrame.revalidate();
+            JPanel child;
+            if(isFacebook()) { // LWC-4069
+                child = getFacebookPanel();
+            } else {
+                chatFrame = chatFrameProvider.get();
+                child = chatFrame;                
+            }
+            panel.add(child, BorderLayout.CENTER);
+            child.revalidate();
         }
         return panel;
     }
-    
+
+    private boolean isFacebook() {
+        return lastEvent.getSource().getConfiguration().getType() == Network.Type.FACEBOOK;
+    }
+
     /**
      * Returns the chat button displayed in the status panel.
      */
@@ -131,7 +152,9 @@ public class ChatMediator {
      */
     public void startOrSelectConversation(String friendId) {
         setVisible(true);
-        chatFrame.selectOrStartConversation(chatModel.get().getChatFriend(friendId));
+        if(!isFacebook()) { // LWC-4069            
+            chatFrame.selectOrStartConversation(chatModel.get().getChatFriend(friendId));
+        }
     }
         
     /**
@@ -162,6 +185,7 @@ public class ChatMediator {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendConnectionEvent event) {
+                lastEvent = event;
                 switch(event.getType()) {
                 // register listeners for incoming events with friends, make the 
                 // chat button visible
@@ -190,6 +214,7 @@ public class ChatMediator {
                     chatModel.get().unregisterListeners();
                     chatModel.get().removeIncomingListener(incomingChatListener);
                     EventAnnotationProcessor.unsubscribe(ChatMediator.this);
+                    panel = null;
                     break;
                 }
             }
@@ -261,7 +286,40 @@ public class ChatMediator {
         chatButton.setText(count > 0 ? I18n.tr("Chat ({0})", count) : I18n.tr("Chat"));
         chatButton.setIcon(count > 0 ? unviewedChatIcon : normalChatIcon);
     }
-    
+
+    public JPanel getFacebookPanel() { // LWC-4069
+        JPanel panel = new JPanel(new MigLayout("gap 10! 10!"));
+        panel.setBorder(BorderFactory.createMatteBorder(1,1,0,1, Color.BLACK));
+        JEditorPane editorPane = new JEditorPane();
+        editorPane.setContentType("text/html");
+        editorPane.setEditable(false);
+        editorPane.setCaretPosition(0);
+        editorPane.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
+        editorPane.setOpaque(false);
+        editorPane.setFocusable(false);
+        editorPane.setText("<HTML>" + ChatSettings.FACEBOOK_CHAT_DISABLED_TEXT.get() + "</HTML>");
+
+
+        StyleSheet mainStyle = ((HTMLDocument)editorPane.getDocument()).getStyleSheet();
+        String rules = "h1 { font-family: dialog; color:  #313131; font-size: 12; font-weight: bold}" +
+                "p {font-family: dialog; color: #313131; font-size: 11; }" ;
+        StyleSheet newStyle = new StyleSheet();
+        newStyle.addRule(rules);
+        mainStyle.addStyleSheet(newStyle); 
+        editorPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    NativeLaunchUtils.openURL("http://www.facebook.com");
+                }
+            }
+        });        
+
+        panel.add(editorPane);
+
+        return panel;        
+    }
+
     /**
      * Heavy weight component so it displays over the browser.
      */

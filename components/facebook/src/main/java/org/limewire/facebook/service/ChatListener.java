@@ -125,7 +125,7 @@ public class ChatListener implements Runnable {
             if("app_msg".equals(msgType) && appId.equals(facebookAppID.get())) {
                 processLiveMessage(payload);
             } else if ("msg".equals(msgType) || "typ".equals(msgType)) {
-                processChatMessage(payload, msgType);
+                // LWC-4069 processChatMessage(payload, msgType);
             } else {
                 LOG.debugf("unhandled payload: {0}", payload.toString());
             }
