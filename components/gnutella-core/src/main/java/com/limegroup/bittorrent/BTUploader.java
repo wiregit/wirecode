@@ -11,6 +11,7 @@ import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -24,7 +25,7 @@ import com.limegroup.gnutella.uploader.UploadType;
  * Wraps the Torrent class in the Uplaoder interface to enable the gui to treat
  * the torrent uploader as a normal uploader.
  */
-public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
+public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     private final ActivityCallback activityCallback;
 
@@ -33,15 +34,16 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private volatile URN urn = null;
-    
+
     private final TorrentUploadManager torrentUploadManager;
 
-    public BTUploader(Torrent torrent, ActivityCallback activityCallback, TorrentUploadManager torrentUploadManager) {
+    public BTUploader(Torrent torrent, ActivityCallback activityCallback,
+            TorrentUploadManager torrentUploadManager) {
         this.torrent = torrent;
         this.activityCallback = activityCallback;
         this.torrentUploadManager = torrentUploadManager;
     }
-    
+
     public void registerTorrentListener() {
         torrent.addListener(this);
     }
@@ -51,9 +53,19 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
         if (event == TorrentEvent.STOPPED) {
             finish();
             torrent.removeListener(this);
+        } else if (event == TorrentEvent.STATUS_CHANGED) {
+            // TODO incorporate seed time etc.?
+            // probably should
+            if (torrent.isFinished()
+                    && torrent.getSeedRatio() >= BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
+                            .getValue()) {
+                torrent.stop();
+                // TODO for now stop, in future we will want to keep it in the
+                // tray somehow.
+            }
         }
     };
-    
+
     @Override
     public void stop() {
         // TODO refactor to prompt from the gui
@@ -67,7 +79,7 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
             finish();
         }
     }
-    
+
     private void finish() {
         cancelled.set(true);
         activityCallback.removeUpload(this);
@@ -121,11 +133,11 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
         if (status == null) {
             return UploadStatus.CONNECTING;
         }
-        
-        if(status.isError()) {
-            //TODO add retry
-            //TODO custom error state
-           return UploadStatus.UNAVAILABLE_RANGE;
+
+        if (status.isError()) {
+            // TODO add retry
+            // TODO custom error state
+            return UploadStatus.UNAVAILABLE_RANGE;
         }
 
         if (status.isPaused()) {

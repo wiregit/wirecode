@@ -66,6 +66,7 @@ public class TorrentImpl implements Torrent {
 
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
+    // used to decide if the torrent was just newly completed or not.
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     private Boolean isPrivate = null;
@@ -100,7 +101,8 @@ public class TorrentImpl implements Torrent {
             this.paths.addAll(paths);
         }
         this.totalSize = totalSize;
-        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings().getTorrentDownloadFolder();
+        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
+                .getTorrentDownloadFolder();
 
         if (name != null) {
             this.name = name;
@@ -211,7 +213,7 @@ public class TorrentImpl implements Torrent {
         // TODO potentially rename the method, or at least put in another
         // parameter to use as the directory to move the torrent file and fast
         // resume files to.
-        assert complete.get();
+        assert isFinished();
         torrentManager.moveTorrent(this, directory);
         torrentDataFile.set(new File(directory, torrentDataFile.get().getName()));
 
@@ -221,10 +223,10 @@ public class TorrentImpl implements Torrent {
         // responsibility.
         File oldFastResumeFile = fastResumeFile.get();
         File oldTorrentFile = torrentFile.get();
-        fastResumeFile.set(new File(torrentManager.getTorrentManagerSettings().getTorrentUploadsFolder(),
-                oldFastResumeFile.getName()));
-        torrentFile.set(new File(torrentManager.getTorrentManagerSettings().getTorrentUploadsFolder(),
-                oldTorrentFile.getName()));
+        fastResumeFile.set(new File(torrentManager.getTorrentManagerSettings()
+                .getTorrentUploadsFolder(), oldFastResumeFile.getName()));
+        torrentFile.set(new File(torrentManager.getTorrentManagerSettings()
+                .getTorrentUploadsFolder(), oldTorrentFile.getName()));
 
         FileUtils.copy(oldTorrentFile, torrentFile.get());
         FileUtils.copy(oldFastResumeFile, fastResumeFile.get());
@@ -265,7 +267,8 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public boolean isFinished() {
-        return complete.get();
+        TorrentStatus status = this.status.get();
+        return status == null ? false : status.isFinished();
     }
 
     @Override
@@ -357,7 +360,8 @@ public class TorrentImpl implements Torrent {
     public float getSeedRatio() {
         TorrentStatus status = this.status.get();
         if (status != null) {
-            return status.getSeedRatio();
+            float seedRatio = status.getSeedRatio(); 
+            return seedRatio;
         }
         return 0;
     }
@@ -377,8 +381,7 @@ public class TorrentImpl implements Torrent {
         if (!cancelled.get()) {
             synchronized (TorrentImpl.this) {
                 TorrentImpl.this.status.set(torrentStatus);
-                boolean newlyfinished = complete.get() != torrentStatus.isFinished()
-                        && torrentStatus.isFinished();
+                boolean newlyfinished = !complete.get() && torrentStatus.isFinished();
                 complete.set(torrentStatus.isFinished());
 
                 if (newlyfinished) {
@@ -407,8 +410,10 @@ public class TorrentImpl implements Torrent {
 
         File torrent = torrentFile.get();
         File torrentParent = torrent.getParentFile();
-        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings().getTorrentDownloadFolder();
-        File torrentUploadFolder = torrentManager.getTorrentManagerSettings().getTorrentUploadsFolder();
+        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
+                .getTorrentDownloadFolder();
+        File torrentUploadFolder = torrentManager.getTorrentManagerSettings()
+                .getTorrentUploadsFolder();
         if (!torrentParent.equals(torrentDownloadFolder)
                 && !torrentParent.equals(torrentUploadFolder)) {
             // if the torrent file is not located in the incomplete or upload
@@ -420,8 +425,9 @@ public class TorrentImpl implements Torrent {
             torrentFile.set(newTorrentFile);
         }
         torrentManager.registerTorrent(this);
-        //TODO need to comment why this is done in this method, and that we only want 
-        //to do to do it for downloading torrents, not seeding torrents.
+        // TODO need to comment why this is done in this method, and that we
+        // only want
+        // to do to do it for downloading torrents, not seeding torrents.
         torrentManager.initialize(this);
         return true;
     }
