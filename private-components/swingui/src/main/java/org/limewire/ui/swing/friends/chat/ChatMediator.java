@@ -210,6 +210,7 @@ public class ChatMediator {
                     if(panel != null) {
                         setVisible(false);
                         chatFrame.closeAllChats();
+                        panel.dispose();
                     }
                     chatModel.get().unregisterListeners();
                     chatModel.get().removeIncomingListener(incomingChatListener);
