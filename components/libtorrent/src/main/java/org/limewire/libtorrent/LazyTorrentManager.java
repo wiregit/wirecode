@@ -77,6 +77,10 @@ public class LazyTorrentManager implements TorrentManager {
 
     @Override
     public boolean isDownloadingTorrent(File torrentFile) {
+        if(!initialized) {
+            return false;
+        }
+        
         setupTorrentManager();
         return torrentManager.get().isDownloadingTorrent(torrentFile);
     }
@@ -173,6 +177,7 @@ public class LazyTorrentManager implements TorrentManager {
             return 0;
         }
         
+        setupTorrentManager();
         return torrentManager.get().getTotalDownloadRate();
     }
 
@@ -181,6 +186,8 @@ public class LazyTorrentManager implements TorrentManager {
         if (!initialized) {
             return 0;
         }
+        
+        setupTorrentManager();
         return torrentManager.get().getTotalUploadRate();
     }
 

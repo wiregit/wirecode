@@ -80,7 +80,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         String name = (String) memento.get("name");
 
                         if (torrentDataFile.exists()) {
-                            if (!torrentManager.get().isDownloadingTorrent(mementoFile)) {
+                            if (torrentManager.get().isValid() && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
                                 try {
                                     torrent.init(name, sha1, -1, trackerURL, null, fastResumeFile,
                                             torrentFile, torrentDataFile, null);
