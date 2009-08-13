@@ -2,7 +2,6 @@ package org.limewire.ui.swing.search.resultpanel.list;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -100,8 +99,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
         albumHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         albumHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
-        albumHeadingLabel.setMargin(new Insets(3, 0, 3, 3));
-        albumHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        albumHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -199,8 +197,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         mediaHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
         mediaHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
-        mediaHeadingLabel.setMargin(new Insets(3, 0, 3, 3));
-        mediaHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        mediaHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -298,10 +295,12 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
     }
     
     @Override
-    protected void updateAlbum(VisualStoreResult vsr, RowDisplayResult result, boolean editing) {
+    protected void updateAlbum(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing) {
+        // Set album cover.
         albumCoverButton.setIcon(vsr.getStoreResult().getAlbumIcon());
         
-        switch (result.getConfig()) {
+        // Update subheading visibility.
+        switch (rowResult.getConfig()) {
         case HeadingOnly:
             albumSubHeadingLabel.setVisible(false);
             break;
@@ -317,9 +316,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
             break;
         }
         
-        albumHeadingLabel.setText(getHeadingHtml(albumWidthResolver, albumHeadingWidth, editing));
-        albumHeadingLabel.setToolTipText(result.getHeading());
-        albumSubHeadingLabel.setText(result.getSubheading());
+        // Set text and price fields.
+        albumHeadingLabel.setText(getHeadingHtml(rowResult, albumWidthResolver, albumHeadingWidth, editing));
+        albumHeadingLabel.setToolTipText(rowResult.getHeading());
+        albumSubHeadingLabel.setText(rowResult.getSubheading());
         
         albumPriceLabel.setText(vsr.getStoreResult().getPrice());
         
@@ -333,10 +333,12 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
     }
     
     @Override
-    protected void updateMedia(VisualStoreResult vsr, RowDisplayResult result, boolean editing) {
+    protected void updateMedia(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing) {
+        // Set category icon.
         mediaIconButton.setIcon(categoryIconManager.getIcon(vsr));
         
-        switch (result.getConfig()) {
+        // Update subheading visibility.
+        switch (rowResult.getConfig()) {
         case HeadingOnly:
             mediaSubHeadingLabel.setVisible(false);
             break;
@@ -352,9 +354,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
             break;
         }
         
-        mediaHeadingLabel.setText(getHeadingHtml(mediaWidthResolver, mediaHeadingWidth, editing));
-        mediaHeadingLabel.setToolTipText(result.getHeading());
-        mediaSubHeadingLabel.setText(result.getSubheading());
+        // Set text and price fields.
+        mediaHeadingLabel.setText(getHeadingHtml(rowResult, mediaWidthResolver, mediaHeadingWidth, editing));
+        mediaHeadingLabel.setToolTipText(rowResult.getHeading());
+        mediaSubHeadingLabel.setText(rowResult.getSubheading());
         
         mediaPriceLabel.setText(vsr.getStoreResult().getPrice());
         

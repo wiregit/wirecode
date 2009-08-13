@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
@@ -16,7 +17,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
-import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
@@ -53,7 +54,6 @@ abstract class ListViewStoreRenderer extends JXPanel {
     
     private JTable table;
     private VisualStoreResult vsr;
-    private RowDisplayResult rowResult;
     private int row;
     private int col;
 
@@ -85,27 +85,23 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * Initializes the components in the renderer.
      */
     private void initComponents() {
+        // TODO replace with custom top & bottom border
+        setBorder(BorderFactory.createLineBorder(Color.WHITE));
         setToolTipText(null);
         
         // Initialize album/media panels.
         initAlbumComponent();
         initMediaComponent();
         
-        // Initialize top and bottom borders.
-        Line topLine = Line.createHorizontalLine(Color.WHITE);
-        Line bottomLine = Line.createHorizontalLine(Color.WHITE);
-        
         // Initialize album track container.
         albumTrackPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, fill, novisualpadding"));
         albumTrackPanel.setOpaque(false);
         
         // Layout renderer components.
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding, hidemode 3"));
-        add(topLine, "alignx left, aligny top, gapbottom 6, growx, pushx 200, wrap");
-        add(albumPanel, "alignx left, aligny 50%, gap 6 6, growx, wrap");
-        add(mediaPanel, "alignx left, aligny 50%, gap 6 6, growx, wrap");
-        add(albumTrackPanel, "span 3, left, aligny top, gap 36 36 6 0, grow, wrap");
-        add(bottomLine, "alignx left, aligny top, gaptop 6, growx, pushx 200");
+        setLayout(new MigLayout("insets 6 0 0 0, gap 0! 0!, novisualpadding, hidemode 3"));
+        add(albumPanel, "alignx left, aligny 50%, gap 6 6 0 6, growx, pushx 200, wrap");
+        add(mediaPanel, "alignx left, aligny 50%, gap 6 6 0 6, growx, pushx 200, wrap");
+        add(albumTrackPanel, "span 3, left, aligny top, gap 36 36 0 6, grow, wrap");
     }
     
     /**
@@ -137,7 +133,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
     /**
      * Returns the heading as an HTML document.
      */
-    protected String getHeadingHtml(final FontWidthResolver fontWidthResolver, 
+    protected String getHeadingHtml(final RowDisplayResult rowResult,
+            final FontWidthResolver fontWidthResolver, 
             int headingWidth, boolean editing) {
         // The visible rect width is always 0 for renderers so getVisibleRect()
         // won't work here.  Width is zero the first time editorpane is 
@@ -178,21 +175,20 @@ abstract class ListViewStoreRenderer extends JXPanel {
     /**
      * Updates the renderer to display the specified VisualStoreResult.
      */
-    public void update(JTable table, VisualStoreResult vsr, RowDisplayResult result,
+    public void update(JTable table, VisualStoreResult vsr, RowDisplayResult rowResult,
             boolean editing, int row, int col) {
         // Save table and store result.
         this.table = table;
         this.vsr = vsr;
-        this.rowResult = result;
         this.row = row;
         this.col = col;
         
-        if (vsr.getStoreResult().isAlbum()) {
+        if (vsr.getStoreResult().isAlbum() && (vsr.getDownloadState() == BasicDownloadState.NOT_STARTED)) {
             albumPanel.setVisible(true);
             mediaPanel.setVisible(false);
             showTracksAction.putValue(Action.NAME, vsr.isShowTracks() ? 
                     I18n.tr("Hide Tracks").toUpperCase() : I18n.tr("Show Tracks").toUpperCase());
-            updateAlbum(vsr, result, editing);
+            updateAlbum(vsr, rowResult, editing);
             updateAlbumTracks(vsr);
             //System.out.println("album.prefSize=" + getPreferredSize()); // TODO REMOVE
             
@@ -200,7 +196,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
             albumPanel.setVisible(false);
             mediaPanel.setVisible(true);
             albumTrackPanel.setVisible(false);
-            updateMedia(vsr, result, editing);
+            updateMedia(vsr, rowResult, editing);
             //System.out.println("media.prefSize=" + getPreferredSize()); // TODO REMOVE
         }
     }
@@ -208,12 +204,12 @@ abstract class ListViewStoreRenderer extends JXPanel {
     /**
      * Updates album content for specified VisualStoreResult.
      */
-    protected abstract void updateAlbum(VisualStoreResult vsr, RowDisplayResult result, boolean editing);
+    protected abstract void updateAlbum(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing);
     
     /**
      * Updates media content for specified VisualStoreResult.
      */
-    protected abstract void updateMedia(VisualStoreResult vsr, RowDisplayResult result, boolean editing);
+    protected abstract void updateMedia(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing);
     
     /**
      * Adds display panels when multiple tracks are available.

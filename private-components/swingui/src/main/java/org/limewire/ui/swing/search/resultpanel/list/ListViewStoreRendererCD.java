@@ -2,7 +2,6 @@ package org.limewire.ui.swing.search.resultpanel.list;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -104,8 +103,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
         albumHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         albumHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
-        albumHeadingLabel.setMargin(new Insets(3, 0, 3, 3));
-        albumHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        albumHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -138,19 +136,19 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumPriceButton = new PriceButton(downloadAction);
         
         // Layout components in container.
-        albumHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
-        albumHeadingPanel.add(albumHeadingLabel, "left, aligny 50%, growx, hidemode 3"); 
+        albumHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding, hidemode 3"));
+        albumHeadingPanel.add(albumHeadingLabel, "left, aligny 50%, growx"); 
         if (storeStyle.getType() == Type.STYLE_C) {
-            albumHeadingPanel.add(albumDownloadButton, "left, aligny 50%, hidemode 3");
+            albumHeadingPanel.add(albumDownloadButton, "left, aligny 50%");
         } else {
-            albumHeadingPanel.add(albumPriceButton, "left, aligny 75%, hidemode 3");
+            albumHeadingPanel.add(albumPriceButton, "left, aligny 75%");
         }
         
         albumTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
         albumTextPanel.add(albumHeadingPanel, "left, aligny 50%, growx, hidemode 3, wrap");
         albumTextPanel.add(albumSubHeadingLabel, "left, aligny 50%, growx, shrinkprio 200, hidemode 3, wrap");
-        albumTextPanel.add(albumStreamButton, "left, aligny 50%, gaptop 3, hidemode 3");
-        albumTextPanel.add(albumTracksButton, "left, aligny 50%, gaptop 3, gapleft 6, hidemode 3");
+        albumTextPanel.add(albumStreamButton, "left, aligny 50%, gaptop 3");
+        albumTextPanel.add(albumTracksButton, "left, aligny 50%, gaptop 3, gapleft 6");
         
         albumPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding"));
         albumPanel.add(albumCoverButton, "alignx left, aligny top, shrinkprio 0, growprio 0");
@@ -184,8 +182,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
         mediaHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
-        mediaHeadingLabel.setMargin(new Insets(3, 0, 3, 3));
-        mediaHeadingLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        mediaHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -276,10 +273,12 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     }
 
     @Override
-    protected void updateAlbum(VisualStoreResult vsr, RowDisplayResult result, boolean editing) {
+    protected void updateAlbum(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing) {
+        // Set album cover.
         albumCoverButton.setIcon(vsr.getStoreResult().getAlbumIcon());
         
-        switch (result.getConfig()) {
+        // Update subheading visibility.
+        switch (rowResult.getConfig()) {
         case HeadingOnly:
             albumSubHeadingLabel.setVisible(false);
             break;
@@ -295,9 +294,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             break;
         }
         
-        albumHeadingLabel.setText(getHeadingHtml(albumWidthResolver, getAlbumHeadingWidth(), editing));
-        albumHeadingLabel.setToolTipText(result.getHeading());
-        albumSubHeadingLabel.setText(result.getSubheading());
+        // Set text and price fields.
+        albumHeadingLabel.setText(getHeadingHtml(rowResult, albumWidthResolver, getAlbumHeadingWidth(), editing));
+        albumHeadingLabel.setToolTipText(rowResult.getHeading());
+        albumSubHeadingLabel.setText(rowResult.getSubheading());
         
         albumPriceButton.setText(vsr.getStoreResult().getPrice());
         
@@ -308,9 +308,9 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     }
 
     @Override
-    protected void updateMedia(VisualStoreResult vsr, RowDisplayResult result, boolean editing) {
-        
-        switch (result.getConfig()) {
+    protected void updateMedia(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing) {
+        // Update subheading visibility.
+        switch (rowResult.getConfig()) {
         case HeadingOnly:
             mediaSubHeadingLabel.setVisible(false);
             break;
@@ -326,9 +326,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             break;
         }
         
-        mediaHeadingLabel.setText(getHeadingHtml(mediaWidthResolver, getMediaHeadingWidth(), editing));
-        mediaHeadingLabel.setToolTipText(result.getHeading());
-        mediaSubHeadingLabel.setText(result.getSubheading());
+        // Set text and price fields.
+        mediaHeadingLabel.setText(getHeadingHtml(rowResult, mediaWidthResolver, getMediaHeadingWidth(), editing));
+        mediaHeadingLabel.setToolTipText(rowResult.getHeading());
+        mediaSubHeadingLabel.setText(rowResult.getSubheading());
         
         mediaPriceButton.setText(vsr.getStoreResult().getPrice());
         
