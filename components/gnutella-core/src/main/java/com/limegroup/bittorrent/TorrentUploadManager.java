@@ -80,6 +80,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         String name = (String) memento.get("name");
 
                         if (torrentDataFile.exists()) {
+                            //TODO show error message when seeds cannot be resumed?
                             if (torrentManager.get().isValid() && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
                                 try {
                                     torrent.init(name, sha1, -1, trackerURL, null, fastResumeFile,
