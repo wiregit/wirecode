@@ -35,15 +35,7 @@ class LibTorrentWrapper {
     void initialize(TorrentManagerSettings torrentSettings) {
         try {
             if (OSUtils.isWindows()) {
-                System.loadLibrary("msvcr71");
-                System.loadLibrary("msvcp71");
-                System.loadLibrary("libeay32");
-                System.loadLibrary("ssleay32");
-                System.loadLibrary("boost_date_time-vc71-mt-1_39");
-                System.loadLibrary("boost_system-vc71-mt-1_39");
-                System.loadLibrary("boost_filesystem-vc71-mt-1_39");
-                System.loadLibrary("boost_thread-vc71-mt-1_39");
-                System.loadLibrary("torrent");
+             // everything compiled into torrent-wrapper.dll
             } else if (OSUtils.isLinux()) {
                 // everything compiled into libtorrent-wrapper.so
             } else if (OSUtils.isMacOSX()) {
@@ -55,6 +47,7 @@ class LibTorrentWrapper {
             init(torrentSettings);
             loaded.set(true);
         } catch (Throwable e) {
+            e.printStackTrace();
             LOG.error("Failure loading the libtorrent libraries.", e);
             if (torrentSettings.isReportingLibraryLoadFailture()) {
                 ExceptionUtils.reportOrReturn(e);
