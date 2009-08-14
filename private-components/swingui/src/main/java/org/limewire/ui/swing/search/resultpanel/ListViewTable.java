@@ -131,11 +131,11 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
         storeHighlighter.setBackground(storeStyle.getBackground());
         
         // Set style in editor/renderer components.
-        if (listEditor != null) {
-            listEditor.setStoreStyle(storeStyle);
-        }
         if (listRenderer != null) {
             listRenderer.setStoreStyle(storeStyle);
+        }
+        if (listEditor != null) {
+            listEditor.setStoreStyle(storeStyle);
         }
         
         // Update store row heights and repaint.
@@ -164,7 +164,6 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
      */
     public void updateRowSizes() {
         DefaultEventTableModel model = getEventTableModel();
-//        System.out.println("updateRowSizes: rows=" + model.getRowCount()); // TODO REMOVE
         
         setIgnoreRepaints(true);
         
@@ -216,7 +215,7 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
         setIgnoreRepaints(true);
         
         // Process all store result rows.  This is a little inefficient, but
-        // I think we're okay because this is only called when the style is
+        // we may be okay because this is only called when the style is 
         // updated, which happens when we first receive store results.
         boolean setRowSize = false;
         for (int row = 0; row < model.getRowCount(); row++) {
