@@ -3,13 +3,10 @@ package org.limewire.ui.swing.search.resultpanel;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -24,6 +21,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
+import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -51,7 +49,6 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
-import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
@@ -189,6 +186,14 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     void register() {
         storeListener = new StoreListener() {
             @Override
+            public void loginChanged(boolean loggedIn) {
+                // TODO update renderer style
+            }
+
+            @Override
+            public void resultsFound(StoreResult[] storeResults) {}
+            
+            @Override
             public void styleUpdated(final StoreStyle storeStyle) {
                 SwingUtils.invokeLater(new Runnable() {
                     public void run() {
@@ -196,7 +201,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                         // Post event to force repaint using updated renderer.
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
-                                resultsList.repaint();
+                                resultsList.resizeAndRepaint();
                             }
                         });
                     }
@@ -204,9 +209,6 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             }
         };
         storeManager.addStoreListener(storeListener);
-        
-        // Request current style from store.
-        storeManager.loadStoreStyle();
     }
     
     /**
