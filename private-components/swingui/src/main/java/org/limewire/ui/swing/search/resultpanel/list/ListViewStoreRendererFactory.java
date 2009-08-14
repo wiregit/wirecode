@@ -1,9 +1,9 @@
 package org.limewire.ui.swing.search.resultpanel.list;
 
-import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
+import org.limewire.ui.swing.search.resultpanel.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
 import com.google.inject.Inject;
@@ -17,7 +17,7 @@ class ListViewStoreRendererFactory {
     private final CategoryIconManager categoryIconManager;
     private final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     private final Provider<SearchResultTruncator> headingTruncator;
-    private final StoreManager storeManager;
+    private final StoreController storeController;
     
     /**
      * Constructs a ListViewStoreRendererFactory using the specified services.
@@ -27,11 +27,11 @@ class ListViewStoreRendererFactory {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
-            StoreManager storeManager) {
+            StoreController storeController) {
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
-        this.storeManager = storeManager;
+        this.storeController = storeController;
     }
     
     /**
@@ -39,12 +39,7 @@ class ListViewStoreRendererFactory {
      * current style is not available, then the default style is used.
      */
     public ListViewStoreRenderer create() {
-        StoreStyle storeStyle = storeManager.getStoreStyle();
-        if (storeStyle == null) {
-            storeStyle = new DefaultListStoreStyle();
-        }
-        
-        return create(storeStyle);
+        return create(storeController.getStoreStyle());
     }
     
     /**
@@ -54,12 +49,19 @@ class ListViewStoreRendererFactory {
         // Create renderer based on style type.
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
-            return new ListViewStoreRendererAB(categoryIconManager, headingBuilder, headingTruncator, storeStyle);
+            return new ListViewStoreRendererAB(storeStyle, categoryIconManager,
+                    headingBuilder, headingTruncator, storeController);
+            
         case STYLE_C: case STYLE_D:
-            return new ListViewStoreRendererCD(categoryIconManager, headingBuilder, headingTruncator, storeStyle);
+            return new ListViewStoreRendererCD(storeStyle, categoryIconManager, 
+                    headingBuilder, headingTruncator, storeController);
+            
         default:
-            // TODO review for correctness - maybe throw exception
-            return new ListViewStoreRendererAB(categoryIconManager, headingBuilder, headingTruncator, storeStyle);
+            // Return default renderer so store results may still be viewed in
+            // spite of an unrecognized store style.
+            // TODO review - should we send notification of incorrect condition
+            return new ListViewStoreRendererAB(storeStyle, categoryIconManager, 
+                    headingBuilder, headingTruncator, storeController);
         }
     }
 }

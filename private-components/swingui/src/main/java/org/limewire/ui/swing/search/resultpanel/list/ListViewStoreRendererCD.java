@@ -30,6 +30,7 @@ import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
+import org.limewire.ui.swing.search.resultpanel.StoreController;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer.NoDancingHtmlLabel;
@@ -64,14 +65,14 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     private JButton mediaPriceButton;
     
     /**
-     * Constructs a store renderer with the specified icon manager and store
-     * style.
+     * Constructs a store renderer with the specified store style and services.
      */
-    public ListViewStoreRendererCD(CategoryIconManager categoryIconManager,
+    public ListViewStoreRendererCD(StoreStyle storeStyle,
+            CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
-            StoreStyle storeStyle) {
-        super(categoryIconManager, headingBuilder, headingTruncator, storeStyle);
+            StoreController storeController) {
+        super(storeStyle, categoryIconManager, headingBuilder, headingTruncator, storeController);
     }
 
     @Override

@@ -7,22 +7,22 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.ui.swing.components.CustomLineBorder;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
+import org.limewire.ui.swing.search.resultpanel.StoreController;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -38,10 +38,11 @@ import com.google.inject.Provider;
 abstract class ListViewStoreRenderer extends JXPanel {
     private static final int LEFT_COLUMN_WIDTH = 450;
 
+    protected final StoreStyle storeStyle;
     protected final CategoryIconManager categoryIconManager;
     protected final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     protected final Provider<SearchResultTruncator> headingTruncator;
-    protected final StoreStyle storeStyle;
+    protected final StoreController storeController;
 
     protected final JXPanel albumPanel;
     protected final JXPanel mediaPanel;
@@ -61,18 +62,22 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * Constructs a ListViewStoreRenderer.
      */
     public ListViewStoreRenderer(
+            StoreStyle storeStyle,
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
-            StoreStyle storeStyle) {
+            StoreController storeController) {
         
+        this.storeStyle = storeStyle;
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
-        this.storeStyle = storeStyle;
+        this.storeController = storeController;
+        
         this.albumPanel = new JXPanel();
         this.mediaPanel = new JXPanel();
         this.albumTrackPanel = new JXPanel();
+        
         this.downloadAction = new DownloadAction();
         this.streamAction = new StreamAction();
         this.showInfoAction = new ShowInfoAction();
@@ -85,8 +90,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * Initializes the components in the renderer.
      */
     private void initComponents() {
-        // TODO replace with custom top & bottom border
-        setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        setBorder(new CustomLineBorder(Color.WHITE, 1, Color.WHITE, 0, Color.WHITE, 1, Color.WHITE, 0));
         setToolTipText(null);
         
         // Initialize album/media panels.
@@ -242,12 +246,14 @@ abstract class ListViewStoreRenderer extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (vsr != null) {
-                System.out.println("download.actionPerformed: " + vsr.getHeading());
-                // TODO implement
+                storeController.download(vsr);
             }
         }
     }
     
+    /**
+     * Action to download store track result.
+     */
     protected class DownloadTrackAction extends AbstractAction {
         private final StoreTrackResult trackResult;
 
@@ -257,10 +263,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("downloadTrack.actionPerformed: " + trackResult.getProperty(FilePropertyKey.NAME));
-            // TODO Auto-generated method stub
+            storeController.downloadTrack(trackResult);
         }
-        
     }
     
     /**
@@ -271,12 +275,14 @@ abstract class ListViewStoreRenderer extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (vsr != null) {
-                System.out.println("stream.actionPerformed: " + vsr.getHeading());
-                // TODO implement
+                storeController.stream(vsr);
             }
         }
     }
     
+    /**
+     * Action to stream store track result.
+     */
     protected class StreamTrackAction extends AbstractAction {
         private final StoreTrackResult trackResult;
 
@@ -286,10 +292,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("streamTrack.actionPerformed: " + trackResult.getProperty(FilePropertyKey.NAME));
-            // TODO Auto-generated method stub
+            storeController.streamTrack(trackResult);
         }
-        
     }
     
     /**
