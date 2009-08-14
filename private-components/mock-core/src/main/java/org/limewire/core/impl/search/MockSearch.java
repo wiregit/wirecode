@@ -1,6 +1,5 @@
 package org.limewire.core.impl.search;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -16,28 +14,32 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.api.search.store.StoreListener;
+import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
-import org.limewire.core.impl.MockURN;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
-import org.limewire.core.impl.search.store.MockStoreResult;
-import org.limewire.core.impl.search.store.MockStoreTrackResult;
-import org.limewire.core.impl.search.store.MockStoreResult.MockAlbumIcon;
 import org.limewire.friend.api.FriendPresence;
 
-
+/**
+ * Implementation of Search for the mock core.
+ */
 public class MockSearch implements Search {
     public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
 
-    private SearchDetails searchDetails;
-    private CopyOnWriteArrayList<SearchListener> listeners =
+    private final SearchDetails searchDetails;
+    private final StoreManager storeManager;
+    private final CopyOnWriteArrayList<SearchListener> listeners =
         new CopyOnWriteArrayList<SearchListener>();
 
+    private StoreListener storeListener;
     private int repeatCount = 0;
 
-    public MockSearch(SearchDetails searchDetails) {
+    public MockSearch(SearchDetails searchDetails, StoreManager storeManager) {
         this.searchDetails = searchDetails;
+        this.storeManager = storeManager;
     }
 
     @Override
@@ -58,14 +60,40 @@ public class MockSearch implements Search {
     
     @Override
     public void start() {
+        // Create listener for store results.
+        storeListener = new StoreListener() {
+            @Override
+            public void resultsFound(StoreResult[] storeResults) {
+                for (StoreResult storeResult : storeResults) {
+                    handleStoreResult(storeResult);
+                }
+            }
+
+            @Override
+            public void loginChanged(boolean loggedIn) {}
+
+            @Override
+            public void styleUpdated(StoreStyle storeStyle) {}
+        };
+        storeManager.addStoreListener(storeListener);
+        
+        // Notify search listeners.
         for (SearchListener listener : listeners) {
             listener.searchStarted(this);
         }
+        
+        // Add mock results.
         addResults("");
+        storeManager.startSearch(searchDetails);
     }
     
     @Override
     public void stop() {
+        if (storeListener != null) {
+            storeManager.removeStoreListener(storeListener);
+            storeListener = null;
+        }
+        
         for (SearchListener listener : listeners) {
             listener.searchStopped(this);
         }
@@ -121,7 +149,6 @@ public class MockSearch implements Search {
             addRecordsWedding(i);
         }
         if(query.indexOf("monkey") > -1){
-            addStoreRecords(i);
             addRecordsWedding(i);
             addRecordsMonkey(i);
         }
@@ -1202,76 +1229,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(3994));
         msr.setProperty(FilePropertyKey.NAME, name);
         handleSearchResult(msr);
-    }
-    
-    private void addStoreRecords(int i) {
-        // Create album with multiple tracks.
-        URN urn = new MockURN("www.store.limewire.com" + i);
-        MockStoreResult msr = new MockStoreResult(urn, Category.AUDIO);
-        msr.setFileExtension("mp3");
-        msr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
-        msr.setPrice("4 Credits");
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        //msr.setProperty(FilePropertyKey.NAME, "Premonitions, Monkeys & Science");
-        msr.setProperty(FilePropertyKey.NAME, "When Everyone has a Sweet Party and you're invited! I was at this totally swinging hepcat party last weekend. Oh man, that joint was jumpin!");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setSize(9 * 1024 * 1024);
-        
-        MockStoreTrackResult mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 1));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Heh?");
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-        
-        mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 2));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Take Me To Space (Man)");
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-        
-        mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 3));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Crush");
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-        
-        handleStoreResult(msr);
-        
-        // Create single file result.
-        urn = new MockURN("www.store.limewire.com" + (i + 10));
-        msr = new MockStoreResult(urn, Category.AUDIO);
-        msr.setFileExtension("mp3");
-        msr.setPrice("1 Credit");
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        msr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
-        msr.setProperty(FilePropertyKey.NAME, "Chomp");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setSize(6 * 1024 * 1024);
-        
-        mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 11));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
-        mstr.setProperty(FilePropertyKey.NAME, "Chomp");
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-        
-        handleStoreResult(msr);
     }
     
     static class MockRemoteHost implements RemoteHost {
