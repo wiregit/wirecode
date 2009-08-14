@@ -99,9 +99,9 @@ class ConversationPanel {
         setConversationPanel(new JPanel());
         
         for(String key : chats.keySet()) {
-            ConversationPane conversation = chats.remove(key);
-            conversation.dispose();
+            chats.get(key).dispose();
         }
+        chats.clear();
     }
     
     /**
