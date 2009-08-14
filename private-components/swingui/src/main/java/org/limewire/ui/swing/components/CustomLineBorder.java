@@ -89,24 +89,24 @@ public class CustomLineBorder extends AbstractBorder {
         Color oldColor = g.getColor();
 
         // Paint individual borders.
-        g.setColor(topColor);
-        for (int i = 0; i < topThickness; i++) {
-            g.drawLine(x, y + i, x + width - 1, y + i);
-        }
-        
         g.setColor(leftColor);
         for (int i = 0; i < leftThickness; i++) {
             g.drawLine(x + i, y, x + i, y + height - 1);
         }
         
-        g.setColor(bottomColor);
-        for (int i = 0; i < bottomThickness; i++) {
-            g.drawLine(x, y + height - i - 1, x + width - 1, y + height - i - 1);
-        }
-        
         g.setColor(rightColor);
         for (int i = 0; i < rightThickness; i++) {
             g.drawLine(x + width - i - 1, y, x + width - i - 1, y + height - 1);
+        }
+        
+        g.setColor(topColor);
+        for (int i = 0; i < topThickness; i++) {
+            g.drawLine(x, y + i, x + width - 1, y + i);
+        }
+        
+        g.setColor(bottomColor);
+        for (int i = 0; i < bottomThickness; i++) {
+            g.drawLine(x, y + height - i - 1, x + width - 1, y + height - i - 1);
         }
 
         // Restore original color.
