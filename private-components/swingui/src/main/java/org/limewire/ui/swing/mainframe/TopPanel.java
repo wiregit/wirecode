@@ -30,6 +30,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
@@ -213,12 +214,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     public SearchNavItem addAdvancedSearch() {
         String title = I18n.tr("Advanced Search");
         AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
-        advancedPanel.addSearchListener(new UiSearchListener() {
-            @Override
-            public void searchTriggered(SearchInfo searchInfo) {
-                searchHandler.doSearch(searchInfo);
-            }
-        });
+        
         NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(advancedPanel));
         SearchAction action = new SearchAction(item);
         action.putValue(Action.LONG_DESCRIPTION, action.getValue(Action.NAME));
@@ -235,7 +231,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
         advancedPanel.addSearchListener(new UiSearchListener() {
             @Override
              public void searchTriggered(SearchInfo searchInfo) {
-                searchNavItem.remove();
+                searchHandler.doSearch(searchInfo);
+                if ((searchInfo.getSearchCategory() != SearchCategory.PROGRAM || LibrarySettings.ALLOW_PROGRAMS.getValue())) {
+                    searchNavItem.remove();
+                }
              } 
          });
         
