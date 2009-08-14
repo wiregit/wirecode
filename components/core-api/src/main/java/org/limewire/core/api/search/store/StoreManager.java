@@ -1,5 +1,7 @@
 package org.limewire.core.api.search.store;
 
+import org.limewire.core.api.search.SearchDetails;
+
 /**
  * Defines a manager for Lime Store.
  */
@@ -18,12 +20,17 @@ public interface StoreManager {
     void removeStoreListener(StoreListener listener);
     
     /**
+     * Returns true if the user is logged in to the store.
+     */
+    boolean isLoggedIn();
+    
+    /**
      * Returns the current style for Lime Store results.
      */
     StoreStyle getStoreStyle();
     
     /**
-     * Retrieves the style for Lime Store results from the server.
+     * Starts search for store results using specified search details.
      */
-    void loadStoreStyle();
+    void startSearch(SearchDetails searchDetails);
 }
