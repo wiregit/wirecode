@@ -181,7 +181,7 @@ public final class UrnCache {
      */
     public synchronized void addUrns(File file, Set<? extends URN> urns) {
         UrnSetKey key = new UrnSetKey(file);
-        getUrnMap().put(key, Collections.unmodifiableSet(urns));
+        getUrnMap().put(key, UrnSet.unmodifiableSet(urns));
         dirty = true;
     }
 
@@ -265,7 +265,7 @@ public final class UrnCache {
             if (set != entry.getValue()) { // if it changed, replace the value
                                            // w/ unmodifiable
                 dirty = true;
-                entry.setValue(Collections.unmodifiableSet(set));
+                entry.setValue(UrnSet.unmodifiableSet(set));
             }
         }
         return dirty;
