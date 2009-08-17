@@ -25,8 +25,6 @@ public class MessageDecorator {
     public MessageDecorator(MessagePainterFactory painterFactory) {
         GuiUtils.assignResources(this);
         
-        System.out.println("created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        
         this.painterFactory = painterFactory;
     }
     
