@@ -29,7 +29,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
-import org.limewire.ui.swing.components.MessageComponent.MessageBackground;
+import org.limewire.ui.swing.components.decorators.MessageDecorator;
 import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -53,6 +53,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private EventListener<FriendConnectionEvent> connectionListener;
     private ListenerSupport<FriendConnectionEvent> connectionSupport;
     private final RemoteLibraryManager remoteLibraryManager;
+    private final MessageDecorator messageDecorator;
 
     private BrowseSearch browseSearch;
     
@@ -63,13 +64,15 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private List<Friend> friends;
 
     @Inject
-    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, Provider<ChatMediator> chatMediator, RemoteLibraryManager remoteLibraryManager, 
+    public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, Provider<ChatMediator> chatMediator, RemoteLibraryManager remoteLibraryManager,
+            MessageDecorator messageDecorator,
             @Assisted SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
         this.connectionEventBean = connectionEventBean;
         this.chatMediator = chatMediator;
         this.searchResultsModel = searchResultsModel;
         this.remoteLibraryManager = remoteLibraryManager;
+        this.messageDecorator = messageDecorator;
     }
     
     public void update(BrowseState state, BrowseSearch browseSearch, List<Friend> friends){
@@ -117,7 +120,8 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
      * as to what state their friend is in when no files are displayed.
      */
     private JComponent createMessageComponent(String text) {
-        MessageComponent messageComponent = new MessageComponent(MessageBackground.GRAY);
+        MessageComponent messageComponent = new MessageComponent();
+        messageDecorator.decorateGrayMessage(messageComponent);
 
         JLabel message = new JLabel(text);
         messageComponent.decorateHeaderLabel(message);
