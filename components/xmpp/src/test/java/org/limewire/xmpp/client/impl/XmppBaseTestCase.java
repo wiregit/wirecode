@@ -62,7 +62,7 @@ public abstract class XmppBaseTestCase extends BaseTestCase {
     }
 
     protected Injector createInjector(Module... modules) {
-        return Guice.createInjector(Stage.PRODUCTION, modules);
+        return Guice.createInjector(Stage.DEVELOPMENT, modules);
     }
 
     protected Module[] getModules() {

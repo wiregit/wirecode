@@ -17,6 +17,7 @@ import junit.framework.Assert;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.limewire.inject.GuiceUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.listener.ListenerSupport;
@@ -152,10 +153,17 @@ public class LimeTestUtils {
     }
     
     public static Injector createInjector(Stage stage, Class<? extends ActivityCallback> callbackClass, Module...modules) {
+        return createInjector(stage, callbackClass, true, modules);
+    }
+    
+    private static Injector createInjector(Stage stage, Class<? extends ActivityCallback> callbackClass, boolean loadEager, Module...modules) {
         Module combinedReplacements = Modules.combine(modules);
         Module combinedOriginals = Modules.combine(new LimeWireCoreModule(callbackClass), new BlockingConnectionFactoryModule());
         Module replaced = Modules.override(combinedOriginals).with(combinedReplacements);
-        return Guice.createInjector(stage, replaced);
+        Injector injector = Guice.createInjector(stage, replaced);
+        if(loadEager)
+            GuiceUtils.loadEagerSingletons(injector);
+        return injector;
     }
 
     /**
@@ -163,6 +171,10 @@ public class LimeTestUtils {
      */
     public static Injector createInjector(Module... modules) {
         return createInjector(ActivityCallbackStub.class, modules);
+    }
+    
+    public static Injector createInjectorNonEagerly(Module... modules) {
+        return createInjector(Stage.DEVELOPMENT, ActivityCallbackStub.class, false, modules);
     }
     
     public static Injector createInjector(Stage stage, Module... modules) {
@@ -179,9 +191,9 @@ public class LimeTestUtils {
      * @param callbackClass the class that is used as a callback
      * @return the injector
      */
-    public static Injector createInjectorAndStart(Class<? extends ActivityCallback> callbackClass, Module...modules) {
+    private static Injector createInjectorAndStart(Class<? extends ActivityCallback> callbackClass, Module...modules) {
         // Use PRODUCTION to ensure all Services are created.
-        Injector injector = createInjector(Stage.PRODUCTION, callbackClass, modules);
+        Injector injector = createInjector(Stage.DEVELOPMENT, callbackClass, modules);
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
         return injector;
@@ -191,7 +203,9 @@ public class LimeTestUtils {
      * Wraps {@link #createInjectorAndStart(Module, Class) createInjectorAndStart(Module, ActivityCallbackStub.class)}.
      */
     public static Injector createInjectorAndStart(Module...modules) {
-        return createInjectorAndStart(ActivityCallbackStub.class, modules);
+        Injector injector = createInjectorAndStart(ActivityCallbackStub.class, modules);
+        GuiceUtils.loadEagerSingletons(injector);
+        return injector;
     }
 
     public static class NetworkManagerStubModule extends AbstractModule {

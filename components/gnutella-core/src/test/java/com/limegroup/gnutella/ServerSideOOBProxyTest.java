@@ -143,7 +143,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     @Override
     protected void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         responseFactory = injector.getInstance(ResponseFactory.class);

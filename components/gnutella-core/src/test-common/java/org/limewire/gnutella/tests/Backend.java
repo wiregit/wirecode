@@ -364,7 +364,7 @@ public class Backend extends org.limewire.gnutella.tests.LimeTestCase {
 
             preSetUp();
             setStandardSettings(port);
-            Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(ActivityCallbackStub.class), LimeTestUtils.createModule(this));
+            Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(ActivityCallbackStub.class), LimeTestUtils.createModule(this));
             lifecycleManager.start();
             populateSharedDirectory(gnutellaFileCollection);
             if (!reject)

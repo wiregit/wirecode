@@ -63,7 +63,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     @Override
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(UploadManager.class).to(UploadManagerStub.class);

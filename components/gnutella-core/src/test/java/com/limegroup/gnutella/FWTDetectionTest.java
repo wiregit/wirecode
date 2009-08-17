@@ -88,7 +88,7 @@ public class FWTDetectionTest extends LimeTestCase {
     public void setUp() throws Exception {
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
            @Override
             protected void configure() {
                bind(ConnectionManager.class).to(CMStub.class);

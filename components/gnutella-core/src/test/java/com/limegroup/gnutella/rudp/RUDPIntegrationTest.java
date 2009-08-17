@@ -75,7 +75,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception {
         setSettings();
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         selectorProvider = injector.getInstance(UDPSelectorProvider.class);

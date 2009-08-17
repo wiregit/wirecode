@@ -127,7 +127,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         setSettings();
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 
-        LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
+        LimeTestUtils.createInjector(Stage.DEVELOPMENT, LimeTestUtils.createModule(this));
         
         lifecycleManager.start();
         connectionServices.connect();	

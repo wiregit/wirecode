@@ -10,26 +10,26 @@ import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.api.feature.AuthTokenFeature;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.friend.impl.util.PresenceUtils;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Installs {@link AuthTokenFeatureInitializer} in the feature registry
  * and attaches {@link AuthTokenFeature auth token features} to presences
  * when {@link #featureReceived(String, AuthToken)} is called.
  */
-@Singleton
+@EagerSingleton
 class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
     
     private static final Log LOG = LogFactory.getLog(AuthTokenDispatcher.class);

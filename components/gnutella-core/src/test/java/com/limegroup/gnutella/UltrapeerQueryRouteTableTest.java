@@ -95,7 +95,7 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
     public void setUp() throws Exception {
 
         final ResponseVerifier testVerifier = new TestResponseVerifier();
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ResponseVerifier.class).toInstance(testVerifier);

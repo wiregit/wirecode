@@ -79,7 +79,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setPort(SERVER_PORT);
         networkManagerStub.setExternalAddress(new byte[] { (byte)129, 1, 4, 10 });
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class,
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, MyActivityCallback.class,
                 new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
         callback = (MyActivityCallback) injector.getInstance(ActivityCallback.class);

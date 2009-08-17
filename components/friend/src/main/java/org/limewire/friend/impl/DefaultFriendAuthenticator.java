@@ -6,6 +6,7 @@ import org.limewire.friend.impl.feature.AuthTokenImpl;
 import org.limewire.friend.impl.feature.AuthTokenRegistry;
 import org.limewire.http.auth.Authenticator;
 import org.limewire.http.auth.AuthenticatorRegistry;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SHA1;
@@ -13,14 +14,13 @@ import org.limewire.security.SecurityUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Handles authentication and creation of user passwords for the friend component.
  * 
  * The class is inherently stateless except for a per session random seed.
  */
-@Singleton
+@EagerSingleton
 class DefaultFriendAuthenticator implements Authenticator, AuthTokenRegistry {
 
     private final static Log LOG = LogFactory.getLog(DefaultFriendAuthenticator.class);

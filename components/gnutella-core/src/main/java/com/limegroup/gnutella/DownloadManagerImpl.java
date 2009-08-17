@@ -26,6 +26,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
@@ -43,7 +44,6 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
@@ -74,7 +74,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.mozilla.MozillaDownload;
 import com.limegroup.mozilla.MozillaDownloaderImpl;
 
-@Singleton
+@EagerSingleton
 public class DownloadManagerImpl implements DownloadManager, Service, EventListener<LibraryStatusEvent> {
     
     private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);

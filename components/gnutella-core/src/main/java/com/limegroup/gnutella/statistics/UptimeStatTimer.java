@@ -8,21 +8,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
-import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.Clock;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.Statistics;
 
 /**
  * Periodically updates the uptime statistics.
  */
-@Singleton
+@EagerSingleton
 final class UptimeStatTimer implements Service {
 
     /** Current uptime in seconds. */

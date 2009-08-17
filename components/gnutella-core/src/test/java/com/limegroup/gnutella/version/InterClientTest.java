@@ -64,7 +64,7 @@ public class InterClientTest extends PeerTestCase {
                 bind(ActivityCallback.class).toInstance(myActivityCallback);
             }
         };
-        super.setUp(LimeTestUtils.createInjector(Stage.PRODUCTION, m));
+        super.setUp(LimeTestUtils.createInjector(Stage.DEVELOPMENT, m));
         setEmpty();
         PEER = connect(true);
         BlockingConnectionUtils.drain(PEER);

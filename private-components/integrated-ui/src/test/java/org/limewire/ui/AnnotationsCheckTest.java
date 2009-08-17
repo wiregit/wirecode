@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 
 import junit.framework.Test;
 
+import org.limewire.inject.GuiceUtils;
 import org.limewire.inspection.InspectionException;
 import org.limewire.inspection.InspectionRequirement;
 import org.limewire.inspection.InspectionTool;
@@ -77,7 +78,9 @@ public class AnnotationsCheckTest extends BaseTestCase {
         SwingUtilities.invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                injectorRef.set(Guice.createInjector(new AllLimeWireModules__DO_NOT_USE())); 
+                Injector injector = Guice.createInjector(new AllLimeWireModules__DO_NOT_USE());
+                GuiceUtils.loadEagerSingletons(injector);
+                injectorRef.set(injector); 
                 for(File path : paths) {
                     results.putAll(InspectionTool.generateMappings(path, injectorRef.get(), new String[0]));
                 }

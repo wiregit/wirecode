@@ -159,7 +159,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 
         activityCallback = new MyCallback();
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeWireIOTestModule(), NetworkManagerStub.MODULE, 
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new LimeWireIOTestModule(), NetworkManagerStub.MODULE, 
                 new AbstractModule() {
             @Override
             protected void configure() {

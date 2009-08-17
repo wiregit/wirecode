@@ -14,6 +14,7 @@ import org.limewire.friend.api.FriendConnectionFactoryRegistry;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.Network;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventBean;
@@ -24,10 +25,9 @@ import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.JabberSettings;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 
-@Singleton
+@EagerSingleton
 public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFactory {
 
     private static final Log LOG = LogFactory.getLog(XMPPConnectionFactoryImpl.class);

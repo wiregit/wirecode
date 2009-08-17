@@ -118,7 +118,7 @@ public class LeafRoutingTest extends LimeTestCase {
         networkManager.setPort(5454);
         networkManager.setAcceptedIncomingConnection(true);
         networkManager.setSolicitedGUID(new GUID());
-        LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManager);

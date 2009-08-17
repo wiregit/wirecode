@@ -42,7 +42,7 @@ public class LeafQRPTest extends ClientSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         super.setUp(injector);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
     }

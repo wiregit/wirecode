@@ -87,7 +87,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        super.setUp(LimeTestUtils.createInjector(Stage.PRODUCTION));
+        super.setUp(LimeTestUtils.createInjector(Stage.DEVELOPMENT));
     }
     
     // BEGIN TESTS

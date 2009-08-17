@@ -79,7 +79,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     @Override
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
         
         messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);

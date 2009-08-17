@@ -73,7 +73,7 @@ public class FileManagerTestCase extends LimeTestCase {
         cleanFiles(_storeDir, false);
 
 
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);

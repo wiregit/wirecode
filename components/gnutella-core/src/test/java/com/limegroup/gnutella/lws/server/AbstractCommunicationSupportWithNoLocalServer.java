@@ -140,7 +140,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         LWSSettings.LWS_AUTHENTICATION_HOSTNAME.set("localhost");
         LWSSettings.LWS_AUTHENTICATION_PORT.setValue(8080);
         
-        inj = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        inj = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
         lifecycleManager = inj.getInstance(LifecycleManager.class);
         lifecycleManager.start();

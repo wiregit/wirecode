@@ -27,6 +27,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
+import org.limewire.inject.GuiceUtils;
 import org.limewire.inject.LimeWireInjectModule;
 import org.limewire.inject.Modules;
 import org.limewire.inspection.Inspector;
@@ -277,7 +278,7 @@ public class AppFrame extends SingleFrameApplication {
         Injector childInjector;
         if (injector == null) {
             LimeMozillaInitializer.initialize();
-            childInjector = Guice.createInjector(Stage.PRODUCTION,
+            childInjector = Guice.createInjector(Stage.DEVELOPMENT,
                     new MockModule(),
                     new LimeWireInjectModule(),
                     new LimeWireSwingUiModule(false),
@@ -285,7 +286,7 @@ public class AppFrame extends SingleFrameApplication {
         } else {
             // TODO: We want to use child injectors, but weird things happen
             //       with circular dependencies...
-            childInjector = Guice.createInjector(Stage.PRODUCTION,
+            childInjector = Guice.createInjector(Stage.DEVELOPMENT,
                     Modules.providersFrom(injector),
                     new LimeWireInjectModule(),
                     thiz,
@@ -303,6 +304,7 @@ public class AppFrame extends SingleFrameApplication {
                         }
                     });
         }        
+        GuiceUtils.loadEagerSingletons(childInjector);
         return childInjector;
     }
     

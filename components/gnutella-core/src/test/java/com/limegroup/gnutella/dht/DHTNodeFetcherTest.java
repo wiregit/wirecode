@@ -84,7 +84,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         }
         
         // fake a connection to the network
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);

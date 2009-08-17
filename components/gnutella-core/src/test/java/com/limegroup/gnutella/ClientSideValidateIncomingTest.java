@@ -70,7 +70,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     
     @Override
     public void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         acceptor = (AcceptorImpl)injector.getInstance(Acceptor.class);
         
         // set values before everything is initialized

@@ -6,13 +6,13 @@ import java.io.FileFilter;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.lifecycle.ServiceStage;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -27,7 +27,7 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /** Some glue that installs listeners & things. TODO: Figure out a better way to do this. */
-@Singleton
+@EagerSingleton
 class CoreRandomGlue {
 
     private final Library library;

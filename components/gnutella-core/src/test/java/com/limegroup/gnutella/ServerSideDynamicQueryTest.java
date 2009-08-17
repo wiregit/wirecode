@@ -81,7 +81,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         super.setUp(injector);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         responseFactory = injector.getInstance(ResponseFactory.class);

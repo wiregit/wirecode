@@ -60,7 +60,7 @@ public class PushDownloadManagerTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(DownloaderStub.class).asEagerSingleton();

@@ -83,7 +83,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         doSettings();
         
         final NodeAssigner na = new NodeAssignerStub();
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImplStub.class);

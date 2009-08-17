@@ -54,7 +54,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         DHTTestUtils.setSettings(PORT);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         
         dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
     }

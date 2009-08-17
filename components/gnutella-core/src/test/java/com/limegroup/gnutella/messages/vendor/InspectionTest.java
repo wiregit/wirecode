@@ -110,7 +110,7 @@ public class InspectionTest extends ServerSideTestCase {
         keyPair = keyGen.generateKeyPair();
         final SecureMessageVerifier smv = new SecureMessageVerifierImpl(keyPair.getPublic(), "testSMV");
         
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).toInstance(smv);

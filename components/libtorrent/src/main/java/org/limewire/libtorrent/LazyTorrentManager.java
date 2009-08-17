@@ -6,11 +6,11 @@ import java.util.List;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
 /**
  * Lazy TorrentManager wraps the TorrentManagerImpl and allows holding off
@@ -22,7 +22,7 @@ import com.google.inject.Singleton;
  * implementation was initialized.
  * 
  */
-@Singleton
+@EagerSingleton
 public class LazyTorrentManager implements TorrentManager {
     private final Provider<TorrentManagerImpl> torrentManager;
 

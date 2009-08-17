@@ -18,6 +18,7 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -31,7 +32,6 @@ import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -50,7 +50,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This is the class that goes in the route table when a request is
  * sent whose reply is for me.
  */
-@Singleton
+@EagerSingleton
 public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
     
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);

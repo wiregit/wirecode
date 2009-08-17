@@ -33,7 +33,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
 
     public void testServicesAdded() {
         final FakeRegistry registry = new FakeRegistry();
-        LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ServiceRegistry.class).toInstance(registry);

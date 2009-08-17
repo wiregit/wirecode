@@ -110,7 +110,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
         TEST_PORT++;
         doSettings();
         
-        LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
+        LimeTestUtils.createInjector(Stage.DEVELOPMENT, LimeTestUtils.createModule(this));
         
         lifecycleManager.start();
         connectionServices.connect();

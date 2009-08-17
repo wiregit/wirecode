@@ -100,7 +100,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setPort(PORT);
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, MyActivityCallback.class, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
 
         DownloadManagerImpl downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);

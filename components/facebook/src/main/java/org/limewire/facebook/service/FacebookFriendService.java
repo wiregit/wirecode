@@ -27,6 +27,7 @@ import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.impl.feature.LimewireFeatureInitializer;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -37,7 +38,6 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 /**
@@ -45,7 +45,7 @@ import com.google.inject.name.Named;
  * The entry point for logging into facebook.  Also logs out the <code>FacebookFriendConnection</code>
  * on limewire shutdown.
  */
-@Singleton
+@EagerSingleton
 class FacebookFriendService implements FriendConnectionFactory, Service {
     
     private static Log LOG = LogFactory.getLog(FacebookFriendService.class);

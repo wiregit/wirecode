@@ -73,7 +73,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 
         // initialize services
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, LimeTestUtils.createModule(this));
 
         uploadManager = (HTTPUploadManager) injector.getInstance(UploadManager.class);
         lifeCycleManager.start();

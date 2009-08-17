@@ -89,7 +89,7 @@ public class SimppManagerTest extends LimeTestCase {
     }
     
     public void createSimppManager() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(SimppDataProvider.class).toInstance(new SimppDataProvider() {

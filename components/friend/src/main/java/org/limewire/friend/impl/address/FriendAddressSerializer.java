@@ -2,7 +2,7 @@ package org.limewire.friend.impl.address;
 
 import java.io.IOException;
 
-import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
@@ -11,12 +11,11 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Serializes and deserializes {@link FriendAddress} objects.
  */
-@Singleton
+@EagerSingleton
 public class FriendAddressSerializer implements AddressSerializer {
 
     static final String JID = "JID";

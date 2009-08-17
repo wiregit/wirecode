@@ -91,7 +91,7 @@ public class QueryUnicasterTest extends org.limewire.gnutella.tests.LimeTestCase
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 
-		Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+		Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
 		queryUnicaster = injector.getInstance(QueryUnicaster.class);
 		lifecycleManager = injector.getInstance(LifecycleManager.class);
 		queryUnicaster = injector.getInstance(QueryUnicaster.class);

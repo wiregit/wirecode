@@ -80,7 +80,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        super.setUp(LimeTestUtils.createInjector(Stage.PRODUCTION));
+        super.setUp(LimeTestUtils.createInjector(Stage.DEVELOPMENT));
         
         // get the resource file for com/limegroup/gnutella
         File file = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/ID3V24.mp3");

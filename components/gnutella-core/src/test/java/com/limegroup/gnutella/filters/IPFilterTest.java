@@ -84,7 +84,7 @@ public class IPFilterTest extends LimeTestCase {
             atLeast(1).of(hostileFilter).refreshHosts();
         }});
 	
-        injector = LimeTestUtils.createInjector(m);
+        injector = LimeTestUtils.createInjectorNonEagerly(m);
         filter = injector.getInstance(IPFilter.class);
         final CountDownLatch loaded = new CountDownLatch(1);
         IPFilterCallback ipfc = new IPFilter.IPFilterCallback() {

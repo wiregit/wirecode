@@ -49,7 +49,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     @Override
     public void setUp() throws Exception {
         _queue=new ArrayList(10);
-        super.setUp(LimeTestUtils.createInjector(Stage.PRODUCTION));
+        super.setUp(LimeTestUtils.createInjector(Stage.DEVELOPMENT));
     }
 
     // BEGIN TESTS

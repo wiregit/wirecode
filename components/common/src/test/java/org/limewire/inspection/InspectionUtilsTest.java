@@ -6,6 +6,9 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.inject.EagerSingleton;
+import org.limewire.inject.GuiceUtils;
+import org.limewire.inject.LimeWireInjectModule;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.OSUtils;
 
@@ -29,12 +32,20 @@ public class InspectionUtilsTest extends BaseTestCase {
     public void setUp() throws Exception {
         Requirements.created = false;
         
+        injector = Guice.createInjector(getModules());
+        GuiceUtils.loadEagerSingletons(injector);
+    }
+    
+    private Module[] getModules() {
+        List<Module> modules = new ArrayList<Module>();
+        modules.add(new LimeWireInjectModule());
         Module m = new AbstractModule() {
             @Override
             public void configure() {
                 bind(TestInterface.class).to(TestClass.class);
                 bind(TestInterface2.class).to(TestClass2.class);
                 bind(SyncListInterface.class).to(SyncList.class);
+                bind(SyncListInterface2.class).to(SyncList2.class);
                 bind(OutterI.class).to(Outter.class);
                 bind(Parent.class).to(ConcreteChild.class);
                 bind(IConcrete.class).to(Concrete.class);
@@ -42,7 +53,8 @@ public class InspectionUtilsTest extends BaseTestCase {
                 bind(NetworkData.class).to(NetworkDataImpl.class);
             }
         };
-        injector = Guice.createInjector(m);
+        modules.add(m);
+        return modules.toArray(new Module[modules.size()]);
     }
     
     
@@ -106,6 +118,11 @@ public class InspectionUtilsTest extends BaseTestCase {
         syncList.l = Collections.synchronizedList(new ArrayList());
         syncList.l.add(new Object());
         assertEquals(String.valueOf(syncList.l.size()),InspectionUtils.inspectValue(nameOf(SyncList.class) + ",l", injector, true));
+    
+        SyncList2 syncList2 = injector.getInstance(SyncList2.class);
+        syncList2.l = Collections.synchronizedList(new ArrayList());
+        syncList2.l.add(new Object());
+        assertEquals(String.valueOf(syncList2.l.size()),InspectionUtils.inspectValue(nameOf(SyncList2.class) + ",l", injector, true));
     }
     
     public void testContainer() throws Exception {
@@ -345,6 +362,20 @@ public class InspectionUtilsTest extends BaseTestCase {
 
     @Singleton
     private static class SyncList implements SyncListInterface {
+        @InspectableForSize("")
+        List l;
+
+        public void setList(List l) {
+            this.l = l;
+        }
+    }
+    
+    private static interface SyncListInterface2 {
+        void setList(List l);
+    }
+    
+    @EagerSingleton
+    private static class SyncList2 implements SyncListInterface2 {
         @InspectableForSize("")
         List l;
 

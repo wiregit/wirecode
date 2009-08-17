@@ -10,6 +10,7 @@ import java.util.Vector;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.inject.GuiceUtils;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -38,7 +39,8 @@ public class Main {
     
     
     public static void main(String args[]) {
-        Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(MainCallback.class));
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(MainCallback.class));
+        GuiceUtils.loadEagerSingletons(injector);
         Main main = injector.getInstance(Main.class);
         main.start();
     }

@@ -84,7 +84,7 @@ public class UDPPushTest extends LimeTestCase {
         ConnectionSettings.SOLICITED_GRACE_PERIOD.setValue(5000l);
 
         // initialize services
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(Acceptor.class).to(AcceptorStub.class);

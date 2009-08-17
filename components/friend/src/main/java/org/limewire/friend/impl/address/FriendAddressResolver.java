@@ -13,6 +13,7 @@ import org.limewire.friend.api.feature.ConnectBackRequestFeature;
 import org.limewire.friend.api.feature.Feature;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.friend.api.feature.FeatureEvent.Type;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
@@ -27,13 +28,12 @@ import org.limewire.net.address.AddressResolver;
 import org.limewire.net.address.FirewalledAddress;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Resolves addresses of type {@link FriendAddress} by looking up the full jabber id 
  * including resource in the logged in users.
  */
-@Singleton
+@EagerSingleton
 public class FriendAddressResolver implements AddressResolver {
 
     private final static Log LOG = LogFactory.getLog(FriendAddressResolver.class, LOGGING_CATEGORY);

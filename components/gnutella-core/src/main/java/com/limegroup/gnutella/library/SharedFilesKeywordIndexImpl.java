@@ -16,8 +16,9 @@ import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.inspection.InspectableForSize;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectableForSize;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -28,7 +29,6 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.MediaTypeAggregator;
 import com.limegroup.gnutella.Response;
@@ -45,7 +45,7 @@ import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 // TODO split this up further and remove query and response from here,
 // or introduce a generic indexing class that can be used
-@Singleton
+@EagerSingleton
 class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
     /**

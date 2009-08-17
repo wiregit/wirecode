@@ -89,7 +89,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     @Override
     protected void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         
         super.setUp(injector);
 

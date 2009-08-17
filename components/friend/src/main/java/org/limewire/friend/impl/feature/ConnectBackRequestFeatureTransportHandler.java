@@ -5,14 +5,14 @@ import org.limewire.friend.api.feature.ConnectBackRequestFeature;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.net.ConnectBackRequest;
 import org.limewire.net.ConnectBackRequestedEvent;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
+@EagerSingleton
 public class ConnectBackRequestFeatureTransportHandler implements FeatureTransport.Handler<ConnectBackRequest>{
     private final EventBroadcaster<ConnectBackRequestedEvent> connectBackRequestedEventBroadcaster;
 

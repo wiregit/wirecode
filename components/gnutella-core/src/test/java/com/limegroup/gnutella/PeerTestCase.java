@@ -85,7 +85,7 @@ public abstract class PeerTestCase extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setUp(LimeTestUtils.createInjector(Stage.PRODUCTION));
+        setUp(LimeTestUtils.createInjector(Stage.DEVELOPMENT));
     }
     
     @Override

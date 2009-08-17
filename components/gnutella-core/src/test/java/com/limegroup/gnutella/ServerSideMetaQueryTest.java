@@ -60,7 +60,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyCallback.class, LimeTestUtils.createModule(this));
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, MyCallback.class, LimeTestUtils.createModule(this));
         super.setUp(injector);
         
         FileManagerTestUtils.waitForLoad(library, 500);

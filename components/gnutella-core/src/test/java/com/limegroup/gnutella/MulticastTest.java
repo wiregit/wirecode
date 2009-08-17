@@ -113,7 +113,7 @@ public class MulticastTest extends LimeTestCase {
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
 
-        LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
+        LimeTestUtils.createInjector(Stage.DEVELOPMENT, LimeTestUtils.createModule(this));
         messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
         
         lifeCycleManager.start();

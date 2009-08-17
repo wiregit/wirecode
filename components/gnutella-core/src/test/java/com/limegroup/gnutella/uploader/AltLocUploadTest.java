@@ -159,7 +159,7 @@ public class AltLocUploadTest extends LimeTestCase {
         doSettings();
 
         // initialize services
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(UploadManager.class).to(TestUploadManager.class);

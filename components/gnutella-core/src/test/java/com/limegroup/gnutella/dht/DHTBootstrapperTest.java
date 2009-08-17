@@ -48,7 +48,7 @@ public class DHTBootstrapperTest extends DHTTestCase {
         DHTTestUtils.setSettings(PORT);
         MojitoDHT dht = MojitoFactory.createDHT();
         
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
 
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
         

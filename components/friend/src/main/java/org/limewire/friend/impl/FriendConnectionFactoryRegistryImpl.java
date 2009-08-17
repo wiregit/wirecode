@@ -9,10 +9,9 @@ import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.friend.api.FriendConnectionFactoryRegistry;
 import org.limewire.friend.api.Network;
+import org.limewire.inject.EagerSingleton;
 
-import com.google.inject.Singleton;
-
-@Singleton
+@EagerSingleton
 class FriendConnectionFactoryRegistryImpl implements FriendConnectionFactoryRegistry, FriendConnectionFactory {
      
     private final Map<Network.Type, FriendConnectionFactory> factories =

@@ -15,6 +15,7 @@ import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.FriendPresenceEvent;
 import org.limewire.friend.api.MutableFriendManager;
 import org.limewire.friend.api.feature.LimewireFeature;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -22,7 +23,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 /**
@@ -37,7 +37,7 @@ import com.google.inject.name.Named;
  * <p>
  * The class is threadsafe.
  */
-@Singleton
+@EagerSingleton
 class MutableFriendManagerImpl implements MutableFriendManager {
 
     private static final Log LOG = LogFactory.getLog(MutableFriendManagerImpl.class);

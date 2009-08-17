@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
@@ -31,7 +32,6 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.URN;
@@ -63,7 +63,7 @@ import de.kapsi.net.daap.Transaction;
  * This class handles the mDNS registration and acts as an
  * interface between LimeWire and DAAP.
  */
-@Singleton
+@EagerSingleton
 public class DaapManager {
     
     private static final Log LOG = LogFactory.getLog(DaapManager.class);

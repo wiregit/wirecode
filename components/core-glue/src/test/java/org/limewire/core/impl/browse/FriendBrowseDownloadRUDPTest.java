@@ -36,6 +36,7 @@ import org.limewire.friend.api.RosterEvent;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.inject.GuiceUtils;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -103,7 +104,9 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
     }
 
     private Injector createInjector(Module... modules) {
-        return Guice.createInjector(Stage.PRODUCTION, modules);
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, modules);
+        GuiceUtils.loadEagerSingletons(injector);
+        return injector;
     }
 
     private FriendConnectionConfiguration getDefaultXmppConnectionConfig(final String userName, final String passwd,

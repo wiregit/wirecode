@@ -74,7 +74,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	addr2 = new InetSocketAddress(InetAddress.getLocalHost(), port2);
 
     	
-    	Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LibraryStubModule());
+    	Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new LibraryStubModule());
     	
     	lifecycleManager = injector.getInstance(LifecycleManager.class);
         messageRouter = injector.getInstance(MessageRouter.class);

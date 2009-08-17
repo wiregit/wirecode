@@ -159,7 +159,7 @@ public class PushUploadTest extends LimeTestCase {
     protected void setUp() throws Exception {
         doSettings();
 
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).to(MyNetworkManager.class);

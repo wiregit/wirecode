@@ -162,7 +162,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
 					 NetworkSettings.PORT.getValue());
         
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         headersFactory = injector.getInstance(HeadersFactory.class);

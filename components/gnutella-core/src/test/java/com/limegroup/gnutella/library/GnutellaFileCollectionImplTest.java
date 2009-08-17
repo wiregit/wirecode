@@ -57,7 +57,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
+        LimeTestUtils.createInjector(Stage.DEVELOPMENT, LimeTestUtils.createModule(this));
         injector.getInstance(ServiceRegistry.class).initialize();
     }
 

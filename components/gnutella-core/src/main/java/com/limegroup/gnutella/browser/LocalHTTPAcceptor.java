@@ -17,13 +17,13 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.BasicHttpAcceptor;
 import org.limewire.http.auth.AuthenticationInterceptor;
+import org.limewire.inject.EagerSingleton;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
-@Singleton
+@EagerSingleton
 public class LocalHTTPAcceptor extends BasicHttpAcceptor {
 
     private static final Log LOG = LogFactory.getLog(LocalHTTPAcceptor.class);

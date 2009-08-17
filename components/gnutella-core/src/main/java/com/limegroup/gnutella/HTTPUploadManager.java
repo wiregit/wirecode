@@ -27,6 +27,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.auth.ServerAuthState;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.FileLocker;
@@ -35,7 +36,6 @@ import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.http.HttpContextParams;
@@ -99,7 +99,7 @@ import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileViewProv
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  * @see com.limegroup.gnutella.HTTPAcceptor
  */
-@Singleton
+@EagerSingleton
 public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         UploadManager, HTTPUploadSessionManager, Service {
 

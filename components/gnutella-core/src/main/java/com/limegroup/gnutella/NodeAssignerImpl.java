@@ -14,6 +14,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkInstanceUtils;
@@ -26,7 +27,6 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -43,7 +43,7 @@ import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
  * 
  */
 // TODO starts DHTManager, should also stop it
-@Singleton
+@EagerSingleton
 class NodeAssignerImpl implements NodeAssigner, Service {
     
     private static final Log LOG = LogFactory.getLog(NodeAssignerImpl.class);

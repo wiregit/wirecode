@@ -119,7 +119,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     @Override
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyCallback.class, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, MyCallback.class, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
         
         callback = (MyCallback) injector.getInstance(ActivityCallback.class);

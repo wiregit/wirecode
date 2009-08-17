@@ -19,6 +19,7 @@ import org.limewire.collection.IntSet.IntSetIterator;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.filter.Filter;
 import org.limewire.friend.api.Friend;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -34,7 +35,6 @@ import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -47,7 +47,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
  * by this class, and this class is responsible for properly locking all mutable
  * operations.
  */
-@Singleton
+@EagerSingleton
 class FileViewManagerImpl implements FileViewManager {
     
     private static final Log LOG = LogFactory.getLog(FileViewManagerImpl.class);

@@ -34,7 +34,7 @@ public class FirewalledStatusTest extends ClientSideTestCase {
     
     @Override
     public void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         super.setUp(injector);
         networkManager = injector.getInstance(NetworkManager.class);
     }

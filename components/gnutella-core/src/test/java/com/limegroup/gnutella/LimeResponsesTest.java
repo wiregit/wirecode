@@ -52,7 +52,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
-		Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+		Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         super.setUp(injector);
 		connectionManager = injector.getInstance(ConnectionManager.class);
 		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);

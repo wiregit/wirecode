@@ -12,6 +12,7 @@ import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.inject.GuiceUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
@@ -287,8 +288,9 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
     private BTDownloaderImpl createBTDownloader(File torrentFile) throws IOException {
         AssertComparisons.assertTrue(torrentFile.exists());
-        Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
                 ActivityCallbackAdapter.class));
+        GuiceUtils.loadEagerSingletons(injector);
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);

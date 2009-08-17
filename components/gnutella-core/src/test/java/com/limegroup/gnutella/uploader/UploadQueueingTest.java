@@ -110,7 +110,7 @@ public class UploadQueueingTest extends LimeTestCase {
         savedNIOWatchdogDelay = (int) StalledUploadWatchdog.DELAY_TIME;
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
 
-        LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivitCallback.class, new LibraryStubModule(), LimeTestUtils.createModule(this));
+        LimeTestUtils.createInjector(Stage.DEVELOPMENT, MyActivitCallback.class, new LibraryStubModule(), LimeTestUtils.createModule(this));
         initializeFileManager();
         lifeCycleManager.start();
     }

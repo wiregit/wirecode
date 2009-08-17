@@ -30,6 +30,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -61,7 +62,6 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
@@ -84,7 +84,7 @@ import com.limegroup.gnutella.util.URLDecoder;
 /**
  * Handles sending out pushes and awaiting incoming GIVs.
  */
-@Singleton
+@EagerSingleton
 public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHandlerRegistry, AddressConnector, RegisteringEventListener<AddressEvent> {
 
     private static final Log LOG = LogFactory.getLog(PushDownloadManager.class, LOGGING_CATEGORY);

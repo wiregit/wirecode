@@ -3,14 +3,14 @@ package org.limewire.ui.swing.friends.login;
 import javax.swing.SwingUtilities;
 
 import org.limewire.friend.api.FriendConnectionFactory;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
+@EagerSingleton
 public class AutoLoginService implements Service {
     
     private final FriendAccountConfigurationManager accountManager;

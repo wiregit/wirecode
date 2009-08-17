@@ -98,7 +98,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         UDP_ACCESS = new DatagramSocket(9000);
         UDP_ACCESS.setSoTimeout(TIMEOUT*2);
         networkManagerStub = new NetworkManagerStub();
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class,
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, MyActivityCallback.class,
                 new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
 

@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -20,14 +21,13 @@ import org.limewire.io.IP;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 
 /**
  * Blocks messages and hosts based on IP address.  
  */
-@Singleton
+@EagerSingleton
 public final class LocalIPFilter extends AbstractIPFilter {
     
     private static final Log LOG = LogFactory.getLog(LocalIPFilter.class);

@@ -112,7 +112,7 @@ public class ServerSideWhatIsNewTest
     
     @Override
     public void setUp() throws Exception  {
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         super.setUp(injector);
         
         gnutellaFileCollection.remove(berkeleyFD);

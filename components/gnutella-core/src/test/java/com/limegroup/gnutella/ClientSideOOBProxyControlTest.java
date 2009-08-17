@@ -40,7 +40,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         super.setUp(injector);
         messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);

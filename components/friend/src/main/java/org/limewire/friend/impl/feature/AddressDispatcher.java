@@ -5,18 +5,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.io.Address;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
-import org.limewire.net.address.AddressEvent;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
@@ -24,9 +17,16 @@ import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressRegistry;
+import org.limewire.friend.impl.util.PresenceUtils;
+import org.limewire.inject.EagerSingleton;
+import org.limewire.io.Address;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+import org.limewire.net.address.AddressEvent;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * The <code>AddressDispatcher</code> does dispatching of local and remote <code>Address</code>s.<BR>
@@ -36,7 +36,7 @@ import com.google.inject.Singleton;
  * which maps <code>FriendAddress</code>s (conceptually a friend id + GUID) to a <code>Connectable</code> or
  * <code>FirewalledAddress</code>.
  */
-@Singleton
+@EagerSingleton
 public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTransport.Handler<Address> {
     private static final Log LOG = LogFactory.getLog(AddressDispatcher.class);
     private final FriendAddressRegistry addressRegistry;

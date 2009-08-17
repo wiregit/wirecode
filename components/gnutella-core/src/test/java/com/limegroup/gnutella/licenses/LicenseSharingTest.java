@@ -67,14 +67,14 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	@Override
 	public void setUp() throws Exception {
 	    networkManagerStub = new NetworkManagerStub();
-	    injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+	    injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
 	        @Override
 	        protected void configure() {
 	            bind(NetworkManager.class).toInstance(networkManagerStub);
 	        }
 	    });
         super.setUp(injector);
-
+        
 	    FileManagerTestUtils.waitForLoad(library, 4000);
         // get the resource file for com/limegroup/gnutella
         File cc1 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.mp3");
@@ -153,8 +153,8 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         QueryRequest query = queryRequestFactory.createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
-        
-        Thread.sleep(5 * 1000);
+
+        Thread.sleep(5 * 1000); 
 
         QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[1]);
         assertNotNull(reply);

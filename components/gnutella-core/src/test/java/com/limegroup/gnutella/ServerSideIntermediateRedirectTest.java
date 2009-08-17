@@ -85,7 +85,7 @@ public final class ServerSideIntermediateRedirectTest
 	
 	@Override
 	protected void setUp() throws Exception {
-	    Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+	    Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
 	    super.setUp(injector);
 	    messageFactory = injector.getInstance(MessageFactory.class);
 	    messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);

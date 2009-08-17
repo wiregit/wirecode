@@ -56,7 +56,7 @@ public class LibraryTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         fileList = (LibraryImpl) injector.getInstance(Library.class);
         urnValidator = injector.getInstance(UrnValidator.class);
         fileList.initialize();

@@ -8,12 +8,12 @@ import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.friend.api.feature.FileOfferFeature;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.listener.EventBroadcaster;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
+@EagerSingleton
 public class FileOfferFeatureTransportHandler implements FeatureTransport.Handler<FileMetaData>{
 
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;

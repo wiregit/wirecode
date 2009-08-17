@@ -270,12 +270,12 @@ public class InspectionUtils {
         boolean singleton = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
             public Boolean visitEagerSingleton() { return true; }
             public Boolean visitNoScoping() { return false; }
-            public Boolean visitScope(com.google.inject.Scope scope) { return scope == Scopes.SINGLETON || scope == MoreScopes.LAZY_SINGLETON; }
+            public Boolean visitScope(com.google.inject.Scope scope) { return scope == Scopes.SINGLETON || scope == MoreScopes.LAZY_SINGLETON || scope == MoreScopes.EAGER_SINGLETON; }
             public Boolean visitScopeAnnotation(java.lang.Class<? extends Annotation> scopeAnnotation) { return false; }
         });
             
         if(!singleton) {
-            throw new InspectionException("must be singleton or lazysingleton annotation or be interface!");
+            throw new InspectionException("must be singleton or lazysingleton or eagerSingleton annotation or be interface!");
         }
     }
     

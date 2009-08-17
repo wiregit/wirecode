@@ -65,7 +65,7 @@ public class TLSConnectionTest extends LimeTestCase {
    
     @Override
     public void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
         
         PORT++; // TODO: Remove hack to override port
         

@@ -9,11 +9,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.util.ExceptionUtils;
 
-import com.google.inject.Singleton;
-
-@Singleton
+@EagerSingleton
 class ServiceRegistryImpl implements ServiceRegistry {
     
     private static final Log LOG = LogFactory.getLog(ServiceRegistryImpl.class);
