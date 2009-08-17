@@ -8,8 +8,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.ui.swing.components.IconButton;
@@ -18,6 +16,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Header in the ChatFrame. Contains the minimize icon and information
@@ -34,8 +34,7 @@ class ChatHeader {
 
     private JPanel panel;
     private JLabel friendNameLabel;
-    private IconButton closeButton;
-    
+
     @Inject
     public ChatHeader(MinimizeAction minimizeAction) {
         GuiUtils.assignResources(this);
@@ -48,8 +47,8 @@ class ChatHeader {
         friendNameLabel = new JLabel();
         friendNameLabel.setForeground(textColor);
         friendNameLabel.setFont(textFont);
-        
-        closeButton = new PopupCloseButton(minimizeAction);
+
+        IconButton closeButton = new PopupCloseButton(minimizeAction);
         
         panel.add(friendNameLabel, "gapleft 4, gapright 2, wmax 360, push");
         panel.add(closeButton, "gapright 3");

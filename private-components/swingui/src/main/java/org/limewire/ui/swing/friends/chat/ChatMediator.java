@@ -71,7 +71,8 @@ public class ChatMediator {
 
     @Resource private Icon unviewedChatIcon;
     @Resource private Icon normalChatIcon;
-    
+
+    private final Provider<ChatHeader> chatHeaderProvider;
     private final JLayeredPane layeredPane;
     private final Provider<ChatModel> chatModel;
     private final Provider<ChatFrame> chatFrameProvider;
@@ -85,9 +86,11 @@ public class ChatMediator {
     private volatile FriendConnectionEvent lastEvent;
 
     @Inject
-    public ChatMediator(Provider<ChatFrame> chatFrameProvider, ButtonDecorator buttonDecorator, TrayNotifier trayNotifier,
+    public ChatMediator(Provider<ChatFrame> chatFrameProvider, Provider<ChatHeader> chatHeaderProvider,
+                        ButtonDecorator buttonDecorator, TrayNotifier trayNotifier,
             Provider<ChatModel> chatModel, @GlobalLayeredPane JLayeredPane layeredPane) {
         this.chatFrameProvider = chatFrameProvider;
+        this.chatHeaderProvider = chatHeaderProvider;
         this.layeredPane = layeredPane;
         this.trayNotifier = trayNotifier;
         this.chatModel = chatModel;
@@ -291,6 +294,7 @@ public class ChatMediator {
     public JPanel getFacebookPanel() { // LWC-4069
         JPanel panel = new JPanel(new MigLayout("gap 10! 10!"));
         panel.setBorder(BorderFactory.createMatteBorder(1,1,0,1, Color.BLACK));
+        panel.add(chatHeaderProvider.get().getComponent(), "dock north");
         JEditorPane editorPane = new JEditorPane();
         editorPane.setContentType("text/html");
         editorPane.setEditable(false);
