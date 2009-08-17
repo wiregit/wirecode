@@ -16,6 +16,7 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 
@@ -36,6 +37,14 @@ public class BitTorrentOptionPanel extends OptionPanel {
     private JLabel seedRatioLabel;
 
     private SeedRatioSlider seedRatio;
+
+    private NumericTextField startPortField;
+
+    private NumericTextField endPortField;
+    
+    private JLabel firewallDescriptionLabel;
+    
+    private JLabel firewallToLabel;
 
     private final Provider<TorrentManager> torrentManager;
 
@@ -86,12 +95,21 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
         seedRatio = new SeedRatioSlider();
 
+        firewallDescriptionLabel = new JLabel(I18n.tr("Firewall port range:"));
+        firewallToLabel = new JLabel(I18n.tr("to"));
+        startPortField = new NumericTextField(5, 1, 0xFFFF);
+        endPortField = new NumericTextField(5, 1, 0xFFFF);
+
         if (torrentManager.get().isValid()) {
             p.add(limewireControl, "wrap");
             p.add(myControl, "wrap");
 
             p.add(seedRatioLabel, "split");
             p.add(seedRatio, "alignx right, wrap");
+            p.add(firewallDescriptionLabel, "split");
+            p.add(startPortField, "split");
+            p.add(firewallToLabel, "split");
+            p.add(endPortField, "alignx right, wrap");
 
         } else {
             // TODO updating text after we get the new error message from mike
@@ -110,8 +128,26 @@ public class BitTorrentOptionPanel extends OptionPanel {
         SwingUiSettings.AUTOMATIC_SETTINGS.setValue(limewireControl.isSelected());
         if (limewireControl.isSelected()) {
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(SeedRatioSlider.DEAFULT_SLIDER);
+            BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.revertToDefault();
+            BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.revertToDefault();
         } else {
-            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatio.getValue()/(float)10);
+            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatio.getValue()
+                    / (float) 10);
+            
+            int startPort = startPortField
+            .getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
+            
+            int endPort = endPortField
+            .getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
+            
+            if(startPort > endPort) {
+                int temp = startPort;
+                startPort = endPort;
+                endPort = temp;
+            }
+            
+            BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.setValue(startPort);
+            BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.setValue(endPort);
         }
 
         if (torrentManager.get().isValid()) {
@@ -124,6 +160,10 @@ public class BitTorrentOptionPanel extends OptionPanel {
     boolean hasChanged() {
         return SwingUiSettings.AUTOMATIC_SETTINGS.getValue() != limewireControl.isSelected()
                 || seedRatio.getValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
+                        .getValue()
+                || startPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT
+                        .getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue()
+                || endPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_END_PORT
                         .getValue();
     }
 
@@ -137,7 +177,9 @@ public class BitTorrentOptionPanel extends OptionPanel {
         }
 
         seedRatio.setValue((int) (BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue() * 10));
-
+        startPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
+        endPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
+        
         updateState(auto);
     }
 
@@ -156,6 +198,12 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedRatioLabel.setVisible(!limewireControlled);
         seedRatio.setVisible(!limewireControlled);
         seedRatio.setEnabled(!limewireControlled);
+        firewallDescriptionLabel.setVisible(!limewireControlled);
+        firewallToLabel.setVisible(!limewireControlled);
+        startPortField.setVisible(!limewireControlled);
+        startPortField.setEnabled(!limewireControlled);
+        endPortField.setVisible(!limewireControlled);
+        endPortField.setEnabled(!limewireControlled);
     }
 
 }
