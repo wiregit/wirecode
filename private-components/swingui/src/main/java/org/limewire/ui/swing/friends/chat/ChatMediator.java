@@ -212,7 +212,9 @@ public class ChatMediator {
                     getChatButton().setVisible(false);
                     if(panel != null) {
                         setVisible(false);
-                        chatFrame.closeAllChats();
+                        if (chatFrame != null) {
+                            chatFrame.closeAllChats();
+                        }
                         panel.dispose();
                     }
                     chatModel.get().unregisterListeners();
@@ -374,7 +376,7 @@ public class ChatMediator {
                 g.drawLine(0, height-1, width-1, height-1);
                 g.drawLine(width-1, 0, width-1, height-1);
                 
-                if (chatFrame.getSelectedConversation() != null) {
+                if (chatFrame != null && chatFrame.getSelectedConversation() != null) {
                     g.setPaint(activeBorder);
                     g.drawLine(0,0,width-2,0);
                 }
