@@ -33,14 +33,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     private JRadioButton myControl;
 
-    private JLabel uploadBandWidthLabel;
-
-    private BandWidthSlider uploadBandWidth;
-
-    private JLabel downloadBandWidthLabel;
-
-    private BandWidthSlider downloadBandWidth;
-
     private JLabel seedRatioLabel;
 
     private SeedRatioSlider seedRatio;
@@ -90,12 +82,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(limewireControl);
         buttonGroup.add(myControl);
 
-        downloadBandWidthLabel = new JLabel(I18n.tr("Download bandwidth"));
-        uploadBandWidthLabel = new JLabel(I18n.tr("Upload bandwidth"));
         seedRatioLabel = new JLabel(I18n.tr("Seed Ratio"));
-
-        uploadBandWidth = new BandWidthSlider();
-        downloadBandWidth = new BandWidthSlider();
 
         seedRatio = new SeedRatioSlider();
 
@@ -103,10 +90,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
             p.add(limewireControl, "wrap");
             p.add(myControl, "wrap");
 
-            p.add(downloadBandWidthLabel, "split");
-            p.add(downloadBandWidth, "alignx right, wrap");
-            p.add(uploadBandWidthLabel, "split");
-            p.add(uploadBandWidth, "alignx right, wrap");
             p.add(seedRatioLabel, "split");
             p.add(seedRatio, "alignx right, wrap");
 
@@ -126,12 +109,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
     boolean applyOptions() {
         SwingUiSettings.AUTOMATIC_SETTINGS.setValue(limewireControl.isSelected());
         if (limewireControl.isSelected()) {
-            BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(BandWidthSlider.DEFAULT_SLIDER);
-            BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(BandWidthSlider.DEFAULT_SLIDER);
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(SeedRatioSlider.DEAFULT_SLIDER);
         } else {
-            BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(uploadBandWidth.getValue());
-            BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(downloadBandWidth.getValue());
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatio.getValue()/(float)10);
         }
 
@@ -144,10 +123,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
     @Override
     boolean hasChanged() {
         return SwingUiSettings.AUTOMATIC_SETTINGS.getValue() != limewireControl.isSelected()
-                || uploadBandWidth.getValue() != BittorrentSettings.LIBTORRENT_UPLOAD_SPEED
-                        .getValue()
-                || downloadBandWidth.getValue() != BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED
-                        .getValue()
                 || seedRatio.getValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                         .getValue();
     }
@@ -161,8 +136,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
             myControl.setSelected(true);
         }
 
-        uploadBandWidth.setValue(BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.getValue());
-        downloadBandWidth.setValue(BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.getValue());
         seedRatio.setValue((int) (BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue() * 10));
 
         updateState(auto);
@@ -180,14 +153,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
      *        visible.
      */
     private void updateState(boolean limewireControlled) {
-        uploadBandWidthLabel.setVisible(!limewireControlled);
-        uploadBandWidth.setVisible(!limewireControlled);
-        uploadBandWidth.setEnabled(!limewireControlled);
-        
-        downloadBandWidthLabel.setVisible(!limewireControlled);
-        downloadBandWidth.setVisible(!limewireControlled);
-        downloadBandWidth.setEnabled(!limewireControlled);
-        
         seedRatioLabel.setVisible(!limewireControlled);
         seedRatio.setVisible(!limewireControlled);
         seedRatio.setEnabled(!limewireControlled);

@@ -8,7 +8,9 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.libtorrent.LazyTorrentManager;
 import org.limewire.libtorrent.TorrentImpl;
 
@@ -31,8 +33,7 @@ public class LimeWireBittorrentModule extends AbstractModule {
 
                             @Override
                             public int getMaxDownloadBandwidth() {
-                                int download_speed = BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED
-                                        .getValue();
+                                int download_speed = DownloadSettings.DOWNLOAD_SPEED.getValue();
                                 if (download_speed >= 100) {
                                     return 0;
                                 }
@@ -43,8 +44,7 @@ public class LimeWireBittorrentModule extends AbstractModule {
 
                             @Override
                             public int getMaxUploadBandwidth() {
-                                int upload_speed = BittorrentSettings.LIBTORRENT_UPLOAD_SPEED
-                                        .getValue();
+                                int upload_speed = UploadSettings.UPLOAD_SPEED.getValue();
                                 if (upload_speed >= 100) {
                                     return 0;
                                 }

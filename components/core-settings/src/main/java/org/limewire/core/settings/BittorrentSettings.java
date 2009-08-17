@@ -24,14 +24,6 @@ public class BittorrentSettings extends LimeProps {
     public static final BooleanSetting LIBTORRENT_ENABLED = FACTORY.createBooleanSetting(
             "LIBTORRENT_ENABLED", true);
 
-    // TODO integrate with DownloadSettings.DOWNLOAD_SPEED
-    public static final IntSetting LIBTORRENT_DOWNLOAD_SPEED = FACTORY.createIntSetting(
-            "LIBTORRENT_DOWNLOAD_SPEED", 100);
-
-    // TODO integrate with DownloadSettings.UPLOAD_SPEED
-    public static final IntSetting LIBTORRENT_UPLOAD_SPEED = FACTORY.createIntSetting(
-            "LIBTORRENT_UPLOAD_SPEED", 100);
-
     public static final IntSetting LIBTORRENT_LISTEN_START_PORT = FACTORY.createIntSetting(
             "LIBTORRENT_LISTEN_START_PORT", 6881);
 
