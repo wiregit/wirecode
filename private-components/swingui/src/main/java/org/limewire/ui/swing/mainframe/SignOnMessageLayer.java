@@ -84,7 +84,7 @@ class SignOnMessageLayer {
     private final EventListenerList<LibrarySharingEvent> libraryListenerList;
     private final Provider<Rectangle> libraryTableRect;
     private final EventBean<FriendConnectionEvent> connectionEventBean;
-    private final MessageDecorator messageDecorator;
+    private final Provider<MessageDecorator> messageDecoratorProvider;
     
     /** Current message component. */
     private Component messageComponent;
@@ -111,7 +111,7 @@ class SignOnMessageLayer {
             EventListenerList<LibrarySharingEvent> libraryListenerList,
             @LibraryTableRect Provider<Rectangle> libraryTableRect,
             EventBean<FriendConnectionEvent> connectionEventBean,
-            MessageDecorator messageDecorator) {
+            Provider<MessageDecorator> messageDecoratorProvider) {
         
         this.layeredPane = limeWireLayeredPane;
         this.topPanel = topPanel;
@@ -121,7 +121,7 @@ class SignOnMessageLayer {
         this.libraryListenerList = libraryListenerList;
         this.libraryTableRect = libraryTableRect;
         this.connectionEventBean = connectionEventBean;
-        this.messageDecorator = messageDecorator;
+        this.messageDecoratorProvider = messageDecoratorProvider;
         
         GuiUtils.assignResources(this);
     }
@@ -393,7 +393,7 @@ class SignOnMessageLayer {
            
             messagePanel = new JXPanel(new MigLayout("insets 3 3 3 3, gap 0!"));
             messagePanel.setOpaque(false);
-            messageDecorator.decorateGreenRectangleMessage(messagePanel);
+            messageDecoratorProvider.get().decorateGreenRectangleMessage(messagePanel);
             
             // Create message components.
             closeButton = createCloseButton();
@@ -446,7 +446,7 @@ class SignOnMessageLayer {
             
             // Create message component.
             messageComponent = new MessageComponent(5, 5, 18, 8);
-            messageDecorator.decorateGreenMessage(messageComponent);
+            messageDecoratorProvider.get().decorateGreenMessage(messageComponent);
             
             // Create message elements.
             closeButton = createCloseButton();

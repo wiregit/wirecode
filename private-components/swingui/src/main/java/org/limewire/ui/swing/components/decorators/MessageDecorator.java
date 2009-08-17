@@ -9,7 +9,9 @@ import org.limewire.ui.swing.painter.factories.MessagePainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class MessageDecorator {
     
     private final MessagePainterFactory painterFactory;
@@ -22,6 +24,8 @@ public class MessageDecorator {
     @Inject
     public MessageDecorator(MessagePainterFactory painterFactory) {
         GuiUtils.assignResources(this);
+        
+        System.out.println("created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         
         this.painterFactory = painterFactory;
     }

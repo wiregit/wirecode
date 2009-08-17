@@ -53,7 +53,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private EventListener<FriendConnectionEvent> connectionListener;
     private ListenerSupport<FriendConnectionEvent> connectionSupport;
     private final RemoteLibraryManager remoteLibraryManager;
-    private final MessageDecorator messageDecorator;
+    private final Provider<MessageDecorator> messageDecoratorProvider;
 
     private BrowseSearch browseSearch;
     
@@ -65,14 +65,14 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
 
     @Inject
     public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, Provider<ChatMediator> chatMediator, RemoteLibraryManager remoteLibraryManager,
-            MessageDecorator messageDecorator,
+            Provider<MessageDecorator> messageDecoratorProvider,
             @Assisted SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
         this.connectionEventBean = connectionEventBean;
         this.chatMediator = chatMediator;
         this.searchResultsModel = searchResultsModel;
         this.remoteLibraryManager = remoteLibraryManager;
-        this.messageDecorator = messageDecorator;
+        this.messageDecoratorProvider = messageDecoratorProvider;
     }
     
     public void update(BrowseState state, BrowseSearch browseSearch, List<Friend> friends){
@@ -121,7 +121,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
      */
     private JComponent createMessageComponent(String text) {
         MessageComponent messageComponent = new MessageComponent();
-        messageDecorator.decorateGrayMessage(messageComponent);
+        messageDecoratorProvider.get().decorateGrayMessage(messageComponent);
 
         JLabel message = new JLabel(text);
         messageComponent.decorateHeaderLabel(message);

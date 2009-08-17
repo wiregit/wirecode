@@ -16,7 +16,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class MessagePainterFactory {
     
     @Resource private int arcWidth;
