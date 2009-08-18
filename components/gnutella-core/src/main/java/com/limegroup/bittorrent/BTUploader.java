@@ -62,8 +62,8 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
             if (finished
                     &&  seedRatio >= BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                             .getValue()) {
-                remove();
                 this.finished.set(true);
+                remove();
             }
         }
     }
@@ -73,6 +73,7 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
         torrent.remove();
         torrent.removeListener(this);
         torrentUploadManager.removeMemento(torrent);
+        activityCallback.removeUpload(this);
     };
 
     @Override
@@ -90,9 +91,8 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     }
 
     private void finish() {
-        remove();
         cancelled.set(true);
-        activityCallback.removeUpload(this);
+        remove();
     }
 
     @Override
