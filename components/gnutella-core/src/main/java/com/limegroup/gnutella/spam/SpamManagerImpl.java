@@ -10,6 +10,11 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
+/**
+ * Calculates spam ratings for search results based on their similarity to
+ * previous results that have been marked, either manually or automatically, as
+ * spam or not spam. 
+ */
 @Singleton
 class SpamManagerImpl implements SpamManager {
 
@@ -28,6 +33,7 @@ class SpamManagerImpl implements SpamManager {
     /**
      * Returns the spam manager's rating table. For testing.
      */
+    @Override
     public RatingTable getRatingTable() {
         return ratingTable;
     }
@@ -37,6 +43,7 @@ class SpamManagerImpl implements SpamManager {
      * 
      * @param qr the QueryRequest started by the user
      */
+    @Override
     public void startedQuery(QueryRequest qr) {
         if (SearchSettings.ENABLE_SPAM_FILTER.getValue())
             ratingTable.clear(qr);
@@ -49,6 +56,7 @@ class SpamManagerImpl implements SpamManager {
      * @return the spam rating of the RemoteFileDesc, between 0 (not spam) and 1
      *         (spam)
      */
+    @Override
     public float calculateSpamRating(RemoteFileDesc rfd) {
         if (!SearchSettings.ENABLE_SPAM_FILTER.getValue())
             return 0;
@@ -69,6 +77,7 @@ class SpamManagerImpl implements SpamManager {
     /**
      * Increases the spam ratings of tokens associated with a spam query reply.
      */
+    @Override
     public void handleSpamQueryReply(QueryReply qr) {
         if (SearchSettings.ENABLE_SPAM_FILTER.getValue())
             ratingTable.rate(qr, 1);
@@ -79,6 +88,7 @@ class SpamManagerImpl implements SpamManager {
      * 
      * @param rfds an array of RemoteFileDescs that should be marked as spam
      */
+    @Override
     public void handleUserMarkedSpam(RemoteFileDesc[] rfds) {
         for (RemoteFileDesc rfd : rfds)
             rfd.setSpamRating(1);
@@ -91,6 +101,7 @@ class SpamManagerImpl implements SpamManager {
      * 
      * @param rfds an array of RemoteFileDescs that should be marked as good
      */
+    @Override
     public void handleUserMarkedGood(RemoteFileDesc[] rfds) {
         for (RemoteFileDesc rfd : rfds)
             rfd.setSpamRating(0);
@@ -101,6 +112,7 @@ class SpamManagerImpl implements SpamManager {
     /**
      * Clears all collected filter data.
      */
+    @Override
     public void clearFilterData() {
         ratingTable.clear();
     }
