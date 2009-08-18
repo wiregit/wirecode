@@ -30,7 +30,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 @Singleton
 public class UploadSlotManagerImpl implements UploadSlotManager {
     
-    private static final Log LOG = LogFactory.getLog(UploadSlotManager.class);
+    private static final Log LOG = LogFactory.getLog(UploadSlotManagerImpl.class);
     
     /**
      * The three priority levels

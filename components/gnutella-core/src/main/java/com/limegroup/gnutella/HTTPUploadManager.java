@@ -746,6 +746,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         HTTPUploadSession session = getOrCreateSession(context);
         HTTPUploader uploader = session.getUploader();
         if (LOG.isDebugEnabled()) {
+            LOG.debug("request line: " + request.getRequestLine());
+            LOG.debug("session: " + session);
             LOG.debug("uploader: " + uploader);
         }
         if (uploader != null) {
@@ -757,9 +759,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     LOG.debug("uploader method: " + uploader.getMethod() + " vs method: " + request.getRequestLine().getMethod());
                     LOG.debug("request line: " + request.getRequestLine());
                 }
-                // start new file
-                slotManager.requestDone(session);
-
+                
+                
                 // Because queuing is per-socket (and not per file),
                 // we do not want to reset the queue status if they're
                 // requesting a new file.
@@ -770,10 +771,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     // until the newer line finished, at which point
                     // the first one would display as a -1 queue position.
                     uploader.setState(UploadStatus.INTERRUPTED);
-                } else {
-                    slotManager.requestDone(session);
-                }
-
+                } 
+                
                 cleanupFinishedUploader(uploader);
 
                 uploader = new HTTPUploader(filename, session, tcpBandwidthStatistics);
