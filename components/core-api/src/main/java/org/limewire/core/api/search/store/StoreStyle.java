@@ -76,4 +76,6 @@ public interface StoreStyle {
     boolean isShowInfoOnHover();
     
     boolean isShowTracksOnHover();
+
+    boolean isStreamButtonVisible();
 }

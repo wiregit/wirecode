@@ -7,6 +7,7 @@ import javax.swing.Icon;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.endpoint.RemoteHost;
 
 /**
  * Defines a Lime Store result.
@@ -61,6 +62,11 @@ public interface StoreResult {
      * Returns the sort priority for the result.
      */
     SortPriority getSortPriority();
+    
+    /**
+     * Returns the source for the result as a RemoteHost object.
+     */
+    RemoteHost getSource();
     
     /**
      * Returns the URN for the result.
