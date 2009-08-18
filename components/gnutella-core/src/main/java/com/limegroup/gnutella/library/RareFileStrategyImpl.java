@@ -1,14 +1,14 @@
 package com.limegroup.gnutella.library;
 
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.inject.EagerSingleton;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.util.RPNParser;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-@EagerSingleton
+@Singleton
 public class RareFileStrategyImpl implements RareFileStrategy { 
     
     private volatile RPNParser parser;
