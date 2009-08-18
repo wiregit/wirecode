@@ -16,7 +16,6 @@ import org.limewire.util.TestUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Stage;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ClientSideTestCase;
 import com.limegroup.gnutella.ForMeReplyHandler;
@@ -67,7 +66,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	@Override
 	public void setUp() throws Exception {
 	    networkManagerStub = new NetworkManagerStub();
-	    injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
+	    injector = LimeTestUtils.createInjector(new AbstractModule() {
 	        @Override
 	        protected void configure() {
 	            bind(NetworkManager.class).toInstance(networkManagerStub);

@@ -160,6 +160,7 @@ public class ChatListener implements Runnable {
         }
     }
 
+    @SuppressWarnings("unused")
     private void processChatMessage(JSONObject payload, String msgType) throws JSONException {
         String parsedSenderId = payload.getString("from");
 

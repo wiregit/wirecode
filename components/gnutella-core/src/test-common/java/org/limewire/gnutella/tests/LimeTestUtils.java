@@ -149,36 +149,31 @@ public class LimeTestUtils {
      * @return the injector
      */
     public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
-        return createInjector(Stage.DEVELOPMENT, callbackClass, modules);
+        return createInjector(callbackClass, true, modules);
     }
     
-    public static Injector createInjector(Stage stage, Class<? extends ActivityCallback> callbackClass, Module...modules) {
-        return createInjector(stage, callbackClass, true, modules);
-    }
-    
-    private static Injector createInjector(Stage stage, Class<? extends ActivityCallback> callbackClass, boolean loadEager, Module...modules) {
-        Module combinedReplacements = Modules.combine(modules);
-        Module combinedOriginals = Modules.combine(new LimeWireCoreModule(callbackClass), new BlockingConnectionFactoryModule());
-        Module replaced = Modules.override(combinedOriginals).with(combinedReplacements);
-        Injector injector = Guice.createInjector(stage, replaced);
-        if(loadEager)
-            GuiceUtils.loadEagerSingletons(injector);
-        return injector;
-    }
-
     /**
      * Wraps {@link #createInjector(Module, Class) createInjector(Module, ActivityCallbackStub.class)}.
      */
     public static Injector createInjector(Module... modules) {
-        return createInjector(ActivityCallbackStub.class, modules);
+        return createInjector(ActivityCallbackStub.class, true, modules);
     }
     
+    /**
+     * Creates the Guice injector without eagerly loading EagerSingletons.
+     */
     public static Injector createInjectorNonEagerly(Module... modules) {
-        return createInjector(Stage.DEVELOPMENT, ActivityCallbackStub.class, false, modules);
+        return createInjector(ActivityCallbackStub.class, false, modules);
     }
     
-    public static Injector createInjector(Stage stage, Module... modules) {
-        return createInjector(stage, ActivityCallbackStub.class, modules);
+    private static Injector createInjector(Class<? extends ActivityCallback> callbackClass, boolean loadEager, Module...modules) {
+        Module combinedReplacements = Modules.combine(modules);
+        Module combinedOriginals = Modules.combine(new LimeWireCoreModule(callbackClass), new BlockingConnectionFactoryModule());
+        Module replaced = Modules.override(combinedOriginals).with(combinedReplacements);
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, replaced);
+        if(loadEager)
+            GuiceUtils.loadEagerSingletons(injector);
+        return injector;
     }
 
     /**
@@ -193,7 +188,7 @@ public class LimeTestUtils {
      */
     private static Injector createInjectorAndStart(Class<? extends ActivityCallback> callbackClass, Module...modules) {
         // Use PRODUCTION to ensure all Services are created.
-        Injector injector = createInjector(Stage.DEVELOPMENT, callbackClass, modules);
+        Injector injector = createInjector(callbackClass, true, modules);
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
         return injector;
@@ -203,9 +198,7 @@ public class LimeTestUtils {
      * Wraps {@link #createInjectorAndStart(Module, Class) createInjectorAndStart(Module, ActivityCallbackStub.class)}.
      */
     public static Injector createInjectorAndStart(Module...modules) {
-        Injector injector = createInjectorAndStart(ActivityCallbackStub.class, modules);
-        GuiceUtils.loadEagerSingletons(injector);
-        return injector;
+        return createInjectorAndStart(ActivityCallbackStub.class, modules);
     }
 
     public static class NetworkManagerStubModule extends AbstractModule {

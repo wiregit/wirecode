@@ -15,7 +15,6 @@ import org.limewire.lifecycle.ServiceStage;
 import org.limewire.lifecycle.StagedRegisterBuilder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Stage;
 
 public class ServiceRegistryIntegrationTest extends LimeTestCase {
     
@@ -33,7 +32,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
 
     public void testServicesAdded() {
         final FakeRegistry registry = new FakeRegistry();
-        LimeTestUtils.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
+        LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ServiceRegistry.class).toInstance(registry);

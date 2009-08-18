@@ -143,6 +143,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         return null;
     }
 
+    @SuppressWarnings("unused")
     private void setModeImpl(FriendPresence.Mode mode) throws FriendException {
         XMPPFriendConnectionImpl connection = getActiveConnection();
         if (connection != null) {

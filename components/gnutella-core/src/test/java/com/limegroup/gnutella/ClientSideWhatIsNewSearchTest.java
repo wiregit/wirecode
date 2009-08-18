@@ -14,7 +14,6 @@ import org.limewire.util.MediaType;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.filters.response.XMLDocFilterTest;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -49,7 +48,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, StoreRepliesActivityCallback.class);
+        Injector injector = LimeTestUtils.createInjector(StoreRepliesActivityCallback.class);
         super.setUp(injector);
         
         callback = (StoreRepliesActivityCallback) injector.getInstance(ActivityCallback.class);

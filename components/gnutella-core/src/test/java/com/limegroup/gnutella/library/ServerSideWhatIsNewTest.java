@@ -28,7 +28,6 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Stage;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ClientSideTestCase;
 import com.limegroup.gnutella.DownloadServices;
@@ -112,7 +111,7 @@ public class ServerSideWhatIsNewTest
     
     @Override
     public void setUp() throws Exception  {
-        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT);
+        injector = LimeTestUtils.createInjector();
         super.setUp(injector);
         
         gnutellaFileCollection.remove(berkeleyFD);

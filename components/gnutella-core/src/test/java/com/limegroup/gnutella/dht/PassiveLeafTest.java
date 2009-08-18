@@ -32,7 +32,6 @@ import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
-import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -58,7 +57,7 @@ public class PassiveLeafTest extends DHTTestCase {
     protected void setUp() throws Exception {
         DHTTestUtils.setSettings(PORT);
         
-        injector = LimeTestUtils.createInjector(Stage.DEVELOPMENT, new LimeWireIOTestModule());
+        injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule());
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
     }
