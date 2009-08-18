@@ -570,7 +570,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (vsr != null && e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {  
+                if (vsr != null && !vsr.isSpam() && e.getClickCount() == 2 &&
+                        SwingUtilities.isLeftMouseButton(e)) {  
                     downloadHandler.download(vsr);
                 }
             }
