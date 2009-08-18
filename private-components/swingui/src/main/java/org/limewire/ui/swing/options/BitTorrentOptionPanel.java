@@ -63,8 +63,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
         p.setLayout(new MigLayout("gapy 10"));
         p.setOpaque(false);
 
-        limewireControl = new JRadioButton(I18n
-                .tr("Let LimeWire manage my BitTorrent settings (Recommended)"));
+        limewireControl = new JRadioButton("<html>"+I18n
+                .tr("Let LimeWire manage my BitTorrent settings (Recommended)")+"</html>");
         limewireControl.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {

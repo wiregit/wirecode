@@ -270,7 +270,7 @@ public class LibraryOptionPanel extends OptionPanel {
             
             unsafeTypeOptionPanel = unsafeOptionPanelProvider.get();
             
-            shareP2PdownloadedFilesCheckBox = new JCheckBox(I18n.tr("Add files I download from P2P Users to my Public Shared List"));
+            shareP2PdownloadedFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Add files I download from P2P Users to my Public Shared List")+"</html>");
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
             
             configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
@@ -318,10 +318,10 @@ public class LibraryOptionPanel extends OptionPanel {
         private void updateUnsafeMessage() {
             if (((Boolean)unsafeTypeOptionPanelStateManagerProvider.get().getValue(LibrarySettings.ALLOW_PROGRAMS)).booleanValue()
                     || ((Boolean)unsafeTypeOptionPanelStateManagerProvider.get().getValue(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING)).booleanValue()) {
-                unsafeMessageLabel.setText(I18n.tr("You have enabled some unsafe file sharing options."));
+                unsafeMessageLabel.setText("<html>"+I18n.tr("You have enabled some unsafe file sharing options.")+"</html>");
             }
             else {
-                unsafeMessageLabel.setText(I18n.tr("LimeWire is preventing you from unsafe searching and sharing."));
+                unsafeMessageLabel.setText("<html>"+I18n.tr("LimeWire is preventing you from unsafe searching and sharing.")+"</html>");
             }
         }
         
