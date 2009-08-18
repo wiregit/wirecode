@@ -198,12 +198,6 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 SwingUtils.invokeLater(new Runnable() {
                     public void run() {
                         resultsList.setStoreStyle(storeStyle);
-                        // Post event to force repaint using updated renderer.
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                resultsList.resizeAndRepaint();
-                            }
-                        });
                     }
                 });
             }
