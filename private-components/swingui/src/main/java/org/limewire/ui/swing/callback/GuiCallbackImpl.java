@@ -12,29 +12,32 @@ import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.magnet.MagnetLink;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MagnetHandler;
-import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
-@Singleton
+@EagerSingleton
 public class GuiCallbackImpl implements GuiCallback {
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final Provider<MagnetHandler> magnetHandler;
 
     @Inject
-    public GuiCallbackImpl(GuiCallbackService guiCallbackService,
-            Provider<DownloadExceptionHandler> downloadExceptionHandler,
+    public GuiCallbackImpl(Provider<DownloadExceptionHandler> downloadExceptionHandler,
             Provider<MagnetHandler> magnetHandler) {
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.magnetHandler = magnetHandler;
+    }
+    
+    @Inject
+    void register(GuiCallbackService guiCallbackService) {
         guiCallbackService.setGuiCallback(this);
     }
 
