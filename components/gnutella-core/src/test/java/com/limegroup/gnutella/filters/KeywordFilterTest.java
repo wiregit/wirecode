@@ -161,16 +161,6 @@ public class KeywordFilterTest extends BaseTestCase {
         context.assertIsSatisfied();   
     }
 
-    public void queryReply(QueryRequest query, String keyword){
-        final QueryRequest localQuery = query;
-        final String localKeyword = keyword;
-
-        context.checking(new Expectations() {{
-            one(localQuery).getQuery();
-            will(returnValue(localKeyword));
-        }});
-    }
-
     public void testOtherMessagesAreIgnored() throws Exception{
         context.checking(new Expectations() {{
             never(pingRequestMock);
