@@ -146,6 +146,10 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
         if (status == null) {
             return UploadStatus.CONNECTING;
         }
+        
+        if(torrent.isPaused()) {
+            return UploadStatus.QUEUED;
+        }
 
         if (status.isError()) {
             // TODO add retry
