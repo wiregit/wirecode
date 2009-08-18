@@ -2,7 +2,9 @@ package org.limewire.ui.swing.search.model;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -10,6 +12,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreResult.SortPriority;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
@@ -24,9 +27,11 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     private final StoreResult storeResult;
     private final Provider<PropertiableHeadings> propertiableHeadings;
+    private final Set<RemoteHost> remoteHosts;
+    private final Set<Friend> friends;
     
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
-    private int relevance = 999;
+    private int relevance;
     private String heading;
     private String subHeading;
     private boolean showTracks = true;
@@ -36,6 +41,13 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
             Provider<PropertiableHeadings> propertiableHeadings) {
         this.storeResult = storeResult;
         this.propertiableHeadings = propertiableHeadings;
+        this.relevance = storeResult.getAlbumResults().size();
+        this.remoteHosts = new HashSet<RemoteHost>();
+        this.friends = new HashSet<Friend>();
+        
+        // Add source for store result.
+        this.remoteHosts.add(storeResult.getSource());
+        this.friends.add(storeResult.getSource().getFriendPresence().getFriend());
     }
     
     @Override
@@ -116,7 +128,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public Collection<RemoteHost> getSources() {
-        return Collections.emptySet();
+        return remoteHosts;
     }
 
     @Override
@@ -165,6 +177,11 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
             this.showTracks = showTracks;
             this.rowDisplayResult = null;
         }
+    }
+    
+    @Override
+    public SortPriority getSortPriority() {
+        return storeResult.getSortPriority();
     }
     
     @Override
@@ -241,7 +258,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public Collection<Friend> getFriends() {
-        return Collections.emptySet();
+        return friends;
     }
 
     @Override
@@ -258,5 +275,4 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
         VisualSearchResult vsr = (VisualSearchResult) o;
         return getHeading().compareTo(vsr.getHeading());
     }
-
 }
