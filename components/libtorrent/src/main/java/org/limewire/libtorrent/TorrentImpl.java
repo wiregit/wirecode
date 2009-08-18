@@ -64,6 +64,9 @@ public class TorrentImpl implements Torrent {
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
+    // TODO rename cancelled, it no longer just means cancelled, it also means
+    // that the torrent has been removed from the torrent manager. Might be able
+    // to refactor the variable away entirely.
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     // used to decide if the torrent was just newly completed or not.
@@ -327,7 +330,7 @@ public class TorrentImpl implements Torrent {
         remove();
         listeners.broadcast(TorrentEvent.STOPPED);
     }
-    
+
     @Override
     public void remove() {
         if (started.get() && !cancelled.getAndSet(true)) {
@@ -365,7 +368,7 @@ public class TorrentImpl implements Torrent {
     public float getSeedRatio() {
         TorrentStatus status = this.status.get();
         if (status != null) {
-            float seedRatio = status.getSeedRatio(); 
+            float seedRatio = status.getSeedRatio();
             return seedRatio;
         }
         return 0;
