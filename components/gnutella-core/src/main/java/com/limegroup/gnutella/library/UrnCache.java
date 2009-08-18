@@ -102,7 +102,7 @@ public final class UrnCache {
     @Inject
     void register(@Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService,
             ServiceScheduler serviceScheduler) {
-        serviceScheduler.scheduleAtFixedRate("urncache persister", new Runnable() {
+        serviceScheduler.scheduleWithFixedDelay("urncache persister", new Runnable() {
             @Override
             public void run() {
                 persistCache();

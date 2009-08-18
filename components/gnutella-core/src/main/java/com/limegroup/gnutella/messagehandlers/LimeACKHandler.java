@@ -58,7 +58,7 @@ public class LimeACKHandler implements MessageHandler, Service {
     }
     
     public void start() {
-        backgroundExecutor.scheduleAtFixedRate(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
     }
     
     public void stop() {}

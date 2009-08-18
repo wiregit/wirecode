@@ -114,7 +114,7 @@ public class CoreDownloadListManager implements DownloadListManager {
               }
           };
      
-          scheduler.scheduleAtFixedRate("UI Download Status Monitor", command, PERIOD*2, PERIOD, TimeUnit.MILLISECONDS, backgroundExecutor);
+          scheduler.scheduleWithFixedDelay("UI Download Status Monitor", command, PERIOD*2, PERIOD, TimeUnit.MILLISECONDS, backgroundExecutor);
 	}
 
     // forces refresh

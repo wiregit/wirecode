@@ -79,7 +79,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
               }
           };
           
-          scheduler.scheduleAtFixedRate("UI Upload Status Monitor", 
+          scheduler.scheduleWithFixedDelay("UI Upload Status Monitor", 
                   command, 0, PERIOD,
                   TimeUnit.MILLISECONDS, executor).in(this);
     }
