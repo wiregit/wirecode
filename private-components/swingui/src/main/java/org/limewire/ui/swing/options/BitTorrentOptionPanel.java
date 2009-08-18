@@ -91,7 +91,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(limewireControl);
         buttonGroup.add(myControl);
 
-        seedRatioLabel = new JLabel(I18n.tr("Seed Ratio"));
+        seedRatioLabel = new JLabel(I18n.tr("Upload torrents until ratio"));
 
         seedRatio = new SeedRatioSlider();
 
