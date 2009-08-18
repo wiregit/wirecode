@@ -59,7 +59,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         context = new Mockery();
         connectionManager = context.mock(ConnectionManager.class);
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjectorNonEagerly(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);

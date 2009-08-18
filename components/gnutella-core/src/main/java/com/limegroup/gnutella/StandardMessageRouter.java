@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -24,7 +25,6 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnection;
@@ -63,7 +63,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
 /**
  * This class is the message routing implementation for TCP messages.
  */
-@Singleton
+@EagerSingleton
 public class StandardMessageRouter extends MessageRouterImpl {
     
     private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
