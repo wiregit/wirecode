@@ -35,6 +35,7 @@ class LocalFileItemFilterator implements TextFilterator<LocalFileItem> {
         if(category == null) {
             baseList.add(fileItem.getCategory().getSingularName());
         }
+        baseList.add(fileItem.getFileName());
     }
 
 }
