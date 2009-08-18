@@ -4,6 +4,11 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
+/**
+ * Calculates spam ratings for search results based on their similarity to
+ * previous results that have been marked, either manually or automatically, as
+ * spam or not spam. 
+ */
 public interface SpamManager {
 
     /**
