@@ -1,16 +1,10 @@
 package org.limewire.core.impl.search.store;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import org.limewire.core.api.search.store.StoreStyle;
 
@@ -18,6 +12,18 @@ import org.limewire.core.api.search.store.StoreStyle;
  * Implementation of StoreStyle for the mock core.
  */
 public class MockStoreStyle implements StoreStyle {
+    private static final String DOWNLOAD_BIG_ICON = "download-btn-1big.png";
+    private static final String DOWNLOAD_SMALL_ICON = "download-btn-1small.png";
+    private static final String STREAM_ICON = "stream-btn.png";
+
+    private static final String BUY_ALBUM_A_ICON = "style1-buy-album-btn.png";
+    private static final String BUY_TRACK_A_ICON = "style1-buy-song-btn.png";
+    
+    private static final String BUY_ALBUM_B_ICON = "style2-buy-album-btn.png";
+    private static final String BUY_TRACK_B_ICON = "style2-buy-btn.png";
+    
+    private static final String BUY_C_ICON = "style3-buy-icon.png";
+    private static final String DOWNLOAD_C_ICON = "style3-download-icon.png";
 
     private final Type type;
     
@@ -42,7 +48,7 @@ public class MockStoreStyle implements StoreStyle {
     Color qualityForeground = Color.decode("#313131");
     Font showTracksFont = new Font(Font.DIALOG, Font.BOLD, 8);
     Color showTracksForeground = Color.decode("#2152a6");
-    Icon streamIcon = new StreamIcon();
+    Icon streamIcon;
     Font trackFont = new Font(Font.DIALOG, Font.PLAIN, 11);
     Color trackForeground = Color.decode("#313131");
     Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
@@ -53,6 +59,7 @@ public class MockStoreStyle implements StoreStyle {
     boolean priceVisible = true;
     boolean showInfoOnHover = false;
     boolean showTracksOnHover = false;
+    boolean streamButtonVisible = true;
     
     /**
      * Constructs a StoreStyle with the specified type.
@@ -60,12 +67,30 @@ public class MockStoreStyle implements StoreStyle {
     public MockStoreStyle(Type type) {
         this.type = type;
         
-        if ((type == Type.STYLE_A) || (type == Type.STYLE_B)) {
-            downloadAlbumIcon = new DownloadAlbumIcon(32);
-            downloadTrackIcon = new DownloadTrackIcon(24);
-        } else {
-            downloadAlbumIcon = new DownloadAlbumIcon(20);
-            downloadTrackIcon = new DownloadTrackIcon(20);
+        streamIcon = getIcon(STREAM_ICON);
+        
+        switch (type) {
+        case STYLE_A:
+            buyAlbumIcon = getIcon(BUY_ALBUM_A_ICON);
+            buyTrackIcon = getIcon(BUY_TRACK_A_ICON);
+            downloadAlbumIcon = getIcon(DOWNLOAD_BIG_ICON);
+            downloadTrackIcon = getIcon(DOWNLOAD_SMALL_ICON);
+            break;
+            
+        case STYLE_B:
+            buyAlbumIcon = getIcon(BUY_ALBUM_B_ICON);
+            buyTrackIcon = getIcon(BUY_TRACK_B_ICON);
+            downloadAlbumIcon = getIcon(DOWNLOAD_SMALL_ICON);
+            downloadTrackIcon = getIcon(DOWNLOAD_SMALL_ICON);
+            break;
+            
+        case STYLE_C:
+        case STYLE_D:
+            buyAlbumIcon = getIcon(BUY_C_ICON);
+            buyTrackIcon = getIcon(BUY_C_ICON);
+            downloadAlbumIcon = getIcon(DOWNLOAD_C_ICON);
+            downloadTrackIcon = getIcon(DOWNLOAD_C_ICON);
+            break;
         }
     }
     
@@ -229,122 +254,15 @@ public class MockStoreStyle implements StoreStyle {
         return showTracksOnHover;
     }
     
-    public static class StreamIcon implements Icon {
-        private final int size = 20;
-
-        @Override
-        public int getIconHeight() {
-            return size;
-        }
-
-        @Override
-        public int getIconWidth() {
-            return size;
-        }
-
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            // Create graphics.
-            Graphics2D g2d = (Graphics2D) g.create();
-            
-            // Set graphics to use anti-aliasing for smoothness.
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-            
-            // Set line color and thickness.
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.setStroke(new BasicStroke(1.0f));
-
-            // Create shape.
-            Shape circle = new Ellipse2D.Double(0, 0, size - 1, size - 1);
-            
-            // Draw shape centered in icon.
-            g2d.draw(circle);
-
-            // Dispose graphics.
-            g2d.dispose();
-        }
+    @Override
+    public boolean isStreamButtonVisible() {
+        return streamButtonVisible;
     }
     
-    public static class DownloadAlbumIcon implements Icon {
-        private final int size;
-
-        public DownloadAlbumIcon(int size) {
-            this.size = size;
-        }
-        
-        @Override
-        public int getIconHeight() {
-            return size;
-        }
-
-        @Override
-        public int getIconWidth() {
-            return size;
-        }
-
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            // Create graphics.
-            Graphics2D g2d = (Graphics2D) g.create();
-            
-            // Set graphics to use anti-aliasing for smoothness.
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-            
-            // Set line color and thickness.
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.setStroke(new BasicStroke(1.0f));
-
-            // Create shape.
-            Shape circle = new Ellipse2D.Double(0, 0, size - 1, size - 1);
-            
-            // Draw shape centered in icon.
-            g2d.draw(circle);
-
-            // Dispose graphics.
-            g2d.dispose();
-        }
-    }
-    
-    public static class DownloadTrackIcon implements Icon {
-        private final int size;
-
-        public DownloadTrackIcon(int size) {
-            this.size = size;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return size;
-        }
-
-        @Override
-        public int getIconWidth() {
-            return size;
-        }
-
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            // Create graphics.
-            Graphics2D g2d = (Graphics2D) g.create();
-            
-            // Set graphics to use anti-aliasing for smoothness.
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-            
-            // Set line color and thickness.
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.setStroke(new BasicStroke(1.0f));
-
-            // Create shape.
-            Shape circle = new Ellipse2D.Double(0, 0, size - 1, size - 1);
-            
-            // Draw shape centered in icon.
-            g2d.draw(circle);
-
-            // Dispose graphics.
-            g2d.dispose();
-        }
+    /**
+     * Retrieves the icon using the specified image file name.
+     */
+    private Icon getIcon(String name) {
+        return new ImageIcon(getClass().getResource(name));
     }
 }

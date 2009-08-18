@@ -51,15 +51,26 @@ public class MockStoreManager implements StoreManager {
     }
 
     @Override
-    public void startSearch(SearchDetails searchDetails) {
+    public void startSearch(final SearchDetails searchDetails) {
         new Thread(new Runnable() {
             public void run() {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {}
                 
+                // Get query text.
+                String query = searchDetails.getSearchQuery();
+                
                 // Create mock store style.
-                storeStyle = new MockStoreStyle(Type.STYLE_A);
+                if (query.indexOf("monkey") > -1) {
+                    storeStyle = new MockStoreStyle(Type.STYLE_A);
+                } else if (query.indexOf("bear") > -1) {
+                    storeStyle = new MockStoreStyle(Type.STYLE_B);
+                } else if (query.indexOf("cat") > -1) {
+                    storeStyle = new MockStoreStyle(Type.STYLE_C);
+                } else if (query.indexOf("dog") > -1) {
+                    storeStyle = new MockStoreStyle(Type.STYLE_D);
+                }
                 
                 // Create mock store results.
                 StoreResult[] storeResults = createStoreResults(0);

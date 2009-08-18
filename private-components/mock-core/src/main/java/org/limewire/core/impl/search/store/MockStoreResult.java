@@ -18,8 +18,12 @@ import javax.swing.Icon;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.impl.friend.MockFriend;
+import org.limewire.core.impl.friend.MockFriendPresence;
+import org.limewire.friend.api.FriendPresence;
 
 /**
  * Implementation of StoreResult for the mock core.
@@ -30,6 +34,7 @@ public class MockStoreResult implements StoreResult {
     private final URN urn;
     private final Map<FilePropertyKey, Object> propertyMap = 
         new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+    private final RemoteHost remoteHost;
     private final List<StoreTrackResult> resultList;
     
     private Icon albumIcon;
@@ -43,6 +48,7 @@ public class MockStoreResult implements StoreResult {
     public MockStoreResult(URN urn, Category category) {
         this.urn = urn;
         this.category = category;
+        this.remoteHost = new MockStoreHost();
         this.resultList = new ArrayList<StoreTrackResult>();
     }
     
@@ -88,7 +94,12 @@ public class MockStoreResult implements StoreResult {
     
     @Override
     public SortPriority getSortPriority() {
-        return SortPriority.MIXED;
+        return SortPriority.TOP;
+    }
+
+    @Override
+    public RemoteHost getSource() {
+        return remoteHost;
     }
     
     @Override
@@ -168,6 +179,34 @@ public class MockStoreResult implements StoreResult {
 
             // Dispose graphics.
             g2d.dispose();
+        }
+    }
+    
+    private class MockStoreHost implements RemoteHost {
+        private final FriendPresence friendPresence;
+
+        public MockStoreHost() {
+            friendPresence = new MockFriendPresence(new MockFriend("Store", false));
+        }
+        
+        @Override
+        public FriendPresence getFriendPresence() {
+            return friendPresence;
+        }
+
+        @Override
+        public boolean isBrowseHostEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isChatEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isSharingEnabled() {
+            return false;
         }
     }
 }
