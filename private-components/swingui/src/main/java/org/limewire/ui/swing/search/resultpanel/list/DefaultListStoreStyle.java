@@ -49,17 +49,18 @@ public class DefaultListStoreStyle implements StoreStyle {
     Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
     Color trackLengthForeground = Color.decode("#313131");
     
-    boolean downloadButtonVisible;
-    boolean priceButtonVisible;
-    boolean priceVisible;
-    boolean showInfoOnHover;
-    boolean showTracksOnHover;
+    boolean downloadButtonVisible = true;
+    boolean priceButtonVisible = false;
+    boolean priceVisible = false;
+    boolean showInfoOnHover = false;
+    boolean showTracksOnHover = false;
+    boolean streamButtonVisible = true;
     
     /**
      * Constructs a DefaultListStoreStyle.
      */
     public DefaultListStoreStyle() {
-        type = Type.STYLE_C;
+        type = Type.STYLE_A;
         
         if ((type == Type.STYLE_A) || (type == Type.STYLE_B)) {
             downloadAlbumIcon = new DownloadAlbumIcon(32);
@@ -228,6 +229,11 @@ public class DefaultListStoreStyle implements StoreStyle {
     @Override
     public boolean isShowTracksOnHover() {
         return showTracksOnHover;
+    }
+    
+    @Override
+    public boolean isStreamButtonVisible() {
+        return streamButtonVisible;
     }
     
     public static class StreamIcon implements Icon {

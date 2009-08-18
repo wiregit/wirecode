@@ -2,11 +2,11 @@ package org.limewire.ui.swing.search.resultpanel.list;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -25,7 +25,6 @@ import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
@@ -105,6 +104,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         albumHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
         albumHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
+        albumHeadingLabel.setMinimumSize(new Dimension(0, 22));
         albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -131,10 +131,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumStreamButton = new IconButton(streamAction);
         albumStreamButton.setIcon(storeStyle.getStreamIcon());
         
-        albumDownloadButton = new IconButton(downloadAction);
+        albumDownloadButton = new IconButton();
         albumDownloadButton.setIcon(storeStyle.getDownloadAlbumIcon());
         
-        albumPriceButton = new PriceButton(downloadAction);
+        albumPriceButton = new PriceButton();
         
         // Layout components in container.
         albumHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding, hidemode 3"));
@@ -148,8 +148,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
         albumTextPanel.add(albumHeadingPanel, "left, aligny 50%, growx, hidemode 3, wrap");
         albumTextPanel.add(albumSubHeadingLabel, "left, aligny 50%, growx, shrinkprio 200, hidemode 3, wrap");
-        albumTextPanel.add(albumStreamButton, "left, aligny 50%, gaptop 3");
-        albumTextPanel.add(albumTracksButton, "left, aligny 50%, gaptop 3, gapleft 6");
+        albumTextPanel.add(albumStreamButton, "left, aligny 50%, gaptop 3, gapright 6, hidemode 3");
+        albumTextPanel.add(albumTracksButton, "left, aligny 50%, gaptop 3");
         
         albumPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding"));
         albumPanel.add(albumCoverButton, "alignx left, aligny top, shrinkprio 0, growprio 0");
@@ -184,6 +184,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
         mediaHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
+        mediaHeadingLabel.setMinimumSize(new Dimension(0, 22));
         mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -205,10 +206,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaStreamButton = new IconButton(streamAction);
         mediaStreamButton.setIcon(storeStyle.getStreamIcon());
         
-        mediaDownloadButton = new IconButton(downloadAction);
+        mediaDownloadButton = new IconButton();
         mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         
-        mediaPriceButton = new PriceButton(downloadAction);
+        mediaPriceButton = new PriceButton();
         
         // Layout components in container.
         mediaHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
@@ -224,7 +225,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaTextPanel.add(mediaSubHeadingLabel, "left, aligny 50%, growx, hidemode 3");
         
         mediaPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding"));
-        mediaPanel.add(mediaStreamButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0");
+        mediaPanel.add(mediaStreamButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0, hidemode 3");
         mediaPanel.add(mediaTextPanel, "alignx left, aligny 50%, gapleft 6, growx, shrinkprio 200, growprio 200, pushx 200");
     }
 
@@ -237,10 +238,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         JButton streamButton = new IconButton(new StreamTrackAction(result));
         streamButton.setIcon(storeStyle.getStreamIcon());
         
-        JButton downloadButton = new IconButton(new DownloadTrackAction(result));
+        JButton downloadButton = new IconButton();
         downloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         
-        JButton priceButton = new PriceButton(new DownloadTrackAction(result));
+        JButton priceButton = new PriceButton();
         priceButton.setText(result.getPrice());
         
         JLabel trackLabel = new JLabel();
@@ -255,7 +256,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         // Layout components in container.
         trackPanel.setLayout(new MigLayout("insets 6 6 6 6, gap 0! 0!, novisualpadding"));
-        trackPanel.add(streamButton, "alignx left, gapright 6, growprio 0, shrinkprio 0");
+        trackPanel.add(streamButton, "alignx left, gapright 6, growprio 0, shrinkprio 0, hidemode 3");
         trackPanel.add(trackLabel, "alignx left, growx, growprio 200, shrinkprio 200");
         if (storeStyle.getType() == Type.STYLE_C) {
             trackPanel.add(downloadButton, "alignx left, gapleft 6, growprio 0, shrinkprio 0");
@@ -264,9 +265,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         }
         trackPanel.add(lengthLabel, "alignx right, growprio 0, shrinkprio 0, pushx 200");
         
-        //System.out.println("prefSize=" + trackPanel.getPreferredSize()); // TODO REMOVE
-        
         // Apply style to show/hide components.
+        streamButton.setVisible(storeStyle.isStreamButtonVisible());
         downloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         priceButton.setVisible(storeStyle.isPriceVisible());
         
@@ -303,6 +303,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumPriceButton.setText(vsr.getStoreResult().getPrice());
         
         // Apply style to show/hide components.
+        albumStreamButton.setVisible(storeStyle.isStreamButtonVisible());
         albumTracksButton.setVisible(!storeStyle.isShowTracksOnHover() || editing);
         albumDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         albumPriceButton.setVisible(storeStyle.isPriceVisible());
@@ -335,6 +336,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaPriceButton.setText(vsr.getStoreResult().getPrice());
         
         // Apply style to show/hide components.
+        mediaStreamButton.setVisible(storeStyle.isStreamButtonVisible());
         mediaDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         mediaPriceButton.setVisible(storeStyle.isPriceVisible());
     }
@@ -382,8 +384,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
      */
     private class PriceButton extends JXButton {
         
-        public PriceButton(Action action) {
-            super(action);
+        public PriceButton() {
+            super();
             
             setBorder(BorderFactory.createEmptyBorder(1, 6, 1, 6));
             setFocusPainted(false);
@@ -397,9 +399,6 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             } else {
                 setContentAreaFilled(false);
             }
-            
-            // Install listener to show hand cursor.
-            new RolloverCursorListener().install(this);
         }
     }
 }

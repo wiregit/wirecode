@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.resultpanel.list;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -101,6 +102,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         albumHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
         albumHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
+        albumHeadingLabel.setMinimumSize(new Dimension(0, 22));
         albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -143,7 +145,6 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumStreamButton.setIcon(storeStyle.getStreamIcon());
         
         albumDownloadButton = new IconButton(downloadAction);
-        albumDownloadButton.setIcon(storeStyle.getDownloadAlbumIcon());
         
         // Layout album text components.
         albumTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
@@ -160,7 +161,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         if (storeStyle.getType() == Type.STYLE_A) {
             albumDownloadPanel.add(albumPriceLabel, "alignx right, aligny 50%, gapright 8");
         } else {
-            albumDownloadPanel.add(albumStreamButton, "alignx right, aligny 50%, gapright 4");
+            albumDownloadPanel.add(albumStreamButton, "alignx right, aligny 50%, gapright 4, hidemode 3");
         }
         albumDownloadPanel.add(albumDownloadButton, "alignx right, aligny 50%, gapright 30");
         
@@ -168,7 +169,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding"));
         albumPanel.add(albumCoverButton, "spany, alignx left, aligny 50%, shrinkprio 0, growprio 0");
         if (storeStyle.getType() == Type.STYLE_A) {
-            albumPanel.add(albumStreamButton, "spany, alignx left, aligny 50%, gapleft 6, shrinkprio 0, growprio 0");
+            albumPanel.add(albumStreamButton, "spany, alignx left, aligny 50%, gapleft 6, shrinkprio 0, growprio 0, hidemode 3");
         }
         albumPanel.add(albumTextPanel, "spany, alignx left, aligny 50%, gapleft 6, growx, shrinkprio 200, growprio 200, pushx 200");
         albumPanel.add(albumInfoPanel, "alignx right, aligny top, gapleft 4, shrinkprio 0, growprio 0, wrap");
@@ -199,6 +200,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         mediaHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
         mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
         mediaHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
+        mediaHeadingLabel.setMinimumSize(new Dimension(0, 22));
         mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -225,7 +227,6 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         mediaStreamButton.setIcon(storeStyle.getStreamIcon());
         
         mediaDownloadButton = new IconButton(downloadAction);
-        mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         
         mediaInfoButton = new IconButton(showInfoAction);
         mediaInfoButton.setFont(storeStyle.getInfoFont());
@@ -239,7 +240,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         // Layout components in container.
         mediaPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding"));
         if (storeStyle.getType() == Type.STYLE_A) {
-            mediaPanel.add(mediaStreamButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0");
+            mediaPanel.add(mediaStreamButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0, hidemode 3");
         } else {
             mediaPanel.add(mediaIconButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0");
         }
@@ -247,7 +248,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         if (storeStyle.getType() == Type.STYLE_A) {
             mediaPanel.add(mediaPriceLabel, "alignx right, aligny 50%, gapleft 6, gapright 6, shrinkprio 0, growprio 0");
         } else {
-            mediaPanel.add(mediaStreamButton, "alignx right, aligny 50%, gapleft 6, gapright 6, shrinkprio 0, growprio 0");
+            mediaPanel.add(mediaStreamButton, "alignx right, aligny 50%, gapleft 6, gapright 6, shrinkprio 0, growprio 0, hidemode 3");
         }
         mediaPanel.add(mediaDownloadButton, "alignx right, aligny 50%, gapright 12, shrinkprio 0, growprio 0");
         mediaPanel.add(mediaInfoButton, "alignx right, aligny top, shrinkprio 0, growprio 0");
@@ -263,7 +264,11 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         streamButton.setIcon(storeStyle.getStreamIcon());
         
         JButton downloadButton = new IconButton(new DownloadTrackAction(result));
-        downloadButton.setIcon(storeStyle.getDownloadTrackIcon());
+        if (storeController.isPayAsYouGo()) {
+            downloadButton.setIcon(storeStyle.getBuyTrackIcon());
+        } else {
+            downloadButton.setIcon(storeStyle.getDownloadTrackIcon());
+        }
         
         JLabel trackLabel = new JLabel();
         trackLabel.setFont(storeStyle.getTrackFont());
@@ -278,17 +283,18 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         // Layout components in container.
         trackPanel.setLayout(new MigLayout("insets 4 6 4 6, gap 0! 0!, novisualpadding"));
         if (storeStyle.getType() == Type.STYLE_A) {
-            trackPanel.add(streamButton, "alignx left, gapright 6, growprio 0, shrinkprio 0");
+            trackPanel.add(streamButton, "alignx left, gapright 6, growprio 0, shrinkprio 0, hidemode 3");
         }
         trackPanel.add(trackLabel, "alignx left, growx, growprio 200, shrinkprio 200, pushx 200");
         if (storeStyle.getType() == Type.STYLE_A) {
             trackPanel.add(priceLabel, "alignx right, gapright 12, growprio 0, shrinkprio 0");
         } else {
-            trackPanel.add(streamButton, "alignx right, gapright 6, growprio 0, shrinkprio 0");
+            trackPanel.add(streamButton, "alignx right, gapright 6, growprio 0, shrinkprio 0, hidemode 3");
         }
         trackPanel.add(downloadButton, "alignx right, growprio 0, shrinkprio 0");
         
         // Apply style to show/hide components.
+        streamButton.setVisible(storeStyle.isStreamButtonVisible());
         downloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         priceLabel.setVisible(storeStyle.isPriceVisible());
         
@@ -329,8 +335,15 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumInfoButton.setVisible(!storeStyle.isShowInfoOnHover() || editing);
         
         // Apply style to show/hide components.
+        albumStreamButton.setVisible(storeStyle.isStreamButtonVisible());
         albumDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         albumPriceLabel.setVisible(storeStyle.isPriceVisible());
+        
+        if (storeController.isPayAsYouGo()) {
+            albumDownloadButton.setIcon(storeStyle.getBuyAlbumIcon());
+        } else {
+            albumDownloadButton.setIcon(storeStyle.getDownloadAlbumIcon());
+        }
     }
     
     @Override
@@ -366,7 +379,14 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         mediaInfoButton.setVisible(!storeStyle.isShowInfoOnHover() || editing);
         
         // Apply style to show/hide components.
+        mediaStreamButton.setVisible(storeStyle.isStreamButtonVisible());
         mediaDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         mediaPriceLabel.setVisible(storeStyle.isPriceVisible());
+        
+        if (storeController.isPayAsYouGo()) {
+            mediaDownloadButton.setIcon(storeStyle.getBuyTrackIcon());
+        } else {
+            mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
+        }
     }
 }
