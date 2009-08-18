@@ -210,4 +210,6 @@ public interface Torrent {
 
     public void setAutoManaged(boolean autoManaged);
 
+    void remove();
+
 }

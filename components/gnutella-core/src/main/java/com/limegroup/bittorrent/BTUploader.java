@@ -32,10 +32,13 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     private final Torrent torrent;
 
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
-
+    private final AtomicBoolean finished = new AtomicBoolean(false);
+    
     private volatile URN urn = null;
 
     private final TorrentUploadManager torrentUploadManager;
+    
+    
 
     public BTUploader(Torrent torrent, ActivityCallback activityCallback,
             TorrentUploadManager torrentUploadManager) {
@@ -52,18 +55,24 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     public void handleEvent(TorrentEvent event) {
         if (event == TorrentEvent.STOPPED) {
             finish();
-            torrent.removeListener(this);
         } else if (event == TorrentEvent.STATUS_CHANGED) {
-            // TODO incorporate seed time etc.?
-            // probably should
-            if (torrent.isFinished()
-                    && torrent.getSeedRatio() >= BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
+            //considered to be finished uploading if seed ratio has been reached
+            boolean finished = torrent.isFinished();
+            float seedRatio = torrent.getSeedRatio();
+            if (finished
+                    &&  seedRatio >= BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                             .getValue()) {
-                torrent.stop();
-                // TODO for now stop, in future we will want to keep it in the
-                // tray somehow.
+                remove();
+                this.finished.set(true);
             }
         }
+    }
+
+    private void remove() {
+        //TODO remove torrent reference and replace with an empty instance?
+        torrent.remove();
+        torrent.removeListener(this);
+        torrentUploadManager.removeMemento(torrent);
     };
 
     @Override
@@ -81,9 +90,9 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     }
 
     private void finish() {
+        remove();
         cancelled.set(true);
         activityCallback.removeUpload(this);
-        torrentUploadManager.removeMemento(torrent);
     }
 
     @Override
@@ -127,6 +136,10 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
         if (cancelled.get()) {
             return UploadStatus.CANCELLED;
         }
+        
+        if(finished.get()) {
+            return UploadStatus.COMPLETE;
+        }
 
         TorrentStatus status = torrent.getStatus();
 
@@ -163,7 +176,7 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     @Override
     public UploadStatus getLastTransferState() {
-        return UploadStatus.UPLOADING;
+        return getState();
     }
 
     @Override
