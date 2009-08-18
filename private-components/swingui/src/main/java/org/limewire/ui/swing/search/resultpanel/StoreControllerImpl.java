@@ -10,7 +10,8 @@ import org.limewire.ui.swing.search.resultpanel.list.DefaultListStoreStyle;
 import com.google.inject.Inject;
 
 /**
- * Default implementation of StoreController. 
+ * Default implementation of StoreController.  This class mediates interactions
+ * between the store UI and various core services.
  */
 public class StoreControllerImpl implements StoreController {
 
@@ -25,8 +26,9 @@ public class StoreControllerImpl implements StoreController {
     }
     
     @Override
-    public boolean isLoggedIn() {
-        return storeManager.isLoggedIn();
+    public boolean isPayAsYouGo() {
+        // TODO also return true if user owns pay-as-you-go account
+        return !storeManager.isLoggedIn();
     }
 
     @Override

@@ -5,14 +5,15 @@ import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 
 /**
- * Defines an interface for handling store requests.
+ * Defines an interface for mediating interactions between the store UI
+ * and various core services.
  */
 public interface StoreController {
 
     /**
-     * Returns true if the user is logged in to the store.
+     * Returns true if store results are pay-as-you-go.
      */
-    boolean isLoggedIn();
+    boolean isPayAsYouGo();
     
     /**
      * Returns the current style for Lime Store results.
