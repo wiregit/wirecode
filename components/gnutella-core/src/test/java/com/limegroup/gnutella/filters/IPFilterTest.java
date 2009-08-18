@@ -16,7 +16,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
@@ -87,12 +86,13 @@ public class IPFilterTest extends LimeTestCase {
         injector = LimeTestUtils.createInjectorNonEagerly(m);
         filter = injector.getInstance(IPFilter.class);
         final CountDownLatch loaded = new CountDownLatch(1);
-        IPFilterCallback ipfc = new IPFilter.IPFilterCallback() {
-            public void ipFiltersLoaded() {
+        SpamFilter.LoadCallback callback = new SpamFilter.LoadCallback() {
+            @Override
+            public void spamFilterLoaded() {
                 loaded.countDown();
             }
         };
-        filter.refreshHosts(ipfc);
+        filter.refreshHosts(callback);
         loaded.await();
         context.assertIsSatisfied();
     }

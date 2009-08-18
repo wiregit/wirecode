@@ -83,12 +83,10 @@ class CoreRandomGlue {
             }
             
             public void start() {
-                spamServices.reloadIPFilter();
-                spamServices.reloadURNFilter();
+                spamServices.reloadSpamFilters();
                 simppManager.addListener(new SimppListener() {
                     public void simppUpdated(int newVersion) {
-                        spamServices.reloadIPFilter();
-                        spamServices.reloadURNFilter();
+                        spamServices.reloadSpamFilters();
                     }
                 });
             }

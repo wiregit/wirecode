@@ -27,9 +27,9 @@ public class HostileFilter extends  AbstractIPFilter {
      * Refresh the IPFilter's instance.
      */
     @Override
-    public void refreshHosts(IPFilterCallback callback) {
+    public void refreshHosts(LoadCallback callback) {
         refreshHosts();
-        callback.ipFiltersLoaded();
+        callback.spamFilterLoaded();
     }
     
     @Override

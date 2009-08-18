@@ -65,16 +65,18 @@ public class SpamServicesImpl implements SpamServices {
 
     @Override
     public void reloadIPFilter() {
-        ipFilter.get().refreshHosts(new IPFilter.IPFilterCallback() {
-            public void ipFiltersLoaded() {
+        ipFilter.get().refreshHosts(new SpamFilter.LoadCallback() {
+            @Override
+            public void spamFilterLoaded() {
                 adjustSpamFilters();
             }
         });
     }
 
     @Override
-    public void reloadURNFilter() {
+    public void reloadSpamFilters() {
         urnFilter.get().refreshURNs();
+        reloadIPFilter();
     }
 
     @Override

@@ -38,7 +38,7 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.LocalIPFilter;
-import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
+import com.limegroup.gnutella.filters.SpamFilter.LoadCallback;
 import com.limegroup.gnutella.filters.response.XMLDocFilterTest;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDesc;
@@ -102,8 +102,9 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
 	    pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
 	    
 	    final CountDownLatch latch = new CountDownLatch(1);
-	    injector.getInstance(LocalIPFilter.class).refreshHosts(new IPFilterCallback() {
-            public void ipFiltersLoaded() {
+	    injector.getInstance(LocalIPFilter.class).refreshHosts(new LoadCallback() {
+            @Override
+            public void spamFilterLoaded() {
                 latch.countDown();
             }
         });

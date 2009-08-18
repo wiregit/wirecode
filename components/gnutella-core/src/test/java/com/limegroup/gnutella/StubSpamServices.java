@@ -12,7 +12,7 @@ public class StubSpamServices implements SpamServices {
     public void reloadIPFilter() {        
     }
 
-    public void reloadURNFilter() {
+    public void reloadSpamFilters() {
     }
 
     public void blockHost(String host) {

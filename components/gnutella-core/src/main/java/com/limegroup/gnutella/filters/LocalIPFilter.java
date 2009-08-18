@@ -65,13 +65,13 @@ public final class LocalIPFilter extends AbstractIPFilter {
         refreshHosts(null);
     }
     
-    public void refreshHosts(final IPFilterCallback callback) {
+    public void refreshHosts(final LoadCallback callback) {
         Runnable load = new Runnable() {
             public void run() {
                 hostileNetworkFilter.refreshHosts();
                 refreshHostsImpl();
                 if (callback != null)
-                    callback.ipFiltersLoaded();
+                    callback.spamFilterLoaded();
             }
         };
         if (!shouldLoadHostiles) 

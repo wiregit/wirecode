@@ -16,4 +16,11 @@ public interface SpamFilter {
      * Returns true iff this is considered spam and should not be processed.
      */
     boolean allow(Message m);
+
+    /**
+     * Defines an interface for being informed when a filter finishes loading.
+     */
+    interface LoadCallback {
+        void spamFilterLoaded();
+    }
 }

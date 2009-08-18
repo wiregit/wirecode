@@ -13,7 +13,7 @@ public class LimeWireFiltersModule extends AbstractModule {
         
         bind(IPFilter.class).to(LocalIPFilter.class);
         bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).to(HostileFilter.class);
-        
+        bind(URNFilter.class).to(URNFilterImpl.class);
         bind(SpamFilterFactory.class).to(SpamFilterFactoryImpl.class);
     }
 
