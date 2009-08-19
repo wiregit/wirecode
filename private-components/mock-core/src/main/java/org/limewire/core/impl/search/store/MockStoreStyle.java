@@ -2,6 +2,10 @@ package org.limewire.core.impl.search.store;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -12,85 +16,99 @@ import org.limewire.core.api.search.store.StoreStyle;
  * Implementation of StoreStyle for the mock core.
  */
 public class MockStoreStyle implements StoreStyle {
-    private static final String DOWNLOAD_BIG_ICON = "download-btn-1big.png";
-    private static final String DOWNLOAD_SMALL_ICON = "download-btn-1small.png";
-    private static final String STREAM_ICON = "stream-btn.png";
-
-    private static final String BUY_ALBUM_A_ICON = "style1-buy-album-btn.png";
-    private static final String BUY_TRACK_A_ICON = "style1-buy-song-btn.png";
-    
-    private static final String BUY_ALBUM_B_ICON = "style2-buy-album-btn.png";
-    private static final String BUY_TRACK_B_ICON = "style2-buy-btn.png";
-    
-    private static final String BUY_C_ICON = "style3-buy-icon.png";
-    private static final String DOWNLOAD_C_ICON = "style3-download-icon.png";
 
     private final Type type;
+    private final Properties properties;
     
-    Font albumFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color albumForeground = Color.decode("#313131");
-    Font albumLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color albumLengthForeground = Color.decode("#313131");
-    Font artistFont = new Font(Font.DIALOG, Font.PLAIN, 13);
-    Color artistForeground = Color.decode("#2152a6");
-    Color background = Color.decode("#e8f2f6");
-    Icon buyAlbumIcon;
-    Icon buyTrackIcon;
-    Icon downloadAlbumIcon;
-    Icon downloadTrackIcon;
-    Font infoFont = new Font(Font.DIALOG, Font.BOLD, 8);
-    Color infoForeground = Color.decode("#2152a6");
-    Color priceBackground = Color.decode("#f5f5f5");
-    Color priceBorderColor = Color.decode("#9e9b9b");
-    Font priceFont = new Font(Font.DIALOG, Font.PLAIN, 10);
-    Color priceForeground = Color.decode("#2152a6");
-    Font qualityFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color qualityForeground = Color.decode("#313131");
-    Font showTracksFont = new Font(Font.DIALOG, Font.BOLD, 8);
-    Color showTracksForeground = Color.decode("#2152a6");
-    Icon streamIcon;
-    Font trackFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color trackForeground = Color.decode("#313131");
-    Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color trackLengthForeground = Color.decode("#313131");
+    private Font albumFont;
+    private Color albumForeground;
+    private Font albumLengthFont;
+    private Color albumLengthForeground;
+    private Font artistFont;
+    private Color artistForeground;
+    private Color background;
+    private Icon buyAlbumIcon;
+    private Icon buyTrackIcon;
+    private Icon downloadAlbumIcon;
+    private Icon downloadTrackIcon;
+    private Font infoFont;
+    private Color infoForeground;
+    private Color priceBackground;
+    private Color priceBorderColor;
+    private Font priceFont;
+    private Color priceForeground;
+    private Font qualityFont;
+    private Color qualityForeground;
+    private Font showTracksFont;
+    private Color showTracksForeground;
+    private Icon streamIcon;
+    private Font trackFont;
+    private Color trackForeground;
+    private Font trackLengthFont;
+    private Color trackLengthForeground;
     
-    boolean downloadButtonVisible = true;
-    boolean priceButtonVisible = true;
-    boolean priceVisible = true;
-    boolean showInfoOnHover = false;
-    boolean showTracksOnHover = false;
-    boolean streamButtonVisible = true;
+    private boolean downloadButtonVisible;
+    private boolean priceButtonVisible;
+    private boolean priceVisible;
+    private boolean showInfoOnHover;
+    private boolean showTracksOnHover;
+    private boolean streamButtonVisible;
     
     /**
      * Constructs a StoreStyle with the specified type.
      */
     public MockStoreStyle(Type type) {
         this.type = type;
-        
-        streamIcon = getIcon(STREAM_ICON);
-        
-        switch (type) {
-        case STYLE_A:
-            buyAlbumIcon = getIcon(BUY_ALBUM_A_ICON);
-            buyTrackIcon = getIcon(BUY_TRACK_A_ICON);
-            downloadAlbumIcon = getIcon(DOWNLOAD_BIG_ICON);
-            downloadTrackIcon = getIcon(DOWNLOAD_SMALL_ICON);
-            break;
+        this.properties = new Properties();
+        loadProperties();
+    }
+    
+    /**
+     * Loads style attributes from properties file.
+     */
+    private void loadProperties() {
+        try {
+            URL url = getClass().getResource("MockStoreStyle.properties");
+            properties.load(url.openStream());
             
-        case STYLE_B:
-            buyAlbumIcon = getIcon(BUY_ALBUM_B_ICON);
-            buyTrackIcon = getIcon(BUY_TRACK_B_ICON);
-            downloadAlbumIcon = getIcon(DOWNLOAD_SMALL_ICON);
-            downloadTrackIcon = getIcon(DOWNLOAD_SMALL_ICON);
-            break;
+            albumFont = getFont("albumFont");
+            albumForeground = getColor("albumForeground");
+            albumLengthFont = getFont("albumLengthFont");
+            albumLengthForeground = getColor("albumLengthForeground");
+            artistFont = getFont("artistFont");
+            artistForeground = getColor("artistForeground");
+            background = getColor("background");
+            buyAlbumIcon = getIcon("buyAlbumIcon");
+            buyTrackIcon = getIcon("buyTrackIcon");
+            downloadAlbumIcon = getIcon("downloadAlbumIcon");
+            downloadTrackIcon = getIcon("downloadTrackIcon");
+            infoFont = getFont("infoFont");
+            infoForeground = getColor("infoForeground");
+            priceBackground = getColor("priceBackground");
+            priceBorderColor = getColor("priceBorderColor");
+            priceFont = getFont("priceFont");
+            priceForeground = getColor("priceForeground");
+            qualityFont = getFont("qualityFont");
+            qualityForeground = getColor("qualityForeground");
+            showTracksFont = getFont("showTracksFont");
+            showTracksForeground = getColor("showTracksForeground");
+            streamIcon = getIcon("streamIcon");
+            trackFont = getFont("trackFont");
+            trackForeground = getColor("trackForeground");
+            trackLengthFont = getFont("trackLengthFont");
+            trackLengthForeground = getColor("trackLengthForeground");
             
-        case STYLE_C:
-        case STYLE_D:
-            buyAlbumIcon = getIcon(BUY_C_ICON);
-            buyTrackIcon = getIcon(BUY_C_ICON);
-            downloadAlbumIcon = getIcon(DOWNLOAD_C_ICON);
-            downloadTrackIcon = getIcon(DOWNLOAD_C_ICON);
-            break;
+            downloadButtonVisible = getBoolean("downloadButtonVisible");
+            priceButtonVisible = getBoolean("priceButtonVisible");
+            priceVisible = getBoolean("priceVisible");
+            showInfoOnHover = getBoolean("showInfoOnHover");
+            showTracksOnHover = getBoolean("showTracksOnHover");
+            streamButtonVisible = getBoolean("streamButtonVisible");
+            
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     
@@ -260,9 +278,30 @@ public class MockStoreStyle implements StoreStyle {
     }
     
     /**
-     * Retrieves the icon using the specified image file name.
+     * Returns the color for the specified property key.
      */
-    private Icon getIcon(String name) {
-        return new ImageIcon(getClass().getResource(name));
+    private boolean getBoolean(String propertyKey) {
+        return Boolean.parseBoolean(properties.getProperty(type + "." + propertyKey));
+    }
+    
+    /**
+     * Returns the color for the specified property key.
+     */
+    private Color getColor(String propertyKey) {
+        return Color.decode(properties.getProperty(type + "." + propertyKey));
+    }
+    
+    /**
+     * Returns the font for the specified property key.
+     */
+    private Font getFont(String propertyKey) {
+        return Font.decode(properties.getProperty(type + "." + propertyKey));
+    }
+    
+    /**
+     * Retrieves the icon for the specified property key.
+     */
+    private Icon getIcon(String propertyKey) {
+        return new ImageIcon(getClass().getResource(properties.getProperty(type + "." + propertyKey)));
     }
 }
