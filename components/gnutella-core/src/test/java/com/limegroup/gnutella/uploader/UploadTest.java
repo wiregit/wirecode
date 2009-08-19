@@ -157,7 +157,7 @@ public class UploadTest extends LimeTestCase {
         doSettings();
 
         // initialize services
-        LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule(), LimeTestUtils.createModule(this));
+        LimeTestUtils.createInjector(new LimeWireIOTestModule(), LimeTestUtils.createModule(this));
         
         startServices();
         File testDir = TestUtils.getResourceFile(testDirName);

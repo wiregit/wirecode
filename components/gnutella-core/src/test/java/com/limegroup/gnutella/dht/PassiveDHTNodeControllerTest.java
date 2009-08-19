@@ -57,7 +57,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
         
-        injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule());
+        injector = LimeTestUtils.createInjector(new LimeWireIOTestModule());
         dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
