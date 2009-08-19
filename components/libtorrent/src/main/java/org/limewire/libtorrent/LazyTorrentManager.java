@@ -8,6 +8,7 @@ import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentPeer;
+import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.Inject;
@@ -25,7 +26,7 @@ import com.google.inject.Singleton;
  * 
  */
 @Singleton
-public class LazyTorrentManager implements TorrentManager {
+public class LazyTorrentManager implements TorrentManager, Service {
     private final Provider<TorrentManagerImpl> torrentManager;
 
     private volatile boolean initialized = false;
@@ -59,7 +60,7 @@ public class LazyTorrentManager implements TorrentManager {
 
     @Override
     public String getServiceName() {
-        return torrentManager.get().getServiceName();
+        return "TorrentManager";
     }
 
     @Override

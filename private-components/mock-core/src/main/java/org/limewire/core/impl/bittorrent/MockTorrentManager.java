@@ -83,11 +83,6 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public String getServiceName() {
-        return getClass().getName();
-    }
-
-    @Override
     public void initialize() {
         
     }

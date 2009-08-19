@@ -243,11 +243,6 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public String getServiceName() {
-        return "TorrentManager";
-    }
-
-    @Override
     public void initialize() {
         if (torrentSettings.get().isTorrentsEnabled()) {
             lock.writeLock().lock();

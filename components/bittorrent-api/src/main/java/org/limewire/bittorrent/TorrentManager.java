@@ -3,9 +3,7 @@ package org.limewire.bittorrent;
 import java.io.File;
 import java.util.List;
 
-import org.limewire.lifecycle.Service;
-
-public interface TorrentManager extends Service {
+public interface TorrentManager {
 
     /**
      * Removes torrent from control of the torrent manager. Also delegates a
@@ -108,4 +106,19 @@ public interface TorrentManager extends Service {
      * Sets the automanaged flag to the given value for the torrent.
      */
     public void setAutoManaged(Torrent torrent, boolean autoManaged);
+    
+    /**
+     * Starts the torrent manager, and its necessary worker threads.
+     */
+    public void start();
+    
+    /**
+     * Shuts down the torrent manager, and any needed threads.
+     */
+    public void stop();
+    
+    /**
+     * Initializes this torrent manager. 
+     */
+    public void initialize();
 }
