@@ -54,7 +54,11 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     @Override
     public void handleEvent(TorrentEvent event) {
         if (event == TorrentEvent.STOPPED) {
-            finish();
+            if(!finished.get()) {
+                cancel();
+            } else {
+                remove();
+            }
         } else if (event == TorrentEvent.STATUS_CHANGED) {
             //considered to be finished uploading if seed ratio has been reached
             boolean finished = torrent.isFinished();
@@ -63,14 +67,18 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
                     &&  seedRatio >= BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                             .getValue()) {
                 this.finished.set(true);
-                remove();
+                torrent.stop();
             }
         }
     }
 
+    private void cancel() {
+        cancelled.set(true);
+        remove();
+    }
+    
     private void remove() {
         //TODO remove torrent reference and replace with an empty instance?
-        torrent.remove();
         torrent.removeListener(this);
         torrentUploadManager.removeMemento(torrent);
         activityCallback.removeUpload(this);
@@ -86,13 +94,8 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
                     torrent.stop();
                 }
             }, "BTUploader Stop Torrent").start();
-            finish();
+            cancel();
         }
-    }
-
-    private void finish() {
-        cancelled.set(true);
-        remove();
     }
 
     @Override

@@ -327,15 +327,10 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public void stop() {
-        remove();
-        listeners.broadcast(TorrentEvent.STOPPED);
-    }
-
-    @Override
-    public void remove() {
         if (started.get() && !cancelled.getAndSet(true)) {
             torrentManager.removeTorrent(this);
         }
+        listeners.broadcast(TorrentEvent.STOPPED);
     }
 
     @Override
