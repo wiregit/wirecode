@@ -142,4 +142,8 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     public void cancelPendingTasks() {
         
     }
+
+    @Override
+    public void renameFile(File oldFile, File newFile) {
+    }
 }
