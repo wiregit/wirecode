@@ -7,6 +7,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.Inject;
@@ -23,7 +24,7 @@ import com.google.inject.Provider;
  * 
  */
 @EagerSingleton
-public class LazyTorrentManager implements TorrentManager {
+public class LazyTorrentManager implements TorrentManager, Service {
     private final Provider<TorrentManagerImpl> torrentManager;
 
     private volatile boolean initialized = false;

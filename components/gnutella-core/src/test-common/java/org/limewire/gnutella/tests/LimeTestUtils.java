@@ -1,6 +1,7 @@
 package org.limewire.gnutella.tests;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,7 +11,9 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -25,6 +28,7 @@ import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.Base32;
+import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
@@ -318,5 +322,60 @@ public class LimeTestUtils {
                 }
             }
         };
+    }
+    
+    
+    private static List<File> getBuildFolders(File root) {
+        final List<File> paths = new ArrayList<File>();
+        // add all components that have a build/classes dir.
+        root.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                File classes = new File(pathname, "build/classes");
+                if(classes.exists()) {
+                    paths.add(classes);
+                }
+                return false;
+            }
+        });
+        
+        return paths;
+    }
+
+    /**
+     * Returns all non-test build folders. 
+     */
+    public static List<File> getBuildFolders(Class clazz) throws Exception {
+        File f = TestUtils.getResourceInPackage(clazz.getSimpleName() + ".class", clazz).getCanonicalFile();
+        // step out to find the root folder of the component
+        int packageDepth = StringUtils.countOccurrences(clazz.getName(), '.');
+        // + 1 to back out of top level package 
+        for (int i = 0; i < packageDepth + 1; i++) {
+            f = f.getParentFile();
+        }
+        // f now == <something>/limewire/[private-]components/component/build/tests
+        // we want to back out to <something>/limewire
+        //      build/          component/      components/      limewire/   
+        f = f.getParentFile().getParentFile().getParentFile().getParentFile();
+        
+        final List<File> paths = new ArrayList<File>();
+        paths.addAll(getBuildFolders(new File(f, "components")));
+        paths.addAll(getBuildFolders(new File(f, "private-components")));        
+        if (paths.size() < 10) {
+            throw new IOException("didn't find all classes: " + paths);
+        }
+        return paths;
+    }
+    
+    /**
+     * Returns all non-test class files. 
+     */
+    public static Set<File> getAllClassFiles(Class clazz) throws Exception {
+        List<File> buildFolders = getBuildFolders(clazz);
+        Set<File> classFiles = new HashSet<File>();
+        for (File buildFolder : buildFolders) {
+            classFiles.addAll(Arrays.asList(FileUtils.getFilesRecursive(buildFolder, "class")));
+        }
+        return classFiles;
     }
 }

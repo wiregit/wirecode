@@ -6,14 +6,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Asynchronous;
-import org.limewire.lifecycle.DefaultService;
+import org.limewire.lifecycle.Service;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 
 import com.google.inject.Inject;
 
 @EagerSingleton
-public class FirewallServiceImpl extends DefaultService implements FirewallService {
+public class FirewallServiceImpl implements FirewallService, Service {
     
     public static final File LIMEWIRE_EXE_FILE = new File("LimeWire.exe").getAbsoluteFile();
     
@@ -92,5 +92,13 @@ public class FirewallServiceImpl extends DefaultService implements FirewallServi
         }
         
         return false;
+    }
+
+    @Override
+    public void initialize() {
+    }
+
+    @Override
+    public void start() {
     }
 }

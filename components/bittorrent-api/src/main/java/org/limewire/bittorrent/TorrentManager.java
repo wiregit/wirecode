@@ -3,9 +3,7 @@ package org.limewire.bittorrent;
 import java.io.File;
 import java.util.List;
 
-import org.limewire.lifecycle.Service;
-
-public interface TorrentManager extends Service {
+public interface TorrentManager {
 
     /**
      * Removes torrent from control of the torrent manager. Also delegates a

@@ -253,12 +253,10 @@ public class TorrentManagerImpl implements TorrentManager {
         }
     }
 
-    @Override
     public String getServiceName() {
         return "TorrentManager";
     }
 
-    @Override
     public void initialize() {
         if (torrentSettings.get().isTorrentsEnabled()) {
             lock.writeLock().lock();
@@ -278,7 +276,6 @@ public class TorrentManagerImpl implements TorrentManager {
         }
     }
 
-    @Override
     public void start() {
         if (isValid()) {
             lock.writeLock().lock();
@@ -306,7 +303,6 @@ public class TorrentManagerImpl implements TorrentManager {
         }
     }
 
-    @Override
     public void stop() {
         lock.writeLock().lock();
         try {
