@@ -67,6 +67,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
+import org.limewire.ui.swing.search.resultpanel.StoreController;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
@@ -176,10 +177,10 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         Provider<SearchHeadingDocumentBuilder> headingBuilder,
         @Assisted ListViewRowHeightRule rowHeightRule,
         @Assisted ListViewDisplayedRowsLimit displayLimit,
+        @Assisted StoreController storeController,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
-        SearchResultMenuFactory searchResultMenuFactory,
-        ListViewStoreRendererFactory storeRendererFactory) {
+        SearchResultMenuFactory searchResultMenuFactory) {
 
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
@@ -189,7 +190,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
-        this.storeRendererFactory = storeRendererFactory;
+        this.storeRendererFactory = new ListViewStoreRendererFactory(
+                categoryIconManager, headingBuilder, truncator, storeController);
         
         GuiUtils.assignResources(this);
 

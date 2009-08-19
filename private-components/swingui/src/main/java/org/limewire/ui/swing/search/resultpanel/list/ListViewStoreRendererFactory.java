@@ -6,7 +6,6 @@ import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
@@ -22,7 +21,6 @@ class ListViewStoreRendererFactory {
     /**
      * Constructs a ListViewStoreRendererFactory using the specified services.
      */
-    @Inject
     public ListViewStoreRendererFactory(
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
@@ -59,7 +57,7 @@ class ListViewStoreRendererFactory {
         default:
             // Return default renderer so store results may still be viewed in
             // spite of an unrecognized store style.
-            // TODO review - should we send notification of incorrect condition
+            // TODO review - maybe send notification of incorrect condition
             return new ListViewStoreRendererAB(storeStyle, categoryIconManager, 
                     headingBuilder, headingTruncator, storeController);
         }
