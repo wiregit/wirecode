@@ -3,7 +3,6 @@ package org.limewire.core.impl.search.store;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -25,33 +24,13 @@ import com.google.inject.Singleton;
 @Singleton
 public class MockStoreManager implements StoreManager {
 
-    private final CopyOnWriteArrayList<StoreListener> listeners = 
-        new CopyOnWriteArrayList<StoreListener>();
-    
-    private volatile StoreStyle storeStyle;
-
-    @Override
-    public void addStoreListener(StoreListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void removeStoreListener(StoreListener listener) {
-        listeners.add(listener);
-    }
-
     @Override
     public boolean isLoggedIn() {
         return false;
     }
-    
-    @Override
-    public StoreStyle getStoreStyle() {
-        return storeStyle;
-    }
 
     @Override
-    public void startSearch(final SearchDetails searchDetails) {
+    public void startSearch(final SearchDetails searchDetails, final StoreListener storeListener) {
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -62,6 +41,7 @@ public class MockStoreManager implements StoreManager {
                 String query = searchDetails.getSearchQuery();
                 
                 // Create mock store style.
+                StoreStyle storeStyle;
                 if (query.indexOf("monkey") > -1) {
                     storeStyle = new MockStoreStyle(Type.STYLE_A);
                 } else if (query.indexOf("bear") > -1) {
@@ -70,36 +50,20 @@ public class MockStoreManager implements StoreManager {
                     storeStyle = new MockStoreStyle(Type.STYLE_C);
                 } else if (query.indexOf("dog") > -1) {
                     storeStyle = new MockStoreStyle(Type.STYLE_D);
+                } else {
+                    storeStyle = new MockStoreStyle(Type.STYLE_A);
                 }
                 
                 // Create mock store results.
                 StoreResult[] storeResults = createStoreResults(0);
                 
                 // Fire event to update style.
-                fireStyleUpdated(storeStyle);
+                storeListener.styleUpdated(storeStyle);
                 
                 // Fire event to handle results.
-                fireResultsFound(storeResults);
+                storeListener.resultsFound(storeResults);
             }
         }).start();
-    }
-
-    /**
-     * Notifies registered listeners to handle the specified store results.
-     */
-    private void fireResultsFound(StoreResult[] storeResults) {
-        for (StoreListener listener : listeners) {
-            listener.resultsFound(storeResults);
-        }
-    }
-    
-    /**
-     * Notifies registered listeners to update the specified store style.
-     */
-    private void fireStyleUpdated(StoreStyle storeStyle) {
-        for (StoreListener listener : listeners) {
-            listener.styleUpdated(storeStyle);
-        }
     }
     
     /**

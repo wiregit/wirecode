@@ -8,29 +8,13 @@ import org.limewire.core.api.search.SearchDetails;
 public interface StoreManager {
 
     /**
-     * Adds the specified listener to the list that is notified on store 
-     * events.
-     */
-    void addStoreListener(StoreListener listener);
-    
-    /**
-     * Removes the specified listener from the list that is notified on store 
-     * events.
-     */
-    void removeStoreListener(StoreListener listener);
-    
-    /**
      * Returns true if the user is logged in to the store.
      */
     boolean isLoggedIn();
     
     /**
-     * Returns the current style for Lime Store results.
+     * Starts search for store results using the specified search details and
+     * store listener.
      */
-    StoreStyle getStoreStyle();
-    
-    /**
-     * Starts search for store results using specified search details.
-     */
-    void startSearch(SearchDetails searchDetails);
+    void startSearch(SearchDetails searchDetails, StoreListener storeListener);
 }
