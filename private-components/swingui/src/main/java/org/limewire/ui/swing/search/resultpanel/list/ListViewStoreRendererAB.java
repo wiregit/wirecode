@@ -161,7 +161,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         if (storeStyle.getType() == Type.STYLE_A) {
             albumDownloadPanel.add(albumPriceLabel, "alignx right, aligny 50%, gapright 8");
         } else {
-            albumDownloadPanel.add(albumStreamButton, "alignx right, aligny 50%, gapright 4, hidemode 3");
+            albumDownloadPanel.add(albumStreamButton, "alignx right, aligny top, gapright 4, hidemode 3");
         }
         albumDownloadPanel.add(albumDownloadButton, "alignx right, aligny 50%, gapright 30");
         
@@ -248,7 +248,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         if (storeStyle.getType() == Type.STYLE_A) {
             mediaPanel.add(mediaPriceLabel, "alignx right, aligny 50%, gapleft 6, gapright 6, shrinkprio 0, growprio 0");
         } else {
-            mediaPanel.add(mediaStreamButton, "alignx right, aligny 50%, gapleft 6, gapright 6, shrinkprio 0, growprio 0, hidemode 3");
+            mediaPanel.add(mediaStreamButton, "alignx right, aligny 40%, gapleft 6, gapright 6, shrinkprio 0, growprio 0, hidemode 3");
         }
         mediaPanel.add(mediaDownloadButton, "alignx right, aligny 50%, gapright 12, shrinkprio 0, growprio 0");
         mediaPanel.add(mediaInfoButton, "alignx right, aligny top, shrinkprio 0, growprio 0");
@@ -289,7 +289,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         if (storeStyle.getType() == Type.STYLE_A) {
             trackPanel.add(priceLabel, "alignx right, gapright 12, growprio 0, shrinkprio 0");
         } else {
-            trackPanel.add(streamButton, "alignx right, gapright 6, growprio 0, shrinkprio 0, hidemode 3");
+            trackPanel.add(streamButton, "alignx right, aligny top, gapright 6, growprio 0, shrinkprio 0, hidemode 3");
         }
         trackPanel.add(downloadButton, "alignx right, growprio 0, shrinkprio 0");
         
