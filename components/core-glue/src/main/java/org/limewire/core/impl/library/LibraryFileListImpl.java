@@ -54,7 +54,7 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
     
     @Override
-    public void renameFile(File oldFile, File newFile) {
+    public void fileRenamed(File oldFile, File newFile) {
         managedList.fileRenamed(oldFile, newFile);
     }
     

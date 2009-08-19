@@ -11,8 +11,8 @@ public interface LibraryFileList extends LocalFileList {
     /** Returns the current state of the library. */
     LibraryState getState();
  
-    /** Renames the given file. */
-    void renameFile(File oldFile, File newFile);
+    /** Notifies LibraryFileList that the file has been renamed. */
+    void fileRenamed(File oldFile, File newFile);
     
     void addPropertyChangeListener(PropertyChangeListener listener);
 

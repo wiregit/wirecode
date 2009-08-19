@@ -68,8 +68,8 @@ public class RenameFileAction extends AbstractAction {
     /**
      * Notifies the library that the fileName has been changed.
      */
-    private void rename(File oldFile, File newFile) {
-        libraryManager.get().getLibraryManagedList().renameFile(oldFile, newFile);
+    private void updateFileNameInLibrary(File oldFile, File newFile) {
+        libraryManager.get().getLibraryManagedList().fileRenamed(oldFile, newFile);
     }
     
     /**
@@ -136,7 +136,7 @@ public class RenameFileAction extends AbstractAction {
             
             // try performing the file rename, if something goes wrong, revert textfield.
             if(FileUtils.forceRename(oldFile, newFile)) {
-                rename(oldFile, newFile);
+                updateFileNameInLibrary(oldFile, newFile);
                 closeDialog();
             } else {
                 textField.setText(oldFileItem.getName());

@@ -144,6 +144,6 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
 
     @Override
-    public void renameFile(File oldFile, File newFile) {
+    public void fileRenamed(File oldFile, File newFile) {
     }
 }
