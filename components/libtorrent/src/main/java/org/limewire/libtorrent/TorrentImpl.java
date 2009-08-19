@@ -64,9 +64,6 @@ public class TorrentImpl implements Torrent {
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
-    // TODO rename cancelled, it no longer just means cancelled, it also means
-    // that the torrent has been removed from the torrent manager. Might be able
-    // to refactor the variable away entirely.
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     // used to decide if the torrent was just newly completed or not.
