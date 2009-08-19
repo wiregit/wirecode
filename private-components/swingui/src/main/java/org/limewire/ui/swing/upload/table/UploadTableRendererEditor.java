@@ -169,7 +169,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         add(cancelButton, "gapright 10, alignx right, aligny 50%, spany 3, push, wrap");
         add(progressBar, "gapleft 10, , gaptop 2, hidemode 3, wrap");
         add(browseNameLabel, "split 4, gapleft 10, gapbottom 5, gaptop 2, aligny top");
-        add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, aligny top");
+        add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, alignx left, aligny top");
         add(timeLabel, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
         add(removeLink, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
     }
