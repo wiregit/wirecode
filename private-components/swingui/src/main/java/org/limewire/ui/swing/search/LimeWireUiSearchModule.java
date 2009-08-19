@@ -14,7 +14,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncatorImpl;
 import org.limewire.ui.swing.search.resultpanel.StoreController;
-import org.limewire.ui.swing.search.resultpanel.StoreControllerImpl;
+import org.limewire.ui.swing.search.resultpanel.StoreControllerFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRuleImpl;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
@@ -73,7 +73,9 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(SearchResultTruncator.class).toProvider(LazyBinder.newLazyProvider(
                 SearchResultTruncator.class, SearchResultTruncatorImpl.class));
         
-        bind(StoreController.class).to(StoreControllerImpl.class);
+        bind(StoreControllerFactory.class).toProvider(
+                FactoryProvider.newFactory(
+                        StoreControllerFactory.class, StoreController.class));
 
         bind(BrowseFailedMessagePanelFactory.class).toProvider(
             FactoryProvider.newFactory(
