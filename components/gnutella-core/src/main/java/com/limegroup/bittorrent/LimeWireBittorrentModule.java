@@ -86,6 +86,12 @@ public class LimeWireBittorrentModule extends AbstractModule {
 
                             @Override
                             public float getSeedRatioLimit() {
+                                if (BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue() >= BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
+                                        .getMaxValue()) {
+                                    // fake unlimited value for using the
+                                    // maximum range for the seed ratio.
+                                    return Float.MAX_VALUE;
+                                }
                                 return BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue();
                             }
 

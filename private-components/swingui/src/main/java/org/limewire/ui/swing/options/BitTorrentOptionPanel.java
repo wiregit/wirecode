@@ -65,7 +65,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
     private JPanel getBitTorrentPanel() {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
-        p.setLayout(new MigLayout("gapy 10"));
+        p.setLayout(new MigLayout("gapy 10, fill"));
         p.setOpaque(false);
 
         limewireControl = new JRadioButton(I18n
@@ -105,7 +105,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
             p.add(myControl, "wrap");
 
             p.add(seedRatioLabel, "split");
-            p.add(seedRatio, "alignx right, wrap");
+            p.add(seedRatio, ", growx, alignx left, wrap");
             p.add(portLabel, "split");
             p.add(startPortField, "split");
             p.add(portToLabel, "split");
@@ -127,12 +127,11 @@ public class BitTorrentOptionPanel extends OptionPanel {
     boolean applyOptions() {
         SwingUiSettings.AUTOMATIC_SETTINGS.setValue(limewireControl.isSelected());
         if (limewireControl.isSelected()) {
-            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(SeedRatioSlider.DEAFULT_SLIDER);
+            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.revertToDefault();
             BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.revertToDefault();
             BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.revertToDefault();
         } else {
-            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatio.getValue()
-                    / (float) 10);
+            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatio.getSeedRatio());
             
             int startPort = startPortField
             .getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
@@ -176,7 +175,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
             myControl.setSelected(true);
         }
 
-        seedRatio.setValue((int) (BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue() * 10));
+        seedRatio.setSeedRatio(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue());
         startPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
         endPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
         

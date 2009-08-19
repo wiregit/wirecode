@@ -1,12 +1,13 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.FlowLayout;
-
+import javax.swing.BoundedRangeModel;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Basic component that provides the user with a slider for picking a percentage
@@ -21,7 +22,7 @@ public abstract class LimeSlider extends JComponent {
 
     public LimeSlider(int minSlider, int maxSlider) {
         setOpaque(false);
-        setLayout(new FlowLayout());
+        setLayout(new MigLayout("nogrid, fill"));
         label = new JLabel();
         slider = new JSlider(minSlider, maxSlider);
         slider.setOpaque(false);
@@ -37,6 +38,10 @@ public abstract class LimeSlider extends JComponent {
 
     public void setValue(int value) {
         slider.setValue(value);
+    }
+    
+    public BoundedRangeModel getModel() {
+        return slider.getModel();
     }
 
     /**

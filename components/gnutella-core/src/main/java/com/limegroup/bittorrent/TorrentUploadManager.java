@@ -146,7 +146,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
 
     @Override
     public BTUploader createBTUploader(Torrent torrent) {
-        BTUploader btUploader = new BTUploader(torrent, activityCallback.get(), this);
+        BTUploader btUploader = new BTUploader(torrent, activityCallback.get(), this, torrentManager.get());
         btUploader.registerTorrentListener();
         activityCallback.get().addUpload(btUploader);
         return btUploader;

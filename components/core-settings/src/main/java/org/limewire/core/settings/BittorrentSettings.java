@@ -35,7 +35,7 @@ public class BittorrentSettings extends LimeProps {
                     .getUserSettingsDir(), "uploads.dat/"));
 
     public static final FloatSetting LIBTORRENT_SEED_RATIO_LIMIT = FACTORY.createFloatSetting(
-            "LIBTORRENT_SEED_RATIO_LIMIT", 2.0f);
+            "LIBTORRENT_SEED_RATIO_LIMIT", 2.0f, 1.0f, 10.0f);
 
     public static final FloatSetting LIBTORRENT_SEED_TIME_RATIO_LIMIT = FACTORY.createFloatSetting(
             "LIBTORRENT_SEED_TIME_RATIO_LIMIT", 7f);

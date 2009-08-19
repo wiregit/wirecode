@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -38,13 +38,16 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     private final TorrentUploadManager torrentUploadManager;
     
+    private final TorrentManager torrentManager;
+    
     
 
     public BTUploader(Torrent torrent, ActivityCallback activityCallback,
-            TorrentUploadManager torrentUploadManager) {
+            TorrentUploadManager torrentUploadManager, TorrentManager torrentManager) {
         this.torrent = torrent;
         this.activityCallback = activityCallback;
         this.torrentUploadManager = torrentUploadManager;
+        this.torrentManager = torrentManager;
     }
 
     public void registerTorrentListener() {
@@ -63,9 +66,9 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
             //considered to be finished uploading if seed ratio has been reached
             boolean finished = torrent.isFinished();
             float seedRatio = torrent.getSeedRatio();
+            float targetSeedRatio = torrentManager.getTorrentManagerSettings().getSeedRatioLimit();
             if (finished
-                    &&  seedRatio >= BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
-                            .getValue()) {
+                    &&  seedRatio >= targetSeedRatio) {
                 this.finished.set(true);
                 torrent.stop();
             }
