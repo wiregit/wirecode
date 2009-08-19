@@ -19,9 +19,6 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.search.store.StoreListener;
-import org.limewire.core.api.search.store.StoreManager;
-import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -33,6 +30,7 @@ import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.SearchResultsModel.StyleListener;
 import org.limewire.ui.swing.search.resultpanel.classic.AllTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.AudioTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ClassicDoubleClickHandler;
@@ -119,7 +117,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
     private final DefaultTableCellRenderer defaultTableCellRenderer;
-    private final StoreManager storeManager;
+    private final StoreController storeController;
     
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
@@ -131,7 +129,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private ColorHighlighter resultsColorHighlighter;
     private Scrollable visibleComponent;
     
-    private StoreListener storeListener;
+    private StyleListener styleListener;
 
     /**
      * Constructs a BaseResultPanel with the specified components.
@@ -151,7 +149,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             LibraryMediator libraryMediator,
             Provider<QualityRenderer> qualityRenderer, 
             DefaultTableCellRenderer defaultTableCellRenderer,
-            StoreManager storeManager) {
+            StoreControllerFactory storeControllerFactory) {
         
         this.searchResultsModel = searchResultsModel;
         this.tableFormatFactory = tableFormatFactory;
@@ -166,7 +164,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         this.qualityRenderer = qualityRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
-        this.storeManager = storeManager;
+        this.storeController = storeControllerFactory.create(searchResultsModel);
         
         rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery());
 
@@ -184,15 +182,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
      */
     @Inject
     void register() {
-        storeListener = new StoreListener() {
-            @Override
-            public void loginChanged(boolean loggedIn) {
-                // TODO update renderer style
-            }
-
-            @Override
-            public void resultsFound(StoreResult[] storeResults) {}
-            
+        styleListener = new StyleListener() {
             @Override
             public void styleUpdated(final StoreStyle storeStyle) {
                 SwingUtils.invokeLater(new Runnable() {
@@ -202,7 +192,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 });
             }
         };
-        storeManager.addStoreListener(storeListener);
+        searchResultsModel.addStyleListener(styleListener);
     }
     
     /**
@@ -217,7 +207,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         listTable.setEmptyRowsPainted(false);
         
         // Set store style.
-        StoreStyle storeStyle = storeManager.getStoreStyle();
+        StoreStyle storeStyle = searchResultsModel.getStoreStyle();
         listTable.setStoreStyle((storeStyle != null) ? storeStyle : new DefaultListStoreStyle());
         
         return listTable;
@@ -296,10 +286,10 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
-                downloadHandler, rowHeightRule, displayLimit);
+                downloadHandler, rowHeightRule, displayLimit, storeController);
         
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
-                downloadHandler, rowHeightRule, displayLimit);
+                downloadHandler, rowHeightRule, displayLimit, storeController);
         
 //        // TODO REMOVE DEAD CODE
 //        TableColumnModel tcm = resultsList.getColumnModel();
@@ -521,7 +511,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
      * Disposes of resources used by the container.
      */
     public void dispose() {
-        storeManager.removeStoreListener(storeListener);
+        searchResultsModel.removeStyleListener(styleListener);
     }
     
     /**
