@@ -16,35 +16,44 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     
     private final Provider<MandragoreWormFilter> wormFilter;
     private final Provider<ResponseQueryFilter> queryFilter;
+    private final Provider<ProgramsFilter> programsFilter;
+    private final Provider<SecureResultFilter> secureResultFilter;
     private final Provider<ResponseTypeFilter> typeFilter;
     private final Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter;
     private final Provider<MutableGUIDFilter> mutableGUIDFilter;
+    private final Provider<KeywordFilter> keywordFilter;
     
     @Inject
     public ResponseFilterFactoryImpl(Provider<MandragoreWormFilter> wormFilter,
             Provider<ResponseQueryFilter> queryFilter,
+            Provider<ProgramsFilter> programsFilter,
+            Provider<SecureResultFilter> secureResultFilter,
             Provider<ResponseTypeFilter> typeFilter,
             Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter,
-            Provider<MutableGUIDFilter> mutableGUIDFilter) {
+            Provider<MutableGUIDFilter> mutableGUIDFilter,
+            Provider<KeywordFilter> keywordFilter) {
         this.wormFilter = wormFilter;
         this.queryFilter = queryFilter;
+        this.programsFilter = programsFilter;
+        this.secureResultFilter = secureResultFilter;
         this.typeFilter = typeFilter;
         this.whiteListUpdateUrnFilter = whiteListUpdateUrnFilter;
         this.mutableGUIDFilter = mutableGUIDFilter;
+        this.keywordFilter = keywordFilter;
     }
     
     @Override
     public ResponseFilter createResponseFilter() {
         List<ResponseFilter> filters = new ArrayList<ResponseFilter>();
         
-        filters.add(new KeywordFilter());
+        filters.add(keywordFilter.get());
         if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
             filters.add(mutableGUIDFilter.get());
         filters.add(wormFilter.get());
         filters.add(queryFilter.get());
         filters.add(typeFilter.get());
-        filters.add(new SecureResultFilter());
-        filters.add(new ProgramsFilter());
+        filters.add(secureResultFilter.get());
+        filters.add(programsFilter.get());
         
         return new CompoundResponseFilter(filters,
                 Collections.singletonList(whiteListUpdateUrnFilter.get()));

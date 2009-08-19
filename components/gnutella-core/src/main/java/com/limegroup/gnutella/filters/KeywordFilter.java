@@ -31,7 +31,7 @@ public class KeywordFilter implements SpamFilter, ResponseFilter {
     /** INVARIANT: strings in ban contain only lowercase */
     private final List<String> ban;
 
-    public KeywordFilter() {
+    KeywordFilter() {
         ImmutableList.Builder<String> builder =
             new ImmutableList.Builder<String>();
         for(String word : FilterSettings.BANNED_WORDS.get()) {
@@ -45,11 +45,7 @@ public class KeywordFilter implements SpamFilter, ResponseFilter {
                 builder.add(word);
             }
         }
-        ImmutableList<String> list = builder.build();
-        if(list.isEmpty())
-            ban = Collections.emptyList();
-        else
-            ban = list;
+        ban = builder.build();
     }
 
     KeywordFilter(Collection<String> words) {
