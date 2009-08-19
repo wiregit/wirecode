@@ -13,18 +13,6 @@ public interface StoreStyle {
         STYLE_A, STYLE_B, STYLE_C, STYLE_D
     }
     
-    Font getAlbumFont();
-    
-    Color getAlbumForeground();
-    
-    Font getAlbumLengthFont();
-    
-    Color getAlbumLengthForeground();
-    
-    Font getArtistFont();
-    
-    Color getArtistForeground();
-    
     Color getBackground();
     
     Icon getBuyAlbumIcon();
@@ -34,6 +22,10 @@ public interface StoreStyle {
     Icon getDownloadAlbumIcon();
     
     Icon getDownloadTrackIcon();
+    
+    Font getHeadingFont();
+  
+    Color getHeadingForeground();
     
     Font getInfoFont();
     
@@ -47,15 +39,15 @@ public interface StoreStyle {
     
     Color getPriceBorderColor();
     
-    Font getQualityFont();
-    
-    Color getQualityForeground();
-
     Font getShowTracksFont();
 
     Color getShowTracksForeground();
     
     Icon getStreamIcon();
+    
+    Font getSubHeadingFont();
+  
+    Color getSubHeadingForeground();
     
     Font getTrackFont();
     

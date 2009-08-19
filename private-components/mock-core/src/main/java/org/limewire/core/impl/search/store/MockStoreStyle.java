@@ -20,28 +20,24 @@ public class MockStoreStyle implements StoreStyle {
     private final Type type;
     private final Properties properties;
     
-    private Font albumFont;
-    private Color albumForeground;
-    private Font albumLengthFont;
-    private Color albumLengthForeground;
-    private Font artistFont;
-    private Color artistForeground;
     private Color background;
     private Icon buyAlbumIcon;
     private Icon buyTrackIcon;
     private Icon downloadAlbumIcon;
     private Icon downloadTrackIcon;
+    private Font headingFont;
+    private Color headingForeground;
     private Font infoFont;
     private Color infoForeground;
     private Color priceBackground;
     private Color priceBorderColor;
     private Font priceFont;
     private Color priceForeground;
-    private Font qualityFont;
-    private Color qualityForeground;
     private Font showTracksFont;
     private Color showTracksForeground;
     private Icon streamIcon;
+    private Font subHeadingFont;
+    private Color subHeadingForeground;
     private Font trackFont;
     private Color trackForeground;
     private Font trackLengthFont;
@@ -71,28 +67,24 @@ public class MockStoreStyle implements StoreStyle {
             URL url = getClass().getResource("MockStoreStyle.properties");
             properties.load(url.openStream());
             
-            albumFont = getFont("albumFont");
-            albumForeground = getColor("albumForeground");
-            albumLengthFont = getFont("albumLengthFont");
-            albumLengthForeground = getColor("albumLengthForeground");
-            artistFont = getFont("artistFont");
-            artistForeground = getColor("artistForeground");
             background = getColor("background");
             buyAlbumIcon = getIcon("buyAlbumIcon");
             buyTrackIcon = getIcon("buyTrackIcon");
             downloadAlbumIcon = getIcon("downloadAlbumIcon");
             downloadTrackIcon = getIcon("downloadTrackIcon");
+            headingFont = getFont("headingFont");
+            headingForeground = getColor("headingForeground");
             infoFont = getFont("infoFont");
             infoForeground = getColor("infoForeground");
             priceBackground = getColor("priceBackground");
             priceBorderColor = getColor("priceBorderColor");
             priceFont = getFont("priceFont");
             priceForeground = getColor("priceForeground");
-            qualityFont = getFont("qualityFont");
-            qualityForeground = getColor("qualityForeground");
             showTracksFont = getFont("showTracksFont");
             showTracksForeground = getColor("showTracksForeground");
             streamIcon = getIcon("streamIcon");
+            subHeadingFont = getFont("subHeadingFont");
+            subHeadingForeground = getColor("subHeadingForeground");
             trackFont = getFont("trackFont");
             trackForeground = getColor("trackForeground");
             trackLengthFont = getFont("trackLengthFont");
@@ -110,36 +102,6 @@ public class MockStoreStyle implements StoreStyle {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    
-    @Override
-    public Font getAlbumFont() {
-        return albumFont;
-    }
-
-    @Override
-    public Color getAlbumForeground() {
-        return albumForeground;
-    }
-
-    @Override
-    public Font getAlbumLengthFont() {
-        return albumLengthFont;
-    }
-
-    @Override
-    public Color getAlbumLengthForeground() {
-        return albumLengthForeground;
-    }
-
-    @Override
-    public Font getArtistFont() {
-        return artistFont;
-    }
-
-    @Override
-    public Color getArtistForeground() {
-        return artistForeground;
     }
 
     @Override
@@ -165,6 +127,16 @@ public class MockStoreStyle implements StoreStyle {
     @Override
     public Icon getDownloadTrackIcon() {
         return downloadTrackIcon;
+    }
+
+    @Override
+    public Font getHeadingFont() {
+        return headingFont;
+    }
+
+    @Override
+    public Color getHeadingForeground() {
+        return headingForeground;
     }
 
     @Override
@@ -198,16 +170,6 @@ public class MockStoreStyle implements StoreStyle {
     }
 
     @Override
-    public Font getQualityFont() {
-        return qualityFont;
-    }
-
-    @Override
-    public Color getQualityForeground() {
-        return qualityForeground;
-    }
-
-    @Override
     public Font getShowTracksFont() {
         return showTracksFont;
     }
@@ -220,6 +182,16 @@ public class MockStoreStyle implements StoreStyle {
     @Override
     public Icon getStreamIcon() {
         return streamIcon;
+    }
+
+    @Override
+    public Font getSubHeadingFont() {
+        return subHeadingFont;
+    }
+
+    @Override
+    public Color getSubHeadingForeground() {
+        return subHeadingForeground;
     }
 
     @Override

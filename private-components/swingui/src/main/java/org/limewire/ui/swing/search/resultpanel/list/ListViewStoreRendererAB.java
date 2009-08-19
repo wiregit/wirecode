@@ -98,9 +98,9 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         albumHeadingLabel.setOpenUrlsNatively(false);
         albumHeadingLabel.setOpaque(false);
         albumHeadingLabel.setFocusable(false);
-        albumHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
-        albumHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
-        albumHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
+        albumHeadingLabel.setHtmlFont(storeStyle.getHeadingFont());
+        albumHeadingLabel.setHtmlForeground(storeStyle.getHeadingForeground());
+        albumHeadingLabel.setHtmlLinkForeground(storeStyle.getHeadingForeground());
         albumHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         albumHeadingLabel.setMinimumSize(new Dimension(0, 22));
         albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
@@ -116,10 +116,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         });
         
         albumSubHeadingLabel = new NoDancingHtmlLabel();
-        albumSubHeadingLabel.setFont(storeStyle.getAlbumFont());
-        albumSubHeadingLabel.setForeground(storeStyle.getAlbumForeground());
+        albumSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
+        albumSubHeadingLabel.setForeground(storeStyle.getSubHeadingForeground());
         
-        albumWidthResolver = new HeadingFontWidthResolver(albumHeadingLabel, storeStyle.getArtistFont());
+        albumWidthResolver = new HeadingFontWidthResolver(albumHeadingLabel, storeStyle.getHeadingFont());
         
         albumInfoPanel = new JXPanel();
         albumInfoPanel.setOpaque(false);
@@ -196,9 +196,9 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         mediaHeadingLabel.setOpenUrlsNatively(false);
         mediaHeadingLabel.setOpaque(false);
         mediaHeadingLabel.setFocusable(false);
-        mediaHeadingLabel.setHtmlFont(storeStyle.getArtistFont());
-        mediaHeadingLabel.setHtmlForeground(storeStyle.getArtistForeground());
-        mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getArtistForeground());
+        mediaHeadingLabel.setHtmlFont(storeStyle.getHeadingFont());
+        mediaHeadingLabel.setHtmlForeground(storeStyle.getHeadingForeground());
+        mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getHeadingForeground());
         mediaHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         mediaHeadingLabel.setMinimumSize(new Dimension(0, 22));
         mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
@@ -214,10 +214,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         });
         
         mediaSubHeadingLabel = new NoDancingHtmlLabel();
-        mediaSubHeadingLabel.setFont(storeStyle.getAlbumFont());
-        mediaSubHeadingLabel.setForeground(storeStyle.getAlbumForeground());
+        mediaSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
+        mediaSubHeadingLabel.setForeground(storeStyle.getSubHeadingForeground());
         
-        mediaWidthResolver = new HeadingFontWidthResolver(mediaHeadingLabel, storeStyle.getArtistFont());
+        mediaWidthResolver = new HeadingFontWidthResolver(mediaHeadingLabel, storeStyle.getHeadingFont());
         
         mediaPriceLabel = new JLabel();
         mediaPriceLabel.setFont(storeStyle.getPriceFont());

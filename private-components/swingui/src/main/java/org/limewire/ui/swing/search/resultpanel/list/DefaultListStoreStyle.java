@@ -22,39 +22,35 @@ public class DefaultListStoreStyle implements StoreStyle {
 
     private final Type type;
     
-    Font albumFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color albumForeground = Color.decode("#313131");
-    Font albumLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color albumLengthForeground = Color.decode("#313131");
-    Font artistFont = new Font(Font.DIALOG, Font.PLAIN, 13);
-    Color artistForeground = Color.decode("#2152a6");
-    Color background = Color.decode("#e8f2f6");
-    Icon buyAlbumIcon;
-    Icon buyTrackIcon;
-    Icon downloadAlbumIcon;
-    Icon downloadTrackIcon;
-    Font infoFont = new Font(Font.DIALOG, Font.BOLD, 8);
-    Color infoForeground = Color.decode("#2152a6");
-    Color priceBackground = Color.decode("#f5f5f5");
-    Color priceBorderColor = Color.decode("#9e9b9b");
-    Font priceFont = new Font(Font.DIALOG, Font.PLAIN, 10);
-    Color priceForeground = Color.decode("#2152a6");
-    Font qualityFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color qualityForeground = Color.decode("#313131");
-    Font showTracksFont = new Font(Font.DIALOG, Font.BOLD, 8);
-    Color showTracksForeground = Color.decode("#2152a6");
-    Icon streamIcon = new StreamIcon();
-    Font trackFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color trackForeground = Color.decode("#313131");
-    Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
-    Color trackLengthForeground = Color.decode("#313131");
+    private Color background = Color.decode("#e8f2f6");
+    private Icon buyAlbumIcon;
+    private Icon buyTrackIcon;
+    private Icon downloadAlbumIcon;
+    private Icon downloadTrackIcon;
+    private Font headingFont = new Font(Font.DIALOG, Font.PLAIN, 13);
+    private Color headingForeground = Color.decode("#2152a6");
+    private Font infoFont = new Font(Font.DIALOG, Font.BOLD, 8);
+    private Color infoForeground = Color.decode("#2152a6");
+    private Color priceBackground = Color.decode("#f5f5f5");
+    private Color priceBorderColor = Color.decode("#9e9b9b");
+    private Font priceFont = new Font(Font.DIALOG, Font.PLAIN, 10);
+    private Color priceForeground = Color.decode("#2152a6");
+    private Font showTracksFont = new Font(Font.DIALOG, Font.BOLD, 8);
+    private Color showTracksForeground = Color.decode("#2152a6");
+    private Icon streamIcon = new StreamIcon();
+    private Font subHeadingFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    private Color subHeadingForeground = Color.decode("#313131");
+    private Font trackFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    private Color trackForeground = Color.decode("#313131");
+    private Font trackLengthFont = new Font(Font.DIALOG, Font.PLAIN, 11);
+    private Color trackLengthForeground = Color.decode("#313131");
     
-    boolean downloadButtonVisible = true;
-    boolean priceButtonVisible = false;
-    boolean priceVisible = false;
-    boolean showInfoOnHover = false;
-    boolean showTracksOnHover = false;
-    boolean streamButtonVisible = true;
+    private boolean downloadButtonVisible = true;
+    private boolean priceButtonVisible = false;
+    private boolean priceVisible = false;
+    private boolean showInfoOnHover = false;
+    private boolean showTracksOnHover = false;
+    private boolean streamButtonVisible = true;
     
     /**
      * Constructs a DefaultListStoreStyle.
@@ -69,36 +65,6 @@ public class DefaultListStoreStyle implements StoreStyle {
             downloadAlbumIcon = new DownloadAlbumIcon(20);
             downloadTrackIcon = new DownloadTrackIcon(20);
         }
-    }
-    
-    @Override
-    public Font getAlbumFont() {
-        return albumFont;
-    }
-
-    @Override
-    public Color getAlbumForeground() {
-        return albumForeground;
-    }
-
-    @Override
-    public Font getAlbumLengthFont() {
-        return albumLengthFont;
-    }
-
-    @Override
-    public Color getAlbumLengthForeground() {
-        return albumLengthForeground;
-    }
-
-    @Override
-    public Font getArtistFont() {
-        return artistFont;
-    }
-
-    @Override
-    public Color getArtistForeground() {
-        return artistForeground;
     }
 
     @Override
@@ -124,6 +90,16 @@ public class DefaultListStoreStyle implements StoreStyle {
     @Override
     public Icon getDownloadTrackIcon() {
         return downloadTrackIcon;
+    }
+
+    @Override
+    public Font getHeadingFont() {
+        return headingFont;
+    }
+
+    @Override
+    public Color getHeadingForeground() {
+        return headingForeground;
     }
 
     @Override
@@ -157,16 +133,6 @@ public class DefaultListStoreStyle implements StoreStyle {
     }
 
     @Override
-    public Font getQualityFont() {
-        return qualityFont;
-    }
-
-    @Override
-    public Color getQualityForeground() {
-        return qualityForeground;
-    }
-
-    @Override
     public Font getShowTracksFont() {
         return showTracksFont;
     }
@@ -179,6 +145,16 @@ public class DefaultListStoreStyle implements StoreStyle {
     @Override
     public Icon getStreamIcon() {
         return streamIcon;
+    }
+
+    @Override
+    public Font getSubHeadingFont() {
+        return subHeadingFont;
+    }
+
+    @Override
+    public Color getSubHeadingForeground() {
+        return subHeadingForeground;
     }
 
     @Override
