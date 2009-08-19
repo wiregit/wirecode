@@ -76,22 +76,36 @@ public interface TorrentManager extends Service {
      * Returns the current TorrentSettings object set on the torrent session.
      */
     public TorrentManagerSettings getTorrentManagerSettings();
-    
+
     /**
-     * Returns the total upload rate used by libtorrent. This includes payload and protocol overhead. 
+     * Returns the total upload rate used by libtorrent. This includes payload
+     * and protocol overhead.
      */
     public float getTotalUploadRate();
-    
+
     /**
-     * Returns the total download rate used by libtorrent. This includes payload and protocol overhead.
+     * Returns the total download rate used by libtorrent. This includes payload
+     * and protocol overhead.
      */
     public float getTotalDownloadRate();
 
+    /**
+     * Returns a list of torrent file entries for the given torrent.
+     */
     public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent);
 
+    /**
+     * Returns a list of connected peers for the given torrent.
+     */
     public List<TorrentPeer> getTorrentPeers(Torrent torrent);
 
+    /**
+     * Initializes the filesystem for the given torrent.
+     */
     public void initialize(Torrent torrent);
 
+    /**
+     * Sets the automanaged flag to the given value for the torrent.
+     */
     public void setAutoManaged(Torrent torrent, boolean autoManaged);
 }

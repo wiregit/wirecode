@@ -64,9 +64,18 @@ public interface TorrentManagerSettings {
      */
     public int getSeedTimeLimit();
 
+    /**
+     * Returns the limit for the active number of active managed torrent downloads.
+     */
     public int getActiveDownloadsLimit();
 
+    /**
+     * Returns the limit for the active number of active managed torrent seeds.
+     */
     public int getActiveSeedsLimit();
 
+    /**
+     * Returns the limit for the total number of active managed torrents.
+     */
     public int getActiveLimit();
 }

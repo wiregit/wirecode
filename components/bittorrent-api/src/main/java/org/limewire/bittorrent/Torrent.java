@@ -202,11 +202,24 @@ public interface Torrent {
      */
     public boolean isPrivate();
 
+    /**
+     * Returns a list of TorrentFileEntry containing an entry for each file in
+     * this torrent.
+     */
     public List<TorrentFileEntry> getTorrentFileEntries();
 
+    /**
+     * Returns a list of currently connected peers for this torrent.
+     */
     public List<TorrentPeer> getTorrentPeers();
 
+    /**
+     * Returns true if the torrent is automanaged.
+     */
     public boolean isAutoManaged();
 
+    /**
+     * Sets whether or not this torrent is automanaged.
+     */
     public void setAutoManaged(boolean autoManaged);
 }
