@@ -8,6 +8,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -70,6 +71,11 @@ class SwingSearchListener implements SearchListener {
     @Override
     public void handleStoreResult(Search search, StoreResult storeResult) {
         searchResultsModel.addStoreResult(storeResult);
+    }
+    
+    @Override
+    public void handleStoreStyle(Search search, StoreStyle storeStyle) {
+        searchResultsModel.setStoreStyle(storeStyle);
     }
 
     @Override

@@ -19,6 +19,7 @@ import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.logging.Log;
@@ -136,6 +137,11 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         
         @Override
         public void handleStoreResult(Search search, StoreResult storeResult) {
+            // Do nothing.
+        }
+        
+        @Override
+        public void handleStoreStyle(Search search, StoreStyle storeStyle) {
             // Do nothing.
         }
 
