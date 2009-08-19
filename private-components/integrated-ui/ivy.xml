@@ -33,7 +33,7 @@
         <dependency org="none" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
         
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
-        <dependency org="org.limewire" name="gnutella-core" rev="latest.integration" conf="test-common"/>
+        <dependency org="org.limewire" name="gnutella-core" rev="latest.integration" conf="test"/>
         
         <dependency org="none" name="tests/inspTool" rev="${inspTool.version}" conf="test"/>
         <dependency org="none" name="tests/bcel" rev="${bcel.version}" conf="test"/>
