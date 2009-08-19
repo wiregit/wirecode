@@ -263,15 +263,9 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                         GuiUtils.toUnitbytes(item.getFileSize()), 
                         GuiUtils.rate2speed(item.getUploadSpeed()));
             }
-        case QUEUED:
-            if(item.getUploadItemType() == UploadItemType.BITTORRENT) {
-                return I18n.tr("Waiting for other torrent seeds");
-            } else {
-                // {0}: number of uploads before this upload that have to finish
-                return I18n.trn("Waiting for {0} upload to finish", "Waiting for {0} uploads to finish", item.getQueuePosition());
-            }
         case WAITING:
-            return I18n.tr("Waiting for connections...");
+        case QUEUED:
+            return I18n.tr("Waiting...");
         case UNABLE_TO_UPLOAD:
             return getErrorMessage(item.getErrorState());        
         }
