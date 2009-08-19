@@ -42,9 +42,9 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     private NumericTextField endPortField;
     
-    private JLabel firewallDescriptionLabel;
+    private JLabel portLabel;
     
-    private JLabel firewallToLabel;
+    private JLabel portToLabel;
 
     private final Provider<TorrentManager> torrentManager;
 
@@ -95,8 +95,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
         seedRatio = new SeedRatioSlider();
 
-        firewallDescriptionLabel = new JLabel(I18n.tr("Firewall port range:"));
-        firewallToLabel = new JLabel(I18n.tr("to"));
+        portLabel = new JLabel(I18n.tr("Use ports:"));
+        portToLabel = new JLabel(I18n.tr("to"));
         startPortField = new NumericTextField(5, 1, 0xFFFF);
         endPortField = new NumericTextField(5, 1, 0xFFFF);
 
@@ -106,9 +106,9 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
             p.add(seedRatioLabel, "split");
             p.add(seedRatio, "alignx right, wrap");
-            p.add(firewallDescriptionLabel, "split");
+            p.add(portLabel, "split");
             p.add(startPortField, "split");
-            p.add(firewallToLabel, "split");
+            p.add(portToLabel, "split");
             p.add(endPortField, "alignx right, wrap");
 
         } else {
@@ -198,8 +198,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedRatioLabel.setVisible(!limewireControlled);
         seedRatio.setVisible(!limewireControlled);
         seedRatio.setEnabled(!limewireControlled);
-        firewallDescriptionLabel.setVisible(!limewireControlled);
-        firewallToLabel.setVisible(!limewireControlled);
+        portLabel.setVisible(!limewireControlled);
+        portToLabel.setVisible(!limewireControlled);
         startPortField.setVisible(!limewireControlled);
         startPortField.setEnabled(!limewireControlled);
         endPortField.setVisible(!limewireControlled);
