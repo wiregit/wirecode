@@ -34,7 +34,6 @@ public class MockSearch implements Search {
     private final CopyOnWriteArrayList<SearchListener> listeners =
         new CopyOnWriteArrayList<SearchListener>();
 
-    private StoreListener storeListener;
     private int repeatCount = 0;
 
     public MockSearch(SearchDetails searchDetails, StoreManager storeManager) {
@@ -60,8 +59,13 @@ public class MockSearch implements Search {
     
     @Override
     public void start() {
+        // Notify search listeners.
+        for (SearchListener listener : listeners) {
+            listener.searchStarted(this);
+        }
+        
         // Create listener for store results.
-        storeListener = new StoreListener() {
+        StoreListener storeListener = new StoreListener() {
             @Override
             public void resultsFound(StoreResult[] storeResults) {
                 for (StoreResult storeResult : storeResults) {
@@ -73,27 +77,18 @@ public class MockSearch implements Search {
             public void loginChanged(boolean loggedIn) {}
 
             @Override
-            public void styleUpdated(StoreStyle storeStyle) {}
+            public void styleUpdated(StoreStyle storeStyle) {
+                handleStoreStyle(storeStyle);
+            }
         };
-        storeManager.addStoreListener(storeListener);
-        
-        // Notify search listeners.
-        for (SearchListener listener : listeners) {
-            listener.searchStarted(this);
-        }
         
         // Add mock results.
         addResults("");
-        storeManager.startSearch(searchDetails);
+        storeManager.startSearch(searchDetails, storeListener);
     }
     
     @Override
     public void stop() {
-        if (storeListener != null) {
-            storeManager.removeStoreListener(storeListener);
-            storeListener = null;
-        }
-        
         for (SearchListener listener : listeners) {
             listener.searchStopped(this);
         }
@@ -124,6 +119,12 @@ public class MockSearch implements Search {
     private void handleStoreResult(StoreResult storeResult) {
         for (SearchListener listener : listeners) {
             listener.handleStoreResult(this, storeResult);
+        }
+    }
+    
+    private void handleStoreStyle(StoreStyle storeStyle) {
+        for (SearchListener listener : listeners) {
+            listener.handleStoreStyle(this, storeStyle);
         }
     }
     
