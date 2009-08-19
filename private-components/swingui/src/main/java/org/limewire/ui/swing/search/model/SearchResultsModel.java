@@ -7,6 +7,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.components.DisposalListenerList;
 import org.limewire.ui.swing.filter.FilterableSource;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
@@ -104,4 +105,34 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      */
     SearchType getSearchType();
     
+    /**
+     * Returns the style for store results.
+     */
+    StoreStyle getStoreStyle();
+    
+    /**
+     * Sets the store style to the specified value.
+     */
+    void setStoreStyle(StoreStyle storeStyle);
+    
+    /**
+     * Adds the specified listener to the list that is notified when the 
+     * store style is updated.
+     */
+    void addStyleListener(StyleListener listener);
+    
+    /**
+     * Removes the specified listener from the list that is notified when the 
+     * store style is updated.
+     */
+    void removeStyleListener(StyleListener listener);
+    
+    /**
+     * Defines a listener that is notified when the store style is updated.
+     */
+    public interface StyleListener {
+        
+        /** Invoked when the style for store results is updated. */
+        void styleUpdated(StoreStyle storeStyle);
+    }
 }
