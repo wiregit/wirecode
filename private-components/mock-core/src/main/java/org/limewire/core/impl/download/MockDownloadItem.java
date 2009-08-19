@@ -285,4 +285,9 @@ public class MockDownloadItem implements DownloadItem {
     public Collection<File> getCompleteFiles() {
         return Collections.singletonList(getDownloadingFile());
     }
+
+    @Override
+    public DownloadItemType getDownloadItemType() {
+        return DownloadItemType.GNUTELLA;
+    }
 }

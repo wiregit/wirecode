@@ -131,6 +131,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 put(DownloadState.RESUMING, "Resuming");
                 put(DownloadState.FETCHING, "Fetching");
                 put(DownloadState.DANGEROUS, "Dangerous file");
+                put(DownloadState.TORRENT_ERROR, "Torrent Error");
                 
                 assert isComplete();
             }
