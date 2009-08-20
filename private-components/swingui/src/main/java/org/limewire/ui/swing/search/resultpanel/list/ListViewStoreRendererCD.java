@@ -34,6 +34,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthR
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer.NoDancingHtmlLabel;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.util.CommonUtils;
 
 import com.google.inject.Provider;
 
@@ -247,12 +248,12 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         JLabel trackLabel = new JLabel();
         trackLabel.setFont(storeStyle.getTrackFont());
         trackLabel.setForeground(storeStyle.getTrackForeground());
-        trackLabel.setText((String) result.getProperty(FilePropertyKey.NAME));
+        trackLabel.setText((String) result.getProperty(FilePropertyKey.TITLE));
         
         JLabel lengthLabel = new JLabel();
         lengthLabel.setFont(storeStyle.getTrackLengthFont());
         lengthLabel.setForeground(storeStyle.getTrackLengthForeground());
-        lengthLabel.setText("2:30"); // TODO convert from FilePropertyKey.LENGTH
+        lengthLabel.setText(CommonUtils.seconds2time((Long) result.getProperty(FilePropertyKey.LENGTH)));
         
         // Layout components in container.
         trackPanel.setLayout(new MigLayout("insets 6 6 6 6, gap 0! 0!, novisualpadding"));

@@ -273,7 +273,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         JLabel trackLabel = new JLabel();
         trackLabel.setFont(storeStyle.getTrackFont());
         trackLabel.setForeground(storeStyle.getTrackForeground());
-        trackLabel.setText((String) result.getProperty(FilePropertyKey.NAME));
+        trackLabel.setText((String) result.getProperty(FilePropertyKey.TITLE));
         
         JLabel priceLabel = new JLabel();
         priceLabel.setFont(storeStyle.getPriceFont());
