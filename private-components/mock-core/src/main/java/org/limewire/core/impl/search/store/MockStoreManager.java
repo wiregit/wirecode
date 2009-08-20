@@ -78,9 +78,10 @@ public class MockStoreManager implements StoreManager {
         msr.setFileExtension("mp3");
         msr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
         msr.setPrice("4 Credits");
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        //msr.setProperty(FilePropertyKey.NAME, "Premonitions, Monkeys & Science");
-        msr.setProperty(FilePropertyKey.NAME, "When Everyone has a Sweet Party and you're invited! I was at this totally swinging hepcat party last weekend. Oh man, that joint was jumpin!");
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
+        msr.setProperty(FilePropertyKey.ALBUM, "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
+        msr.setProperty(FilePropertyKey.TITLE, "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
+        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(568));
         msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         msr.setSize(9 * 1024 * 1024);
 
@@ -88,8 +89,9 @@ public class MockStoreManager implements StoreManager {
         mstr.setExtension("mp3");
         mstr.setUrn("www.store.limewire.com" + (i + 1));
         mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Heh?");
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
+        mstr.setProperty(FilePropertyKey.TITLE, "Heh?");
+        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(129));
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         mstr.setSize(3 * 1024 * 1024);
         msr.addAlbumResult(mstr);
@@ -98,8 +100,9 @@ public class MockStoreManager implements StoreManager {
         mstr.setExtension("mp3");
         mstr.setUrn("www.store.limewire.com" + (i + 2));
         mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Take Me To Space (Man)");
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
+        mstr.setProperty(FilePropertyKey.TITLE, "Take Me To Space (Man)");
+        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(251));
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         mstr.setSize(3 * 1024 * 1024);
         msr.addAlbumResult(mstr);
@@ -108,8 +111,9 @@ public class MockStoreManager implements StoreManager {
         mstr.setExtension("mp3");
         mstr.setUrn("www.store.limewire.com" + (i + 3));
         mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
-        mstr.setProperty(FilePropertyKey.NAME, "Crush");
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
+        mstr.setProperty(FilePropertyKey.TITLE, "Crush");
+        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(188));
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         mstr.setSize(3 * 1024 * 1024);
         msr.addAlbumResult(mstr);
@@ -121,9 +125,10 @@ public class MockStoreManager implements StoreManager {
         msr = new MockStoreResult(urn, Category.AUDIO);
         msr.setFileExtension("mp3");
         msr.setPrice("1 Credit");
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
         msr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
-        msr.setProperty(FilePropertyKey.NAME, "Chomp");
+        msr.setProperty(FilePropertyKey.TITLE, "Chomp");
+        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(208));
         msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         msr.setSize(6 * 1024 * 1024);
 
@@ -131,9 +136,10 @@ public class MockStoreManager implements StoreManager {
         mstr.setExtension("mp3");
         mstr.setUrn("www.store.limewire.com" + (i + 11));
         mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monster");
+        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
         mstr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
-        mstr.setProperty(FilePropertyKey.NAME, "Chomp");
+        mstr.setProperty(FilePropertyKey.TITLE, "Chomp");
+        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(208));
         mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
         mstr.setSize(3 * 1024 * 1024);
         msr.addAlbumResult(mstr);

@@ -150,7 +150,6 @@ public class MockSearch implements Search {
             addRecordsWedding(i);
         }
         if(query.indexOf("monkey") > -1){
-            addRecordsWedding(i);
             addRecordsMonkey(i);
         }
         if(query.indexOf("water") > -1){
@@ -444,8 +443,8 @@ public class MockSearch implements Search {
 
         msr = new MockSearchResult();
         name = "No Monkeying in the cafeteria";
-        msr.setExtension("avi");
-        msr.setResultType(Category.VIDEO);
+        msr.setExtension("mp3");
+        msr.setResultType(Category.AUDIO);
         msr.setSize(9876L);
         msr.addSource("134.11.4.123");
         msr.setUrn("www.bracket.edu" + i);
@@ -528,58 +527,58 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.YEAR, "2007");
         handleSearchResult(msr);
 
-        msr = new MockSearchResult();
-        name = "Monkey Wrench to the head";
-        msr.setExtension("avi");
-        msr.setResultType(Category.VIDEO);
-        msr.setSize(9376L);
-        msr.addSource("127.5.1.21");
-        msr.setUrn("www.WrenchFerabracket.edu" + i);
-        msr.setProperty(FilePropertyKey.AUTHOR, "Ouch");
-        msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
-        msr.setProperty(FilePropertyKey.DESCRIPTION,
-            "Food fight");
-        msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
-        msr.setProperty(FilePropertyKey.HEIGHT, "480");
-        msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(48));
-        msr.setProperty(FilePropertyKey.RATING, "8");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(1));
-        msr.setProperty(FilePropertyKey.WIDTH, "230");
-        msr.setProperty(FilePropertyKey.YEAR, "2007");
-        handleSearchResult(msr);
-
-        msr = new MockSearchResult();
-        name = "Monkeys aren't orangutans";
-        msr.setExtension("avi");
-        msr.setResultType(Category.VIDEO);
-        msr.setSize(2876L);
-        msr.addSource("127.1.5.21");
-        msr.setUrn("www.OalRangbracket.edu" + i);
-        msr.setProperty(FilePropertyKey.AUTHOR, "Moneky High School");
-        msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
-        msr.setProperty(FilePropertyKey.DESCRIPTION,
-            "Food fight");
-        msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
-        msr.setProperty(FilePropertyKey.HEIGHT, "480");
-        msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(48));
-        msr.setProperty(FilePropertyKey.RATING, "8");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setProperty(FilePropertyKey.WIDTH, "230");
-        msr.setProperty(FilePropertyKey.YEAR, "2007");
-        handleSearchResult(msr);
+//        msr = new MockSearchResult();
+//        name = "Monkey Wrench to the head";
+//        msr.setExtension("avi");
+//        msr.setResultType(Category.VIDEO);
+//        msr.setSize(9376L);
+//        msr.addSource("127.5.1.21");
+//        msr.setUrn("www.WrenchFerabracket.edu" + i);
+//        msr.setProperty(FilePropertyKey.AUTHOR, "Ouch");
+//        msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
+//        msr.setProperty(FilePropertyKey.DESCRIPTION,
+//            "Food fight");
+//        msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
+//        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+//        msr.setProperty(FilePropertyKey.NAME, name);
+//        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(48));
+//        msr.setProperty(FilePropertyKey.RATING, "8");
+//        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(1));
+//        msr.setProperty(FilePropertyKey.WIDTH, "230");
+//        msr.setProperty(FilePropertyKey.YEAR, "2007");
+//        handleSearchResult(msr);
+//
+//        msr = new MockSearchResult();
+//        name = "Monkeys aren't orangutans";
+//        msr.setExtension("avi");
+//        msr.setResultType(Category.VIDEO);
+//        msr.setSize(2876L);
+//        msr.addSource("127.1.5.21");
+//        msr.setUrn("www.OalRangbracket.edu" + i);
+//        msr.setProperty(FilePropertyKey.AUTHOR, "Moneky High School");
+//        msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
+//        msr.setProperty(FilePropertyKey.DESCRIPTION,
+//            "Food fight");
+//        msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
+//        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+//        msr.setProperty(FilePropertyKey.NAME, name);
+//        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(48));
+//        msr.setProperty(FilePropertyKey.RATING, "8");
+//        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+//        msr.setProperty(FilePropertyKey.WIDTH, "230");
+//        msr.setProperty(FilePropertyKey.YEAR, "2007");
+//        handleSearchResult(msr);
         
         msr = new MockSearchResult();
         name = "Don't Monkey With me";
-        msr.setExtension("avi");
-        msr.setResultType(Category.VIDEO);
+        msr.setExtension("mp3");
+        msr.setResultType(Category.AUDIO);
         msr.setSize(93876L);
         msr.addSource("127.1.34.21");
         msr.setUrn("www.Sepbracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Mall Of Canada");
         msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
-        msr.setProperty(FilePropertyKey.DESCRIPTION,
+        msr.setProperty(FilePropertyKey.DESCRIPTION, 
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -591,27 +590,28 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.YEAR, "2002");
         handleSearchResult(msr);
 
-        msr = new MockSearchResult();
-        name = "Monkeys surfing";
-        msr.setExtension("avi");
-        msr.setResultType(Category.VIDEO);
-        msr.setSize(9876L);
-        msr.addSource("127.14.1.21");
-        msr.setUrn("www.SurfBlahBl.edu" + i);
-        msr.setProperty(FilePropertyKey.AUTHOR, "Surfing Monkeys");
-        msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
-        msr.setProperty(FilePropertyKey.DESCRIPTION,
-            "Food fight");
-        msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
-        msr.setProperty(FilePropertyKey.HEIGHT, "480");
-        msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(48));
-        msr.setProperty(FilePropertyKey.RATING, "8");
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setProperty(FilePropertyKey.WIDTH, "230");
-        msr.setProperty(FilePropertyKey.YEAR, "2007");
-        handleSearchResult(msr);
-}
+//        msr = new MockSearchResult();
+//        name = "Monkeys surfing";
+//        msr.setExtension("avi");
+//        msr.setResultType(Category.VIDEO);
+//        msr.setSize(9876L);
+//        msr.addSource("127.14.1.21");
+//        msr.setUrn("www.SurfBlahBl.edu" + i);
+//        msr.setProperty(FilePropertyKey.AUTHOR, "Surfing Monkeys");
+//        msr.setProperty(FilePropertyKey.BITRATE, Long.valueOf(5000));
+//        msr.setProperty(FilePropertyKey.DESCRIPTION,
+//            "Food fight");
+//        msr.setProperty(FilePropertyKey.FILE_SIZE, Long.valueOf(5222));
+//        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+//        msr.setProperty(FilePropertyKey.NAME, name);
+//        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(48));
+//        msr.setProperty(FilePropertyKey.RATING, "8");
+//        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
+//        msr.setProperty(FilePropertyKey.WIDTH, "230");
+//        msr.setProperty(FilePropertyKey.YEAR, "2007");
+//        handleSearchResult(msr);
+    }
+    
     private void addRecordsWater(int i){
         MockSearchResult msr;
         String name;

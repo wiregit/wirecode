@@ -39,6 +39,7 @@ public class MockStoreResult implements StoreResult {
     
     private Icon albumIcon;
     private String fileExtension;
+    private String fileName;
     private String price;
     private long size;
     
@@ -75,6 +76,11 @@ public class MockStoreResult implements StoreResult {
     @Override
     public String getFileExtension() {
         return fileExtension;
+    }
+
+    @Override
+    public String getFileName() {
+        return fileName;
     }
 
     @Override
@@ -117,6 +123,10 @@ public class MockStoreResult implements StoreResult {
     
     public void setFileExtension(String extension) {
         this.fileExtension = extension;
+    }
+    
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
     
     public void setPrice(String price) {
