@@ -9,11 +9,12 @@ import org.limewire.util.Objects;
 class SourceItem {
     /** Source types. */
     public static enum Type {
-        ANONYMOUS, ANY_FRIEND, FRIEND;
+        ANONYMOUS, ANY_FRIEND, FRIEND, STORE;
     }
     
     public static final SourceItem ANONYMOUS_SOURCE = new SourceItem(Type.ANONYMOUS, I18n.tr("P2P Users"));
     public static final SourceItem ANY_FRIEND_SOURCE = new SourceItem(Type.ANY_FRIEND, I18n.tr("Any Friend"));
+    public static final SourceItem STORE_SOURCE = new SourceItem(Type.STORE, I18n.tr("Store"));
    
     private final Type type;
     private final String name;
