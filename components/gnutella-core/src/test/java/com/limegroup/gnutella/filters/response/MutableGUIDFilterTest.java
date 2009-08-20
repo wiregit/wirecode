@@ -88,7 +88,7 @@ public class MutableGUIDFilterTest extends BaseTestCase {
     private class KeywordFilterStub extends KeywordFilter {
         
         KeywordFilterStub() {
-            super(false);
+            super(false, false);
         }
         
         @Override

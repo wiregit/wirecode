@@ -14,6 +14,7 @@ import com.limegroup.gnutella.filters.KeywordFilter;
 @Singleton
 class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     
+    private final Provider<XMLDocFilter> xmlDocFilter;
     private final Provider<MandragoreWormFilter> wormFilter;
     private final Provider<ResponseQueryFilter> queryFilter;
     private final Provider<ProgramsFilter> programsFilter;
@@ -24,7 +25,8 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     private final Provider<KeywordFilter> keywordFilter;
     
     @Inject
-    public ResponseFilterFactoryImpl(Provider<MandragoreWormFilter> wormFilter,
+    public ResponseFilterFactoryImpl(Provider<XMLDocFilter> xmlDocFilter,
+            Provider<MandragoreWormFilter> wormFilter,
             Provider<ResponseQueryFilter> queryFilter,
             Provider<ProgramsFilter> programsFilter,
             Provider<SecureResultFilter> secureResultFilter,
@@ -32,6 +34,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
             Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter,
             Provider<MutableGUIDFilter> mutableGUIDFilter,
             Provider<KeywordFilter> keywordFilter) {
+        this.xmlDocFilter = xmlDocFilter;
         this.wormFilter = wormFilter;
         this.queryFilter = queryFilter;
         this.programsFilter = programsFilter;
@@ -54,6 +57,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         filters.add(typeFilter.get());
         filters.add(secureResultFilter.get());
         filters.add(programsFilter.get());
+        filters.add(xmlDocFilter.get());
         
         return new CompoundResponseFilter(filters,
                 Collections.singletonList(whiteListUpdateUrnFilter.get()));

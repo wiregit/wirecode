@@ -14,13 +14,19 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
+import org.limewire.core.settings.FilterSettings;
+
 public class XMLDocFilter extends KeywordFilter {
 
     private final Map<String, String> disallowedFieldValues;
     private final Map<String, List<String>> disallowedExactFieldValues;
 
-    XMLDocFilter(boolean banAdult) {
-        super(banAdult);
+    XMLDocFilter() {
+        this(FilterSettings.FILTER_ADULT.getValue(), true);
+    }
+
+    XMLDocFilter(boolean banAdult, boolean banPersonal) {
+        super(banAdult, banPersonal);
         if(banAdult) {
             ImmutableMap.Builder<String, String> fields =
                 new ImmutableMap.Builder<String, String>();
@@ -51,23 +57,20 @@ public class XMLDocFilter extends KeywordFilter {
      * Returns true if none of the filters matched. 
      */
     private boolean allowDoc(LimeXMLDocument doc) {
-        for (Entry<String, String> entry : disallowedFieldValues.entrySet()) {
-            String value = doc.getValue(entry.getKey());
-            if (value != null) {
-                value = value.toLowerCase(Locale.US);
-                if (value.contains(entry.getValue())) {
-                    return false;
-                }
-            }
-        }
-        for (Entry<String, List<String>> entry : disallowedExactFieldValues.entrySet()) {
-            String value = doc.getValue(entry.getKey());
-            if (value != null) {
-                value = value.toLowerCase(Locale.US);
-                for (String disallowed : entry.getValue()) {
-                    if (value.equals(disallowed)) {
+        for(Entry<String, String> entry : doc.getNameValueSet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if(super.matches(value))
+                return false;
+            value = value.toLowerCase(Locale.US);
+            String dis = disallowedFieldValues.get(key);
+            if(dis != null && value.contains(dis))
+                return false;
+            List<String> exact = disallowedExactFieldValues.get(key);
+            if(exact != null) {
+                for(String s : exact) {
+                    if(s.equals(value))
                         return false;
-                    }
                 }
             }
         }

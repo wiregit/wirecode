@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.filters;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,17 +31,23 @@ public class KeywordFilter implements SpamFilter, ResponseFilter {
     private final List<String> ban;
 
     KeywordFilter() {
+        this(FilterSettings.FILTER_ADULT.getValue(), true);
+    }
+
+    protected KeywordFilter(boolean banAdult, boolean banPersonal) {
         ImmutableList.Builder<String> builder =
             new ImmutableList.Builder<String>();
-        for(String word : FilterSettings.BANNED_WORDS.get()) {
-            builder.add(word);
-        }
-        for(String ext : FilterSettings.BANNED_EXTENSIONS.get()) {
-            builder.add(ext);
-        }
-        if(FilterSettings.FILTER_ADULT.getValue()) {
+        if(banAdult) {
             for(String word : ADULT_WORDS) {
                 builder.add(word);
+            }
+        }
+        if(banPersonal) {
+            for(String word : FilterSettings.BANNED_WORDS.get()) {
+                builder.add(word);
+            }
+            for(String ext : FilterSettings.BANNED_EXTENSIONS.get()) {
+                builder.add(ext);
             }
         }
         ban = builder.build();
@@ -55,19 +60,6 @@ public class KeywordFilter implements SpamFilter, ResponseFilter {
             builder.add(word.toLowerCase(Locale.US));
         }
         ban = builder.build();
-    }
-
-    public KeywordFilter(boolean banAdult) {
-        if(banAdult) {
-            ImmutableList.Builder<String> builder =
-                new ImmutableList.Builder<String>();
-            for(String word : ADULT_WORDS) {
-                builder.add(word.toLowerCase(Locale.US));
-            }
-            ban = builder.build();        
-        } else {
-            ban = Collections.emptyList();
-        }
     }
 
     @Override // SpamFilter
@@ -86,7 +78,7 @@ public class KeywordFilter implements SpamFilter, ResponseFilter {
     /** 
      * Returns true if phrase matches any of the banned words.
      */
-    private boolean matches(String phrase) {
+    protected boolean matches(String phrase) {
         String canonical = phrase.toLowerCase(Locale.US);
         for(String word : ban) {
             if(canonical.indexOf(word) != -1)

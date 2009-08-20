@@ -55,7 +55,7 @@ public class KeywordFilterTest extends BaseTestCase {
 
         responseFactory = injector.getInstance(ResponseFactory.class);
 
-        filter = new KeywordFilter(false);
+        filter = new KeywordFilter(false, false);
         banned = new ArrayList<String>();
     }
 
@@ -147,7 +147,7 @@ public class KeywordFilterTest extends BaseTestCase {
         /*
          * turn filter on
          */
-        filter = new KeywordFilter(true);
+        filter = new KeywordFilter(true, false);
 
         response = createResponse("adult");
         assertFalse(filter.allow(queryReplyMock, response));

@@ -31,7 +31,7 @@ public final class MutableGUIDFilter implements ResponseFilter {
     private final KeywordFilter keywordFilter;
     
     MutableGUIDFilter() { 
-        keywordFilter = new XMLDocFilter(true); 
+        keywordFilter = new XMLDocFilter(true, false); 
     }
     
     MutableGUIDFilter(KeywordFilter keywordFilter) {

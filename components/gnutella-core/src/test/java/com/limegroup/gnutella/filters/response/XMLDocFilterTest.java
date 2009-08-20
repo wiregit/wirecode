@@ -7,6 +7,7 @@ import java.util.Collections;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
@@ -58,8 +59,8 @@ public class XMLDocFilterTest extends LimeTestCase {
     }
     
     public void testDisallowAdultXMLResponses() throws Exception {
-        // Test filter switched off
-        ResponseFilter filter = new XMLDocFilter(false);
+        // Test with adult filter switched off
+        ResponseFilter filter = new XMLDocFilter(false, false);
 
         QueryReply qr = createXMLReply(LimeXMLNames.VIDEO_TYPE, "Adult");
         assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
@@ -70,8 +71,8 @@ public class XMLDocFilterTest extends LimeTestCase {
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "NC-17");
         assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
 
-        // Test filter switched on
-        filter = new XMLDocFilter(true);
+        // Test with adult filter switched on
+        filter = new XMLDocFilter(true, false);
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "R");
         assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
@@ -101,14 +102,42 @@ public class XMLDocFilterTest extends LimeTestCase {
         assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
     }
     
+    public void testKeywordFilterAppliesToXMLValues() throws Exception {
+        // Test with adult filter switched off
+        ResponseFilter filter = new XMLDocFilter(false, false);
+
+        QueryReply qr = createXMLReply(LimeXMLNames.VIDEO_TITLE, "fluffy bunnies");
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));        
+
+        qr = createXMLReply(LimeXMLNames.VIDEO_TITLE, "sexy bunnies");
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));        
+
+        // Test with adult filter switched on
+        filter = new XMLDocFilter(true, false);
+
+        qr = createXMLReply(LimeXMLNames.VIDEO_TITLE, "fluffy bunnies");
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));        
+
+        qr = createXMLReply(LimeXMLNames.VIDEO_TITLE, "sexy bunnies");
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));        
+
+        // Test with personal filter switched on
+        FilterSettings.BANNED_WORDS.set(new String[] { "bunnies" });
+        filter = new XMLDocFilter(false, true);
+        
+        qr = createXMLReply(LimeXMLNames.VIDEO_TITLE, "fluffy bunnies");
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));        
+
+        qr = createXMLReply(LimeXMLNames.VIDEO_TITLE, "sexy bunnies");
+        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));        
+    }
+    
     private QueryReply createXMLReply(String field, String values) throws Exception {
         return createXMLReply(field, values, 5555, address);
     }
     
-    public QueryReply createXMLReply(String field, String values, int port, byte[] address) throws Exception {
-        
+    private QueryReply createXMLReply(String field, String values, int port, byte[] address) throws Exception {
         Response resp = createXMLResponse("filename", field, values, responseFactory, limeXMLDocumentFactory);
-        
         return createReply(resp, port, address, queryReplyFactory, limeXMLDocumentHelper);
     }
     
@@ -126,7 +155,7 @@ public class XMLDocFilterTest extends LimeTestCase {
         return qr;
     }
     
-    protected QueryReply createReply(String response, ResponseFactory responseFactory) {
+    private QueryReply createReply(String response, ResponseFactory responseFactory) {
         return createReply(responseFactory.createResponse(5, 5, response, UrnHelper.SHA1), new GUID(), 5555, address, queryReplyFactory); 
     }
     
