@@ -44,6 +44,11 @@ public interface StoreResult {
     String getFileExtension();
     
     /**
+     * Returns the file name for the result.
+     */
+    String getFileName();
+    
+    /**
      * Returns the price for the result.
      */
     String getPrice();
