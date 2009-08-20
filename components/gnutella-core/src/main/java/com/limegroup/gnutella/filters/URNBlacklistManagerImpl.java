@@ -212,6 +212,8 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
                         out = new BufferedOutputStream(
                                 new FileOutputStream(getFile()));
                         body.writeTo(out);
+                        out.flush();
+                        out.close();
                         spamServices.get().reloadSpamFilters();
                     } catch(IOException e) {
                         LOG.debug("Error saving URNs", e);
