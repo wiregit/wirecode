@@ -21,7 +21,8 @@ import org.limewire.ui.swing.util.PropertiableHeadings;
 import com.google.inject.Provider;
 
 /**
- * An implementation of VisualSearchResult for results from the Lime Store.
+ * An implementation of VisualStoreResult for displaying results from the 
+ * Lime Store.
  */
 public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
@@ -34,9 +35,14 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     private int relevance;
     private String heading;
     private String subHeading;
+    private boolean preExistingDownload;    
     private boolean showTracks = true;
     private RowDisplayResult rowDisplayResult;
     
+    /**
+     * Constructs a StoreResultAdapter with the specified store result and
+     * and heading service.
+     */
     public StoreResultAdapter(StoreResult storeResult,
             Provider<PropertiableHeadings> propertiableHeadings) {
         this.storeResult = storeResult;
@@ -53,10 +59,12 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     
     @Override
     public void addSimilarSearchResult(VisualSearchResult similarResult) {
+        // Do nothing.
     }
 
     @Override
     public void removeSimilarSearchResult(VisualSearchResult result) {
+        // Do nothing.
     }
 
     @Override
@@ -142,7 +150,6 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public boolean isChildrenVisible() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -153,8 +160,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public boolean isPreExistingDownload() {
-        // TODO Auto-generated method stub
-        return false;
+        return preExistingDownload;
     }
 
     @Override
@@ -192,7 +198,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public void setChildrenVisible(boolean childrenVisible) {
-        // TODO Auto-generated method stub
+        // Do nothing.
     }
 
     @Override
@@ -202,7 +208,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public void setPreExistingDownload(boolean preExistingDownload) {
-        // TODO Auto-generated method stub
+        this.preExistingDownload = preExistingDownload;
     }
     
     @Override
@@ -212,28 +218,27 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public void setSimilarityParent(VisualSearchResult parent) {
-        // TODO Auto-generated method stub
+        // Do nothing.
     }
 
     @Override
     public void setSpam(boolean spam) {
-        // TODO Auto-generated method stub
+        // Do nothing.
     }
 
     @Override
     public void setVisible(boolean visible) {
-        // TODO Auto-generated method stub
+        // Do nothing.
     }
 
     @Override
     public void toggleChildrenVisibility() {
-        // TODO Auto-generated method stub
+        // Do nothing.
     }
 
     @Override
     public Object getNavSelectionId() {
-        // TODO Auto-generated method stub
-        return null;
+        return getUrn();
     }
 
     @Override
@@ -243,8 +248,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public String getFileName() {
-        // TODO Auto-generated method stub
-        return null;
+        return storeResult.getFileName();
     }
 
     @Override
