@@ -67,7 +67,7 @@ public class DockIconFactoryImpl implements DockIconFactory
             if (item == null)
                 return false;
 
-            return item.getState() != DownloadState.CANCELLED && item.getState() != DownloadState.STALLED &&
+            return item.getState() != DownloadState.CANCELLED && item.getState() != DownloadState.ERROR &&
                     item.getState() != DownloadState.DONE;
         }
     }
