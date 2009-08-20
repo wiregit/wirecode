@@ -139,7 +139,7 @@ class SignOnMessageLayer {
             }
 
             @Override
-            public void categoryRemoved(NavCategory category) {
+            public void categoryRemoved(NavCategory category, boolean wasSelected) {
             }
 
             @Override
@@ -147,7 +147,7 @@ class SignOnMessageLayer {
             }
 
             @Override
-            public void itemRemoved(NavCategory category, NavItem navItem) {
+            public void itemRemoved(NavCategory category, NavItem navItem, boolean wasSelected) {
             }
 
             @Override

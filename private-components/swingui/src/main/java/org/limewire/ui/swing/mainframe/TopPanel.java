@@ -176,15 +176,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         navigator.addNavigationListener(new NavigationListener() {
             @Override
-            public void categoryRemoved(NavCategory category) {
-                if(category == NavCategory.SEARCH_RESULTS) {
+            public void categoryRemoved(NavCategory category, boolean wasSelected) {
+                if(wasSelected && category == NavCategory.SEARCH_RESULTS) {
                     goHome();
                 }
             }
             
             @Override public void categoryAdded(NavCategory category) {}
             @Override public void itemAdded(NavCategory category, NavItem navItem) {}
-            @Override public void itemRemoved(NavCategory category, NavItem navItem) {}
+            @Override public void itemRemoved(NavCategory category, NavItem navItem, boolean wasSelected) {}
             
             @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {
                 if(category != NavCategory.SEARCH_RESULTS) {
@@ -302,7 +302,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
 
         @Override
-        public void itemRemoved() {
+        public void itemRemoved(boolean wasSelected) {
             searchList.removeTabActionMap(actionMap);
             panel.dispose();
             if(searchList.getTabs().size() == 0){
