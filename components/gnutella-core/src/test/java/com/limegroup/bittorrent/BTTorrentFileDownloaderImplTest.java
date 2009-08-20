@@ -422,7 +422,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
             
             @Override
-            public void dangerousDownloadDeleted(String filename) {
+            public void warnUser(String filename, String message) {
             }
 
             @Override

@@ -81,7 +81,7 @@ public class GuiCallbackImpl implements GuiCallback {
     }
     
     @Override
-    public void dangerousDownloadDeleted(String filename) {
+    public void warnUser(String filename, final String warning) {
         final String truncated;
         if(filename.length() < 70)
             truncated = filename;
@@ -91,11 +91,7 @@ public class GuiCallbackImpl implements GuiCallback {
             @Override
             public void run() {
                 FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(),
-                        I18n.tr("{0}\n" +
-                                "This file may have been designed to damage your computer.\n" +
-                                "LimeWire has cancelled the download for your protection.",
-                                truncated),
-                        I18n.tr("Dangerous Download Cancelled"),
+                        truncated + "\n" + warning, I18n.tr("Warning"),
                         JOptionPane.WARNING_MESSAGE);
             }
         });

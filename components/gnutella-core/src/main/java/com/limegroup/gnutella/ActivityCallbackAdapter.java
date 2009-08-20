@@ -109,7 +109,7 @@ public class ActivityCallbackAdapter implements ActivityCallback {
        
     }
     
-    public void dangerousDownloadDeleted(String filename) {
+    public void warnUser(String filename, String warning) {
         
     }
 

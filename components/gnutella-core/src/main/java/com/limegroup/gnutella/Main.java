@@ -243,7 +243,7 @@ public class Main {
             dloader.discardCorruptDownload(false);
         }
         
-        public void dangerousDownloadDeleted(String filename) {}
+        public void warnUser(String filename, String message) {}
     
         public void restoreApplication() {}
     

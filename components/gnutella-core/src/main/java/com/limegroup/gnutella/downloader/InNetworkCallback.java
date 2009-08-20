@@ -41,7 +41,7 @@ public class InNetworkCallback implements DownloadCallback {
         dloader.discardCorruptDownload(true);
     }
     
-    public void dangerousDownloadDeleted(String filename) {
+    public void warnUser(String filename, String message) {
     }
 
     public String getHostValue(String key) {

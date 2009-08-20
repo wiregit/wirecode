@@ -21,6 +21,7 @@ import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -37,6 +38,7 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -53,6 +55,7 @@ import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMementoImpl;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
+import com.limegroup.gnutella.malware.DangerousFileChecker;
 
 /**
  * Wraps the Torrent class in the Downloader interface to enable the gui to
@@ -62,26 +65,22 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         EventListener<TorrentEvent> {
 
     private static final Log LOG = LogFactory.getLog(BTDownloaderImpl.class);
+    private static final String DANGEROUS_TORRENT_WARNING =
+        "This torrent may have been designed to damage your computer.\n" +
+        "LimeWire has cancelled the download for your protection.";
     
     private final DownloadManager downloadManager;
-
     private final Torrent torrent;
-
     private final BTUploaderFactory btUploaderFactory;
-
     private final AtomicBoolean finishing = new AtomicBoolean(false);
-
     private final AtomicBoolean complete = new AtomicBoolean(false);
-
     private final Library library;
-
     private final EventMulticaster<DownloadStateEvent> listeners;
-    
     private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(DownloadState.QUEUED);
-
     private final FileCollection gnutellaFileCollection;
-    
     private final Provider<TorrentUploadManager> torrentUploadManager;
+    private final Provider<DangerousFileChecker> dangerousFileChecker;
+    private final Provider<DownloadCallback> downloadCallback;
     
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
@@ -89,9 +88,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private volatile URN urn = null;
 
     @Inject
-    BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            Library library, @Named("fastExecutor") ScheduledExecutorService fastExecutor, @GnutellaFiles FileCollection gnutellaFileCollection, Provider<TorrentUploadManager> torrentUploadManager) {
+    BTDownloaderImpl(SaveLocationManager saveLocationManager,
+            DownloadManager downloadManager,
+            BTUploaderFactory btUploaderFactory,
+            Provider<Torrent> torrentProvider,
+            Library library,
+            @Named("fastExecutor") ScheduledExecutorService fastExecutor,
+            @GnutellaFiles FileCollection gnutellaFileCollection,
+            Provider<TorrentUploadManager> torrentUploadManager,
+            Provider<DangerousFileChecker> dangerousFileChecker,
+            Provider<DownloadCallback> downloadCallback) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
@@ -100,6 +106,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.gnutellaFileCollection = gnutellaFileCollection;
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(fastExecutor);
         this.torrentUploadManager = torrentUploadManager;
+        this.dangerousFileChecker = dangerousFileChecker;
+        this.downloadCallback = downloadCallback;
     }
 
     /**
@@ -115,6 +123,17 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void handleEvent(TorrentEvent event) {
         if (TorrentEvent.COMPLETED == event && !complete.get()) {
             finishing.set(true);
+            // If the torrent contains any dangerous files, delete everything
+            // and inform the user that the download has been cancelled.
+            for(File f : FileUtils.getFilesRecursive(getIncompleteFile(), (String[])null)) {
+                if(dangerousFileChecker.get().isDangerous(f)) {
+                    torrent.stop();
+                    listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
+                    downloadCallback.get().warnUser(getSaveFile().getName(),
+                            I18nMarker.marktr(DANGEROUS_TORRENT_WARNING));
+                    return;
+                }
+            }
             FileUtils.forceDeleteRecursive(getSaveFile());
             File completeDir = getSaveFile().getParentFile();
             torrent.moveTorrent(completeDir);

@@ -226,9 +226,9 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
     
     @Override
-    public void dangerousDownloadDeleted(String filename) {
+    public void warnUser(String filename, String warning) {
         if(guiCallback != null)
-            guiCallback.dangerousDownloadDeleted(filename);
+            guiCallback.warnUser(filename, warning);
     }
     
     @Override

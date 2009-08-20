@@ -33,6 +33,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Address;
 import org.limewire.io.DiskException;
 import org.limewire.io.GUID;
@@ -208,6 +209,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     */
 
     private static final Log LOG = LogFactory.getLog(ManagedDownloaderImpl.class);
+    private static final String DANGEROUS_FILE_WARNING =
+        "This file may have been designed to damage your computer.\n" +
+        "LimeWire has cancelled the download for your protection.";
 
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
@@ -1949,7 +1953,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // Delete the file
             discardCorruptDownload(true);
             // Inform the user that the file was deleted
-            downloadCallback.dangerousDownloadDeleted(getSaveFile().getName());
+            downloadCallback.warnUser(getSaveFile().getName(),
+                    I18nMarker.marktr(DANGEROUS_FILE_WARNING));
             // Remove the download from the UI
             return DownloadState.DANGEROUS;
         }

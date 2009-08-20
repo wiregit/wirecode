@@ -39,7 +39,7 @@ public interface GuiCallback {
     boolean promptUserQuestion(String marktr);
     
     /**
-     * Declares that a dangerous download was decisively deleted.
+     * Shows the user a warning about a file.
      */
-    void dangerousDownloadDeleted(String filename);
+    void warnUser(String filename, String message);
 }
