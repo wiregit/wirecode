@@ -25,7 +25,8 @@ import org.jmock.lib.action.CustomAction;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.util.Base32;
+import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -39,6 +40,12 @@ import com.limegroup.gnutella.http.HttpExecutor;
 
 public class URNBlacklistManagerImplTest extends LimeTestCase {
 
+    // This file contains a single random URN and a valid signature
+    private File validFile =
+        TestUtils.getResourceFile("com/limegroup/gnutella/resources/urns.good");
+    // This file contains the same signature, but the URN has been modified
+    private File invalidFile =
+        TestUtils.getResourceFile("com/limegroup/gnutella/resources/urns.bad");
     private URNBlacklistManagerImpl urnBlacklistManager;
     private Mockery context;
     private HttpExecutor httpExecutor;
@@ -140,15 +147,9 @@ public class URNBlacklistManagerImplTest extends LimeTestCase {
     }
 
     public void testReadingFileTriggersCheckIfFileIsCorrupt() throws Exception {
-        byte[] data = new byte[19];
-        for(int i = 0; i < data.length; i++) {
-            data[i] = (byte)i;
-        }
         File f = urnBlacklistManager.getFile();
-        FileOutputStream out = new FileOutputStream(f);
-        out.write(data);
-        out.flush();
-        out.close();
+        // Copy all but the last byte, so the file is invalid
+        FileUtils.copy(validFile, validFile.length() - 1, f);
         context.checking(new Expectations() {{
             one(httpExecutor).execute(with(any(HttpHead.class)),
                     with(any(HttpParams.class)),
@@ -159,21 +160,26 @@ public class URNBlacklistManagerImplTest extends LimeTestCase {
         context.assertIsSatisfied();        
     }
 
-    public void testReadingFileReturnsDataIfFileIsNotCorrupt() throws Exception {
-        byte[] data = new byte[20];
-        for(int i = 0; i < data.length; i++) {
-            data[i] = (byte)i;
-        }
-        String urn = Base32.encode(data);
+    public void testReadingFileTriggersCheckIfSignatureIsBad() throws Exception {
         File f = urnBlacklistManager.getFile();
-        FileOutputStream out = new FileOutputStream(f);
-        out.write(data);
-        out.flush();
-        out.close();
+        FileUtils.copy(invalidFile, f);
+        context.checking(new Expectations() {{
+            one(httpExecutor).execute(with(any(HttpHead.class)),
+                    with(any(HttpParams.class)),
+                    with(any(HttpClientListener.class)));
+        }});
+        assertTrue(f.exists());
+        assertFalse(urnBlacklistManager.iterator().hasNext());
+        context.assertIsSatisfied();        
+    }
+
+    public void testReadingFileReturnsDataIfSignatureIsGood() throws Exception {
+        File f = urnBlacklistManager.getFile();
+        FileUtils.copy(validFile, f);
         assertTrue(f.exists());
         Iterator<String> i = urnBlacklistManager.iterator();
         assertTrue(i.hasNext());
-        assertEquals(urn, i.next());
+        i.next();
         assertFalse(i.hasNext());
         context.assertIsSatisfied();
     }

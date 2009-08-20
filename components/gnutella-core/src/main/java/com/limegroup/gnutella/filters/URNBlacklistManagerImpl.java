@@ -7,6 +7,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -249,22 +255,22 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
 
         private final byte[] buf = new byte[20];
         private DataInputStream in = null;
-        private String next = null;
+        private Signature signature = null;
+        private boolean hasNext = false;
         private long length = -1;
         private int totalRead = 0;
 
         @Override
         public boolean hasNext() {
-            return next != null || readNext();
+            return hasNext || readNext();
         }
 
         @Override
         public String next() {
             if(!hasNext())
                 throw new NoSuchElementException();
-            String s = next;
-            next = null;
-            return s;
+            hasNext = false;
+            return Base32.encode(buf);
         }
 
         @Override
@@ -273,7 +279,7 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
         }
 
         /**
-         * Tries to read another URN and assign it to <code>next</code>. An
+         * Tries to read another URN and store it in <code>buf</code>. An
          * update is triggered if the file is missing, empty or corrupt.
          * @return true if a URN was read.
          */
@@ -287,16 +293,23 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
                     init();
                 // Unexpected EOF will throw an exception
                 in.readFully(buf);
+                signature.update(buf);
                 totalRead += buf.length;
-                // Stop when we reach EOF or MAX_LENGTH
+                // When we reach the end of the data, try to read the signature
                 if(totalRead == length) {
+                    byte[] sig = new byte[SIG_LENGTH];
+                    in.readFully(sig);
                     LOG.debug("Closing file");
                     in.close();
+                    if(signature.verify(sig))
+                        LOG.debug("Valid signature");
+                    else
+                        throw new GeneralSecurityException("Invalid signature");
                 }
-                next = Base32.encode(buf);
+                hasNext = true;
                 return true;
-            } catch(IOException e) {
-                LOG.debug("Error reading from file", e);
+            } catch(Exception e) {
+                LOG.debug("Error loading URNs", e);
                 IOUtils.close(in);
                 // The file is invalid - replace it with any available version
                 FilterSettings.LAST_URN_BLACKLIST_UPDATE.setValue(0);
@@ -308,18 +321,24 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
         /**
          * Performs some validity checks on the file and opens it for reading.
          */
-        private void init() throws IOException {
-            // Fail fast if the file is fubar
+        private void init() throws IOException, GeneralSecurityException {
+            // Fail fast if the file is fundamentally fubar
             File file = getFile();
-            length = file.length();
-            if(length == 0 || length % 20 != 0)
+            length = file.length() - SIG_LENGTH;
+            // The data excluding the signature should be a multiple of 20 bytes
+            if(length <= 0 || length > MAX_LENGTH || length % 20 != 0)
                 throw new IOException("File is missing, empty or corrupt");
-            // Only read MAX_LENGTH bytes even if the file is larger
-            if(length > MAX_LENGTH)
-                length = MAX_LENGTH;
+            // Open the file for reading
             LOG.debug("Opening file");
             in = new DataInputStream(new BufferedInputStream(
                     new FileInputStream(file)));
+            // Initialise the signature verifier
+            signature = Signature.getInstance(SIG_ALGORITHM);
+            byte[] keyBytes = Base32.decode(PUBLIC_KEY);
+            KeyFactory factory = KeyFactory.getInstance(KEY_ALGORITHM);
+            EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+            PublicKey key = factory.generatePublic(keySpec);
+            signature.initVerify(key);
         }
     }
 }
