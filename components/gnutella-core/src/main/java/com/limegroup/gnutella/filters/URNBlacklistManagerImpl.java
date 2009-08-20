@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.filters;
 
 import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -231,7 +231,9 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
                 HttpResponse response, IOException e) {
             if(LOG.isDebugEnabled()) {
                 String method = request.getMethod();
-                String status = response.getStatusLine().toString();
+                String status = null;
+                if(response != null)
+                    status = response.getStatusLine().toString();
                 LOG.debug(method + " request failed with status " + status, e);
             }
             setNextUpdateTime();
