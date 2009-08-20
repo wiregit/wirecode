@@ -27,6 +27,7 @@ import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -35,7 +36,6 @@ import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -47,7 +47,7 @@ import com.limegroup.gnutella.http.HttpExecutor;
  * via HTTP. The manager's <code>iterator()</code> method can be used to read
  * the URNs from disk as base32-encoded strings.
  */
-@Singleton
+@EagerSingleton
 class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
 
     private static final Log LOG =
