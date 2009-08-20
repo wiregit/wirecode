@@ -45,7 +45,8 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
         this.remoteHosts = new HashSet<RemoteHost>();
         this.friends = new HashSet<Friend>();
         
-        // Add source for store result.
+        // Add source from store result.  The friend name is displayed in the
+        // From widget.
         this.remoteHosts.add(storeResult.getSource());
         this.friends.add(storeResult.getSource().getFriendPresence().getFriend());
     }
@@ -264,6 +265,11 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     @Override
     public boolean isAnonymous() {
         return false;
+    }
+
+    @Override
+    public boolean isStore() {
+        return true;
     }
     
     @Override

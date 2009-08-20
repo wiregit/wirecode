@@ -41,6 +41,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
     
     @Override
+    public boolean isStore() {
+        return false;
+    }
+    
+    @Override
     public Category getCategory() {
         return Category.AUDIO;
     }
