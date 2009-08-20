@@ -514,7 +514,7 @@ public class FileUtils {
                     dirs.add(currFile);
                 else if (currFile.isFile()) { // we have a 'file'....
                     boolean shouldAdd = false;
-                    if (filter == null)
+                    if (filter == null || filter.length == 0)
                         shouldAdd = true;
                     else {
                         String ext = FileUtils.getFileExtension(currFile);
