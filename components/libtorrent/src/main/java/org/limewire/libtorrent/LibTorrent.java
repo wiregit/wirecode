@@ -181,5 +181,10 @@ interface LibTorrent extends Library {
      * Initializes the given torrents storage.
      */
     public WrapperStatus set_auto_managed_torrent(String sha1, boolean auto_managed);
+    
+    /**
+     * This is a simple function used to test that the loaded library is working. 
+     */
+    public void echo(String message);
 
 }
