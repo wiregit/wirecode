@@ -24,6 +24,7 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.FilterList;
@@ -157,7 +158,7 @@ class ChatFriendList extends GlazedJXTable {
         tooltip.append("</b><br/>");
         String status = chatFriend.getStatus();
         if (status != null && status.length() > 0) {
-            tooltip.append("<div>").append(status).append("</div>");
+            tooltip.append("<div>").append("<b>" + I18n.tr("Status: ") + "</b>").append(status).append("</div>");
         }
         tooltip.append("</body>")
             .append("</html>");
