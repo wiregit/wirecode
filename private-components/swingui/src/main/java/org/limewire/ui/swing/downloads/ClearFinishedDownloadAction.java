@@ -24,6 +24,5 @@ class ClearFinishedDownloadAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         downloadMediator.get().clearFinished();
-//      dock.draw(0);
     } 
 }

@@ -18,6 +18,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
+import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -60,7 +61,7 @@ public class DownloadHeaderPanel {
     @Inject
     public DownloadHeaderPanel(DownloadMediator downloadMediator, DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
             ClearFinishedDownloadAction clearFinishedNowAction, FixStalledDownloadAction fixStalledDownloadAction,
-            ComboBoxDecorator comboBoxDecorator, BarPainterFactory barPainterFactory) {
+            ComboBoxDecorator comboBoxDecorator, BarPainterFactory barPainterFactory, DockIconFactory iconFactory) {
         
         this.downloadMediator = downloadMediator;
         this.downloadHeaderPopupMenu = downloadHeaderPopupMenu;
@@ -74,6 +75,9 @@ public class DownloadHeaderPanel {
         component = new JXPanel(new MigLayout("insets 2 0 2 0, gap 0, novisualpadding, fill"));
         component.setBackgroundPainter(barPainterFactory.createDownloadSummaryBarPainter());
         ResizeUtils.forceHeight(component, 20);
+        
+        // initialize the dock icon since it registers as a Service
+        iconFactory.createDockIcon();
         
         initialize();
     }
