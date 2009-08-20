@@ -437,7 +437,7 @@ public class SpamManagerTest extends LimeTestCase {
 
         // The URN filter should block the result and mark it as spam
         URNFilter urnFilter = injector.getInstance(URNFilter.class);
-        urnFilter.refreshURNs();
+        urnFilter.refreshURNs(null);
         assertEquals(0, manager.getRatingTable().size());
         assertFalse(urnFilter.allow(reply));
         assertGreaterThan(0, manager.getRatingTable().size());

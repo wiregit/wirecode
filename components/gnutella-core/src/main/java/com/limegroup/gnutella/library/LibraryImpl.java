@@ -35,10 +35,10 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
+import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.inspection.DataCategory;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
@@ -57,6 +57,7 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.auth.ValidationEvent;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.XmlController;
@@ -78,6 +79,7 @@ class LibraryImpl implements Library, FileCollection {
     private final DangerousFileChecker dangerousFileChecker;
     private final EventListenerList<FileProcessingEvent> fileProcessingListeners;
     private final XmlController xmlController;
+    private final URNFilter urnFilter;
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -150,7 +152,8 @@ class LibraryImpl implements Library, FileCollection {
                 DangerousFileChecker dangerousFileChecker,
                 XmlController xmlController,
                 @DiskIo ListeningExecutorService diskIoService,
-                EventListenerList<FileProcessingEvent> processingListenerList) {
+                EventListenerList<FileProcessingEvent> processingListenerList,
+                URNFilter urnFilter) {
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
@@ -167,6 +170,7 @@ class LibraryImpl implements Library, FileCollection {
         this.xmlController = xmlController;
         this.diskIoService = diskIoService;
         this.fileProcessingListeners = processingListenerList;
+        this.urnFilter = urnFilter;
     }
     
     @Override
@@ -644,9 +648,10 @@ class LibraryImpl implements Library, FileCollection {
             Exception ex = createFailureException(fd.getFile(), oldFileDesc, FileViewChangeFailedException.Reason.ERROR_LOADING_URNS);
             ex.initCause(urnEvent.getException());
             task.setException(ex);
-        } else if(urnValidator.isInvalid(UrnSet.getSha1(urns))) {
+        } else if(urnValidator.isInvalid(UrnSet.getSha1(urns)) ||
+                urnFilter.isBlacklisted(UrnSet.getSha1(urns))) {
             remove(fd.getFile());
-            task.setException(createFailureException(fd.getFile(), oldFileDesc, FileViewChangeFailedException.Reason.INVALID_URN)); 
+            task.setException(createFailureException(fd.getFile(), oldFileDesc, FileViewChangeFailedException.Reason.INVALID_URN));
         } else {
             // Add URNs.
             for(URN urn : urns) {

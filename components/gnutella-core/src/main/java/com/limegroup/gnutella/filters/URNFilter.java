@@ -1,24 +1,36 @@
 package com.limegroup.gnutella.filters;
 
+import java.util.Set;
+
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryReply;
 
 /**
- * A filter that blocks query responses with URNs that match either of
- * two blacklists, one local and one remote (SIMPP). This is designed
- * for filtering out spam and malware.
+ * A filter that checks query responses, query replies and individual URNs
+ * against a URN blacklist.
  */
 public interface URNFilter extends SpamFilter {
 
     /**
-     * Reloads the local and remote blacklists. Called when the spam service
-     * starts and on SIMPP updates.
+     * Reloads the blacklist in a different thread and informs the callback,
+     * unless the callback is null.
      */ 
-    public void refreshURNs();
+    void refreshURNs(final LoadCallback callback);
 
     /**
      * Returns true if any response in the query reply matches the blacklist.
-     * Unlike <code>allow(Message)</code>, matching query replies are not passed
-     * to the spam filter.
+     * Unlike <code>allow(Message)</code>, matching query replies are not
+     * passed to the spam filter.
      */
-    public boolean isSpam(QueryReply q);
+    boolean isBlacklisted(QueryReply q);
+
+    /**
+     * Returns true if the given URN matches the blacklist.
+     */
+    boolean isBlacklisted(URN urn);
+    
+    /**
+     * Returns the blacklisted URNs as base32-encoded strings. For testing.
+     */
+    Set<String> getBlacklist();
 }

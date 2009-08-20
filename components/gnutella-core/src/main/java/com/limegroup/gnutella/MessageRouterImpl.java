@@ -1915,7 +1915,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
                                         queryReply.getTotalLength(),
                                         queryReply.getUniqueResultCount(),
                                         queryReply.getPartialResultCount(),
-                                        classC, !urnFilter.isSpam(queryReply));
+                                        classC, !urnFilter.isBlacklisted(queryReply));
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
