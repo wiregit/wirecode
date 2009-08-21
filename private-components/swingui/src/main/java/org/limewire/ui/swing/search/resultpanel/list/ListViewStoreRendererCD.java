@@ -85,7 +85,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
-                if (albumDownloadButton.isVisible()) {
+                if (storeStyle.getType() == Type.STYLE_C) {
                     albumHeadingWidth = getSize().width - albumDownloadButton.getSize().width;
                 } else {
                     albumHeadingWidth = getSize().width - albumPriceButton.getSize().width;
@@ -303,7 +303,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         // Set text and price fields.
         albumHeadingLabel.setText(getHeadingHtml(rowResult, albumWidthResolver, getAlbumHeadingWidth(), editing));
-        albumHeadingLabel.setToolTipText(rowResult.getHeading());
+        albumHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
         albumSubHeadingLabel.setText(rowResult.getSubheading());
         
         albumPriceButton.setText(vsr.getStoreResult().getPrice());
@@ -342,7 +342,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         // Set text and price fields.
         mediaHeadingLabel.setText(getHeadingHtml(rowResult, mediaWidthResolver, getMediaHeadingWidth(), editing));
-        mediaHeadingLabel.setToolTipText(rowResult.getHeading());
+        mediaHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
         mediaSubHeadingLabel.setText(rowResult.getSubheading());
         
         mediaPriceButton.setText(vsr.getStoreResult().getPrice());

@@ -325,7 +325,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         
         // Set text and price fields.
         albumHeadingLabel.setText(getHeadingHtml(rowResult, albumWidthResolver, albumHeadingWidth, editing));
-        albumHeadingLabel.setToolTipText(rowResult.getHeading());
+        albumHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
         albumSubHeadingLabel.setText(rowResult.getSubheading());
         
         albumPriceLabel.setText(vsr.getStoreResult().getPrice());
@@ -370,7 +370,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
         
         // Set text and price fields.
         mediaHeadingLabel.setText(getHeadingHtml(rowResult, mediaWidthResolver, mediaHeadingWidth, editing));
-        mediaHeadingLabel.setToolTipText(rowResult.getHeading());
+        mediaHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
         mediaSubHeadingLabel.setText(rowResult.getSubheading());
         
         mediaPriceLabel.setText(vsr.getStoreResult().getPrice());

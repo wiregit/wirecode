@@ -36,6 +36,8 @@ import com.google.inject.Provider;
  * to display/hide their track listing.
  */
 abstract class ListViewStoreRenderer extends JXPanel {
+    protected static final String HTML_BEGIN = "<html>";
+    protected static final String HTML_END = "</html>";
     private static final int LEFT_COLUMN_WIDTH = 450;
 
     protected final StoreStyle storeStyle;
@@ -194,14 +196,12 @@ abstract class ListViewStoreRenderer extends JXPanel {
                     I18n.tr("Hide Tracks").toUpperCase() : I18n.tr("Show Tracks").toUpperCase());
             updateAlbum(vsr, rowResult, editing);
             updateAlbumTracks(vsr);
-            //System.out.println("album.prefSize=" + getPreferredSize()); // TODO REMOVE
             
         } else {
             albumPanel.setVisible(false);
             mediaPanel.setVisible(true);
             albumTrackPanel.setVisible(false);
             updateMedia(vsr, rowResult, editing);
-            //System.out.println("media.prefSize=" + getPreferredSize()); // TODO REMOVE
         }
     }
     
