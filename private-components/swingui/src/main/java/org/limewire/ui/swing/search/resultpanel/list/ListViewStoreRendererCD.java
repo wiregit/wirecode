@@ -52,7 +52,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     
     private JButton albumTracksButton;
     private JButton albumStreamButton;
-    private JButton albumDownloadButton;
+    private IconButton albumDownloadButton;
     private JButton albumPriceButton;
     
     private HTMLLabel mediaHeadingLabel;
@@ -61,7 +61,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     private int mediaHeadingWidth;
     
     private JButton mediaStreamButton;
-    private JButton mediaDownloadButton;
+    private IconButton mediaDownloadButton;
     private JButton mediaPriceButton;
     
     /**
@@ -133,7 +133,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumStreamButton.setIcon(storeStyle.getStreamIcon());
         
         albumDownloadButton = new IconButton();
-        albumDownloadButton.setIcon(storeStyle.getDownloadAlbumIcon());
+        albumDownloadButton.removeActionHandListener();
         
         albumPriceButton = new PriceButton();
         
@@ -208,7 +208,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaStreamButton.setIcon(storeStyle.getStreamIcon());
         
         mediaDownloadButton = new IconButton();
-        mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
+        mediaDownloadButton.removeActionHandListener();
         
         mediaPriceButton = new PriceButton();
         
@@ -239,8 +239,13 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         JButton streamButton = new IconButton(new StreamTrackAction(result));
         streamButton.setIcon(storeStyle.getStreamIcon());
         
-        JButton downloadButton = new IconButton();
-        downloadButton.setIcon(storeStyle.getDownloadTrackIcon());
+        IconButton downloadButton = new IconButton();
+        downloadButton.removeActionHandListener();
+        if (storeController.isPayAsYouGo()) {
+            downloadButton.setIcon(storeStyle.getBuyTrackIcon());
+        } else {
+            downloadButton.setIcon(storeStyle.getDownloadTrackIcon());
+        }
         
         JButton priceButton = new PriceButton();
         priceButton.setText(result.getPrice());
@@ -308,6 +313,12 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumTracksButton.setVisible(!storeStyle.isShowTracksOnHover() || editing);
         albumDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         albumPriceButton.setVisible(storeStyle.isPriceVisible());
+        
+        if (storeController.isPayAsYouGo()) {
+            albumDownloadButton.setIcon(storeStyle.getBuyAlbumIcon());
+        } else {
+            albumDownloadButton.setIcon(storeStyle.getDownloadAlbumIcon());
+        }
     }
 
     @Override
@@ -340,6 +351,12 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaStreamButton.setVisible(storeStyle.isStreamButtonVisible());
         mediaDownloadButton.setVisible(storeStyle.isDownloadButtonVisible());
         mediaPriceButton.setVisible(storeStyle.isPriceVisible());
+        
+        if (storeController.isPayAsYouGo()) {
+            mediaDownloadButton.setIcon(storeStyle.getBuyTrackIcon());
+        } else {
+            mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
+        }
     }
     
     /**
