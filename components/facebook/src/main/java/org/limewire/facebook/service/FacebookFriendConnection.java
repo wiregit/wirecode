@@ -41,7 +41,6 @@ import org.json.JSONObject;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.facebook.service.Facebook;
 import org.limewire.facebook.service.livemessage.AddressHandler;
 import org.limewire.facebook.service.livemessage.AddressHandlerFactory;
 import org.limewire.facebook.service.livemessage.AuthTokenHandler;
@@ -57,6 +56,7 @@ import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
 import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.facebook.service.settings.FacebookAPIKey;
 import org.limewire.facebook.service.settings.FacebookAuthServerUrls;
+import org.limewire.facebook.service.settings.FacebookURLs;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
@@ -112,10 +112,6 @@ public class FacebookFriendConnection implements FriendConnection {
      */
     private volatile int maxTries = 2;
     
-    private static final String HOME_PAGE = "http://www.facebook.com/home.php";
-    private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
-    private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
-    private static final String FACEBOOK_RECONNECT_URL = "http://www.facebook.com/ajax/presence/reconnect.php?reason=3";
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
 
     private final FriendConnectionConfiguration configuration;
@@ -185,6 +181,7 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private final Provider<String[]> authUrls;
     private final ClientConnectionManager httpConnectionManager;
+    private final Provider<Map<String, Provider<String>>> facebookURLs;
 
     @Inject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -205,7 +202,8 @@ public class FacebookFriendConnection implements FriendConnection {
                                     @Facebook ScheduledListeningExecutorService executorService,
                                     @ChatChannel MutableProvider<String> chatChannel,
                                     @FacebookAuthServerUrls Provider<String[]> authUrls,
-                                    @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager) {
+                                    @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager,
+                                    @FacebookURLs Provider<Map<String, Provider<String>>> facebookURLs) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -219,6 +217,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.chatChannel = chatChannel;
         this.authUrls = authUrls;
         this.httpConnectionManager = httpConnectionManager;
+        this.facebookURLs = facebookURLs;
         this.addressHandler = addressHandlerFactory.create(this);
         this.authTokenHandler = authTokenHandlerFactory.create(this);
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
@@ -302,7 +301,7 @@ public class FacebookFriendConnection implements FriendConnection {
     
     public void reconnect() throws IOException {
         LOG.debug("reconnecting...");
-        String response = httpGET(FACEBOOK_RECONNECT_URL + "&post_form_id=" + postFormID.get()); 
+        String response = httpGET(facebookURLs.get().get(FacebookURLs.RECONNECT_URL).get() + "&post_form_id=" + postFormID.get()); 
         LOG.debugf("reconnect response: {0}", response);
     }
 
@@ -399,7 +398,7 @@ public class FacebookFriendConnection implements FriendConnection {
         URL logout = new URL(logoutURL);
         String logouthost = logout.getProtocol() + "://" + logout.getHost();
         String logoutpath = logout.getPath();
-        httpPOST(logouthost, logoutpath, nvps);
+        httpPOST(logouthost + logoutpath, nvps);
     }
 
     @Override
@@ -452,7 +451,7 @@ public class FacebookFriendConnection implements FriendConnection {
      * Sets this facebook user visible for chat.
      */ 
     private void setVisible() throws IOException {
-        HttpPost httpPost = new HttpPost(FACEBOOK_CHAT_SETTINGS_URL);
+        HttpPost httpPost = new HttpPost(facebookURLs.get().get(FacebookURLs.CHAT_SETTINGS_URL).get());
         httpPost.addHeader("User-Agent", USER_AGENT_HEADER);
 
         List <NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -570,7 +569,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     public void readMetadataFromPages() throws IOException {
-        String homePage = httpGET(HOME_PAGE);
+        String homePage = httpGET(facebookURLs.get().get(FacebookURLs.HOME_PAGE_URL).get());
 
         if(homePage == null){
             throw new IOException("no response");
@@ -581,7 +580,7 @@ public class FacebookFriendConnection implements FriendConnection {
 
         readLogoutURL(homePage);
 
-        String presencePopoutPage = httpGET(PRESENCE_POPOUT_PAGE);
+        String presencePopoutPage = httpGET(facebookURLs.get().get(FacebookURLs.PRESENCE_POPOUT_PAGE_URL).get());
         readChannel(presencePopoutPage);
         readPOSTFormID(presencePopoutPage);
     }
@@ -589,7 +588,7 @@ public class FacebookFriendConnection implements FriendConnection {
     // the logout url is dynamic - it contains a few query params that seem to change across sessions.
     // read the logout url here
     private void readLogoutURL(String homePage) throws IOException {
-        String logoutURLPrefix = "<a href=\"http://www.facebook.com/logout.php?";
+        String logoutURLPrefix = "<a href=\"" + facebookURLs.get().get(FacebookURLs.LOGOUT_URL).get();
         int logoutURLBeginPos = homePage.indexOf(logoutURLPrefix);
         int logoutURLEndPos = homePage.indexOf("\">", logoutURLBeginPos);
         if (logoutURLBeginPos < 0){
@@ -698,9 +697,9 @@ public class FacebookFriendConnection implements FriendConnection {
      *
      * @return null if there is no response data
      */
-    public String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
-        LOG.debugf("facebook POST: {0}", host + urlPostfix);
-        HttpPost httpPost = new HttpPost(host + urlPostfix);
+    public String httpPOST(String url, List <NameValuePair> nvps) throws IOException {
+        LOG.debugf("facebook POST: {0}", url);
+        HttpPost httpPost = new HttpPost(url);
         httpPost.addHeader("Connection", "close");
         httpPost.addHeader("User-Agent", USER_AGENT_HEADER);
         httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
@@ -816,7 +815,7 @@ public class FacebookFriendConnection implements FriendConnection {
             nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
         }
         try {
-            String resp = httpPOST("http://www.facebook.com", "/ajax/chat/send.php", nvps);
+            String resp = httpPOST(facebookURLs.get().get(FacebookURLs.SEND_CHAT_URL).get(), nvps);
             handleChatResponseError(friendId, resp);
         } catch (IOException e) {
             throw new FriendException(e);
@@ -841,7 +840,7 @@ public class FacebookFriendConnection implements FriendConnection {
             nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
         }
         try {
-            String resp = httpPOST("http://www.facebook.com", "/ajax/chat/typ.php", nvps);
+            String resp = httpPOST(facebookURLs.get().get(FacebookURLs.SEND_CHAT_STATE_URL).get(), nvps);
             return handleChatResponseError(friendId, resp);
         } catch (IOException e) {
             LOG.debug("error sending chat update", e);
