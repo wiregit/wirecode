@@ -196,7 +196,7 @@ public class MockStoreResult implements StoreResult {
         private final FriendPresence friendPresence;
 
         public MockStoreHost() {
-            friendPresence = new MockFriendPresence(new MockFriend("Store", false));
+            friendPresence = new MockFriendPresence(new MockFriend("Store", false), "Store");
         }
         
         @Override
