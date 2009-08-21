@@ -54,6 +54,11 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
 
     @Override
     public String getSubHeading(PropertiableFile propertiable) {
+        return getSubHeading(propertiable, false);
+    }
+
+    @Override
+    public String getSubHeading(PropertiableFile propertiable, boolean album) {
         //TODO: Unit test this class (then refactor)!!! So many conditions :-(
         String subheading = "";
 
@@ -64,7 +69,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
             Long length = (Long)propertiable.getProperty(FilePropertyKey.LENGTH);
 
             boolean insertHyphen = false;
-            if (!StringUtils.isEmpty(albumTitle)) {
+            if (!StringUtils.isEmpty(albumTitle) && !album) {
                 subheading += albumTitle;
                 insertHyphen = true;
             }
