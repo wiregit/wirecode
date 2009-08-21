@@ -393,7 +393,7 @@ public class OSUtils {
             // by the path, filename and extension plus 1 null character.
             //
             // NTFS can actually support 32767 characters in the paths 
-            // but one must prepend “\\?\” to the file paths. This tells the 
+            // but one must prepend \\?\ to the file paths. This tells the 
             // APIs to not to enforce 260 character limit.
             return 259;
         }
