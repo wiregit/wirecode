@@ -51,7 +51,7 @@ public class XMLDocFilterTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         address = InetAddress.getLocalHost().getAddress();
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjectorNonEagerly();
         responseFactory = injector.getInstance(ResponseFactory.class);
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
         limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);

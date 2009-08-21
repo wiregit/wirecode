@@ -142,7 +142,7 @@ public class RequeryDownloadTest extends LimeTestCase {
     public void setUp() throws Exception {
         final LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
         localSocketAddressProviderStub.setLocalAddressPrivate(false);
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjectorNonEagerly(new AbstractModule() {
           @Override
             protected void configure() {
               bind(MessageRouter.class).to(TestMessageRouter.class);

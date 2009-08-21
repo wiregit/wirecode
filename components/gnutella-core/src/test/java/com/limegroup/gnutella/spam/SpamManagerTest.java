@@ -91,7 +91,7 @@ public class SpamManagerTest extends LimeTestCase {
         spamUrn = URN.createSHA1Urn("urn:sha1:" + spam);
         FilterSettings.FILTERED_URNS_LOCAL.set(new String[] { spam });
 
-		injector = LimeTestUtils.createInjector();
+		injector = LimeTestUtils.createInjectorNonEagerly();
 		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 		remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);

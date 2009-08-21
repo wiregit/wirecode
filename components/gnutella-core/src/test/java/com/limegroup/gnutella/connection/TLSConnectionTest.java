@@ -78,7 +78,7 @@ public class TLSConnectionTest extends LimeTestCase {
         connectionManager = injector.getInstance(ConnectionManager.class);
         connectionManager.connect();
 
-        injector2 = LimeTestUtils.createInjector(); 
+        injector2 = LimeTestUtils.createInjectorNonEagerly(); 
         routedConnectionFactory = injector2.getInstance(RoutedConnectionFactory.class);        
         headersFactory = injector2.getInstance(HeadersFactory.class);
     }

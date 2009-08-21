@@ -55,7 +55,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
                 bind(FECUtils.class).toInstance(fecUtils);
             }
         };
-        injector = LimeTestUtils.createInjector(m);
+        injector = LimeTestUtils.createInjectorNonEagerly(m);
     }
     
     public void testLoadsProperties() throws Exception {

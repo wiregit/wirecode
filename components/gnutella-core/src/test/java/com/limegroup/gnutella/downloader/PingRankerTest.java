@@ -96,7 +96,7 @@ public class PingRankerTest extends LimeTestCase {
                 bind(MessageRouter.class).to(MessageRouterStub.class);
             }
         };
-        Injector i = LimeTestUtils.createInjector(module);
+        Injector i = LimeTestUtils.createInjectorNonEagerly(module);
 
         udpReplyHandlerFactory = i.getInstance(UDPReplyHandlerFactory.class);
         pushEndpointFactory = i.getInstance(PushEndpointFactory.class);

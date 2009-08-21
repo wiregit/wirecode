@@ -24,6 +24,7 @@ import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.inject.LimeWireInjectModule;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -85,7 +86,7 @@ public class URNBlacklistManagerImplTest extends LimeTestCase {
                 bind(ServiceRegistry.class).toInstance(serviceRegistry);
             }
         };
-        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, m);
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, m, new LimeWireInjectModule());
         urnBlacklistManager =
             injector.getInstance(URNBlacklistManagerImpl.class);
         context.assertIsSatisfied();

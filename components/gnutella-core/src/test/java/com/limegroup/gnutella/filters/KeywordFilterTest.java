@@ -46,7 +46,7 @@ public class KeywordFilterTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjectorNonEagerly();
 
         context = new Mockery();
         queryRequestMock = context.mock(QueryRequest.class);

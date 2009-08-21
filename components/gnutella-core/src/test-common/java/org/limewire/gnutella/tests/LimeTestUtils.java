@@ -166,6 +166,13 @@ public class LimeTestUtils {
     /**
      * Creates the Guice injector without eagerly loading EagerSingletons.
      */
+    public static Injector createInjectorNonEagerly(Class<? extends ActivityCallback> callbackClass, Module... modules) {
+        return createInjector(callbackClass, false, modules);
+    }
+    
+    /**
+     * Creates the Guice injector without eagerly loading EagerSingletons.
+     */
     public static Injector createInjectorNonEagerly(Module... modules) {
         return createInjector(ActivityCallbackStub.class, false, modules);
     }

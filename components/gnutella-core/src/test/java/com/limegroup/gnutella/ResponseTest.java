@@ -91,7 +91,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
 	@Override
 	protected void setUp() throws Exception {
 	    context = new Mockery();
-	    injector = LimeTestUtils.createInjector();
+	    injector = LimeTestUtils.createInjectorNonEagerly();
 	    queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
 	    responseFactoryImpl = (ResponseFactoryImpl) injector.getInstance(ResponseFactory.class);
 	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);

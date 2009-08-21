@@ -94,7 +94,7 @@ public class OOBHandlerTest extends BaseTestCase {
             }
         };
         
-        Injector injector = LimeTestUtils.createInjector(module);
+        Injector injector = LimeTestUtils.createInjectorNonEagerly(module);
         responseFactory = injector.getInstance(ResponseFactory.class);
         queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
         handler = injector.getInstance(OOBHandler.class);

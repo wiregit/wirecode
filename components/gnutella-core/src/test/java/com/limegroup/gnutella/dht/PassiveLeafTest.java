@@ -57,7 +57,7 @@ public class PassiveLeafTest extends DHTTestCase {
     protected void setUp() throws Exception {
         DHTTestUtils.setSettings(PORT);
         
-        injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule());
+        injector = LimeTestUtils.createInjector(new LimeWireIOTestModule());
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
     }

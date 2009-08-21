@@ -67,7 +67,7 @@ public class RestrictedResponderTest extends BaseTestCase {
                 return "1.2.3.4";
             }
         };
-		Injector injector = LimeTestUtils.createInjector();
+		Injector injector = LimeTestUtils.createInjectorNonEagerly();
 
 		pingRequestFactory = injector.getInstance(PingRequestFactory.class);
 		networkManager = injector.getInstance(NetworkManager.class);

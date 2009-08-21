@@ -75,7 +75,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
             when(states.is("default"));
         }});
         sessionManager = new MockHTTPUploadSessionManager();
-        LimeTestUtils.createInjector(new AbstractModule() {
+        LimeTestUtils.createInjectorNonEagerly(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
