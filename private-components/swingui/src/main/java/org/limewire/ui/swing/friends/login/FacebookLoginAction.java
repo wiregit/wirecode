@@ -140,7 +140,7 @@ public class FacebookLoginAction extends AbstractAction {
                             nsICookieManager.class);
                             nsISimpleEnumerator enumerator = cookieService.getEnumerator();
                             List<Cookie> cookiesCopy = new ArrayList<Cookie>();
-                            Cookie login_x = null;
+                            Cookie username = null;
                             while(enumerator.hasMoreElements()) {                        
                                 nsICookie cookie = XPCOMUtils.proxy(enumerator.getNext(), nsICookie.class);
                                 if(cookie.getHost() != null && cookie.getHost().endsWith(".facebook.com")) {
@@ -156,8 +156,8 @@ public class FacebookLoginAction extends AbstractAction {
                                     copy.setSecure(cookie.getIsSecure());
                                     // TODO copy.setVersion();
                                     cookiesCopy.add(copy);
-                                    if(copy.getName().equals("login_x")) {
-                                        login_x = copy;
+                                    if(copy.getName().equals("lxe")) {
+                                        username = copy;
                                     }
                                 } else {
                                     LOG.debugf("dropping cookie {0} = {1} for host {2}", cookie.getName(), cookie.getValue(), cookie.getHost());
@@ -165,7 +165,7 @@ public class FacebookLoginAction extends AbstractAction {
                             }
                             
                             config.setAttribute("cookie", cookiesCopy);
-                            setUsername(config, login_x);
+                            setUsername(config, username);
                             friendConnectionFactory.login(config);
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
@@ -237,25 +237,15 @@ public class FacebookLoginAction extends AbstractAction {
         });
     }
     
-    private void setUsername(FriendAccountConfiguration config, Cookie login_x) {
-        if(login_x != null) {
+    private void setUsername(FriendAccountConfiguration config, Cookie usernameCookie) {
+        if(usernameCookie != null) {
             try {
-                String value = URLDecoder.decode(login_x.getValue(), "UTF-8");
-                config.setUsername(extractEmail(value));
+                String value = URLDecoder.decode(usernameCookie.getValue(), "UTF-8");
+                config.setUsername(value);
             } catch (UnsupportedEncodingException e) {
-                LOG.debugf(e, "failed to decode {0}", login_x.getValue());
+                LOG.debugf(e, "failed to decode {0}", usernameCookie.getValue());
             }
         }
-    }
-
-    private String extractEmail(String s) {
-        int emailNameIndex = s.indexOf("\"email\"");
-        s = s.substring(emailNameIndex + "\"email\"".length());
-        int emailStart = s.indexOf('"');
-        String email = s.substring(emailStart + 1);
-        int emailEndIndex = email.indexOf('"');
-        email = email.substring(0, emailEndIndex);
-        return email;
     }
     
     // TODO: For some reason this class is an action not a panel.  In order for the listeners to be 
