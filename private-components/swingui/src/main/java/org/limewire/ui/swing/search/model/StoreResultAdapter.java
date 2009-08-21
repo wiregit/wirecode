@@ -143,7 +143,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     @Override
     public String getSubHeading() {
         if (subHeading == null) {
-            subHeading = propertiableHeadings.get().getSubHeading(this);
+            subHeading = propertiableHeadings.get().getSubHeading(this, storeResult.isAlbum());
         }
         return subHeading;
     }
