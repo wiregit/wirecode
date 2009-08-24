@@ -25,6 +25,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.StoreController;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
@@ -74,8 +75,10 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            SearchResultMenuFactory popupMenuFactory,
             StoreController storeController) {
-        super(storeStyle, categoryIconManager, headingBuilder, headingTruncator, storeController);
+        super(storeStyle, categoryIconManager, headingBuilder, headingTruncator,
+                popupMenuFactory, storeController);
     }
 
     @Override

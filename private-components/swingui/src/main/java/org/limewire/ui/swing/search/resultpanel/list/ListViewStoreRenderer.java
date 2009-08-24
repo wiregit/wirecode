@@ -3,6 +3,9 @@ package org.limewire.ui.swing.search.resultpanel.list;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -16,17 +19,25 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.ui.swing.components.CustomLineBorder;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewTable;
+import org.limewire.ui.swing.search.resultpanel.ResultsTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.StoreController;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenu.ViewType;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Provider;
 
@@ -44,6 +55,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final CategoryIconManager categoryIconManager;
     protected final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     protected final Provider<SearchResultTruncator> headingTruncator;
+    protected final SearchResultMenuFactory popupMenuFactory;
     protected final StoreController storeController;
 
     protected final JXPanel albumPanel;
@@ -55,6 +67,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final Action showInfoAction;
     protected final Action showTracksAction;
     
+    private MouseListener popupListener;
     private JTable table;
     private VisualStoreResult vsr;
     private int row;
@@ -68,12 +81,14 @@ abstract class ListViewStoreRenderer extends JXPanel {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            SearchResultMenuFactory popupMenuFactory,
             StoreController storeController) {
         
         this.storeStyle = storeStyle;
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
+        this.popupMenuFactory = popupMenuFactory;
         this.storeController = storeController;
         
         this.albumPanel = new JXPanel();
@@ -98,6 +113,10 @@ abstract class ListViewStoreRenderer extends JXPanel {
         // Initialize album/media panels.
         initAlbumComponent();
         initMediaComponent();
+        
+        // Initialize popup listener.
+        installPopupListener(albumPanel);
+        installPopupListener(mediaPanel);
         
         // Initialize album track container.
         albumTrackPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, fill, novisualpadding"));
@@ -124,6 +143,17 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * Creates a component to display an album track.
      */
     protected abstract Component createTrackComponent(StoreTrackResult result);
+    
+    /**
+     * Installs the popup and selection listener on the specified component.
+     */
+    protected void installPopupListener(Component component) {
+        if (popupListener == null) {
+            popupListener = new SelectionPopupListener();
+        }
+        
+        component.addMouseListener(popupListener);
+    }
     
     /**
      * Returns the column width.
@@ -239,6 +269,27 @@ abstract class ListViewStoreRenderer extends JXPanel {
     }
     
     /**
+     * Updates the table row selection based on the specified mouse event.
+     */
+    private void updateSelection(MouseEvent e) {
+        if (table.isEditing()) {
+            // Get cell being edited by this editor.
+            int editRow = table.getEditingRow();
+            int editCol = table.getEditingColumn();
+            
+            // Update the selection.  We also prepare the editor to apply
+            // the selection colors to the current editor component.
+            if ((editRow > -1) && (editRow < table.getRowCount())) {
+                table.changeSelection(editRow, editCol, e.isControlDown(), e.isShiftDown());
+                table.prepareEditor(table.getCellEditor(), editRow, editCol);
+            }
+        }
+        
+        // Request focus so Enter key can be handled.
+        e.getComponent().requestFocusInWindow();
+    }
+    
+    /**
      * Action to download store result.
      */
     private class DownloadAction extends AbstractAction {
@@ -308,8 +359,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (vsr != null) {
-                System.out.println("showInfo.actionPerformed: " + vsr.getHeading());
-                // TODO implement
+                StoreResultInfoPanel infoPanel = new StoreResultInfoPanel(storeController);
+                infoPanel.display(vsr);
             }
         }
     }
@@ -342,6 +393,61 @@ abstract class ListViewStoreRenderer extends JXPanel {
                     });
                 }
             }
+        }
+    }
+    
+    /**
+     * Mouse listener to update selection and display popup menu.
+     */
+    private class SelectionPopupListener extends MousePopupListener {
+        
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                updateSelection(e);
+            }
+            super.mousePressed(e);
+        }
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if ((vsr != null) && (e.getClickCount() == 2) && SwingUtilities.isLeftMouseButton(e)) {  
+                storeController.download(vsr);
+            } else {
+                super.mouseClicked(e);
+            }
+        }
+        
+        @Override
+        public void handlePopupMouseEvent(MouseEvent e) {
+            // Update selection if mouse is not in selected row.
+            if (table.isEditing()) {
+                int editRow = table.getEditingRow();
+                if (!table.isRowSelected(editRow)) {
+                    updateSelection(e);
+                }
+            }
+            
+            // Create list of selected results.
+            List<VisualSearchResult> selectedResults = new ArrayList<VisualSearchResult>();
+            DefaultEventTableModel model = ((ResultsTable) table).getEventTableModel();
+            int[] selectedRows = table.getSelectedRows();
+            for (int row : selectedRows) {
+                Object element = model.getElementAt(row);
+                if (element instanceof VisualSearchResult) {
+                    selectedResults.add((VisualSearchResult) element);
+                }
+            }
+            
+            // If nothing selected, use current result.
+            if (selectedResults.size() == 0) {
+                selectedResults.add(vsr);
+            }
+            
+            // Display context menu.
+            SearchResultMenu searchResultMenu = popupMenuFactory.create(
+                    storeController.getDownloadHandler(), selectedResults, ViewType.List);
+            searchResultMenu.show(e.getComponent(), e.getX()+3, e.getY()+3);
         }
     }
 }

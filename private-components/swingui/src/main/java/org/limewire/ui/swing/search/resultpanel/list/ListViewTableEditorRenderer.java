@@ -191,13 +191,12 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
         this.storeRendererFactory = new ListViewStoreRendererFactory(
-                categoryIconManager, headingBuilder, truncator, storeController);
+                categoryIconManager, headingBuilder, truncator, 
+                searchResultMenuFactory, storeController);
         
         GuiUtils.assignResources(this);
 
         headingFontWidthResolver = new HeadingFontWidthResolver(heading, headingFont);
-        
-        storeRenderer = storeRendererFactory.create();
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
        
@@ -328,9 +327,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             return emptyPanel;
         }
         
-        // Use component for store result.  If the RowDisplayResult is not yet
-        // available, create a temporary one for rendering.
-        if (vsr instanceof VisualStoreResult) {
+        // Use component for store result if available.  If the RowDisplayResult
+        // is not yet available, create a temporary one for rendering.
+        if ((vsr instanceof VisualStoreResult) && (storeRenderer != null)) {
             RowDisplayResult result = vsr.getRowDisplayResult();
             if (result == null) result = rowHeightRule.createDisplayResult(vsr);
             storeRenderer.update(table, (VisualStoreResult) vsr, result, editing, row, col);
