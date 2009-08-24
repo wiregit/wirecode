@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.downloader;
+package org.limewire.util;
 
 /**
  * A simple visitor.

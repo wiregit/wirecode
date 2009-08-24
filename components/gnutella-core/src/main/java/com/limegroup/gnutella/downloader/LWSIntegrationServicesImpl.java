@@ -24,6 +24,7 @@ import org.limewire.core.settings.LWSSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
+import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

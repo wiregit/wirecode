@@ -41,6 +41,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
+import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -62,7 +63,6 @@ import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
-import com.limegroup.gnutella.downloader.Visitor;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
