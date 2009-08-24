@@ -441,9 +441,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public void addStoreResult(final StoreResult storeResult) {
-        // TODO REMOVE
-        System.out.println("addStoreResult: isEDT=" + SwingUtilities.isEventDispatchThread());
-        
+        // Add store result on EDT so events are forwarded to the UI correctly.
         SwingUtils.invokeLater(new Runnable() {
             @Override
             public void run() {
