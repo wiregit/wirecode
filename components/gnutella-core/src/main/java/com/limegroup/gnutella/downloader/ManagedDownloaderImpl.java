@@ -27,12 +27,12 @@ import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Address;
 import org.limewire.io.DiskException;
@@ -47,7 +47,6 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
-import org.limewire.friend.impl.address.FriendAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -3268,12 +3267,5 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             incompleteFileManager.removeEntry(incompleteFile);
             FileUtils.delete(incompleteFile, false);
         }
-    }
-    
-    @Override
-    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
-            throws DownloadException {
-        //overriding to track down cause of https://www.limewire.org/jira/browse/LWC-3697 remove when fixed
-        super.setSaveFile(saveDirectory, fileName, overwrite);
     }
 }
