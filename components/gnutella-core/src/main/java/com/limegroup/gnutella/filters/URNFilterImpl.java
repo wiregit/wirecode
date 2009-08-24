@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.util.Visitor;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -34,10 +35,10 @@ class URNFilterImpl implements URNFilter {
 
     @Inject
     URNFilterImpl(SpamManager spamManager,
-            URNBlacklistManager bannedContentManager,
+            URNBlacklistManager urnBlacklistManager,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.spamManager = spamManager;
-        this.urnBlacklistManager = bannedContentManager;
+        this.urnBlacklistManager = urnBlacklistManager;
         this.backgroundExecutor = backgroundExecutor;
     }
 
@@ -51,7 +52,8 @@ class URNFilterImpl implements URNFilter {
         backgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+                final ImmutableSet.Builder<String> builder =
+                    ImmutableSet.builder();
                 // 1. Local setting
                 for(String s : FilterSettings.FILTERED_URNS_LOCAL.get())
                     builder.add(s);
@@ -61,9 +63,13 @@ class URNFilterImpl implements URNFilter {
                         builder.add(s);
                 }
                 // 3. File
-                for(String s : urnBlacklistManager) {
-                    builder.add(s);
-                }
+                urnBlacklistManager.loadURNs(new Visitor<String>() {
+                    @Override
+                    public boolean visit(String s) {
+                        builder.add(s);
+                        return true;
+                    }
+                });
                 blacklist = builder.build();
                 if(LOG.isDebugEnabled())
                     LOG.debug("Filter contains " + blacklist.size() + " URNs");

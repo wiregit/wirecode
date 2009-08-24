@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.SimpleTimeZone;
 
 import junit.framework.Test;
@@ -24,17 +24,11 @@ import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.inject.LimeWireInjectModule;
-import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
+import org.limewire.util.Visitor;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.google.inject.name.Names;
+import com.google.inject.util.Providers;
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
@@ -52,7 +46,7 @@ public class URNBlacklistManagerImplTest extends LimeTestCase {
     private HttpExecutor httpExecutor;
     private HttpParams defaultParams;
     private SpamServices spamServices;
-    private ServiceRegistry serviceRegistry;
+    private StubVisitor visitor;
 
     public URNBlacklistManagerImplTest(String name) {
         super(name);
@@ -71,24 +65,10 @@ public class URNBlacklistManagerImplTest extends LimeTestCase {
         httpExecutor = context.mock(HttpExecutor.class);
         defaultParams = context.mock(HttpParams.class);
         spamServices = context.mock(SpamServices.class);
-        serviceRegistry = context.mock(ServiceRegistry.class);
-        context.checking(new Expectations() {{
-            one(serviceRegistry).register(with(any(
-                    URNBlacklistManagerImpl.class)));
-        }});
-        Module m = new AbstractModule() {
-            @Override
-            public void configure() {
-                bind(HttpExecutor.class).toInstance(httpExecutor);
-                bind(HttpParams.class).annotatedWith(Names.named(
-                "defaults")).toInstance(defaultParams);
-                bind(SpamServices.class).toInstance(spamServices);
-                bind(ServiceRegistry.class).toInstance(serviceRegistry);
-            }
-        };
-        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, m, new LimeWireInjectModule());
-        urnBlacklistManager =
-            injector.getInstance(URNBlacklistManagerImpl.class);
+        visitor = new StubVisitor();
+        urnBlacklistManager = new URNBlacklistManagerImpl(
+                Providers.of(httpExecutor), Providers.of(defaultParams),
+                Providers.of(spamServices));
         context.assertIsSatisfied();
     }
 
@@ -119,69 +99,65 @@ public class URNBlacklistManagerImplTest extends LimeTestCase {
         context.assertIsSatisfied();        
     }
 
-    public void testReadingFileTriggersCheckIfFileIsMissing() {
-        File f = urnBlacklistManager.getFile();
+    public void testLoadingURNsTriggersCheckIfFileIsMissing() {
         context.checking(new Expectations() {{
             one(httpExecutor).execute(with(any(HttpHead.class)),
                     with(any(HttpParams.class)),
                     with(any(HttpClientListener.class)));
         }});
-        assertFalse(f.exists());
-        assertFalse(urnBlacklistManager.iterator().hasNext());
+        urnBlacklistManager.loadURNs(visitor);
+        assertFalse(urnBlacklistManager.getFile().exists());
+        assertTrue(visitor.urns.isEmpty());
         context.assertIsSatisfied();
     }
 
-    public void testReadingFileTriggersCheckIfFileIsEmpty() throws Exception {
-        File f = urnBlacklistManager.getFile();
-        FileOutputStream out = new FileOutputStream(f);
-        out.write(new byte[0]);
-        out.flush();
-        out.close();
+    public void testLoadingURNsTriggersCheckIfFileIsEmpty() throws Exception {
+        // Create an empty file
+        assertTrue(urnBlacklistManager.getFile().createNewFile());
         context.checking(new Expectations() {{
             one(httpExecutor).execute(with(any(HttpHead.class)),
                     with(any(HttpParams.class)),
                     with(any(HttpClientListener.class)));
         }});
-        assertTrue(f.exists());
-        assertFalse(urnBlacklistManager.iterator().hasNext());
+        urnBlacklistManager.loadURNs(visitor);
+        assertTrue(urnBlacklistManager.getFile().exists());
+        assertTrue(visitor.urns.isEmpty());
         context.assertIsSatisfied();        
     }
 
-    public void testReadingFileTriggersCheckIfFileIsCorrupt() throws Exception {
-        File f = urnBlacklistManager.getFile();
+    public void testLoadingURNsTriggersCheckIfFileIsCorrupt() throws Exception {
         // Copy all but the last byte, so the file is invalid
+        File f = urnBlacklistManager.getFile();
         FileUtils.copy(validFile, validFile.length() - 1, f);
         context.checking(new Expectations() {{
             one(httpExecutor).execute(with(any(HttpHead.class)),
                     with(any(HttpParams.class)),
                     with(any(HttpClientListener.class)));
         }});
-        assertTrue(f.exists());
-        assertFalse(urnBlacklistManager.iterator().hasNext());
+        urnBlacklistManager.loadURNs(visitor);
+        assertTrue(urnBlacklistManager.getFile().exists());
+        assertTrue(visitor.urns.isEmpty());
         context.assertIsSatisfied();        
     }
 
-    public void testReadingFileTriggersCheckIfSignatureIsBad() throws Exception {
-        File f = urnBlacklistManager.getFile();
-        FileUtils.copy(invalidFile, f);
+    public void testLoadingURNsTriggersCheckIfSignatureIsBad() throws Exception {
+        FileUtils.copy(invalidFile, urnBlacklistManager.getFile());
         context.checking(new Expectations() {{
             one(httpExecutor).execute(with(any(HttpHead.class)),
                     with(any(HttpParams.class)),
                     with(any(HttpClientListener.class)));
         }});
-        assertTrue(f.exists());
-        assertFalse(urnBlacklistManager.iterator().hasNext());
+        urnBlacklistManager.loadURNs(visitor);
+        assertTrue(urnBlacklistManager.getFile().exists());
+        assertTrue(visitor.urns.isEmpty());
         context.assertIsSatisfied();        
     }
 
-    public void testReadingFileReturnsDataIfSignatureIsGood() throws Exception {
-        File f = urnBlacklistManager.getFile();
-        FileUtils.copy(validFile, f);
-        assertTrue(f.exists());
-        Iterator<String> i = urnBlacklistManager.iterator();
-        assertTrue(i.hasNext());
-        i.next();
-        assertFalse(i.hasNext());
+    public void testLoadingURNsReturnsDataIfSignatureIsGood() throws Exception {
+        FileUtils.copy(validFile, urnBlacklistManager.getFile());
+        urnBlacklistManager.loadURNs(visitor);
+        assertTrue(urnBlacklistManager.getFile().exists());
+        assertEquals(1, visitor.urns.size());
         context.assertIsSatisfied();
     }
 
@@ -415,6 +391,16 @@ public class URNBlacklistManagerImplTest extends LimeTestCase {
                 (HttpClientListener)invocation.getParameter(2);
             listener.requestComplete(request, response);
             return null;
+        }
+    }
+
+    private static class StubVisitor implements Visitor<String> {
+        ArrayList<String> urns = new ArrayList<String>();
+
+        @Override
+        public boolean visit(String s) {
+            urns.add(s);
+            return true;
         }
     }
 }

@@ -1,10 +1,8 @@
 package com.limegroup.gnutella.filters;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
@@ -15,13 +13,8 @@ import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.util.Base32;
+import org.limewire.util.Visitor;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.google.inject.name.Names;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -65,22 +58,8 @@ public class URNFilterTest extends LimeTestCase {
         FilterSettings.FILTERED_URNS_REMOTE.set(new String[] {badRemote});
         context = new Mockery();
         spamManager = context.mock(SpamManager.class);
-        final URNBlacklistManager urnBlacklistManager =
-            context.mock(URNBlacklistManager.class);
-        final ScheduledExecutorService backgroundExecutor =
-            new SimpleTimer(true); 
-        Module m = new AbstractModule() {
-            @Override
-            public void configure() {
-                bind(URNFilter.class).to(URNFilterImpl.class);
-                bind(SpamManager.class).toInstance(spamManager);
-                bind(URNBlacklistManager.class).toInstance(urnBlacklistManager);
-                bind(ScheduledExecutorService.class).annotatedWith(Names.named(
-                "backgroundExecutor")).toInstance(backgroundExecutor);
-            }
-        };
-        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, m);
-        urnFilter = injector.getInstance(URNFilter.class);
+        urnFilter = new URNFilterImpl(spamManager,
+                new StubURNBlacklistManager(), new SimpleTimer(true));
         final CountDownLatch loaded = new CountDownLatch(1);
         SpamFilter.LoadCallback callback = new SpamFilter.LoadCallback() {
             @Override
@@ -88,18 +67,6 @@ public class URNFilterTest extends LimeTestCase {
                 loaded.countDown();
             }
         };
-        // The blacklist manager's iterator should return the badFile URN
-        final Iterator iterator = context.mock(Iterator.class);
-        context.checking(new Expectations() {{
-            one(urnBlacklistManager).iterator();
-            will(returnValue(iterator));
-            one(iterator).hasNext();
-            will(returnValue(true));
-            one(iterator).next();
-            will(returnValue(badFile));
-            one(iterator).hasNext();
-            will(returnValue(false));
-        }});
         // The blacklist should not have been loaded yet
         assertNull(urnFilter.getBlacklist());
         urnFilter.refreshURNs(callback);
@@ -180,5 +147,12 @@ public class URNFilterTest extends LimeTestCase {
         assertTrue(urnFilter.isBlacklisted(badURN));
         assertFalse(urnFilter.isBlacklisted(goodURN));
         context.assertIsSatisfied();
+    }
+
+    private class StubURNBlacklistManager implements URNBlacklistManager {
+        @Override
+        public void loadURNs(Visitor<String> visitor) {
+            visitor.visit(badFile);
+        }
     }
 }

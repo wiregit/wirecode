@@ -1,20 +1,16 @@
 package com.limegroup.gnutella.filters;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -39,6 +35,7 @@ import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -102,14 +99,74 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
     }
 
     /**
-     * Returns an iterator over the URNs in the blacklist manager's file.
-     * This method blocks, as do the methods of the iterator. Iteration may
-     * trigger an update check if the file is missing, empty or corrupt. The
-     * iterator should be read to completion to ensure the file is closed.
+     * Loads and verifies the URN blacklist, then passes each successfully
+     * loaded URN to the given visitor as a base32-encoded string. This method
+     * blocks.
      */
     @Override
-    public Iterator<String> iterator() {
-        return new URNIterator();
+    public void loadURNs(Visitor<String> visitor) {
+        byte[] buf = new byte[20];
+        byte[] sig = new byte[SIG_LENGTH];
+        RandomAccessFile in = null;
+
+        // Fail fast if the file is fundamentally fubar
+        File file = getFile();
+        long length = file.length() - SIG_LENGTH;
+        // The data excluding the signature should be a multiple of 20 bytes
+        if(length <= 0 || length > MAX_LENGTH || length % 20 != 0) {
+            LOG.debug("File is missing, empty, or an invalid size");
+            invalidFile();
+            return;
+        }
+        try {
+            LOG.debug("Opening file");
+            in = new RandomAccessFile(file, "r");
+            // Initialise the signature verifier
+            Signature signature = Signature.getInstance(SIG_ALGORITHM);
+            byte[] keyBytes = Base32.decode(PUBLIC_KEY);
+            KeyFactory factory = KeyFactory.getInstance(KEY_ALGORITHM);
+            EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+            PublicKey key = factory.generatePublic(keySpec);
+            signature.initVerify(key);
+            // Feed the data to the signature verifier
+            for(long read = 0; read < length; read += buf.length) {
+                // Unexpected EOF will throw an exception
+                in.readFully(buf);
+                signature.update(buf);
+            }
+            // Read the signature
+            in.readFully(sig);
+            // Verify the signature
+            if(signature.verify(sig)) {
+                LOG.debug("Valid signature");
+            } else {
+                LOG.debug("Invalid signature");
+                invalidFile();
+                return;
+            }
+            // Rewind and read the file again, passing URNs to the visitor
+            in.seek(0);
+            for(long read = 0; read < length; read += buf.length) {
+                // Unexpected EOF will throw an exception
+                in.readFully(buf);
+                if(!visitor.visit(Base32.encode(buf)))
+                    break; // The visitor's had enough
+            }
+        } catch(IOException e) {
+            LOG.debug("Error loading URNs", e);
+            invalidFile();
+        } catch(GeneralSecurityException e) {
+            LOG.debug("Error verifying URNs", e);
+            invalidFile();
+        } finally {
+            IOUtils.close(in);
+        }
+    }
+    
+    private void invalidFile() {
+        // The file is invalid - replace it with any available version
+        FilterSettings.LAST_URN_BLACKLIST_UPDATE.setValue(0);
+        checkForUpdate();   
     }
 
     /**
@@ -244,101 +301,6 @@ class URNBlacklistManagerImpl implements URNBlacklistManager, Service {
             }
             setNextUpdateTime();
             return false; // Do not attempt any further requests.
-        }
-    }
-
-    /**
-     * Reads raw SHA1 URNs from a file and returns them as base32-encoded
-     * strings.
-     */
-    private class URNIterator implements Iterator<String> {
-
-        private final byte[] buf = new byte[20];
-        private DataInputStream in = null;
-        private Signature signature = null;
-        private boolean hasNext = false;
-        private long length = -1;
-        private int totalRead = 0;
-
-        @Override
-        public boolean hasNext() {
-            return hasNext || readNext();
-        }
-
-        @Override
-        public String next() {
-            if(!hasNext())
-                throw new NoSuchElementException();
-            hasNext = false;
-            return Base32.encode(buf);
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         * Tries to read another URN and store it in <code>buf</code>. An
-         * update is triggered if the file is missing, empty or corrupt.
-         * @return true if a URN was read.
-         */
-        private boolean readNext() {
-            try {
-                // Have we finished?
-                if(totalRead == length)
-                    return false;
-                // Have we started?
-                if(in == null)
-                    init();
-                // Unexpected EOF will throw an exception
-                in.readFully(buf);
-                signature.update(buf);
-                totalRead += buf.length;
-                // When we reach the end of the data, try to read the signature
-                if(totalRead == length) {
-                    byte[] sig = new byte[SIG_LENGTH];
-                    in.readFully(sig);
-                    LOG.debug("Closing file");
-                    in.close();
-                    if(signature.verify(sig))
-                        LOG.debug("Valid signature");
-                    else
-                        throw new GeneralSecurityException("Invalid signature");
-                }
-                hasNext = true;
-                return true;
-            } catch(Exception e) {
-                LOG.debug("Error loading URNs", e);
-                IOUtils.close(in);
-                // The file is invalid - replace it with any available version
-                FilterSettings.LAST_URN_BLACKLIST_UPDATE.setValue(0);
-                checkForUpdate();
-                return false;
-            }
-        }
-
-        /**
-         * Performs some validity checks on the file and opens it for reading.
-         */
-        private void init() throws IOException, GeneralSecurityException {
-            // Fail fast if the file is fundamentally fubar
-            File file = getFile();
-            length = file.length() - SIG_LENGTH;
-            // The data excluding the signature should be a multiple of 20 bytes
-            if(length <= 0 || length > MAX_LENGTH || length % 20 != 0)
-                throw new IOException("File is missing, empty or corrupt");
-            // Open the file for reading
-            LOG.debug("Opening file");
-            in = new DataInputStream(new BufferedInputStream(
-                    new FileInputStream(file)));
-            // Initialise the signature verifier
-            signature = Signature.getInstance(SIG_ALGORITHM);
-            byte[] keyBytes = Base32.decode(PUBLIC_KEY);
-            KeyFactory factory = KeyFactory.getInstance(KEY_ALGORITHM);
-            EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-            PublicKey key = factory.generatePublic(keySpec);
-            signature.initVerify(key);
         }
     }
 }
