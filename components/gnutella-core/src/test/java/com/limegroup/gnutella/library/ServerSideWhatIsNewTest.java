@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SpeedConstants;
@@ -755,6 +756,7 @@ public class ServerSideWhatIsNewTest
         } else {
             LibraryUtils.PROGRAM_SHARE.mkdir();
         }
+        LibrarySettings.ALLOW_PROGRAMS.set(true);
 
         File winDst = new File(LibraryUtils.PROGRAM_SHARE, "LimeWireWin3.69.0010.exe");
         File linDst = new File(LibraryUtils.PROGRAM_SHARE, "LimeWireLinux.bin");
@@ -813,6 +815,7 @@ public class ServerSideWhatIsNewTest
                 toDelete[j].delete();
             }
             LibraryUtils.PROGRAM_SHARE.delete();
+            LibrarySettings.ALLOW_PROGRAMS.revertToDefault();
 
         }
     }
