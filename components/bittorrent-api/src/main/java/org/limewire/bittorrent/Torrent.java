@@ -13,15 +13,16 @@ public interface Torrent {
 
     /**
      * Initializes the torrent from the given fields. Either the torrentFile and
-     * saveDir fields cannot be null. Or the name, sha1, long totalSize,
-     * paths, and saveDir fields must be set.
+     * saveDir fields cannot be null. Or the name, sha1, long totalSize, paths,
+     * and saveDir fields must be set.
      * <p>
      * Otherwise if torrentFile is set and other fields are as well, the field
      * passed in will be used, and any missing field will be pulled from the
      * torrent file.
      */
     public void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile, Boolean isPrivate) throws IOException;
+            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile,
+            Boolean isPrivate) throws IOException;
 
     /**
      * Returns the name of this torrent.
@@ -44,11 +45,6 @@ public interface Torrent {
      * non-existent file can be returned.
      */
     public File getFastResumeFile();
-
-    /**
-     * Returns a list of peers connected to this torrent.
-     */
-    public List<String> getPeers();
 
     /**
      * Moves the torrent to the specified directory.
@@ -97,8 +93,7 @@ public interface Torrent {
     public boolean isStarted();
 
     /**
-     * Returns the first tracker url to this torrent.
-     * Can be null.
+     * Returns the first tracker url to this torrent. Can be null.
      */
     public String getTrackerURL();
 
@@ -180,8 +175,9 @@ public interface Torrent {
 
     /**
      * Registers the torrent with the torrent manager.
+     * 
      * @returns true if the torrent was registered, or false if an error
-     * occurred.
+     *          occurred.
      */
     public boolean registerWithTorrentManager();
 
@@ -192,18 +188,44 @@ public interface Torrent {
     boolean removeListener(EventListener<TorrentEvent> listener);
 
     /**
-     * Adds a listener to this torrent. 
+     * Adds a listener to this torrent.
      */
     void addListener(EventListener<TorrentEvent> listener);
 
     /**
-     * Returns the number of connections this torrent has. 
+     * Returns the number of connections this torrent has.
      */
     public int getNumConnections();
 
     /**
-     * Returns true if this is a private torrent. 
+     * Returns true if this is a private torrent.
      */
     public boolean isPrivate();
 
+    /**
+     * Returns a list of TorrentFileEntry containing an entry for each file in
+     * this torrent.
+     */
+    public List<TorrentFileEntry> getTorrentFileEntries();
+
+    /**
+     * Returns a list of currently connected peers for this torrent.
+     */
+    public List<TorrentPeer> getTorrentPeers();
+
+    /**
+     * Returns true if the torrent is automanaged.
+     */
+    public boolean isAutoManaged();
+
+    /**
+     * Sets whether or not this torrent is automanaged. For an explanation of automanagement
+     * see http://www.rasterbar.com/products/libtorrent/manual.html#queuing
+     * 
+     * Basically it means that the torrent will be managed by libtorrent. Every polling period
+     * queued and active torrents are checked to see if they should be given some active time
+     * to allow for seeding/downloading. Automanaged torrents adhere to limits for total torrents
+     * allowed active, total seeds, etc.
+     */
+    public void setAutoManaged(boolean autoManaged);
 }

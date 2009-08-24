@@ -12,10 +12,11 @@ import javax.swing.JRadioButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 
@@ -33,34 +34,38 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     private JRadioButton myControl;
 
-    private JLabel uploadBandWidthLabel;
+    private JLabel seedRatioLabel;
 
-    private BandWidthSlider uploadBandWidth;
+    private SeedRatioSlider seedRatio;
 
-    private JLabel downloadBandWidthLabel;
+    private NumericTextField startPortField;
 
-    private BandWidthSlider downloadBandWidth;
+    private NumericTextField endPortField;
+    
+    private JLabel portLabel;
+    
+    private JLabel portToLabel;
 
     private final Provider<TorrentManager> torrentManager;
 
-    private final TorrentSettings torrentSettings;
+    private final TorrentManagerSettings torrentSettings;
 
     @Inject
     public BitTorrentOptionPanel(Provider<TorrentManager> torrentManager,
-            @TorrentSettingsAnnotation TorrentSettings torrentSettings) {
+            @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.torrentManager = torrentManager;
         this.torrentSettings = torrentSettings;
-        
+
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         setOpaque(false);
-        
+
         add(getBitTorrentPanel(), "pushx, growx");
     }
 
     private JPanel getBitTorrentPanel() {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
-        p.setLayout(new MigLayout("gapy 10"));
+        p.setLayout(new MigLayout("gapy 10, fill"));
         p.setOpaque(false);
 
         limewireControl = new JRadioButton("<html>"+I18n
@@ -78,7 +83,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 updateState(limewireControl.isSelected());
             }
         });
-        
+
         limewireControl.setOpaque(false);
         myControl.setOpaque(false);
 
@@ -86,26 +91,34 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(limewireControl);
         buttonGroup.add(myControl);
 
-        downloadBandWidthLabel = new JLabel(I18n.tr("Download bandwidth"));
-        uploadBandWidthLabel = new JLabel(I18n.tr("Upload bandwidth"));
+        seedRatioLabel = new JLabel(I18n.tr("Upload torrents until ratio"));
 
-        uploadBandWidth = new BandWidthSlider();
-        downloadBandWidth = new BandWidthSlider();
+        seedRatio = new SeedRatioSlider();
+
+        portLabel = new JLabel(I18n.tr("Use ports:"));
+        portToLabel = new JLabel(I18n.tr("to"));
+        startPortField = new NumericTextField(5, 1, 0xFFFF);
+        endPortField = new NumericTextField(5, 1, 0xFFFF);
 
         if (torrentManager.get().isValid()) {
             p.add(limewireControl, "wrap");
             p.add(myControl, "wrap");
 
-            p.add(downloadBandWidthLabel, "split");
-            p.add(downloadBandWidth, "alignx right, wrap");
-            p.add(uploadBandWidthLabel, "split");
-            p.add(uploadBandWidth, "alignx right, wrap");
+            p.add(seedRatioLabel, "split");
+            p.add(seedRatio, ", growx, alignx left, wrap");
+            p.add(portLabel, "split");
+            p.add(startPortField, "split");
+            p.add(portToLabel, "split");
+            p.add(endPortField, "alignx right, wrap");
+
         } else {
-            //TODO updating text after we get the new error message from mike s.
+            // TODO updating text after we get the new error message from mike
+            // s.
             p
                     .add(new MultiLineLabel(
                             I18n
-                                    .tr("There was an error loading bittorrent. You will not be use bittorrent capabilities until this is resolved."), 500));
+                                    .tr("There was an error loading bittorrent. You will not be use bittorrent capabilities until this is resolved."),
+                            500));
         }
         return p;
     }
@@ -114,15 +127,30 @@ public class BitTorrentOptionPanel extends OptionPanel {
     boolean applyOptions() {
         SwingUiSettings.AUTOMATIC_SETTINGS.setValue(limewireControl.isSelected());
         if (limewireControl.isSelected()) {
-            BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(BandWidthSlider.MAX_SLIDER);
-            BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(BandWidthSlider.MAX_SLIDER);
+            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.revertToDefault();
+            BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.revertToDefault();
+            BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.revertToDefault();
         } else {
-            BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.setValue(uploadBandWidth.getValue());
-            BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.setValue(downloadBandWidth.getValue());
+            BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatio.getSeedRatio());
+            
+            int startPort = startPortField
+            .getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
+            
+            int endPort = endPortField
+            .getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
+            
+            if(startPort > endPort) {
+                int temp = startPort;
+                startPort = endPort;
+                endPort = temp;
+            }
+            
+            BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.setValue(startPort);
+            BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.setValue(endPort);
         }
 
         if (torrentManager.get().isValid()) {
-            torrentManager.get().updateSettings(torrentSettings);
+            torrentManager.get().setTorrentManagerSettings(torrentSettings);
         }
         return false;
     }
@@ -130,9 +158,11 @@ public class BitTorrentOptionPanel extends OptionPanel {
     @Override
     boolean hasChanged() {
         return SwingUiSettings.AUTOMATIC_SETTINGS.getValue() != limewireControl.isSelected()
-                || uploadBandWidth.getValue() != BittorrentSettings.LIBTORRENT_UPLOAD_SPEED
+                || seedRatio.getValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                         .getValue()
-                || downloadBandWidth.getValue() != BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED
+                || startPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT
+                        .getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue()
+                || endPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_END_PORT
                         .getValue();
     }
 
@@ -145,9 +175,10 @@ public class BitTorrentOptionPanel extends OptionPanel {
             myControl.setSelected(true);
         }
 
-        uploadBandWidth.setValue(BittorrentSettings.LIBTORRENT_UPLOAD_SPEED.getValue());
-        downloadBandWidth.setValue(BittorrentSettings.LIBTORRENT_DOWNLOAD_SPEED.getValue());
-
+        seedRatio.setSeedRatio(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue());
+        startPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
+        endPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
+        
         updateState(auto);
     }
 
@@ -163,12 +194,15 @@ public class BitTorrentOptionPanel extends OptionPanel {
      *        visible.
      */
     private void updateState(boolean limewireControlled) {
-        uploadBandWidthLabel.setVisible(!limewireControlled);
-        uploadBandWidth.setVisible(!limewireControlled);
-        uploadBandWidth.setEnabled(!limewireControlled);
-        downloadBandWidthLabel.setVisible(!limewireControlled);
-        downloadBandWidth.setVisible(!limewireControlled);
-        downloadBandWidth.setEnabled(!limewireControlled);
+        seedRatioLabel.setVisible(!limewireControlled);
+        seedRatio.setVisible(!limewireControlled);
+        seedRatio.setEnabled(!limewireControlled);
+        portLabel.setVisible(!limewireControlled);
+        portToLabel.setVisible(!limewireControlled);
+        startPortField.setVisible(!limewireControlled);
+        startPortField.setEnabled(!limewireControlled);
+        endPortField.setVisible(!limewireControlled);
+        endPortField.setEnabled(!limewireControlled);
     }
 
 }

@@ -92,4 +92,9 @@ public interface TorrentStatus {
      */
     public float getSeedRatio();
 
+    /**
+     * Returns true if this torrent is automanaged. 
+     */
+    public boolean isAutoManaged();
+
 }

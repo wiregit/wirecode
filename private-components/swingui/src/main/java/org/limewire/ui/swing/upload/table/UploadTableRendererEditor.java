@@ -171,7 +171,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         add(cancelButton, "gapright 10, alignx right, aligny 50%, spany 3, push, wrap");
         add(progressBar, "gapleft 10, , gaptop 2, hidemode 3, wrap");
         add(browseNameLabel, "split 4, gapleft 10, gapbottom 5, gaptop 2, aligny top");
-        add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, aligny top");
+        add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, alignx left, aligny top");
         add(timeLabel, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
         add(removeLink, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
     }
@@ -265,11 +265,9 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                         GuiUtils.toUnitbytes(item.getFileSize()), 
                         GuiUtils.rate2speed(item.getUploadSpeed()));
             }
-        case QUEUED:
-            // {0}: number of uploads before this upload that have to finish
-            return I18n.trn("Waiting for {0} upload to finish", "Waiting for {0} uploads to finish", item.getQueuePosition());
         case WAITING:
-            return I18n.tr("Waiting for connections...");
+        case QUEUED:
+            return I18n.tr("Waiting...");
         case UNABLE_TO_UPLOAD:
             return getErrorMessage(item.getErrorState());        
         }

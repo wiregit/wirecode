@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
@@ -146,9 +147,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             try {
                 torrentUploadManager.get().writeMemento(torrent);
+                torrent.setAutoManaged(true);
             } catch (IOException e) {
-                LOG.error("Error saving torrent upload menento for torrent: " + torrent.getName(), e);
-                //non-fatal, upload will just not be loaded on application restart
+                LOG.error("Error saving torrent upload menento for torrent: " + torrent.getName(),
+                        e);
+                // non-fatal, upload will just not be loaded on application
+                // restart
             }
         } else if (TorrentEvent.STOPPED == event) {
             torrent.removeListener(this);
@@ -156,10 +160,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
         } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
-			//nothing to do now.
+            // nothing to do now.
         } else {
             DownloadState currentState = getState();
-            if(lastState.getAndSet(currentState) != currentState) {
+            if (lastState.getAndSet(currentState) != currentState) {
                 listeners.broadcast(new DownloadStateEvent(this, currentState));
             }
         }
@@ -167,25 +171,29 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     /**
      * Adds the torrents files to the gnutella share list if the torrent is not
-     * private and sharing is enabled, otehrwise the files are added to the library. 
+     * private and sharing is enabled, otehrwise the files are added to the
+     * library.
      */
     private void addFileToCollections(File completeFile) {
-        
+
         if (completeFile.isDirectory()) {
             FileFilter torrentFileFilter = new FileFilter() {
                 @Override
                 public boolean accept(File file) {
-                    //library addFile method will filter out any truly unaddable files.
+                    // library addFile method will filter out any truly
+                    // unaddable files.
                     return true;
                 }
-            }; 
+            };
             library.addFolder(completeFile, torrentFileFilter);
-            if(!torrent.isPrivate() && SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
+            if (!torrent.isPrivate()
+                    && SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 gnutellaFileCollection.addFolder(completeFile, torrentFileFilter);
             }
         } else {
             library.add(completeFile);
-            if(!torrent.isPrivate() && SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
+            if (!torrent.isPrivate()
+                    && SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 gnutellaFileCollection.add(completeFile);
             }
         }
@@ -200,13 +208,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         setDefaultFileName(torrent.getName());
     }
 
-    
     @Override
     public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
             throws DownloadException {
         super.setSaveFile(saveDirectory, fileName, overwrite);
     }
-    
+
     @Override
     public boolean registerTorrentWithTorrentManager() {
         return torrent.registerWithTorrentManager();
@@ -318,17 +325,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         TorrentState state = status.getState();
 
+        // complete must be before aborted in order to not remove the download
+        // from the list prematurely when teh seed ratio is reached and the
+        // torrent is marked as cancelled.
+        if (torrent.isFinished()) {
+            return DownloadState.COMPLETE;
+        }
+
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
         }
 
-        if (torrent.isFinished()) {
-            return DownloadState.COMPLETE;
-        }
-        
-        // TODO: This currently shows stalled which will probably
-        // be inaccurate.
         if (status.isError()) {
+            //gave up maps to stalled in the core api, which is a recoverable error. All torrent downlaods are recoverable.
             return DownloadState.GAVE_UP;
         }
 
@@ -504,7 +513,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         List<Address> list = new LinkedList<Address>();
 
-        for (String ip : torrent.getPeers()) {
+        List<TorrentPeer> peers = torrent.getTorrentPeers();
+        for (TorrentPeer peer : peers) {
+            String ip = peer.getIPAddress();
             try {
                 list.add(new ConnectableImpl(new IpPortImpl(ip), false));
             } catch (UnknownHostException e) {
@@ -583,10 +594,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         File torrentFile = torrent.getTorrentFile();
         String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
         btMemento.setTorrentPath(torrentPath);
-        
+
         btMemento.setPrivate(torrent.isPrivate());
-        
-        
+
     }
 
     public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento)
@@ -614,7 +624,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
                     fastResumeFile, torrentFile, memento.getIncompleteFile(), memento.isPrivate());
         } catch (IOException e) {
-            //the .torrent file could be invalid, try to initialize just with the memento contents.
+            // the .torrent file could be invalid, try to initialize just with
+            // the memento contents.
             try {
                 torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
                         .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
@@ -644,7 +655,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         byte[] infoHash = btmetainfo.getInfoHash();
 
         String sha1 = StringUtils.toHexString(infoHash);
-        
+
         boolean isPrivate = btmetainfo.isPrivate();
 
         File saveFile = memento.getSaveFile();
@@ -667,7 +678,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         try {
-            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null, newIncompleteFile, isPrivate);
+            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null,
+                    newIncompleteFile, isPrivate);
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }
@@ -681,7 +693,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         } else if (LibTorrentBTDownloadMemento.class.isInstance(memento)) {
             initFromCurrentMemento((LibTorrentBTDownloadMemento) memento);
         }
-        if(!registerTorrentWithTorrentManager())
+        if (!registerTorrentWithTorrentManager())
             throw new InvalidDataException("Error registering torrent");
     }
 
@@ -701,9 +713,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void deleteIncompleteFiles() {
-        if(!complete.get()) {
+        if (!complete.get()) {
             File incompleteFile = getIncompleteFile();
-            if(incompleteFile != null) {
+            if (incompleteFile != null) {
                 FileUtils.forceDeleteRecursive(incompleteFile);
             }
         }

@@ -100,76 +100,91 @@ interface LibTorrent extends Library {
      * Updates the sessions settings using the provided settings structure.
      */
     public WrapperStatus update_settings(LibTorrentSettings libTorrentSettings);
-    
+
     /**
-     * Starts the dht 
+     * Starts the dht
      */
     public WrapperStatus start_dht();
 
     /**
-     * Stops the dht 
+     * Stops the dht
      */
     public WrapperStatus stop_dht();
 
     /**
-     * Starts the upnp service. 
+     * Starts the upnp service.
      */
     public WrapperStatus start_upnp();
 
     /**
-     * Stops the upnp service. 
+     * Stops the upnp service.
      */
     public WrapperStatus stop_upnp();
 
     /**
-     * Starts the local service discovery service 
+     * Starts the local service discovery service
      */
     public WrapperStatus start_lsd();
 
     /**
-     * Stops the local service discovery service 
+     * Stops the local service discovery service
      */
     public WrapperStatus stop_lsd();
 
     /**
-     * Starts the natpmp service. 
+     * Starts the natpmp service.
      */
 
     public WrapperStatus start_natpmp();
 
     /**
-     * Stops the natpmp service. 
+     * Stops the natpmp service.
      */
     public WrapperStatus stop_natpmp();
 
     /**
-     * Frees the peers from memory. 
+     * Frees the peers from memory.
      */
     public WrapperStatus free_peers(Pointer[] torrentPeersPointers, int length);
-    
+
     /**
      * Set the target seed ratio for this torrent.
      */
     public WrapperStatus set_seed_ratio(String id, float seed_ratio);
-    
+
     /**
      * Returns the file priority for the given index.
      */
     public WrapperStatus get_file_priority(String id, int fileIndex, IntByReference priority);
-    
-    /**
-     * Sets the file priority for the given index.
-     */
-    public WrapperStatus set_file_priority(String id, int fileIndex, int priority);
 
     /**
-     * Returns the number of files for the given torrent. 
+     * Sets the file priorities for the given torrent.
+     */
+    public WrapperStatus set_file_priorities(String id, int[] priorities, int num_priorities);
+
+    /**
+     * Returns the number of files for the given torrent.
      */
     public WrapperStatus get_num_files(String id, IntByReference numFiles);
-    
+
     /**
-     * Returns the files for the given torrent. 
+     * Returns the files for the given torrent.
      */
     public WrapperStatus get_files(String id, Pointer[] filePointers);
+
+    /**
+     * Initializes the given torrents storage.
+     */
+    public WrapperStatus init_torrent(String sha1);
+
+    /**
+     * Initializes the given torrents storage.
+     */
+    public WrapperStatus set_auto_managed_torrent(String sha1, boolean auto_managed);
+    
+    /**
+     * This is a simple function used to test that the loaded library is working. 
+     */
+    public void echo(String message);
 
 }

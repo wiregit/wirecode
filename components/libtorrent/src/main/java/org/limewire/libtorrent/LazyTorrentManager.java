@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -57,22 +59,16 @@ public class LazyTorrentManager implements TorrentManager, Service {
     }
 
     @Override
-    public List<String> getPeers(Torrent torrent) {
-        setupTorrentManager();
-        return torrentManager.get().getPeers(torrent);
-    }
-
-    @Override
     public String getServiceName() {
-        return torrentManager.get().getServiceName();
+        return "TorrentManager";
     }
 
     @Override
-    public TorrentSettings getTorrentSettings() {
+    public TorrentManagerSettings getTorrentManagerSettings() {
         // not calling setup because we don't want to initialize the library
         // here.
         // settings can be gotten without initialization.
-        return torrentManager.get().getTorrentSettings();
+        return torrentManager.get().getTorrentManagerSettings();
     }
 
     @Override
@@ -82,6 +78,10 @@ public class LazyTorrentManager implements TorrentManager, Service {
 
     @Override
     public boolean isDownloadingTorrent(File torrentFile) {
+        if(!initialized) {
+            return false;
+        }
+        
         setupTorrentManager();
         return torrentManager.get().isDownloadingTorrent(torrentFile);
     }
@@ -167,9 +167,9 @@ public class LazyTorrentManager implements TorrentManager, Service {
     }
 
     @Override
-    public void updateSettings(TorrentSettings settings) {
+    public void setTorrentManagerSettings(TorrentManagerSettings settings) {
         setupTorrentManager();
-        torrentManager.get().updateSettings(settings);
+        torrentManager.get().setTorrentManagerSettings(settings);
     }
 
     @Override
@@ -178,6 +178,7 @@ public class LazyTorrentManager implements TorrentManager, Service {
             return 0;
         }
         
+        setupTorrentManager();
         return torrentManager.get().getTotalDownloadRate();
     }
 
@@ -186,7 +187,32 @@ public class LazyTorrentManager implements TorrentManager, Service {
         if (!initialized) {
             return 0;
         }
+        
+        setupTorrentManager();
         return torrentManager.get().getTotalUploadRate();
     }
 
+    @Override
+    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent) {
+        setupTorrentManager();
+        return torrentManager.get().getTorrentFileEntries(torrent);
+    }
+
+    @Override
+    public List<TorrentPeer> getTorrentPeers(Torrent torrent) {
+        setupTorrentManager();
+        return torrentManager.get().getTorrentPeers(torrent);
+    }
+
+    @Override
+    public void initialize(Torrent torrent) {
+        setupTorrentManager();
+        torrentManager.get().initialize(torrent);
+    }
+
+    @Override
+    public void setAutoManaged(Torrent torrent, boolean autoManaged) {
+        setupTorrentManager();
+        torrentManager.get().setAutoManaged(torrent, autoManaged);
+    }
 }

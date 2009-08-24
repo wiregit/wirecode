@@ -54,11 +54,13 @@ class CoreDownloadItem implements DownloadItem {
 
     private final QueueTimeCalculator queueTimeCalculator;
     private final FriendManager friendManager;
+    private final DownloadItemType downloadItemType;
     
     public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator, FriendManager friendManager) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
         this.friendManager = friendManager;
+        this.downloadItemType = downloader instanceof BTDownloader ? DownloadItemType.BITTORRENT : DownloadItemType.GNUTELLA;
         
         downloader.addListener(new EventListener<DownloadStateEvent>() {
             @Override
@@ -73,6 +75,10 @@ class CoreDownloadItem implements DownloadItem {
         });
     }
 
+    @Override
+    public DownloadItemType getDownloadItemType() {
+        return downloadItemType;
+    }
     
     void fireDataChanged() {
         cachedSize = downloader.getAmountRead();
@@ -338,7 +344,7 @@ class CoreDownloadItem implements DownloadItem {
     
     @Override
     public boolean isTryAgainEnabled() {
-        return downloader.getState() == com.limegroup.gnutella.Downloader.DownloadState.WAITING_FOR_USER;
+        return DownloadItemType.BITTORRENT == downloadItemType || downloader.getState() == com.limegroup.gnutella.Downloader.DownloadState.WAITING_FOR_USER;
     }
 
     @Override

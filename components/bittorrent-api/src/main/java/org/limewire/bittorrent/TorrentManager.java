@@ -27,12 +27,6 @@ public interface TorrentManager {
     public void recoverTorrent(Torrent torrent);
 
     /**
-     * Returns a list of ip addresses for the peers connected to the specified
-     * torrent.
-     */
-    public List<String> getPeers(Torrent torrent);
-
-    /**
      * Moves the underlying storage of the torrent to the specified directory.
      * Currently this is used to move an a completed torrent from the incomplete
      * directory to the complete directory, without interrupting any seeding
@@ -74,21 +68,57 @@ public interface TorrentManager {
     /**
      * Updates the torrent manager with any new setting values.
      */
-    void updateSettings(TorrentSettings settings);
+    void setTorrentManagerSettings(TorrentManagerSettings settings);
 
     /**
      * Returns the current TorrentSettings object set on the torrent session.
      */
-    public TorrentSettings getTorrentSettings();
-    
+    public TorrentManagerSettings getTorrentManagerSettings();
+
     /**
-     * Returns the total upload rate used by libtorrent. This includes payload and protocol overhead. 
+     * Returns the total upload rate used by libtorrent. This includes payload
+     * and protocol overhead.
      */
     public float getTotalUploadRate();
-    
+
     /**
-     * Returns the total download rate used by libtorrent. This includes payload and protocol overhead.
+     * Returns the total download rate used by libtorrent. This includes payload
+     * and protocol overhead.
      */
     public float getTotalDownloadRate();
 
+    /**
+     * Returns a list of torrent file entries for the given torrent.
+     */
+    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent);
+
+    /**
+     * Returns a list of connected peers for the given torrent.
+     */
+    public List<TorrentPeer> getTorrentPeers(Torrent torrent);
+
+    /**
+     * Initializes the filesystem for the given torrent.
+     */
+    public void initialize(Torrent torrent);
+
+    /**
+     * Sets the automanaged flag to the given value for the torrent.
+     */
+    public void setAutoManaged(Torrent torrent, boolean autoManaged);
+    
+    /**
+     * Starts the torrent manager, and its necessary worker threads.
+     */
+    public void start();
+    
+    /**
+     * Shuts down the torrent manager, and any needed threads.
+     */
+    public void stop();
+    
+    /**
+     * Initializes this torrent manager. 
+     */
+    public void initialize();
 }

@@ -3,13 +3,12 @@ package org.limewire.libtorrent;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.TorrentException;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
-import org.limewire.util.OSUtils;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -32,21 +31,8 @@ class LibTorrentWrapper {
      * Initializes the LibTorrent library. Finding necessary dependencies first,
      * then loading the libtorrent library as a jna lib.
      */
-    void initialize(TorrentSettings torrentSettings) {
+    void initialize(TorrentManagerSettings torrentSettings) {
         try {
-            if (OSUtils.isWindows()) {
-                System.loadLibrary("libeay32");
-                System.loadLibrary("ssleay32");
-                System.loadLibrary("boost_date_time-vc90-mt-1_39");
-                System.loadLibrary("boost_system-vc90-mt-1_39");
-                System.loadLibrary("boost_filesystem-vc90-mt-1_39");
-                System.loadLibrary("boost_thread-vc90-mt-1_39");
-                System.loadLibrary("torrent");
-            } else if (OSUtils.isLinux()) {
-                // everything compiled into libtorrent-wrapper.so
-            } else if (OSUtils.isMacOSX()) {
-                // everything compiled into libtorrent-wrapper.dylib
-            }
 
             this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
 
@@ -64,7 +50,7 @@ class LibTorrentWrapper {
         return loaded.get();
     }
 
-    private void init(TorrentSettings torrentSettings) {
+    private void init(TorrentManagerSettings torrentSettings) {
         LOG.debugf("before init");
         catchWrapperException(libTorrent.init(new LibTorrentSettings(torrentSettings)));
         LOG.debugf("after init");
@@ -193,7 +179,7 @@ class LibTorrentWrapper {
         }
     }
 
-    public void update_settings(TorrentSettings torrentSettings) {
+    public void update_settings(TorrentManagerSettings torrentSettings) {
         LOG.debugf("before update_settings: {0}", torrentSettings);
         catchWrapperException(libTorrent.update_settings(new LibTorrentSettings(torrentSettings)));
         LOG.debugf("after update_settings: {0}", torrentSettings);
@@ -270,10 +256,10 @@ class LibTorrentWrapper {
     /**
      * Sets the file priority for the given index.
      */
-    public void set_file_priority(String id, int fileIndex, int priority) {
-        LOG.debugf("before set_file_priority");
-        catchWrapperException(libTorrent.set_file_priority(id, fileIndex, priority));
-        LOG.debugf("after set_file_priority");
+    public void set_file_priorities(String id, int[] priorities) {
+        LOG.debugf("before set_file_priorities");
+        catchWrapperException(libTorrent.set_file_priorities(id, priorities, priorities.length));
+        LOG.debugf("after set_file_priorities");
     }
     
     /**
@@ -309,5 +295,17 @@ class LibTorrentWrapper {
         
         LOG.debugf("after get_files");
         return fileEntries;
+    }
+
+    public void init_torrent(String sha1) {
+        LOG.debugf("before init_torrent: " + sha1);
+        catchWrapperException(libTorrent.init_torrent(sha1));
+        LOG.debugf("after init_torrent: " + sha1);
+    }
+    
+    public void set_auto_managed_torrent(String sha1, boolean auto_managed) {
+        LOG.debugf("before set_auto_managed_torrent: " + sha1 + " - " + auto_managed);
+        catchWrapperException(libTorrent.set_auto_managed_torrent(sha1, auto_managed));
+        LOG.debugf("after set_auto_managed_torrent: " + sha1 + " - " + auto_managed);
     }
 }

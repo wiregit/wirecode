@@ -172,7 +172,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
             if(limitBandWidthCheckBox.isSelected()) {
                 DownloadSettings.DOWNLOAD_SPEED.setValue(bandWidthSlider.getValue());
             } else {
-                DownloadSettings.DOWNLOAD_SPEED.setValue(BandWidthSlider.MAX_SLIDER);
+                DownloadSettings.DOWNLOAD_SPEED.setValue(BandWidthSlider.DEFAULT_SLIDER);
             }
             return false;
         }
@@ -235,7 +235,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
             if(uploadBandwidthCheckBox.isSelected()) {
                 UploadSettings.UPLOAD_SPEED.setValue(bandWidthSlider.getValue());
             } else {
-                UploadSettings.UPLOAD_SPEED.setValue(BandWidthSlider.MAX_SLIDER);
+                UploadSettings.UPLOAD_SPEED.setValue(BandWidthSlider.DEFAULT_SLIDER);
             }
             return false;
         }

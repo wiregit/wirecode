@@ -80,7 +80,8 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         String name = (String) memento.get("name");
 
                         if (torrentDataFile.exists()) {
-                            if (!torrentManager.get().isDownloadingTorrent(mementoFile)) {
+                            //TODO show error message when seeds cannot be resumed?
+                            if (torrentManager.get().isValid() && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
                                 try {
                                     torrent.init(name, sha1, -1, trackerURL, null, fastResumeFile,
                                             torrentFile, torrentDataFile, null);
@@ -89,6 +90,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                                 }
                                 torrentManager.get().registerTorrent(torrent);
                                 createBTUploader(torrent);
+                                torrent.setAutoManaged(true);
                                 torrent.start();
                             }
                         }
@@ -126,7 +128,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
     }
 
     private File getMementoFile(Torrent torrent) {
-        File torrentMomento = new File(torrentManager.get().getTorrentSettings()
+        File torrentMomento = new File(torrentManager.get().getTorrentManagerSettings()
                 .getTorrentUploadsFolder(), torrent.getName() + ".memento");
         return torrentMomento;
     }
@@ -144,7 +146,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
 
     @Override
     public BTUploader createBTUploader(Torrent torrent) {
-        BTUploader btUploader = new BTUploader(torrent, activityCallback.get(), this);
+        BTUploader btUploader = new BTUploader(torrent, activityCallback.get(), this, torrentManager.get());
         btUploader.registerTorrentListener();
         activityCallback.get().addUpload(btUploader);
         return btUploader;

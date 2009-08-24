@@ -5,28 +5,25 @@ import java.util.Collections;
 import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentPeer;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 
 import com.google.inject.Inject;
 
 public class MockTorrentManager implements TorrentManager {
 
-    private final TorrentSettings torrentSettings;
+    private final TorrentManagerSettings torrentSettings;
     
     @Inject
-    public MockTorrentManager(@TorrentSettingsAnnotation TorrentSettings torrentSettings) {
+    public MockTorrentManager(@TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.torrentSettings = torrentSettings;
     }
     
     @Override
-    public List<String> getPeers(Torrent torrent) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public TorrentSettings getTorrentSettings() {
+    public TorrentManagerSettings getTorrentManagerSettings() {
         return torrentSettings;
     }
 
@@ -81,22 +78,21 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public void updateSettings(TorrentSettings settings) {
+    public void setTorrentManagerSettings(TorrentManagerSettings settings) {
         
     }
 
-    public String getServiceName() {
-        return getClass().getName();
-    }
-
+    @Override
     public void initialize() {
         
     }
 
+    @Override
     public void start() {
         
     }
 
+    @Override
     public void stop() {
         
     }
@@ -109,5 +105,25 @@ public class MockTorrentManager implements TorrentManager {
     @Override
     public float getTotalUploadRate() {
         return 0;
+    }
+
+    @Override
+    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<TorrentPeer> getTorrentPeers(Torrent torrent) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void initialize(Torrent torrent) {
+        
+    }
+
+    @Override
+    public void setAutoManaged(Torrent torrent, boolean autoManaged) {
+        
     }
 }
