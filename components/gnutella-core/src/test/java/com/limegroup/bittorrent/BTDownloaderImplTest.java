@@ -265,7 +265,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         });
         
         if(downloader.getState() != DownloadState.COMPLETE) {
-            assertTrue("Time ran out before download completed.", countDownLatch.await(60, TimeUnit.SECONDS));
+            assertTrue("Time ran out before download completed.", countDownLatch.await(100, TimeUnit.SECONDS));
         }
         assertEquals(DownloadState.COMPLETE, downloader.getState());
     }
