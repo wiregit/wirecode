@@ -41,7 +41,6 @@ import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ResultEnterAction;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
-import org.limewire.ui.swing.search.resultpanel.list.DefaultListStoreStyle;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
@@ -208,7 +207,9 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         
         // Set store style.
         StoreStyle storeStyle = searchResultsModel.getStoreStyle();
-        listTable.setStoreStyle((storeStyle != null) ? storeStyle : new DefaultListStoreStyle());
+        if (storeStyle != null) {
+            listTable.setStoreStyle(storeStyle);
+        }
         
         return listTable;
     }
