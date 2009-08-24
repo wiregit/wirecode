@@ -89,6 +89,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "urncache persister", "ScheduledService",
         "TorrentManager", "LazyTorrentManager",
         "Settings Saver", "SettingsSaverService",
+        "URNBlacklistManager", "URNBlacklistManagerImpl"
         
         };
         
