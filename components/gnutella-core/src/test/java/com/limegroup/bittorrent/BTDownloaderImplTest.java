@@ -132,9 +132,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
         try {
             FileUtils.deleteRecursive(completeFile);
 
-            File incompleteFile = downloader.getIncompleteFile();
-            incompleteFile.delete();
-
             File completeFile1 = downloader.getCompleteFiles().get(0);
             completeFile1.delete();
 
@@ -178,9 +175,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
         File completeFile = downloader.getSaveFile();
         try {
             completeFile.delete();
-
-            File incompleteFile = downloader.getIncompleteFile();
-            incompleteFile.delete();
 
             downloader.startDownload();
             finishDownload(downloader);
@@ -230,9 +224,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
         File completeFile = downloader.getSaveFile();
         try {
             FileUtils.deleteRecursive(completeFile);
-
-            File incompleteFile = downloader.getIncompleteFile();
-            incompleteFile.delete();
 
             File completeFile1 = downloader.getCompleteFiles().get(0);
             completeFile1.delete();
