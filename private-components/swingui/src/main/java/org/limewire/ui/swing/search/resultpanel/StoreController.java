@@ -1,12 +1,14 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.io.File;
+
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
-import org.limewire.ui.swing.search.resultpanel.list.DefaultListStoreStyle;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -38,16 +40,28 @@ public class StoreController {
         // TODO also return true if user owns pay-as-you-go account
         return !storeManager.isLoggedIn();
     }
+    
+    /**
+     * Returns a handler for downloading search results.
+     */
+    public DownloadHandler getDownloadHandler() {
+        // TODO implement by using factory to create concrete handler
+        return new DownloadHandler() {
+            @Override
+            public void download(VisualSearchResult vsr) {
+            }
+            
+            @Override
+            public void download(VisualSearchResult vsr, File saveFile) {
+            }
+        };
+    }
 
     /**
      * Returns the current style for Lime Store results.
      */
     public StoreStyle getStoreStyle() {
-        StoreStyle storeStyle = searchResultsModel.getStoreStyle();
-        if (storeStyle == null) {
-            storeStyle = new DefaultListStoreStyle();
-        }
-        return storeStyle;
+        return searchResultsModel.getStoreStyle();
     }
     
     /**
