@@ -58,6 +58,8 @@ class FileDescImpl implements FileDesc {
 	 */
 	private final long fileSize;
 	
+	private final long lastModified;
+	
 	/**
 	 * The number of hits this file has recieved.
 	 */
@@ -125,6 +127,7 @@ class FileDescImpl implements FileDesc {
 		this.file = Objects.nonNull(file, "file");
         this.index = index;
         this.urns = UrnSet.unmodifiableSet(urns); 
+        this.lastModified = file.lastModified();
         
         hits = 0; // Starts off with 0 hits
     }
@@ -166,7 +169,7 @@ class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#lastModified()
      */
 	public long lastModified() {
-		return file.lastModified();
+		return lastModified;
 	}
 
 	/* (non-Javadoc)
