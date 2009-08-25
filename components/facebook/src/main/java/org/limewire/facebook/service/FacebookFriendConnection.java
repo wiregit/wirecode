@@ -86,7 +86,6 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SecurityUtils;
-import org.limewire.ui.swing.friends.settings.FacebookFriendAccountConfiguration;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -115,7 +114,7 @@ public class FacebookFriendConnection implements FriendConnection {
     
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
 
-    private final FacebookFriendAccountConfiguration configuration;
+    private final FacebookFriendConnectionConfiguration configuration;
     private final Provider<String> apiKey;
     private final ChatListenerFactory chatListenerFactory;
     private final ScheduledListeningExecutorService executorService;
@@ -185,7 +184,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final Provider<Map<String, Provider<String>>> facebookURLs;
 
     @Inject
-    public FacebookFriendConnection(@Assisted FacebookFriendAccountConfiguration configuration,
+    public FacebookFriendConnection(@Assisted FacebookFriendConnectionConfiguration configuration,
                                     @FacebookAPIKey Provider<String> apiKey,
                                     AsynchronousEventBroadcaster<FriendConnectionEvent> connectionBroadcaster,
                                     EventBroadcaster<FeatureEvent> featureEventBroadcaster,

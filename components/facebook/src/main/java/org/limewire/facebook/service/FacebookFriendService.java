@@ -35,7 +35,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.friends.settings.FacebookFriendAccountConfiguration;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -138,7 +137,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
         return executorService.submit(new Callable<FriendConnection>() {
             @Override
             public FriendConnection call() throws Exception {
-                return loginImpl((FacebookFriendAccountConfiguration)configuration);
+                return loginImpl((FacebookFriendConnectionConfiguration)configuration);
             }
         });
     }
@@ -149,7 +148,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
         registry.register(Network.Type.FACEBOOK, this);
     }
     
-    FacebookFriendConnection loginImpl(FacebookFriendAccountConfiguration configuration) throws FriendException {
+    FacebookFriendConnection loginImpl(FacebookFriendConnectionConfiguration configuration) throws FriendException {
         LOG.debug("creating connection");
         connection = connectionFactory.create(configuration);
         presenceHandlerFactory.create(connection);
