@@ -412,19 +412,19 @@ public class TorrentImpl implements Torrent {
         if (!torrentManager.isValid()) {
             return false;
         }
-//        torrentManager.getTorrentManagerSettings().getTorrentDownloadFolder().mkdirs();
-        //TODO might need to remove the touch logic here when the user can select the notion of only downloading a subset of the torrents files.
+
         for (File file : getTorrentDataFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
                 try {
-                   file.createNewFile();
+                    file.createNewFile();
                 } catch (Throwable e) {
-                    // non-fatal libtorrent will create them
-                }
+                    // libtorrent expects the files to have been created
+                    return false;
+                } 
             }
         }
-        
+
         File torrent = torrentFile.get();
         File torrentParent = torrent.getParentFile();
         File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
