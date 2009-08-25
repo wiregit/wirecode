@@ -325,7 +325,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                             currentId++;
                         }
 
-                        List<Integer> collections = fileData.get(file);
+                        List<Integer> collections = fileData.get(createKey(file));
                         if (collections == null || collections == Collections.<Integer> emptyList()) {
                             collections = new ArrayList<Integer>(1);
                             fileData.put(createKey(file), collections);
@@ -335,7 +335,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                 }
 
                 if (shareData.gnutella) {
-                    List<Integer> collections = fileData.get(file);
+                    List<Integer> collections = fileData.get(createKey(file));
                     if (collections == null || collections == Collections.<Integer> emptyList()) {
                         collections = new ArrayList<Integer>(1);
                         fileData.put(createKey(file), collections);
@@ -690,7 +690,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     boolean isFileInCollection(File file, int collectionId) {
         lock.readLock().lock();
         try {
-            List<Integer> collections = fileData.get(file);
+            List<Integer> collections = fileData.get(createKey(file));
             if(collections != null) {
                 return collections.contains(collectionId);
             } else {
