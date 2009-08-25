@@ -125,7 +125,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             finishing.set(true);
             // If the torrent contains any dangerous files, delete everything
             // and inform the user that the download has been cancelled.
-            for(File f : FileUtils.getFilesRecursive(getIncompleteFile(), (String[])null)) {
+            for(File f : getIncompleteFiles()) {
                 if(dangerousFileChecker.get().isDangerous(f)) {
                     torrent.stop();
                     listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
