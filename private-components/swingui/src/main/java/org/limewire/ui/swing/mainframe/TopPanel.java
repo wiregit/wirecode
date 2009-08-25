@@ -83,7 +83,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final Navigator navigator;
     private final NavItem homeNav;
     private final NavItem libraryNav;
-    private final KeywordAssistedSearchBuilder keywordAssistedSearchBuilder;
+    private final Provider<KeywordAssistedSearchBuilder> keywordAssistedSearchBuilder;
     private final Provider<AdvancedSearchPanel> advancedSearchPanel;
     private final SearchHandler searchHandler;
     private final HomeMediator homeMediator;
@@ -103,7 +103,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryMediator myLibraryMediator,
-                    KeywordAssistedSearchBuilder keywordAssistedSearchBuilder,
+                    Provider<KeywordAssistedSearchBuilder> keywordAssistedSearchBuilder,
                     Provider<AdvancedSearchPanel> advancedSearchPanel,
                     Provider<FriendsButton> friendsButtonProvider,
                     AllFriendsRefreshManager allFriendsRefreshManager) {        
@@ -393,7 +393,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 String query = searchText;
                 
                 // Check if the category was overridden by a keyword 
-                CategoryOverride categoryOverride = keywordAssistedSearchBuilder.parseCategoryOverride(query);
+                CategoryOverride categoryOverride = keywordAssistedSearchBuilder.get().parseCategoryOverride(query);
                 
                 // Do not allow searches in the Other category
                 if (categoryOverride != null && categoryOverride.getCategory() != SearchCategory.OTHER) {
@@ -408,7 +408,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 }
                     
                 // Attempt to parse an advanced search from the search query
-                SearchInfo search = keywordAssistedSearchBuilder.attemptToCreateAdvancedSearch(
+                SearchInfo search = keywordAssistedSearchBuilder.get().attemptToCreateAdvancedSearch(
                         query, category);
                 
                 // Fall back on the normal search

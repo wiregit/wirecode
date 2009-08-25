@@ -53,23 +53,18 @@ public class DownloadActionHandler {
     
     private final LibraryMediator libraryMediator;
     private DownloadListManager downloadListManager;
-//    private ShareWidget<File> shareWidget = null;
     private LibraryManager libraryManager;
     private final FileInfoDialogFactory fileInfoFactory;
-//    private final Provider<ShareWidgetFactory> shareFactory;
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final SearchHandler searchHandler;
-    private final KeywordAssistedSearchBuilder searchBuilder;
+    private final Provider<KeywordAssistedSearchBuilder> searchBuilder;
     
     @Inject
-    public DownloadActionHandler(//Provider<ShareWidgetFactory> shareFactory, 
-            DownloadListManager downloadListManager, 
+    public DownloadActionHandler(DownloadListManager downloadListManager, 
             LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
-            SearchHandler searchHandler,
-            KeywordAssistedSearchBuilder searchBuilder){
+            SearchHandler searchHandler, Provider<KeywordAssistedSearchBuilder> searchBuilder){
         this.downloadListManager = downloadListManager;
-//        this.shareFactory = shareFactory;
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
@@ -139,7 +134,7 @@ public class DownloadActionHandler {
         }
         
         // make search based on on title and category
-        SearchInfo search = searchBuilder.attemptToCreateAdvancedSearch(title, SearchCategory
+        SearchInfo search = searchBuilder.get().attemptToCreateAdvancedSearch(title, SearchCategory
                 .forCategory(item.getCategory()));
 
         if (search != null) {
