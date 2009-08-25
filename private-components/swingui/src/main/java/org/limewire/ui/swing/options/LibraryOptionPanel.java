@@ -114,7 +114,7 @@ public class LibraryOptionPanel extends OptionPanel {
         private JRadioButton alwaysAddRadioButton;
         
         public CategoriesPanel() {
-            super("Categories");
+            super(I18n.tr("Categories"));
 
             askMeRadioButton = new JRadioButton(new AbstractAction(I18n.tr("Ask me what kinds of files to add")) {
                 @Override
