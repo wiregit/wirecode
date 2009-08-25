@@ -489,18 +489,19 @@ class LibraryImpl implements Library, FileCollection {
      * @param rev - current  version of LimeXMLDocs being used
      * @param oldFileDesc the old FileDesc this is replacing
      */
-    private ListeningFuture<FileDesc> add(File file, 
+    private ListeningFuture<FileDesc> add(File originalFile, 
             final List<? extends LimeXMLDocument> metadata,
             final FileDesc oldFileDesc) {
-        LOG.debugf("Attempting to load file: {0}", file);
-        
+        LOG.debugf("Attempting to load file: {0}", originalFile);
+
+        File file = null;
         // Make sure capitals are resolved properly, etc.
         try {
-            file = FileUtils.getCanonicalFile(file);
+            file = FileUtils.getCanonicalFile(originalFile);
         } catch (IOException e) {
-            LOG.debugf("Not adding {0} because canonicalize failed", file);
-            dispatchFailure(file, oldFileDesc);            
-            return new SimpleFuture<FileDesc>(createFailureException(file, oldFileDesc, FileViewChangeFailedException.Reason.CANT_CANONICALIZE));
+            LOG.debugf("Not adding {0} because canonicalize failed", originalFile);
+            dispatchFailure(originalFile, null);            
+            return new SimpleFuture<FileDesc>(createFailureException(originalFile, oldFileDesc, FileViewChangeFailedException.Reason.CANT_CANONICALIZE));
         }
         
         rwLock.readLock().lock();
@@ -528,11 +529,22 @@ class LibraryImpl implements Library, FileCollection {
             return new SimpleFuture<FileDesc>(createFailureException(file, oldFileDesc, FileViewChangeFailedException.Reason.FILE_TYPE_NOT_ALLOWED));
         }
         
-        final File interned = new File(file.getPath().intern());
-        getLibraryData().addManagedFile(interned);
-           
         PendingFuture task = new PendingFuture();
-        startLoadingFileDesc(interned, urnCache.getUrns(interned), metadata, oldFileDesc, task);
+        
+        // Prefer the original file if the canonical file is the same
+        if (file.getPath().equals(originalFile.getPath())) {
+            getLibraryData().addManagedFile(originalFile);
+            startLoadingFileDesc(originalFile, urnCache.getUrns(file), metadata, oldFileDesc, task);
+        }
+        else { // Otherwise replace the non canonical file with the new one and use that
+            
+            // Make sure the new canonical is also interned
+            file = new File(file.getPath().intern());
+            
+            getLibraryData().addOrRenameManagedFile(file, originalFile);
+            startLoadingFileDesc(file, urnCache.getUrns(file), metadata, oldFileDesc, task);
+        }
+                
         return task;
     }
     
