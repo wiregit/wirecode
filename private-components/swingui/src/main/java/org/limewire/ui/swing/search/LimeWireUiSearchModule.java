@@ -13,12 +13,12 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncatorImpl;
-import org.limewire.ui.swing.search.resultpanel.StoreController;
-import org.limewire.ui.swing.search.resultpanel.StoreControllerFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRuleImpl;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
+import org.limewire.ui.swing.search.store.StoreController;
+import org.limewire.ui.swing.search.store.StoreControllerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;

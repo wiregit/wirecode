@@ -46,6 +46,8 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
+import org.limewire.ui.swing.search.store.StoreController;
+import org.limewire.ui.swing.search.store.StoreControllerFactory;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;

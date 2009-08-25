@@ -30,10 +30,11 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
-import org.limewire.ui.swing.search.resultpanel.StoreController;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu.ViewType;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.search.store.StoreController;
+import org.limewire.ui.swing.search.store.StoreResultInfoPanel;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 

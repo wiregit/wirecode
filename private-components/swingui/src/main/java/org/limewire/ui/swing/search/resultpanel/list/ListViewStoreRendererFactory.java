@@ -4,7 +4,7 @@ import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
-import org.limewire.ui.swing.search.resultpanel.StoreController;
+import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
 import com.google.inject.Provider;
