@@ -98,11 +98,6 @@ public interface TorrentManager {
     public List<TorrentPeer> getTorrentPeers(Torrent torrent);
 
     /**
-     * Initializes the filesystem for the given torrent.
-     */
-    public void initialize(Torrent torrent);
-
-    /**
      * Sets the automanaged flag to the given value for the torrent.
      */
     public void setAutoManaged(Torrent torrent, boolean autoManaged);

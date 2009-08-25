@@ -118,11 +118,6 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public void initialize(Torrent torrent) {
-        
-    }
-
-    @Override
     public void setAutoManaged(Torrent torrent, boolean autoManaged) {
         
     }

@@ -173,12 +173,7 @@ interface LibTorrent extends Library {
     public WrapperStatus get_files(String id, Pointer[] filePointers);
 
     /**
-     * Initializes the given torrents storage.
-     */
-    public WrapperStatus init_torrent(String sha1);
-
-    /**
-     * Initializes the given torrents storage.
+     * Marks this torrent as automanged or not.
      */
     public WrapperStatus set_auto_managed_torrent(String sha1, boolean auto_managed);
     

@@ -471,13 +471,6 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public void initialize(Torrent torrent) {
-        if(!torrent.isFinished()) {
-            libTorrent.init_torrent(torrent.getSha1());
-        }
-    }
-
-    @Override
     public void setAutoManaged(Torrent torrent, boolean autoManaged) {
         libTorrent.set_auto_managed_torrent(torrent.getSha1(), autoManaged);
     }

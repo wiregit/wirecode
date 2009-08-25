@@ -296,13 +296,7 @@ class LibTorrentWrapper {
         LOG.debugf("after get_files");
         return fileEntries;
     }
-
-    public void init_torrent(String sha1) {
-        LOG.debugf("before init_torrent: " + sha1);
-        catchWrapperException(libTorrent.init_torrent(sha1));
-        LOG.debugf("after init_torrent: " + sha1);
-    }
-    
+   
     public void set_auto_managed_torrent(String sha1, boolean auto_managed) {
         LOG.debugf("before set_auto_managed_torrent: " + sha1 + " - " + auto_managed);
         catchWrapperException(libTorrent.set_auto_managed_torrent(sha1, auto_managed));
