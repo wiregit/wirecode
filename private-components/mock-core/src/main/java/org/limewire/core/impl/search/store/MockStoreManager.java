@@ -75,9 +75,10 @@ public class MockStoreManager implements StoreManager {
         // Create album with multiple tracks.
         URN urn = new MockURN("www.store.limewire.com" + i);
         MockStoreResult msr = new MockStoreResult(urn, Category.AUDIO);
+        msr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
         msr.setFileExtension("mp3");
         msr.setFileName("Green Monkeys The Collection.mp3");
-        msr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
+        msr.setInfoURI("http://www.store.limewire.com/store/app/pages/album/Album/productId/210687/");
         msr.setPrice("4 Credits");
         msr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
         msr.setProperty(FilePropertyKey.ALBUM, "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
@@ -126,6 +127,7 @@ public class MockStoreManager implements StoreManager {
         msr = new MockStoreResult(urn, Category.AUDIO);
         msr.setFileExtension("mp3");
         msr.setFileName("Green Monkeys Chomp.mp3");
+        msr.setInfoURI("http://www.store.limewire.com/store/app/pages/album/Album/productId/210687/");
         msr.setPrice("1 Credit");
         msr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
         msr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");

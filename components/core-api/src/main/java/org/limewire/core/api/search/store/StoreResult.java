@@ -49,6 +49,11 @@ public interface StoreResult {
     String getFileName();
     
     /**
+     * Returns the URI of the info page for the result.
+     */
+    String getInfoURI();
+    
+    /**
      * Returns the price for the result.
      */
     String getPrice();
