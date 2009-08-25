@@ -66,6 +66,7 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
             //considered to be finished uploading if seed ratio has been reached
             boolean finished = torrent.isFinished();
             float seedRatio = torrent.getSeedRatio();
+            
             float targetSeedRatio = torrentManager.getTorrentManagerSettings().getSeedRatioLimit();
             if (finished
                     &&  seedRatio >= targetSeedRatio) {
@@ -152,7 +153,7 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
             return UploadStatus.CONNECTING;
         }
         
-        if(torrent.isPaused()) {
+        if(torrent.isPaused() || (torrent.isFinished() && torrent.getNumUploads() == 0)) {
             return UploadStatus.QUEUED;
         }
 
