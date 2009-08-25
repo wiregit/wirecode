@@ -60,9 +60,13 @@ public class BittorrentSettings extends LimeProps {
      * will be removed. This number is also used via the libtorrent queuing
      * algorithm when trying to decide to queue/dequeue automanaged torrents.
      * This limit only effect automanaged torrents.
+     * 
+     * When the UPLOAD_TORRENTS_FOREVER setting is set to true, no matter what
+     * the value of this setting is, it will pass the maximum value to
+     * libtorrent.
      */
     public static final FloatSetting LIBTORRENT_SEED_RATIO_LIMIT = FACTORY.createFloatSetting(
-            "LIBTORRENT_SEED_RATIO_LIMIT", 2.0f, 1.0f, 10.0f);
+            "LIBTORRENT_SEED_RATIO_LIMIT", 2.0f, 0.00f, Float.MAX_VALUE);
 
     /**
      * The target seed time ratio limit. The amount of time trying to seed over
@@ -80,9 +84,16 @@ public class BittorrentSettings extends LimeProps {
      * algorithm when trying to decide to queue/dequeue automanaged torrents.
      * This limit only effect automanaged torrents, but will take other torrents
      * into account as we.
+     * 
+     * When the UPLOAD_TORRENTS_FOREVER setting is set to true, no matter what
+     * the value of this setting is, it will pass the maximum value to
+     * libtorrent.
      */
     public static final IntSetting LIBTORRENT_SEED_TIME_LIMIT = FACTORY.createIntSetting(
-            "LIBTORRENT_SEED_TIME_LIMIT", 60 * 60 * 24);// 24 hours
+            "LIBTORRENT_SEED_TIME_LIMIT", 60 * 60 * 24, 0, Integer.MAX_VALUE);// 24
+
+    // hours
+    // default
 
     /**
      * The total number of active downloads limit. This number is also used via
@@ -110,4 +121,11 @@ public class BittorrentSettings extends LimeProps {
      */
     public static final IntSetting LIBTORRENT_ACTIVE_LIMIT = FACTORY.createIntSetting(
             "LIBTORRENT_ACTIVE_LIMIT", 15);
+
+    /**
+     * This setting will cause torrents to upload forever, and will not limit
+     * how long or to what seed ratio the torrents will seed.
+     */
+    public static final BooleanSetting UPLOAD_TORRENTS_FOREVER = FACTORY.createBooleanSetting(
+            "UPLOAD_TORRENTS_FOREVER", false);
 }

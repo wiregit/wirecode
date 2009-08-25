@@ -32,15 +32,14 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     private final Torrent torrent;
 
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
+
     private final AtomicBoolean finished = new AtomicBoolean(false);
-    
+
     private volatile URN urn = null;
 
     private final TorrentUploadManager torrentUploadManager;
-    
+
     private final TorrentManager torrentManager;
-    
-    
 
     public BTUploader(Torrent torrent, ActivityCallback activityCallback,
             TorrentUploadManager torrentUploadManager, TorrentManager torrentManager) {
@@ -57,19 +56,23 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     @Override
     public void handleEvent(TorrentEvent event) {
         if (event == TorrentEvent.STOPPED) {
-            if(!finished.get()) {
+            if (!finished.get()) {
                 cancel();
             } else {
                 remove();
             }
         } else if (event == TorrentEvent.STATUS_CHANGED) {
-            //considered to be finished uploading if seed ratio has been reached
+            // considered to be finished uploading if seed ratio has been
+            // reached
             boolean finished = torrent.isFinished();
             float seedRatio = torrent.getSeedRatio();
-            
+            TorrentStatus status = torrent.getStatus();
+            int seedTime = status != null ? status.getSeedingTime() : 0;
+
             float targetSeedRatio = torrentManager.getTorrentManagerSettings().getSeedRatioLimit();
-            if (finished
-                    &&  seedRatio >= targetSeedRatio) {
+            int targetSeedTime = torrentManager.getTorrentManagerSettings().getSeedTimeLimit();
+
+            if (finished && (seedRatio >= targetSeedRatio || seedTime >= targetSeedTime)) {
                 this.finished.set(true);
                 torrent.stop();
             }
@@ -80,7 +83,7 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
         cancelled.set(true);
         remove();
     }
-    
+
     private void remove() {
         torrent.removeListener(this);
         torrentUploadManager.removeMemento(torrent);
@@ -142,8 +145,8 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
         if (cancelled.get()) {
             return UploadStatus.CANCELLED;
         }
-        
-        if(finished.get()) {
+
+        if (finished.get()) {
             return UploadStatus.COMPLETE;
         }
 
@@ -152,8 +155,8 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
         if (status == null) {
             return UploadStatus.CONNECTING;
         }
-        
-        if(torrent.isPaused() || (torrent.isFinished() && torrent.getNumUploads() == 0)) {
+
+        if (torrent.isPaused() || (torrent.isFinished() && torrent.getNumUploads() == 0)) {
             return UploadStatus.QUEUED;
         }
 

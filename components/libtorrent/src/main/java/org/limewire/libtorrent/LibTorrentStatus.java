@@ -134,6 +134,15 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
      */
     public int auto_managed;
 
+    /**
+     * int for the amount of time this torrent has been seeding in seconds.
+     */
+    public int seeding_time;
+
+    /**
+     * int for the amount of time this torrent has been seeding in seconds.
+     */
+    public int active_time;
 
     /**
      * String containing the error message for the torrent. Null/empty if there
@@ -252,5 +261,15 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     @Override
     public boolean isAutoManaged() {
         return false;
+    }
+
+    @Override
+    public int getSeedingTime() {
+        return seeding_time;
+    }
+
+    @Override
+    public int getActiveTime() {
+        return active_time;
     }
 }

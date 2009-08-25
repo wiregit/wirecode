@@ -122,13 +122,6 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting AUTO_RENAME_DUPLICATE_FILES =
         FACTORY.createBooleanSetting("AUTO_RENAME_DUPLICATE_FILES", true);
 
-    /**
-     * Setting whether LimeWire should manage the BT settings
-     * automatically.
-     */
-    public static BooleanSetting AUTOMATIC_SETTINGS = 
-        FACTORY.createBooleanSetting("BT_AUTOMATIC_SETTINGS", true);
-
     /** True if any positions have been set. */
     @InspectablePrimitive(value = "application positions set", category = DataCategory.USAGE)
     public static final BooleanSetting POSITIONS_SET =

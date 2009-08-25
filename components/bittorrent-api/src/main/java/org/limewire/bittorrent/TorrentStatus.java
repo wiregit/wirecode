@@ -97,4 +97,14 @@ public interface TorrentStatus {
      */
     public boolean isAutoManaged();
 
+    /**
+     * Returns the amount of time the torrent has been seeding in seconds. 
+     */
+    public int getSeedingTime();
+    
+    /**
+     * Returns the amount of time the torrent has been active in seconds. 
+     */
+    public int getActiveTime();
+
 }
