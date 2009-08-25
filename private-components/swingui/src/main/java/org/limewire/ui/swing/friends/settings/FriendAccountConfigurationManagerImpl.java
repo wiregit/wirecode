@@ -61,6 +61,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     private void init() {
         loadWellKnownServers();
         loadCustomServer();
+        loadAutoLoginAccount();
         loaded = true;
     }
     
@@ -80,17 +81,22 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
         FriendAccountConfigurationImpl customConfig =
             new FriendAccountConfigurationImpl(custom, "Jabber", resource, Network.Type.XMPP, otherIconSmall, otherIconLarge);
         configs.put(customConfig.getLabel(), customConfig);
+    }
+
+    private void loadAutoLoginAccount() {
         String autoLogin = SwingUiSettings.XMPP_AUTO_LOGIN.get();
         if(!autoLogin.equals("")) {
             int comma = autoLogin.indexOf(',');
             try {
                 String label = autoLogin.substring(0, comma);
                 String username = autoLogin.substring(comma + 1);
-                String password = passwordManager.loadPassword(username);
-                FriendAccountConfiguration config = configs.get(label);
+                FriendAccountConfiguration config = configs.get(label);                        
                 if(config != null) {
                     config.setUsername(username);
-                    config.setPassword(password);
+                    if(config.storePassword()) {
+                        String password = passwordManager.loadPassword(username); 
+                        config.setPassword(password);
+                    }                    
                     autoLoginConfig = config;
                 }
             } catch(IndexOutOfBoundsException ignored) {
@@ -105,7 +111,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
 
     private void loadWellKnownServers() {
         FriendAccountConfiguration facebook =
-            new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIconSmall, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK);
+            new FacebookFriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIconSmall, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK, this);
         configs.put(facebook.getLabel(), facebook);
         FriendAccountConfiguration gmail =
             new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIconSmall, gmailIconLarge, resource, getGTalkServers(), Network.Type.XMPP);
@@ -178,7 +184,9 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
         // Store the new configuration, if there is one
         if(config != null) {
             try {
-                passwordManager.storePassword(config.getUserInputLocalID(), config.getPassword());
+                if(config.storePassword()) {
+                    passwordManager.storePassword(config.getUserInputLocalID(), config.getPassword());
+                }
                 SwingUiSettings.XMPP_AUTO_LOGIN.set(config.getLabel() + "," + config.getUserInputLocalID());
                 if(config.getLabel().equals("Jabber"))
                     SwingUiSettings.USER_DEFINED_JABBER_SERVICENAME.set(config.getServiceName());

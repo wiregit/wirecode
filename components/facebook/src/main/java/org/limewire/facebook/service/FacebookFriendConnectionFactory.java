@@ -1,7 +1,7 @@
 package org.limewire.facebook.service;
 
-import org.limewire.friend.api.FriendConnectionConfiguration;
+import org.limewire.ui.swing.friends.settings.FacebookFriendAccountConfiguration;
 
 public interface FacebookFriendConnectionFactory {
-    FacebookFriendConnection create(FriendConnectionConfiguration configuration);    
+    FacebookFriendConnection create(FacebookFriendAccountConfiguration configuration);    
 }

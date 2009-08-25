@@ -1,6 +1,9 @@
 package org.limewire.core.settings;
 
+import java.util.Properties;
+
 import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.Setting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
@@ -71,4 +74,7 @@ public class FacebookSettings extends LimeProps {
     
     public static final StringSetting RECEIVE_CHAT_URL = 
         FACTORY.createRemoteStringSetting("FACEBOOK_RECEIVE_CHAT_URL", "http://0.channel" + "$channel" + ".facebook.com/x/0/false/p_" + "$uid" + "=" + "$seq", "Facebook.receiveChatURL");
+
+    public static final Setting<Properties> ATTRIBUTES =
+        FACTORY.createPropertiesSetting("FACEBOOK_ATTRIBUTES", new Properties()).setPrivate(true);
 }

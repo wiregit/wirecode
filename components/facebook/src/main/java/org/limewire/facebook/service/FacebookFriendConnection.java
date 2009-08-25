@@ -86,6 +86,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SecurityUtils;
+import org.limewire.ui.swing.friends.settings.FacebookFriendAccountConfiguration;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -114,7 +115,7 @@ public class FacebookFriendConnection implements FriendConnection {
     
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
 
-    private final FriendConnectionConfiguration configuration;
+    private final FacebookFriendAccountConfiguration configuration;
     private final Provider<String> apiKey;
     private final ChatListenerFactory chatListenerFactory;
     private final ScheduledListeningExecutorService executorService;
@@ -184,7 +185,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final Provider<Map<String, Provider<String>>> facebookURLs;
 
     @Inject
-    public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
+    public FacebookFriendConnection(@Assisted FacebookFriendAccountConfiguration configuration,
                                     @FacebookAPIKey Provider<String> apiKey,
                                     AsynchronousEventBroadcaster<FriendConnectionEvent> connectionBroadcaster,
                                     EventBroadcaster<FeatureEvent> featureEventBroadcaster,
@@ -258,26 +259,29 @@ public class FacebookFriendConnection implements FriendConnection {
         return executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                logoutImpl();
+                logoutImpl(true);
                 return null;
             }
         });
     }
+    
+    synchronized void logoutImpl(boolean forceExpireSession) {
+        logoutImpl(forceExpireSession, null);
+    }
 
-    synchronized void logoutImpl() {
-        closeConnection(true);
-        connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));
+    synchronized void logoutImpl(boolean forceExpireSession, Exception e) {
+        closeConnection(forceExpireSession);
+        connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED, e));
     }
 
     /**
      * Close the connection by logging out of facebook and cleaning up objects
      * associated with this connection.
      *
-     * @param shouldCleanUpFacebookClient true if we need to or should
+     * @param forceExpireSession true if we need to or should
      * attempt to expire our facebook JSON client. This should be
-     * false when we know for sure the facebook session is invalid.
      */
-    private void closeConnection(boolean shouldCleanUpFacebookClient) {
+    private void closeConnection(boolean forceExpireSession) {
         LOG.debug("logging out from facebook...");
         loggedIn.set(false);
         loggingIn.set(false);
@@ -286,7 +290,7 @@ public class FacebookFriendConnection implements FriendConnection {
         cancelListeners();
         
         // over-the-network logout activities
-        endChatSession(shouldCleanUpFacebookClient);
+        endChatSession(forceExpireSession);
         
         // remove all friends
         synchronized (friends) {
@@ -310,12 +314,12 @@ public class FacebookFriendConnection implements FriendConnection {
      * signing out of facebook website, sending messages to other
      * presences to let them know we are going offline, etc.
      *
-     * @param shouldCleanUpFacebookClient same as in {@link #closeConnection}
+     * @param expireSession same as in {@link #closeConnection}
      */
-    private void endChatSession(boolean shouldCleanUpFacebookClient) {
+    private void endChatSession(boolean expireSession) {
+        sendOfflinePresences();    
 
-        if (shouldCleanUpFacebookClient) {
-            sendOfflinePresences();
+        if (expireSession || !configuration.isAutologin()) {            
             try {
                 expireSession();
             } catch (FacebookException e) {
@@ -323,13 +327,15 @@ public class FacebookFriendConnection implements FriendConnection {
             } catch (IOException e) {
                 LOG.debug("error expiring facebook session", e);
             }
-        }
 
-        // todo: what to do in case of error?  what are the repercussions of not logging out of fb
-        try {
-            logoutFromFacebook();
-        } catch (IOException e) {
-            LOG.debug("logout from facebook failed", e);
+            // todo: what to do in case of error?  what are the repercussions of not logging out of fb
+            try {
+                logoutFromFacebook();
+            } catch (IOException e) {
+                LOG.debug("logout from facebook failed", e);
+            }
+            configuration.clearCookies();
+            configuration.setAutoLogin(false);
         }
     }
 
@@ -416,7 +422,12 @@ public class FacebookFriendConnection implements FriendConnection {
             try {
                 loggingIn.set(true);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
-                requestSession();
+                if(needsNewSession()) {
+                    requestSession();
+                } else {
+                    loadSession();
+                }
+                facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
                 fetchAllFriends();
                 readMetadataFromPages();
                 discoInfoHandler = discoInfoHandlerFactory.create(this);
@@ -446,7 +457,17 @@ public class FacebookFriendConnection implements FriendConnection {
             } 
         }
     }
-    
+
+    private boolean needsNewSession() {
+        return configuration.getAttribute("auth-token") != null;
+    }
+
+    private void loadSession() {
+        secret = (String)configuration.getAttribute("secret");
+        session = (String)configuration.getAttribute("session_key");
+        uid = (String)configuration.getAttribute("uid");
+    }
+
     /**
      * Sets this facebook user visible for chat.
      */ 
@@ -564,8 +585,12 @@ public class FacebookFriendConnection implements FriendConnection {
         session = json.getString("session_key");
         secret = json.getString("secret");
         uid = json.getString("uid");
-        LOG.debugf("received session {0}, secret {1}, uid: {2}", session, secret, uid);
-        facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
+        int expires = json.getInt("expires");
+        LOG.debugf("received session {0}, secret {1}, uid: {2}, expires: {3}", session, secret, uid, expires);
+        configuration.setAttribute("session_key", session);
+        configuration.setAttribute("secret", secret);
+        configuration.setAttribute("uid", uid);
+        configuration.setAutoLogin(expires == 0);
     }
 
     public void readMetadataFromPages() throws IOException {
@@ -773,11 +798,7 @@ public class FacebookFriendConnection implements FriendConnection {
                         LOG.debug("Error sending live message:", e);
 
                         if (loggedIn.get()) {
-                            closeConnection(false);
-                            // ok to broadcast. connectionBroadcaster must be async broadcaster
-                            FriendException fe = new FriendException("chat session expired", e);
-                            connectionBroadcaster.broadcast(new FriendConnectionEvent(
-                                    FacebookFriendConnection.this, FriendConnectionEvent.Type.DISCONNECTED, fe));
+                            logoutImpl(true, new FriendException("chat session expired", e));
                         }
                     } catch (IOException e) {
                         LOG.debug("Error sending live message:", e);
