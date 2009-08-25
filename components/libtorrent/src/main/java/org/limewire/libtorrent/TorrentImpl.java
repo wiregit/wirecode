@@ -22,6 +22,7 @@ import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
+import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
@@ -402,12 +403,28 @@ public class TorrentImpl implements Torrent {
         }
     }
 
+    private List<File> getTorrentDataFiles() {
+        return TorrentUtil.buildTorrentFiles(this, getTorrentDataFile());
+    }
+    
     @Override
     public boolean registerWithTorrentManager() {
         if (!torrentManager.isValid()) {
             return false;
         }
-
+//        torrentManager.getTorrentManagerSettings().getTorrentDownloadFolder().mkdirs();
+        //TODO might need to remove the touch logic here when the user can select the notion of only downloading a subset of the torrents files.
+        for (File file : getTorrentDataFiles()) {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                try {
+                   file.createNewFile();
+                } catch (Throwable e) {
+                    // non-fatal libtorrent will create them
+                }
+            }
+        }
+        
         File torrent = torrentFile.get();
         File torrentParent = torrent.getParentFile();
         File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
