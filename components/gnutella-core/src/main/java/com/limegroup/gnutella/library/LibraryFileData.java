@@ -220,7 +220,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             LibraryConverterHelper helper = new LibraryConverterHelper(new LibraryConverterHelper.FileAdder() {
                @Override
                 public void addFile(File file) {
-                   if(!fileDataFinal.containsKey(file)) {
+                   if(!fileDataFinal.containsKey(createKey(file))) {
                        fileDataFinal.put(createKey(file), Collections.<Integer>emptyList());
                    }
                 }
@@ -456,7 +456,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     void removeManagedFile(File file) {
         lock.writeLock().lock();
         try {
-            boolean changed = fileData.remove(file) != null;
+            boolean changed = fileData.remove(createKey(file)) != null;
             dirty |= changed;            
         } finally {
             lock.writeLock().unlock();
@@ -659,7 +659,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     
     /** Returns true if the file was removed from the collection, false if it wasn't in the collection. */
     private boolean removeFileFromCollection(File file, int collectionId) {
-        List<Integer> collections = fileData.get(file);
+        List<Integer> collections = fileData.get(createKey(file));
         if(collections == null || collections.isEmpty()) {
             return false;
         }
@@ -672,7 +672,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     private boolean addFileToCollection(File file, int collectionId) {
         boolean changed = false;
         
-        List<Integer> collections = fileData.get(file);
+        List<Integer> collections = fileData.get(createKey(file));
         if(collections == null || collections == Collections.<Integer>emptyList()) {
             collections = new ArrayList<Integer>(1);
             fileData.put(createKey(file), collections);
