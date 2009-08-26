@@ -228,4 +228,10 @@ public interface Torrent {
      * allowed active, total seeds, etc.
      */
     public void setAutoManaged(boolean autoManaged);
+    
+    
+    /**
+     * 
+     */
+    public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority);
 }

@@ -110,11 +110,11 @@ class LibTorrentWrapper {
         LOG.debugf("after get_num_peers: {0} - {1}", id, numPeersReference);
 
         int numPeers = numPeersReference.getValue();
-        
+
         if (numPeers == 0) {
             return new LibTorrentPeer[0];
         }
-        
+
         LibTorrentPeer[] torrentPeers = new LibTorrentPeer[numPeers];
         Pointer[] torrentPeersPointers = new Pointer[numPeers];
         for (int i = 0; i < torrentPeersPointers.length; i++) {
@@ -261,9 +261,9 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.set_file_priorities(id, priorities, priorities.length));
         LOG.debugf("after set_file_priorities");
     }
-    
+
     /**
-     * Returns the number of files for the given torrent. 
+     * Returns the number of files for the given torrent.
      */
     public int get_num_files(String id) {
         LOG.debugf("before get_num_files");
@@ -272,9 +272,9 @@ class LibTorrentWrapper {
         LOG.debugf("after get_num_files");
         return numFiles.getValue();
     }
-    
+
     /**
-     * Returns the files for the given torrent. 
+     * Returns the files for the given torrent.
      */
     public LibTorrentFileEntry[] get_files(String id) {
         LOG.debugf("before get_files");
@@ -288,18 +288,26 @@ class LibTorrentWrapper {
         }
 
         catchWrapperException(libTorrent.get_files(id, filePointers));
-        
+
         for (int i = 0; i < fileEntries.length; i++) {
             fileEntries[i].read();
         }
-        
+
         LOG.debugf("after get_files");
         return fileEntries;
     }
-   
+
     public void set_auto_managed_torrent(String sha1, boolean auto_managed) {
-        LOG.debugf("before set_auto_managed_torrent: " + sha1 + " - " + auto_managed);
+        LOG.debugf("before set_auto_managed_torrent: {0} - {1}", sha1, auto_managed);
         catchWrapperException(libTorrent.set_auto_managed_torrent(sha1, auto_managed));
-        LOG.debugf("after set_auto_managed_torrent: " + sha1 + " - " + auto_managed);
+        LOG.debugf("after set_auto_managed_torrent: {0} - {1}", sha1, auto_managed);
+    }
+
+    public void set_file_priority(String sha1, int index, int priority) {
+        LOG.debugf("before set_file_priority: {0} - index: {1} - priority: {2}", sha1, index,
+                priority);
+        catchWrapperException(libTorrent.set_file_priority(sha1, index, priority));
+        LOG.debugf("after set_file_priority: {0} - index: {1} - priority: {2}", sha1, index,
+                priority);
     }
 }

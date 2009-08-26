@@ -474,4 +474,10 @@ public class TorrentManagerImpl implements TorrentManager {
     public void setAutoManaged(Torrent torrent, boolean autoManaged) {
         libTorrent.set_auto_managed_torrent(torrent.getSha1(), autoManaged);
     }
+
+    @Override
+    public void setTorrenFileEntryPriority(Torrent torrent, TorrentFileEntry torrentFileEntry,
+            int priority) {
+        libTorrent.set_file_priority(torrent.getSha1(), torrentFileEntry.getIndex(), priority);
+    }
 }

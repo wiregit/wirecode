@@ -482,4 +482,9 @@ public class TorrentImpl implements Torrent {
     public void setAutoManaged(boolean autoManaged) {
         torrentManager.setAutoManaged(this, autoManaged);
     }
+
+    @Override
+    public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority) {
+        torrentManager.setTorrenFileEntryPriority(this, torrentFileEntry, priority);
+    }
 }

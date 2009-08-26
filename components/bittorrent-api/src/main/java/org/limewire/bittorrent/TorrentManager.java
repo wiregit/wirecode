@@ -116,4 +116,7 @@ public interface TorrentManager {
      * Initializes this torrent manager. 
      */
     public void initialize();
+
+    public void setTorrenFileEntryPriority(Torrent torrent,
+            TorrentFileEntry torrentFileEntry, int priority);
 }

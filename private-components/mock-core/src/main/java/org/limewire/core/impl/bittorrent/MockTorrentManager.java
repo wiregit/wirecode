@@ -121,4 +121,10 @@ public class MockTorrentManager implements TorrentManager {
     public void setAutoManaged(Torrent torrent, boolean autoManaged) {
         
     }
+
+    @Override
+    public void setTorrenFileEntryPriority(Torrent torrent, TorrentFileEntry torrentFileEntry,
+            int priority) {
+        
+    }
 }
