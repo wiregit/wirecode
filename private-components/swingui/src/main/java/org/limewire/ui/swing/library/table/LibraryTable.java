@@ -79,7 +79,8 @@ public class LibraryTable extends MouseableTable {
             Provider<IsPlayingRenderer> isPlayingRenderer,
             Provider<LaunchFileAction> launchAction,
             IconLabelRendererFactory iconLabelRendererFactory,
-            RemoveEditor removeEditor) {
+            RemoveEditor removeEditor,
+            DeletionKeyListener deletionKeyListener) {
         this.defaultCellRenderer = defaultCellRenderer;
         this.nameCategoryRenderer = nameCategoryRenderer;
         this.timeRenderer = timeRenderer;
@@ -90,7 +91,7 @@ public class LibraryTable extends MouseableTable {
         this.launchAction = launchAction;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
         this.removeEditor = removeEditor;
-        
+
         initTable();
         
         //TODO: anything below here should be initialized outside of the constructor
@@ -102,6 +103,8 @@ public class LibraryTable extends MouseableTable {
         }; 
 
         setPopupHandler(new LibraryPopupHandler(this, libraryPopupMenu));
+        
+        this.addKeyListener(deletionKeyListener);
     }
     
     private void initTable() {
@@ -131,6 +134,7 @@ public class LibraryTable extends MouseableTable {
         // Windows, Mac, and Linux.
         JTableHeader header = getTableHeader();
         header.addMouseListener(mousePopupListener);
+        
         // Install column state handler.
         columnStateHandler = new ColumnStateHandler(this, fileItemFormat);
     }

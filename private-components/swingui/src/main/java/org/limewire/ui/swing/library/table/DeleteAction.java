@@ -43,7 +43,7 @@ class DeleteAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final List<LocalFileItem> selectedItems = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
+        List<LocalFileItem> selectedItems = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
         
         String title = null;
         String message = null;
@@ -53,7 +53,7 @@ class DeleteAction extends AbstractAction {
         if (OSUtils.isWindows() && OSUtils.supportsTrash()) {
             title = I18n.trn("Move File to the Recycle Bin", "Move Files to the Recycle Bin", selectedItems.size());
             message = I18n.trn("Move this file to the Recycle Bin?", 
-                    "Move this file to the Recycle Bin", selectedItems.size());
+                    "Move this file to the Recycle Bin?", selectedItems.size());
             yesText = I18n.tr("Move to Recycle Bin");
         }
         else if (OSUtils.isMacOSX() && OSUtils.supportsTrash()) {
@@ -65,7 +65,7 @@ class DeleteAction extends AbstractAction {
         else {
             title = I18n.trn("Delete File", "Delete Files", selectedItems.size());
             message = I18n.trn("Delete this file from disk?", "Delete these files from disk?", selectedItems.size());
-            yesText = I18n.tr("Delete");
+            yesText = I18n.tr("Delete from Disk");
         }
         
         Object[] options = null;
@@ -82,25 +82,29 @@ class DeleteAction extends AbstractAction {
                 options, noText);
         
         if (confirmation > -1 && options[confirmation] == yesText) {
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {                  
-                    File currentSong = PlayerUtils.getCurrentSongFile();
-                    for(LocalFileItem item : selectedItems) {
-                        if(item.getFile().equals(currentSong)){
-                            stopAudio();
-                        }
-                        if(!item.isIncomplete()) {
-                            FileUtils.unlockFile(item.getFile());
-                            libraryManager.getLibraryManagedList().removeFile(item.getFile());
-                            FileUtils.delete(item.getFile(), OSUtils.supportsTrash());
-                        }
-                    }
-                }
-            });
+            deleteSelectedItems(libraryManager, selectedItems);
         }
     }
     
-    private void stopAudio() {
+    static void deleteSelectedItems(final LibraryManager libraryManager, final List<LocalFileItem> selectedItems) {
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {                  
+                File currentSong = PlayerUtils.getCurrentSongFile();
+                for(LocalFileItem item : selectedItems) {
+                    if(item.getFile().equals(currentSong)){
+                        stopAudio();
+                    }
+                    if(!item.isIncomplete()) {
+                        FileUtils.unlockFile(item.getFile());
+                        libraryManager.getLibraryManagedList().removeFile(item.getFile());
+                        FileUtils.delete(item.getFile(), OSUtils.supportsTrash());
+                    }
+                }
+            }
+        });
+    }
+    
+    private static void stopAudio() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
