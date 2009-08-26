@@ -21,7 +21,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -102,7 +101,7 @@ public class FocusJOptionPane {
             parentComponent = createFocusComponent();
             dispose = true;
         }
-        return showConfirmationDialog(parentComponent, message, title, optionType, JOptionPane.QUESTION_MESSAGE, dispose);
+        return showConfirmationDialog(parentComponent, message, title, optionType, JOptionPane.QUESTION_MESSAGE, null, dispose);
     }
     
     /**
@@ -116,7 +115,7 @@ public class FocusJOptionPane {
             parentComponent = createFocusComponent();
             dispose = true;
         }
-        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, dispose); 
+        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, null, dispose); 
     }
 
     /**
@@ -131,21 +130,22 @@ public class FocusJOptionPane {
             parentComponent = createFocusComponent();
             dispose = true;
         }
-        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, dispose);
+        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, null, dispose);
     }
     
     /**
      * Ensures that the colors for the dialog are set properlly prior to being shown.
      */
     private static int showConfirmationDialog(Component parentComponent, Object message, String title,
-            int optionType, int messageType, boolean dispose) {
+            int optionType, int messageType, Object[] options, boolean dispose) {
         Color oldOptionColor = UIManager.getColor("OptionPane.background");
         Color oldPanelColor = UIManager.getColor("Panel.background");
         UIManager.put("OptionPane.background", GuiUtils.getMainFrame().getBackground());
         UIManager.put("Panel.background", GuiUtils.getMainFrame().getBackground());
         
         try {
-            return JOptionPane.showConfirmDialog(parentComponent, message, title, optionType, messageType);
+            return JOptionPane.showOptionDialog(parentComponent, message, title, optionType, messageType,
+                    null, options, null);
         } finally {
             if(dispose)
                 ((JFrame)parentComponent).dispose();
@@ -177,7 +177,7 @@ public class FocusJOptionPane {
     }
     
     public static int showYesNoMessage(String message, String title, int defaultOption, JComponent parent) {
-        final String[] options = {I18n.tr("Yes"), I18nMarker.marktr("No")};
+        final String[] options = {I18n.tr("Yes"), I18n.tr("No")};
         
         int option;
         Color oldOptionColor = UIManager.getColor("OptionPane.background");

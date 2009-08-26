@@ -39,7 +39,7 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     public AllTableFormat(IconManager iconManager) {
         super(ACTION_INDEX, "LIBRARY_ALL_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_ALL_PLAY", "", 16, 16, true, false), 
-                new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", "Name", 480, true, true), 
+                new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", I18n.tr("Name"), 480, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 230, true, true),     
 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_ALL_SIZE", I18n.tr("Size"), 60, false, true),
