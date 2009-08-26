@@ -194,4 +194,10 @@ public interface DownloadItem extends PropertiableFile {
      * Returns a list of the completed download files for this DownloadItem. 
      */
     public Collection<File> getCompleteFiles();
+    
+    /**
+     * Returns the given Download property that matches the DownloadPropertyKey, Null is returned if the 
+     * property does not exist for this DownloadItem. 
+     */
+    public Object getDownloadProperty(DownloadPropertyKey key);
 }

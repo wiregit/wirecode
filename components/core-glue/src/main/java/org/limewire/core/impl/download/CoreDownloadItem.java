@@ -14,6 +14,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -486,5 +487,14 @@ class CoreDownloadItem implements DownloadItem {
             files.add(downloader.getSaveFile());
         }
         return files;
+    }
+
+    @Override
+    public Object getDownloadProperty(DownloadPropertyKey key) {
+        if(key == DownloadPropertyKey.TORRENT && DownloadItemType.BITTORRENT == downloadItemType) {
+            BTDownloader btDownloader = (BTDownloader)downloader;
+            return btDownloader.getTorrent();
+        }
+        return null;
     }
 }
