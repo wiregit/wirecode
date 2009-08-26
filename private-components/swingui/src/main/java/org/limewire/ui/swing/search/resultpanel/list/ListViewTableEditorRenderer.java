@@ -199,7 +199,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         headingFontWidthResolver = new HeadingFontWidthResolver(heading, headingFont);
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
-       
+        
+        setStoreStyle(storeController.getStoreStyle());
+        
         makePanel(navigator, libraryMediator);       
 
         setupButtons();
