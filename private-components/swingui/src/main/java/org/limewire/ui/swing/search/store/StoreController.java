@@ -5,6 +5,7 @@ import java.io.File;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreManager;
+import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
@@ -103,6 +104,9 @@ public class StoreController {
         if (!storeManager.isLoggedIn()) {
             startLogin();
             
+        } else if (!storeManager.isDownloadApproved(vsr.getStoreResult())) {
+            startApproval(vsr.getStoreResult());
+                
         } else {
             // TODO implement
             System.out.println("StoreController.download: " + vsr.getHeading());
@@ -115,6 +119,9 @@ public class StoreController {
     public void downloadTrack(StoreTrackResult str) {
         if (!storeManager.isLoggedIn()) {
             startLogin();
+            
+        } else if (!storeManager.isDownloadApproved(str)) {
+            startApproval(str);
             
         } else {
             // TODO implement
@@ -139,10 +146,26 @@ public class StoreController {
     }
 
     /**
+     * Initiates the download approval process for the specified store result.
+     */
+    private void startApproval(StoreResult storeResult) {
+        StoreBrowserPanel loginPanel = new StoreBrowserPanel(this);
+        loginPanel.showDownload(storeResult);
+    }
+
+    /**
+     * Initiates the download approval process for the specified track result.
+     */
+    private void startApproval(StoreTrackResult trackResult) {
+        StoreBrowserPanel loginPanel = new StoreBrowserPanel(this);
+        loginPanel.showDownload(trackResult);
+    }
+
+    /**
      * Initiates the login process for the store.
      */
     private void startLogin() {
-        StoreLoginPanel loginPanel = new StoreLoginPanel(this);
-        loginPanel.display();
+        StoreBrowserPanel loginPanel = new StoreBrowserPanel(this);
+        loginPanel.showLogin();
     }
 }
