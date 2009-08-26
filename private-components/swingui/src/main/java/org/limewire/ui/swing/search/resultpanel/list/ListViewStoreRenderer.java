@@ -33,8 +33,8 @@ import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu.ViewType;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.search.store.StoreBrowserPanel;
 import org.limewire.ui.swing.search.store.StoreController;
-import org.limewire.ui.swing.search.store.StoreResultInfoPanel;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 
@@ -360,8 +360,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (vsr != null) {
-                StoreResultInfoPanel infoPanel = new StoreResultInfoPanel(storeController);
-                infoPanel.display(vsr);
+                new StoreBrowserPanel(storeController).showInfo(vsr);
             }
         }
     }
