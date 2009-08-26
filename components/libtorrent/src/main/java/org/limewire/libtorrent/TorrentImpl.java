@@ -49,7 +49,7 @@ public class TorrentImpl implements Torrent {
     // TODO eventually remove this field and just delegate to libtorrent
     private final List<String> paths;
 
-    private final  AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
+    private final AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
 
     private final AtomicReference<File> torrentFile = new AtomicReference<File>(null);
 
@@ -406,25 +406,28 @@ public class TorrentImpl implements Torrent {
     private List<File> getTorrentDataFiles() {
         return TorrentUtil.buildTorrentFiles(this, getTorrentDataFile());
     }
-    
+
     @Override
     public boolean registerWithTorrentManager() {
         if (!torrentManager.isValid()) {
             return false;
         }
-//        torrentManager.getTorrentManagerSettings().getTorrentDownloadFolder().mkdirs();
-        //TODO might need to remove the touch logic here when the user can select the notion of only downloading a subset of the torrents files.
+        // TODO might need to remove the touch logic here when the user can
+        // select the notion of only downloading a subset of the torrents files.
+        // there is a bug in libtorrent/boost on linux that is expecting the
+        // files to be created.
         for (File file : getTorrentDataFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
                 try {
-                   file.createNewFile();
+                    file.createNewFile();
                 } catch (Throwable e) {
-                    // non-fatal libtorrent will create them
+                    // libtorrent expects the files to have been created
+                    return false;
                 }
             }
         }
-        
+
         File torrent = torrentFile.get();
         File torrentParent = torrent.getParentFile();
         File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
