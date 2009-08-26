@@ -5,9 +5,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collections;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.settings.FacebookSettings;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
@@ -27,7 +26,6 @@ import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
-import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -104,8 +102,6 @@ public class ServiceSelectionLoginPanel extends JPanel {
         JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
         bottomPanel.setOpaque(false);
         
-        boolean supportsFacebook = MozillaInitialization.isInitialized() && FacebookSettings.FACEBOOK_ENABLED.get();
-        
         Action loginAction = new ServiceAction(accountManager.getConfig("Gmail"));
         loginActions.put(accountManager.getConfig("Gmail"), loginAction);
         JXButton gmailButton = new JXButton(loginAction);
@@ -127,8 +123,9 @@ public class ServiceSelectionLoginPanel extends JPanel {
         JPanel selectionPanel = new JPanel(new MigLayout("nogrid, gap 0, insets 0 0 30 0, alignx center, filly"));
         selectionPanel.setOpaque(false);
         
-        if (supportsFacebook) {
-            loginAction = facebookLoginActionFactory.create((FacebookFriendAccountConfiguration)accountManager.getConfig("Facebook"));
+        FriendAccountConfiguration config = accountManager.getConfig("Facebook");
+        if (config != null) {
+            loginAction = facebookLoginActionFactory.create((FacebookFriendAccountConfiguration)config);
             loginActions.put(accountManager.getConfig("Facebook"), loginAction);
             JXButton facebookButton = new JXButton(loginAction);
             ResizeUtils.forceSize(facebookButton, new Dimension(180, 58));
