@@ -101,7 +101,7 @@ public class FocusJOptionPane {
             parentComponent = createFocusComponent();
             dispose = true;
         }
-        return showConfirmationDialog(parentComponent, message, title, optionType, JOptionPane.QUESTION_MESSAGE, null, dispose);
+        return showConfirmationDialog(parentComponent, message, title, optionType, JOptionPane.QUESTION_MESSAGE, null, null, dispose);
     }
     
     /**
@@ -115,7 +115,7 @@ public class FocusJOptionPane {
             parentComponent = createFocusComponent();
             dispose = true;
         }
-        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, null, dispose); 
+        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, null, null, dispose); 
     }
 
     /**
@@ -130,14 +130,15 @@ public class FocusJOptionPane {
             parentComponent = createFocusComponent();
             dispose = true;
         }
-        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, null, dispose);
+        return showConfirmationDialog(parentComponent, message, title, optionType, messageType, options, initialValue, 
+                dispose);
     }
     
     /**
      * Ensures that the colors for the dialog are set properlly prior to being shown.
      */
     private static int showConfirmationDialog(Component parentComponent, Object message, String title,
-            int optionType, int messageType, Object[] options, boolean dispose) {
+            int optionType, int messageType, Object[] options, Object initialValue, boolean dispose) {
         Color oldOptionColor = UIManager.getColor("OptionPane.background");
         Color oldPanelColor = UIManager.getColor("Panel.background");
         UIManager.put("OptionPane.background", GuiUtils.getMainFrame().getBackground());
@@ -145,7 +146,7 @@ public class FocusJOptionPane {
         
         try {
             return JOptionPane.showOptionDialog(parentComponent, message, title, optionType, messageType,
-                    null, options, null);
+                    null, options, initialValue);
         } finally {
             if(dispose)
                 ((JFrame)parentComponent).dispose();
