@@ -18,7 +18,6 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.components.Resizable;
-import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -121,9 +120,9 @@ class ProNag extends JXPanel implements Resizable {
     
     private String createDefaultPage(boolean firstLaunch) {
         
-        URL closeImage = HomePanel.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/close.png");
-        URL bgImage = HomePanel.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/bg.png");
-        URL getImage = HomePanel.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/button_get_limewire_pro.png");
+        URL closeImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/close.png");
+        URL bgImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/bg.png");
+        URL getImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/button_get_limewire_pro.png");
              
         
         String outgoing = application.addClientInfoToUrl("http://www.limewire.com/clientpro?offline=true&fromFirstRun=" + firstLaunch);
