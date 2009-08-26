@@ -40,6 +40,11 @@ class ListViewStoreRendererFactory {
      * Creates a List view renderer for the specified store style.
      */
     public ListViewStoreRenderer create(StoreStyle storeStyle) {
+        // Return null if style is null or unknown.
+        if (storeStyle == null) {
+            return null;
+        }
+        
         // Create renderer based on style type.
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
@@ -51,11 +56,7 @@ class ListViewStoreRendererFactory {
                     headingBuilder, headingTruncator, popupMenuFactory, storeController);
             
         default:
-            // Return default renderer so store results may still be viewed in
-            // spite of an unrecognized store style.
-            // TODO review - maybe send notification of incorrect condition
-            return new ListViewStoreRendererAB(storeStyle, categoryIconManager, 
-                    headingBuilder, headingTruncator, popupMenuFactory, storeController);
+            return null;
         }
     }
 }
