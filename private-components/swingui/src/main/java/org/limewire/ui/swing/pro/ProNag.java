@@ -145,7 +145,7 @@ class ProNag extends JXPanel implements Resizable {
          + "<table width=\"346\" height=\"51\" border=\"0\" cellspacing=\"0\" cellpadding=\"25\">"
          + "<tr>"
          + "<td align=\"left\">"
-         + "<a href=\"http://www.limewire.com/download/pro/?ref=lwn1&amp;nstime=1251309416&amp;rnv=f\"><img src=\""+getImage.toExternalForm()+"\" alt=\"\" border=\"0\" /></a>"
+         + "<a href=\"http://www.limewire.com/download/pro/?ref=lwn1&amp;nstime=1251309416&amp;rnv=z\"><img src=\""+getImage.toExternalForm()+"\" alt=\"\" border=\"0\" /></a>"
          + "</td>"
          + "</tr>"
          + "</table>"
