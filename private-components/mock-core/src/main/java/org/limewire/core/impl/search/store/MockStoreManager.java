@@ -12,6 +12,7 @@ import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.core.impl.MockURN;
 import org.limewire.core.impl.search.store.MockStoreResult.MockAlbumIcon;
@@ -23,6 +24,16 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class MockStoreManager implements StoreManager {
+
+    @Override
+    public boolean isDownloadApproved(StoreResult storeResult) {
+        return false;
+    }
+
+    @Override
+    public boolean isDownloadApproved(StoreTrackResult trackResult) {
+        return false;
+    }
 
     @Override
     public boolean isLoggedIn() {
