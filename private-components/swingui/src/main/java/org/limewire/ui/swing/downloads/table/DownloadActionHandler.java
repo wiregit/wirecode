@@ -12,6 +12,7 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -131,6 +132,10 @@ public class DownloadActionHandler {
         String title = item.getPropertyString(FilePropertyKey.TITLE);
         if(title == null) {
             title = FileUtils.getFilenameNoExtension(item.getFileName());
+        }
+        int maxLength = SearchSettings.MAX_QUERY_LENGTH.getValue();
+        if(title.length() > maxLength) {
+            title = title.substring(0, maxLength);
         }
         
         // make search based on on title and category
