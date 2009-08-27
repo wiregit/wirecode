@@ -480,4 +480,9 @@ public class TorrentManagerImpl implements TorrentManager {
             int priority) {
         libTorrent.set_file_priority(torrent.getSha1(), torrentFileEntry.getIndex(), priority);
     }
+
+    @Override
+    public boolean isInitialized() {
+       return isValid();
+    }
 }

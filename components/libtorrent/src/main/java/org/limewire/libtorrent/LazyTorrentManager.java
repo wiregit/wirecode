@@ -216,4 +216,9 @@ public class LazyTorrentManager implements TorrentManager, Service {
         setupTorrentManager();
         torrentManager.get().setTorrenFileEntryPriority(torrent, torrentFileEntry, priority);
     }
+
+    @Override
+    public boolean isInitialized() {
+       return initialized;
+    }
 }

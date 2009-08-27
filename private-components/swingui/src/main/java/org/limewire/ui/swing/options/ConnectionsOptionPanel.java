@@ -76,7 +76,8 @@ public class ConnectionsOptionPanel extends OptionPanel {
         boolean restart = getConnectionSpeedPanel().applyOptions();
         restart |= getDownloadsPanel().applyOptions();
         restart |= getUploadPanel().applyOptions();
-        if (torrentManager.get().isValid()) {
+        
+        if (torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
             torrentManager.get().setTorrentManagerSettings(torrentSettings);
         }
         return restart;

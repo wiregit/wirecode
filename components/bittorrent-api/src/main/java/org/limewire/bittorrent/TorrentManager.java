@@ -101,22 +101,27 @@ public interface TorrentManager {
      * Sets the automanaged flag to the given value for the torrent.
      */
     public void setAutoManaged(Torrent torrent, boolean autoManaged);
-    
+
     /**
      * Starts the torrent manager, and its necessary worker threads.
      */
     public void start();
-    
+
     /**
      * Shuts down the torrent manager, and any needed threads.
      */
     public void stop();
-    
+
     /**
-     * Initializes this torrent manager. 
+     * Initializes this torrent manager.
      */
     public void initialize();
 
-    public void setTorrenFileEntryPriority(Torrent torrent,
-            TorrentFileEntry torrentFileEntry, int priority);
+    public void setTorrenFileEntryPriority(Torrent torrent, TorrentFileEntry torrentFileEntry,
+            int priority);
+
+    /**
+     * Returns true if the torrent manager is initialized.
+     */
+    public boolean isInitialized();
 }

@@ -127,4 +127,9 @@ public class MockTorrentManager implements TorrentManager {
             int priority) {
         
     }
+
+    @Override
+    public boolean isInitialized() {
+        return false;
+    }
 }
