@@ -12,6 +12,9 @@ import javax.swing.SpinnerNumberModel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -20,6 +23,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Connections Option View.
@@ -29,9 +33,14 @@ public class ConnectionsOptionPanel extends OptionPanel {
     private ConnectionSpeedPanel connectionSpeedPanel;
     private DownloadsPanel downloadsPanel;
     private UploadsPanel uploadPanel;
+    private final Provider<TorrentManager> torrentManager;
+    private final TorrentManagerSettings torrentSettings;
     
     @Inject
-    public ConnectionsOptionPanel() {
+    public ConnectionsOptionPanel(Provider<TorrentManager> torrentManager, @TorrentSettingsAnnotation  TorrentManagerSettings torrentSettings) {
+        this.torrentManager = torrentManager;
+        this.torrentSettings = torrentSettings;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         setOpaque(false);
@@ -67,7 +76,9 @@ public class ConnectionsOptionPanel extends OptionPanel {
         boolean restart = getConnectionSpeedPanel().applyOptions();
         restart |= getDownloadsPanel().applyOptions();
         restart |= getUploadPanel().applyOptions();
-
+        if (torrentManager.get().isValid()) {
+            torrentManager.get().setTorrentManagerSettings(torrentSettings);
+        }
         return restart;
     }
 
@@ -138,7 +149,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
     }
     
-    private static class DownloadsPanel extends OptionPanel {
+    private class DownloadsPanel extends OptionPanel {
 
         private static final int MIN_DOWNLOADS = 1;
         private static final int MAX_DOWNLOADS = 999;
