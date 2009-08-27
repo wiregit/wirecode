@@ -28,18 +28,15 @@ public class Main {
         
             SplashScreen splashScreen = SplashScreen.getSplashScreen();
             Frame splash = null;
-            Image splashImage = null;;
+            Image splashImage = getSplashImage();
 
             // show initial splash screen only if there are no arguments
             if (args == null || args.length == 0) {
-                Rectangle bounds;
+                Rectangle bounds = null;
                 
                 if(splashScreen != null && splashScreen.isVisible()) {
                     bounds = splashScreen.getBounds();
                     splashImage = Toolkit.getDefaultToolkit().createImage(splashScreen.getImageURL());    
-                } else {
-                    bounds = null;
-                    splashImage = getSplashImage();
                 } 
                 
                 if(splashImage != null) {
