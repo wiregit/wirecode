@@ -14,6 +14,8 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.mozilla.browser.IMozillaWindow;
+import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
 import org.mozilla.interfaces.nsICookie;
@@ -21,10 +23,12 @@ import org.mozilla.interfaces.nsICookieManager;
 import org.mozilla.interfaces.nsIDOMEvent;
 import org.mozilla.interfaces.nsIDOMEventListener;
 import org.mozilla.interfaces.nsIDOMEventTarget;
+import org.mozilla.interfaces.nsIDOMWindow;
 import org.mozilla.interfaces.nsIDOMWindow2;
 import org.mozilla.interfaces.nsISimpleEnumerator;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.xpcom.Mozilla;
+import org.w3c.dom.Document;
 
 /**
  * Main container for the MozSwing browser used for the Lime Store.  
@@ -128,21 +132,40 @@ public class StoreBrowserPanel extends Browser {
         Frame owner = GuiUtils.getMainFrame();
         
         // Create dialog.
-        JDialog dialog = new LimeJDialog(owner);
+        BrowserDialog dialog = new BrowserDialog(owner, this);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setModalityType(ModalityType.DOCUMENT_MODAL);
         dialog.setTitle(title);
 
-        // Set content.
-        dialog.getContentPane().setLayout(new BorderLayout());
-        dialog.getContentPane().add(this, BorderLayout.CENTER);
-        
         // Position dialog and display.
         dialog.pack();
         dialog.setLocationRelativeTo(owner);
         dialog.setVisible(true);
     }
 
+    /**
+     * Dialog to display store browser.
+     */
+    private static class BrowserDialog extends LimeJDialog implements IMozillaWindow {
+        private final MozillaPanel mozillaPanel;
+        
+        public BrowserDialog(Frame owner, MozillaPanel mozillaPanel) {
+            super(owner);
+            
+            this.mozillaPanel = mozillaPanel;
+            
+            // Set dialog content to browser.
+            setLayout(new BorderLayout());
+            add(mozillaPanel, BorderLayout.CENTER);
+            mozillaPanel.setContainerWindow(this);
+        }
+
+        @Override
+        public MozillaPanel getPanel() {
+            return mozillaPanel;
+        }
+    }
+    
     /**
      * Listener to handle load events on the DOM.
      */
@@ -151,7 +174,7 @@ public class StoreBrowserPanel extends Browser {
         @Override
         public void handleEvent(nsIDOMEvent event) {
             String url = getUrl();
-            System.out.println("handleEvent-load: url=" + url); // TODO REMOVE
+            System.out.println("load event: url=" + url); // TODO REMOVE
             
             if (url.toLowerCase().contains("home")) {
                 // Get cookie service.
@@ -164,12 +187,21 @@ public class StoreBrowserPanel extends Browser {
                 while (enumerator.hasMoreElements()) {
                     nsICookie cookie = XPCOMUtils.proxy(enumerator.getNext(), nsICookie.class);
                     //System.out.println("cookie name=" + cookie.getName() + ", value=" + cookie.getValue() + ", host=" + cookie.getHost());
+                    // TODO implement to save cookie in store controller/manager?
                     count++;
                 }
                 //System.out.println("cookie count = " + count);
             }
-
-            // TODO implement to save cookie in store controller/manager?
+            
+            nsIDOMWindow window = getChromeAdapter().getWebBrowser().getContentDOMWindow();
+            Document document = getDocument();
+            
+            // TODO maybe get document attributes to set browser size?
+            // Does not work.
+            //String script = "resizeWindow();";
+            //jsexec(script);
+            // This works.
+            //getChromeAdapter().sizeBrowserTo(420, 540);
         }
 
         @Override
