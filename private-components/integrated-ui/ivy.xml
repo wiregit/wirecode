@@ -20,6 +20,8 @@
         <dependency org="org.limewire" name="mojito-ui" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="facebook" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="friend" rev="latest.integration" conf="compile,runtime"/>
         
         <dependency org="none" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
         <dependency org="none" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
