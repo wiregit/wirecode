@@ -83,7 +83,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                             //TODO show error message when seeds cannot be resumed?
                             if (torrentManager.get().isValid() && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
                                 try {
-                                    torrent.init(name, sha1, -1, trackerURL, null, fastResumeFile,
+                                    torrent.init(name, sha1, trackerURL, fastResumeFile,
                                             torrentFile, torrentDataFile, null);
                                 } catch (IOException e) {
                                     LOG.error("Error initializing memento from: " + mementoFile, e);

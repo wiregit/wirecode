@@ -20,9 +20,8 @@ public interface Torrent {
      * passed in will be used, and any missing field will be pulled from the
      * torrent file.
      */
-    public void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile,
-            Boolean isPrivate) throws IOException;
+    public void init(String name, String sha1, String trackerURL, File fastResumeFile,
+            File torrentFile, File torrentDataFile, Boolean isPrivate) throws IOException;
 
     /**
      * Returns the name of this torrent.
@@ -82,12 +81,6 @@ public interface Torrent {
     public boolean isFinished();
 
     /**
-     * Returns the total size of this torrent if all files were to be
-     * downloaded.
-     */
-    public long getTotalSize();
-
-    /**
      * Returns true if the torrent has been started, false otherwise.
      */
     public boolean isStarted();
@@ -106,11 +99,6 @@ public interface Torrent {
      * Returns the number of peers in this torrents swarm.
      */
     public int getNumPeers();
-
-    /**
-     * Returns the non absolute paths to all files in the torrent.
-     */
-    public List<String> getPaths();
 
     /**
      * Returns the root data file for this torrent.
@@ -214,21 +202,22 @@ public interface Torrent {
     public boolean isAutoManaged();
 
     /**
-     * Sets whether or not this torrent is automanaged. For an explanation of automanagement
-     * see http://www.rasterbar.com/products/libtorrent/manual.html#queuing
+     * Sets whether or not this torrent is automanaged. For an explanation of
+     * automanagement see
+     * http://www.rasterbar.com/products/libtorrent/manual.html#queuing
      * 
-     * Basically it means that the torrent will be managed by libtorrent. Every polling period
-     * queued and active torrents are checked to see if they should be given some active time
-     * to allow for seeding/downloading. Automanaged torrents adhere to limits for total torrents
-     * allowed active, total seeds, etc.
+     * Basically it means that the torrent will be managed by libtorrent. Every
+     * polling period queued and active torrents are checked to see if they
+     * should be given some active time to allow for seeding/downloading.
+     * Automanaged torrents adhere to limits for total torrents allowed active,
+     * total seeds, etc.
      */
     public void setAutoManaged(boolean autoManaged);
-    
-    
+
     /**
      * 
      */
     public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority);
-    
+
     public File getTorrentDataFile(TorrentFileEntry torrentFileEntry);
 }

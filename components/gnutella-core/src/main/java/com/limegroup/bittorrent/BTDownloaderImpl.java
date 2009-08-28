@@ -5,7 +5,6 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -212,7 +211,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void init(File torrentFile, File saveDirectory) throws IOException {
-        torrent.init(null, null, -1, null, null, null, torrentFile, null, null);
+        torrent.init(null, null, null, null, torrentFile, null, null);
         setDefaultFileName(torrent.getName());
     }
 
@@ -385,7 +384,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public long getContentLength() {
         TorrentStatus status = torrent.getStatus();
-        long contentLength = status != null ? status.getTotalWanted() : torrent.getTotalSize();
+        long contentLength = status != null ? status.getTotalWanted() : -1;
         return contentLength;
     }
 
@@ -599,10 +598,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         btMemento.setName(torrent.getName());
         btMemento.setSha1Urn(getSha1Urn());
-        btMemento.setContentLength(getContentLength());
         btMemento.setIncompleteFile(getIncompleteFile());
         btMemento.setTrackerURL(torrent.getTrackerURL());
-        btMemento.setPaths(torrent.getPaths());
         File fastResumeFile = torrent.getFastResumeFile();
         String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
         btMemento.setFastResumePath(fastResumePath);
@@ -636,15 +633,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         try {
             torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
-                    .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
-                    fastResumeFile, torrentFile, memento.getIncompleteFile(), memento.isPrivate());
+                    .getTrackerURL(), fastResumeFile, torrentFile, memento.getIncompleteFile(),
+                    memento.isPrivate());
         } catch (IOException e) {
             // the .torrent file could be invalid, try to initialize just with
             // the memento contents.
             try {
                 torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
-                        .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
-                        fastResumeFile, null, memento.getIncompleteFile(), memento.isPrivate());
+                        .getTrackerURL(), fastResumeFile, null, memento.getIncompleteFile(),
+                        memento.isPrivate());
             } catch (IOException e1) {
                 throw new InvalidDataException("Could not initialize the BTDownloader", e1);
             }
@@ -654,18 +651,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
         BTMetaInfoMemento btmetainfo = memento.getBtMetaInfoMemento();
 
-        List<String> paths = new ArrayList<String>();
-
-        for (TorrentFile torrentFile : btmetainfo.getFileSystem().getFiles()) {
-            paths.add(torrentFile.getTorrentPath());
-        }
-
         URI[] trackers = btmetainfo.getTrackers();
         URI tracker1 = trackers[0];
 
         String name = btmetainfo.getFileSystem().getName();
-
-        long totalSize = btmetainfo.getFileSystem().getTotalSize();
 
         byte[] infoHash = btmetainfo.getInfoHash();
 
@@ -693,8 +682,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         try {
-            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null,
-                    newIncompleteFile, isPrivate);
+            torrent.init(name, sha1, tracker1.toString(), null, null, newIncompleteFile, isPrivate);
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }
@@ -738,11 +726,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public List<File> getCompleteFiles() {
-        return TorrentUtil.buildTorrentFiles(torrent, getSaveFile());
+        return TorrentUtil.buildTorrentFiles(torrent, getSaveFile().getParentFile());
     }
 
     public List<File> getIncompleteFiles() {
-        return TorrentUtil.buildTorrentFiles(torrent, getIncompleteFile());
+        return TorrentUtil.buildTorrentFiles(torrent, getIncompleteFile().getParentFile());
     }
 
     @Override

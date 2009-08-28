@@ -111,7 +111,9 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     @Override
     public long getFileSize() {
-        return torrent.getTotalSize();
+        TorrentStatus status = torrent.getStatus();
+        long fileSize = status != null ? status.getTotalWanted() : -1;
+        return fileSize;
     }
 
     @Override

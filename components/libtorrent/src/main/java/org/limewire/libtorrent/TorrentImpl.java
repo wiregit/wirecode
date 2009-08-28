@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,9 +19,7 @@ import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
@@ -46,9 +43,6 @@ public class TorrentImpl implements Torrent {
 
     private final AtomicReference<TorrentStatus> status;
 
-    // TODO eventually remove this field and just delegate to libtorrent
-    private final List<String> paths;
-
     private final AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
 
     private final AtomicReference<File> torrentFile = new AtomicReference<File>(null);
@@ -60,8 +54,6 @@ public class TorrentImpl implements Torrent {
     private String name = null;
 
     private String trackerURL = null;
-
-    private long totalSize = -1;
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -78,7 +70,6 @@ public class TorrentImpl implements Torrent {
         this.torrentManager = torrentManager;
         listeners = new AsynchronousMulticasterImpl<TorrentEvent>(fastExecutor);
         status = new AtomicReference<TorrentStatus>();
-        paths = new ArrayList<String>();
     }
 
     @Override
@@ -92,16 +83,11 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile,
-            Boolean isPrivate) throws IOException {
+    public synchronized void init(String name, String sha1, String trackerURL, File fastResumeFile,
+            File torrentFile, File torrentDataFile, Boolean isPrivate) throws IOException {
 
         this.sha1 = sha1;
         this.trackerURL = trackerURL;
-        if (paths != null) {
-            this.paths.addAll(paths);
-        }
-        this.totalSize = totalSize;
         File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
                 .getTorrentDownloadFolder();
 
@@ -124,9 +110,6 @@ public class TorrentImpl implements Torrent {
                 if (this.name == null) {
                     this.name = btData.getName();
                 }
-                this.totalSize = getTotalSize(btData);
-
-                buildPaths(btData);
 
                 if (this.trackerURL == null) {
                     this.trackerURL = btData.getAnnounce();
@@ -161,30 +144,6 @@ public class TorrentImpl implements Torrent {
                 this.name) : torrentDataFile);
         this.torrentFile.set(torrentFile == null ? new File(torrentDownloadFolder, this.name
                 + ".torrent") : torrentFile);
-    }
-
-    private void buildPaths(BTData btData) {
-        if (this.paths.size() == 0) {
-            if (btData.getFiles() != null) {
-                for (BTFileData fileData : btData.getFiles()) {
-                    this.paths.add(fileData.getPath());
-                }
-            }
-        }
-    }
-
-    private long getTotalSize(BTData btData) {
-        long totalSize = 0;
-        if (btData.getLength() == null) {
-            if (btData.getFiles() != null) {
-                for (BTFileData file : btData.getFiles()) {
-                    totalSize += file.getLength();
-                }
-            }
-        } else {
-            totalSize = btData.getLength();
-        }
-        return totalSize;
     }
 
     @Override
@@ -273,11 +232,6 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public long getTotalSize() {
-        return totalSize;
-    }
-
-    @Override
     public boolean isStarted() {
         return started.get();
     }
@@ -289,18 +243,13 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public boolean isMultiFileTorrent() {
-        return paths.size() > 0;
+        return getTorrentFileEntries().size() > 0;
     }
 
     @Override
     public int getNumPeers() {
         TorrentStatus status = this.status.get();
         return status == null ? 0 : status.getNumPeers();
-    }
-
-    @Override
-    public List<String> getPaths() {
-        return paths;
     }
 
     @Override
@@ -393,10 +342,6 @@ public class TorrentImpl implements Torrent {
         }
     }
 
-    private List<File> getTorrentDataFiles() {
-        return TorrentUtil.buildTorrentFiles(this, getTorrentDataFile());
-    }
-
     @Override
     public boolean registerWithTorrentManager() {
         if (!torrentManager.isValid()) {
@@ -406,17 +351,19 @@ public class TorrentImpl implements Torrent {
         // select the notion of only downloading a subset of the torrents files.
         // there is a bug in libtorrent/boost on linux that is expecting the
         // files to be created.
-        for (File file : getTorrentDataFiles()) {
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                try {
-                    file.createNewFile();
-                } catch (Throwable e) {
-                    // libtorrent expects the files to have been created
-                    return false;
-                }
-            }
-        }
+        // TODO instead of doign this here, make sure that the alert checks for
+        // hasMetaData, and create the files ... eventually.....
+        // for (File file : getTorrentDataFiles()) {
+        // if (!file.exists()) {
+        // file.getParentFile().mkdirs();
+        // try {
+        // file.createNewFile();
+        // } catch (Throwable e) {
+        // // libtorrent expects the files to have been created
+        // return false;
+        // }
+        // }
+        // }
 
         File torrent = torrentFile.get();
         File torrentParent = torrent.getParentFile();
