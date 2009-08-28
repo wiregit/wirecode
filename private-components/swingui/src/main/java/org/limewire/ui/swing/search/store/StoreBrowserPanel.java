@@ -1,19 +1,24 @@
 package org.limewire.ui.swing.search.store;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Dialog.ModalityType;
 
 import javax.swing.JDialog;
+import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.ui.swing.browser.Browser;
+import org.limewire.ui.swing.browser.LimeDomListener;
+import org.limewire.ui.swing.browser.UriAction;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.mozilla.browser.IMozillaWindow;
 import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.XPCOMUtils;
@@ -39,6 +44,9 @@ public class StoreBrowserPanel extends Browser {
 
     private final StoreController storeController;
     
+    private LimeDomListener clickDomListener;
+    private LoadDOMListener loadDomListener;
+    
     /**
      * Constructs a StoreBrowserPanel using the specified services.
      */
@@ -55,7 +63,11 @@ public class StoreBrowserPanel extends Browser {
      * Initializes the components in the container.
      */
     private void initComponents() {
-        // TODO implement or remove
+        // Create DOM listener for click events.
+        clickDomListener = new LimeDomListener();
+        
+        // Create DOM listener for load events.
+        loadDomListener = new LoadDOMListener();
     }
 
     /**
@@ -65,15 +77,36 @@ public class StoreBrowserPanel extends Browser {
     public void onAttachBrowser(ChromeAdapter chromeAdapter,
             ChromeAdapter parentChromeAdapter) {
         super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
-
+        
         // Get DOM event target.
         nsIDOMEventTarget eventTarget = XPCOMUtils.qi(
                 chromeAdapter.getWebBrowser().getContentDOMWindow(),
                 nsIDOMWindow2.class).getWindowRoot();
 
-        // Add DOM listener for load events.  We do this to capture cookies
-        // when a page is loaded.
-        eventTarget.addEventListener("load", new LoadDOMListener(), true);
+        // Add DOM listeners.
+        eventTarget.addEventListener("load", loadDomListener, true);
+        eventTarget.addEventListener("click", clickDomListener, true);
+    }
+    
+    /**
+     * Overrides superclass method to remove listeners for DOM events.
+     */
+    @Override
+    public void onDetachBrowser() {
+        if (getChromeAdapter() != null) {
+            // Get DOM event target.
+            nsIDOMEventTarget eventTarget = XPCOMUtils.qi(
+                    getChromeAdapter().getWebBrowser().getContentDOMWindow(),
+                    nsIDOMWindow2.class).getWindowRoot();
+            
+            // Remove DOM listeners.
+            eventTarget.removeEventListener("load", loadDomListener, true);
+            eventTarget.removeEventListener("click", clickDomListener, true);
+            
+            // TODO remove actions on click listener?
+        }
+        
+        super.onDetachBrowser();
     }
     
     /**
@@ -104,6 +137,9 @@ public class StoreBrowserPanel extends Browser {
      * Displays the File Info dialog for the specified store result.
      */
     public void showInfo(VisualStoreResult vsr) {
+        // Add actions to click listener.
+        clickDomListener.addTargetedUrlAction("", new ClickUriAction());
+        
         // Load result info into browser.
         setPreferredSize(new Dimension(420, 540));
         load(storeController.getInfoURI(vsr));
@@ -125,7 +161,7 @@ public class StoreBrowserPanel extends Browser {
     }
     
     /**
-     * Displays this container in a model dialog with the specified title.
+     * Displays this container in a modal dialog with the specified title.
      */
     private void showDialog(String title) {
         // Get main frame.
@@ -141,6 +177,16 @@ public class StoreBrowserPanel extends Browser {
         dialog.pack();
         dialog.setLocationRelativeTo(owner);
         dialog.setVisible(true);
+    }
+    
+    /**
+     * Disposes of the dialog. 
+     */
+    private void disposeDialog() {
+        Container ancestor = getTopLevelAncestor();
+        if (ancestor instanceof BrowserDialog) {
+            ((BrowserDialog) ancestor).dispose();
+        }
     }
 
     /**
@@ -174,7 +220,7 @@ public class StoreBrowserPanel extends Browser {
         @Override
         public void handleEvent(nsIDOMEvent event) {
             String url = getUrl();
-            System.out.println("load event: url=" + url); // TODO REMOVE
+            System.out.println("load event: type=" + event.getType() + ", url=" + url); // TODO REMOVE
             
             if (url.toLowerCase().contains("home")) {
                 // Get cookie service.
@@ -207,6 +253,33 @@ public class StoreBrowserPanel extends Browser {
         @Override
         public nsISupports queryInterface(String uuid) {
             return Mozilla.queryInterface(this, uuid);
+        }
+    }
+    
+    /**
+     * Action to process click events on the DOM.
+     */
+    private class ClickUriAction implements UriAction {
+
+        @Override
+        public boolean uriClicked(TargetedUri targetedUri) {
+            System.out.println("uriClicked: EDT=" + SwingUtilities.isEventDispatchThread() + 
+                    ", target=" + targetedUri.getTarget() + ", uri=" + targetedUri.getUri());
+            
+            // TODO implement for real
+            
+            String uri = targetedUri.getUri();
+            if (uri.toLowerCase().contains("#more")) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        disposeDialog();
+                    }
+                });
+            }
+            
+            // Return true to prevent further processing.
+            return true;
         }
     }
 }
