@@ -1,4 +1,4 @@
-package org.limewire.core.impl.friend;
+package org.limewire.ui.swing.friend;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
