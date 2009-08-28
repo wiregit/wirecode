@@ -5,8 +5,6 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -31,12 +29,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentAlert;
-import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentFileEntry;
-import org.limewire.bittorrent.TorrentPeer;
-import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.FontUtils;
@@ -240,7 +233,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
                     setEnabled(false);
                 } else {
                     setSelected(((TorrentFileEntryWrapper)value).getPriority() != DONT_DOWNLOAD);
-                    setEnabled(true);
+                    setEnabled(!torrent.isFinished());
                 }
             } else {
                 setSelected(false);
@@ -259,7 +252,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
                     setEnabled(false);
                 } else {
                     setSelected(((TorrentFileEntryWrapper)value).getPriority() != DONT_DOWNLOAD);
-                    setEnabled(true);
+                    setEnabled(!torrent.isFinished());
                 }
             } else {
                 currentWrapper = null;
@@ -475,306 +468,5 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
             cancelCellEditing();
             return true;
         }
-    }
-    
-    private class FakeTorrent implements Torrent {
-
-        @Override
-        public void addListener(EventListener<TorrentEvent> listener) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void alert(TorrentAlert alert) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public float getDownloadRate() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public File getFastResumeFile() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String getName() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public int getNumConnections() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public int getNumPeers() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public int getNumUploads() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public List<String> getPaths() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public float getSeedRatio() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public String getSha1() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public TorrentStatus getStatus() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public File getTorrentDataFile() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public File getTorrentFile() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<TorrentFileEntry> getTorrentFileEntries() {
-            List<TorrentFileEntry> list = new ArrayList<TorrentFileEntry>();
-            list.add(new FakeTorrentEntry("file 1", 0, 0, 0.0f, 1000, 0));
-            list.add(new FakeTorrentEntry("file 2", 1, 1, 0.01f, 4000, 400));
-            list.add(new FakeTorrentEntry("file 3", 2, 3, 0.15f, 4000, 500));
-            list.add(new FakeTorrentEntry("file 4", 3, 2, 0.652454f, 4000, 2400));
-            list.add(new FakeTorrentEntry("file 5", 0, 2, 1.0f, 4000, 2400));
-            
-            return list;
-        }
-
-        @Override
-        public List<TorrentPeer> getTorrentPeers() {
-            return null;
-        }
-
-        @Override
-        public long getTotalDownloaded() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public long getTotalSize() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public long getTotalUploaded() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public String getTrackerURL() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public float getUploadRate() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public void init(String name, String sha1, long totalSize, String trackerURL,
-                List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile,
-                Boolean isPrivate) throws IOException {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public boolean isAutoManaged() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isFinished() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isMultiFileTorrent() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isPaused() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isPrivate() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isSingleFileTorrent() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isStarted() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void moveTorrent(File directory) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void pause() {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public boolean registerWithTorrentManager() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean removeListener(EventListener<TorrentEvent> listener) {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void resume() {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void setAutoManaged(boolean autoManaged) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void start() {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void stop() {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void updateStatus(TorrentStatus torrentStatus) {
-            // TODO Auto-generated method stub
-            
-        }
-        
-    }
-    
-    private class FakeTorrentEntry implements TorrentFileEntry {
-
-        private final String path;
-        private final int index;
-        private final int priority;
-        private final float progress;
-        private final long size;
-        private final long totalDone;
-        
-        public FakeTorrentEntry(String path, int index, int priority, float progress, long size, long totalDone) {
-            this.path = path;
-            this.index = index;
-            this.priority = priority;
-            this.progress = progress;
-            this.size = size;
-            this.totalDone = totalDone;
-        }
-        
-        @Override
-        public int getIndex() {
-            return index;
-        }
-
-        @Override
-        public String getPath() {
-            return path;
-        }
-
-        @Override
-        public int getPriority() {
-            return priority;
-        }
-
-        @Override
-        public float getProgress() {
-            return progress;
-        }
-
-        @Override
-        public long getSize() {
-            return size;
-        }
-
-        @Override
-        public long getTotalDone() {
-            return totalDone;
-        }
-        
     }
 }
