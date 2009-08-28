@@ -272,4 +272,14 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     public int getActiveTime() {
         return active_time;
     }
+
+    @Override
+    public long getTotalWanted() {
+        return total_wanted;
+    }
+
+    @Override
+    public long getTotalWantedDone() {
+        return total_wanted_done;
+    }
 }

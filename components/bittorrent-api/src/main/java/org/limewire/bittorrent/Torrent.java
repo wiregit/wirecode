@@ -103,11 +103,6 @@ public interface Torrent {
     public boolean isMultiFileTorrent();
 
     /**
-     * Returns the total amount of the torren that has fnished downloading.
-     */
-    public long getTotalDownloaded();
-
-    /**
      * Returns the number of peers in this torrents swarm.
      */
     public int getNumPeers();
@@ -234,4 +229,6 @@ public interface Torrent {
      * 
      */
     public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority);
+    
+    public File getTorrentDataFile(TorrentFileEntry torrentFileEntry);
 }

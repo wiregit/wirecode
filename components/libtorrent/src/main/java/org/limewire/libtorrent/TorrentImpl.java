@@ -293,16 +293,6 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public long getTotalDownloaded() {
-        TorrentStatus status = this.status.get();
-        if (status == null) {
-            return -1;
-        } else {
-            return status.getTotalDone();
-        }
-    }
-
-    @Override
     public int getNumPeers() {
         TorrentStatus status = this.status.get();
         return status == null ? 0 : status.getNumPeers();
@@ -486,5 +476,10 @@ public class TorrentImpl implements Torrent {
     @Override
     public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority) {
         torrentManager.setTorrenFileEntryPriority(this, torrentFileEntry, priority);
+    }
+
+    @Override
+    public File getTorrentDataFile(TorrentFileEntry torrentFileEntry) {
+        return new File(getTorrentDataFile().getParent(), torrentFileEntry.getPath());
     }
 }

@@ -65,35 +65,44 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         EventListener<TorrentEvent> {
 
     private static final Log LOG = LogFactory.getLog(BTDownloaderImpl.class);
-    private static final String DANGEROUS_TORRENT_WARNING =
-        "This torrent may have been designed to damage your computer.\n" +
-        "LimeWire has cancelled the download for your protection.";
-    
+
+    private static final String DANGEROUS_TORRENT_WARNING = "This torrent may have been designed to damage your computer.\n"
+            + "LimeWire has cancelled the download for your protection.";
+
     private final DownloadManager downloadManager;
+
     private final Torrent torrent;
+
     private final BTUploaderFactory btUploaderFactory;
+
     private final AtomicBoolean finishing = new AtomicBoolean(false);
+
     private final AtomicBoolean complete = new AtomicBoolean(false);
+
     private final Library library;
+
     private final EventMulticaster<DownloadStateEvent> listeners;
-    private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(DownloadState.QUEUED);
+
+    private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(
+            DownloadState.QUEUED);
+
     private final FileCollection gnutellaFileCollection;
+
     private final Provider<TorrentUploadManager> torrentUploadManager;
+
     private final Provider<DangerousFileChecker> dangerousFileChecker;
+
     private final Provider<DownloadCallback> downloadCallback;
-    
+
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
     private volatile URN urn = null;
 
     @Inject
-    BTDownloaderImpl(SaveLocationManager saveLocationManager,
-            DownloadManager downloadManager,
-            BTUploaderFactory btUploaderFactory,
-            Provider<Torrent> torrentProvider,
-            Library library,
-            @Named("fastExecutor") ScheduledExecutorService fastExecutor,
+    BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
+            BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
+            Library library, @Named("fastExecutor") ScheduledExecutorService fastExecutor,
             @GnutellaFiles FileCollection gnutellaFileCollection,
             Provider<TorrentUploadManager> torrentUploadManager,
             Provider<DangerousFileChecker> dangerousFileChecker,
@@ -125,8 +134,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             finishing.set(true);
             // If the torrent contains any dangerous files, delete everything
             // and inform the user that the download has been cancelled.
-            for(File f : getIncompleteFiles()) {
-                if(dangerousFileChecker.get().isDangerous(f)) {
+            for (File f : getIncompleteFiles()) {
+                if (dangerousFileChecker.get().isDangerous(f)) {
                     torrent.stop();
                     listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
                     downloadCallback.get().warnUser(getSaveFile().getName(),
@@ -330,7 +339,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         if (status.isError()) {
-            //gave up maps to stalled in the core api, which is a recoverable error. All torrent downlaods are recoverable.
+            // gave up maps to stalled in the core api, which is a recoverable
+            // error. All torrent downlaods are recoverable.
             return DownloadState.GAVE_UP;
         }
 
@@ -374,12 +384,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public long getContentLength() {
-        return torrent.getTotalSize();
+        TorrentStatus status = torrent.getStatus();
+        long contentLength = status != null ? status.getTotalWanted() : torrent.getTotalSize();
+        return contentLength;
     }
 
     @Override
     public long getAmountRead() {
-        return torrent.getTotalDownloaded();
+        TorrentStatus status = torrent.getStatus();
+        if (status == null) {
+            return -1;
+        } else {
+            return status.getTotalDone();
+        }
     }
 
     @Override
@@ -451,7 +468,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public long getAmountVerified() {
-        return torrent.getTotalDownloaded();
+        TorrentStatus status = torrent.getStatus();
+        if (status == null) {
+            return -1;
+        } else {
+            return status.getTotalWantedDone();
+        }
     }
 
     @Override
