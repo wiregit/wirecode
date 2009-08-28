@@ -71,7 +71,6 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         component.setOpaque(false);
         
         eventList = GlazedLists.threadSafeList(new BasicEventList<TorrentFileEntryWrapper>());
-//        FakeTorrent torrent = new FakeTorrent();
         for(TorrentFileEntry entry : torrent.getTorrentFileEntries()) {
             eventList.add(new TorrentFileEntryWrapper(entry));
         }
@@ -100,6 +99,11 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
                 torrent.setTorrenFileEntryPriority(wrapper.getTorrentFileEntry(), wrapper.getPriority());
             }
         }
+    }
+
+    @Override
+    public void unregisterListeners() {
+        //no listeners registered
     }
     
     /**

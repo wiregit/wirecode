@@ -22,4 +22,10 @@ public interface FileInfoPanel {
      * Saves any information that may have changed state.
      */
     public void save();
+    
+    /**
+     * Removes any listeners that may be registered when hiding the 
+     * dialog.
+     */
+    public void unregisterListeners();
 }

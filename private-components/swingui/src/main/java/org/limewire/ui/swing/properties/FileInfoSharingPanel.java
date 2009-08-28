@@ -69,6 +69,11 @@ public class FileInfoSharingPanel implements FileInfoPanel {
         //currently the lists are updated on click, not on save
     }
     
+    @Override
+    public void unregisterListeners() {
+        //no listeners registered
+    }
+    
     private void init() {
         component.setOpaque(false);
         switch(type) {

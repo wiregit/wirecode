@@ -60,13 +60,20 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         //component never changes state
     }
     
+    @Override
+    public void unregisterListeners() {
+        if(downloadStatus != null && propertiableFile instanceof DownloadItem) {
+            ((DownloadItem)propertiableFile).removePropertyChangeListener(downloadStatus);
+        }
+    }
+    
     private void init() {
         switch(type) {
         case DOWNLOADING_FILE:
             if(propertiableFile instanceof DownloadItem) {
                 component.add(createHeaderLabel(I18n.tr("Downloading from")),"push");
                 
-                final JLabel percentLabel = createPlainLabel("test");            
+                final JLabel percentLabel = createPlainLabel("");            
                 component.add(percentLabel, "alignx right, wrap");
                 component.add(Line.createHorizontalLine(),"span, growx 100, gapbottom 4, wrap");
                 

@@ -28,6 +28,10 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
+/**
+ * A list of tabs to select different panels containing information
+ * about a given PropertiableFile.
+ */
 class FileInfoTabPanel {
 
     enum Tabs {
@@ -92,14 +96,24 @@ class FileInfoTabPanel {
         component.add(tabList, "growy");
     }
     
+    /**
+     * Returns the JComponent that displays the tabs. 
+     */
     public JComponent getComponent() {
         return component;
     }
     
+    /**
+     * Adds a listener to the tabs that is notified when a new tab is selected.
+     */
     public void addSearchTabListener(FileInfoTabListener listener) {
         listeners.add(listener);
     }
     
+    /**
+     * Replaces the current list of tabs with this list. The tabs
+     * are added in order of index of the list.
+     */
     public void setTabs(List<Tabs> tabs) {
         tabActionMaps.clear();
         for(Tabs tab: tabs) {

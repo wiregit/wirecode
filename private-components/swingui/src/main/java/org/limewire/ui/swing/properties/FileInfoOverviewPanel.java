@@ -80,6 +80,11 @@ class FileInfoOverviewPanel implements FileInfoPanel{
         //component never changes state
     }
     
+    @Override
+    public void unregisterListeners() {
+        //no listeners registered
+    }
+    
     private void init() {
         component.setOpaque(false);
 

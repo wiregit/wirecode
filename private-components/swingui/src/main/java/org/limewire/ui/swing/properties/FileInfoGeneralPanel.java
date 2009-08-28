@@ -123,6 +123,11 @@ public class FileInfoGeneralPanel implements FileInfoPanel{
         }
     }
     
+    @Override
+    public void unregisterListeners() {
+        //no listeners registered
+    }
+    
     private void init() {
         component.setOpaque(false);
         

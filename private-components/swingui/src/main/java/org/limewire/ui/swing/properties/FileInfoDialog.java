@@ -55,7 +55,6 @@ public class FileInfoDialog extends LimeJDialog {
     
     @Resource private Color backgroundColor;
 
-//    private final FileInfoPanel fileInfoPanel;
     private final FileInfoTabPanel tabPanel;
     private final JPanel cardPanel;
     private final Map<Tabs, FileInfoPanel> cards;
@@ -68,7 +67,6 @@ public class FileInfoDialog extends LimeJDialog {
         super(GuiUtils.getMainFrame());
         
         tabPanel = fileInfoTabPanel;
-//        this.fileInfoPanel = factory.createFileInfoPanel(propertiableFile, type);
         cardPanel = new JPanel(new BorderLayout());
         cardPanel.setPreferredSize(new Dimension(400,600));
         cards = new HashMap<Tabs, FileInfoPanel>();
@@ -104,7 +102,9 @@ public class FileInfoDialog extends LimeJDialog {
             @Override
             public void componentHidden(ComponentEvent e) {
                 //unregister any listeners used and dispose of dialog when made invisible
-//                FileInfoDialog.this.fileInfoPanel.unregisterListeners();    
+                for(FileInfoPanel panel : cards.values()) {
+                    panel.unregisterListeners();
+                }
                 FileInfoDialog.this.dispose();
             }
 
@@ -196,7 +196,6 @@ public class FileInfoDialog extends LimeJDialog {
             for(FileInfoPanel panel : cards.values()) {
                 panel.save();
             }
-//            fileInfoPanel.commit();
         }
     }
 
