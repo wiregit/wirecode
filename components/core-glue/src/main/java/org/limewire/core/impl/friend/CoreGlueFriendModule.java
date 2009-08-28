@@ -3,7 +3,6 @@ package org.limewire.core.impl.friend;
 import org.limewire.core.api.friend.FileMetaDataConverter;
 import org.limewire.friend.api.LimeWireFriendModule;
 import org.limewire.friend.impl.LimeWireFriendImplModule;
-import org.limewire.ui.swing.friend.FacebookShareEventNotifier;
 
 import com.google.inject.AbstractModule;
 
@@ -19,7 +18,6 @@ public class CoreGlueFriendModule extends AbstractModule {
         bind(FileMetaDataConverter.class).to(FileMetaDataConverterImpl.class);
         bind(FriendShareListRefresher.class);
         bind(FriendPresenceLibraryAdder.class);
-        bind(FacebookShareEventNotifier.class);
     }
 
 }
