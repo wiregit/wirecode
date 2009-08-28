@@ -2,6 +2,7 @@ package org.limewire.core.settings;
 
 import java.util.Properties;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.Setting;
 import org.limewire.setting.StringArraySetting;
@@ -77,4 +78,16 @@ public class FacebookSettings extends LimeProps {
 
     public static final Setting<Properties> ATTRIBUTES =
         FACTORY.createPropertiesSetting("FACEBOOK_ATTRIBUTES", new Properties()).setPrivate(true);
+    
+    public static final BooleanSetting SEND_SHARE_NOTIFICATIONS =
+        FACTORY.createRemoteBooleanSetting("FACEBOOK_SEND_SHARE_NOTIFICATIONS", true, "Facebook.sendShareNotifications");
+    
+    public static final StringArraySetting SHARE_NOTIFICATIONS_TEXTS = 
+        FACTORY.createRemoteStringArraySetting("FACEBOOK_NOTIFICATIONS_TEXTS", I18nMarker.marktrn("just shared a file with you on LimeWire. Start {0}LimeWire{1} or {2}download{3} it to get the file.",
+                "just shared {4} files with you on LimeWire. Start {0}LimeWire{1} or {2}download{3} it to get them."), "Facebook.shareNotificationsTexts");
+
+    public static final StringArraySetting SHARE_LINK_URLS = 
+        FACTORY.createRemoteStringArraySetting("FACEBOOK_SHARE_LINK_URLS", 
+                new String[] { "http://openmagnet.limewire.com/", "http://limewire.com/" },
+        "Facebook.shareLinkUrls");
 }

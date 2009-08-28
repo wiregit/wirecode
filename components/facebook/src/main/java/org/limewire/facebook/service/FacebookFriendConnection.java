@@ -515,7 +515,7 @@ public class FacebookFriendConnection implements FriendConnection {
             }
             JSONArray users = new JSONArray();
             try {
-                users = (JSONArray) facebookClient.users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status")));
+                users = (JSONArray) facebookClient.users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status", "locale")));
             } catch (RuntimeException re) {
                 handleFacebookAPIRuntimeException(re);
             }
@@ -1041,5 +1041,42 @@ public class FacebookFriendConnection implements FriendConnection {
     @SuppressWarnings("unchecked")
     private static List<Cookie> parseCookies(FriendConnectionConfiguration configuration) {
         return (List<Cookie>)configuration.getAttribute("cookie");
+    }
+    
+    public void sendNotification(Friend friend, final String text) {
+        final Long userId = Long.parseLong(friend.getId());
+        executorService.submit(new Runnable() {
+            public void run() {
+                try {
+                    facebookClient.notifications_send(Collections.singleton(userId), text);
+                } catch (RuntimeException re) {
+                    try {
+                        handleFacebookAPIRuntimeException(re);
+                    } catch (IOException e) {
+                        LOG.debug("error sending notification", e);
+                    }
+                } catch (FacebookException e) {
+                    LOG.debug("error sending notifcation", e);
+                }
+            }
+        });
+    }
+    
+    public void publishUserAction(final Long templateBundleId) {
+        executorService.submit(new Runnable() {
+            public void run() {
+                try {
+                    facebookClient.feed_publishUserAction(templateBundleId);
+                } catch (RuntimeException re) {
+                    try {
+                        handleFacebookAPIRuntimeException(re);
+                    } catch (IOException e) {
+                        LOG.debug("error publishing user action", e);
+                    }
+                } catch (FacebookException e) {
+                    LOG.debug("error publishing user action", e);
+                }
+            }
+        });
     }
 }
