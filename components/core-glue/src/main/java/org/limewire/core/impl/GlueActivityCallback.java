@@ -21,6 +21,7 @@ import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.upload.UploadListener;
 import org.limewire.core.impl.upload.UploadListenerList;
+import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -288,6 +289,18 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         } 
         
         return approve;
+    }
+
+    @Override
+    public boolean promptTorrentFilePriorities(Torrent torrent) {
+        if(guiCallback != null) {
+            if(!BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.getValue()) {
+                return true;
+            } else {
+                return guiCallback.promptTorrentFilePriorities(torrent);
+            }
+        }
+        return true;
     }
 
 }

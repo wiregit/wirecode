@@ -89,4 +89,9 @@ public class ActivityCallbackStub implements ActivityCallback {
     public boolean promptTorrentUploadCancel(Torrent torrent) {
         return true;
     }
+    
+    @Override
+    public boolean promptTorrentFilePriorities(Torrent torrent) {
+        return true;
+    }
 }

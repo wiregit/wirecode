@@ -5,6 +5,7 @@ import javax.swing.JDialog;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class TorrentDownloadSelector extends LimeJDialog {
@@ -15,6 +16,7 @@ public class TorrentDownloadSelector extends LimeJDialog {
         
         JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("Torrent Download"), 
                 null, panel.getComponent());
+        dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
         dialog.setResizable(true);
         dialog.setVisible(true);
         dialog.dispose();

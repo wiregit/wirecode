@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
@@ -889,7 +890,15 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                     DownloadException.ErrorCode.NO_TORRENT_MANAGER,
                     torrentFile);
         }
-        initializeDownload(ret, true);
+
+        Torrent torrent = ret.getTorrent();
+        if(!downloadCallback.get().promptTorrentFilePriorities(torrent)) {
+            torrentManager.get().removeTorrent(torrent);
+            throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
+        } else {
+            initializeDownload(ret, true);
+        }
+
         return ret;
     }
 

@@ -306,5 +306,10 @@ public class Main {
                 System.out.println("   "+rfd.getFileName());
             }
         }
+        
+        @Override
+        public boolean promptTorrentFilePriorities(Torrent torrent) {
+            return true;
+        }
     }
 }
