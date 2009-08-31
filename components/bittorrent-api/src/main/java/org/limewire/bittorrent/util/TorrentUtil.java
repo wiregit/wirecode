@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 
 public class TorrentUtil {
     /**
@@ -13,8 +14,12 @@ public class TorrentUtil {
      */
     public static List<File> buildTorrentFiles(Torrent torrent, File root) {
         List<File> files = new ArrayList<File>();
-        for (TorrentFileEntry torrentFileEntry : torrent.getTorrentFileEntries()) {
-            files.add(new File(root, torrentFileEntry.getPath()));
+
+        TorrentInfo torrentMetaData = torrent.getTorrentInfo();
+        if (torrentMetaData != null) {
+            for (TorrentFileEntry torrentFileEntry : torrentMetaData.getTorrentFileEntries()) {
+                files.add(new File(root, torrentFileEntry.getPath()));
+            }
         }
         return files;
     }

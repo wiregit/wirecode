@@ -12,16 +12,9 @@ import org.limewire.listener.EventListener;
 public interface Torrent {
 
     /**
-     * Initializes the torrent from the given fields. Either the torrentFile and
-     * saveDir fields cannot be null. Or the name, sha1, long totalSize, paths,
-     * and saveDir fields must be set.
-     * <p>
-     * Otherwise if torrentFile is set and other fields are as well, the field
-     * passed in will be used, and any missing field will be pulled from the
-     * torrent file.
+     * Initializes the torrent from the given torrent parameters Object.
      */
-    public void init(String name, String sha1, String trackerURL, File fastResumeFile,
-            File torrentFile, File torrentDataFile, Boolean isPrivate) throws IOException;
+    public void init(TorrentParams params) throws IOException;
 
     /**
      * Returns the name of this torrent.
@@ -220,4 +213,12 @@ public interface Torrent {
     public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority);
 
     public File getTorrentDataFile(TorrentFileEntry torrentFileEntry);
+
+    public TorrentInfo getTorrentInfo();
+
+    public void setTorrentInfo(TorrentInfo torrentInfo);
+
+    public boolean hasMetaData();
+
+    void initFiles();
 }

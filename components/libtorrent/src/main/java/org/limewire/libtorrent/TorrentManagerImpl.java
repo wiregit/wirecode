@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentPeer;
@@ -147,10 +148,11 @@ public class TorrentManagerImpl implements TorrentManager {
         String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath() : null;
         String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
         String saveDirectory = torrent.getTorrentDataFile().getParentFile().getAbsolutePath();
-        
+
         lock.writeLock().lock();
         try {
-            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, saveDirectory, fastResumePath);
+            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, saveDirectory,
+                    fastResumePath);
             updateStatus(torrent);
             torrents.put(torrent.getSha1(), torrent);
         } finally {
@@ -224,8 +226,23 @@ public class TorrentManagerImpl implements TorrentManager {
         try {
             LibTorrentStatus torrentStatus = getStatus(torrent);
             torrent.updateStatus(torrentStatus);
+            addMetaData(torrent);
         } finally {
             lock.readLock().unlock();
+        }
+    }
+
+    private void addMetaData(Torrent torrent) {
+        if (!torrent.hasMetaData()) {
+            // TODO add more data to the torrentInfo object
+            // use torrent_handle hasMetadata to get a real idea when the
+            // metadata is available.
+            List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
+            if (fileEntries.size() > 0) {
+                TorrentInfo torrentInfo = new TorrentInfo();
+                torrentInfo.setTorrentFileEntries(fileEntries);
+                torrent.setTorrentInfo(torrentInfo);
+            }
         }
     }
 
@@ -268,8 +285,8 @@ public class TorrentManagerImpl implements TorrentManager {
                         TimeUnit.MILLISECONDS);
 
                 if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-                    alertFuture = fastExecutor.scheduleWithFixedDelay(new AlertPoller(), 1000,
-                            500, TimeUnit.MILLISECONDS);
+                    alertFuture = fastExecutor.scheduleWithFixedDelay(new AlertPoller(), 1000, 500,
+                            TimeUnit.MILLISECONDS);
                     resumeFileFuture = fastExecutor.scheduleWithFixedDelay(
                             new ResumeDataScheduler(), 10000, 10000, TimeUnit.MILLISECONDS);
                 }
@@ -397,7 +414,7 @@ public class TorrentManagerImpl implements TorrentManager {
                 String sha1 = torrentIterator.next();
                 Torrent torrent = torrents.get(sha1);
 
-                if (torrent != null) {
+                if (torrent != null && torrent.hasMetaData()) {
                     libTorrent.signal_fast_resume_data_request(sha1);
                 }
             } finally {
@@ -437,7 +454,7 @@ public class TorrentManagerImpl implements TorrentManager {
         float rate = 0;
         for (Torrent torrent : torrents.values()) {
             TorrentStatus torrentStatus = torrent.getStatus();
-            if(torrentStatus != null) {
+            if (torrentStatus != null) {
                 rate += torrentStatus.getDownloadRate();
             }
         }
@@ -449,7 +466,7 @@ public class TorrentManagerImpl implements TorrentManager {
         float rate = 0;
         for (Torrent torrent : torrents.values()) {
             TorrentStatus torrentStatus = torrent.getStatus();
-            if(torrentStatus != null) {
+            if (torrentStatus != null) {
                 rate += torrentStatus.getUploadRate();
             }
         }
@@ -483,6 +500,6 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public boolean isInitialized() {
-       return isValid();
+        return isValid();
     }
 }

@@ -71,7 +71,8 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         component.setOpaque(false);
         
         eventList = GlazedLists.threadSafeList(new BasicEventList<TorrentFileEntryWrapper>());
-        for(TorrentFileEntry entry : torrent.getTorrentFileEntries()) {
+        List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
+        for(TorrentFileEntry entry : fileEntries) {
             eventList.add(new TorrentFileEntryWrapper(entry));
         }
         

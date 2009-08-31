@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,7 +17,9 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentAlert;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.bencoding.Token;
@@ -41,7 +44,9 @@ public class TorrentImpl implements Torrent {
 
     private final TorrentManager torrentManager;
 
-    private final AtomicReference<TorrentStatus> status;
+    private final AtomicReference<TorrentStatus> status = new AtomicReference<TorrentStatus>(null);
+
+    private final AtomicReference<TorrentInfo> torrentInfo = new AtomicReference<TorrentInfo>(null);
 
     private final AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
 
@@ -69,7 +74,6 @@ public class TorrentImpl implements Torrent {
             @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
         this.torrentManager = torrentManager;
         listeners = new AsynchronousMulticasterImpl<TorrentEvent>(fastExecutor);
-        status = new AtomicReference<TorrentStatus>();
     }
 
     @Override
@@ -83,21 +87,17 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public synchronized void init(String name, String sha1, String trackerURL, File fastResumeFile,
-            File torrentFile, File torrentDataFile, Boolean isPrivate) throws IOException {
+    public synchronized void init(TorrentParams params) throws IOException {
 
-        this.sha1 = sha1;
-        this.trackerURL = trackerURL;
-        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
-                .getTorrentDownloadFolder();
+        this.sha1 = params.getSha1();
+        this.trackerURL = params.getTrackerURL();
+        this.name = params.getName();
+        this.isPrivate = params.getPrivate();
 
-        if (name != null) {
-            this.name = name;
-        }
-
-        if (isPrivate != null) {
-            this.isPrivate = isPrivate.booleanValue();
-        }
+        File torrentFile = params.getTorrentFile();
+        File fastResumeFile = params.getFastResumeFile();
+        File torrentDataFile = params.getTorrentDataFile();
+        File saveDirectory = params.getSaveDirectory();
 
         if (torrentFile != null && torrentFile.exists()) {
             FileInputStream fis = null;
@@ -134,7 +134,14 @@ public class TorrentImpl implements Torrent {
             this.isPrivate = Boolean.TRUE;
         }
 
-        if (this.name == null || torrentDownloadFolder == null || this.sha1 == null) {
+        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
+                .getTorrentDownloadFolder();
+
+        if (saveDirectory == null) {
+            saveDirectory = torrentDownloadFolder;
+        }
+
+        if (this.name == null || saveDirectory == null || this.sha1 == null) {
             throw new IOException("There was an error initializing the torrent.");
         }
 
@@ -347,23 +354,6 @@ public class TorrentImpl implements Torrent {
         if (!torrentManager.isValid()) {
             return false;
         }
-        // TODO might need to remove the touch logic here when the user can
-        // select the notion of only downloading a subset of the torrents files.
-        // there is a bug in libtorrent/boost on linux that is expecting the
-        // files to be created.
-        // TODO instead of doign this here, make sure that the alert checks for
-        // hasMetaData, and create the files ... eventually.....
-        // for (File file : getTorrentDataFiles()) {
-        // if (!file.exists()) {
-        // file.getParentFile().mkdirs();
-        // try {
-        // file.createNewFile();
-        // } catch (Throwable e) {
-        // // libtorrent expects the files to have been created
-        // return false;
-        // }
-        // }
-        // }
 
         File torrent = torrentFile.get();
         File torrentParent = torrent.getParentFile();
@@ -401,6 +391,13 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public List<TorrentFileEntry> getTorrentFileEntries() {
+        if (cancelled.get()) {
+            TorrentInfo torrentInfo = this.torrentInfo.get();
+            if (torrentInfo == null) {
+                return Collections.emptyList();
+            }
+            return torrentInfo.getTorrentFileEntries();
+        }
         return torrentManager.getTorrentFileEntries(this);
     }
 
@@ -428,5 +425,39 @@ public class TorrentImpl implements Torrent {
     @Override
     public File getTorrentDataFile(TorrentFileEntry torrentFileEntry) {
         return new File(getTorrentDataFile().getParent(), torrentFileEntry.getPath());
+    }
+
+    @Override
+    public TorrentInfo getTorrentInfo() {
+        return torrentInfo.get();
+    }
+
+    @Override
+    public void setTorrentInfo(TorrentInfo torrentInfo) {
+        synchronized (TorrentImpl.this) {
+            this.torrentInfo.set(torrentInfo);
+            listeners.broadcast(TorrentEvent.META_DATA_UPDATED);
+        }
+    }
+
+    @Override
+    public boolean hasMetaData() {
+        return torrentInfo.get() != null;
+    }
+
+    @Override
+    public void initFiles() {
+        for (TorrentFileEntry fileEntry : getTorrentFileEntries()) {
+            File file = getTorrentDataFile(fileEntry);
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                try {
+                    file.createNewFile();
+                } catch (Throwable e) {
+                    // should be able to continue on most platforms, libtorrent
+                    // will create as needed.
+                }
+            }
+        }
     }
 }
