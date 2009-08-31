@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.bittorrent.BTData;
+import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentAlert;
@@ -20,7 +21,6 @@ import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.io.IOUtils;
@@ -196,6 +196,7 @@ public class TorrentImpl implements Torrent {
     public void start() {
         if (!started.getAndSet(true)) {
             resume();
+            listeners.broadcast(TorrentEvent.STARTED);
         }
     }
 

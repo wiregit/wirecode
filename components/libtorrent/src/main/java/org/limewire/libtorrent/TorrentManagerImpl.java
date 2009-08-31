@@ -23,6 +23,7 @@ import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.inject.LazySingleton;
+import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -76,7 +77,7 @@ public class TorrentManagerImpl implements TorrentManager {
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
-        @InspectionPoint("torrent manager")
+        @InspectionPoint(value = "torrent manager", category = DataCategory.USAGE)
         private final Inspectable inspectable = new Inspectable() {
             @Override
             public Object inspect() {

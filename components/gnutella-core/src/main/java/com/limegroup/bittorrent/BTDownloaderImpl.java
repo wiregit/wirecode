@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.bittorrent.Torrent;
@@ -22,6 +23,8 @@ import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -68,6 +71,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private static final String DANGEROUS_TORRENT_WARNING =
         "This torrent may have been designed to damage your computer.\n" +
         "LimeWire has cancelled the download for your protection.";
+    
+    @InspectablePrimitive(value = "number of torrents started", category = DataCategory.USAGE)
+    private static final AtomicInteger torrentsStarted = new AtomicInteger();
+    @InspectablePrimitive(value = "number of torrents finished", category = DataCategory.USAGE)
+    private static final AtomicInteger torrentsFinished = new AtomicInteger();
     
     private final DownloadManager downloadManager;
     private final Torrent torrent;
@@ -123,6 +131,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void handleEvent(TorrentEvent event) {
         if (TorrentEvent.COMPLETED == event && !complete.get()) {
             finishing.set(true);
+            torrentsFinished.incrementAndGet();
             // If the torrent contains any dangerous files, delete everything
             // and inform the user that the download has been cancelled.
             for(File f : getIncompleteFiles()) {
@@ -160,7 +169,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
         } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
             // nothing to do now.
-        } else {
+        } else if(TorrentEvent.STARTED == event) {
+            torrentsStarted.incrementAndGet();    
+        }
+        else {
             DownloadState currentState = getState();
             if (lastState.getAndSet(currentState) != currentState) {
                 listeners.broadcast(new DownloadStateEvent(this, currentState));

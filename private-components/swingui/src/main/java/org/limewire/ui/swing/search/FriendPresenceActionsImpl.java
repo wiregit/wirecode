@@ -17,6 +17,8 @@ import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.DataCategory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -24,6 +26,12 @@ import com.google.inject.Provider;
 @LazySingleton
 class FriendPresenceActionsImpl implements FriendPresenceActions {
     private static final Log LOG = LogFactory.getLog(FriendPresenceActionsImpl.class);
+    @SuppressWarnings("unused")
+    @InspectablePrimitive(value = "browse all friends", category = DataCategory.USAGE)
+    private int numBrowseAll;
+    @SuppressWarnings("unused")
+    @InspectablePrimitive(value = "browse single friend", category = DataCategory.USAGE)
+    private int numBrowseFriend;
 
 
     private final Provider<ChatMediator> chatMediator;
@@ -62,6 +70,7 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
     
     @Override
     public void viewFriendLibrary(Friend friend) {
+        numBrowseFriend++;
         assert(friend != null && !friend.isAnonymous());
         LOG.debugf("viewLibraryOf: {0}", friend);
         
@@ -93,6 +102,7 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
     
     @Override
     public void browseAllFriends(boolean forceRefresh) {
+        numBrowseAll++;
         if(navigateIfTabExists(ALL_FRIENDS_KEY)){
             if (forceRefresh) {
                 allFriendsRefreshManager.refresh();

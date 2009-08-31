@@ -9,6 +9,8 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 
@@ -30,6 +32,9 @@ public class LazyTorrentManager implements TorrentManager, Service {
     private final Provider<TorrentManagerImpl> torrentManager;
 
     private volatile boolean initialized = false;
+    
+    @InspectionPoint("torrent manager status")
+    private final Inspectable torrentManagerStatus = new TorrentManagerStatus();
 
     @Inject
     public LazyTorrentManager(Provider<TorrentManagerImpl> torrentManager) {
@@ -208,5 +213,17 @@ public class LazyTorrentManager implements TorrentManager, Service {
     public void setAutoManaged(Torrent torrent, boolean autoManaged) {
         setupTorrentManager();
         torrentManager.get().setAutoManaged(torrent, autoManaged);
+    }
+    
+    private enum Status{NOT_INITIALIZED, LOADED, FAILED}
+
+    private class TorrentManagerStatus implements Inspectable {
+        
+        @Override
+        public Object inspect() {
+            synchronized (LazyTorrentManager.this) {
+                return initialized ? (torrentManager.get().isValid() ? Status.LOADED.toString() : Status.FAILED.toString()) : Status.NOT_INITIALIZED.toString();
+            }
+        }
     }
 }

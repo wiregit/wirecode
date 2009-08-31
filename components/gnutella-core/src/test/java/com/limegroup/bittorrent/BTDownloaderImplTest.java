@@ -8,11 +8,14 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.GuiceUtils;
+import org.limewire.inspection.InspectionUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
@@ -22,8 +25,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallbackAdapter;
-import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.Downloader.DownloadState;
+import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 
@@ -230,12 +233,16 @@ public class BTDownloaderImplTest extends LimeTestCase {
         File torrentFile = new File(torrentfilePath);
         return torrentFile;
     }
-
+    
     private BTDownloaderImpl createBTDownloader(File torrentFile) throws IOException {
-        AssertComparisons.assertTrue(torrentFile.exists());
         Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
                 ActivityCallbackAdapter.class));
         GuiceUtils.loadEagerSingletons(injector);
+        return createBTDownloader(torrentFile, injector);
+    }
+
+    private BTDownloaderImpl createBTDownloader(File torrentFile, Injector injector) throws IOException {
+        AssertComparisons.assertTrue(torrentFile.exists());        
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);
@@ -291,5 +298,29 @@ public class BTDownloaderImplTest extends LimeTestCase {
         
         File completeFile = downloader.getSaveFile();
         FileUtils.deleteRecursive(completeFile);
+    }
+    
+    public void testInspections() throws Exception {
+        File torrentFile = createFile("test-peer-dl-single-file.torrent");
+
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
+                ActivityCallbackAdapter.class));
+        GuiceUtils.loadEagerSingletons(injector);
+        injector.getInstance(TorrentManager.class).isValid();
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile, injector);
+        try {
+            // TODO more InspectionTool code into common so it can generate the mapping
+            assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
+            assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsFinished", injector, true));
+            //downloader.startDownload();
+            downloader.handleEvent(TorrentEvent.STARTED);
+            Thread.sleep(500);
+            assertEquals("1", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
+//            downloader.handleEvent(TorrentEvent.COMPLETED);
+//            Thread.sleep(500);
+//            assertEquals("1", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsFinished", injector, true));
+        } finally {
+            cleanup(downloader);    
+        }
     }
 }

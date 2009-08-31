@@ -30,6 +30,7 @@ public class LimeWireFriendImplModule extends AbstractModule {
 
         bind(AuthTokenRegistry.class).to(DefaultFriendAuthenticator.class).asEagerSingleton();
         bind(FriendInspections.class);
+        bind(SessionTimeListener.class);
     }
     
     @Provides @Named("known") Collection<Friend> knownFriendsList(@Named("known") Map<String, Friend> friends) {

@@ -43,6 +43,9 @@ public class FriendInspections {
                 boolean isLoggedIn = (conn != null) && conn.isLoggedIn();
                 Map<Object, Object> map = new HashMap<Object, Object>();
                 map.put("loggedIn", isLoggedIn);
+                if(isLoggedIn) {
+                    map.put("logged in service", conn.getConfiguration().getNetworkName());
+                }
                 collectFriendStatistics(map, conn);    
                 return map;
             }
@@ -50,8 +53,12 @@ public class FriendInspections {
             private void collectFriendStatistics(Map<Object, Object> data, FriendConnection connection) {
                 int count = 0;
                 InspectionHistogram<Integer> presencesHistogram = new InspectionHistogram<Integer>();
+                int onlineFriends = 0;
                 if (connection != null) {
                     for (Friend user : connection.getFriends()) {
+                        if(user.isSignedIn()) {
+                            onlineFriends++;
+                        }
                         Map<String, FriendPresence> presences = user.getPresences();
                         presencesHistogram.count(presences.size());
                         for (FriendPresence presence : presences.values()) {
@@ -64,6 +71,8 @@ public class FriendInspections {
                     }
                 }
                 data.put("limewire friends", count);
+                data.put("online friends", onlineFriends);
+                data.put("total friends", connection.getFriends().size());
                 data.put("presences", presencesHistogram.inspect());
             }
         };
