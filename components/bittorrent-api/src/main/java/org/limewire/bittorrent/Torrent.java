@@ -208,17 +208,32 @@ public interface Torrent {
     public void setAutoManaged(boolean autoManaged);
 
     /**
-     * 
+     * Sets the priority for the specified TorrentFileEntry.
      */
     public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority);
 
+    /**
+     * Returns the filesystem path for the specified torrentFileEntry.
+     */
     public File getTorrentDataFile(TorrentFileEntry torrentFileEntry);
 
+    /**
+     * Returns a snapshot TorrentInfo object for the torrent.
+     */
     public TorrentInfo getTorrentInfo();
 
+    /**
+     * Sets the snapshot TorrentInfo for this torrent.
+     */
     public void setTorrentInfo(TorrentInfo torrentInfo);
 
+    /**
+     * Returns true if this torrent has metadata yet or not.
+     */
     public boolean hasMetaData();
 
-    void initFiles();
+    /**
+     * Initializes files on the file system for this torrent.
+     */
+    public void initFiles();
 }
