@@ -11,6 +11,8 @@ public interface FileInfoPanelFactory {
 
     public FileInfoPanel createGeneralPanel(FileInfoType type, PropertiableFile propertiableFile);
     
+    public FileInfoPanel createOverviewPanel(Torrent torrent);
+    
     public FileInfoPanel createOverviewPanel(FileInfoType type, PropertiableFile propertiableFile);
     
     public FileInfoPanel createTransferPanel(FileInfoType type, PropertiableFile propertiableFile);
