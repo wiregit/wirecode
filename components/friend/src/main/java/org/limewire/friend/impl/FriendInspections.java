@@ -45,6 +45,7 @@ public class FriendInspections {
                 map.put("loggedIn", isLoggedIn);
                 if(isLoggedIn) {
                     map.put("logged in service", conn.getConfiguration().getNetworkName());
+                    map.put("total friends", conn.getFriends().size());
                 }
                 collectFriendStatistics(map, conn);    
                 return map;
@@ -71,8 +72,7 @@ public class FriendInspections {
                     }
                 }
                 data.put("limewire friends", count);
-                data.put("online friends", onlineFriends);
-                data.put("total friends", connection.getFriends().size());
+                data.put("online friends", onlineFriends);                
                 data.put("presences", presencesHistogram.inspect());
             }
         };

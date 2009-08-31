@@ -8,18 +8,18 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.bittorrent.TorrentEvent;
-import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.GuiceUtils;
-import org.limewire.inspection.InspectionUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
+import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.inspection.InspectionUtils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -95,6 +95,30 @@ public class BTDownloaderImplTest extends LimeTestCase {
         FileUtils.deleteRecursive(torrentDir);
         FileUtils.deleteRecursive(fileDir);
         super.tearDown();
+    }
+    
+    public void testInspections() throws Exception {
+        File torrentFile = createFile("test-peer-dl-single-file.torrent");
+
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
+                ActivityCallbackAdapter.class));
+        GuiceUtils.loadEagerSingletons(injector);
+        injector.getInstance(TorrentManager.class).isValid();
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile, injector);
+        try {
+            // TODO more InspectionTool code into common so it can generate the mapping
+            assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
+            assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsFinished", injector, true));
+            //downloader.startDownload();
+            downloader.handleEvent(TorrentEvent.STARTED);
+            Thread.sleep(500);
+            assertEquals("1", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
+//            downloader.handleEvent(TorrentEvent.COMPLETED);
+//            Thread.sleep(500);
+//            assertEquals("1", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsFinished", injector, true));
+        } finally {
+            cleanup(downloader);    
+        }
     }
 
     /**
@@ -298,29 +322,5 @@ public class BTDownloaderImplTest extends LimeTestCase {
         
         File completeFile = downloader.getSaveFile();
         FileUtils.deleteRecursive(completeFile);
-    }
-    
-    public void testInspections() throws Exception {
-        File torrentFile = createFile("test-peer-dl-single-file.torrent");
-
-        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
-                ActivityCallbackAdapter.class));
-        GuiceUtils.loadEagerSingletons(injector);
-        injector.getInstance(TorrentManager.class).isValid();
-        BTDownloaderImpl downloader = createBTDownloader(torrentFile, injector);
-        try {
-            // TODO more InspectionTool code into common so it can generate the mapping
-            assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
-            assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsFinished", injector, true));
-            //downloader.startDownload();
-            downloader.handleEvent(TorrentEvent.STARTED);
-            Thread.sleep(500);
-            assertEquals("1", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
-//            downloader.handleEvent(TorrentEvent.COMPLETED);
-//            Thread.sleep(500);
-//            assertEquals("1", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsFinished", injector, true));
-        } finally {
-            cleanup(downloader);    
-        }
     }
 }
