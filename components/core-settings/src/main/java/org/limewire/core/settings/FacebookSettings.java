@@ -88,6 +88,6 @@ public class FacebookSettings extends LimeProps {
 
     public static final StringArraySetting SHARE_LINK_URLS = 
         FACTORY.createRemoteStringArraySetting("FACEBOOK_SHARE_LINK_URLS", 
-                new String[] { "http://openmagnet.limewire.com/", "http://limewire.com/" },
+                new String[] { "http://client-data.limewire.com/fb-client-open/", "http://client-data.limewire.com/fb-download-notification/" },
         "Facebook.shareLinkUrls");
 }
