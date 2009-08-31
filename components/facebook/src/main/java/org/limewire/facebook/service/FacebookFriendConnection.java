@@ -688,9 +688,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 int statusCode = response.getStatusLine().getStatusCode();
                 HttpEntity entity = response.getEntity();
                 if (statusCode != 200) {
-                    // turn this off after the next beta and the then just throw IOException to trigger
-                    // the retry code
-                    throw new RuntimeException("status code: " + statusCode + ", content: " + entity != null ? EntityUtils.toString(entity) : "none");
+                    throw new IOException("wrong status code: " + statusCode + ", content: " + entity != null ? EntityUtils.toString(entity) : "none");
                 }
                 if (entity != null) {
                     String responseStr = EntityUtils.toString(entity);
