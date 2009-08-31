@@ -70,7 +70,7 @@ public class ProNagController {
                 dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
                 dialog.setSize(new Dimension(380, 240));
                 dialog.getRootPane().setDefaultButton(nag.getDefaultButton());
-                dialog.setModal(false);
+                dialog.setModal(true);
                 dialog.setVisible(true);
             }
         }
