@@ -12,15 +12,18 @@ import org.limewire.facebook.service.settings.FacebookAppID;
 import org.limewire.facebook.service.settings.FacebookAuthServerUrls;
 import org.limewire.facebook.service.settings.FacebookReportBugs;
 import org.limewire.facebook.service.settings.FacebookURLs;
+import org.limewire.facebook.service.settings.InspectionsServerUrls;
 import org.limewire.geocode.GeoLocation;
 import org.limewire.geocode.GeocodeUrl;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inject.MutableProvider;
+import org.limewire.setting.StringSetting;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.ImmutableMap;
 
 public class LimeWireCoreSettingsModule extends AbstractModule {
     @Override
@@ -33,6 +36,7 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<String>(){}).annotatedWith(FacebookAppID.class).toProvider(FacebookSettings.APP_ID);
         bind(new TypeLiteral<Boolean>(){}).annotatedWith(FacebookReportBugs.class).toProvider(FacebookSettings.REPORT_BUGS);
         bind(new TypeLiteral<Map<String, Provider<String>>>(){}).annotatedWith(FacebookURLs.class).toProvider(FacebookURLsMapProvider.class);
+        bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);   
     }
 
     @Singleton
@@ -55,6 +59,18 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
             map.put(FacebookURLs.UPDATE_PRESENCES_URL, FacebookSettings.UPDATE_PRESENCES_URL);
             map.put(FacebookURLs.RECEIVE_CHAT_URL, FacebookSettings.RECEIVE_CHAT_URL);
             return Collections.unmodifiableMap(map);        
+        }
+    }
+    
+    @Singleton
+    private static class InspectionsURLsMapProvider extends AbstractLazySingletonProvider<Map<String, StringSetting>> {
+        @Inject public InspectionsURLsMapProvider() {}
+
+        @Override
+        protected Map<String, StringSetting> createObject() {
+            return ImmutableMap.of(
+                InspectionsServerUrls.INSPECTION_SPEC_REQUEST_URL, InspectionsSettings.INSPECTION_SPEC_REQUEST_URL, 
+                InspectionsServerUrls.INSPECTION_SPEC_SUBMIT_URL, InspectionsSettings.INSPECTION_SPEC_SUBMIT_URL);        
         }
     }
 }
