@@ -457,7 +457,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         if (status == null) {
             return -1;
         } else {
-            return status.getTotalDone();
+            return status.getTotalWantedDone();
         }
     }
 
