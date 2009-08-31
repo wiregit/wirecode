@@ -43,8 +43,16 @@ class RemoveFromLibraryAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {       
         List<LocalFileItem> selected = selectedLocalFileItems.get();
         
-        int confirmation = FocusJOptionPane.showConfirmDialog(null, getMessage(selected), I18n.trn("Remove File","Remove Files", selected.size()), JOptionPane.OK_CANCEL_OPTION); 
-        if (confirmation == JOptionPane.OK_OPTION) {
+        String removeText = I18n.tr("Remove");
+        String cancelText = I18n.tr("Cancel");
+        
+        Object[] options = new Object[] {removeText, cancelText};
+        
+        int confirmation = FocusJOptionPane.showOptionDialog(null, 
+                getMessage(selected), I18n.trn("Remove File","Remove Files", selected.size()), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                options, cancelText);
+        
+        if (confirmation > -1 && options[confirmation] == removeText) {
             removeFromLibrary(libraryManager, selected);
         }
     }

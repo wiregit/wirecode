@@ -64,14 +64,7 @@ public class DeletionKeyListener implements KeyListener {
                 deleteText = I18n.tr("Delete from Disk");
             }
             
-            Object[] options = null;
-            
-            if (OSUtils.isMacOSX()) {
-                options = new Object[] {cancelText, removeText, deleteText};
-            }
-            else {
-                options = new Object[] {removeText, deleteText, cancelText};
-            }
+            Object[] options = new Object[] {removeText, deleteText, cancelText};
             
             int confirmation = FocusJOptionPane.showOptionDialog(null, 
                     message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,

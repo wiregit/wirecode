@@ -68,14 +68,7 @@ class DeleteAction extends AbstractAction {
             yesText = I18n.tr("Delete from Disk");
         }
         
-        Object[] options = null;
-        
-        if (OSUtils.isMacOSX()) {
-            options = new Object[] {noText, yesText};
-        }
-        else {
-            options = new Object[] {yesText, noText};
-        }
+        Object[] options = new Object[] {yesText, noText};
         
         int confirmation = FocusJOptionPane.showOptionDialog(null, 
                 message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,

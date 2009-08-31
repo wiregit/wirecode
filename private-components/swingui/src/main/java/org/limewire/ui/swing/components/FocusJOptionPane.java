@@ -126,6 +126,7 @@ public class FocusJOptionPane {
             int optionType, int messageType, Icon icon, Object[] options, Object initialValue)
             throws HeadlessException {
         boolean dispose = false;
+        parentComponent = getWindowForComponent(parentComponent);
         if(parentComponent == null) {
             parentComponent = createFocusComponent();
             dispose = true;
