@@ -97,7 +97,6 @@ public class TorrentImpl implements Torrent {
         File torrentFile = params.getTorrentFile();
         File fastResumeFile = params.getFastResumeFile();
         File torrentDataFile = params.getTorrentDataFile();
-        File saveDirectory = params.getSaveDirectory();
 
         if (torrentFile != null && torrentFile.exists()) {
             FileInputStream fis = null;
@@ -137,11 +136,7 @@ public class TorrentImpl implements Torrent {
         File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
                 .getTorrentDownloadFolder();
 
-        if (saveDirectory == null) {
-            saveDirectory = torrentDownloadFolder;
-        }
-
-        if (this.name == null || saveDirectory == null || this.sha1 == null) {
+        if (this.name == null || torrentDownloadFolder == null || this.sha1 == null) {
             throw new IOException("There was an error initializing the torrent.");
         }
 

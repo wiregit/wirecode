@@ -16,8 +16,6 @@ public class TorrentParams {
 
     private File torrentDataFile;
 
-    private File saveDirectory;
-    
     private Boolean isPrivate;
     
     public TorrentParams(File torrentFile) {
@@ -59,11 +57,6 @@ public class TorrentParams {
         return this;
     }
     
-    public TorrentParams saveDirectory(File saveDirectory) {
-        setSaveDirectory(saveDirectory);
-        return this;
-    }
-
     public TorrentParams isPrivate(boolean isPrivate) {
         setPrivate(isPrivate);
         return this;
@@ -124,13 +117,4 @@ public class TorrentParams {
     public void setPrivate(Boolean isPrivate) {
         this.isPrivate = isPrivate;
     }
-    
-    public File getSaveDirectory() {
-        return saveDirectory;
-    }
-    
-    public void setSaveDirectory(File saveDirectory) {
-        this.saveDirectory = saveDirectory;
-    }
-
 }
