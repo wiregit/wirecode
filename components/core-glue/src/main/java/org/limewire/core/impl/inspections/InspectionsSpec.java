@@ -18,8 +18,8 @@ import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectionException;
 
 /**
- * represents an inspections instruction - a response sent from the lw server
- * telling the client:
+ * represents an inspections instruction - a response 
+ * sent from the lw server telling the client:
  * 
  * Contains all inspection points to be collected 
  * after the same delay and at the same intervals, is one 
@@ -29,12 +29,14 @@ import org.limewire.inspection.InspectionException;
 public class InspectionsSpec {
     
     private static final Log LOG = LogFactory.getLog(InspectionsSpec.class);
-    
-    // inspection points specified by name
+
+    /**
+     * inspection points specified by name.
+     */
     private final List<String> inspectionPoints;
 
     /**
-     * delay (seconds) before the inspections in this spec are first performed
+     * delay (seconds) before the inspections in this spec are first executed.
      */
     private final long startDelay;
 
@@ -44,10 +46,19 @@ public class InspectionsSpec {
     private final long interval;
 
     /**
-     * 
+     * A handle to the scheduled inspections so we can cancel
+     * or reschedule. 
      */
     private ScheduledFuture scheduledInspections;
 
+    /**
+     * Creates based on parameters: inspection key list, 
+     * start delay, and interval between inspections executed.
+     * 
+     * @param inspectionPoints inspection points specified by name.
+     * @param startDelay delay (in seconds) before the inspections in this spec are first executed.
+     * @param interval delay (in seconds) between executions of inspections in this spec.
+     */
     InspectionsSpec(List<String> inspectionPoints, long startDelay, long interval) {
         this.inspectionPoints = new ArrayList<String>(inspectionPoints);
         this.startDelay = startDelay;

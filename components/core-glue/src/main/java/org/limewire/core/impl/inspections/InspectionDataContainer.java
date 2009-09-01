@@ -54,10 +54,18 @@ public class InspectionDataContainer {
      */
     private final long collectionTimestamp;
 
+    /**
+     * Creates with current timestamp, no inspections results
+     */
     public InspectionDataContainer() {
         this(System.currentTimeMillis());
     }
 
+    /**
+     * Creates with timestamp parameter, no inspections results
+     * 
+     * @param collectionTimestamp milliseconds since epoch
+     */
     public InspectionDataContainer(long collectionTimestamp) {
         this.collectionTimestamp = collectionTimestamp;
     }
@@ -106,7 +114,13 @@ public class InspectionDataContainer {
         }
         return bencodingMap;
     }
-    
+
+    /**
+     * Add inspection result data.
+     * 
+     * @param key String identifying inspection point.
+     * @param inspectionData bencodable inspection data.
+     */
     public void addInspectionResult(String key, Object inspectionData) {
         inspectionResults.put(key, inspectionData);
     }
@@ -117,10 +131,6 @@ public class InspectionDataContainer {
     
     Object getData(String key) {
         return inspectionResults.get(key);
-    }
-    
-    Set<String> getKeys() {
-        return inspectionResults.keySet();
     }
     
     int getResultCount() {
