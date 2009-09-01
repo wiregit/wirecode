@@ -6,6 +6,7 @@ import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -61,6 +62,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
     private final Provider<TorrentManager> torrentManager;
 
     private final TorrentManagerSettings torrentSettings;
+    
+    private JCheckBox prioritizeTorrentPopup;
 
     @Inject
     public BitTorrentOptionPanel(Provider<TorrentManager> torrentManager,
@@ -128,7 +131,11 @@ public class BitTorrentOptionPanel extends OptionPanel {
         portToLabel = new JLabel(I18n.tr("to"));
         startPortField = new NumericTextField(5, 1, 0xFFFF);
         endPortField = new NumericTextField(5, 1, 0xFFFF);
-
+        
+        prioritizeTorrentPopup = new JCheckBox(I18n.tr("Show torrent file dialog when starting new torrents"));
+        prioritizeTorrentPopup.setOpaque(false);
+        
+        
         if (torrentManager.get().isValid()) {
             p.add(uploadForever, "wrap");
             p.add(myControl, "wrap");
@@ -141,12 +148,13 @@ public class BitTorrentOptionPanel extends OptionPanel {
             p.add(startPortField, "split");
             p.add(portToLabel, "split");
             p.add(endPortField, "alignx right, wrap");
+            p.add(prioritizeTorrentPopup, "wrap");
 
         } else {
             p
                     .add(new MultiLineLabel(
                             I18n
-                                    .tr("There was an error loading bittorrent. You will not be use bittorrent capabilities until this is resolved."),
+                                    .tr("There was an error loading bittorrent. You will not be able to use bittorrent capabilities until this is resolved."),
                             500));
         }
         return p;
@@ -176,6 +184,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
         BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.setValue(startPort);
         BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.setValue(endPort);
+        
+        BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.setValue(prioritizeTorrentPopup.isSelected());
 
         if (torrentManager.get().isValid()) {
             torrentManager.get().setTorrentManagerSettings(torrentSettings);
@@ -193,7 +203,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 || startPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT
                         .getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue()
                 || endPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_END_PORT
-                        .getValue();
+                        .getValue() 
+                || prioritizeTorrentPopup.isSelected() != BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.getValue();
     }
 
     @Override
@@ -209,6 +220,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedTime.setValue(getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()));
         startPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
         endPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
+        prioritizeTorrentPopup.setSelected(BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
 
         updateState(auto);
     }

@@ -12,17 +12,9 @@ import org.limewire.listener.EventListener;
 public interface Torrent {
 
     /**
-     * Initializes the torrent from the given fields. Either the torrentFile and
-     * saveDir fields cannot be null. Or the name, sha1, long totalSize, paths,
-     * and saveDir fields must be set.
-     * <p>
-     * Otherwise if torrentFile is set and other fields are as well, the field
-     * passed in will be used, and any missing field will be pulled from the
-     * torrent file.
+     * Initializes the torrent from the given torrent parameters Object.
      */
-    public void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File torrentDataFile,
-            Boolean isPrivate) throws IOException;
+    public void init(TorrentParams params) throws IOException;
 
     /**
      * Returns the name of this torrent.
@@ -82,12 +74,6 @@ public interface Torrent {
     public boolean isFinished();
 
     /**
-     * Returns the total size of this torrent if all files were to be
-     * downloaded.
-     */
-    public long getTotalSize();
-
-    /**
      * Returns true if the torrent has been started, false otherwise.
      */
     public boolean isStarted();
@@ -103,19 +89,9 @@ public interface Torrent {
     public boolean isMultiFileTorrent();
 
     /**
-     * Returns the total amount of the torren that has fnished downloading.
-     */
-    public long getTotalDownloaded();
-
-    /**
      * Returns the number of peers in this torrents swarm.
      */
     public int getNumPeers();
-
-    /**
-     * Returns the non absolute paths to all files in the torrent.
-     */
-    public List<String> getPaths();
 
     /**
      * Returns the root data file for this torrent.
@@ -219,13 +195,40 @@ public interface Torrent {
     public boolean isAutoManaged();
 
     /**
-     * Sets whether or not this torrent is automanaged. For an explanation of automanagement
-     * see http://www.rasterbar.com/products/libtorrent/manual.html#queuing
+     * Sets whether or not this torrent is automanaged. For an explanation of
+     * automanagement see
+     * http://www.rasterbar.com/products/libtorrent/manual.html#queuing
      * 
-     * Basically it means that the torrent will be managed by libtorrent. Every polling period
-     * queued and active torrents are checked to see if they should be given some active time
-     * to allow for seeding/downloading. Automanaged torrents adhere to limits for total torrents
-     * allowed active, total seeds, etc.
+     * Basically it means that the torrent will be managed by libtorrent. Every
+     * polling period queued and active torrents are checked to see if they
+     * should be given some active time to allow for seeding/downloading.
+     * Automanaged torrents adhere to limits for total torrents allowed active,
+     * total seeds, etc.
      */
     public void setAutoManaged(boolean autoManaged);
+
+    /**
+     * Sets the priority for the specified TorrentFileEntry.
+     */
+    public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority);
+
+    /**
+     * Returns the filesystem path for the specified torrentFileEntry.
+     */
+    public File getTorrentDataFile(TorrentFileEntry torrentFileEntry);
+
+    /**
+     * Sets the snapshot TorrentInfo for this torrent.
+     */
+    public void setTorrentInfo(TorrentInfo torrentInfo);
+
+    /**
+     * Returns true if this torrent has metadata yet or not.
+     */
+    public boolean hasMetaData();
+
+    /**
+     * Initializes files on the file system for this torrent.
+     */
+    public void initFiles();
 }

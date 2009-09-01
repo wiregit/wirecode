@@ -15,6 +15,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -289,5 +290,10 @@ public class MockDownloadItem implements DownloadItem {
     @Override
     public DownloadItemType getDownloadItemType() {
         return DownloadItemType.GNUTELLA;
+    }
+
+    @Override
+    public Object getDownloadProperty(DownloadPropertyKey key) {
+        return null;
     }
 }

@@ -176,10 +176,17 @@ interface LibTorrent extends Library {
      * Marks this torrent as automanged or not.
      */
     public WrapperStatus set_auto_managed_torrent(String sha1, boolean auto_managed);
-    
+
     /**
-     * This is a simple function used to test that the loaded library is working. 
+     * This is a simple function used to test that the loaded library is
+     * working.
      */
     public void echo(String message);
+
+    /**
+     * Sets the file priority for the given torrent and torrent file index to
+     * the given priority.
+     */
+    public WrapperStatus set_file_priority(String sha1, int index, int priority);
 
 }

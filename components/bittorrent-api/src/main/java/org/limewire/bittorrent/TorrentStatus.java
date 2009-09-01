@@ -10,19 +10,19 @@ public interface TorrentStatus {
 
     /**
      * Returns the rate in byte/second that data is being uploaded for this
-     * torrent. This includes payload and protocol overhead. 
+     * torrent. This includes payload and protocol overhead.
      */
     public float getUploadRate();
-    
+
     /**
-     * Returns the rate in bytes/second that payload data is being downloaded for this
-     * torrent.
+     * Returns the rate in bytes/second that payload data is being downloaded
+     * for this torrent.
      */
     public float getDownloadPayloadRate();
 
     /**
-     * Returns the rate in byte/second that payload data is being uploaded for this
-     * torrent.
+     * Returns the rate in byte/second that payload data is being uploaded for
+     * this torrent.
      */
     public float getUploadPayloadRate();
 
@@ -86,25 +86,39 @@ public interface TorrentStatus {
      * Returns the LibTorrentState for this torrent.
      */
     public TorrentState getState();
-    
+
     /**
-     * Returns the seed ratio for this torrent. 
+     * Returns the seed ratio for this torrent.
      */
     public float getSeedRatio();
 
     /**
-     * Returns true if this torrent is automanaged. 
+     * Returns true if this torrent is automanaged.
      */
     public boolean isAutoManaged();
 
     /**
-     * Returns the amount of time the torrent has been seeding in seconds. 
+     * Returns the amount of time the torrent has been seeding in seconds.
      */
     public int getSeedingTime();
-    
+
     /**
-     * Returns the amount of time the torrent has been active in seconds. 
+     * Returns the amount of time the torrent has been active in seconds.
      */
     public int getActiveTime();
+
+    /**
+     * Returns the total number of bytes wanted to download. Some files in the
+     * torrent might have been marked as not to download. Those files bytes will
+     * not be included in this number.
+     */
+    public long getTotalWanted();
+
+    /**
+     * Returns the total number of bytes wanted that have been downloaded. Some
+     * files in the torrent might have been marked as not to download. Those
+     * files bytes will not be included in this number.
+     */
+    public long getTotalWantedDone();
 
 }

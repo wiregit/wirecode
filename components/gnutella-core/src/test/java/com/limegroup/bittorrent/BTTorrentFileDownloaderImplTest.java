@@ -445,6 +445,11 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                     Set<? extends IpPort> locs) {
                 
             }
+            
+            @Override
+            public boolean promptTorrentFilePriorities(Torrent torrent) {
+                return true;
+            }
 
         });
         

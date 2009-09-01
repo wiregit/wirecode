@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import org.limewire.bittorrent.Torrent;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadCallback;
@@ -46,5 +48,10 @@ public class InNetworkCallback implements DownloadCallback {
 
     public String getHostValue(String key) {
         return null;
+    }
+    
+    @Override
+    public boolean promptTorrentFilePriorities(Torrent torrent) {
+        return true;
     }
 }

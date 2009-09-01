@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
@@ -80,11 +81,16 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         String name = (String) memento.get("name");
 
                         if (torrentDataFile.exists()) {
-                            //TODO show error message when seeds cannot be resumed?
-                            if (torrentManager.get().isValid() && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
+                            // TODO show error message when seeds cannot be
+                            // resumed?
+                            if (torrentManager.get().isValid()
+                                    && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
                                 try {
-                                    torrent.init(name, sha1, -1, trackerURL, null, fastResumeFile,
-                                            torrentFile, torrentDataFile, null);
+                                    TorrentParams params = new TorrentParams(name, sha1);
+                                    params.trackerURL(trackerURL).fastResumeFile(fastResumeFile)
+                                            .torrentFile(torrentFile).torrentDataFile(
+                                                    torrentDataFile);
+                                    torrent.init(params);
                                 } catch (IOException e) {
                                     LOG.error("Error initializing memento from: " + mementoFile, e);
                                 }
@@ -146,7 +152,8 @@ public class TorrentUploadManager implements BTUploaderFactory {
 
     @Override
     public BTUploader createBTUploader(Torrent torrent) {
-        BTUploader btUploader = new BTUploader(torrent, activityCallback.get(), this, torrentManager.get());
+        BTUploader btUploader = new BTUploader(torrent, activityCallback.get(), this,
+                torrentManager.get());
         btUploader.registerTorrentListener();
         activityCallback.get().addUpload(btUploader);
         return btUploader;

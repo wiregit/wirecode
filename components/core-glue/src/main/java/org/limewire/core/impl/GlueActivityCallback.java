@@ -290,4 +290,12 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         return approve;
     }
 
+    @Override
+    public boolean promptTorrentFilePriorities(Torrent torrent) {
+        if(guiCallback != null) {
+            return guiCallback.promptTorrentFilePriorities(torrent);
+        }
+        return true;
+    }
+
 }

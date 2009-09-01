@@ -33,6 +33,7 @@ public class LazyTorrentManager implements TorrentManager, Service {
 
     private volatile boolean initialized = false;
     
+    @SuppressWarnings("unused")
     @InspectionPoint("torrent manager status")
     private final Inspectable torrentManagerStatus = new TorrentManagerStatus();
 
@@ -225,5 +226,17 @@ public class LazyTorrentManager implements TorrentManager, Service {
                 return initialized ? (torrentManager.get().isValid() ? Status.LOADED.toString() : Status.FAILED.toString()) : Status.NOT_INITIALIZED.toString();
             }
         }
+    }
+
+    @Override
+    public void setTorrenFileEntryPriority(Torrent torrent, TorrentFileEntry torrentFileEntry,
+            int priority) {
+        setupTorrentManager();
+        torrentManager.get().setTorrenFileEntryPriority(torrent, torrentFileEntry, priority);
+    }
+
+    @Override
+    public boolean isInitialized() {
+       return initialized;
     }
 }

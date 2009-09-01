@@ -134,4 +134,9 @@ public class ActivityCallbackAdapter implements ActivityCallback {
         return true;
     }
 
+    @Override
+    public boolean promptTorrentFilePriorities(Torrent torrent) {
+        return true;
+    }
+
 }

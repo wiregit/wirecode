@@ -18,6 +18,13 @@ public class BittorrentSettings extends LimeProps {
     }
 
     /**
+     * Whether to show a popup dialog allowing the user to select files within
+     * the torrent to download prior to starting the download.
+     */
+    public static final BooleanSetting SHOW_POPUP_BEFORE_DOWNLOADING = 
+        FACTORY.createBooleanSetting("SHOW_POPUP_BEFORE_DOWNLOADING", true);
+    
+    /**
      * Setting for whether or not be want to report issues loading the
      * libtorrent libraries.
      */
