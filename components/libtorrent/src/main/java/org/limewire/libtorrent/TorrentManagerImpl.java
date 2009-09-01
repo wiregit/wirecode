@@ -240,8 +240,7 @@ public class TorrentManagerImpl implements TorrentManager {
             // metadata is available.
             List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
             if (fileEntries.size() > 0) {
-                TorrentInfo torrentInfo = new TorrentInfo();
-                torrentInfo.setTorrentFileEntries(fileEntries);
+                TorrentInfo torrentInfo = new TorrentInfo(fileEntries);
                 torrent.setTorrentInfo(torrentInfo);
             }
         }

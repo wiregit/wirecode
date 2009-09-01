@@ -228,8 +228,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // the TorrentInfo object, right now making a copy of the last known
             // contents, to display the correct value in the ui, in general
             // these fields are not kept up to date however.
-            TorrentInfo torrentInfo = new TorrentInfo();
-            torrentInfo.setTorrentFileEntries(fileEntries);
+            TorrentInfo torrentInfo = new TorrentInfo(fileEntries);
             torrent.setTorrentInfo(torrentInfo);
 
             for (TorrentFileEntry fileEntry : fileEntries) {
