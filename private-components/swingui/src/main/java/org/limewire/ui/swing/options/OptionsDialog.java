@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -135,7 +137,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     }
     
     private void createComponents(BarPainterFactory barPainterFactory) {
-        setLayout(new MigLayout("gap 0, insets 0 0 0 0, fill", "fill", "[60!][fill][40!, fill]"));
+        setLayout(new BorderLayout());
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel();
@@ -145,15 +147,16 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         headerPanel.setBackgroundPainter(barPainterFactory.createTopBarPainter());
                 
         footerPanel = new JPanel();
+        footerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
         
         createFooter();
         createHeader();
         
         select(LIBRARY);
         
-        add(headerPanel, "aligny top, wrap");
-        add(cardPanel, "grow, wrap");
-        add(footerPanel);
+        add(headerPanel, BorderLayout.NORTH);
+        add(cardPanel, BorderLayout.CENTER);
+        add(footerPanel, BorderLayout.SOUTH);
         
 
     }
