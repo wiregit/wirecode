@@ -1,9 +1,13 @@
 package org.limewire.core.impl.inspections;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.name.Named;
-import com.limegroup.gnutella.util.LimeWireUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -18,21 +22,18 @@ import org.limewire.core.settings.InspectionsSettings;
 import org.limewire.facebook.service.settings.InspectionsServerUrls;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.inspection.Inspector;
 import org.limewire.io.InvalidDataException;
-import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.StringSetting;
-import org.limewire.inspection.Inspector;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.concurrent.ScheduledExecutorService;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * - request/receive instructions from LW server for which inspections
@@ -58,6 +59,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
     private final ClientConnectionManager httpConnectionManager;
     private final InspectionsParser parser;
     private final Provider<Map<String, StringSetting>> inspectionsServerUrls;
+    private final AtomicBoolean started = new AtomicBoolean(false);
     
     private List<InspectionsSpec> inspectionsSpecs = new ArrayList<InspectionsSpec>();
         
@@ -156,33 +158,38 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
     /**
      * async because we contact the http server, retrying upon failure
      */
-    @Asynchronous
     @Override
     public void start() {
         if (InspectionsSettings.PUSH_INSPECTIONS_ENABLED.get()) {
-            // contact server, get insp. instructions
-            List<InspectionsSpec> specs = Collections.emptyList();
-            try {
-                String requestUrl = inspectionsServerUrls.get().get(
-                InspectionsServerUrls.INSPECTION_SPEC_REQUEST_URL).get();
-                byte[] rawInspectionSpecs = queryInspectionsServer(requestUrl, null);
-                specs = parser.parseInspectionSpecs(rawInspectionSpecs);
-            } catch (IOException e) {
-                LOG.error("Error in getting inspections specifications from server", e); 
-            } catch (InvalidDataException e) {
-                LOG.error("Error in getting inspections specifications from server", e);
-            }
-            
-            if (!specs.isEmpty()) {
-                initInspectionSpecs(specs);
-            }
+            started.set(true);
+            scheduler.execute(new Runnable(){
+                @Override
+                public void run() {
+                    // contact server, get insp. instructions
+                    List<InspectionsSpec> specs = Collections.emptyList();
+                    try {
+                        String requestUrl = inspectionsServerUrls.get().get(
+                        InspectionsServerUrls.INSPECTION_SPEC_REQUEST_URL).get();
+                        byte[] rawInspectionSpecs = queryInspectionsServer(requestUrl, null);
+                        specs = parser.parseInspectionSpecs(rawInspectionSpecs);
+                    } catch (IOException e) {
+                        LOG.error("Error in getting inspections specifications from server", e); 
+                    } catch (InvalidDataException e) {
+                        LOG.error("Error in getting inspections specifications from server", e);
+                    }
+                    
+                    if (!specs.isEmpty()) {
+                        initInspectionSpecs(specs);
+                    }
+                }
+            });            
         }
     }
 
     @Override
     public void stop() {
         // todo: send any unsent (such as previously failed, or not yet sent) inspections results
-        if (InspectionsSettings.PUSH_INSPECTIONS_ENABLED.get()) {
+        if (started.get()) {
             // cancel any pending inspections scheduled
             cancelInspections(inspectionsSpecs);
         }
