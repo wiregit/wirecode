@@ -21,9 +21,9 @@ public class InspectionsSettings extends LimeProps {
      */
     public static final StringSetting INSPECTION_SPEC_REQUEST_URL = 
         FACTORY.createRemoteStringSetting("INSPECTION_SPEC_REQUEST_URL", 
-                "http://www.limewire.org/", "Inspection.requestUrl");
+                "http://localhost:9876", "Inspection.requestUrl");
     
     public static final StringSetting INSPECTION_SPEC_SUBMIT_URL = 
         FACTORY.createRemoteStringSetting("INSPECTION_SPEC_SUBMIT_URL", 
-                "http://www.limewire.org/", "Inspection.submitUrl");
+                "http://localhost:9876", "Inspection.submitUrl");
 }
