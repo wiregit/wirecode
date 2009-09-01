@@ -37,10 +37,11 @@ import com.google.inject.Provider;
 /**
  * Displays general information about a PropertiableFile.
  */
-class FileInfoOverviewPanel implements FileInfoPanel{
+class FileInfoOverviewPanel implements FileInfoPanel {
 
     @Resource private Font smallFont;
     @Resource private Font smallBoldFont;
+    @Resource private Font headerFont;
     
     private final FileInfoType type;
     private final PropertiableFile propertiableFile;
@@ -91,6 +92,8 @@ class FileInfoOverviewPanel implements FileInfoPanel{
 
         addOverviewCategory();
         
+        HyperlinkButton renameButton = new HyperlinkButton(I18n.tr("Rename"));
+        
         HyperlinkButton copyToClipboard = null;
         if(type == FileInfoType.LOCAL_FILE){
             if(propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).isShareable()) {
@@ -114,9 +117,10 @@ class FileInfoOverviewPanel implements FileInfoPanel{
         HyperlinkButton moreFileInfo = new HyperlinkButton(new BitziLookupAction(propertiableFile));
         moreFileInfo.setFont(smallFont);
       
-        if(copyToClipboard != null)
-            component.add(copyToClipboard, "cell 1 1, alignx right");
+        component.add(renameButton, "cell 1 1, alignx right");
         component.add(moreFileInfo, "cell 1 2, alignx right");
+        if(copyToClipboard != null)
+            component.add(copyToClipboard, "cell 1 3, alignx right");
     }
     
 
@@ -131,6 +135,7 @@ class FileInfoOverviewPanel implements FileInfoPanel{
         iconDock.add(new JLabel(icon));
         component.add(iconDock, "aligny top, growy, gap 7, gaptop 5, dock west");
         JTextField name = createLabelField(propertiableFile.getFileName());
+        name.setFont(headerFont);
         name.setPreferredSize(new Dimension(440, 26));
         component.add(name, "growx, span, wrap");
         component.add(createLabel(I18n.tr("Size:")), "split 2");

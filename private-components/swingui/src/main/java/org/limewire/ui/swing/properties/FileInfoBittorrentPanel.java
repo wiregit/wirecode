@@ -232,23 +232,16 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            if(value instanceof TorrentFileEntryWrapper) {
-                if(((TorrentFileEntryWrapper)value).getProgress() == 1.0f) {
-                    setSelected(true);
-                    setEnabled(false);
-                } else {
-                    setSelected(((TorrentFileEntryWrapper)value).getPriority() != DONT_DOWNLOAD);
-                    setEnabled(!torrent.isFinished());
-                }
-            } else {
-                setSelected(false);
-            }
-            
-            return this;
+            return getTableCellComponent(table, value, isSelected, column, column);
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            return getTableCellComponent(table, value, isSelected, column, column);
+        }
+        
+        private Component getTableCellComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             if(value instanceof TorrentFileEntryWrapper) {
                 currentWrapper = (TorrentFileEntryWrapper) value;
@@ -374,36 +367,16 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-
-            if(value instanceof TorrentFileEntryWrapper) {
-                int priority = ((TorrentFileEntryWrapper)value).getPriority();
-
-                if(((TorrentFileEntryWrapper)value).getProgress() == 1.0f) {
-                    button.setIcon(null);
-                    button.setText("");
-//                    button.setText(I18n.tr("delete"));
-                } else if(priority == DONT_DOWNLOAD) {
-                    button.setIcon(null);
-                    button.setText("");
-                } else if(priority == LOWEST_PRIORITY) {
-                    button.setIcon(lowestPriorityIcon);
-                    button.setText("");
-                } else if(priority == NORMAL_PRIORITY) {
-                    button.setIcon(normalPriorityIcon);
-                    button.setText("");
-                } else if(priority == HIGHEST_PRIORITY) {
-                    button.setIcon(highestPriorityIcon);
-                    button.setText("");
-                }
-            } else {
-                button.setIcon(null);
-                button.setText("");
-            }
-            return this;
+            return getTableCellComponent(table, value, isSelected, row, column);
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            return getTableCellComponent(table, value, isSelected, row, column);
+        }
+        
+        private Component getTableCellComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             if(value instanceof TorrentFileEntryWrapper) {
                 currentWrapper = (TorrentFileEntryWrapper) value;

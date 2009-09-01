@@ -28,7 +28,7 @@ import org.limewire.ui.swing.util.I18n;
 public class FileInfoTransfersPanel implements FileInfoPanel {
 
     @Resource private Font smallFont;
-    @Resource private Font largeFont;
+    @Resource private Font headerFont;
     
     private final JPanel component;
     private final FileInfoType type;
@@ -97,7 +97,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     
     private JLabel createHeaderLabel(String text) { 
         JLabel label = new JLabel(text);
-        label.setFont(largeFont);
+        label.setFont(headerFont);
         return label;
     }
     

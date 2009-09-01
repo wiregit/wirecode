@@ -31,7 +31,7 @@ import org.limewire.ui.swing.util.I18n;
 
 public class FileInfoSharingPanel implements FileInfoPanel {
 
-    @Resource private Font largeFont;
+    @Resource private Font headerFont;
     @Resource private Icon removeIcon;
     @Resource private Icon removeIconRollover;
     @Resource private Icon removeIconPressed;
@@ -140,7 +140,7 @@ public class FileInfoSharingPanel implements FileInfoPanel {
     
     private JLabel createHeaderLabel(String text) { 
         JLabel label = new JLabel(text);
-        label.setFont(largeFont);
+        label.setFont(headerFont);
         return label;
     }
     

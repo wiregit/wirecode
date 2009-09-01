@@ -19,7 +19,7 @@ import org.limewire.ui.swing.util.I18n;
 /**
  * An overview panel when only a Torrent is available.
  */
-class FileInfoBittorrentOverview implements FileInfoPanel {
+class FileInfoBittorrentOverviewPanel implements FileInfoPanel {
     
     @Resource private Font smallFont;
     @Resource private Font smallBoldFont;
@@ -27,7 +27,7 @@ class FileInfoBittorrentOverview implements FileInfoPanel {
     private final JPanel component;
     private final Torrent torrent;
     
-    public FileInfoBittorrentOverview(Torrent torrent) {
+    public FileInfoBittorrentOverviewPanel(Torrent torrent) {
         this.torrent = torrent;
         
         GuiUtils.assignResources(this);
