@@ -237,7 +237,16 @@ public class InspectionsIntegrationTest extends LimeTestCase {
         startInspectionsCommunicator();       
         Thread.sleep(15000);
         
-        // todo: check for map of "error" to InspectionException
+        List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
+        
+        // expecting inspection result with error
+        assertEquals(1, listInspDataEncoded.size());
+        InspectionDataContainer inspData = parseInspectionData(listInspDataEncoded.get(0));
+        assertEquals(1, inspData.getResultCount());
+        Map<?, ?> map = (Map<?, ?>)inspData.getData(inspections.get(0));
+        assertEquals(1, map.size());
+        assertEquals("java.lang.RuntimeException: error in inspection", 
+                     StringUtils.toUTF8String((byte[])map.get("error")));
     }
     
     public void testServerSendsNoInspections() throws Exception {
