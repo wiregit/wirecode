@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.properties;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -129,7 +130,9 @@ class FileInfoOverviewPanel implements FileInfoPanel{
         iconDock.setOpaque(false);
         iconDock.add(new JLabel(icon));
         component.add(iconDock, "aligny top, growy, gap 7, gaptop 5, dock west");
-        component.add(createLabelField(propertiableFile.getFileName()), "growx, span, wrap");
+        JTextField name = createLabelField(propertiableFile.getFileName());
+        name.setPreferredSize(new Dimension(440, 26));
+        component.add(name, "growx, span, wrap");
         component.add(createLabel(I18n.tr("Size:")), "split 2");
         component.add(createLabelField(FileInfoUtils.getFileSize(propertiableFile)), "growx, wrap");
         
@@ -159,14 +162,20 @@ class FileInfoOverviewPanel implements FileInfoPanel{
             }
             break;
         case IMAGE:
-            component.add(createLabel(I18n.tr("Date Created:")), "split 2");
-            component.add(createLabelField(FileInfoUtils.convertDate(propertiableFile)), "growx, wrap");
+            String date = FileInfoUtils.convertDate(propertiableFile);
+            if(date.length() > 0) {
+                component.add(createLabel(I18n.tr("Date Created:")), "split 2");
+                component.add(createLabelField(date), "growx, wrap");
+            }
             break;
         case DOCUMENT:
             component.add(createLabel(I18n.tr("Type:")), "split 2");
             component.add(createLabelField(iconManager.get().getMIMEDescription(propertiableFile)), "growx, wrap");
-            component.add(createLabel(I18n.tr("Date Created:")), "split 2");
-            component.add(createLabelField(FileInfoUtils.convertDate(propertiableFile)), "growx, wrap");
+            date = FileInfoUtils.convertDate(propertiableFile);
+            if(date.length() > 0) {
+                component.add(createLabel(I18n.tr("Date Created:")), "split 2");
+                component.add(createLabelField(date), "growx, wrap");
+            }
             break;
         case PROGRAM:
             break;
