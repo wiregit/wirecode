@@ -101,8 +101,6 @@ public class FileInfoSharingPanel implements FileInfoPanel {
                                     listPanel.remove(removeButton);
                                     //make sure the friend actually disappears
                                     component.revalidate();
-                                    //make sure we don't get stuck on the hand cursor
-//                                    setCursor(Cursor.getDefaultCursor());
                                 }
                             }
                         });
@@ -114,9 +112,6 @@ public class FileInfoSharingPanel implements FileInfoPanel {
                     scroll.setOpaque(false);
                     scroll.setBorder(BorderFactory.createEmptyBorder());
                     component.add(scroll, "grow, wrap");
-//                    sharingPanel.add(scroll, "grow");
-                    
-//                    component.add(sharingPanel, "growx");
                 } else {
                     component.add(createHeaderLabel(I18n.tr("This file is not shared")), "span, wrap");
                 }
