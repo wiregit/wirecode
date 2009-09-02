@@ -8,6 +8,9 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +26,8 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -56,20 +61,24 @@ public class FileInfoDialog extends LimeJDialog {
     @Resource private Color backgroundColor;
 
     private final FileInfoTabPanel tabPanel;
+    private final FileInfoOverviewPanel overviewPanel;
     private final JPanel cardPanel;
     private final Map<Tabs, FileInfoPanel> cards;
     private JButton okButton;
+    private PropertiableFile propertiableFile;
+    private RenameListener renameListener;
     
     @Inject
-    public FileInfoDialog(@Assisted final PropertiableFile propertiableFile, @Assisted final FileInfoType type,
-                        FileInfoTabPanel fileInfoTabPanel,
-                        final FileInfoPanelFactory fileInfoFactory) {
+    public FileInfoDialog(@Assisted PropertiableFile propertiable, @Assisted final FileInfoType type,
+                        FileInfoTabPanel fileInfoTabPanel, final FileInfoPanelFactory fileInfoFactory,
+                        final LibraryManager libraryManager) {
         super(GuiUtils.getMainFrame());
         
         tabPanel = fileInfoTabPanel;
         cardPanel = new JPanel(new BorderLayout());
         cardPanel.setPreferredSize(new Dimension(400,600));
         cards = new HashMap<Tabs, FileInfoPanel>();
+        this.propertiableFile = propertiable;
         
         GuiUtils.assignResources(this);
         
@@ -83,8 +92,8 @@ public class FileInfoDialog extends LimeJDialog {
         setLayout(new MigLayout("gap 0, insets 0, fill"));
         getContentPane().setBackground(backgroundColor);
 
-        
-        add(fileInfoFactory.createOverviewPanel(type, propertiableFile).getComponent(), "growx, wrap");
+        overviewPanel = (FileInfoOverviewPanel) fileInfoFactory.createOverviewPanel(type, propertiableFile);
+        add(overviewPanel.getComponent(), "growx, wrap");
         add(tabPanel.getComponent(), "growx, wrap");
         add(cardPanel, "grow");
         createFooter();
@@ -105,6 +114,7 @@ public class FileInfoDialog extends LimeJDialog {
                 for(FileInfoPanel panel : cards.values()) {
                     panel.unregisterListeners();
                 }
+                libraryManager.getLibraryManagedList().removePropertyChangeListener(renameListener);
                 FileInfoDialog.this.dispose();
             }
 
@@ -118,6 +128,9 @@ public class FileInfoDialog extends LimeJDialog {
                     okButton.requestFocusInWindow();
             }
         });
+        
+        renameListener = new RenameListener(libraryManager);
+        libraryManager.getLibraryManagedList().addPropertyChangeListener(renameListener);
         
         tabPanel.addSearchTabListener(new FileInfoTabListener(){
             @Override
@@ -146,8 +159,10 @@ public class FileInfoDialog extends LimeJDialog {
                 FileInfoDialog.this.repaint();
             }
         });
-
-        setVisible(true);
+    }
+    
+    public void renameFile() {
+        overviewPanel.enableRename();
     }
     
     private void createTabs(PropertiableFile propertiableFile, final FileInfoType type) {
@@ -212,6 +227,35 @@ public class FileInfoDialog extends LimeJDialog {
         @Override
         public void actionPerformed(ActionEvent e) {
             setVisible(false);
+        }
+    }
+    
+    /**
+	 * Listens for rename events. If this file was renamed, 
+     * updates all the created panels with the new 
+     * propertiable file since the underlying FileDesc
+     * has changed.
+ 	 */
+    private class RenameListener implements PropertyChangeListener {
+        private LibraryManager libraryManager;
+        
+        public RenameListener(LibraryManager libraryManager) {
+            this.libraryManager = libraryManager;
+        }
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            // if its a rename event, check if this propertiable file name changed.
+            if(evt.getPropertyName().equals("rename")) {
+                // if this file name changed, update the propertiable file on all the created panels so
+                // they can properlly save
+                if( propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).getFile().equals(evt.getOldValue())) {
+                    propertiableFile = libraryManager.getLibraryManagedList().getFileItem((File)evt.getNewValue());
+                    for(FileInfoPanel panel : cards.values()) {
+                        panel.updatePropertiableFile(propertiableFile);
+                    }
+                    overviewPanel.updatePropertiableFile(propertiableFile);
+                }
+            }
         }
     }
 }

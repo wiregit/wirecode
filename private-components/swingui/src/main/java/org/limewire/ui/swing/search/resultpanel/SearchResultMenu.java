@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 
@@ -163,7 +164,8 @@ public class SearchResultMenu extends JPopupMenu {
         // Add View File Info menu item.
         add(new AbstractAction(tr("View File Info...")) {
             public void actionPerformed(ActionEvent e) {
-                fileInfoFactory.createFileInfoDialog(firstItem, FileInfoType.REMOTE_FILE);
+                JDialog dialog = fileInfoFactory.createFileInfoDialog(firstItem, FileInfoType.REMOTE_FILE);
+                dialog.setVisible(true);
             }
         }).setEnabled(viewFileInfoEnabled);
     }

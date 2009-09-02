@@ -49,6 +49,13 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
     
     @Override
+    protected void changeFileDesc(FileDesc old, FileDesc now) {
+        super.changeFileDesc(old, now);
+        //notify ui elements that the filename has changed
+        changeSupport.firePropertyChange("rename", old.getFile(), now.getFile());
+    }
+    
+    @Override
     protected FileCollection getCoreCollection() {
         return managedList;
     }

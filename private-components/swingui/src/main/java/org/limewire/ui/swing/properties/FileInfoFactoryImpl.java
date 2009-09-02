@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.properties;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.PropertiableFile;
@@ -29,13 +30,14 @@ public class FileInfoFactoryImpl implements FileInfoPanelFactory {
     private final Provider<SharedFileListManager> sharedFileListManager;
     private final Provider<MetaDataManager> metaDataManager;
     private final Provider<LibraryMediator> libraryMediator;
+    private final Provider<LibraryManager> libraryManager;
     
     @Inject
     public FileInfoFactoryImpl(Provider<IconManager> iconManager, Provider<MagnetLinkFactory> magnetLinkFactory, 
             Provider<CategoryIconManager> categoryIconManager, Provider<ThumbnailManager> thumbnailManager,
             Provider<PropertyDictionary> propertyDictionary, Provider<SpamManager> spamManager,
             Provider<SharedFileListManager> sharedFileListManager, Provider<MetaDataManager> metaDataManager,
-            Provider<LibraryMediator> libraryMediator) {
+            Provider<LibraryMediator> libraryMediator, Provider<LibraryManager> libraryManager) {
         this.iconManager = iconManager;
         this.magnetLinkFactory = magnetLinkFactory;
         this.categoryIconManager = categoryIconManager;
@@ -45,6 +47,7 @@ public class FileInfoFactoryImpl implements FileInfoPanelFactory {
         this.sharedFileListManager = sharedFileListManager;
         this.metaDataManager = metaDataManager;
         this.libraryMediator = libraryMediator;
+        this.libraryManager = libraryManager;
     }
     
     @Override
@@ -64,7 +67,7 @@ public class FileInfoFactoryImpl implements FileInfoPanelFactory {
 
     @Override
     public FileInfoPanel createOverviewPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoOverviewPanel(type, propertiableFile, iconManager, magnetLinkFactory.get(), categoryIconManager.get(), thumbnailManager.get());
+        return new FileInfoOverviewPanel(type, propertiableFile, iconManager, magnetLinkFactory.get(), categoryIconManager.get(), thumbnailManager.get(), libraryManager.get());
     }
 
     @Override

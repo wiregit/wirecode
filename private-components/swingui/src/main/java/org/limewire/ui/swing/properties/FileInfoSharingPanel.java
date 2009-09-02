@@ -74,6 +74,11 @@ public class FileInfoSharingPanel implements FileInfoPanel {
         //no listeners registered
     }
     
+    @Override
+    public void updatePropertiableFile(PropertiableFile file) {
+        //do nothing
+    }
+    
     private void init() {
         component.setOpaque(false);
         switch(type) {

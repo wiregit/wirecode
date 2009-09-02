@@ -58,6 +58,11 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     @Override
     public void save() {
         //component never changes state
+    }    
+
+    @Override
+    public void updatePropertiableFile(PropertiableFile file) {
+        //do nothing
     }
     
     @Override

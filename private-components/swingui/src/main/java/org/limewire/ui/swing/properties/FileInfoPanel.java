@@ -2,6 +2,8 @@ package org.limewire.ui.swing.properties;
 
 import javax.swing.JComponent;
 
+import org.limewire.core.api.library.PropertiableFile;
+
 /**
  * A subPanel that displays information about a given file.
  */
@@ -22,6 +24,11 @@ public interface FileInfoPanel {
      * Saves any information that may have changed state.
      */
     public void save();
+    
+    /**
+     * Replaces the current PropertiableFile with this one.
+     */
+    public void updatePropertiableFile(PropertiableFile file);
     
     /**
      * Removes any listeners that may be registered when hiding the 

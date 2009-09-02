@@ -57,7 +57,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
  * Displays meta data information about the given PropertiableFile. If the file
  * is local, the meta data can be edited and saved as xml. 
  */
-public class FileInfoGeneralPanel implements FileInfoPanel{
+public class FileInfoGeneralPanel implements FileInfoPanel {
 
     @Resource private Font smallFont;
     @Resource private Font mediumFont;
@@ -66,11 +66,12 @@ public class FileInfoGeneralPanel implements FileInfoPanel{
     private final JPanel component;
     
     private final FileInfoType type;
-    private final PropertiableFile propertiableFile;
+    private PropertiableFile propertiableFile;
     private final PropertyDictionary propertyDictionary;
     private final SpamManager spamManager;
     private final MetaDataManager metaDataManager;
     private final LibraryMediator libraryMediator;
+    private JTextField locationField;
     
     private final Map<FilePropertyKey, JComponent> changedProps = new HashMap<FilePropertyKey, JComponent>();
     
@@ -97,6 +98,12 @@ public class FileInfoGeneralPanel implements FileInfoPanel{
     @Override
     public boolean hasChanged() {
         return changedProps.size() != 0 && propertiableFile instanceof LocalFileItem;
+    }
+
+    @Override
+    public void updatePropertiableFile(PropertiableFile file) {
+        this.propertiableFile = file;
+        locationField.setText(((LocalFileItem)propertiableFile).getFile().getAbsolutePath());
     }
 
     @Override
@@ -212,7 +219,8 @@ public class FileInfoGeneralPanel implements FileInfoPanel{
         switch(type) {
         case LOCAL_FILE:
             if(propertiableFile instanceof LocalFileItem) {
-                component.add(createLabelField(((LocalFileItem)propertiableFile).getFile().getAbsolutePath()), "span, growx, wrap");
+                locationField = createLabelField(((LocalFileItem)propertiableFile).getFile().getAbsolutePath());
+                component.add(locationField, "span, growx, wrap");
                 
                 HyperlinkButton locateOnDisk = new HyperlinkButton(
                     new AbstractAction(I18n.tr("Locate on Disk")) {

@@ -36,6 +36,7 @@ public final class InspectionsTestUtils {
         return baos.toByteArray();
     }
     
+    @SuppressWarnings("unused")
     private static Map<String, Object> inspectionsSpecToMap(InspectionsSpec spec) {
         Map<String, Object> specMap1 = new HashMap<String, Object>();
         specMap1.put("startdelay", spec.getInitialDelay());

@@ -30,6 +30,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.FontUtils;
@@ -65,6 +66,11 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
     @Override
     public JComponent getComponent() {
         return component;
+    }
+
+    @Override
+    public void updatePropertiableFile(PropertiableFile file) {
+        //do nothing
     }
     
     private void init() {

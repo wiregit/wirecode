@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.upload.table;
 
+import javax.swing.JDialog;
+
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
@@ -41,7 +43,8 @@ public class UploadActionHandler {
         } else if (actionCommmand == LOCATE_ON_DISK_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
-            fileInfoFactory.createFileInfoDialog(item, FileInfoType.LOCAL_FILE);
+            JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.LOCAL_FILE);
+            dialog.setVisible(true);
         } else if (actionCommmand == REMOVE_COMMAND){
             uploadListManager.remove(item);
         } else if (actionCommmand == LIBRARY_COMMAND){

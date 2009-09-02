@@ -2,6 +2,8 @@ package org.limewire.ui.swing.downloads.table;
 
 import java.io.File;
 
+import javax.swing.JDialog;
+
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
@@ -96,14 +98,18 @@ public class DownloadActionHandler {
             }
         } else if (actionCommmand == PROPERTIES_COMMAND){
             if(item.getState() != DownloadState.DONE) {
-                fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+                JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+                dialog.setVisible(true);
             } else {
                 // if finished downloading, try showing all the information from the localFileItem
                 LocalFileItem localItem = libraryManager.getLibraryManagedList().getFileItem(item.getLaunchableFile());
-                if(localItem != null)
-                    fileInfoFactory.createFileInfoDialog(localItem, FileInfoType.LOCAL_FILE);
-                else  // if can't find the localFileItem, revert to the downloadItem
-                    fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+                if(localItem != null) {
+                    JDialog dialog = fileInfoFactory.createFileInfoDialog(localItem, FileInfoType.LOCAL_FILE);
+                    dialog.setVisible(true);
+                } else { // if can't find the localFileItem, revert to the downloadItem
+                    JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+                    dialog.setVisible(true);
+                }
             }
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadListManager.remove(item);

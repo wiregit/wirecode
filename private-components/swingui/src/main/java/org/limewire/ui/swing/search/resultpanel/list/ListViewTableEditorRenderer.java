@@ -26,6 +26,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -268,7 +269,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         propertiesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                fileInfoFactory.createFileInfoDialog(vsr, FileInfoType.REMOTE_FILE);
+                JDialog dialog = fileInfoFactory.createFileInfoDialog(vsr, FileInfoType.REMOTE_FILE);
+                dialog.setVisible(true);
             }
         });
         

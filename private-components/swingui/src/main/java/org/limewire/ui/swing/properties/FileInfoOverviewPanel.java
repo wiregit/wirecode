@@ -5,18 +5,25 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.PropertiableFile;
@@ -31,6 +38,8 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Provider;
 
@@ -44,23 +53,29 @@ class FileInfoOverviewPanel implements FileInfoPanel {
     @Resource private Font headerFont;
     
     private final FileInfoType type;
-    private final PropertiableFile propertiableFile;
+    private PropertiableFile propertiableFile;
     private final Provider<IconManager> iconManager;
     private final MagnetLinkFactory magnetLinkFactory;
     private final CategoryIconManager categoryIconManager;
     private final ThumbnailManager thumbnailManager;
+    private final LibraryManager libraryManager;
+    private final RenameAction renameAction;
     
     private final JPanel component;
+    private JTextField nameLabel;
     
     public FileInfoOverviewPanel(FileInfoType type, PropertiableFile propertiableFile, 
             Provider<IconManager> iconManager, MagnetLinkFactory magnetLinkFactory, 
-            CategoryIconManager categoryIconManager, ThumbnailManager thumbnailManager) {
+            CategoryIconManager categoryIconManager, ThumbnailManager thumbnailManager,
+            LibraryManager libraryManager) {
         this.type = type;
         this.propertiableFile = propertiableFile;
         this.iconManager = iconManager;
         this.magnetLinkFactory = magnetLinkFactory;
         this.categoryIconManager = categoryIconManager;
         this.thumbnailManager = thumbnailManager;
+        this.libraryManager = libraryManager;
+        this.renameAction = new RenameAction();
         
         GuiUtils.assignResources(this);
         
@@ -87,12 +102,23 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         //no listeners registered
     }
     
+
+    @Override
+    public void updatePropertiableFile(PropertiableFile file) {
+        this.propertiableFile = file;
+        nameLabel.setText(propertiableFile.getFileName());
+    }
+    
+    public void enableRename() {
+        renameAction.actionPerformed(null);
+    }
+    
     private void init() {
         component.setOpaque(false);
 
         addOverviewCategory();
         
-        HyperlinkButton renameButton = new HyperlinkButton(I18n.tr("Rename"));
+        HyperlinkButton renameButton = new HyperlinkButton(renameAction);
         
         HyperlinkButton copyToClipboard = null;
         if(type == FileInfoType.LOCAL_FILE){
@@ -134,10 +160,10 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         iconDock.setOpaque(false);
         iconDock.add(new JLabel(icon));
         component.add(iconDock, "aligny top, growy, gap 7, gaptop 5, dock west");
-        JTextField name = createLabelField(propertiableFile.getFileName());
-        name.setFont(headerFont);
-        name.setPreferredSize(new Dimension(440, 26));
-        component.add(name, "growx, span, wrap");
+        nameLabel = createLabelField(propertiableFile.getFileName());
+        nameLabel.setFont(headerFont);
+        nameLabel.setPreferredSize(new Dimension(440, 26));
+        component.add(nameLabel, "growx, span, wrap");
         component.add(createLabel(I18n.tr("Size:")), "split 2");
         component.add(createLabelField(FileInfoUtils.getFileSize(propertiableFile)), "growx, wrap");
         
@@ -227,5 +253,111 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         default:
             return categoryIconManager.getIcon(propertiableFile);
         }
+    }
+    
+    /**
+     * Handles renaming of the file name. This is handled using
+     * a popup menu to get the support of loosing focus and
+     * properlly disappearing.
+     */
+    private class RenameAction extends AbstractAction {
+
+        private final JTextField textField;
+        private final JPopupMenu menu;
+        
+        public RenameAction() {
+            super(I18n.tr("Rename"));
+            
+            textField = new JTextField();
+            textField.setFont(headerFont);
+            textField.addKeyListener(new KeyListener(){
+                @Override
+                public void keyPressed(KeyEvent e) {}
+                @Override
+                public void keyReleased(KeyEvent e) {}
+
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    if(e.getKeyChar() == KeyEvent.VK_ENTER) {
+                        menu.setVisible(false);
+                    }
+                }
+            });
+
+            menu = new JPopupMenu();
+            menu.add(textField);
+            menu.addPopupMenuListener(new PopupMenuListener(){
+                @Override
+                public void popupMenuCanceled(PopupMenuEvent e) {
+                    saveFileName();
+                }
+
+                @Override
+                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                    saveFileName();
+                }
+
+                @Override
+                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
+            });
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(!menu.isVisible()) {
+                setText();
+
+                menu.show(component, nameLabel.getLocation().x-3, nameLabel.getLocation().y-3);
+                textField.requestFocusInWindow();
+                textField.selectAll();
+            }
+        }
+        
+        private void setText() {
+            String fileName = FileUtils.getFilenameNoExtension(nameLabel.getText());
+            textField.setText(fileName);
+            textField.setFont(headerFont);
+            ResizeUtils.forceWidth(textField, nameLabel.getWidth());
+        }
+        
+        private void saveFileName() {
+            String newFileName = textField.getText().trim();
+            LocalFileItem oldFileItem = (LocalFileItem) propertiableFile;
+            // check the new file name is valid
+            if(!isValidFileName(newFileName)) {
+                textField.setText(oldFileItem.getName());
+                return;
+            }
+            
+            // check if the name hasn't changed, just return
+            if(newFileName.equals(oldFileItem.getName())) {
+                return;
+            }
+
+            File oldFile = oldFileItem.getFile();
+            
+            newFileName = newFileName + "." + FileUtils.getFileExtension(oldFile);
+            File newFile = new File(oldFile.getParentFile(), newFileName);
+            
+            // try performing the file rename, if something goes wrong, revert textfield.
+            if(FileUtils.forceRename(oldFile, newFile)) {
+                updateFileNameInLibrary(oldFile, newFile);
+            }
+        }
+        
+        /**
+         * Notifies the library that the fileName has been changed.
+         */
+        private void updateFileNameInLibrary(File oldFile, File newFile) {
+            libraryManager.getLibraryManagedList().fileRenamed(oldFile, newFile);
+        }
+        
+        /**
+         * Returns true if the text is a valid file name.
+         */
+        private boolean isValidFileName(String fileName) {
+            return fileName != null && fileName.length() > 0;
+        }
+        
     }
 }

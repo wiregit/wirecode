@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JDialog;
+
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibrarySelected;
@@ -33,7 +35,9 @@ class ViewFileInfoAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         List<LocalFileItem> localFileItems = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
-        if(localFileItems.size() > 0)
-            fileInfoFactory.createFileInfoDialog(localFileItems.get(0), FileInfoType.LOCAL_FILE);
+        if(localFileItems.size() > 0) {
+            JDialog dialog = fileInfoFactory.createFileInfoDialog(localFileItems.get(0), FileInfoType.LOCAL_FILE);
+            dialog.setVisible(true);
+        }
     }
 }
