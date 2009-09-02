@@ -1111,8 +1111,11 @@ public class FileUtils {
     public static boolean deleteEmptyDirectories(File directory) {
         if(directory.isDirectory()) {
             boolean empty = true;
-            for(File file : directory.listFiles()) {
-                empty &= file.isDirectory() && deleteEmptyDirectories(file);
+            File[] files = directory.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    empty &= file.isDirectory() && deleteEmptyDirectories(file);
+                }
             }
             if(empty) {
                 directory.delete();
