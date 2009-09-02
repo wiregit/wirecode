@@ -95,6 +95,8 @@ public class LibraryUtils {
 
         if (OSUtils.isMacOSX()) {
             sensitiveDirectories.addAll(getUserDirectories("Documents"));
+            sensitiveDirectories.addAll(getUserDirectories("Desktop"));
+            sensitiveDirectories.addAll(getUserDirectories("Library"));
             sensitiveDirectories.add(File.separator + "Users");
             sensitiveDirectories.add(File.separator + "System");
             sensitiveDirectories.add(File.separator + "System Folder");
