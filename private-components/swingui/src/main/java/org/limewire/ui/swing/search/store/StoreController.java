@@ -56,6 +56,13 @@ public class StoreController {
     }
     
     /**
+     * Returns the URI text for the confirm download page.
+     */
+    public String getConfirmURI() {
+        return storeManager.getConfirmURI();
+    }
+    
+    /**
      * Returns the URI text for the specified visual store result.
      */
     public String getInfoURI(VisualStoreResult vsr) {
@@ -72,7 +79,7 @@ public class StoreController {
      * Returns the URI text for the login page.
      */
     public String getLoginURI() {
-        return "https://www.store.limewire.com/store/app/pages/account/LogIn/noDest/1/";
+        return storeManager.getLoginURI();
     }
 
     /**
