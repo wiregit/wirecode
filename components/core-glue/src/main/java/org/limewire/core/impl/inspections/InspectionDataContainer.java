@@ -1,16 +1,15 @@
 package org.limewire.core.impl.inspections;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.GZIPInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.GZIPInputStream;
 
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.InvalidDataException;
