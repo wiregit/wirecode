@@ -20,6 +20,7 @@ import org.apache.http.util.EntityUtils;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.InspectionsSettings;
 import org.limewire.facebook.service.settings.InspectionsServerUrls;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.Inspector;
@@ -33,7 +34,6 @@ import org.limewire.setting.StringSetting;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * - request/receive instructions from LW server for which inspections
@@ -62,17 +62,20 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
     private final AtomicBoolean started = new AtomicBoolean(false);
     
     private List<InspectionsSpec> inspectionsSpecs = new ArrayList<InspectionsSpec>();
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
         
     
     @Inject
     public InspectionsCommunicatorImpl(@Named("fastExecutor")ScheduledExecutorService scheduler,
                                        @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager,
                                        @InspectionsServerUrls Provider<Map<String, StringSetting>> inspectionsServerUrls,
-                                       Inspector inspector) {
+                                       Inspector inspector,
+                                       HttpClientInstanceUtils httpClientInstanceUtils) {
         this.scheduler = scheduler;
         this.inspector = inspector;
         this.httpConnectionManager = httpConnectionManager;
         this.inspectionsServerUrls = inspectionsServerUrls;
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
         this.processor = null;
         this.parser = new InspectionsParser();
     }
@@ -115,11 +118,9 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
     }
 
     private byte[] queryInspectionsServer(String serverUrl, HttpEntity entity) throws IOException {
-        String clientVersion = LimeWireUtils.getLimeWireVersion();
-        String guid = ApplicationSettings.CLIENT_ID.get();
-        boolean usage = ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.get(); 
-        String queryString = "client_version=" + clientVersion + "&guid=" + guid + "&usage_setting=" + usage;
-        HttpPost httpPost = new HttpPost(serverUrl + "?" + queryString);
+        boolean usage = ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.get();
+        serverUrl = httpClientInstanceUtils.addClientInfoToUrl(serverUrl) + "&urs=" + Boolean.toString(usage);
+        HttpPost httpPost = new HttpPost(serverUrl);
         httpPost.addHeader("Accept-Encoding", "gzip");
         httpPost.addHeader("Connection", "close");
         if (entity != null) {
@@ -138,6 +139,11 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
      * @throws java.io.IOException for but a 200 response.
      */
     private byte[] executeRequest(HttpUriRequest request) throws IOException {
+        // if inspections were enabled, stop everything
+        if (!InspectionsSettings.PUSH_INSPECTIONS_ENABLED.getValue()) {
+            stop();
+            return new byte[0];
+        }
         HttpClient httpClient = new DefaultHttpClient(httpConnectionManager, null);
         HttpResponse response = httpClient.execute(request);
         int statusCode = response.getStatusLine().getStatusCode();

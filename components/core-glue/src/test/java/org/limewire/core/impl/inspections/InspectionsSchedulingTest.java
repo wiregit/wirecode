@@ -44,7 +44,7 @@ public class InspectionsSchedulingTest extends LimeTestCase {
             will(returnValue(0));
         }});
         ScheduledExecutorService scheduler = new SimpleTimer(true);
-        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector);
+        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector, null);
         QueuingInspectionsResultProcessor inspectionsProcessor = new QueuingInspectionsResultProcessor();
         ic.setResultProcessor(inspectionsProcessor);
 
@@ -80,7 +80,7 @@ public class InspectionsSchedulingTest extends LimeTestCase {
             will(returnValue(0));
         }});
         ScheduledExecutorService scheduler = new SimpleTimer(true);
-        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector);    
+        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector, null);    
         QueuingInspectionsResultProcessor inspectionsProcessor = new QueuingInspectionsResultProcessor();
         ic.setResultProcessor(inspectionsProcessor);
         
@@ -107,7 +107,7 @@ public class InspectionsSchedulingTest extends LimeTestCase {
         final Inspector inspector = context.mock(Inspector.class);
         
         ScheduledExecutorService scheduler = new SimpleTimer(true);
-        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector);    
+        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector, null);    
         QueuingInspectionsResultProcessor inspectionsProcessor = new QueuingInspectionsResultProcessor();
         ic.setResultProcessor(inspectionsProcessor);
         
@@ -135,7 +135,7 @@ public class InspectionsSchedulingTest extends LimeTestCase {
             will(returnValue(0));
         }});
         ScheduledExecutorService scheduler = new SimpleTimer(true);
-        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector);    
+        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector, null);    
         QueuingInspectionsResultProcessor inspectionsProcessor = new QueuingInspectionsResultProcessor();
         ic.setResultProcessor(inspectionsProcessor);
         
@@ -178,7 +178,7 @@ public class InspectionsSchedulingTest extends LimeTestCase {
             will(returnValue(0));
         }});
         ScheduledExecutorService scheduler = new SimpleTimer(true);
-        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector);
+        InspectionsCommunicatorImpl ic = new InspectionsCommunicatorImpl(scheduler, null, null, inspector, null);
         QueuingInspectionsResultProcessor inspectionsProcessor = new QueuingInspectionsResultProcessor();
         ic.setResultProcessor(inspectionsProcessor);
         

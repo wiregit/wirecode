@@ -1,22 +1,20 @@
 package org.limewire.core.impl.inspections;
 
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.Channels;
 
 import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.util.BEncoder;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
+import org.limewire.util.BEncoder;
 
 /**
  * helper parser class
