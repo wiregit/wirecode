@@ -27,9 +27,6 @@ import com.limegroup.gnutella.library.SharedFileCollection;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent;
 
 /**
- * Listens for Facebook friend connection event and posts a feed story to the
- * user's wall saying he installed LimeWire Friends.
- * <p>
  * Listens for friends being added to a shared list and sends the friends
  * a notification if they're Facebook friends and they're online at the time.  
  */
