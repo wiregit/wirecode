@@ -118,8 +118,6 @@ class FileInfoOverviewPanel implements FileInfoPanel {
 
         addOverviewCategory();
         
-        HyperlinkButton renameButton = new HyperlinkButton(renameAction);
-        
         HyperlinkButton copyToClipboard = null;
         if(type == FileInfoType.LOCAL_FILE){
             if(propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).isShareable()) {
@@ -143,7 +141,8 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         HyperlinkButton moreFileInfo = new HyperlinkButton(new BitziLookupAction(propertiableFile));
         moreFileInfo.setFont(smallFont);
       
-        component.add(renameButton, "cell 1 1, alignx right");
+        if(type == FileInfoType.LOCAL_FILE)
+            component.add(new HyperlinkButton(renameAction), "cell 1 1, alignx right");
         component.add(moreFileInfo, "cell 1 2, alignx right");
         if(copyToClipboard != null)
             component.add(copyToClipboard, "cell 1 3, alignx right");
