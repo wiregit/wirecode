@@ -15,6 +15,18 @@ import com.google.inject.Singleton;
 public class CoreStoreManager implements StoreManager {
 
     @Override
+    public String getConfirmURI() {
+        // TODO implement
+        return null;
+    }
+
+    @Override
+    public String getLoginURI() {
+        // TODO implement
+        return null;
+    }
+
+    @Override
     public boolean isDownloadApproved(StoreResult storeResult) {
         // TODO implement
         return false;

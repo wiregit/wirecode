@@ -8,6 +8,16 @@ import org.limewire.core.api.search.SearchDetails;
 public interface StoreManager {
 
     /**
+     * Returns the URI text for the confirm download page.
+     */
+    String getConfirmURI();
+    
+    /**
+     * Returns the URI text for the login page.
+     */
+    String getLoginURI();
+    
+    /**
      * Returns true if the specified store result can be downloaded without
      * further user prompts.
      */

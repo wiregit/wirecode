@@ -26,6 +26,16 @@ import com.google.inject.Singleton;
 public class MockStoreManager implements StoreManager {
 
     @Override
+    public String getConfirmURI() {
+        return getClass().getResource("confirm.html").toString();
+    }
+
+    @Override
+    public String getLoginURI() {
+        return getClass().getResource("login.html").toString();
+    }
+
+    @Override
     public boolean isDownloadApproved(StoreResult storeResult) {
         return false;
     }
