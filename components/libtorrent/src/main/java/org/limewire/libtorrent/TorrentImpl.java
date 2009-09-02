@@ -367,6 +367,7 @@ public class TorrentImpl implements Torrent {
             // directories it should be copied to the directory the torrent is
             // being downloaded to. This is to prevent the user from deleting
             // the torrent which we need to initiate a download properly.
+            torrentDownloadFolder.mkdirs();
             File newTorrentFile = new File(torrentDownloadFolder, getName() + ".torrent");
             FileUtils.copy(torrentFile.get(), newTorrentFile);
             torrentFile.set(newTorrentFile);
