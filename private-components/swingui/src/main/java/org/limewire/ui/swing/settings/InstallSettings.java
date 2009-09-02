@@ -74,7 +74,7 @@ public final class InstallSettings extends LimeWireSettings {
     
     /** Whether to use the old style pro dialog or the new one. */
     public static final BooleanSetting USE_OLD_PRO_DIALOG = 
-        FACTORY.createBooleanSetting("USE_OLD_PRO_DIALOG", false);
+        FACTORY.createBooleanSetting("USE_OLD_PRO_DIALOG", true);
     
     /**
      * Stores the value of the last known version of limewire that has been run. Will be null on a clean install until the program is run and a value is set for it.
