@@ -145,7 +145,10 @@ public class FileInfoDialog extends LimeJDialog {
                     } else if(tab == Tabs.BITTORENT) {
                         if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT) != null) {
                             Torrent torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);
-                            cards.put(tab, fileInfoFactory.createBittorentPanel(torrent));
+                            if(torrent.hasMetaData()) {
+                                //we can't show the file info panel for torrents without metadata.
+                                cards.put(tab, fileInfoFactory.createBittorentPanel(torrent));
+                            }
                         } else {
                             throw new IllegalStateException("No DownloadItem or Torrent found for BITTORENT tab.");
                         }
@@ -174,8 +177,12 @@ public class FileInfoDialog extends LimeJDialog {
             tabs.add(Tabs.SHARING);
             break;
         case DOWNLOADING_FILE:
-            if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadItemType() == DownloadItemType.BITTORRENT)
-                tabs.add(Tabs.BITTORENT);
+            if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadItemType() == DownloadItemType.BITTORRENT) {
+                Torrent torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);
+                if(torrent != null && torrent.hasMetaData()) {
+                    tabs.add(Tabs.BITTORENT);
+                }
+            }
             tabs.add(Tabs.TRANSFERS);
             break;
         case REMOTE_FILE:

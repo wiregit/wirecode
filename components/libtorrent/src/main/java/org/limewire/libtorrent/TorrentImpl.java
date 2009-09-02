@@ -250,7 +250,7 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public boolean isMultiFileTorrent() {
-        return getTorrentFileEntries().size() > 0;
+        return !isSingleFileTorrent();
     }
 
     @Override
@@ -266,7 +266,8 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public boolean isSingleFileTorrent() {
-        return !isMultiFileTorrent();
+        boolean singleFileTorrent = hasMetaData() && torrentInfo.get().getTorrentFileEntries().size() == 1;
+        return singleFileTorrent;
     }
 
     @Override
