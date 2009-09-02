@@ -108,6 +108,7 @@ public class LibraryUtils {
         }
 
         if (OSUtils.isPOSIX()) {
+            sensitiveDirectories.addAll(getUserDirectories("Desktop"));
             sensitiveDirectories.addAll(getUserDirectories("Documents"));
             sensitiveDirectories.add(File.separator + "bin");
             sensitiveDirectories.add(File.separator + "boot");
