@@ -1102,4 +1102,23 @@ public class FileUtils {
 
         return forceDelete(directory);
     }
+    
+    /**
+     * Recursively deletes any empty directories. 
+     * Returns true if the given directory was empty or 
+     * only had empty subdirectories, all of which were deleted. 
+     */
+    public static boolean deleteEmptyDirectories(File directory) {
+        if(directory.isDirectory()) {
+            boolean empty = true;
+            for(File file : directory.listFiles()) {
+                empty &= file.isDirectory() && deleteEmptyDirectories(file);
+            }
+            if(empty) {
+                directory.delete();
+            }
+            return empty;
+        }
+        return false;
+    }
 }

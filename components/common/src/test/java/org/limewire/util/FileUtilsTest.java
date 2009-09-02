@@ -522,4 +522,99 @@ public final class FileUtilsTest extends BaseTestCase {
         (new File("testdestination/subfolder")).delete();
         (new File("testdestination")).delete();
     }
+    
+    public void testDeleteEmptyDirectories() throws Exception {
+        File dir1 = new File("dir1");
+        dir1.delete();
+        dir1.deleteOnExit();
+        dir1.mkdir();
+        
+        assertTrue(dir1.exists());
+        FileUtils.deleteEmptyDirectories(dir1);
+        assertFalse(dir1.exists());
+        
+        dir1.mkdir();
+        File file1 = new File(dir1, "file1");
+        file1.delete();
+        file1.deleteOnExit();
+        file1.createNewFile();
+        File subdir1 = new File(dir1, "subdir1");
+        subdir1.delete();
+        subdir1.deleteOnExit();
+        subdir1.mkdir();
+        
+        assertTrue(dir1.exists());
+        assertTrue(file1.exists());
+        assertTrue(subdir1.exists());
+        FileUtils.deleteEmptyDirectories(dir1);
+        assertTrue(dir1.exists());
+        assertTrue(file1.exists());
+        assertFalse(subdir1.exists());
+
+        
+        subdir1.mkdir();
+        File file2 = new File(subdir1, "file2");
+        file2.delete();
+        file2.deleteOnExit();
+        file2.createNewFile();
+        File subdir2 = new File(dir1, "subdir2");
+        subdir2.delete();
+        subdir2.deleteOnExit();
+        subdir2.mkdir();
+        
+        assertTrue(dir1.exists());
+        assertTrue(file1.exists());
+        assertTrue(subdir1.exists());
+        assertTrue(subdir2.exists());
+        assertTrue(file2.exists());
+        FileUtils.deleteEmptyDirectories(dir1);
+        assertTrue(dir1.exists());
+        assertTrue(file1.exists());
+        assertTrue(subdir1.exists());
+        assertTrue(file2.exists());
+        assertFalse(subdir2.exists());
+        
+        FileUtils.deleteRecursive(dir1);
+        
+        dir1.mkdir();
+        subdir1.mkdir();
+        subdir2.mkdir();
+        
+        File subdir3 = new File(subdir1, "subdir3");
+        subdir3.delete();
+        subdir3.deleteOnExit();
+        subdir3.mkdir();
+        assertTrue(dir1.exists());
+        assertTrue(subdir1.exists());
+        assertTrue(subdir2.exists());
+        assertTrue(subdir3.exists());
+        FileUtils.deleteEmptyDirectories(dir1);
+        assertFalse(dir1.exists());
+        assertFalse(subdir1.exists());
+        assertFalse(subdir2.exists());
+        assertFalse(subdir3.exists());
+        
+        dir1.mkdir();
+        subdir1.mkdir();
+        subdir2.mkdir();
+        subdir3.mkdir();
+        
+        
+        assertTrue(dir1.exists());
+        assertTrue(subdir1.exists());
+        assertTrue(subdir2.exists());
+        assertTrue(subdir3.exists());
+        FileUtils.deleteEmptyDirectories(subdir1);
+        assertTrue(dir1.exists());
+        assertFalse(subdir1.exists());
+        assertTrue(subdir2.exists());
+        assertFalse(subdir3.exists());
+        
+        FileUtils.deleteEmptyDirectories(subdir2);
+        assertTrue(dir1.exists());
+        assertFalse(subdir2.exists());
+        
+        FileUtils.deleteEmptyDirectories(dir1);
+        assertFalse(dir1.exists());
+    }
 }

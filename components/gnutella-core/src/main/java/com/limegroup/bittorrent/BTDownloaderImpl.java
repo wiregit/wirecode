@@ -237,6 +237,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     FileUtils.forceDelete(torrentDataFile);
                 }
             }
+            
+            FileUtils.deleteEmptyDirectories(getSaveFile());
         }
     }
 
