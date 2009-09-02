@@ -292,7 +292,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     @Override
     public boolean promptTorrentFilePriorities(Torrent torrent) {
-        if(guiCallback != null) {
+        if(guiCallback != null && torrent.hasMetaData()) {
             return guiCallback.promptTorrentFilePriorities(torrent);
         }
         return true;
