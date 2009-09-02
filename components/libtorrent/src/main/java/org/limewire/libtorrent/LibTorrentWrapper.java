@@ -9,6 +9,7 @@ import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
+import org.limewire.util.OSUtils;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -309,5 +310,20 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.set_file_priority(sha1, index, priority));
         LOG.debugf("after set_file_priority: {0} - index: {1} - priority: {2}", sha1, index,
                 priority);
+    }
+    
+    
+    public boolean has_metadata(String id) {
+        if(OSUtils.isLinux()) {
+            LOG.debugf("before has_metadata: {0}", id);
+            IntByReference has_metadata = new IntByReference(0);
+            catchWrapperException(libTorrent.has_metadata(id, has_metadata));
+            LOG.debugf("after has_metadata: {0}", id);
+            return has_metadata.getValue() != 0;
+        } else {
+            //TODO remove this else block, all oses should be working without 
+            //this at the moment, but mrogers is having trouble.s
+            return true;
+        }
     }
 }

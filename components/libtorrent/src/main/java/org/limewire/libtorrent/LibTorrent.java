@@ -188,5 +188,10 @@ interface LibTorrent extends Library {
      * the given priority.
      */
     public WrapperStatus set_file_priority(String sha1, int index, int priority);
+    
+    /**
+     * Checks if the given torrent has metadata yet. 
+     */
+    public WrapperStatus has_metadata(String sha1, IntByReference has_metadata);
 
 }

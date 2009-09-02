@@ -234,10 +234,8 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     private void addMetaData(Torrent torrent) {
-        if (!torrent.hasMetaData()) {
+        if (!torrent.hasMetaData() && libTorrent.has_metadata(torrent.getSha1())) {
             // TODO add more data to the torrentInfo object
-            // use torrent_handle hasMetadata to get a real idea when the
-            // metadata is available.
             List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
             if (fileEntries.size() > 0) {
                 TorrentInfo torrentInfo = new TorrentInfo(fileEntries);
