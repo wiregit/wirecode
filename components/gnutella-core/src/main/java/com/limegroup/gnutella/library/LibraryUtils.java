@@ -77,11 +77,8 @@ public class LibraryUtils {
     private static List<String> getSensitiveDirectories() {
         List<String> sensitiveDirectories = new ArrayList<String>();
         
-        if(OSUtils.isWindowsVista()) {
-            sensitiveDirectories.addAll(getUserDirectories("Documents"));
-        }
-        
         if (OSUtils.isWindows()) {
+            sensitiveDirectories.addAll(getUserDirectories("Documents"));
             sensitiveDirectories.addAll(getUserDirectories("My Documents"));
             sensitiveDirectories.addAll(getUserDirectories("Desktop"));
             sensitiveDirectories.add(File.separator + "Documents and Settings");
