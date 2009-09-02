@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.Action;
 import javax.swing.ActionMap;
 
 import net.roydesign.event.ApplicationEvent;
@@ -66,7 +67,10 @@ public class MacEventHandler {
         MRJAdapter.addReopenApplicationListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
-                map.get("restoreView").actionPerformed(evt);
+                Action action = map.get("restoreView");
+                if (action != null) {
+                    action.actionPerformed(evt);
+                }
             }
         });
     }
