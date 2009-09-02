@@ -218,11 +218,6 @@ public interface Torrent {
     public boolean hasMetaData();
 
     /**
-     * Initializes files on the file system for this torrent.
-     */
-    public void initFiles();
-
-    /**
      * Returns the TorrentInfo object for this torrent, can be null 
      * when the torrent does no yet have its metadata loaded. 
      */

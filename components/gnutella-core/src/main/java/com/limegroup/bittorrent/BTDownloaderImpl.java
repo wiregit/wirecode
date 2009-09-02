@@ -159,10 +159,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         } else if(TorrentEvent.STARTED == event) {
             torrentsStarted.incrementAndGet();    
         } else if (TorrentEvent.META_DATA_UPDATED == event) {
-            if(!finishing.get() && !complete.get()) {
-                //TODO should be able to remove once the libtorrent alert bug is fixed.
-                torrent.initFiles();
-            }
+            // nothing to do now.
         } else {
             DownloadState currentState = getState();
             if (lastState.getAndSet(currentState) != currentState) {

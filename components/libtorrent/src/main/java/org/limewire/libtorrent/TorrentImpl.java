@@ -27,8 +27,6 @@ import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousEventMulticaster;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
@@ -42,8 +40,6 @@ import com.google.inject.name.Named;
  * back to the TorrentManager.
  */
 public class TorrentImpl implements Torrent {
-    private static final Log LOG = LogFactory.getLog(TorrentImpl.class);
-    
     private final AsynchronousEventMulticaster<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;
@@ -427,23 +423,6 @@ public class TorrentImpl implements Torrent {
     @Override
     public boolean hasMetaData() {
         return torrentInfo.get() != null;
-    }
-
-    @Override
-    public void initFiles() {
-        for (TorrentFileEntry fileEntry : getTorrentFileEntries()) {
-            File file = getTorrentDataFile(fileEntry);
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                        // should be able to continue on most platforms, libtorrent
-                        // will create as needed.
-                    LOG.warnf("Error creating file: {0}", file);
-                }
-            }
-        }
     }
 
     @Override
