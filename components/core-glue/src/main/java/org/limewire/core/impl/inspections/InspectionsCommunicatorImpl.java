@@ -65,7 +65,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
         
     
     @Inject
-    public InspectionsCommunicatorImpl(@Named("backgroundExecutor")ScheduledExecutorService scheduler,
+    public InspectionsCommunicatorImpl(@Named("fastExecutor")ScheduledExecutorService scheduler,
                                        @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager,
                                        @InspectionsServerUrls Provider<Map<String, StringSetting>> inspectionsServerUrls,
                                        Inspector inspector) {
