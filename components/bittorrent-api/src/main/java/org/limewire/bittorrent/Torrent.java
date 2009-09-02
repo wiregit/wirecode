@@ -84,11 +84,6 @@ public interface Torrent {
     public String getTrackerURL();
 
     /**
-     * Returns true if this is a multi file torrent, false otherwise.
-     */
-    public boolean isMultiFileTorrent();
-
-    /**
      * Returns the number of peers in this torrents swarm.
      */
     public int getNumPeers();
@@ -97,11 +92,6 @@ public interface Torrent {
      * Returns the root data file for this torrent.
      */
     public File getTorrentDataFile();
-
-    /**
-     * Returns true if this is a single file torrent, false otherwise.
-     */
-    public boolean isSingleFileTorrent();
 
     /**
      * Stops the torrent by removing it from the torrent manager.
@@ -231,4 +221,10 @@ public interface Torrent {
      * Initializes files on the file system for this torrent.
      */
     public void initFiles();
+
+    /**
+     * Returns the TorrentInfo object for this torrent, can be null 
+     * when the torrent does no yet have its metadata loaded. 
+     */
+    public TorrentInfo getTorrentInfo();
 }

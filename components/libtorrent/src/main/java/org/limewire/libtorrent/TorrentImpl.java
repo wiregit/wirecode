@@ -249,11 +249,6 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public boolean isMultiFileTorrent() {
-        return !isSingleFileTorrent();
-    }
-
-    @Override
     public int getNumPeers() {
         TorrentStatus status = this.status.get();
         return status == null ? 0 : status.getNumPeers();
@@ -262,12 +257,6 @@ public class TorrentImpl implements Torrent {
     @Override
     public File getTorrentDataFile() {
         return torrentDataFile.get();
-    }
-
-    @Override
-    public boolean isSingleFileTorrent() {
-        boolean singleFileTorrent = hasMetaData() && torrentInfo.get().getTorrentFileEntries().size() == 1;
-        return singleFileTorrent;
     }
 
     @Override
@@ -455,5 +444,10 @@ public class TorrentImpl implements Torrent {
                 }
             }
         }
+    }
+
+    @Override
+    public TorrentInfo getTorrentInfo() {
+        return torrentInfo.get();
     }
 }

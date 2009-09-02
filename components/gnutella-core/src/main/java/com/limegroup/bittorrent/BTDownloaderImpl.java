@@ -323,7 +323,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isLaunchable() {
-        return torrent.isSingleFileTorrent();
+        
+        TorrentInfo torrentInfo = torrent.getTorrentInfo();
+        
+        return torrentInfo != null && torrentInfo.getTorrentFileEntries().size() == 1;
         // TODO old logic would check last verified offest, but logic seems
         // wrong, wince the pieces download randomly, there is no guarentee that
         // the begginning of the file is ok to preview.
@@ -364,7 +367,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return null;
         }
 
-        if (torrent.isMultiFileTorrent()) {
+        TorrentInfo torrentInfo = torrent.getTorrentInfo();
+        if (torrentInfo == null || torrentInfo.getTorrentFileEntries().size() > 1) {
             return null;
         }
 

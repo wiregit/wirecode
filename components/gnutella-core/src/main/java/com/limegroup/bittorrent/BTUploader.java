@@ -242,9 +242,6 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     @Override
     public String getCustomIconDescriptor() {
-        if (torrent.isSingleFileTorrent()) {
-            return null;
-        }
         return BITTORRENT_UPLOAD;
     }
 
