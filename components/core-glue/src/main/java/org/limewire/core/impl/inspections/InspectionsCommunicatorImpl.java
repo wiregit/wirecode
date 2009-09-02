@@ -139,7 +139,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
      * @throws java.io.IOException for but a 200 response.
      */
     private byte[] executeRequest(HttpUriRequest request) throws IOException {
-        // if inspections were enabled, stop everything
+        // if inspections were disabled, stop everything
         if (!InspectionsSettings.PUSH_INSPECTIONS_ENABLED.getValue()) {
             stop();
             return new byte[0];
