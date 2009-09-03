@@ -1,12 +1,17 @@
 package org.limewire.ui.swing.warnings;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
+import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -37,6 +42,7 @@ class LibraryFileAdder {
                 libraryMediator.get().clearFilters();
             }
         }
+        List<File> rejectedFiles = new ArrayList<File>();
         for (File file : files) {
             if (fileList.isFileAddable(file)) {
                 if (file.isDirectory()) {
@@ -44,7 +50,43 @@ class LibraryFileAdder {
                 } else {
                     fileList.addFile(file);
                 }
+            } else {
+                rejectedFiles.add(file);
             }
+        }
+        // if anything was rejected notify user
+        if(rejectedFiles.size() > 0) {
+            FocusJOptionPane.showMessageDialog(null, getRejectedMessage(rejectedFiles), 
+                    I18n.trn("File/Folder not added", "File(s)/Folder(s) not added", rejectedFiles.size()), JOptionPane.INFORMATION_MESSAGE);
+
+        }
+    }
+    
+    /**
+     * Returns message to show when one or more files/folders were
+     * rejected.
+     */
+    private String getRejectedMessage(List<File> rejectedFiles) {
+        // display name if it was only 1 folder/file
+        if(rejectedFiles.size() == 1) {
+            return I18n.tr("{0} could not be added to the Library.", rejectedFiles.get(0).getName());
+        } else {
+            // display the number of files/folders that were rejected.
+            int folderCount = 0;
+            int fileCount = 0;
+            for(File file : rejectedFiles) {
+                if(file.isDirectory())
+                    folderCount += 1;
+                else
+                    fileCount += 1;
+            }
+            if(folderCount > 0 && fileCount > 0)
+                return I18n.tr("{0} folders and {1} files could not be added to the Library.", folderCount, fileCount);
+            else if(folderCount > 0)
+                return I18n.tr("{0} folders could not be added to the Library.", folderCount);
+            else 
+                return I18n.tr("{0} files could not be added to the Library.", fileCount);
+             
         }
     }
 }
