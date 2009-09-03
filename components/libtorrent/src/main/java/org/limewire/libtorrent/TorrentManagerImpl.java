@@ -38,8 +38,6 @@ import com.google.inject.name.Named;
 @LazySingleton
 public class TorrentManagerImpl implements TorrentManager {
 
-    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
-
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
 
     private final ScheduledExecutorService fastExecutor;
@@ -281,14 +279,10 @@ public class TorrentManagerImpl implements TorrentManager {
             try {
                 torrentFuture = fastExecutor.scheduleWithFixedDelay(new EventPoller(), 1000, 500,
                         TimeUnit.MILLISECONDS);
-
-                if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-                    alertFuture = fastExecutor.scheduleWithFixedDelay(new AlertPoller(), 1000, 500,
-                            TimeUnit.MILLISECONDS);
-                    resumeFileFuture = fastExecutor.scheduleWithFixedDelay(
-                            new ResumeDataScheduler(), 10000, 10000, TimeUnit.MILLISECONDS);
-                }
-
+                alertFuture = fastExecutor.scheduleWithFixedDelay(new AlertPoller(), 1000, 500,
+                        TimeUnit.MILLISECONDS);
+                resumeFileFuture = fastExecutor.scheduleWithFixedDelay(new ResumeDataScheduler(),
+                        10000, 10000, TimeUnit.MILLISECONDS);
             } finally {
                 lock.writeLock().unlock();
             }
