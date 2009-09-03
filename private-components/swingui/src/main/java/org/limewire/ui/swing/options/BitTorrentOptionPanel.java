@@ -7,7 +7,7 @@ import java.awt.event.ItemListener;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -19,6 +19,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
+import org.limewire.ui.swing.components.EmbeddedComponentLabel;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
@@ -37,27 +38,16 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     private JRadioButton myControl;
 
-    private JLabel seedRatioLabel;
-
+    private JComponent seedController;
+    private JComponent portController;
+    
     private SpinnerNumberModel seedRatioModel;
-
     private JSpinner seedRatio;
-
-    private JLabel seedTimeLabel;
-
     private SpinnerNumberModel seedTimeModel;
-
     private JSpinner seedTime;
 
-    private JLabel daysLabel;
-
     private NumericTextField startPortField;
-
     private NumericTextField endPortField;
-
-    private JLabel portLabel;
-
-    private JLabel portToLabel;
 
     private final Provider<TorrentManager> torrentManager;
 
@@ -105,7 +95,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(uploadForever);
         buttonGroup.add(myControl);
 
-        seedRatioLabel = new JLabel(I18n.tr("until ratio: "));
 
         seedRatioModel = new SpinnerNumberModel(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                 .get().doubleValue(), BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getMinValue()
@@ -114,10 +103,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
         seedRatio = new JSpinner(seedRatioModel);
         seedRatio.setPreferredSize(new Dimension(50, 20));
-        seedRatio.setMaximumSize(new Dimension(50, 20));
-
-        seedTimeLabel = new JLabel(I18n.tr("OR uploading for: "));
-        daysLabel = new JLabel(I18n.tr("days"));
+        seedRatio.setMaximumSize(new Dimension(60, 20));
 
         seedTimeModel = new SpinnerNumberModel(
                 getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()),
@@ -126,11 +112,16 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
         seedTime = new JSpinner(seedTimeModel);
         seedTime.setPreferredSize(new Dimension(50, 20));
-        seedTime.setMaximumSize(new Dimension(50, 20));
-        portLabel = new JLabel(I18n.tr("Use ports:"));
-        portToLabel = new JLabel(I18n.tr("to"));
+        seedTime.setMaximumSize(new Dimension(60, 20));
+
+        seedController = new EmbeddedComponentLabel(I18n.tr("Limit until ratio of: {c} OR uploading for: {c} days"), 
+                seedRatio, seedTime);        
+        
         startPortField = new NumericTextField(5, 1, 0xFFFF);
         endPortField = new NumericTextField(5, 1, 0xFFFF);
+        
+        portController = new EmbeddedComponentLabel(I18n.tr("Use ports: {c} to {c}"), 
+                startPortField, endPortField);
         
         prioritizeTorrentPopup = new JCheckBox(I18n.tr("Show torrent file dialog when starting new torrents"));
         prioritizeTorrentPopup.setOpaque(false);
@@ -139,23 +130,16 @@ public class BitTorrentOptionPanel extends OptionPanel {
         if (torrentManager.get().isValid()) {
             p.add(uploadForever, "wrap");
             p.add(myControl, "wrap");
-            p.add(seedRatioLabel, "gapleft 26, split");
-            p.add(seedRatio, "split");
-            p.add(seedTimeLabel, "split");
-            p.add(seedTime, "split");
-            p.add(daysLabel, "alignx left, wrap");
-            p.add(portLabel, "split");
-            p.add(startPortField, "split");
-            p.add(portToLabel, "split");
-            p.add(endPortField, "alignx right, wrap");
+            
+            p.add(seedController, "gapleft 26, wrap");
+            p.add(portController, "wrap");
+            
             p.add(prioritizeTorrentPopup, "wrap");
 
         } else {
-            p
-                    .add(new MultiLineLabel(
-                            I18n
-                                    .tr("There was an error loading bittorrent. You will not be able to use bittorrent capabilities until this is resolved."),
-                            500));
+            p.add(new MultiLineLabel(
+                  I18n.tr("There was an error loading bittorrent. You will not be able to use bittorrent capabilities until this is resolved."),
+                  500));
         }
         return p;
     }
@@ -235,11 +219,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
      * them.
      */
     private void updateState(boolean uploadForever) {
-        seedRatioLabel.setVisible(!uploadForever);
-        seedRatio.setVisible(!uploadForever);
-        seedTime.setVisible(!uploadForever);
-        seedTimeLabel.setVisible(!uploadForever);
-        daysLabel.setVisible(!uploadForever);
+        seedController.setVisible(!uploadForever);
+        portController.setVisible(!uploadForever);
     }
 
 }
