@@ -87,7 +87,7 @@ public class FileInfoDialog extends LimeJDialog {
         cards.put(Tabs.GENERAL, fileInfoFactory.createGeneralPanel(type, propertiableFile));
         cardPanel.add(cards.get(Tabs.GENERAL).getComponent());
         
-        setTitle(I18n.tr("{0}   Properties", propertiableFile.getFileName()));
+        updateTitle(propertiableFile.getFileName());
         
         setLayout(new MigLayout("gap 0, insets 0, fill"));
         getContentPane().setBackground(backgroundColor);
@@ -162,6 +162,10 @@ public class FileInfoDialog extends LimeJDialog {
                 FileInfoDialog.this.repaint();
             }
         });
+    }
+    
+    private void updateTitle(String fileName) {
+        setTitle(I18n.tr("{0} Properties", propertiableFile.getFileName()));
     }
     
     public void renameFile() {
@@ -261,6 +265,7 @@ public class FileInfoDialog extends LimeJDialog {
                         panel.updatePropertiableFile(propertiableFile);
                     }
                     overviewPanel.updatePropertiableFile(propertiableFile);
+                    updateTitle(propertiableFile.getFileName());
                 }
             }
         }
