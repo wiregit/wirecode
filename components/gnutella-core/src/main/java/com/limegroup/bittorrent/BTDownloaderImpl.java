@@ -216,12 +216,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         if (hasAnyPriorityZero) {
 
-            torrent.stop();// TODO for now not seeding paritally downloaded
-            // torrents, we can make the last pieces of the files
-            // priority zero potentially so it will not
-            // download/seed those pieces, need to look into
-            // this.
-
             // TODO should maybe not use the same TorrentFileEntry for items in
             // the TorrentInfo object, right now making a copy of the last known
             // contents, to display the correct value in the ui, in general
