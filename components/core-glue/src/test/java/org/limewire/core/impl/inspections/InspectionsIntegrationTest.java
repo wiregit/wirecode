@@ -88,6 +88,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
     private void initSettings() {
         InspectionsSettings.INSPECTION_SPEC_REQUEST_URL.set("http://localhost:8123/request");
         InspectionsSettings.INSPECTION_SPEC_SUBMIT_URL.set("http://localhost:8123/submit");
+        InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.set(0);
     }
 
     private void initializeInspectionPoints() {
@@ -284,6 +285,61 @@ public class InspectionsIntegrationTest extends LimeTestCase {
         List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
         
         // expecting no inspections results
+        assertEquals(0, listInspDataEncoded.size());
+    }
+    
+    /**
+     * Test an inspection point which specifies an interval that is too short.
+     */
+    public void testInvalidInterval() throws Exception {
+        List<String> inspections = 
+            Collections.singletonList("org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE");
+        List<InspectionsSpec> specs = Arrays.asList(new InspectionsSpec(inspections, 0, 5));
+        
+        InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.revertToDefault(); // client side should enforce this
+        // start web server and lw services
+        ServerController serverController = startServerWithInspectionSpecs(specs);
+        startInspectionsCommunicator();       
+        Thread.sleep(10000);
+        
+        List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
+        
+        assertEquals(0, listInspDataEncoded.size());
+    }
+    
+    /**
+     * Test an inspection point which specifies a negative interval
+     */
+    public void testNegativeInterval() throws Exception {
+        List<String> inspections = 
+            Collections.singletonList("org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE");
+        List<InspectionsSpec> specs = Arrays.asList(new InspectionsSpec(inspections, 0, -1));
+        
+        // start web server and lw services
+        ServerController serverController = startServerWithInspectionSpecs(specs);
+        startInspectionsCommunicator();       
+        Thread.sleep(10000);
+        
+        List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
+        
+        assertEquals(0, listInspDataEncoded.size());
+    }
+    
+    /**
+     * Test an inspection point which specifies a negative interval
+     */
+    public void testNegativeInterval2() throws Exception {
+        List<String> inspections = 
+            Collections.singletonList("org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE");
+        List<InspectionsSpec> specs = Arrays.asList(new InspectionsSpec(inspections, 0, -100));
+        
+        // start web server and lw services
+        ServerController serverController = startServerWithInspectionSpecs(specs);
+        startInspectionsCommunicator();       
+        Thread.sleep(10000);
+        
+        List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
+        
         assertEquals(0, listInspDataEncoded.size());
     }
     

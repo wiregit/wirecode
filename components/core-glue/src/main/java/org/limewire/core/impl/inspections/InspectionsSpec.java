@@ -5,17 +5,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.InspectionsSettings;
+import org.limewire.inspection.InspectionException;
+import org.limewire.inspection.Inspector;
+import org.limewire.io.InvalidDataException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
-import org.limewire.io.InvalidDataException;
-import org.limewire.core.settings.ApplicationSettings;
-import org.limewire.inspection.Inspector;
-import org.limewire.inspection.InspectionException;
 
 /**
  * represents an inspections instruction - a response 
@@ -97,11 +98,19 @@ public class InspectionsSpec {
             this.inspectionPoints = new ArrayList<String>(inspectionPoints);
             this.startDelay = startDelay;
             this.interval = interval;
+            validate();
         } catch (ClassCastException e) {
             throw new InvalidDataException("invalid inspections specification data", e);
         }
     }
-        
+
+    private void validate() throws InvalidDataException {
+        // in case of erroneous server side responses
+        if(interval < InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.get() && interval != 0) { // this also checks for negative numbers
+            throw new InvalidDataException("invalid inspection spec interval: " + interval);
+        }
+    }
+
     Map<String, Object> asBencodedMap() {
         // "startdelay" -> integer
         // "interval"   -> integer
