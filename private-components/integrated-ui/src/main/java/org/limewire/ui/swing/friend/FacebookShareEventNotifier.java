@@ -12,6 +12,8 @@ import org.limewire.facebook.service.FacebookFriend;
 import org.limewire.facebook.service.FacebookFriendConnection;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.listener.EventBean;
@@ -94,6 +96,12 @@ public class FacebookShareEventNotifier {
         if (friend.getPresences().isEmpty()) {
             LOG.debugf("no notification for offline friend: {0}", friend);
             return;
+        }
+        for (FriendPresence presence : friend.getPresences().values()) {
+            if (presence.hasFeatures(LimewireFeature.ID)) {
+                LOG.debugf("no notification for friend on limewire: {0}", friend);
+                return;
+            }
         }
         if (notifiedFriends.contains(friend.getId())) {
             LOG.debugf("friend was already notified of a share event this session: {0}", friend);
