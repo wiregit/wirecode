@@ -14,17 +14,17 @@ class LimeXMLReplyCollectionFactoryImpl implements LimeXMLReplyCollectionFactory
 
     private final Provider<Library> library;
 
-    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private final Provider<LimeXMLDocumentFactory> limeXMLDocumentFactory;
 
-    private final MetaDataReader metaDataReader;
+    private final Provider<MetaDataReader> metaDataReader;
     
-    private final MetaDataFactory metaDataFactory;
+    private final Provider<MetaDataFactory> metaDataFactory;
     
     @Inject
     public LimeXMLReplyCollectionFactoryImpl(
             Provider<LimeXMLProperties> limeXMLProperties, Provider<Library> library,
-            LimeXMLDocumentFactory limeXMLDocumentFactory, MetaDataReader metaDataReader,
-            MetaDataFactory metaDataFactory) {
+            Provider<LimeXMLDocumentFactory> limeXMLDocumentFactory, Provider<MetaDataReader> metaDataReader,
+            Provider<MetaDataFactory> metaDataFactory) {
         this.limeXMLProperties = limeXMLProperties;
         this.library = library;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;

@@ -86,14 +86,14 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
     private final ActivityCallback activityCallback;
 
-    private final LimeXMLSchemaRepository schemaRepository;
+    private final Provider<LimeXMLSchemaRepository> schemaRepository;
 
     @Inject
     public SharedFilesKeywordIndexImpl(Library library,
             Provider<CreationTimeCache> creationTimeCache,
             Provider<ResponseFactory> responseFactory,
             Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
-            ActivityCallback activityCallback, LimeXMLSchemaRepository schemaRepository,
+            ActivityCallback activityCallback, Provider<LimeXMLSchemaRepository> schemaRepository,
             @GnutellaFiles FileView gnutellaFileView,
             @IncompleteFiles FileView incompleteFileView) {
         this.library = library;
@@ -593,7 +593,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     }
 
     private String getSchemaUriFromMimeType(String mimeType) {
-        Collection<LimeXMLSchema> schemas = schemaRepository.getAvailableSchemas();
+        Collection<LimeXMLSchema> schemas = schemaRepository.get().getAvailableSchemas();
         for (LimeXMLSchema schema : schemas) {
             if (schema.getDescription().equals(mimeType)) {
                 return schema.getSchemaURI();

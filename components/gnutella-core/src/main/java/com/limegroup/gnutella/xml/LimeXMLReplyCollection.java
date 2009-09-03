@@ -110,11 +110,11 @@ public class LimeXMLReplyCollection {
 
     private final Provider<Library> library;
 
-    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private final Provider<LimeXMLDocumentFactory> limeXMLDocumentFactory;
 
-    private final MetaDataFactory metaDataFactory;
+    private final Provider<MetaDataFactory> metaDataFactory;
 
-    private final MetaDataReader metaDataReader;
+    private final Provider<MetaDataReader> metaDataReader;
     
     private final File savedDocsDir;
 
@@ -130,8 +130,8 @@ public class LimeXMLReplyCollection {
      * @param metaDataFactory the MetaDataFactory used in this class
      */
     LimeXMLReplyCollection(String URI, File path, Provider<Library> library,
-            LimeXMLDocumentFactory limeXMLDocumentFactory, MetaDataReader metaDataReader,
-            MetaDataFactory metaDataFactory) {
+            Provider<LimeXMLDocumentFactory> limeXMLDocumentFactory, Provider<MetaDataReader> metaDataReader,
+            Provider<MetaDataFactory> metaDataFactory) {
         this.schemaURI = URI;
         this.library = library;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
@@ -256,7 +256,7 @@ public class LimeXMLReplyCollection {
             
         // check to see if it's corrupted and if so, fix it.
         if( AudioMetaData.isCorrupted(doc) ) {
-            doc = AudioMetaData.fixCorruption(doc, limeXMLDocumentFactory);
+            doc = AudioMetaData.fixCorruption(doc, limeXMLDocumentFactory.get());
             mediaFileToDisk(fd, doc);
         }
         
@@ -283,13 +283,13 @@ public class LimeXMLReplyCollection {
         for(Map.Entry<String, String> next : fields.entrySet())
             nameValues.add(new NameValue<String>(next.getKey(), next.getValue()));
         
-        return limeXMLDocumentFactory.createLimeXMLDocument(nameValues, newer.getSchemaURI());
+        return limeXMLDocumentFactory.get().createLimeXMLDocument(nameValues, newer.getSchemaURI());
      }
     
     /** Returns true if a document can be created for this file. */
     boolean canCreateDocument(File file) {
-        return LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI) && metaDataFactory.containsAudioReader(file)
-                || LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI) && metaDataFactory.containsVideoReader(file);
+        return LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI) && metaDataFactory.get().containsAudioReader(file)
+                || LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI) && metaDataFactory.get().containsVideoReader(file);
     }
         
     
@@ -302,7 +302,7 @@ public class LimeXMLReplyCollection {
         if(canCreateDocument(file)) {
             try {
                 // Documents with multiple file formats may be the wrong type.
-                LimeXMLDocument document = metaDataReader.readDocument(file);
+                LimeXMLDocument document = metaDataReader.get().readDocument(file);
                 if(document.getSchemaURI().equals(schemaURI))
                     return document;
             } catch (IOException ignored) {
@@ -654,18 +654,18 @@ public class LimeXMLReplyCollection {
     private MetaDataWriter getEditorIfNeeded(File file, LimeXMLDocument doc) {
         // check if an editor exists for this file, if no editor exists
         //  just store data in xml repository only
-        if(!metaDataFactory.containsEditor(file.getName()))
+        if(!metaDataFactory.get().containsEditor(file.getName()))
             return null;
         
         //get the editor for this file and populate it with the XML doc info
-        MetaDataWriter newValues = new MetaDataWriter(file.getPath(), metaDataFactory);
+        MetaDataWriter newValues = new MetaDataWriter(file.getPath(), metaDataFactory.get());
         newValues.populate(doc);
         
         
         // try reading the file off of disk
         MetaData existing = null;
         try {
-            existing = metaDataFactory.parse(file);
+            existing = metaDataFactory.get().parse(file);
         } catch (IOException e) {
             return null;
         }
@@ -700,10 +700,10 @@ public class LimeXMLReplyCollection {
         // if a FileDesc for this file exists, write out the changes to disk
         // and update the FileDesc in the FileManager
         List<LimeXMLDocument> currentXmlDocs = fd.getLimeXMLDocuments();
-        if(metaDataFactory.containsEditor(fd.getFile().getName())) {
+        if(metaDataFactory.get().containsEditor(fd.getFile().getName())) {
             try {
                   //TODO: Disk IO being performed here!!
-                  LimeXMLDocument newAudioXmlDoc = metaDataReader.readDocument(fd.getFile());
+                  LimeXMLDocument newAudioXmlDoc = metaDataReader.get().readDocument(fd.getFile());
                   LimeXMLDocument oldAudioXmlDoc = getAudioDoc(currentXmlDocs);
                   
                   if(oldAudioXmlDoc == null || !oldAudioXmlDoc.equals(newAudioXmlDoc)) {
@@ -765,7 +765,7 @@ public class LimeXMLReplyCollection {
                 if (AudioMetaData.isNonLimeAudioField(nameVal.getName()))
                     newAudioList.add(nameVal);
             }
-            oldAudioDoc = limeXMLDocumentFactory.createLimeXMLDocument(newAudioList, LimeXMLNames.AUDIO_SCHEMA);
+            oldAudioDoc = limeXMLDocumentFactory.get().createLimeXMLDocument(newAudioList, LimeXMLNames.AUDIO_SCHEMA);
             retList.add(oldAudioDoc);
         }
         return retList;
@@ -857,7 +857,7 @@ public class LimeXMLReplyCollection {
         Map<FileAndUrn, LimeXMLDocument> docMap = new HashMap<FileAndUrn, LimeXMLDocument>(read.size());
         for(Map.Entry<FileAndUrn, String> entry : read.entrySet()) {
             try {
-                docMap.put(entry.getKey(), limeXMLDocumentFactory.createLimeXMLDocument(entry.getValue()));
+                docMap.put(entry.getKey(), limeXMLDocumentFactory.get().createLimeXMLDocument(entry.getValue()));
             } catch(IOException ignored) {
                 LOG.warn("Error creating document for: " + entry.getValue(), ignored);
             } catch(SchemaNotFoundException ignored) {
@@ -892,7 +892,7 @@ public class LimeXMLReplyCollection {
         Map<URN, LimeXMLDocument> docMap = new HashMap<URN, LimeXMLDocument>(read.size());
         for(Map.Entry<URN, String> entry : read.entrySet()) {
             try {
-                docMap.put(entry.getKey(), limeXMLDocumentFactory.createLimeXMLDocument(entry.getValue()));
+                docMap.put(entry.getKey(), limeXMLDocumentFactory.get().createLimeXMLDocument(entry.getValue()));
             } catch(IOException ignored) {
                 LOG.warn("Error creating document for: " + entry.getValue(), ignored);
             } catch(SchemaNotFoundException ignored) {
@@ -927,7 +927,7 @@ public class LimeXMLReplyCollection {
         Map<URN, LimeXMLDocument> docMap = new HashMap<URN, LimeXMLDocument>(read.size());
         for(Map.Entry<URN, SerialXml> entry : read.entrySet()) {
             try {
-                docMap.put(entry.getKey(), limeXMLDocumentFactory.createLimeXMLDocument(entry.getValue().getXml(true)));
+                docMap.put(entry.getKey(), limeXMLDocumentFactory.get().createLimeXMLDocument(entry.getValue().getXml(true)));
             } catch(IOException ignored) {
                 LOG.warn("Error creating document for: " + entry.getValue(), ignored);
             } catch(SchemaNotFoundException ignored) {

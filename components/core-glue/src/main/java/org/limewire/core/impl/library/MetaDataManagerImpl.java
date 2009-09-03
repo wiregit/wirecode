@@ -16,6 +16,7 @@ import org.limewire.util.NameValue;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
@@ -31,12 +32,12 @@ public class MetaDataManagerImpl implements MetaDataManager {
     private final SchemaReplyCollectionMapper schemaReplyCollectionMapper;
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
-    private final MetaDataFactory metaDataFactory;
+    private final Provider<MetaDataFactory> metaDataFactory;
 
     @Inject
     public MetaDataManagerImpl(LimeXMLDocumentFactory limeXMLDocumentFactory,
             SchemaReplyCollectionMapper schemaReplyCollectionMapper,
-            MetaDataFactory metaDataFactory) {
+            Provider<MetaDataFactory> metaDataFactory) {
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
         this.metaDataFactory = metaDataFactory;
@@ -92,7 +93,7 @@ public class MetaDataManagerImpl implements MetaDataManager {
             collection.addReply(fileDesc, result);
         }
 
-        if(metaDataFactory.containsReader(fileDesc.getFile())) {
+        if(metaDataFactory.get().containsReader(fileDesc.getFile())) {
             final MetaDataState committed = collection.mediaFileToDisk(fileDesc, result);
             if (committed != MetaDataState.NORMAL && committed != MetaDataState.UNCHANGED) {
                 throw new MetaDataException("Internal Document Error. Data could not be saved.");

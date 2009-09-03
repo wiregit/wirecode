@@ -68,7 +68,7 @@ public abstract class TestConnection extends GnutellaConnection {
             QueryReplyFactory queryReplyFactory,
             MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            SearchResultHandler searchResultHandler,
+            Provider<SearchResultHandler> searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,

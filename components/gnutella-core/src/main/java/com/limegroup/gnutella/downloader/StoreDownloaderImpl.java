@@ -55,7 +55,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
      * To succesfully use the download templates when saving Store Files. The MetaData
      * must be parsed after downloading has been completed.
      */
-    private final MetaDataFactory metaDataFactory;
+    private final Provider<MetaDataFactory> metaDataFactory;
 
     @Inject
     public StoreDownloaderImpl(SaveLocationManager saveLocationManager,
@@ -83,7 +83,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             RemoteFileDescFactory remoteFileDescFactory, 
             Provider<PushList> pushListProvider,
             SocketsManager socketsManager,
-            MetaDataFactory metaDataFactory, 
+            Provider<MetaDataFactory> metaDataFactory, 
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager, Library library) {
@@ -172,7 +172,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         // parse the meta data of this file
         AudioMetaData metaData = null;
         try {
-            metaData = (AudioMetaData) metaDataFactory.parse(newDownloadFile);
+            metaData = (AudioMetaData) metaDataFactory.get().parse(newDownloadFile);
         } catch (IOException e) {
             // don't catch this exception, problem reading the ID3 tags, just
             // use default locations instead

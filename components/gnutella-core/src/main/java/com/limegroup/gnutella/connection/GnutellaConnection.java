@@ -302,7 +302,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
     private final NetworkUpdateSanityChecker networkUpdateSanityChecker;
 
-    private final SearchResultHandler searchResultHandler;
+    private final Provider<SearchResultHandler> searchResultHandler;
 
     private final Provider<SimppManager> simppManager;
 
@@ -351,7 +351,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            SearchResultHandler searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<SearchResultHandler> searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
@@ -399,7 +399,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            SearchResultHandler searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<SearchResultHandler> searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
@@ -1211,7 +1211,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             // on this connection.
             if (getConnectionCapabilities().isClientSupernodeConnection()
                     && (getConnectionCapabilities().remoteHostSupportsLeafGuidance() >= 0)) {
-                List<QueryRequest> queries = searchResultHandler.getQueriesToReSend();
+                List<QueryRequest> queries = searchResultHandler.get().getQueriesToReSend();
                 for (QueryRequest qr : queries) {
                     send(qr);
                 }

@@ -1251,8 +1251,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
         public ManagedConnectionStub createConnectionStub() {
             return new ManagedConnectionStub("1.2.3.4", 6346, ConnectType.PLAIN, connectionManager.get(), networkManager,
                     queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
-                            .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
+                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                    capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
                     applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
@@ -1270,7 +1270,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 HandshakeResponderFactory handshakeResponderFactory,
                 QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
                 NetworkUpdateSanityChecker networkUpdateSanityChecker,
-                SearchResultHandler searchResultHandler,
+                Provider<SearchResultHandler> searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory, SocketsManager socketsManager,
                 Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
                 Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,

@@ -133,8 +133,8 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
     public RoutedConnection createRoutedConnection(String host, int port, ConnectType type) {
         return new GnutellaConnection(host, port, type, connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
-                        .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
+                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler,
+                capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
                 applicationServices, secureMessageVerifier.get(), outOfBandStatistics, networkInstanceUtils);
@@ -143,8 +143,8 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
     public RoutedConnection createRoutedConnection(Socket socket) {
         return new GnutellaConnection(socket, connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
-                        .get(), capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,
+                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
                         .get(), outOfBandStatistics, networkInstanceUtils);

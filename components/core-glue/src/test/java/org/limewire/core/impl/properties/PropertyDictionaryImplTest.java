@@ -10,7 +10,6 @@ import org.limewire.util.BaseTestCase;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 public class PropertyDictionaryImplTest extends BaseTestCase {
 
@@ -28,9 +27,7 @@ public class PropertyDictionaryImplTest extends BaseTestCase {
     protected void setUp() throws Exception {
         Injector injector = Guice.createInjector(Stage.DEVELOPMENT);
 
-        final LimeXMLSchemaRepository limeXMLSchemaRepository = injector
-                .getInstance(LimeXMLSchemaRepository.class);
-        propertyDictionaryImpl = new PropertyDictionaryImpl(limeXMLSchemaRepository);
+        propertyDictionaryImpl = injector.getInstance(PropertyDictionaryImpl.class);
     }
 
     @Override

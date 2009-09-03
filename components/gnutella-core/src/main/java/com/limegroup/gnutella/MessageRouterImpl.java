@@ -312,7 +312,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final UploadManager uploadManager;
     protected final DownloadManager downloadManager;
     protected final UDPService udpService;
-    protected final SearchResultHandler searchResultHandler;
+    protected final Provider<SearchResultHandler> searchResultHandler;
     protected final SocketsManager socketsManager;
     protected final HostCatcher hostCatcher;
     protected final QueryReplyFactory queryReplyFactory;
@@ -367,7 +367,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             UploadManager uploadManager,
             DownloadManager downloadManager,
             UDPService udpService,
-            SearchResultHandler searchResultHandler,
+            Provider<SearchResultHandler> searchResultHandler,
             SocketsManager socketsManager,
             HostCatcher hostCatcher,
             QueryReplyFactory queryReplyFactory,
@@ -1206,7 +1206,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
     	GUID qGUID = new GUID(reply.getGUID());
     	
-        int numResults = searchResultHandler.getNumResultsForQuery(qGUID);
+        int numResults = searchResultHandler.get().getNumResultsForQuery(qGUID);
     	
         if (numResults < 0) // this may be a proxy query
     		numResults = queryDispatcher.getLeafResultsForQuery(qGUID);

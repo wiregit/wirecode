@@ -122,8 +122,8 @@ public class TestConnectionFactory {
     public OldConnection createOldConnection(int connections) {
         return new OldConnection(connections, false, connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
-                        .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
+                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
                 applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
@@ -137,7 +137,7 @@ public class TestConnectionFactory {
         return new NewConnection(connections, false, new QueryRouteTable(),
                 connectionManager.get(), networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher.get(),
-                networkUpdateSanityChecker.get(), searchResultHandler.get(), capabilitiesVMFactory,
+                networkUpdateSanityChecker.get(), searchResultHandler, capabilitiesVMFactory,
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
@@ -152,7 +152,7 @@ public class TestConnectionFactory {
         return new NewConnection(10, false, new QueryRouteTable(), connectionManager.get(),
                 networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory,
                 queryReplyFactory, messageDispatcher.get(), networkUpdateSanityChecker.get(),
-                searchResultHandler.get(), capabilitiesVMFactory, socketsManager.get(), acceptor
+                searchResultHandler, capabilitiesVMFactory, socketsManager.get(), acceptor
                         .get(), supportedVendorMessage, simppManager, updateHandler,
                 connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory,
                 messageFactory, applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
@@ -166,7 +166,7 @@ public class TestConnectionFactory {
         return new NewConnection(10, false, new HitQueryRouteTable(), connectionManager.get(),
                 networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory,
                 queryReplyFactory, messageDispatcher.get(), networkUpdateSanityChecker.get(),
-                searchResultHandler.get(), capabilitiesVMFactory, socketsManager.get(), acceptor
+                searchResultHandler, capabilitiesVMFactory, socketsManager.get(), acceptor
                         .get(), supportedVendorMessage, simppManager, updateHandler,
                 connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory,
                 messageFactory, applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
@@ -177,7 +177,7 @@ public class TestConnectionFactory {
                 "ALT LEAF CONNECTION", false, 15, true, new QueryRouteTable(), connectionManager
                         .get(), networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher.get(),
-                networkUpdateSanityChecker.get(), searchResultHandler.get(), capabilitiesVMFactory,
+                networkUpdateSanityChecker.get(), searchResultHandler, capabilitiesVMFactory,
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
@@ -188,8 +188,8 @@ public class TestConnectionFactory {
         return new LeafConnection(keywords, "LEAF CONNECTION", true, 20, true,
                 new QueryRouteTable(), connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
-                        .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
+                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
                 applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
@@ -200,7 +200,7 @@ public class TestConnectionFactory {
                 queriesMustBeInRoutingTable, new QueryRouteTable(), connectionManager.get(),
                 networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory,
                 queryReplyFactory, messageDispatcher.get(), networkUpdateSanityChecker.get(),
-                searchResultHandler.get(), capabilitiesVMFactory, socketsManager.get(), acceptor
+                searchResultHandler, capabilitiesVMFactory, socketsManager.get(), acceptor
                         .get(), supportedVendorMessage, simppManager, updateHandler,
                 connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory,
                 messageFactory, applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
@@ -210,7 +210,7 @@ public class TestConnectionFactory {
         return new UltrapeerConnection(null, 15, false, new QueryRouteTable(), connectionManager
                 .get(), networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher.get(),
-                networkUpdateSanityChecker.get(), searchResultHandler.get(), capabilitiesVMFactory,
+                networkUpdateSanityChecker.get(), searchResultHandler, capabilitiesVMFactory,
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
@@ -221,7 +221,7 @@ public class TestConnectionFactory {
         return new UltrapeerConnection(keywords, 15, false, new QueryRouteTable(),
                 connectionManager.get(), networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher.get(),
-                networkUpdateSanityChecker.get(), searchResultHandler.get(), capabilitiesVMFactory,
+                networkUpdateSanityChecker.get(), searchResultHandler, capabilitiesVMFactory,
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier

@@ -9,18 +9,16 @@ import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.BTDataValueException;
 import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.inject.EagerSingleton;
 import org.limewire.io.IOUtils;
 
-import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.metadata.MetaData;
-import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaReader;
 
 /**
  * Converts a torrent file into a MetaData object. 
  */
-@EagerSingleton
+@Singleton
 public class TorrentMetaReader implements MetaReader {
 
     @Override
@@ -45,10 +43,4 @@ public class TorrentMetaReader implements MetaReader {
     public String[] getSupportedExtensions() {
         return new String[] { "torrent" };
     }
-    
-    @Inject
-    public void register(MetaDataFactory metaDataFactory) {
-        metaDataFactory.registerReader(this);
-    }
-
 }

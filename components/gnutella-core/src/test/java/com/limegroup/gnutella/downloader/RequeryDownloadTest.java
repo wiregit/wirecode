@@ -341,7 +341,7 @@ public class RequeryDownloadTest extends LimeTestCase {
                 FileViewManager fileManager, ContentManager contentManager,
                 DHTManager dhtManager, UploadManager uploadManager,
                 DownloadManager downloadManager, UDPService udpService,
-                SearchResultHandler searchResultHandler,
+                Provider<SearchResultHandler> searchResultHandler,
                 SocketsManager socketsManager, HostCatcher hostCatcher,
                 QueryReplyFactory queryReplyFactory, StaticMessages staticMessages,
                 Provider<MessageDispatcher> messageDispatcher,

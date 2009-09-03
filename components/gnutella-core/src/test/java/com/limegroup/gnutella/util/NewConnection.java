@@ -44,7 +44,7 @@ public class NewConnection extends TestConnection {
             HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            SearchResultHandler searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<SearchResultHandler> searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,

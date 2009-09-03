@@ -8,6 +8,7 @@ import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.xml.LimeXMLSchema;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
@@ -15,14 +16,14 @@ import com.limegroup.gnutella.xml.SchemaFieldInfo;
 
 @Singleton
 class PropertyDictionaryImpl implements PropertyDictionary {
-    private final LimeXMLSchemaRepository schemaRepository;
+    private final Provider<LimeXMLSchemaRepository> schemaRepository;
     private List<String> audioGenres;
     private List<String> videoGenres;
     private List<String> videoRatings;
     private List<String> applicationPlatforms;
     
     @Inject
-    public PropertyDictionaryImpl(LimeXMLSchemaRepository schemaRepository) {
+    public PropertyDictionaryImpl(Provider<LimeXMLSchemaRepository> schemaRepository) {
         this.schemaRepository = schemaRepository;
     }
     
@@ -60,7 +61,7 @@ class PropertyDictionaryImpl implements PropertyDictionary {
 
     private List<String> getValueList(String schemaDescription, String enumerationName) {
         List<String> values = new ArrayList<String>();
-        for (LimeXMLSchema schema : schemaRepository.getAvailableSchemas()) {
+        for (LimeXMLSchema schema : schemaRepository.get().getAvailableSchemas()) {
             if (schemaDescription.equals(schema.getDescription())) {
                 for(SchemaFieldInfo info : schema.getEnumerationFields()) {
                     String canonicalizedFieldName = info.getCanonicalizedFieldName();

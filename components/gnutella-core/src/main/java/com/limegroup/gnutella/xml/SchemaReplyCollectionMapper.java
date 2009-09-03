@@ -32,10 +32,10 @@ public class SchemaReplyCollectionMapper implements XmlController {
     
     private final Map<String, LimeXMLReplyCollection> mapper;
     
-    protected final LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory;
+    protected final Provider<LimeXMLReplyCollectionFactory> limeXMLReplyCollectionFactory;
     protected final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
     
-    @Inject SchemaReplyCollectionMapper(LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
+    @Inject SchemaReplyCollectionMapper(Provider<LimeXMLReplyCollectionFactory> limeXMLReplyCollectionFactory,
             Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
         this.limeXMLReplyCollectionFactory = limeXMLReplyCollectionFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
@@ -213,7 +213,7 @@ public class SchemaReplyCollectionMapper implements XmlController {
     private void loadSchemas() {
         String[] schemas = limeXMLSchemaRepository.get().getAvailableSchemaURIs();
         for(String schema : schemas) {
-            add(schema, limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(schema));
+            add(schema, limeXMLReplyCollectionFactory.get().createLimeXMLReplyCollection(schema));
         }
     }
 }

@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -25,12 +26,12 @@ public class MetaDataReader {
     
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
     private final LimeXMLSchemaRepository limeXMLSchemaRepository;
-    private final MetaDataFactory metaDataFactory;
+    private final Provider<MetaDataFactory> metaDataFactory;
 
     @Inject
     MetaDataReader(LimeXMLDocumentFactory limeXMLDocumentFactory,
             LimeXMLSchemaRepository limeXMLSchemaRepository,
-            MetaDataFactory metaDataFactory) {
+            Provider<MetaDataFactory> metaDataFactory) {
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         this.metaDataFactory = metaDataFactory;
@@ -41,7 +42,7 @@ public class MetaDataReader {
      * given schemaURI.
      */
     public LimeXMLDocument readDocument(File file) throws IOException {
-        MetaData data = metaDataFactory.parse(file);
+        MetaData data = metaDataFactory.get().parse(file);
         if (data == null)
             throw new IOException("unable to parse file");
 

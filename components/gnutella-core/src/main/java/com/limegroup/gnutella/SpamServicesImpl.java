@@ -31,7 +31,7 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
     private final Provider<IPFilter> ipFilter;
     private final Provider<URNFilter> urnFilter;
     private final SpamFilterFactory spamFilterFactory;
-    private final SearchResultHandler searchResultHandler;
+    private final Provider<SearchResultHandler> searchResultHandler;
     private final ResponseFilterFactory responseFilterFactory;
     private volatile SpamFilter personalFilter;
     private final AtomicInteger filtersLoading;
@@ -40,7 +40,7 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
     public SpamServicesImpl(Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter, Provider<URNFilter> urnFilter,
             SpamFilterFactory spamFilterFactory,
-            SearchResultHandler searchResultHandler,
+            Provider<SearchResultHandler> searchResultHandler,
             ResponseFilterFactory responseFilterFactory) {
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
@@ -48,7 +48,6 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
         this.spamFilterFactory = spamFilterFactory;
         this.searchResultHandler = searchResultHandler;
         this.responseFilterFactory = responseFilterFactory;
-        personalFilter = spamFilterFactory.createPersonalFilter();
         filtersLoading = new AtomicInteger(0);
     }
 
@@ -63,7 +62,7 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
     public void adjustSpamFilters() {
         LOG.trace("Adjusting spam filters");
         personalFilter = spamFilterFactory.createPersonalFilter();
-        searchResultHandler.setResponseFilter(responseFilterFactory.createResponseFilter());
+        searchResultHandler.get().setResponseFilter(responseFilterFactory.createResponseFilter());
         
         // Replace the route filter on each connection
         for(RoutedConnection c : connectionManager.get().getConnections()) {
@@ -128,6 +127,8 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
 
     @Override
     public boolean isPersonalSpam(Message m) {
+        if(personalFilter == null)
+            personalFilter = spamFilterFactory.createPersonalFilter();
         return !personalFilter.allow(m);
     }
 }

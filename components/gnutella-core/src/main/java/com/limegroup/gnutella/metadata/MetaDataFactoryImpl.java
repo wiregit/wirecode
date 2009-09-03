@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Singleton;
+import com.limegroup.bittorrent.metadata.TorrentMetaReader;
 import com.limegroup.gnutella.metadata.audio.reader.AudioDataReader;
 import com.limegroup.gnutella.metadata.audio.reader.MP3Reader;
 import com.limegroup.gnutella.metadata.audio.reader.WMAReader;
@@ -57,6 +58,8 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
         
         registerEditor(new MP3DataEditor());
         registerEditor(new AudioDataEditor());
+        
+        registerReader(new TorrentMetaReader());
     }
     
     /**

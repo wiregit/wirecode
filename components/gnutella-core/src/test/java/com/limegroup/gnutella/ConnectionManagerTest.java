@@ -903,8 +903,8 @@ public class ConnectionManagerTest extends LimeTestCase {
         public GnutellaConnection createRoutedConnection(String host, int port, ConnectType type) {
             return new TestManagedConnection(connectionManager.get(), networkManager,
                     queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler.get()
-                            , capabilitiesVMFactory, socketsManager, acceptor.get(),
+                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                    capabilitiesVMFactory, socketsManager, acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
                     applicationServices, networkInstanceUtils);
@@ -913,8 +913,8 @@ public class ConnectionManagerTest extends LimeTestCase {
         public TestManagedConnection createTestConnection() {
             return new TestManagedConnection(connectionManager.get(), networkManager,
                     queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler.get()
-                            , capabilitiesVMFactory, socketsManager, acceptor.get(),
+                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                    capabilitiesVMFactory, socketsManager, acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
                     applicationServices, networkInstanceUtils);
@@ -963,7 +963,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                 QueryReplyFactory queryReplyFactory,
                 MessageDispatcher messageDispatcher,
                 NetworkUpdateSanityChecker networkUpdateSanityChecker,
-                SearchResultHandler searchResultHandler,
+                Provider<SearchResultHandler> searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 SocketsManager socketsManager, Acceptor acceptor,
                 MessagesSupportedVendorMessage supportedVendorMessage,
