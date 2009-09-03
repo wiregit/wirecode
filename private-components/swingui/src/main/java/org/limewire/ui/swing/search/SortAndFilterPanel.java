@@ -377,7 +377,7 @@ public class SortAndFilterPanel implements Disposable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Do nothing.
+            SearchInspectionUtils.searchSorted();
         }
 
         public SortOption getSortOption() {

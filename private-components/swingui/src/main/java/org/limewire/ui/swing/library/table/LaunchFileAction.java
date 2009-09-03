@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.LibraryInspectionUtils;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.player.PlayerMediator;
@@ -42,6 +43,7 @@ class LaunchFileAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         List<LocalFileItem> localFileItems = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
         if (localFileItems.size() > 0) {
+            LibraryInspectionUtils.fileLaunched();
             // Get first selected item.
             LocalFileItem fileItem = localFileItems.get(0);
             

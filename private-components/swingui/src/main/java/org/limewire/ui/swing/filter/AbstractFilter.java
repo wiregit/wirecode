@@ -116,6 +116,7 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
      * Activates the filter using the specified text description and matcher.
      */
     protected void activate(String activeText, Matcher<E> matcher) {
+        FilterInspectionUtils.filterUsed();
         this.activeText = activeText;
         editor.setMatcher(matcher);
         active = true;

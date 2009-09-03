@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -243,6 +245,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         MatcherEditor<E> editor =
             new TextComponentMatcherEditor<E>(
                 filterTextField, new FilterableItemTextFilterator<E>(), true);
+        filterTextField.addKeyListener(new InpsectionKeyListener());
         
         // Add text filter to editor list. 
         editorList.add(editor);
@@ -457,6 +460,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            FilterInspectionUtils.moreFiltersClicked();
             propertyPanel.setShowAll(!propertyPanel.isShowAll());
             update(propertyPanel.isShowAll());
         }
@@ -697,5 +701,13 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
          */
         void categorySelected(SearchCategory displayCategory);
         
+    }
+    
+    private static class InpsectionKeyListener extends KeyAdapter {
+        @Override
+        public void keyTyped(KeyEvent e) {
+            FilterInspectionUtils.filterUsed();
+            FilterInspectionUtils.refineBoxUsed();
+        }
     }
 }

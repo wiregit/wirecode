@@ -180,6 +180,7 @@ public class LibraryFilterPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            LibraryInspectionUtils.categoryFilterUsed();
             for(LibraryCategoryListener listener : listeners) {
                 listener.categorySelected(category);
             }

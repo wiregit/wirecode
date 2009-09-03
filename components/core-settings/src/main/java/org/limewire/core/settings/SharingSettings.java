@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
@@ -57,6 +60,13 @@ public class SharingSettings extends LimeProps {
      */
     public static final FileSetting DIRECTORY_FOR_SAVING_FILES = FACTORY.createFileSetting(
             "DIRECTORY_FOR_SAVING_FILES", DEFAULT_SAVE_DIR).setAlwaysSave(true);
+    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private class LazyInspectableContainer {
+        @InspectablePrimitive(value = "default download location changed", category = DataCategory.USAGE)
+        private final boolean locationChanged = !DIRECTORY_FOR_SAVING_FILES.get().equals(DEFAULT_SAVE_DIR);
+    }
 
     /**
      * Directory for saving songs purchased from LimeWire Store (LWS).
@@ -119,8 +129,10 @@ public class SharingSettings extends LimeProps {
      * Specifies whether or not completed downloads should automatically be
      * cleared from the download window.
      */
+    @InspectablePrimitive(value = "clear finished downloads", category = DataCategory.USAGE)
     public static final BooleanSetting CLEAR_DOWNLOAD = FACTORY.createBooleanSetting(
             "CLEAR_DOWNLOAD", false);
+
     
     /**
      * Specifies whether or not to warn the user when they are about to share a folder.
@@ -319,6 +331,7 @@ public class SharingSettings extends LimeProps {
     /**
      * Whether or not to auto-share files when using 'Download As'.
      */
+    @InspectablePrimitive(value = "auto-sharing enabled", category = DataCategory.USAGE)
     public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES = FACTORY
             .createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
 
@@ -462,5 +475,6 @@ public class SharingSettings extends LimeProps {
             root = CommonUtils.getUserHomeDir().getPath();
 
         return new File(root, "LimeWire");
-    }
+    }    
+
 }

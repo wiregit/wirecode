@@ -267,6 +267,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
                     return;
 
                 mouseSkip(e.getX());
+                PlayerInspectionUtils.playerUsed();
             }
             
             /**
@@ -378,6 +379,8 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            PlayerInspectionUtils.playerUsed();
+            
             if (e.getActionCommand() == PLAY){
                 getPlayerMediator().resume();
                 
@@ -438,6 +441,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
 
         @Override
         public void stateChanged(ChangeEvent e) {
+            PlayerInspectionUtils.playerUsed();
             updateVolume();
         }
     }

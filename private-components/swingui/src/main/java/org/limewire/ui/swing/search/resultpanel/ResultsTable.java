@@ -1,11 +1,13 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 
 import org.limewire.ui.swing.listener.MousePopupListener;
+import org.limewire.ui.swing.search.SearchInspectionUtils;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -111,6 +113,13 @@ public class ResultsTable<E extends VisualSearchResult> extends MouseableTable {
             
             // Install column state handler.
             columnStateHandler = new ColumnStateHandler(this, tableFormat);
+            
+            tableHeader.addMouseListener(new MouseAdapter(){
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    SearchInspectionUtils.searchSorted();
+                }
+            });
             
         } else {
             // Reset listeners and table header.

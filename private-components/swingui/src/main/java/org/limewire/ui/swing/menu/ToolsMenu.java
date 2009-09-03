@@ -10,6 +10,8 @@ import javax.swing.JMenu;
 import javax.swing.event.MenuListener;
 
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
@@ -42,6 +44,9 @@ class ToolsMenu extends MnemonicMenu {
     private final Provider<SearchHandler> searchHandlerProvider;
     private final Provider<SearchNavigator> searchNavigatorProvider;
     private final Provider<OptionsAction> optionsAction;
+    
+    @InspectablePrimitive(value = "search view", category = DataCategory.USAGE)
+    private volatile int uploadsViewed = 0;
     
     private AdvancedToolsPanel advancedTools = null;
     
@@ -77,6 +82,7 @@ class ToolsMenu extends MnemonicMenu {
                     navItem = navigatorProvider.get().createNavItem(NavCategory.UPLOAD, UploadMediator.NAME, uploadMediatorProvider.get());
                 }
                 navItem.select();
+                uploadsViewed++;
             }
         });
         

@@ -2,7 +2,13 @@ package org.limewire.core.impl.library;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
@@ -13,6 +19,11 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
@@ -42,6 +53,113 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     private final FileView allSharedFilesView;
     
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
+    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private final class LazyInspectableContainer {
+        @InspectablePrimitive(value = "number of shared lists", category = DataCategory.USAGE)
+        private int sharedListCount = 0;        
+
+        @InspectablePrimitive(value = "number of lists not shared", category = DataCategory.USAGE)
+        private int unSharedListCount = 0;
+        
+        public LazyInspectableContainer(){
+            initialize();
+        }
+        
+        private void initialize() {
+            //start with 1 to skip Public Shared
+            for (int i = 1; i < getModel().size(); i++){
+                if(getModel().get(i).getFriendIds().size() > 0){
+                    sharedListCount++;
+                } else {
+                    unSharedListCount++;
+                }
+            }  
+        }
+        
+
+        @InspectionPoint(value = "number of lists with friends in multiple lists", category = DataCategory.USAGE)
+        private final Inspectable multipleFriendLists = new Inspectable() {
+            @Override
+            public Object inspect() {
+                //calculate number of lists with friends in multiple lists
+                Map<String, List<SharedFileList>> listsPerFriend = new HashMap<String, List<SharedFileList>>();
+                //populate the map
+                for (int i = 1; i < getModel().size(); i++){
+                    if(getModel().get(i).getFriendIds().size() > 0){
+                        for(String friendId : getModel().get(i).getFriendIds()){
+                            if (listsPerFriend.get(friendId) == null){
+                                listsPerFriend.put(friendId, new ArrayList<SharedFileList>());
+                            }
+                            listsPerFriend.get(friendId).add(getModel().get(i));
+                        }
+                    }
+                }
+                
+                //and calculate the number
+                Set<SharedFileList> set = new HashSet<SharedFileList>();
+                for (List<SharedFileList> listsSharedWithFriend : listsPerFriend.values()){
+                    if(sharedLists.size() > 0){
+                        set.addAll(listsSharedWithFriend);
+                    }
+                }
+                return set.size();
+            }
+        }; 
+        
+        @InspectionPoint(value = "number of lists", category = DataCategory.USAGE)
+        private final Inspectable numberOfLists = new Inspectable() {
+            @Override
+            public Object inspect() {
+                //TODO: -1 for Public Shared
+                return getModel().size() - 1;
+            }
+        };           
+
+        
+        @InspectionPoint(value = "number of files in public shared list", category = DataCategory.USAGE)
+        private final Inspectable numberOfFiles = new Inspectable() {
+            @Override
+            public Object inspect() {
+                return getModel().get(0).size();
+            }
+        };
+        
+        @InspectionPoint(value = "number of files in private shared list", category = DataCategory.USAGE)
+        private final Inspectable numberOfFilesInPrivateList = new Inspectable() {
+            @Override
+            public Object inspect() {
+                if (getModel().size() >= 2) {
+                    //we are assuming that the second list is the private shared list
+                    return getModel().get(1).size();
+                } else {
+                    return 0;
+                }
+            }
+        };
+        
+        @InspectionPoint(value = "number of people in private shared list", category = DataCategory.USAGE)
+        private final Inspectable numberOfPeopleInPrivateList = new Inspectable() {
+            @Override
+            public Object inspect() {
+                if (getModel().size() >= 2) {
+                    //we are assuming that the second list is the private shared list
+                    return getModel().get(1).getFriendIds().size();
+                } else {
+                    return 0;
+                }
+            }
+        };
+    }
+
+
+    @InspectablePrimitive(value = "number of lists created", category = DataCategory.USAGE)
+    private long listsCreated;
+    
+    @InspectablePrimitive(value = "number of lists shared", category = DataCategory.USAGE)
+    private long listsShared;
+    
     
     @Inject
     SharedFileListManagerImpl(FileCollectionManager collectionManager,
@@ -150,6 +268,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         list.friendAdded(friendId);
         // if it used to be, trigger an update
         if(wasEmpty) {
+            listsShared++;
             setListInPlace(collection);
         }
     }    
@@ -196,6 +315,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
 
     @Override
     public int createNewSharedFileList(String name) {
+        listsCreated++;
         return collectionManager.createNewCollection(name).getId();        
     }
 

@@ -23,6 +23,8 @@ import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -65,6 +67,9 @@ public class SearchBar extends JXPanel {
     private final SearchNavigator searchNavigator;
     
     private SearchCategory categoryToSearch; 
+    
+    @InspectablePrimitive(value = "search bar category switched", category = DataCategory.USAGE)
+    private volatile int categorySwitched = 0;
     
     
     @Inject
@@ -267,6 +272,7 @@ public class SearchBar extends JXPanel {
         public void actionPerformed(ActionEvent arg0) {
             categoryToSearch = category;            
             autoCompleter.setSuggestionDictionary(friendAutoCompleterFactory.getDictionary(category));
+            categorySwitched++;
         }
         
         public SearchCategory getCategory() {

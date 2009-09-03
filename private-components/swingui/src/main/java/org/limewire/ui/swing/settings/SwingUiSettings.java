@@ -4,8 +4,11 @@ import java.io.File;
 
 import org.limewire.core.settings.LimeProps;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileArraySetting;
 import org.limewire.setting.FileSetting;
@@ -115,6 +118,18 @@ public final class SwingUiSettings extends LimeProps {
      */
     public static final IntSetting SEARCH_VIEW_TYPE_ID =
         FACTORY.createIntSetting("SEARCH_VIEW_TYPE_ID", -1);
+    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private class LazyInspectableContainer {
+        @InspectionPoint(value = "search view", category = DataCategory.USAGE)
+        private final Inspectable numberOfLists = new Inspectable() {
+            @Override
+            public Object inspect() {
+                return SEARCH_VIEW_TYPE_ID.get() == 1 ? "table" : "list";
+            }
+        };   
+    }
 
     /**
      * Auto rename new downloads with filenames matching old downloads.
@@ -239,6 +254,7 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("SHOW_SHARING_OVERLAY_MESSAGE", true);
     
     /** If the Library filters are displayed or not. */
+    @InspectablePrimitive(value = "library filters showing", category = DataCategory.USAGE)
     public static final BooleanSetting SHOW_LIBRARY_FILTERS =
         FACTORY.createBooleanSetting("SHOW_LIBRARY_FILTERS", true);
 

@@ -20,7 +20,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.settings.DownloadSettings;
-import org.limewire.inject.LazySingleton;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
@@ -40,7 +40,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-@LazySingleton
+//EagerSingleton to ensure that register() is called and the listeners are in place at startup
+@EagerSingleton
 public class MainDownloadPanel extends JPanel {  	
     
     public static final String NAME = "MainDownloadPanel";    

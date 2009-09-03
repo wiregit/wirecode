@@ -371,6 +371,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            FilterInspectionUtils.moreFiltersClicked();
             if (morePopupPanel == null) {
                 showMorePopup();
             } else if (morePopupPanel.isPopupReady()) {

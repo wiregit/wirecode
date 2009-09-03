@@ -2,17 +2,26 @@ package org.limewire.ui.swing.downloads;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.inject.LazySingleton;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectableForSize;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.util.FileUtils;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.Inject;
@@ -25,10 +34,30 @@ public class DownloadMediator {
 	/**
 	 * unfiltered - common to all tables
 	 */
+	@InspectableForSize(value = "download count", category = DataCategory.USAGE)
     private final SortedList<DownloadItem> commonBaseList;
 	private DownloadListManager downloadListManager;
 	private boolean isAscending = true;
 	private SortOrder sortOrder = SortOrder.ORDER_ADDED;
+	
+    @InspectablePrimitive(value = "download sorts", category = DataCategory.USAGE)
+    private final Set<SortOrder> sortInspection = new HashSet<SortOrder>();
+    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private class LazyInspectableContainer {
+        @InspectionPoint(value = "active downloads", category = DataCategory.USAGE)
+        private final Inspectable activeDownloads = new Inspectable() {
+            @Override
+            public Object inspect() {
+                FilterList<DownloadItem> activeList = GlazedListsFactory.filterList(commonBaseList, 
+                        new DownloadStateExcluder(DownloadState.CANCELLED, DownloadState.STALLED, DownloadState.DONE, DownloadState.ERROR));
+                int activeCount = activeList.size();
+                activeList.dispose();
+                return activeCount;
+            }            
+        };  
+    }
 	
 	@Inject
 	public DownloadMediator(DownloadListManager downloadManager) {
@@ -84,6 +113,8 @@ public class DownloadMediator {
 	    } else {
             commonBaseList.setComparator(new DescendingComparator(comparator));
         }
+	    
+	    sortInspection.add(order);
 	}
 
 	public void pauseAll() {
@@ -336,4 +367,5 @@ public class DownloadMediator {
             return -1 * delegate.compare(o1, o2);
         }
     }
+    
 }
