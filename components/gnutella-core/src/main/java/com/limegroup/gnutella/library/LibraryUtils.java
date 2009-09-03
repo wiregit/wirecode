@@ -83,14 +83,19 @@ public class LibraryUtils {
             sensitiveDirectories.addAll(getUserDirectories("Desktop"));
             sensitiveDirectories.add(File.separator + "Documents and Settings");
             sensitiveDirectories.add(File.separator + "Program Files");
+            sensitiveDirectories.add(File.separator + "Program Files (x86)");
             sensitiveDirectories.add(File.separator + "Windows");
-            sensitiveDirectories.add(File.separator + "WINDOWS");
             sensitiveDirectories.add(File.separator + "WINNT");
             sensitiveDirectories.add(File.separator + "Users");
             sensitiveDirectories.add(File.separator + "Local Settings");
-            sensitiveDirectories.add(File.separator + "Application Data");
             sensitiveDirectories.add(File.separator + "Temp");
             sensitiveDirectories.add(File.separator + "Temporary Internet Files");
+            sensitiveDirectories.add(File.separator + "Program Data");
+            sensitiveDirectories.add(File.separator + "ProgramData");
+            sensitiveDirectories.add(File.separator + "Application Data");
+            sensitiveDirectories.add(File.separator + "AppData");
+            sensitiveDirectories.add(File.separator + "Windows" + File.separator + "System");
+            sensitiveDirectories.add(File.separator + "Windows" + File.separator + "System32");
         }
 
         if (OSUtils.isMacOSX()) {
@@ -124,6 +129,9 @@ public class LibraryUtils {
             sensitiveDirectories.add(File.separator + "sbin");
             sensitiveDirectories.add(File.separator + "usr");
             sensitiveDirectories.add(File.separator + "var");
+            sensitiveDirectories.add(File.separator + "lib");
+            sensitiveDirectories.add(File.separator + "sys");
+            sensitiveDirectories.add(File.separator + "cdrom");
         }
         return sensitiveDirectories;
     }
@@ -229,9 +237,9 @@ public class LibraryUtils {
             return true;
         }
         
-        String folderPath = folder.getPath();
+        String folderPath = folder.getPath().toUpperCase();
         for (String name : sensitiveDirectories) {
-            if (folderPath.endsWith(name)) {
+            if (folderPath.endsWith(name.toUpperCase())) {
                 return true;
             }
         }
