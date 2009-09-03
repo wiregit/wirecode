@@ -219,14 +219,8 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         cancelButton.addActionListener(new CancelOptionAction(this));
         
         footerPanel.add(helpButton, "push");
-        if (OSUtils.isMacOSX()) {  // Miglayout tag ok/cancel is wrong for linux
-            footerPanel.add(cancelButton);
-            footerPanel.add(okButton);        
-        } 
-        else {
-            footerPanel.add(okButton);
-            footerPanel.add(cancelButton);
-        }
+        footerPanel.add(okButton, "split, tag ok");
+        footerPanel.add(cancelButton, "tag cancel");
     }
 
     @Override
