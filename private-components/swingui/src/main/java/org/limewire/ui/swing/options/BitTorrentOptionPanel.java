@@ -114,13 +114,13 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedTime.setPreferredSize(new Dimension(50, 20));
         seedTime.setMaximumSize(new Dimension(60, 20));
 
-        seedController = new EmbeddedComponentLabel(I18n.tr("Limit until ratio of: {c} OR uploading for: {c} days"), 
+        seedController = new EmbeddedComponentLabel(I18n.tr("Download until ratio of {c} OR after {c} days uploading"), 
                 seedRatio, seedTime);        
         
         startPortField = new NumericTextField(5, 1, 0xFFFF);
         endPortField = new NumericTextField(5, 1, 0xFFFF);
         
-        portController = new EmbeddedComponentLabel(I18n.tr("Use ports: {c} to {c}"), 
+        portController = new EmbeddedComponentLabel(I18n.tr("Use ports {c} to {c}"), 
                 startPortField, endPortField);
         
         prioritizeTorrentPopup = new JCheckBox(I18n.tr("Show torrent file dialog when starting new torrents"));
@@ -131,7 +131,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
             p.add(uploadForever, "wrap");
             p.add(myControl, "wrap");
             
-            p.add(seedController, "gapleft 26, wrap");
+            p.add(seedController, "gapleft 10, wrap");
             p.add(portController, "wrap");
             
             p.add(prioritizeTorrentPopup, "wrap");
