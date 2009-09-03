@@ -24,7 +24,7 @@ public abstract class WizardPage extends JPanel {
     public abstract String getFooter();
     
     protected JLabel createAndDecorateHeader(String text) {
-        JLabel label = new JLabel(text);
+        JLabel label = new JLabel("<html>"+text+"</html>");
         decorator.decorateHeadingText(label);
         return label;
     }
