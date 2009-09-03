@@ -16,7 +16,7 @@ public class FilterInspectionUtils {
     private static volatile boolean isFilterUsed = false;
     
 
-    /** In session Y of user Z, does a user click on “more filters” */
+    /** In session Y of user Z, does a user click on "more filters"*/
     @InspectablePrimitive(value = "more filters button clicked", category = DataCategory.USAGE)
     @SuppressWarnings("unused")
     private static volatile boolean isMoreFiltersClicked = false;
