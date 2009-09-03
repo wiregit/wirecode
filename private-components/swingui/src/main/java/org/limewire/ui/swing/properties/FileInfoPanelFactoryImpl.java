@@ -19,7 +19,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FileInfoFactoryImpl implements FileInfoPanelFactory {
+public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
 
     private final Provider<IconManager> iconManager;
     private final Provider<MagnetLinkFactory> magnetLinkFactory;
@@ -33,7 +33,7 @@ public class FileInfoFactoryImpl implements FileInfoPanelFactory {
     private final Provider<LibraryManager> libraryManager;
     
     @Inject
-    public FileInfoFactoryImpl(Provider<IconManager> iconManager, Provider<MagnetLinkFactory> magnetLinkFactory, 
+    public FileInfoPanelFactoryImpl(Provider<IconManager> iconManager, Provider<MagnetLinkFactory> magnetLinkFactory, 
             Provider<CategoryIconManager> categoryIconManager, Provider<ThumbnailManager> thumbnailManager,
             Provider<PropertyDictionary> propertyDictionary, Provider<SpamManager> spamManager,
             Provider<SharedFileListManager> sharedFileListManager, Provider<MetaDataManager> metaDataManager,

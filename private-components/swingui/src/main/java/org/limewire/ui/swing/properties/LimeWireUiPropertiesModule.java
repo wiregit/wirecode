@@ -11,6 +11,6 @@ public class LimeWireUiPropertiesModule extends AbstractModule {
         bind(FileInfoDialogFactory.class).toProvider(
                 FactoryProvider.newFactory(FileInfoDialogFactory.class, FileInfoDialog.class));
                 
-        bind(FileInfoPanelFactory.class).to(FileInfoFactoryImpl.class);
+        bind(FileInfoPanelFactory.class).to(FileInfoPanelFactoryImpl.class);
     }
 }
