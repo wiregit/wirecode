@@ -360,9 +360,11 @@ public class TorrentManagerImpl implements TorrentManager {
      * the java code through the alertCallback interface.
      */
     private class AlertPoller implements Runnable {
+        private final BasicAlertCallback callback = new BasicAlertCallback();
+        
         @Override
         public void run() {
-            libTorrent.get_alerts(new BasicAlertCallback());
+            libTorrent.get_alerts(callback);
         }
     }
 
