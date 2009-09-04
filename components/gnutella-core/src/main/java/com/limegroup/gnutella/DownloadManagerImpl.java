@@ -865,27 +865,17 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             }
         }
 
-        if (overwrite) {
-            Downloader downloader = getDownloaderForURN(ret.getSha1Urn());
-            if (downloader != null) {
-                downloader.stop();
-                downloader.deleteIncompleteFiles();
-            }
-
-            downloader = getDownloaderForIncompleteFile(ret.getIncompleteFile());
-            if (downloader != null) {
-                downloader.stop();
-                downloader.deleteIncompleteFiles();
-            }
-        } else {
-            checkActiveAndWaiting(ret);
-
+        checkIfAlreadyManagedTorrent(ret);
+        ret.setSaveFile(saveDirectory, null, overwrite);
+        checkActiveAndWaiting(ret);
+		
+        if(!overwrite) {
             File saveFile = ret.getSaveFile();
             if (saveFile.exists()) {
                 throw new DownloadException(ErrorCode.FILE_ALREADY_EXISTS, saveFile);
             }
         }
-        ret.setSaveFile(saveDirectory, null, overwrite);
+        
         if(!ret.registerTorrentWithTorrentManager()) {
             throw new DownloadException(
                     DownloadException.ErrorCode.NO_TORRENT_MANAGER,
@@ -908,16 +898,6 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * of any other download.
      */
     private void checkActiveAndWaiting(BTDownloader ret) throws DownloadException {
-
-        if (torrentManager.get().isManagedTorrent(ret.getTorrentFile())) {
-            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
-                    .getSaveFile());
-        } else if (torrentManager.get().isManagedTorrent(
-                StringUtils.toHexString(ret.getSha1Urn().getBytes()))) {
-            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
-                    .getSaveFile());
-        }
-
         for (CoreDownloader current : activeAndWaiting) {
             if (ret.getSha1Urn().equals(current.getSha1Urn())) {
                 throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
@@ -933,6 +913,17 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                 throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
                         .getIncompleteFile());
             }
+        }
+    }
+
+    private void checkIfAlreadyManagedTorrent(BTDownloader ret) throws DownloadException {
+        if (torrentManager.get().isManagedTorrent(ret.getTorrentFile())) {
+            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
+                    .getSaveFile());
+        } else if (torrentManager.get().isManagedTorrent(
+                StringUtils.toHexString(ret.getSha1Urn().getBytes()))) {
+            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
+                    .getSaveFile());
         }
     }
 
