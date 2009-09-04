@@ -14,9 +14,9 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
-import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
@@ -65,17 +65,14 @@ public class MockSearch implements Search {
         }
         
         // Create listener for store results.
-        StoreListener storeListener = new StoreListener() {
+        StoreSearchListener storeSearchListener = new StoreSearchListener() {
             @Override
             public void resultsFound(StoreResult[] storeResults) {
                 for (StoreResult storeResult : storeResults) {
                     handleStoreResult(storeResult);
                 }
             }
-
-            @Override
-            public void loginChanged(boolean loggedIn) {}
-
+            
             @Override
             public void styleUpdated(StoreStyle storeStyle) {
                 handleStoreStyle(storeStyle);
@@ -84,7 +81,7 @@ public class MockSearch implements Search {
         
         // Add mock results.
         addResults("");
-        storeManager.startSearch(searchDetails, storeListener);
+        storeManager.startSearch(searchDetails, storeSearchListener);
     }
     
     @Override

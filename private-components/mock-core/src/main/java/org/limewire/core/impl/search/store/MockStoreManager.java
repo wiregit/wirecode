@@ -2,7 +2,11 @@ package org.limewire.core.impl.search.store;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -11,6 +15,7 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
@@ -25,6 +30,22 @@ import com.google.inject.Singleton;
 @Singleton
 public class MockStoreManager implements StoreManager {
 
+    private final List<StoreListener> listenerList = 
+        new CopyOnWriteArrayList<StoreListener>();
+    
+    private final Map<AttributeKey, Object> userAttributes = 
+        Collections.synchronizedMap(new EnumMap<AttributeKey, Object>(AttributeKey.class));
+    
+    @Override
+    public void addStoreListener(StoreListener listener) {
+        listenerList.add(listener);
+    }
+
+    @Override
+    public void removeStoreListener(StoreListener listener) {
+        listenerList.remove(listener);
+    }
+    
     @Override
     public String getConfirmURI() {
         return getClass().getResource("confirm.html").toString();
@@ -47,11 +68,39 @@ public class MockStoreManager implements StoreManager {
 
     @Override
     public boolean isLoggedIn() {
-        return false;
+        return (userAttributes.get(AttributeKey.COOKIES) != null);
+    }
+    
+    @Override
+    public Object getUserAttribute(AttributeKey key) {
+        return userAttributes.get(key);
+    }
+    
+    @Override
+    public void setUserAttribute(AttributeKey key, Object attribute) {
+        boolean wasLoggedIn = isLoggedIn();
+        
+        userAttributes.put(key, attribute);
+        
+        if (isLoggedIn() != wasLoggedIn) {
+            fireLoginChanged(isLoggedIn());
+        }
+    }
+    
+    @Override
+    public void logout() {
+        boolean wasLoggedIn = isLoggedIn();
+        
+        userAttributes.remove(AttributeKey.COOKIES);
+        
+        if (isLoggedIn() != wasLoggedIn) {
+            fireLoginChanged(isLoggedIn());
+        }
     }
 
     @Override
-    public void startSearch(final SearchDetails searchDetails, final StoreListener storeListener) {
+    public void startSearch(final SearchDetails searchDetails, 
+            final StoreSearchListener storeSearchListener) {
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -79,10 +128,10 @@ public class MockStoreManager implements StoreManager {
                 StoreResult[] storeResults = createStoreResults(0);
                 
                 // Fire event to update style.
-                storeListener.styleUpdated(storeStyle);
+                storeSearchListener.styleUpdated(storeStyle);
                 
                 // Fire event to handle results.
-                storeListener.resultsFound(storeResults);
+                storeSearchListener.resultsFound(storeResults);
             }
         }).start();
     }
@@ -170,5 +219,11 @@ public class MockStoreManager implements StoreManager {
         resultList.add(msr);
 
         return resultList.toArray(new StoreResult[resultList.size()]);
+    }
+    
+    private void fireLoginChanged(boolean loggedIn) {
+        for (StoreListener listener : listenerList) {
+            listener.loginChanged(loggedIn);
+        }
     }
 }
