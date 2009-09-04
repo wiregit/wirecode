@@ -41,7 +41,6 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_ALL_PLAY", "", 16, 16, true, false), 
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", I18n.tr("Name"), 480, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 230, true, true),     
-
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_ALL_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_ALL_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_ALL_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
