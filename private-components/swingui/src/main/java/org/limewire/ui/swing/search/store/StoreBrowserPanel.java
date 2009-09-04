@@ -70,8 +70,9 @@ public class StoreBrowserPanel extends Browser {
         storeDomListener.addTargetedUrlAction("", new ClickUriAction());
         
         // Add listener for DOM click on named element.
-        storeDomListener.addClickListener("download", new DownloadClickAction());
         storeDomListener.addClickListener("cancel", new CancelClickAction());
+        storeDomListener.addClickListener("download", new DownloadClickAction());
+        storeDomListener.addClickListener("downloadOk", new DownloadOkClickAction());
         
         // Add listener for DOM load with cookies.
         storeDomListener.setLoadCookieAction(new LoginAction());
@@ -257,7 +258,7 @@ public class StoreBrowserPanel extends Browser {
     }
     
     /**
-     * Action to process click events on the DOM.
+     * Action to process click event on hyperlink.
      */
     private class ClickUriAction implements UriAction {
 
@@ -290,7 +291,7 @@ public class StoreBrowserPanel extends Browser {
     }
     
     /**
-     * Action to process click event on download element.
+     * Action to process click event on cancel button.
      */
     private class CancelClickAction implements ClickAction {
 
@@ -307,9 +308,33 @@ public class StoreBrowserPanel extends Browser {
     }
     
     /**
-     * Action to process click event on download element.
+     * Action to process click event on "download" button.
      */
     private class DownloadClickAction implements ClickAction {
+
+        @Override
+        public void nodeClicked(Node node) {
+            SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // Close current dialog.
+                    disposeDialog();
+                    
+                    // Start download process.
+                    if (visualStoreResult != null) {
+                        storeController.download(visualStoreResult);
+                    } else if (trackResult != null) {
+                        storeController.downloadTrack(trackResult);
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * Action to process click event on "download approved" button.
+     */
+    private class DownloadOkClickAction implements ClickAction {
 
         @Override
         public void nodeClicked(Node node) {
