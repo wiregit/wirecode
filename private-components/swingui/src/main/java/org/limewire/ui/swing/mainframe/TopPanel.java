@@ -54,13 +54,13 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.DefaultSearchRepeater;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
-import org.limewire.ui.swing.search.DefaultSearchRepeater;
 import org.limewire.ui.swing.search.SearchResultMediator;
 import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
@@ -105,8 +105,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @InspectablePrimitive(value = "maximum tab count", category = DataCategory.USAGE)
     private volatile long maxTabCount = 0;
 
-    private final AllFriendsRefreshManager allFriendsRefreshManager;
-        
+    private final AllFriendsRefreshManager allFriendsRefreshManager;        
+    
+    @InspectablePrimitive(value = "store visited", category = DataCategory.USAGE)
+    private int storeVisited;
+    
+    @InspectablePrimitive(value = "advanced search opened", category = DataCategory.USAGE)
+    private int advancedSearches;
+    
+    
     @Inject
     public TopPanel(final SearchHandler searchHandler,
                     Navigator navigator,
@@ -160,6 +167,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         storeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                storeVisited++;
                 storeMediator.getComponent().loadDefaultUrl();
             }
         });
@@ -225,6 +233,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     @Override
     public SearchNavItem addAdvancedSearch() {
+        advancedSearches++;
         String title = I18n.tr("Advanced Search");
         AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
         
