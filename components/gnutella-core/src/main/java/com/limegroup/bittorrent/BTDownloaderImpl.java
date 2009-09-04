@@ -592,10 +592,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         List<TorrentPeer> peers = torrent.getTorrentPeers();
         for (TorrentPeer peer : peers) {
             String ip = peer.getIPAddress();
-            try {
-                list.add(new ConnectableImpl(new IpPortImpl(ip), false));
-            } catch (UnknownHostException e) {
-                // Discard invalid host
+            if(ip != null) {
+                try {
+                    list.add(new ConnectableImpl(new IpPortImpl(ip), false));
+                } catch (UnknownHostException e) {
+                    // Discard invalid host
+                }
             }
         }
 
