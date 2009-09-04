@@ -146,7 +146,7 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
      * Calculates the display height for the specified search result by 
      * preparing the list renderer.
      */
-    public int calculateRowHeight(VisualSearchResult vsr) {
+    private int calculateRowHeight(VisualSearchResult vsr) {
         // Determine row height by preparing renderer to use the search 
         // result, and retrieving its preferred height.
         if (listRenderer != null) {
@@ -206,7 +206,7 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
     /**
      * Updates row heights for store results, and repaints the list.
      */
-    private void updateStoreRowSizes() {
+    public void updateStoreRowSizes() {
         // Get table model
         DefaultEventTableModel<VisualSearchResult> model = getEventTableModel();
         if (model == null) return;
@@ -214,9 +214,9 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
         // Ignore repaint requests.
         setIgnoreRepaints(true);
         
-        // Process all store result rows.  This is a little inefficient, but
-        // we may be okay because this is only called when the style is 
-        // updated, which happens when we first receive store results.
+        // Process all store result rows.  This is only called when the style
+        // is updated, which happens when store results are received, or on
+        // store login/logout.
         boolean setRowSize = false;
         for (int row = 0; row < model.getRowCount(); row++) {
             VisualSearchResult vsr = model.getElementAt(row);
