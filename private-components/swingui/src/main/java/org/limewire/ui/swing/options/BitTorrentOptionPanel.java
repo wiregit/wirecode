@@ -220,7 +220,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
      */
     private void updateState(boolean uploadForever) {
         seedController.setVisible(!uploadForever);
-        portController.setVisible(!uploadForever);
     }
 
 }
