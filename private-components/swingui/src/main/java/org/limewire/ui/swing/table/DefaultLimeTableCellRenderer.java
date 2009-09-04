@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.table;
+package org.limewire.ui.swing.table;
 
 import java.awt.Component;
 
@@ -7,12 +7,15 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 
-       
-public class DefaultLibraryRenderer extends DefaultTableCellRenderer {
+/**
+ * A DefaultTableCellRenderer that adds padding to the left and right border
+ * and removes the focus rectangle around the cell.
+ */       
+public class DefaultLimeTableCellRenderer extends DefaultTableCellRenderer {
 
-    private Border border;
+    private final Border border;
     
-    public DefaultLibraryRenderer() {
+    public DefaultLimeTableCellRenderer() {
         border = BorderFactory.createEmptyBorder(0,5,0,5);
     }
     

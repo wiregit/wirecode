@@ -6,7 +6,6 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 
 import org.limewire.inject.LazySingleton;
-import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
@@ -15,7 +14,7 @@ import com.google.inject.Inject;
  * Display the length of an audio/video file in hours:minutes:seconds.
  */
 @LazySingleton
-public class TimeRenderer extends DefaultLibraryRenderer {
+public class TimeRenderer extends DefaultLimeTableCellRenderer {
     
     @Inject
     public TimeRenderer(){

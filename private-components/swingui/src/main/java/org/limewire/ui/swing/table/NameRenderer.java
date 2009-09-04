@@ -9,7 +9,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
-import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -20,7 +19,7 @@ import com.google.inject.Inject;
  * title property is used instead of the name property if it exists.
  */
 @LazySingleton
-public class NameRenderer extends DefaultLibraryRenderer {
+public class NameRenderer extends DefaultLimeTableCellRenderer {
 
     @Inject
     public NameRenderer() {

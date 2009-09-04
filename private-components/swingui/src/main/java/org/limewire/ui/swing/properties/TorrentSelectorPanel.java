@@ -27,7 +27,7 @@ import org.limewire.ui.swing.util.I18n;
 
 public class TorrentSelectorPanel {
     @Resource private Color backgroundColor;
-    @Resource private Font largeFont;
+    @Resource private Font headerFont;
     
     private final JPanel component;
    
@@ -45,7 +45,7 @@ public class TorrentSelectorPanel {
         bittorrentPanel = factory.createBittorentPanel(torrent);
         
         component.add(factory.createOverviewPanel(torrent).getComponent(), "growx, wrap");
-        component.add(createHeaderLabel(I18n.tr("Select files to download")), "wrap");
+        component.add(createHeaderLabel(I18n.tr("Select files to download")), "gapleft 5, wrap");
         component.add(bittorrentPanel.getComponent(), "grow");
         createFooter();
     }
@@ -83,7 +83,7 @@ public class TorrentSelectorPanel {
     
     private JLabel createHeaderLabel(String text) { 
         JLabel label = new JLabel(text);
-        label.setFont(largeFont);
+        label.setFont(headerFont);
         return label;
     }
     

@@ -9,7 +9,6 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.inject.LazySingleton;
-import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -20,7 +19,7 @@ import com.google.inject.Inject;
  * Displays the quality of a file in a table cell. 
  */
 @LazySingleton
-public class QualityRenderer extends DefaultLibraryRenderer {
+public class QualityRenderer extends DefaultLimeTableCellRenderer {
 
     @Inject
     public QualityRenderer(){

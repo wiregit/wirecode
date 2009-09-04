@@ -11,6 +11,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -21,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-class NameCategoryRenderer extends DefaultLibraryRenderer implements TableCellRenderer {
+class NameCategoryRenderer extends DefaultLimeTableCellRenderer implements TableCellRenderer {
 
     private final Provider<IconManager> iconManager;
     private final CategoryIconManager categoryIconManager;

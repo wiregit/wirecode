@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,7 +20,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -32,6 +30,8 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.table.AbstractTableFormat;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
+import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -131,6 +131,10 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
             return entry.getPath();
         }
         
+        public long getSize() {
+            return entry.getSize();
+        }
+        
         public float getProgress() {
             return entry.getProgress();
         }
@@ -168,7 +172,10 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellRenderer(new CheckBoxRendererEditor());
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellEditor(checkBoxEditor);
             
+            getColumn(BitTorrentTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
+            
             getColumn(BitTorrentTableFormat.PERCENT_INDEX).setCellRenderer(new PercentRenderer());
+            getColumn(BitTorrentTableFormat.NAME_INDEX).setCellRenderer(new DefaultLimeTableCellRenderer());
             
             final PriorityRendererEditor editor = new PriorityRendererEditor();
             editor.getButton().addActionListener(new ActionListener(){
@@ -201,12 +208,14 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
 
         private static final int DOWNLOAD_INDEX = 0;
         private static final int NAME_INDEX = 1;
-        private static final int PERCENT_INDEX = 2;
-        private static final int PRIORITY_INDEX = 3;
+        private static final int SIZE_INDEX = 2;
+        private static final int PERCENT_INDEX = 3;
+        private static final int PRIORITY_INDEX = 4;
         
         public BitTorrentTableFormat() {
             super(I18n.tr("DL"),
                   I18n.tr("Name"),
+                  I18n.tr("Size"),
                   I18n.tr("%"),
                   I18n.tr("Priority"));
         }
@@ -216,6 +225,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
             switch(column) {
                 case DOWNLOAD_INDEX: return baseObject;
                 case NAME_INDEX: return baseObject.getPath();
+                case SIZE_INDEX: return baseObject.getSize();
                 case PERCENT_INDEX: return baseObject;
                 case PRIORITY_INDEX: return baseObject;
             }
@@ -308,12 +318,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         }
     }
 
-    private class PercentRenderer extends DefaultTableCellRenderer {
-
-        public PercentRenderer() {
-            setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
-        }
-        
+    private class PercentRenderer extends DefaultLimeTableCellRenderer {        
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {

@@ -21,6 +21,7 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.ColumnStateHandler;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
@@ -57,7 +58,7 @@ public class LibraryTable extends MouseableTable {
     private ColumnStateHandler columnStateHandler;
     private MousePopupListener mousePopupListener;
     
-    private Provider<DefaultLibraryRenderer> defaultCellRenderer;
+    private Provider<DefaultLimeTableCellRenderer> defaultCellRenderer;
     private final Provider<NameCategoryRenderer> nameCategoryRenderer;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
@@ -69,7 +70,7 @@ public class LibraryTable extends MouseableTable {
     private final RemoveEditor removeEditor;
     
     @Inject
-    public LibraryTable(Provider<DefaultLibraryRenderer> defaultCellRenderer,
+    public LibraryTable(Provider<DefaultLimeTableCellRenderer> defaultCellRenderer,
             Provider<NameCategoryRenderer> nameCategoryRenderer,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer,

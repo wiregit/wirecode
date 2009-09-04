@@ -24,6 +24,7 @@ class FileInfoBittorrentOverviewPanel implements FileInfoPanel {
     
     @Resource private Font smallFont;
     @Resource private Font smallBoldFont;
+    @Resource private Font headerFont;
     
     private final JPanel component;
     private final Torrent torrent;
@@ -65,7 +66,9 @@ class FileInfoBittorrentOverviewPanel implements FileInfoPanel {
     private void init() {
         component.setOpaque(false);
 
-        component.add(createLabelField(torrent.getName()), "growx, span, wrap");
+        JTextField field = createLabelField(torrent.getName());
+        field.setFont(headerFont);
+        component.add(field, "growx, span, wrap");
         
         long totalSize = 0;
         for(TorrentFileEntry entry : torrent.getTorrentFileEntries()) {
@@ -76,7 +79,7 @@ class FileInfoBittorrentOverviewPanel implements FileInfoPanel {
         component.add(createLabel(I18n.tr("# files:")), "split 2");
         component.add(createLabelField(Integer.toString(torrent.getTorrentFileEntries().size())), "growx, wrap");
     }
-
+    
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(smallBoldFont);
