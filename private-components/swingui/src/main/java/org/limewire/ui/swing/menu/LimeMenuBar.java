@@ -8,10 +8,11 @@ public class LimeMenuBar extends JMenuBar {
 
     @Inject
     LimeMenuBar(FileMenu fileMenu, FriendsMenu friendMenu, ViewMenu viewMenu, HelpMenu helpMenu,
-            ToolsMenu toolsMenu) {
+            ToolsMenu toolsMenu, StoreMenu storeMenu) {
         add(fileMenu);
         add(viewMenu);
         add(friendMenu);
+        add(storeMenu);
         add(toolsMenu);
         add(helpMenu);
     }
