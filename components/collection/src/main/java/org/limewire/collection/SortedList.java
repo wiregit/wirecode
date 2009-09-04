@@ -42,8 +42,9 @@ public class SortedList<E> extends TreeList<E> {
     }
     
     public SortedList(Collection<? extends E> c, Comparator<? super E>comparator) {
-        super(c);
+        super();
         this.comparator = comparator;
+        this.addAll(c);
     }
 
     @Override
