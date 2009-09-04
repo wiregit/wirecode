@@ -109,7 +109,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
             setSize(743, 707);
             setPreferredSize(getSize());
         }
-        setResizable(false);
+        setResizable(true);
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         

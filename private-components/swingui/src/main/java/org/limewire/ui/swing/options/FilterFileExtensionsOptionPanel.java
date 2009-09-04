@@ -34,7 +34,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
     
     public FilterFileExtensionsOptionPanel(SpamManager spamManager, Action okAction) {
         this.spamManager = spamManager;
-        setLayout(new MigLayout("gapy 10"));
+        setLayout(new MigLayout("gapy 10, nogrid"));
         
         keywordTextField = new JTextField(30);
         addKeywordButton = new JButton(I18n.tr("Add Extension"));

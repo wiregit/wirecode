@@ -36,8 +36,8 @@ public class FirewallOptionPanel extends OptionPanel {
         setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));
         setOpaque(false);
         
-        add(getListeningPortPanel(), "pushx, growx");
-        add(getRouterConfigPanel(), "pushx, growx");
+        add(getListeningPortPanel(), "pushx, grow");
+        add(getRouterConfigPanel(), "pushx, grow");
     }
     
     private OptionPanel getListeningPortPanel() {
