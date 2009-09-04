@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.http.client.methods.HttpGet;
-import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.util.Clock;
 
@@ -56,8 +55,7 @@ public class ConnectionReporter implements ConnectionLifecycleListener {
             case CONNECTION_INITIALIZED:  
                 // TODO use CONNECTED event instead?
                 //if stat gathering has been approved
-                if(ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.getValue() &&
-                        !connected.getAndSet(true)) {
+                if(!connected.getAndSet(true)) {
                     HttpGet request = new HttpGet(LimeWireUtils.addLWInfoToUrl(REPORTING_URL, application.getMyGUID()) +
                             "&connect_time=" + Long.toString(clock.now() - startedConnecting.get()));  
                     httpExecutor.execute(request);
