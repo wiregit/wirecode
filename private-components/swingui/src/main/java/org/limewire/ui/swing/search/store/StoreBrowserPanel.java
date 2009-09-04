@@ -6,18 +6,22 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.Dialog.ModalityType;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.search.store.StoreResult;
+import org.apache.http.cookie.Cookie;
 import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.UriAction;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
+import org.limewire.ui.swing.search.store.StoreDomListener.ClickAction;
+import org.limewire.ui.swing.search.store.StoreDomListener.LoadCookieAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.XPCOMUtils;
@@ -26,6 +30,7 @@ import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMWindow;
 import org.mozilla.interfaces.nsIDOMWindow2;
 import org.mozilla.interfaces.nsIDOMWindowInternal;
+import org.w3c.dom.Node;
 
 /**
  * Main container for the MozSwing browser used for the Lime Store.  
@@ -36,8 +41,11 @@ public class StoreBrowserPanel extends Browser {
 
     private final StoreController storeController;
     
-//    private LimeDomListener clickDomListener;
     private StoreDomListener storeDomListener;
+    
+    private VisualStoreResult visualStoreResult;
+    
+    private StoreTrackResult trackResult;
     
     /**
      * Constructs a StoreBrowserPanel using the specified services.
@@ -55,11 +63,18 @@ public class StoreBrowserPanel extends Browser {
      * Initializes the components in the container.
      */
     private void initComponents() {
-//        // Create DOM listener for click events.
-//        clickDomListener = new LimeDomListener();
-        
         // Create DOM listener.
         storeDomListener = new StoreDomListener(this);
+        
+        // Add listener for DOM click on hyperlink.
+        storeDomListener.addTargetedUrlAction("", new ClickUriAction());
+        
+        // Add listener for DOM click on named element.
+        storeDomListener.addClickListener("download", new DownloadClickAction());
+        storeDomListener.addClickListener("cancel", new CancelClickAction());
+        
+        // Add listener for DOM load with cookies.
+        storeDomListener.setLoadCookieAction(new LoginAction());
     }
 
     /**
@@ -77,7 +92,7 @@ public class StoreBrowserPanel extends Browser {
 
         // Add DOM listeners.
         eventTarget.addEventListener("load", storeDomListener, true);
-//        eventTarget.addEventListener("click", clickDomListener, true);
+        eventTarget.addEventListener("click", storeDomListener, true);
     }
     
     /**
@@ -93,21 +108,24 @@ public class StoreBrowserPanel extends Browser {
             
             // Remove DOM listeners.
             eventTarget.removeEventListener("load", storeDomListener, true);
-//            eventTarget.removeEventListener("click", clickDomListener, true);
-            
-            // TODO remove actions on click listener?
+            eventTarget.removeEventListener("click", storeDomListener, true);
         }
         
         super.onDetachBrowser();
     }
     
+    /**
+     * Overrides superclass method to resize parent window when page is 
+     * loaded successfully.
+     */
     @Override
     public void pageLoadStopped(boolean failed) {
         // Call superclass method.
         super.pageLoadStopped(failed);
         
         if (!failed) {
-            // Get DOM window size on success.
+            // Get DOM window size on success.  This may be set by the web 
+            // page itself using JavaScript.
             nsIDOMWindow window = getChromeAdapter().getWebBrowser().getContentDOMWindow();
             nsIDOMWindowInternal internal = XPCOMUtils.qi(window, nsIDOMWindowInternal.class);
             final int width = internal.getOuterWidth();
@@ -124,35 +142,44 @@ public class StoreBrowserPanel extends Browser {
     }
     
     /**
-     * Displays the store download dialog for the specified result.
+     * Displays the confirm download dialog for the specified result.
      */
-    public void showDownload(StoreResult storeResult) {
+    public void showConfirm(VisualStoreResult vsr) {
+        // Save result.
+        visualStoreResult = vsr;
+        trackResult = null;
+        
         // Load login page into browser.
-        setPreferredSize(new Dimension(640, 480));
-        load(storeController.getLoginURI());
+        setPreferredSize(new Dimension(510, 192));
+        load(storeController.getConfirmURI());
         
         // Display dialog.
-        showDialog(I18n.tr("Download"));
+        showDialog(I18n.tr("Confirm"));
     }
     
     /**
-     * Displays the store download dialog for the specified result.
+     * Displays the confirm download dialog for the specified result.
      */
-    public void showDownload(StoreTrackResult trackResult) {
+    public void showConfirm(StoreTrackResult trackResult) {
+        // Save result.
+        this.trackResult = trackResult;
+        visualStoreResult = null;
+        
         // Load login page into browser.
-        setPreferredSize(new Dimension(640, 480));
-        load(storeController.getLoginURI());
+        setPreferredSize(new Dimension(510, 192));
+        load(storeController.getConfirmURI());
         
         // Display dialog.
-        showDialog(I18n.tr("Download"));
+        showDialog(I18n.tr("Confirm"));
     }
     
     /**
      * Displays the File Info dialog for the specified store result.
      */
     public void showInfo(VisualStoreResult vsr) {
-//        // Add actions to click listener.
-//        clickDomListener.addTargetedUrlAction("", new ClickUriAction());
+        // Save result.
+        visualStoreResult = vsr;
+        trackResult = null;
         
         // Load result info into browser.
         setPreferredSize(new Dimension(420, 540));
@@ -236,25 +263,103 @@ public class StoreBrowserPanel extends Browser {
 
         @Override
         public boolean uriClicked(TargetedUri targetedUri) {
+            // TODO REMOVE
             System.out.println("uriClicked: EDT=" + SwingUtilities.isEventDispatchThread() + 
                     ", target=" + targetedUri.getTarget() + ", uri=" + targetedUri.getUri());
             
-            // TODO implement for real
-            
+            // Get URI text.
             String uri = targetedUri.getUri();
-            if (uri.toLowerCase().contains("#more")) {
+            
+            if (uri.toLowerCase().contains("#cancel")) {
+                // Close dialog if cancelled.
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
                         disposeDialog();
                     }
                 });
+                
+            } else {
+                // Forward to native browser by default.
+                NativeLaunchUtils.openURL(targetedUri.getUri());
             }
-            
-            // TODO forward to native browser on unknown URLs
             
             // Return true to prevent further processing.
             return true;
+        }
+    }
+    
+    /**
+     * Action to process click event on download element.
+     */
+    private class CancelClickAction implements ClickAction {
+
+        @Override
+        public void nodeClicked(Node node) {
+            SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // Close current dialog.
+                    disposeDialog();
+                }
+            });
+        }
+    }
+    
+    /**
+     * Action to process click event on download element.
+     */
+    private class DownloadClickAction implements ClickAction {
+
+        @Override
+        public void nodeClicked(Node node) {
+            SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // Close current dialog.
+                    disposeDialog();
+                    
+                    // Start download process.
+                    if (visualStoreResult != null) {
+                        storeController.doDownload(visualStoreResult);
+                    } else if (trackResult != null) {
+                        storeController.doDownloadTrack(trackResult);
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * Action to handle cookies on successful login.
+     */
+    private class LoginAction implements LoadCookieAction {
+
+        @Override
+        public String getDomain() {
+            return ".store.limewire.com";
+        }
+
+        @Override
+        public boolean isUrlValid(String url) {
+            
+            // TODO replace with actual condition
+            
+            return url.contains("loginSuccess");
+        }
+
+        @Override
+        public void cookiesLoaded(List<Cookie> cookieList) {
+            // Save cookies.
+            storeController.login(cookieList);
+            
+            // Dismiss login dialog.
+            SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    disposeDialog();
+                }
+            });
         }
     }
 }

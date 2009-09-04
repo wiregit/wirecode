@@ -1,20 +1,19 @@
 package org.limewire.ui.swing.search.store;
 
 import java.io.File;
+import java.util.List;
 
+import org.apache.http.cookie.Cookie;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreManager;
-import org.limewire.core.api.search.store.StoreResult;
-import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
-import org.limewire.ui.swing.search.model.SearchResultsModel;
+import org.limewire.core.api.search.store.StoreManager.AttributeKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
 
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
 /**
  * A class that manages the interactions between the Store UI and various 
@@ -22,7 +21,6 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class StoreController {
 
-    private final SearchResultsModel searchResultsModel;
     private final Application application;
     private final StoreManager storeManager;
     
@@ -31,10 +29,8 @@ public class StoreController {
      */
     @Inject
     public StoreController(
-            @Assisted SearchResultsModel searchResultsModel,
             Application application,
             StoreManager storeManager) {
-        this.searchResultsModel = searchResultsModel;
         this.application = application;
         this.storeManager = storeManager;
     }
@@ -81,13 +77,6 @@ public class StoreController {
     public String getLoginURI() {
         return storeManager.getLoginURI();
     }
-
-    /**
-     * Returns the current style for Lime Store results.
-     */
-    public StoreStyle getStoreStyle() {
-        return searchResultsModel.getStoreStyle();
-    }
     
     /**
      * Returns true if the user is logged into the Lime Store.
@@ -105,18 +94,34 @@ public class StoreController {
     }
     
     /**
+     * Sets the user cookies on successful login.
+     */
+    public void login(List<Cookie> cookieList) {
+        storeManager.setUserAttribute(AttributeKey.COOKIES, cookieList);
+    }
+    
+    /**
+     * Logs out of the store.
+     */
+    public void logout() {
+        storeManager.logout();
+    }
+    
+    /**
      * Initiates downloading of the specified visual store result.
      */
     public void download(VisualStoreResult vsr) {
         if (!storeManager.isLoggedIn()) {
             startLogin();
+            if (storeManager.isLoggedIn()) {
+                startApproval(vsr);
+            }
             
         } else if (!storeManager.isDownloadApproved(vsr.getStoreResult())) {
-            startApproval(vsr.getStoreResult());
+            startApproval(vsr);
                 
         } else {
-            // TODO implement
-            System.out.println("StoreController.download: " + vsr.getHeading());
+            doDownload(vsr);
         }
     }
 
@@ -126,14 +131,33 @@ public class StoreController {
     public void downloadTrack(StoreTrackResult str) {
         if (!storeManager.isLoggedIn()) {
             startLogin();
+            // TODO review this - maybe login success starts download approval automatically
+            if (storeManager.isLoggedIn()) {
+                startApproval(str);
+            }
             
         } else if (!storeManager.isDownloadApproved(str)) {
             startApproval(str);
             
         } else {
-            // TODO implement
-            System.out.println("StoreController.downloadTrack: " + str.getProperty(FilePropertyKey.NAME));
+            doDownloadTrack(str);
         }
+    }
+    
+    /**
+     * Performs download of specified store result.
+     */
+    void doDownload(VisualStoreResult vsr) {
+        // TODO implement
+        System.out.println("StoreController.doDownload: " + vsr.getHeading());
+    }
+    
+    /**
+     * Performs download of specified store track result.
+     */
+    void doDownloadTrack(StoreTrackResult str) {
+        // TODO implement
+        System.out.println("StoreController.doDownloadTrack: " + str.getProperty(FilePropertyKey.TITLE));
     }
 
     /**
@@ -149,30 +173,30 @@ public class StoreController {
      */
     public void streamTrack(StoreTrackResult str) {
         // TODO implement
-        System.out.println("StoreController.streamTrack: " + str.getProperty(FilePropertyKey.NAME));
+        System.out.println("StoreController.streamTrack: " + str.getProperty(FilePropertyKey.TITLE));
     }
 
     /**
      * Initiates the download approval process for the specified store result.
      */
-    private void startApproval(StoreResult storeResult) {
-        StoreBrowserPanel loginPanel = new StoreBrowserPanel(this);
-        loginPanel.showDownload(storeResult);
+    private void startApproval(VisualStoreResult vsr) {
+        StoreBrowserPanel browserPanel = new StoreBrowserPanel(this);
+        browserPanel.showConfirm(vsr);
     }
 
     /**
      * Initiates the download approval process for the specified track result.
      */
     private void startApproval(StoreTrackResult trackResult) {
-        StoreBrowserPanel loginPanel = new StoreBrowserPanel(this);
-        loginPanel.showDownload(trackResult);
+        StoreBrowserPanel browserPanel = new StoreBrowserPanel(this);
+        browserPanel.showConfirm(trackResult);
     }
 
     /**
      * Initiates the login process for the store.
      */
     private void startLogin() {
-        StoreBrowserPanel loginPanel = new StoreBrowserPanel(this);
-        loginPanel.showLogin();
+        StoreBrowserPanel browserPanel = new StoreBrowserPanel(this);
+        browserPanel.showLogin();
     }
 }
