@@ -4,7 +4,7 @@ import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
-import org.limewire.ui.swing.search.store.StoreController;
+import org.limewire.ui.swing.search.store.StoreControllerFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
 import com.google.inject.Provider;
@@ -18,7 +18,7 @@ class ListViewStoreRendererFactory {
     private final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     private final Provider<SearchResultTruncator> headingTruncator;
     private final SearchResultMenuFactory popupMenuFactory;
-    private final StoreController storeController;
+    private final StoreControllerFactory storeControllerFactory;
     
     /**
      * Constructs a ListViewStoreRendererFactory using the specified services.
@@ -28,12 +28,12 @@ class ListViewStoreRendererFactory {
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
             SearchResultMenuFactory popupMenuFactory,
-            StoreController storeController) {
+            StoreControllerFactory storeControllerFactory) {
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
         this.popupMenuFactory = popupMenuFactory;
-        this.storeController = storeController;
+        this.storeControllerFactory = storeControllerFactory;
     }
     
     /**
@@ -49,11 +49,13 @@ class ListViewStoreRendererFactory {
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
             return new ListViewStoreRendererAB(storeStyle, categoryIconManager,
-                    headingBuilder, headingTruncator, popupMenuFactory, storeController);
+                    headingBuilder, headingTruncator, popupMenuFactory, 
+                    storeControllerFactory.create());
             
         case STYLE_C: case STYLE_D:
             return new ListViewStoreRendererCD(storeStyle, categoryIconManager, 
-                    headingBuilder, headingTruncator, popupMenuFactory, storeController);
+                    headingBuilder, headingTruncator, popupMenuFactory, 
+                    storeControllerFactory.create());
             
         default:
             return null;

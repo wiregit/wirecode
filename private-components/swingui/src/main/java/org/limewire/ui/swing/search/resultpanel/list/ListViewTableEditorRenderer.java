@@ -57,6 +57,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
+import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
@@ -70,7 +71,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
-import org.limewire.ui.swing.search.store.StoreController;
+import org.limewire.ui.swing.search.store.StoreControllerFactory;
 import org.limewire.ui.swing.table.TransparentCellTableRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -177,10 +178,11 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         Provider<SearchHeadingDocumentBuilder> headingBuilder,
         @Assisted ListViewRowHeightRule rowHeightRule,
         @Assisted ListViewDisplayedRowsLimit displayLimit,
-        @Assisted StoreController storeController,
+        @Assisted SearchResultsModel searchResultsModel,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
-        SearchResultMenuFactory searchResultMenuFactory) {
+        SearchResultMenuFactory searchResultMenuFactory,
+        StoreControllerFactory storeControllerFactory) {
 
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
@@ -192,7 +194,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.searchResultMenuFactory = searchResultMenuFactory;
         this.storeRendererFactory = new ListViewStoreRendererFactory(
                 categoryIconManager, headingBuilder, truncator, 
-                searchResultMenuFactory, storeController);
+                searchResultMenuFactory, storeControllerFactory);
         
         GuiUtils.assignResources(this);
 
@@ -200,7 +202,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
         
-        setStoreStyle(storeController.getStoreStyle());
+        setStoreStyle(searchResultsModel.getStoreStyle());
         
         makePanel(navigator, libraryMediator);       
 
