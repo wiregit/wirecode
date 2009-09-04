@@ -19,6 +19,8 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.store.StoreListener;
+import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -46,8 +48,6 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
-import org.limewire.ui.swing.search.store.StoreController;
-import org.limewire.ui.swing.search.store.StoreControllerFactory;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
@@ -118,7 +118,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
     private final DefaultTableCellRenderer defaultTableCellRenderer;
-    private final StoreController storeController;
+    private final StoreManager storeManager;
     
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
@@ -131,6 +131,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private Scrollable visibleComponent;
     
     private StyleListener styleListener;
+    private StoreListener storeListener;
 
     /**
      * Constructs a BaseResultPanel with the specified components.
@@ -150,7 +151,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             LibraryMediator libraryMediator,
             Provider<QualityRenderer> qualityRenderer, 
             DefaultTableCellRenderer defaultTableCellRenderer,
-            StoreControllerFactory storeControllerFactory) {
+            StoreManager storeManager) {
         
         this.searchResultsModel = searchResultsModel;
         this.tableFormatFactory = tableFormatFactory;
@@ -165,7 +166,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         this.qualityRenderer = qualityRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
-        this.storeController = storeControllerFactory.create(searchResultsModel);
+        this.storeManager = storeManager;
         
         rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery());
 
@@ -179,10 +180,11 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     }
     
     /**
-     * Registers listener to handle store style update.
+     * Registers listeners to handle style updates and store login/logout.
      */
     @Inject
     void register() {
+        // Add model listener to update store rows on style change.
         styleListener = new StyleListener() {
             @Override
             public void styleUpdated(final StoreStyle storeStyle) {
@@ -194,6 +196,15 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             }
         };
         searchResultsModel.addStyleListener(styleListener);
+        
+        // Add store listener to update store rows on login/logout.
+        storeListener = new StoreListener() {
+            @Override
+            public void loginChanged(boolean loggedIn) {
+                resultsList.updateStoreRowSizes();
+            }
+        };
+        storeManager.addStoreListener(storeListener);
     }
     
     /**
@@ -289,10 +300,10 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
-                downloadHandler, rowHeightRule, displayLimit, storeController);
+                downloadHandler, rowHeightRule, displayLimit, searchResultsModel);
         
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
-                downloadHandler, rowHeightRule, displayLimit, storeController);
+                downloadHandler, rowHeightRule, displayLimit, searchResultsModel);
         
 //        // TODO REMOVE DEAD CODE
 //        TableColumnModel tcm = resultsList.getColumnModel();
@@ -515,6 +526,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
      */
     public void dispose() {
         searchResultsModel.removeStyleListener(styleListener);
+        storeManager.removeStoreListener(storeListener);
     }
     
     /**
