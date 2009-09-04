@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
@@ -19,8 +18,6 @@ import javax.swing.JPopupMenu;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -51,9 +48,7 @@ public class FlexibleTabList extends AbstractTabList {
     
     private int maxVisibleTabs;
     private int vizStartIdx = -1;
-    
-    @InspectablePrimitive(value = "more tabs button clicked", category = DataCategory.USAGE)
-    private volatile int moreTabsButtonClicked = 0;
+
     
     /**
      * Constructs a FlexibleTabList with the specified combobox decorator.
@@ -134,12 +129,6 @@ public class FlexibleTabList extends AbstractTabList {
             more.setPressedIcon(morePressedIcon);
             more.setRolloverIcon(moreRolloverIcon);
             more.setSelectedIcon(morePressedIcon);
-            more.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    moreTabsButtonClicked++;
-                }
-            });
             add(more, "gapleft 0:" + String.valueOf(MIN_TAB_WIDTH));
         }
         

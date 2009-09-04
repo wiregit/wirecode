@@ -31,6 +31,9 @@ import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
@@ -79,7 +82,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     private final JXButton friendButton;
     private final SearchBar searchBar;    
-    private final FlexibleTabList searchList;
+
+    private final FlexibleTabList searchList;    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private final class LazyInspectableContainer {
+        @InspectablePrimitive(value = "search tab count", category = DataCategory.USAGE)
+        private final int tabCount = searchList.getTabs().size();        
+    }
     private final Navigator navigator;
     private final NavItem homeNav;
     private final NavItem libraryNav;
@@ -90,6 +100,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     private final String repeatSearchTitle = I18n.tr("Repeat Search");
     private final String refreshBrowseTitle = I18n.tr("Refresh");
+    
+    /** Maximum number of tabs open in this session*/
+    @InspectablePrimitive(value = "maximum tab count", category = DataCategory.USAGE)
+    private volatile long maxTabCount = 0;
 
     private final AllFriendsRefreshManager allFriendsRefreshManager;
         
@@ -115,8 +129,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
         this.advancedSearchPanel = advancedSearchPanel;
         this.homeMediator = homeMediator;
-        this.allFriendsRefreshManager = allFriendsRefreshManager;
-        
+        this.allFriendsRefreshManager = allFriendsRefreshManager;        
         setName("WireframeTop");
         
         setBackgroundPainter(barPainterFactory.createTopBarPainter());
@@ -223,6 +236,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         TabActionMap actionMap = new TabActionMap(action, action, moreTextAction, new ArrayList<Action>());
         
         searchList.addTabActionMapAt(actionMap, 0);
+        maybeIncrementMaxTabCount();
         
         item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, advancedPanel, "", SearchCategory.ALL));
         
@@ -236,7 +250,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     searchNavItem.remove();
                 }
              } 
-         });
+         });       
         
         return searchNavItem;
     }
@@ -253,6 +267,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
         TabActionMap actionMap = new TabActionMap(action, action, moreTextAction, contextActions);       
         searchList.addTabActionMapAt(actionMap, 0);
+        maybeIncrementMaxTabCount();
         
         String searchText = "";
         if(model.getSearchType() == SearchType.KEYWORD) {
@@ -279,6 +294,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
         final Action refresh = new RepeatSearchAction(refreshBrowseTitle, search, model).register();
         return Arrays.asList(refresh);
         
+    }
+    
+    /** Keeps track of the maximum number of tabs open in this session for inspections*/
+    private void maybeIncrementMaxTabCount() {
+        if(searchList.getTabs().size() > maxTabCount){
+            maxTabCount = searchList.getTabs().size();
+        }
     }
     
     /**

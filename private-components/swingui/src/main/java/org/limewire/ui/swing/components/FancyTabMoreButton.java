@@ -23,12 +23,17 @@ import javax.swing.event.PopupMenuListener;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.util.GuiUtils;
 
 class FancyTabMoreButton extends LimeComboBox {
     
     @Resource private Icon selectedIcon;
-    private Icon unselectedIcon;
+    private Icon unselectedIcon;    
+    
+    @InspectablePrimitive(value = "more tabs button clicked", category = DataCategory.USAGE)
+    private static volatile int moreTabsButtonClicked = 0;
     
     private JPopupMenu menu = new JPopupMenu();
     
@@ -147,6 +152,8 @@ class FancyTabMoreButton extends LimeComboBox {
             }
             // Set selected state to display selected icon.
             setSelected(true);
+
+            moreTabsButtonClicked++;
         }
     }
 }

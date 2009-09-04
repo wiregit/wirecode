@@ -46,7 +46,7 @@ class ToolsMenu extends MnemonicMenu {
     private final Provider<OptionsAction> optionsAction;
     
     @InspectablePrimitive(value = "search view", category = DataCategory.USAGE)
-    private volatile int uploadsViewed = 0;
+    private static volatile int uploadsViewed = 0;
     
     private AdvancedToolsPanel advancedTools = null;
     

@@ -69,7 +69,7 @@ public class SearchBar extends JXPanel {
     private SearchCategory categoryToSearch; 
     
     @InspectablePrimitive(value = "search bar category switched", category = DataCategory.USAGE)
-    private volatile int categorySwitched = 0;
+    private static volatile int categorySwitched = 0;
     
     
     @Inject

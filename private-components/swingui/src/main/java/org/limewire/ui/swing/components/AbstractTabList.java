@@ -16,9 +16,6 @@ import javax.swing.ButtonGroup;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.InspectableForSize;
-import org.limewire.inspection.InspectablePrimitive;
 
 /** 
  * A base container for {@link FancyTab FancyTab} objects.  Each tab is
@@ -31,16 +28,12 @@ import org.limewire.inspection.InspectablePrimitive;
  * @see FlexibleTabList
  */
 public abstract class AbstractTabList extends JXPanel {
-
-    @InspectableForSize(value = "search tab count", category = DataCategory.USAGE)
+    
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
     
-    private final FancyTabProperties props = new FancyTabProperties();
-    
-    /** Maximum number of tabs open in this session*/
-    @InspectablePrimitive(value = "maximum tab count", category = DataCategory.USAGE)
-    private volatile long maxTabCount = 0;
+    private final FancyTabProperties props = new FancyTabProperties();    
+
 
     /**
      * Constructs an empty AbstractTabList.
@@ -112,9 +105,6 @@ public abstract class AbstractTabList extends JXPanel {
     protected void addTab(FancyTab tab, int i) {
         tabs.add(i, tab);
         layoutTabs();
-        if(tabs.size() > maxTabCount){
-            maxTabCount = tabs.size();
-        }
     }
     
     /**

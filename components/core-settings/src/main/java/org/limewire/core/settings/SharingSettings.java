@@ -63,9 +63,9 @@ public class SharingSettings extends LimeProps {
     
     @SuppressWarnings("unused")
     @InspectableContainer
-    private class LazyInspectableContainer {
+    private static class LazyInspectableContainer {
         @InspectablePrimitive(value = "default download location changed", category = DataCategory.USAGE)
-        private final boolean locationChanged = !DIRECTORY_FOR_SAVING_FILES.get().equals(DEFAULT_SAVE_DIR);
+        private static final boolean locationChanged = !DIRECTORY_FOR_SAVING_FILES.get().equals(DEFAULT_SAVE_DIR);
     }
 
     /**
