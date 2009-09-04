@@ -87,7 +87,6 @@ public final class TablesHandler extends LimeWireSettings {
      * If none exists, one is created.
      */
     private static IntSetting getSetting(String id, int def) {
-        System.out.println(SETS);
         IntSetting set = (IntSetting)SETS.get(id);
         if (set == null) {
             set = FACTORY.createIntSetting(id, def);
