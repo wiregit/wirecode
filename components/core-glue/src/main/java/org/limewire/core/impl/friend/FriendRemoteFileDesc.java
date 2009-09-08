@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AuthTokenFeature;
 import org.limewire.friend.impl.address.FriendAddress;
@@ -28,37 +29,24 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class FriendRemoteFileDesc implements RemoteFileDesc {
 
-    private final FriendAddress address;
-
     static final String TYPE = "XMPPRFD";
 
+    private final FriendAddress address;
     private final long index;
-
     private final String filename;
-
     private final long size;
-
     private final byte[] clientGUID;
-
     private final int speed;
-
     private final int quality;
-
     private final LimeXMLDocument xmlDoc;
-
     private final Set<URN> urns;
-
     private final String vendor;
-
     private final long createTime;
-
-    private final AddressFactory addressFactory;
-    
+    private final AddressFactory addressFactory; 
     private boolean http11;
-
     private final FriendAddressResolver addressResolver;
-    
     private int hashCode = -1;
+    private float spamRating = 0;
     
     public FriendRemoteFileDesc(FriendAddress address, long index, String filename,
             long size, byte[] clientGUID, int speed, int quality, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
@@ -143,7 +131,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
 
     @Override
     public float getSpamRating() {
-        return 0.0f;
+        return spamRating;
     }
 
     @Override
@@ -179,7 +167,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
 
     @Override
     public boolean isSpam() {
-        return false;
+        return getSpamRating() >= SearchSettings.FILTER_SPAM_RESULTS.getValue();
     }
 
     @Override
@@ -188,6 +176,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
 
     @Override
     public void setSpamRating(float rating) {
+        spamRating = rating;
     }
 
     @Override

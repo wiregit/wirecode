@@ -110,7 +110,7 @@ public class Tokenizer {
             set.add(new UrnToken(urn.toString()));
         set.add(new SizeToken(desc.getSize()));
         set.add(new ApproximateSizeToken(desc.getSize()));
-        // Ignore private addresses such as 192.168.x.x
+        // Ignore friend addresses and private addresses such as 192.168.x.x
         Address address = desc.getAddress();
         if (address instanceof Connectable) {
             Connectable connectable = (Connectable) address;
