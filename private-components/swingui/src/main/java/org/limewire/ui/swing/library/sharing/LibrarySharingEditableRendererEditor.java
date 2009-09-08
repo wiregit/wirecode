@@ -19,6 +19,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
+import org.limewire.friend.api.Network;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -67,7 +68,7 @@ class LibrarySharingEditableRendererEditor extends JCheckBox implements TableCel
             data = (EditableSharingData) value;
             setText(textFor(data));
             setSelected(data.isSelected());
-            setToolTipText(textFor(data));
+            setToolTipText(getToolTipText(data));
         } else {
             setText("");
             setSelected(false);
@@ -84,13 +85,25 @@ class LibrarySharingEditableRendererEditor extends JCheckBox implements TableCel
             EditableSharingData data = (EditableSharingData) value;
             setText(textFor(data));
             setSelected(data.isSelected());
-            setToolTipText(textFor(data));
+            setToolTipText(getToolTipText(data));
         } else {
             setText("");
             setSelected(false);
             setToolTipText("");
         }     
         return this;
+    }
+    
+    private String getToolTipText(EditableSharingData data) {
+        if(data.getFriend() != null) {
+            if(data.getFriend().getNetwork().getType() != Network.Type.FACEBOOK) {
+                return data.getFriend().getRenderName() + " <" + data.getFriend().getId() + ">";
+            } else {
+                return data.getFriend().getRenderName();
+            }
+        } else {
+            return I18n.tr("{0} friends from other accounts", data.getIds().size());
+        }
     }
     
     private String textFor(EditableSharingData data) {

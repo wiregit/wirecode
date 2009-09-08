@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.Network;
 import org.limewire.ui.swing.util.GuiUtils;
 
 class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {
@@ -33,20 +34,28 @@ class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        if(value instanceof Friend) {
-            value = ((Friend)value).getRenderName();
-        } 
-        
-        if(value == null) {
-            value = "";
-        }        
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+        if(value instanceof Friend) {
+            Friend friend = (Friend)value;
+            if(friend.getNetwork().getType() != Network.Type.FACEBOOK) {
+                setToolTipText(friend.getRenderName() + " <" + friend.getId() + ">");
+            } else {
+                setToolTipText(friend.getRenderName());
+            }
+            setText(friend.getRenderName());
+        } else if(value instanceof String){
+            setText((String)value);
+            setToolTipText((String)value);
+        } else {
+            setText("");
+            setToolTipText("");
+        }
         setBorder(border);
         setFont(font);
         setForeground(fontColor);
         setOpaque(!scrollPane.getVerticalScrollBar().isVisible());
         setBackground(backgroundColor);
-        setToolTipText((String)value);
 
         return this;
     }
