@@ -103,7 +103,7 @@ public class StoreDomListener extends LimeDomListener {
             
             // For successful login, retrieve cookies and notify action.
             if ((loadCookieAction != null) && loadCookieAction.isUrlValid(url)) {
-                List<Cookie> cookieList = createCookieList(loadCookieAction.getDomain());
+                List<Cookie> cookieList = getCookieList(loadCookieAction.getDomain());
                 loadCookieAction.cookiesLoaded(cookieList);
             }
         }
@@ -122,9 +122,9 @@ public class StoreDomListener extends LimeDomListener {
     }
     
     /**
-     * Creates a list of cookies for the specified domain.
+     * Returns a list of browser cookies for the specified domain.
      */
-    private List<Cookie> createCookieList(String domain) {
+    public static List<Cookie> getCookieList(String domain) {
         // Get cookie manager.
         nsICookieManager cookieManager = XPCOMUtils.getServiceProxy(
                 "@mozilla.org/cookiemanager;1", nsICookieManager.class);
