@@ -1,5 +1,11 @@
 package org.limewire.core.impl.search.store;
 
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
@@ -15,14 +21,20 @@ import com.google.inject.Singleton;
 @Singleton
 public class CoreStoreManager implements StoreManager {
 
+    private final List<StoreListener> listenerList = 
+        new CopyOnWriteArrayList<StoreListener>();
+    
+    private final Map<AttributeKey, Object> userAttributes = 
+        Collections.synchronizedMap(new EnumMap<AttributeKey, Object>(AttributeKey.class));
+    
     @Override
     public void addStoreListener(StoreListener listener) {
-        // TODO implement
+        listenerList.add(listener);
     }
 
     @Override
     public void removeStoreListener(StoreListener listener) {
-        // TODO implement
+        listenerList.remove(listener);
     }
     
     @Override
@@ -51,28 +63,52 @@ public class CoreStoreManager implements StoreManager {
     
     @Override
     public boolean isLoggedIn() {
-        // TODO implement
-        return false;
+        return (userAttributes.get(AttributeKey.COOKIES) != null);
     }
 
     @Override
     public Object getUserAttribute(AttributeKey key) {
-        // TODO implement
-        return null;
+        return userAttributes.get(key);
     }
 
     @Override
     public void setUserAttribute(AttributeKey key, Object attribute) {
-        // TODO implement
+        boolean wasLoggedIn = isLoggedIn();
+        
+        // Set attribute value.
+        userAttributes.put(key, attribute);
+        
+        // Notify listeners if login state changed.
+        if (isLoggedIn() != wasLoggedIn) {
+            fireLoginChanged(isLoggedIn());
+        }
     }
 
     @Override
     public void logout() {
-        // TODO implement
+        boolean wasLoggedIn = isLoggedIn();
+        
+        // Remove cookies.
+        userAttributes.remove(AttributeKey.COOKIES);
+        
+        // Notify listeners if login state changed.
+        if (isLoggedIn() != wasLoggedIn) {
+            fireLoginChanged(isLoggedIn());
+        }
     }
 
     @Override
     public void startSearch(SearchDetails searchDetails, StoreSearchListener storeSearchListener) {
         // TODO implement
+    }
+    
+    /**
+     * Notifies registered store listeners that the login state has changed
+     * to the specified value.
+     */
+    private void fireLoginChanged(boolean loggedIn) {
+        for (StoreListener listener : listenerList) {
+            listener.loginChanged(loggedIn);
+        }
     }
 }
