@@ -49,6 +49,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
 
     public void selectInLibrary(File file) {
         showLibrary();
+        clearFilters();
         getComponent().selectLocalFileList(libraryManager.get().getLibraryManagedList());
         getComponent().selectAndScrollTo(file);
         
