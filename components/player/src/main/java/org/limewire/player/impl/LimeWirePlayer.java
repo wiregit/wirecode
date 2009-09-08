@@ -51,7 +51,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     /**
      *  Maximum size of the buffer to read/write from.
      */
-    public static final int EXTERNAL_BUFFER_SIZE = 4096 * 4;
+    public static final int EXTERNAL_BUFFER_SIZE = 4096 * 8;
 
     /**
      * Our list of AudioPlayerListeners that are currently listening for events
