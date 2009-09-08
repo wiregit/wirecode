@@ -44,6 +44,7 @@ public class FriendInspections {
                 Map<Object, Object> map = new HashMap<Object, Object>();
                 map.put("loggedIn", isLoggedIn);
                 if(isLoggedIn) {
+                    assert conn != null;
                     map.put("logged in service", conn.getConfiguration().getNetworkName());
                     map.put("total friends", conn.getFriends().size());
                 }

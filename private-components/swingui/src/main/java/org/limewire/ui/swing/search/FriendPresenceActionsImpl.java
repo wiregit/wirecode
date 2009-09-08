@@ -26,10 +26,8 @@ import com.google.inject.Provider;
 @LazySingleton
 class FriendPresenceActionsImpl implements FriendPresenceActions {
     private static final Log LOG = LogFactory.getLog(FriendPresenceActionsImpl.class);
-    @SuppressWarnings("unused")
     @InspectablePrimitive(value = "browse all friends", category = DataCategory.USAGE)
     private int numBrowseAll;
-    @SuppressWarnings("unused")
     @InspectablePrimitive(value = "browse single friend", category = DataCategory.USAGE)
     private int numBrowseFriend;
 

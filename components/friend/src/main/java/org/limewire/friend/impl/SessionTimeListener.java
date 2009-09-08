@@ -21,7 +21,6 @@ public class SessionTimeListener implements EventListener<FriendConnectionEvent>
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
-        @SuppressWarnings("unused")
         @InspectionPoint(value = "friends session time", category = DataCategory.USAGE)
         private Inspectable sessionTime = new SessionTimeInspectable();         
     }
