@@ -34,7 +34,7 @@ public class TorrentSelectorPanel {
     private FileInfoPanel bittorrentPanel;
     private JButton okButton;
     private JCheckBox checkBox;
-    private int closeValue = JOptionPane.CLOSED_OPTION;
+    private int closeValue = JOptionPane.CANCEL_OPTION;
     
     public TorrentSelectorPanel(Torrent torrent, FileInfoPanelFactory factory) {        
         GuiUtils.assignResources(this);
@@ -93,11 +93,11 @@ public class TorrentSelectorPanel {
     private class OKAction extends AbstractAction {
         public OKAction() {
             super(tr("OK"));
-            closeValue = JOptionPane.OK_OPTION;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            closeValue = JOptionPane.OK_OPTION;
             bittorrentPanel.save();
             BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(checkBox.isSelected());
             close();
