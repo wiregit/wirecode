@@ -314,7 +314,8 @@ class LibTorrentWrapper {
     
     
     public boolean has_metadata(String id) {
-        if(OSUtils.isLinux()) {
+        if(!OSUtils.isWindows()) {
+            //TODO remove this if statement after libraries rebuilt on all platforms.
             LOG.debugf("before has_metadata: {0}", id);
             IntByReference has_metadata = new IntByReference(0);
             catchWrapperException(libTorrent.has_metadata(id, has_metadata));
