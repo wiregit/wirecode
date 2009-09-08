@@ -883,7 +883,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         }
 
         Torrent torrent = ret.getTorrent();
-        if(BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.getValue() && !downloadCallback.get().promptTorrentFilePriorities(torrent)) {
+        if(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue() && !downloadCallback.get().promptTorrentFilePriorities(torrent)) {
             torrentManager.get().removeTorrent(torrent);
             throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
         } else {

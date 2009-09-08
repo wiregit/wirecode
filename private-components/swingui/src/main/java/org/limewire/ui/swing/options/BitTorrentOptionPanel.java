@@ -169,7 +169,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.setValue(startPort);
         BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.setValue(endPort);
         
-        BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.setValue(prioritizeTorrentPopup.isSelected());
+        BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(prioritizeTorrentPopup.isSelected());
 
         if (torrentManager.get().isValid()) {
             torrentManager.get().setTorrentManagerSettings(torrentSettings);
@@ -188,7 +188,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
                         .getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue()
                 || endPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_END_PORT
                         .getValue() 
-                || prioritizeTorrentPopup.isSelected() != BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.getValue();
+                || prioritizeTorrentPopup.isSelected() != BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue();
     }
 
     @Override
@@ -204,7 +204,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedTime.setValue(getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()));
         startPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
         endPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
-        prioritizeTorrentPopup.setSelected(BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
+        prioritizeTorrentPopup.setSelected(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
 
         updateState(auto);
     }

@@ -70,7 +70,7 @@ public class TorrentSelectorPanel {
         okButton = new JButton(new OKAction());
         checkBox = new JCheckBox(I18n.tr("Always ask before starting torrent"));
         checkBox.setOpaque(false);
-        checkBox.setSelected(BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
+        checkBox.setSelected(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
         
         JPanel footerPanel = new JPanel(new MigLayout("fill, insets 0 15 10 15"));
         footerPanel.add(checkBox, "span, wrap");
@@ -99,7 +99,7 @@ public class TorrentSelectorPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             bittorrentPanel.save();
-            BittorrentSettings.SHOW_POPUP_BEFORE_DOWNLOADING.setValue(checkBox.isSelected());
+            BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(checkBox.isSelected());
             close();
         }
     }
