@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 
 import org.apache.http.cookie.Cookie;
 import org.limewire.core.api.Application;
+import org.limewire.core.api.search.store.StoreListener;
+import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.BrowserUtils;
 import org.limewire.ui.swing.browser.UriAction;
@@ -27,6 +29,7 @@ import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 import org.mozilla.browser.impl.ChromeAdapter;
+import org.mozilla.interfaces.nsICookieManager;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMWindow2;
 
@@ -36,6 +39,9 @@ import com.google.inject.Inject;
  * UI container for the Lime Store browser.
  */
 public class StorePanel extends JPanel {
+    private static final String LOGIN_COOKIE = "SPRING_SECURITY_REMEMBER_ME_COOKIE";
+    private static final String STORE_DOMAIN = ".store.limewire.com";
+    
     private final Browser browser;
 
     private final Application application;
@@ -109,6 +115,38 @@ public class StorePanel extends JPanel {
         }); 
     }
     
+    /**
+     * Registers a listener on the specified store manager to handle login
+     * changes.
+     */
+    @Inject
+    void register(StoreManager storeManager) {
+        // Add store listener to update browser cookies.
+        storeManager.addStoreListener(new StoreListener() {
+            @Override
+            public void loginChanged(boolean loggedIn) {
+                // Get browser cookies and look for login state.
+                List<Cookie> cookieList = StoreDomListener.getCookieList(STORE_DOMAIN);
+                boolean loginCookieFound = isLoginCookie(cookieList);
+                
+                if (loggedIn) {
+                    // Reload current page.  This updates the page with cookies
+                    // that may have been loaded using the login dialog.
+                    browser.reload();
+
+                } else if (!loggedIn && loginCookieFound) {
+                    // Get cookie manager and clear browser cookies.
+                    nsICookieManager cookieManager = XPCOMUtils.getServiceProxy(
+                            "@mozilla.org/cookiemanager;1", nsICookieManager.class);
+                    cookieManager.removeAll();
+
+                    // Reload home page.
+                    loadDefaultUrl();
+                }
+            }
+        });
+    }
+    
     public void loadDefaultUrl() {
         load("http://store.limewire.com/");
     }
@@ -126,14 +164,25 @@ public class StorePanel extends JPanel {
     }
     
     /**
+     * Returns true if the specified cookie list contains the login cookie.
+     */
+    private boolean isLoginCookie(List<Cookie> cookieList) {
+        for (Cookie cookie : cookieList) {
+            if (LOGIN_COOKIE.equals(cookie.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Action to handle cookies on successful login.
      */
     private class LoginAction implements LoadCookieAction {
-        private final String LOGIN_COOKIE = "SPRING_SECURITY_REMEMBER_ME_COOKIE";
-
+        
         @Override
         public String getDomain() {
-            return ".store.limewire.com";
+            return STORE_DOMAIN;
         }
 
         @Override
@@ -144,13 +193,7 @@ public class StorePanel extends JPanel {
         @Override
         public void cookiesLoaded(List<Cookie> cookieList) {
             // Search for login cookie.
-            boolean loggedIn = false;
-            for (Cookie cookie : cookieList) {
-                if (LOGIN_COOKIE.equals(cookie.getName())) {
-                    loggedIn = true;
-                    break;
-                }
-            }
+            boolean loggedIn = isLoginCookie(cookieList);
             
             if (loggedIn && !storeController.isLoggedIn()) {
                 // Save login cookies.
