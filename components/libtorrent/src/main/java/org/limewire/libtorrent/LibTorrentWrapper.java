@@ -9,7 +9,6 @@ import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
-import org.limewire.util.OSUtils;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -314,17 +313,10 @@ class LibTorrentWrapper {
     
     
     public boolean has_metadata(String id) {
-        if(!OSUtils.isWindows()) {
-            //TODO remove this if statement after libraries rebuilt on all platforms.
-            LOG.debugf("before has_metadata: {0}", id);
-            IntByReference has_metadata = new IntByReference(0);
-            catchWrapperException(libTorrent.has_metadata(id, has_metadata));
-            LOG.debugf("after has_metadata: {0}", id);
-            return has_metadata.getValue() != 0;
-        } else {
-            //TODO remove this else block, all oses should be working without 
-            //this at the moment, but mrogers is having trouble.s
-            return true;
-        }
+        LOG.debugf("before has_metadata: {0}", id);
+        IntByReference has_metadata = new IntByReference(0);
+        catchWrapperException(libTorrent.has_metadata(id, has_metadata));
+        LOG.debugf("after has_metadata: {0}", id);
+        return has_metadata.getValue() != 0;
     }
 }
