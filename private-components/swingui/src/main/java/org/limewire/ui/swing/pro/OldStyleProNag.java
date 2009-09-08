@@ -18,8 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -31,6 +29,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * This is a throw back to the 4.x style upgrade to Pro popup.
@@ -60,7 +60,8 @@ public class OldStyleProNag extends JPanel {
         
         setLayout(new MigLayout("fill, insets 10 10 4 10, gap 7 5"));
                 
-        add(createContentArea(I18n.tr("For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.")), "span, grow, wrap");
+        add(createContentArea(I18n.tr("LimeWire PRO gives you turbo-charged performance, more ultrapeer connections, a higher maximum for search results, and free technical support.\n" +
+                "Get LimeWire PRO today!")), "span, grow, wrap");
         
         JLabel label = new JLabel(I18n.tr("Upgrade to LimeWire PRO?"));
         add(label, "span, wrap, alignx center");
