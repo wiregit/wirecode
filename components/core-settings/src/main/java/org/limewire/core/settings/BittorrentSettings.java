@@ -112,7 +112,7 @@ public class BittorrentSettings extends LimeProps {
             "LIBTORRENT_ACTIVE_DOWNLOADS_LIMIT", 8);
 
     /**
-     * The total number of active downlaods limit. This number is also used via
+     * The total number of active seeds limit. This number is also used via
      * the libtorrent queuing algorithm when trying to decide to queue/dequeue
      * automanaged torrents. This limit only effect automanaged torrents, but
      * will take other torrents into account as we.
