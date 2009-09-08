@@ -12,7 +12,6 @@ import javax.swing.JLabel;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -53,6 +52,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.CalendarRenderer;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
 import org.limewire.ui.swing.table.QualityRenderer;
@@ -120,7 +120,7 @@ public class BaseResultPanel extends JXPanel {
     private final Provider<FileSizeRenderer> fileSizeRenderer;
     private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
-    private final DefaultTableCellRenderer defaultTableCellRenderer;
+    private final DefaultLimeTableCellRenderer defaultTableCellRenderer;
     
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
@@ -150,7 +150,7 @@ public class BaseResultPanel extends JXPanel {
             Provider<CalendarRenderer> calendarRenderer,
             LibraryMediator libraryMediator,
             Provider<QualityRenderer> qualityRenderer, 
-            DefaultTableCellRenderer defaultTableCellRenderer,
+            DefaultLimeTableCellRenderer defaultTableCellRenderer,
             MainDownloadPanel mainDownloadPanel) {
         
         this.searchResultsModel = searchResultsModel;

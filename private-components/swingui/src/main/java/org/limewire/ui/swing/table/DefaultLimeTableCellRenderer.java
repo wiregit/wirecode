@@ -7,10 +7,13 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import com.google.inject.Singleton;
+
 /**
  * A DefaultTableCellRenderer that adds padding to the left and right border
  * and removes the focus rectangle around the cell.
  */       
+@Singleton
 public class DefaultLimeTableCellRenderer extends DefaultTableCellRenderer {
 
     private final Border border;

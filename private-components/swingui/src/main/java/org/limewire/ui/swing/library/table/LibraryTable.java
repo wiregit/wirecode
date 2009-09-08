@@ -6,10 +6,13 @@ import java.io.File;
 import java.util.List;
 
 import javax.swing.DropMode;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -27,6 +30,7 @@ import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.NameRenderer;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TimeRenderer;
@@ -276,6 +280,7 @@ public class LibraryTable extends MouseableTable {
         if(category != null) {
             switch(category) {
             case AUDIO:
+                setHeaderRenderer(AudioTableFormat.LENGTH_INDEX, new TableCellHeaderRenderer(JLabel.TRAILING));
                 setCellRenderer(AudioTableFormat.PLAY_INDEX, isPlayingRenderer.get());
                 setUnsortable(AudioTableFormat.PLAY_INDEX);
                 setCellRenderer(AudioTableFormat.SIZE_INDEX, fileSizeRenderer.get());
@@ -286,6 +291,7 @@ public class LibraryTable extends MouseableTable {
                 setUnsortable(AudioTableFormat.ACTION_INDEX);
                 break;
             case VIDEO:
+                setHeaderRenderer(VideoTableFormat.LENGTH_INDEX, new TableCellHeaderRenderer(JLabel.TRAILING));
                 setCellRenderer(VideoTableFormat.LENGTH_INDEX, timeRenderer.get());
                 setCellRenderer(VideoTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(VideoTableFormat.NAME_INDEX, nameRenderer.get());
@@ -332,6 +338,16 @@ public class LibraryTable extends MouseableTable {
             setCellEditor(AllTableFormat.ACTION_INDEX, removeEditor);
             setUnsortable(AllTableFormat.ACTION_INDEX);
         }
+    }
+    
+    /**
+     * Assigns the specified header renderer to the specified column in the 
+     * Table view column model.   
+     */
+    protected void setHeaderRenderer(int column, TableCellRenderer headerRenderer) {
+        TableColumnModel tcm = getColumnModel();
+        TableColumn tc = tcm.getColumn(column);
+        tc.setHeaderRenderer(headerRenderer);
     }
     
     private void setCellRenderer(int column, TableCellRenderer renderer) {
