@@ -256,6 +256,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         progressSlider.setMinimumSize(new Dimension(206, 6));
         progressSlider.setPreferredSize(new Dimension(206, 6));
         progressSlider.setSize(new Dimension(206, 4));
+        progressSlider.setEnabled(false);
         progressSlider.addMouseListener(new MouseAdapter() {
             /**
              * Reposition the thumb on the jslider to the location of the mouse
