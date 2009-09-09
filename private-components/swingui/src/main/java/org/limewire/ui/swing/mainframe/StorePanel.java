@@ -39,6 +39,13 @@ public class StorePanel extends JPanel {
      */
     private final AtomicBoolean firstHiddenIgnored = new AtomicBoolean(false);
 
+    /**
+     * Saves the current state of the store page. We load a blank page to
+     * stop any playing media when navigating away, this saves that state
+     * and reloads it when the store is brought back up.
+     */
+    private String currentURL;
+    
     @Inject
     public StorePanel(Application application, final Navigator navigator) {
         this.application = application;
@@ -57,7 +64,17 @@ public class StorePanel extends JPanel {
             @Override
             public void componentHidden(ComponentEvent e) {
                 if (firstHiddenIgnored.getAndSet(true) && MozillaInitialization.isInitialized()) {
+                    currentURL = browser.getUrl();
                     browser.load("about:blank");
+                }
+            }
+            
+            @Override
+            public void componentShown(ComponentEvent e) {
+                if(currentURL != null) {
+                    browser.load(currentURL);
+                } else {
+                    loadDefaultUrl();
                 }
             }
         });     

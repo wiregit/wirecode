@@ -168,7 +168,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 storeVisited++;
-                storeMediator.getComponent().loadDefaultUrl();
+                if(storeMediator.getComponent().isVisible())
+                    storeMediator.getComponent().loadDefaultUrl();
             }
         });
      
