@@ -38,9 +38,12 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     private JRadioButton myControl;
 
+    private JComponent seedMaxController;
     private JComponent seedController;
     private JComponent portController;
     
+    private SpinnerNumberModel seedMaxModel;
+    private JSpinner seedMax;
     private SpinnerNumberModel seedRatioModel;
     private JSpinner seedRatio;
     private SpinnerNumberModel seedTimeModel;
@@ -96,6 +99,14 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(myControl);
 
 
+        seedMaxModel = new SpinnerNumberModel(
+                BittorrentSettings.TORRENT_SEEDING_LIMIT.get().intValue(),
+                BittorrentSettings.TORRENT_SEEDING_LIMIT.getMinValue().intValue(),
+                BittorrentSettings.TORRENT_SEEDING_LIMIT.getMaxValue().intValue(), 1);
+        seedMax = new JSpinner(seedMaxModel);
+        seedMax.setPreferredSize(new Dimension(50, 20));
+        seedMax.setMaximumSize(new Dimension(60, 20));
+        
         seedRatioModel = new SpinnerNumberModel(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                 .get().doubleValue(), BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getMinValue()
                 .doubleValue(), BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getMaxValue()
@@ -114,8 +125,11 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedTime.setPreferredSize(new Dimension(50, 20));
         seedTime.setMaximumSize(new Dimension(60, 20));
 
-        seedController = new EmbeddedComponentLabel(I18n.tr("Download until ratio of {c} OR after {c} days uploading"), 
-                seedRatio, seedTime);        
+        seedMaxController = new EmbeddedComponentLabel(I18n.tr("Seed a maximum of {c} torrents"), 
+                seedMax);
+        
+        seedController = new EmbeddedComponentLabel(I18n.tr("Seed until ratio of {c} OR after {c} days uploading"), 
+                seedRatio, seedTime); 
         
         startPortField = new NumericTextField(5, 1, 0xFFFF);
         endPortField = new NumericTextField(5, 1, 0xFFFF);
@@ -128,6 +142,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         
         
         if (torrentManager.get().isValid()) {
+            p.add(seedMaxController, "wrap");
             p.add(uploadForever, "wrap");
             p.add(myControl, "wrap");
             

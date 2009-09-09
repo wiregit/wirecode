@@ -265,7 +265,18 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
 
     @Override
     public int getSeedingTime() {
-        return seeding_time;
+        // Partial downloads have no notion of seeding time since they never fully
+        //  enter the seeding state.  Instead use the active time in this case for
+        //  comparison.
+        // TODO: Update when something better becomes available.  This will cause 
+        //        partial torrent download seeds to become stale comparatively sooner
+        //        than their normal peers.
+        if (seeding_time==0 && LibTorrentState.forId(state) == LibTorrentState.FINISHED) {
+            return active_time;
+        } 
+        else {
+            return seeding_time;
+        }
     }
 
     @Override

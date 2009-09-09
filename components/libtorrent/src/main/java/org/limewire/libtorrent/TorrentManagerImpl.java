@@ -2,6 +2,7 @@ package org.limewire.libtorrent;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentInfo;
@@ -23,12 +25,14 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.collection.SortedList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.libtorrent.callback.AlertCallback;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -48,6 +52,13 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final AtomicReference<TorrentManagerSettings> torrentSettings = new AtomicReference<TorrentManagerSettings>(
             null);
+    
+    EventListener<TorrentEvent> torrentListener = new EventListener<TorrentEvent>() {
+        @Override
+        public void handleEvent(TorrentEvent event) {
+            handleTorrentEvent(event);
+        }
+    };
 
     /**
      * Used to protect from calling libtorrent code with invalid torrent data.
@@ -132,6 +143,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void registerTorrent(Torrent torrent) {
         validateLibrary();
         addTorrent(torrent);
+        torrent.addListener(torrentListener);
     }
 
     @Override
@@ -255,6 +267,80 @@ public class TorrentManagerImpl implements TorrentManager {
         }
     }
 
+    private void handleTorrentEvent(TorrentEvent event) {
+        if (event == TorrentEvent.COMPLETED) {
+            
+            // Check the number of seeding torrents and stop any long running torrents
+            //  if there are more there are more than the limit
+            
+            lock.writeLock().lock();
+            
+            try {
+            
+                int seedingTorrents = 0;
+                int maxSeedingTorrents = torrentSettings.get().getMaxSeedingLimit();
+                
+                // Cut out early if the limit is infinite
+                if (maxSeedingTorrents == Integer.MAX_VALUE) {
+                    return;
+                }
+            
+                for ( Torrent torrent : torrents.values() ) {
+                    if (torrent.isFinished()) {
+                        seedingTorrents++;
+                    }
+                }
+
+                if (seedingTorrents <= maxSeedingTorrents) {
+                    return;
+                }
+            
+                List<Torrent> ratioSortedTorrents = new SortedList<Torrent>(torrents.values(), new Comparator<Torrent>() {
+                    @Override
+                    public int compare(Torrent o1, Torrent o2) {
+                        // Sort smallest first
+                        int compare = Double.compare(o2.getSeedRatio(), o1.getSeedRatio());
+
+                        // Compare by seeding time if seeding ratio is the same (generally at 0:0)
+                        //  -- Older values are discarded first. --
+                        if (compare == 0) {
+                            TorrentStatus status1 = o1.getStatus();
+                            TorrentStatus status2 = o2.getStatus();
+                            if (status1 != null && status2 != null) {
+                                int time1 = status1.getSeedingTime();
+                                int time2 = status2.getSeedingTime();
+                                if (time1 > time2) {
+                                    return -1;
+                                }
+                                else if (time2 > time1) {
+                                    return 1;
+                                }
+                                else {
+                                    return 0;
+                                }
+                            }
+                        }
+                            
+                        return compare;
+                    }
+                });
+                 
+                for ( int i=0 ; i<seedingTorrents-maxSeedingTorrents && ratioSortedTorrents.size()>0 ; ) {
+                    Torrent torrent = ratioSortedTorrents.remove(0);
+                    
+                    if (torrent.isFinished()) {
+                        torrent.stop();
+                        torrent.removeListener(torrentListener);
+                        i++;
+                    }
+                }
+            } 
+            finally {
+                lock.writeLock().unlock();
+            }
+        }
+    }
+    
     @Override
     public void initialize() {
         if (torrentSettings.get().isTorrentsEnabled()) {

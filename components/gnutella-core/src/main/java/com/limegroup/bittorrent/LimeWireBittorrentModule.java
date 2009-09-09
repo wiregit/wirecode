@@ -124,6 +124,11 @@ public class LimeWireBittorrentModule extends AbstractModule {
                             public int getActiveSeedsLimit() {
                                 return BittorrentSettings.LIBTORRENT_ACTIVE_SEEDS_LIMIT.getValue();
                             }
+                            
+                            @Override
+                            public int getMaxSeedingLimit() {
+                                return BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue();
+                            }
                         };
                     }
                 });

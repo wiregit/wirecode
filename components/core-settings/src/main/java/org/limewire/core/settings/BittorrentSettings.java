@@ -128,6 +128,15 @@ public class BittorrentSettings extends LimeProps {
      */
     public static final IntSetting LIBTORRENT_ACTIVE_LIMIT = FACTORY.createIntSetting(
             "LIBTORRENT_ACTIVE_LIMIT", 15);
+    
+    /**
+     * The maximum number of torrents that can be seeded at once.  One the limit is reached
+     *  seeding torrents will be stopped.
+     */
+    // TODO: Reorganise this so it does not clash with LIBTORRENT_ACTIVE_SEEDS_LIMIT above
+    public static final IntSetting TORRENT_SEEDING_LIMIT = FACTORY.createIntSetting(
+            "LIBTORRENT_SEEDING_LIMIT", 20, 0, Integer.MAX_VALUE);
+    
 
     /**
      * This setting will cause torrents to upload forever, and will not limit

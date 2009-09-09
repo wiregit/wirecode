@@ -78,4 +78,9 @@ public interface TorrentManagerSettings {
      * Returns the limit for the total number of active managed torrents.
      */
     public int getActiveLimit();
+    
+    /**
+     * Returns the maximum number of seeding torrents allowed. 
+     */
+    public int getMaxSeedingLimit();
 }

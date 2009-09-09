@@ -77,4 +77,9 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     public int getActiveSeedsLimit() {
         return 0;
     }
+
+    @Override
+    public int getMaxSeedingLimit() {
+        return 0;
+    }
 }
