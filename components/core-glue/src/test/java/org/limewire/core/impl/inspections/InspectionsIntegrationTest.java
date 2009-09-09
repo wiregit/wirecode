@@ -86,6 +86,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
     }
     
     private void initSettings() {
+        InspectionsSettings.PUSH_INSPECTIONS_ENABLED.set(true);
         InspectionsSettings.INSPECTION_SPEC_REQUEST_URL.set("http://localhost:8123/request");
         InspectionsSettings.INSPECTION_SPEC_SUBMIT_URL.set("http://localhost:8123/submit");
         InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.set(0);
