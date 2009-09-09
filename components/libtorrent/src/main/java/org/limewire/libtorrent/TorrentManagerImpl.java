@@ -1,7 +1,9 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,7 +27,6 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.collection.SortedList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -52,7 +53,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final AtomicReference<TorrentManagerSettings> torrentSettings = new AtomicReference<TorrentManagerSettings>(
             null);
-    
+
     EventListener<TorrentEvent> torrentListener = new EventListener<TorrentEvent>() {
         @Override
         public void handleEvent(TorrentEvent event) {
@@ -269,23 +270,24 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private void handleTorrentEvent(TorrentEvent event) {
         if (event == TorrentEvent.COMPLETED) {
-            
-            // Check the number of seeding torrents and stop any long running torrents
-            //  if there are more there are more than the limit
-            
+
+            // Check the number of seeding torrents and stop any long running
+            // torrents
+            // if there are more there are more than the limit
+
             lock.writeLock().lock();
-            
+
             try {
-            
+
                 int seedingTorrents = 0;
                 int maxSeedingTorrents = torrentSettings.get().getMaxSeedingLimit();
-                
+
                 // Cut out early if the limit is infinite
                 if (maxSeedingTorrents == Integer.MAX_VALUE) {
                     return;
                 }
-            
-                for ( Torrent torrent : torrents.values() ) {
+
+                for (Torrent torrent : torrents.values()) {
                     if (torrent.isFinished()) {
                         seedingTorrents++;
                     }
@@ -294,15 +296,17 @@ public class TorrentManagerImpl implements TorrentManager {
                 if (seedingTorrents <= maxSeedingTorrents) {
                     return;
                 }
-            
-                List<Torrent> ratioSortedTorrents = new SortedList<Torrent>(torrents.values(), new Comparator<Torrent>() {
+
+                List<Torrent> ratioSortedTorrents = new ArrayList<Torrent>(torrents.values());
+                Collections.sort(ratioSortedTorrents, new Comparator<Torrent>() {
                     @Override
                     public int compare(Torrent o1, Torrent o2) {
                         // Sort smallest first
                         int compare = Double.compare(o2.getSeedRatio(), o1.getSeedRatio());
 
-                        // Compare by seeding time if seeding ratio is the same (generally at 0:0)
-                        //  -- Older values are discarded first. --
+                        // Compare by seeding time if seeding ratio is the same
+                        // (generally at 0:0)
+                        // -- Older values are discarded first. --
                         if (compare == 0) {
                             TorrentStatus status1 = o1.getStatus();
                             TorrentStatus status2 = o2.getStatus();
@@ -311,36 +315,34 @@ public class TorrentManagerImpl implements TorrentManager {
                                 int time2 = status2.getSeedingTime();
                                 if (time1 > time2) {
                                     return -1;
-                                }
-                                else if (time2 > time1) {
+                                } else if (time2 > time1) {
                                     return 1;
-                                }
-                                else {
+                                } else {
                                     return 0;
                                 }
                             }
                         }
-                            
+
                         return compare;
                     }
                 });
-                 
-                for ( int i=0 ; i<seedingTorrents-maxSeedingTorrents && ratioSortedTorrents.size()>0 ; ) {
+
+                for (int i = 0; i < seedingTorrents - maxSeedingTorrents
+                        && ratioSortedTorrents.size() > 0;) {
                     Torrent torrent = ratioSortedTorrents.remove(0);
-                    
+
                     if (torrent.isFinished()) {
                         torrent.stop();
                         torrent.removeListener(torrentListener);
                         i++;
                     }
                 }
-            } 
-            finally {
+            } finally {
                 lock.writeLock().unlock();
             }
         }
     }
-    
+
     @Override
     public void initialize() {
         if (torrentSettings.get().isTorrentsEnabled()) {
@@ -447,7 +449,7 @@ public class TorrentManagerImpl implements TorrentManager {
      */
     private class AlertPoller implements Runnable {
         private final BasicAlertCallback callback = new BasicAlertCallback();
-        
+
         @Override
         public void run() {
             libTorrent.get_alerts(callback);
