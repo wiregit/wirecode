@@ -100,9 +100,7 @@ public class AdvancedSearchPanel extends JXPanel implements Disposable {
         buttonDecorator.decorateGreenFullButton(searchButton);
         searchButton.setFont(headingFont);
         searchButton.setVisible(false);
-        JPanel searchButtonPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
-        searchButtonPanel.add(searchButton, "dock east");
-        inputPanel.add(searchButtonPanel, "dock south, gapbefore push, gapright 5, gaptop 5");
+        inputPanel.add(searchButton, "cell 0 1, gapbefore push, gapright 5, gaptop 5");
         add(inputPanel, "gapleft 45, gaptop 4");
     }
 
@@ -154,7 +152,7 @@ public class AdvancedSearchPanel extends JXPanel implements Disposable {
                         advancedPanels.put(category.getCategory(), component);
                         
                         ResizeUtils.forceWidth(component, 300);
-                        inputPanel.add(component);
+                        inputPanel.add(component, "cell 0 0, wrap");
                     }
                     
                     // Update visibility so invisible panels don't effect size
