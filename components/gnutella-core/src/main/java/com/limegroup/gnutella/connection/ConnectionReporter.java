@@ -4,14 +4,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.http.client.methods.HttpGet;
-import org.limewire.core.api.Application;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.util.Clock;
 
 import com.google.inject.Inject;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -21,7 +22,7 @@ import com.limegroup.gnutella.http.HttpExecutor;
 @EagerSingleton
 public class ConnectionReporter implements ConnectionLifecycleListener {
     
-    private final Application application;
+    private final ApplicationServices application;
     private final HttpExecutor httpExecutor;
     private final Clock clock;
 
@@ -36,7 +37,7 @@ public class ConnectionReporter implements ConnectionLifecycleListener {
     private long loadTime;
 
     @Inject
-    public ConnectionReporter(Application application,
+    public ConnectionReporter(ApplicationServices application,
                               HttpExecutor httpExecutor,
                               Clock clock) {
         this.application = application;
@@ -60,7 +61,7 @@ public class ConnectionReporter implements ConnectionLifecycleListener {
                 // TODO use CONNECTED event instead?
                 if(!connected.getAndSet(true)) {
                     connectionTime = clock.now() - startedConnecting.get();
-                    HttpGet request = new HttpGet(application.addClientInfoToUrl(REPORTING_URL) +
+                    HttpGet request = new HttpGet(LimeWireUtils.addLWInfoToUrl(REPORTING_URL, application.getMyGUID()) +
                             "&connect_time=" + connectionTime +  
                             "&load_time=" + loadTime);  
                     httpExecutor.execute(request);
