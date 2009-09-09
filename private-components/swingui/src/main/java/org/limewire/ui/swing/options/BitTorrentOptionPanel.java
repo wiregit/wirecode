@@ -161,6 +161,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
+        BittorrentSettings.TORRENT_SEEDING_LIMIT.setValue(seedMaxModel.getNumber().intValue());
+        
         BittorrentSettings.UPLOAD_TORRENTS_FOREVER.setValue(uploadForever.isSelected());
         if (!uploadForever.isSelected()) {
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatioModel.getNumber()
@@ -194,7 +196,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     @Override
     boolean hasChanged() {
-        return BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue() != uploadForever.isSelected()
+        return ((Integer)seedMax.getValue()).intValue() != BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue()
+                || BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue() != uploadForever.isSelected()
                 || ((Float) seedRatio.getValue()).floatValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                         .getValue()
                 || ((Double) Math.ceil(((Double) seedTime.getValue()).doubleValue() * 60 * 60 * 24))
@@ -215,6 +218,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
             myControl.setSelected(true);
         }
 
+        seedMax.setValue(BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue());
         seedRatio.setValue(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.get().doubleValue());
         seedTime.setValue(getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()));
         startPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
