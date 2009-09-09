@@ -52,10 +52,10 @@ public class ProNagController {
             nagShown = true;
            
             if(showNonModalNag(InstallSettings.getNagStyle())) {
-                proNag.loadContents(isFirstLaunch).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                proNag.loadContents(isFirstLaunch).addFutureListener(new EventListener<FutureEvent<Boolean>>() {
                     @Override
                     @SwingEDTEvent
-                    public void handleEvent(FutureEvent<Void> event) {
+                    public void handleEvent(FutureEvent<Boolean> event) {
                         switch (event.getType()) {
                         case SUCCESS:
                             nagContainer.addComponentListener(new PanelResizer(proNag));

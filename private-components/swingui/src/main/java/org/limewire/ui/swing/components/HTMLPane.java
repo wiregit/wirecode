@@ -43,7 +43,7 @@ public class HTMLPane extends JEditorPane {
     private HashMap<Object, Object> pageProperties;
     
     private volatile boolean pageLoaded;
-    private ListeningFuture<Void> currentLoad;
+    private ListeningFuture<Boolean> currentLoad;
     
     public HTMLPane() {
         setEditorKit(kit);
@@ -55,22 +55,24 @@ public class HTMLPane extends JEditorPane {
     }
     
     /** Loads the given URL, loading the backup page if it fails to load. */
-    public ListeningFuture<Void> setPageAsynchronous(final String url, final String backupPage) {        
+    public ListeningFuture<Boolean> setPageAsynchronous(final String url, final String backupPage) {        
         assert SwingUtilities.isEventDispatchThread();        
         if(currentLoad != null) {
             currentLoad.cancel(true);
         }        
-        currentLoad = QUEUE.submit(new Callable<Void>() {
+        currentLoad = QUEUE.submit(new Callable<Boolean>() {
             @Override
-            public Void call() {
+            public Boolean call() {
                 try {
                     setPageImpl(new URL(url));
+                    return true;
                 } catch(IOException iox) {
                     setBackup();
+                    return false;
                 } catch(RuntimeInterruptedException rie) {
                     setBackup();
+                    return false;
                 }
-                return null;
             }
             
             private void setBackup() {

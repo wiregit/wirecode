@@ -13,15 +13,18 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.html.HTML;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.statusbar.ProStatusPanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.settings.InstallSettings;
 
 import com.google.inject.Inject;
 
@@ -33,6 +36,8 @@ class ProNag extends JXPanel implements Resizable {
     
     private final java.awt.Panel parent;
     private final HTMLPane editorPane;
+    
+    private long offlineShownAt = -1;
     
     @Inject public ProNag(Application application, ProStatusPanel proStatusPanel, 
                           final GnutellaConnectionManager connectionManager) {
@@ -64,6 +69,11 @@ class ProNag extends JXPanel implements Resizable {
                     } else if(e.getURL() != null) {
                         String url = e.getURL().toExternalForm();
                         url += "&gs=" + connectionManager.getConnectionStrength().getStrengthId();
+                        // If the offline was shown, add the delay between shown & clicked in ms.
+                        if(offlineShownAt > 0) {
+                            long delay = System.currentTimeMillis() - offlineShownAt;
+                            url += "&offlineDelay=" + delay;
+                        }
                         NativeLaunchUtils.openURL(url);
                     }
                 }
@@ -95,8 +105,7 @@ class ProNag extends JXPanel implements Resizable {
         super.setVisible(flag);
         if(notViz && isVisible()) {
             resize();
-        } 
-        else {
+        } else {
             notifyVisibilityChange();
         }
     }
@@ -108,31 +117,46 @@ class ProNag extends JXPanel implements Resizable {
     private void notifyVisibilityChange() {
        if (isVisible()) {
             proStatusPanel.addCondition(InvisibilityCondition.PRO_ADD_SHOWN);
-        } 
-        else {
+        } else {
             proStatusPanel.removeCondition(InvisibilityCondition.PRO_ADD_SHOWN);    
         }
-    }
+    }    
     
-    
-    public ListeningFuture<Void> loadContents(boolean firstLaunch) {
+    public ListeningFuture<Boolean> loadContents(boolean firstLaunch) {
         String ref = "ref=";
         if(InstallSettings.isRandomNag()) {
             ref += "lwn6";    
         } else { // InstallSettings.NagStyles.NON_MODAL
             ref += "lwn7";
         }
-        return editorPane.setPageAsynchronous(application.addClientInfoToUrl("http://client-data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch + "&" +  ref), createDefaultPage(firstLaunch, ref));
+        String url = application.addClientInfoToUrl(
+                "http://client---data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch + "&" + ref);
+        String backupUrl = createDefaultPage(firstLaunch, ref);
+        
+        ListeningFuture<Boolean> future = editorPane.setPageAsynchronous(url, backupUrl);
+        
+        // add a listener to calculate when the offline was shown (if it was shown)
+        future.addFutureListener(new EventListener<FutureEvent<Boolean>>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FutureEvent<Boolean> event) {
+                // If we used the backup text, set the 'shown at' time.
+                if(event.getResult() == Boolean.FALSE) {
+                    offlineShownAt = System.currentTimeMillis();
+                }
+            };
+        });
+        
+        return future;        
     }
     
     private String createDefaultPage(boolean firstLaunch, String ref) {
-        
         URL closeImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/close.png");
         URL bgImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/bg.png");
-        URL getImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/button_get_limewire_pro.png");
-             
+        URL getImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/button_get_limewire_pro.png");             
         
-        String outgoing = application.addClientInfoToUrl("http://www.limewire.com/clientpro?offline=true&fromFirstRun=" + firstLaunch);
+        String outgoing = "http://www.limewire.com/download/pro/?" + ref + "&rnv=z&fromFirstRun=" + firstLaunch;
+        outgoing = application.addClientInfoToUrl(outgoing); // add common LW info
         outgoing = outgoing.replace("&", "&amp;"); // must HTML-encode, otherwise things get messed up
         return
            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"
@@ -152,7 +176,7 @@ class ProNag extends JXPanel implements Resizable {
          + "<table width=\"346\" height=\"51\" border=\"0\" cellspacing=\"0\" cellpadding=\"25\">"
          + "<tr>"
          + "<td align=\"left\">"
-         + "<a href=\"http://www.limewire.com/download/pro/?" + ref + "&amp;nstime=1251309416&amp;rnv=z\"><img src=\""+getImage.toExternalForm()+"\" alt=\"\" border=\"0\" /></a>"
+         + "<a href=\"" + outgoing + "\"><img src=\""+getImage.toExternalForm()+"\" alt=\"\" border=\"0\" /></a>"
          + "</td>"
          + "</tr>"
          + "</table>"
