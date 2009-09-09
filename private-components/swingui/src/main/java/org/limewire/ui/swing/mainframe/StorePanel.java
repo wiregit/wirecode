@@ -68,15 +68,6 @@ public class StorePanel extends JPanel {
                     browser.load("about:blank");
                 }
             }
-            
-            @Override
-            public void componentShown(ComponentEvent e) {
-                if(currentURL != null) {
-                    browser.load(currentURL);
-                } else {
-                    loadDefaultUrl();
-                }
-            }
         });     
         BrowserUtils.addTargetedUrlAction("_lwStore", new UriAction() {
             @Override
@@ -91,6 +82,19 @@ public class StorePanel extends JPanel {
                 return true;
             }
         }); 
+    }
+    
+    /**
+     * Attempts to load the last page visited, if it fails
+     * will load or a last page doesn't exist will load the 
+     * home default page.
+     */
+    public void loadCurrentUrl() {
+        if(currentURL != null) {
+            browser.load(currentURL);
+        } else {
+            loadDefaultUrl();
+        }
     }
     
     public void loadDefaultUrl() {
