@@ -62,12 +62,13 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActiveLimeWireCheck;
+import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeCoreGlue;
-import com.limegroup.gnutella.UPnPManager;
-import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
+import com.limegroup.gnutella.UPnPManager;
 import com.limegroup.gnutella.browser.ExternalControl;
+import com.limegroup.gnutella.connection.ConnectionReporter;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
 
@@ -92,8 +93,6 @@ public final class Initializer {
     /** The SplashWindow reference. */
     private final AtomicReference<SplashWindow> splashRef = new AtomicReference<SplashWindow>();
     
-    private static long uiLoadTime;
-    
     // Providers so we don't guarantee early creation, let it be as lazy as possible.
     @Inject private Provider<ExternalControl> externalControl;
     @Inject private Provider<FirewallService> firewallServices;
@@ -102,6 +101,7 @@ public final class Initializer {
     @Inject private Provider<NIODispatcher> nioDispatcher;
     @Inject private Provider<UPnPManager> upnpManager;
     @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
+    @Inject private Provider<ConnectionReporter> connectionReporter;
     
     Initializer() {
         // If Log4J is available then remove the NoOpLog
@@ -587,7 +587,7 @@ public final class Initializer {
                         ErrorService.error(throwable, "Startup Error");
                     }
                 }
-                uiLoadTime = System.currentTimeMillis();
+                connectionReporter.get().setLoadTime(System.currentTimeMillis() - Main.getStartTime());
             }
         });
     }  
@@ -696,10 +696,6 @@ public final class Initializer {
             }
         });
         return response.get() == JOptionPane.OK_OPTION;
-    }
-    
-    public static long getUILoadTime(){
-        return uiLoadTime;
     }
 }
 
