@@ -4,14 +4,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.http.client.methods.HttpGet;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.ui.swing.Initializer;
+import org.limewire.ui.swing.Main;
 import org.limewire.util.Clock;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -21,7 +23,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @EagerSingleton
 public class ConnectionReporter implements ConnectionLifecycleListener {
     
-    private final ApplicationServices application;
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
     private final HttpExecutor httpExecutor;
     private final Clock clock;
 
@@ -30,12 +32,16 @@ public class ConnectionReporter implements ConnectionLifecycleListener {
     
     public static final String REPORTING_URL = "http://client-data.limewire.com/conn";
     private ConnectionManager connectionManager;
+    @InspectablePrimitive("time to connect")
+    private long connectionTime;
+    @InspectablePrimitive("time to load")
+    private long loadTime;
 
     @Inject
-    public ConnectionReporter(ApplicationServices application,
+    public ConnectionReporter(HttpClientInstanceUtils httpClientInstanceUtils,
                               HttpExecutor httpExecutor,
                               Clock clock) {
-        this.application = application;
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
         this.httpExecutor = httpExecutor;
         this.clock = clock;
     }
@@ -54,10 +60,12 @@ public class ConnectionReporter implements ConnectionLifecycleListener {
                 break;
             case CONNECTION_INITIALIZED:  
                 // TODO use CONNECTED event instead?
-                //if stat gathering has been approved
                 if(!connected.getAndSet(true)) {
-                    HttpGet request = new HttpGet(LimeWireUtils.addLWInfoToUrl(REPORTING_URL, application.getMyGUID()) +
-                            "&connect_time=" + Long.toString(clock.now() - startedConnecting.get()));  
+                    loadTime = Initializer.getUILoadTime() - Main.getStartTime();
+                    connectionTime = clock.now() - startedConnecting.get();
+                    HttpGet request = new HttpGet(httpClientInstanceUtils.addClientInfoToUrl(REPORTING_URL) +
+                            "&connect_time=" + connectionTime +  
+                            "&load_time=" + loadTime);  
                     httpExecutor.execute(request);
                     connectionManager.removeEventListener(this);
                 }

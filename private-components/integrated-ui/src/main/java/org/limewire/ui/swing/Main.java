@@ -12,7 +12,10 @@ import java.util.Locale;
 /** The entry point into the program using the real core. */
 public class Main {
     
+    private static long startTime;
+    
     public static void main(String[] args) {
+        startTime = System.currentTimeMillis();
         try {
             if (isMacOSX()) {
                 // Register GURL to receive AppleEvents, such as magnet links.
@@ -103,5 +106,9 @@ public class Main {
     /** Determines if this is running on OS X. */
     private static boolean isMacOSX() {
         return System.getProperty("os.name", "").toLowerCase(Locale.US).startsWith("mac os x");
+    }
+    
+    public static long getStartTime() {
+        return startTime;
     }
 }

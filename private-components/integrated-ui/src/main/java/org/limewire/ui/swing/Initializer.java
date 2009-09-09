@@ -92,6 +92,8 @@ public final class Initializer {
     /** The SplashWindow reference. */
     private final AtomicReference<SplashWindow> splashRef = new AtomicReference<SplashWindow>();
     
+    private static long uiLoadTime;
+    
     // Providers so we don't guarantee early creation, let it be as lazy as possible.
     @Inject private Provider<ExternalControl> externalControl;
     @Inject private Provider<FirewallService> firewallServices;
@@ -585,6 +587,7 @@ public final class Initializer {
                         ErrorService.error(throwable, "Startup Error");
                     }
                 }
+                uiLoadTime = System.currentTimeMillis();
             }
         });
     }  
@@ -693,6 +696,10 @@ public final class Initializer {
             }
         });
         return response.get() == JOptionPane.OK_OPTION;
+    }
+    
+    public static long getUILoadTime(){
+        return uiLoadTime;
     }
 }
 
