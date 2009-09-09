@@ -130,7 +130,7 @@ class ProNag extends JXPanel implements Resizable {
             ref += "lwn7";
         }
         String url = application.addClientInfoToUrl(
-                "http://client---data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch + "&" + ref);
+                "http://client-data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch + "&" + ref);
         String backupUrl = createDefaultPage(firstLaunch, ref);
         
         ListeningFuture<Boolean> future = editorPane.setPageAsynchronous(url, backupUrl);
