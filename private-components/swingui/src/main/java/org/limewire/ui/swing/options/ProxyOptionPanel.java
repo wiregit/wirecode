@@ -81,8 +81,9 @@ public class ProxyOptionPanel extends OptionPanel {
         buttonGroup.add(httpRadioButton);
         
         proxyTextField = new JTextField(15);
-        portTextField = new NumericTextField(5, 1, 0xFFFF);
+        portTextField = new NumericTextField(5, 0, 0xFFFF);
         authenticationCheckBox = new JCheckBox();
+        authenticationCheckBox.setOpaque(false);
         authenticationCheckBox.addItemListener(new ProxyButtonListener());
         userNameTextField = new JTextField(15);
         passwordField = new JPasswordField(15);
