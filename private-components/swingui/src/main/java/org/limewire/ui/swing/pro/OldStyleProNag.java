@@ -22,6 +22,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.ImageViewPort;
+import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.statusbar.ProStatusPanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -46,7 +47,7 @@ public class OldStyleProNag extends JPanel {
     private final ProStatusPanel proStatusPanel;
     private final JButton yesButton;
     
-    private String defaultURL = "http://www.limewire.com/download/pro/?ref=lwn1";
+    private String defaultURL = "http://www.limewire.com/download/pro/?";
     
     @Inject
     public OldStyleProNag(Application application, 
@@ -137,7 +138,13 @@ public class OldStyleProNag extends JPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            NativeLaunchUtils.openURL(application.addClientInfoToUrl(defaultURL));
+            String ref = "ref=";
+            if(InstallSettings.isRandomNag()) {
+                ref += "lwn2";    
+            } else { // InstallSettings.NagStyles.MODAL
+                ref += "lwn3";
+            }
+            NativeLaunchUtils.openURL(application.addClientInfoToUrl(defaultURL + ref));
             close();
         }
     }
@@ -170,7 +177,13 @@ public class OldStyleProNag extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            NativeLaunchUtils.openURL(application.addClientInfoToUrl(defaultURL));
+            String ref = "ref=";
+            if(InstallSettings.isRandomNag()) {
+                ref += "lwn4";    
+            } else { // InstallSettings.NagStyles.MODAL
+                ref += "lwn5";
+            }
+            NativeLaunchUtils.openURL(application.addClientInfoToUrl(defaultURL + ref));
             close();
         }
     }

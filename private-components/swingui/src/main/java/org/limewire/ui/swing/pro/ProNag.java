@@ -21,6 +21,7 @@ import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.statusbar.ProStatusPanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.settings.InstallSettings;
 
 import com.google.inject.Inject;
 
@@ -115,10 +116,16 @@ class ProNag extends JXPanel implements Resizable {
     
     
     public ListeningFuture<Void> loadContents(boolean firstLaunch) {
-        return editorPane.setPageAsynchronous(application.addClientInfoToUrl("http://client-data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch), createDefaultPage(firstLaunch));
+        String ref = "ref=";
+        if(InstallSettings.isRandomNag()) {
+            ref += "lwn6";    
+        } else { // InstallSettings.NagStyles.NON_MODAL
+            ref += "lwn7";
+        }
+        return editorPane.setPageAsynchronous(application.addClientInfoToUrl("http://client-data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch + "&" +  ref), createDefaultPage(firstLaunch, ref));
     }
     
-    private String createDefaultPage(boolean firstLaunch) {
+    private String createDefaultPage(boolean firstLaunch, String ref) {
         
         URL closeImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/close.png");
         URL bgImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/bg.png");
@@ -145,7 +152,7 @@ class ProNag extends JXPanel implements Resizable {
          + "<table width=\"346\" height=\"51\" border=\"0\" cellspacing=\"0\" cellpadding=\"25\">"
          + "<tr>"
          + "<td align=\"left\">"
-         + "<a href=\"http://www.limewire.com/download/pro/?ref=lwn1&amp;nstime=1251309416&amp;rnv=z\"><img src=\""+getImage.toExternalForm()+"\" alt=\"\" border=\"0\" /></a>"
+         + "<a href=\"http://www.limewire.com/download/pro/?" + ref + "&amp;nstime=1251309416&amp;rnv=z\"><img src=\""+getImage.toExternalForm()+"\" alt=\"\" border=\"0\" /></a>"
          + "</td>"
          + "</tr>"
          + "</table>"

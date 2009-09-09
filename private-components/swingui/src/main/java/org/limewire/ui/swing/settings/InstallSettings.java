@@ -3,9 +3,11 @@ package org.limewire.ui.swing.settings;
 import org.limewire.core.settings.LimeWireSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.setting.StringSetSetting;
 import org.limewire.setting.StringSetting;
+import org.limewire.util.StringUtils;
 
 /**
  * Handles installation preferences.
@@ -73,8 +75,44 @@ public final class InstallSettings extends LimeWireSettings {
         FACTORY.createBooleanSetting("UPGRADED_TO_5", false);
     
     /** Whether to use the old style pro dialog or the new one. */
-    public static final BooleanSetting USE_OLD_PRO_DIALOG = 
-        FACTORY.createBooleanSetting("USE_OLD_PRO_DIALOG", true);
+    public static final ProbabilisticBooleanSetting RANDOM_USE_MODAL = 
+        FACTORY.createRemoteProbabilisticBooleanSetting("RANDOM_USE_MODAL", .5f, "InstallSettings.UseOldProNag", 0f, 1f);
+
+    public enum NagStyles {
+        NON_MODAL, MODAL, RANDOM}
+    
+    private static final StringSetting NAG_STYLE = 
+        FACTORY.createStringSetting("NAG_STYLE", "");
+    
+    public static NagStyles getNagStyle() {
+        if(StringUtils.isEmpty(NAG_STYLE.get())) {
+            NAG_STYLE.set(pickNagStyle().toString());    
+        } 
+        try {
+            return NagStyles.valueOf(NAG_STYLE.get());
+        } catch (IllegalArgumentException e) {
+            return NagStyles.RANDOM;
+        }
+    }
+    
+    private static InstallSettings.NagStyles pickNagStyle() {
+        double style = Math.random();
+        if(style < (1d/3)) {
+            return InstallSettings.NagStyles.MODAL;
+        } else if(style < (2d/3)) {
+            return InstallSettings.NagStyles.NON_MODAL;
+        } else {
+            return InstallSettings.NagStyles.RANDOM;
+        }
+    }
+    
+    public static boolean isRandomNag() {
+        if(RANDOM_USE_MODAL.get() == 1f || RANDOM_USE_MODAL.get() == 0f) {
+            return false;    
+        } else {
+            return NagStyles.RANDOM == getNagStyle();
+        }
+    }
     
     /**
      * Stores the value of the last known version of limewire that has been run. Will be null on a clean install until the program is run and a value is set for it.

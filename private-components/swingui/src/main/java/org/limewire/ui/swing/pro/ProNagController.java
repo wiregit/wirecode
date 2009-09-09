@@ -50,8 +50,8 @@ public class ProNagController {
         if(allowNagFromStartup && !nagShown) {
             assert SwingUtilities.isEventDispatchThread();
             nagShown = true;
-            
-            if(!InstallSettings.USE_OLD_PRO_DIALOG.getValue()) {
+           
+            if(showNonModalNag(InstallSettings.getNagStyle())) {
                 proNag.loadContents(isFirstLaunch).addFutureListener(new EventListener<FutureEvent<Void>>() {
                     @Override
                     @SwingEDTEvent
@@ -73,6 +73,24 @@ public class ProNagController {
                 dialog.setModal(true);
                 dialog.setVisible(true);
             }
+        }
+    }
+
+    private boolean showNonModalNag(InstallSettings.NagStyles nagStyle) {
+        if(InstallSettings.RANDOM_USE_MODAL.get() == 1f) {
+            return false;    
+        } else if(InstallSettings.RANDOM_USE_MODAL.get() == 0f) {
+            return true;
+        }
+        
+        switch (nagStyle) {
+            case MODAL:
+                return false;
+            case NON_MODAL:
+                return true;
+            default:
+            case RANDOM:
+                return !(InstallSettings.RANDOM_USE_MODAL.getBoolean());
         }
     }
 
