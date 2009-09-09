@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JPanel;
 
 import org.limewire.core.api.Application;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.BrowserUtils;
 import org.limewire.ui.swing.browser.UriAction;
@@ -22,6 +23,7 @@ import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
 
+@EagerSingleton
 public class StorePanel extends JPanel {
     private final Browser browser;
 
