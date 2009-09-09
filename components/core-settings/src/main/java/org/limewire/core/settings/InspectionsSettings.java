@@ -14,7 +14,7 @@ public class InspectionsSettings extends LimeProps {
      */
     public static final BooleanSetting PUSH_INSPECTIONS_ENABLED =
         FACTORY.createRemoteBooleanSetting("PUSH_INSPECTIONS_ENABLED", 
-                true, "Inspection.enabled");
+                false, "Inspection.enabled");
     
     
     /**
