@@ -6,6 +6,7 @@ import java.util.Map;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.StringUtils;
 
 public class DefaultSearchInfo implements SearchInfo {
 
@@ -80,4 +81,8 @@ public class DefaultSearchInfo implements SearchInfo {
         return searchType;
     }
 
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
+    }
 }
