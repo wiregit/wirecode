@@ -219,7 +219,9 @@ public class AppFrame extends SingleFrameApplication {
 
         new ShellAssociationManager().validateFileAssociations(getMainFrame());
 
-        ui.loadProNag();
+        if(!isStartup) {
+            ui.loadProNag();
+        }
     }
    
     @Action
@@ -257,6 +259,7 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setVisible(true);
         getMainFrame().setState(Frame.NORMAL);
         getMainFrame().toFront();
+        ui.loadProNag();
     }
 
     /**

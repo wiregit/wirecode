@@ -26,8 +26,6 @@ public class ProNagController {
     private final ProNag proNag;
     private final Provider<OldStyleProNag> oldProNag;
     
-    private JLayeredPane nagContainer;
-    private boolean allowNagFromStartup;
     private boolean nagShown;
 
     @Inject ProNagController(Application application, ProNag proNag, Provider<OldStyleProNag> oldProNag) {
@@ -37,17 +35,8 @@ public class ProNagController {
         this.oldProNag = oldProNag;
     }
 
-    public void allowProNag(JLayeredPane layeredPane) {
-        if (!application.isProVersion()) {
-            nagContainer = layeredPane;
-            allowNagFromStartup = true;
-        }
-        
-        showNagIfOk();
-    }
-    
-    private void showNagIfOk() {
-        if(allowNagFromStartup && !nagShown) {
+    public void allowProNag(final JLayeredPane nagContainer)  {
+        if(!application.isProVersion() && !nagShown) {
             assert SwingUtilities.isEventDispatchThread();
             nagShown = true;
            
