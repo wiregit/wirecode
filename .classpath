@@ -158,7 +158,7 @@
 	<classpathentry kind="lib" path="lib/jars/fb-java-api-schema-2.1.1.jar" sourcepath="lib/sources/facebook-java-api-2.1.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/glazedlists-snapshot20090628_java15.jar" sourcepath="lib/sources/glazedlists-snapshot20090628-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-1.0.jar" sourcepath="lib/sources/swingx-1.0-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/guice-2.0-snapshot20090814.jar"/>
+	<classpathentry kind="lib" path="lib/jars/guice-2.0-snapshot20090814.jar" sourcepath="lib/sources/guice-2.0-snapshot20090814-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-assistedinject-snapshot20090814.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/inspTool-0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
