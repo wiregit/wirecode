@@ -252,7 +252,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
     private void updateAlbumTracks(VisualStoreResult vsr) {
         albumTrackPanel.removeAll();
         
-        if (vsr.getStoreResult().getAlbumResults().size() > 1) {
+        if (vsr.getStoreResult().isAlbum()) {
             if (vsr.isShowTracks()) {
                 albumTrackPanel.setVisible(true);
                 List<StoreTrackResult> trackList = vsr.getStoreResult().getAlbumResults();
