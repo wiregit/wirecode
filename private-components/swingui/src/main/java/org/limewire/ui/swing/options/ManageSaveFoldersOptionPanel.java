@@ -139,9 +139,9 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
         add(otherTextField, "growx");
         add(otherBrowseButton, "gapleft 30, wrap");
 
-        add(defaultButton, "gaptop 10, push");
-        add(okButton, "split 2, alignx right, gaptop 10");
-        add(cancelButton, "alignx right, gaptop 10");
+        add(defaultButton, "gaptop 10, span, split 3, push");
+        add(okButton, "tag ok, alignx right, gaptop 10");
+        add(cancelButton, "tag cancel, alignx right, gaptop 10");
 
     }
 
