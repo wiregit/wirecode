@@ -296,6 +296,7 @@ class CoreDownloadItem implements DownloadItem {
             return DownloadState.STALLED;
 
         case ABORTED:
+        case DANGEROUS:
             return DownloadState.CANCELLED;
 
         case DISK_PROBLEM:

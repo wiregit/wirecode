@@ -152,8 +152,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             torrent.removeListener(BTDownloaderImpl.this);
         } else if (TorrentEvent.STOPPED == event) {
             torrent.removeListener(this);
-            lastState.set(DownloadState.ABORTED);
-            listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
+            // Did the dangerous file checker stop the torrent?
+            if(lastState.get() != DownloadState.DANGEROUS) {
+                lastState.set(DownloadState.ABORTED);
+                listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
+            }
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
         } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
             // nothing to do now.
@@ -185,17 +188,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * warning the user about them.
      */
     private boolean checkForDangerousFiles() {
-            // If the torrent contains any dangerous files, delete everything
-            // and inform the user that the download has been cancelled.
-            for(File f : getIncompleteFiles()) {
-                if(dangerousFileChecker.get().isDangerous(f)) {
-                    torrent.stop();
-                    listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
-                    downloadCallback.get().warnUser(getSaveFile().getName(),
-                            DANGEROUS_TORRENT_WARNING);
-                    return true;
-                }
+        // If the torrent contains any dangerous files, delete everything
+        // and inform the user that the download has been cancelled.
+        for(File f : getIncompleteFiles()) {
+            if(dangerousFileChecker.get().isDangerous(f)) {
+                lastState.set(DownloadState.DANGEROUS);
+                listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
+                // This will cause TorrentEvent.STOPPED
+                torrent.stop();
+                downloadCallback.get().warnUser(getSaveFile().getName(),
+                        DANGEROUS_TORRENT_WARNING);
+                return true;
             }
+        }
         return false;
     }
 
@@ -374,6 +379,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadState getState() {
+        if(lastState.get() == DownloadState.DANGEROUS)
+            return DownloadState.DANGEROUS;
+        
         TorrentStatus status = torrent.getStatus();
         if (!torrent.isStarted() || status == null) {
             return DownloadState.QUEUED;
@@ -515,6 +523,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         switch (getState()) {
         case ABORTED:
         case COMPLETE:
+        case DANGEROUS:
             return true;
         }
         return false;
