@@ -260,8 +260,12 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         private Component getTableCellComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             if(value instanceof TorrentFileEntryWrapper) {
-                currentWrapper = (TorrentFileEntryWrapper) value;
-                if(((TorrentFileEntryWrapper)value).getProgress() == 1.0f) {
+                currentWrapper = (TorrentFileEntryWrapper) value; 
+                
+                if(torrent.isFinished()) {
+                    setEnabled(false);
+                    setSelected(currentWrapper.getProgress() == 1.0f && currentWrapper.getPriority() > DONT_DOWNLOAD);
+                } else if(currentWrapper.getProgress() == 1.0f) {
                     setSelected(true);
                     setEnabled(false);
                 } else {
@@ -326,8 +330,12 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
             
             if(value instanceof TorrentFileEntryWrapper) {
                 float percent = ((TorrentFileEntryWrapper)value).getProgress();
-                if( percent == 1.0f) {
-                    setText(I18n.tr("Done"));
+                if(torrent.isFinished()) {
+                    if(percent == 1.0f && ((TorrentFileEntryWrapper)value).getPriority() > DONT_DOWNLOAD) {
+                        setText(I18n.tr("Done"));
+                    } else {
+                        setText("");
+                    }
                 } else if(((TorrentFileEntryWrapper)value).getPriority() == DONT_DOWNLOAD){
                     setText("");
                 } else {
