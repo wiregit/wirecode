@@ -60,12 +60,13 @@ public class ConnectionReporterTest extends TestCase {
             }
         });
         ConnectionReporter connectionReporter = injector.getInstance(ConnectionReporter.class);
+        connectionReporter.setLoadTime(1500);
         assertNull(atomicReference.get());
         connectionReporter.handleConnectionLifecycleEvent(new ConnectionLifecycleEvent(new Object(), ConnectionLifecycleEventType.CONNECTING));
         assertNull(atomicReference.get());
         connectionReporter.handleConnectionLifecycleEvent(new ConnectionLifecycleEvent(new Object(), ConnectionLifecycleEventType.CONNECTION_INITIALIZED));
         assertEquals(LimeWireUtils.addLWInfoToUrl(ConnectionReporter.REPORTING_URL, guid.bytes()) +
-                            "&connect_time=4000", atomicReference.get().getURI().toASCIIString());
+                            "&connect_time=4000&load_time=1500", atomicReference.get().getURI().toASCIIString());
         // mockery expectation exception if additional http requests
         // are made upon subsequent ConnectionLifecycleEvents
         for(ConnectionLifecycleEventType eventType : ConnectionLifecycleEventType.values()) {
