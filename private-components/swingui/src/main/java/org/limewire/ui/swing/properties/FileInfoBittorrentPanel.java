@@ -115,7 +115,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
     @Override
     public void save() {
-        if(hasChanged()) {
+        if(hasChanged() && !torrent.isFinished()) {
             for(TorrentFileEntryWrapper wrapper : eventList) {
                 torrent.setTorrenFileEntryPriority(wrapper.getTorrentFileEntry(), wrapper.getPriority());
             }
