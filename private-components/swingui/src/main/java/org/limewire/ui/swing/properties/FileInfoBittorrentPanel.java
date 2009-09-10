@@ -27,8 +27,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
@@ -40,20 +43,27 @@ import org.limewire.ui.swing.util.I18n;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
-public class FileInfoBittorrentPanel implements FileInfoPanel {
+public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<TorrentEvent> {
 
     private static final int DONT_DOWNLOAD = 0;
     private static final int LOWEST_PRIORITY = 1;
     private static final int NORMAL_PRIORITY = 2;
     private static final int HIGHEST_PRIORITY = 3;
-    
+
     private final Torrent torrent;
     
     private final JPanel component;
     private BitTorrentTable table;
+    
+    /**
+     * Items in the eventList are expected to be in the order that they are returned from the Torrent instance.
+     * This is so we can pull items out by the matching index in the TorrentFileEntry.
+     */
     private EventList<TorrentFileEntryWrapper> eventList;
+    
     
     public FileInfoBittorrentPanel(Torrent torrent) {
         this.torrent = torrent;
@@ -76,7 +86,9 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
     private void init() {
         component.setOpaque(false);
         
-        eventList = GlazedLists.threadSafeList(new BasicEventList<TorrentFileEntryWrapper>());
+        ObservableElementList.Connector<TorrentFileEntryWrapper> torrentFileEntryConnector = GlazedLists.beanConnector(TorrentFileEntryWrapper.class);
+        eventList = GlazedListsFactory.observableElementList(new BasicEventList<TorrentFileEntryWrapper>(), torrentFileEntryConnector);
+        
         List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
         for(TorrentFileEntry entry : fileEntries) {
             eventList.add(new TorrentFileEntryWrapper(entry));
@@ -85,13 +97,15 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         table = new BitTorrentTable(new DefaultEventTableModel<TorrentFileEntryWrapper>(eventList, new BitTorrentTableFormat()));
         
         component.add(new JScrollPane(table), "grow");
+        
+        torrent.addListener(this);
     }
 
     @Override
     public boolean hasChanged() {
         boolean hasChanged = false;
         for(TorrentFileEntryWrapper wrapper : eventList) {
-            if(wrapper.getPriority() != wrapper.getTorrentFileEntry().getPriority()) {
+            if(wrapper.hasChanged()) {
                 hasChanged = true;
                 break;
             }
@@ -110,46 +124,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
 
     @Override
     public void unregisterListeners() {
-        //no listeners registered
-    }
-    
-    /**
-     * We need this because we don't want to update the real entries
-     * if the user hits the cancel button
-     */
-    private class TorrentFileEntryWrapper {
-        
-        private final TorrentFileEntry entry;
-        private int priority;
-        
-        public TorrentFileEntryWrapper(TorrentFileEntry entry) {
-            this.entry = entry;
-            this.priority = entry.getPriority();
-        }
-        
-        public String getPath() {
-            return entry.getPath();
-        }
-        
-        public long getSize() {
-            return entry.getSize();
-        }
-        
-        public float getProgress() {
-            return entry.getProgress();
-        }
-        
-        public int getPriority() {
-            return priority;
-        }
-        
-        public void setPriority(int priority) {
-            this.priority = priority;
-        }
-        
-        public TorrentFileEntry getTorrentFileEntry() {
-            return entry;
-        }
+        torrent.removeListener(this);
     }
     
     private class BitTorrentTable extends MouseableTable {
@@ -464,6 +439,17 @@ public class FileInfoBittorrentPanel implements FileInfoPanel {
         public boolean stopCellEditing() {
             cancelCellEditing();
             return true;
+        }
+    }
+
+    @Override
+    public void handleEvent(TorrentEvent event) {
+        if(event == TorrentEvent.STATUS_CHANGED || event== TorrentEvent.COMPLETED) {
+            List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
+            for(TorrentFileEntry newEntry : fileEntries) {
+                TorrentFileEntryWrapper wrapper = eventList.get(newEntry.getIndex());
+                wrapper.setTorrentFileEntry(newEntry);
+            }
         }
     }
 }

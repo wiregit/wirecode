@@ -59,6 +59,7 @@ public class TorrentSelectorPanel {
     }
     
     private void close() {
+        bittorrentPanel.unregisterListeners();
         Window window = SwingUtilities.getWindowAncestor(component);
         window.setVisible(false);
     }

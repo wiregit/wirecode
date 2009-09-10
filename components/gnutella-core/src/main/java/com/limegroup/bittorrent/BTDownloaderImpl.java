@@ -214,15 +214,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             }
         }
 
+        // TODO should maybe not use the same TorrentFileEntry for items in
+        // the TorrentInfo object, right now making a copy of the last known
+        // contents, to display the correct value in the ui, in general
+        // these fields are not kept up to date however.
+        TorrentInfo torrentInfo = new TorrentInfo(fileEntries);
+        torrent.setTorrentInfo(torrentInfo);
+        
         if (hasAnyPriorityZero) {
-
-            // TODO should maybe not use the same TorrentFileEntry for items in
-            // the TorrentInfo object, right now making a copy of the last known
-            // contents, to display the correct value in the ui, in general
-            // these fields are not kept up to date however.
-            TorrentInfo torrentInfo = new TorrentInfo(fileEntries);
-            torrent.setTorrentInfo(torrentInfo);
-
             for (TorrentFileEntry fileEntry : fileEntries) {
                 if (fileEntry.getPriority() == 0) {
                     File torrentDataFile = torrent.getTorrentDataFile(fileEntry);
@@ -315,13 +314,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isLaunchable() {
-        
-        TorrentInfo torrentInfo = torrent.getTorrentInfo();
-        
-        return torrentInfo != null && torrentInfo.getTorrentFileEntries().size() == 1;
-        // TODO old logic would check last verified offest, but logic seems
-        // wrong, wince the pieces download randomly, there is no guarentee that
-        // the begginning of the file is ok to preview.
+        return getDownloadFragment() != null;
     }
 
     @Override
