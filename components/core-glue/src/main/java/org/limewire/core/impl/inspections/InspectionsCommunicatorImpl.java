@@ -140,7 +140,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
      */
     private byte[] executeRequest(HttpUriRequest request) throws IOException {
         // if inspections were disabled, stop everything
-        if (!InspectionsSettings.PUSH_INSPECTIONS_ENABLED.getValue()) {
+        if (!InspectionsSettings.PUSH_INSPECTIONS_ON.getBoolean()) {
             stop();
             return new byte[0];
         }
@@ -166,7 +166,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
      */
     @Override
     public void start() {
-        if (InspectionsSettings.PUSH_INSPECTIONS_ENABLED.get()) {
+        if (InspectionsSettings.PUSH_INSPECTIONS_ON.getBoolean()) {
             started.set(true);
             scheduler.execute(new Runnable(){
                 @Override

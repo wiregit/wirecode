@@ -1,7 +1,7 @@
 package org.limewire.core.settings;
 
-import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.StringSetting;
 
 /**
@@ -12,9 +12,9 @@ public class InspectionsSettings extends LimeProps {
     /**
      * Setting for whether or not push inspections are enabled
      */
-    public static final BooleanSetting PUSH_INSPECTIONS_ENABLED =
-        FACTORY.createRemoteBooleanSetting("PUSH_INSPECTIONS_ENABLED", 
-                false, "Inspection.enabled");
+    public static final ProbabilisticBooleanSetting PUSH_INSPECTIONS_ON =
+        FACTORY.createRemoteProbabilisticBooleanSetting("PUSH_INSPECTIONS_ON", 
+                0f, "Inspections.on", 0f, 1f);
     
     
     /**
