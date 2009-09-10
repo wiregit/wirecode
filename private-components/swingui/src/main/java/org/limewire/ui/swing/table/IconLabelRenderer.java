@@ -4,11 +4,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
@@ -27,7 +24,7 @@ import com.google.inject.assistedinject.Assisted;
  * Renders a table cell with a string and the system icon representing that
  * file type.
  */
-public class IconLabelRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
+public class IconLabelRenderer extends DefaultLimeTableCellRenderer {
 
     private final Provider<IconManager> iconManager;
     private final CategoryIconManager categoryIconManager;
@@ -49,7 +46,6 @@ public class IconLabelRenderer extends DefaultTableCellRenderer implements Table
         this.categoryIconManager = categoryIconManager;
         this.showAudioArtist = showAudioArtist;
         
-        setBorder(BorderFactory.createEmptyBorder(0,2,0,2));
         setIconTextGap(5);
         setFont(font);
     }
@@ -57,6 +53,8 @@ public class IconLabelRenderer extends DefaultTableCellRenderer implements Table
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
+        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        
         Color background;
         Color foreground;
         Icon icon;
