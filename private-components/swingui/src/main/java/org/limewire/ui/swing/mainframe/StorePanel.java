@@ -4,7 +4,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JPanel;
 
@@ -28,23 +27,6 @@ public class StorePanel extends JPanel {
     private final Browser browser;
 
     private final Application application;
-
-    /**
-     * Used to ignore the first component hidden event coming through to the
-     * ComponentListener. The load and hidden events are coming out of order because
-     * of the usage of card layout, and loading StorePanel lazily. When adding a component
-     * to CardLayout, card layout calls setVisible false on it. The main issue is that we have
-     * started loading components lazily as they are selected. So we can't force that componsnts
-     * are added to the card layout before we use them.
-     */
-    private final AtomicBoolean firstHiddenIgnored = new AtomicBoolean(false);
-
-    /**
-     * Saves the current state of the store page. We load a blank page to
-     * stop any playing media when navigating away, this saves that state
-     * and reloads it when the store is brought back up.
-     */
-    private String currentURL;
     
     @Inject
     public StorePanel(Application application, final Navigator navigator) {
@@ -59,13 +41,13 @@ public class StorePanel extends JPanel {
         gbc.weighty = 1;
         add(browser, gbc);
         
-        // Hide the page when the browser goes away.
+        // Stop anything that may be playing in the store when the 
+        // browser is hidden
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentHidden(ComponentEvent e) {
-                if (firstHiddenIgnored.getAndSet(true) && MozillaInitialization.isInitialized()) {
-                    currentURL = browser.getUrl();
-                    browser.load("about:blank");
+                if (MozillaInitialization.isInitialized()) {
+                    stopLWSPlayer();
                 }
             }
         });     
@@ -85,14 +67,20 @@ public class StorePanel extends JPanel {
     }
     
     /**
-     * Attempts to load the last page visited, if it fails
-     * will load or a last page doesn't exist will load the 
-     * home default page.
+     * Javascript calls into the store to stop any player that may be playing.
+     */
+    private void stopLWSPlayer() {
+        MozillaAutomation.executeJavascript(browser, "omalley.stop();"); 
+        MozillaAutomation.executeJavascript(browser, "SimplePlayer.player.stop();");
+        MozillaAutomation.executeJavascript(browser, "productPreviewPlayer.stop();");
+    }
+    
+    /**
+     * If a url is currently loaded, does nothing. If the first time loading this
+     * browser, will load the default URL.
      */
     public void loadCurrentUrl() {
-        if(currentURL != null) {
-            browser.load(currentURL);
-        } else {
+        if(browser.getUrl() == null || browser.getUrl().length() == 0) {
             loadDefaultUrl();
         }
     }
