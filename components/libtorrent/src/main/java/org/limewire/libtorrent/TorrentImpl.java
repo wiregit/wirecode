@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
@@ -67,7 +69,9 @@ public class TorrentImpl implements Torrent {
     // used to decide if the torrent was just newly completed or not.
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
-    private Boolean isPrivate = null;
+    private final AtomicBoolean isPrivate = new AtomicBoolean(true);
+
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Inject
     public TorrentImpl(TorrentManager torrentManager,
@@ -87,65 +91,69 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public synchronized void init(TorrentParams params) throws IOException {
+    public void init(TorrentParams params) throws IOException {
+        lock.writeLock().lock();
+        try {
+            this.sha1 = params.getSha1();
+            this.trackerURL = params.getTrackerURL();
+            this.name = params.getName();
 
-        this.sha1 = params.getSha1();
-        this.trackerURL = params.getTrackerURL();
-        this.name = params.getName();
-        this.isPrivate = params.getPrivate();
+            Boolean isPrivate = params.getPrivate();
 
-        File torrentFile = params.getTorrentFile();
-        File fastResumeFile = params.getFastResumeFile();
-        File torrentDataFile = params.getTorrentDataFile();
+            File torrentFile = params.getTorrentFile();
+            File fastResumeFile = params.getFastResumeFile();
+            File torrentDataFile = params.getTorrentDataFile();
 
-        if (torrentFile != null && torrentFile.exists()) {
-            FileInputStream fis = null;
-            FileChannel fileChannel = null;
-            try {
-                fis = new FileInputStream(torrentFile);
-                fileChannel = fis.getChannel();
-                Map metaInfo = (Map) Token.parse(fileChannel);
-                BTData btData = new BTDataImpl(metaInfo);
-                if (this.name == null) {
-                    this.name = btData.getName();
+            if (torrentFile != null && torrentFile.exists()) {
+                FileInputStream fis = null;
+                FileChannel fileChannel = null;
+                try {
+                    fis = new FileInputStream(torrentFile);
+                    fileChannel = fis.getChannel();
+                    Map metaInfo = (Map) Token.parse(fileChannel);
+                    BTData btData = new BTDataImpl(metaInfo);
+                    if (this.name == null) {
+                        this.name = btData.getName();
+                    }
+
+                    if (this.trackerURL == null) {
+                        this.trackerURL = btData.getAnnounce();
+                    }
+
+                    if (this.sha1 == null) {
+                        this.sha1 = StringUtils.toHexString(btData.getInfoHash());
+                    }
+
+                    if (isPrivate == null) {
+                        isPrivate = btData.isPrivate();
+                    }
+
+                } finally {
+                    IOUtils.close(fileChannel);
+                    IOUtils.close(fis);
                 }
-
-                if (this.trackerURL == null) {
-                    this.trackerURL = btData.getAnnounce();
-                }
-
-                if (this.sha1 == null) {
-                    this.sha1 = StringUtils.toHexString(btData.getInfoHash());
-                }
-
-                if (this.isPrivate == null) {
-                    this.isPrivate = btData.isPrivate();
-                }
-
-            } finally {
-                IOUtils.close(fileChannel);
-                IOUtils.close(fis);
             }
+
+            if (isPrivate != null) {
+                this.isPrivate.set(isPrivate);
+            }
+
+            File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
+                    .getTorrentDownloadFolder();
+
+            if (this.name == null || torrentDownloadFolder == null || this.sha1 == null) {
+                throw new IOException("There was an error initializing the torrent.");
+            }
+
+            this.fastResumeFile.set(fastResumeFile == null ? new File(torrentDownloadFolder,
+                    this.name + ".fastresume") : fastResumeFile);
+            this.torrentDataFile.set(torrentDataFile == null ? new File(torrentDownloadFolder,
+                    this.name) : torrentDataFile);
+            this.torrentFile.set(torrentFile == null ? new File(torrentDownloadFolder, this.name
+                    + ".torrent") : torrentFile);
+        } finally {
+            lock.writeLock().unlock();
         }
-
-        if (this.isPrivate == null) {
-            // private by default if unknown
-            this.isPrivate = Boolean.TRUE;
-        }
-
-        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
-                .getTorrentDownloadFolder();
-
-        if (this.name == null || torrentDownloadFolder == null || this.sha1 == null) {
-            throw new IOException("There was an error initializing the torrent.");
-        }
-
-        this.fastResumeFile.set(fastResumeFile == null ? new File(torrentDownloadFolder, this.name
-                + ".fastresume") : fastResumeFile);
-        this.torrentDataFile.set(torrentDataFile == null ? new File(torrentDownloadFolder,
-                this.name) : torrentDataFile);
-        this.torrentFile.set(torrentFile == null ? new File(torrentDownloadFolder, this.name
-                + ".torrent") : torrentFile);
     }
 
     @Override
@@ -172,29 +180,33 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public synchronized void moveTorrent(File directory) {
-        // TODO potentially rename the method, or at least put in another
-        // parameter to use as the directory to move the torrent file and fast
-        // resume files to.
-        assert isFinished();
-        torrentManager.moveTorrent(this, directory);
-        torrentDataFile.set(new File(directory, torrentDataFile.get().getName()));
+    public void moveTorrent(File directory) {
+        lock.writeLock().lock();
+        try {
+            // TODO potentially rename the method, or at least put in another
+            // parameter to use as the directory to move the torrent file and
+            // fast resume files to.
+            assert isFinished();
+            torrentManager.moveTorrent(this, directory);
+            torrentDataFile.set(new File(directory, torrentDataFile.get().getName()));
 
-        // TODO would be nice to move the following logic to something outside
-        // of
-        // the torrent code, since it is not really the torrent codes
-        // responsibility.
-        File oldFastResumeFile = fastResumeFile.get();
-        File oldTorrentFile = torrentFile.get();
-        fastResumeFile.set(new File(torrentManager.getTorrentManagerSettings()
-                .getTorrentUploadsFolder(), oldFastResumeFile.getName()));
-        torrentFile.set(new File(torrentManager.getTorrentManagerSettings()
-                .getTorrentUploadsFolder(), oldTorrentFile.getName()));
+            // TODO would be nice to move the following logic to something
+            // outside of the torrent code, since it is not really the torrent
+            // codes responsibility.
+            File oldFastResumeFile = fastResumeFile.get();
+            File oldTorrentFile = torrentFile.get();
+            fastResumeFile.set(new File(torrentManager.getTorrentManagerSettings()
+                    .getTorrentUploadsFolder(), oldFastResumeFile.getName()));
+            torrentFile.set(new File(torrentManager.getTorrentManagerSettings()
+                    .getTorrentUploadsFolder(), oldTorrentFile.getName()));
 
-        FileUtils.copy(oldTorrentFile, torrentFile.get());
-        FileUtils.copy(oldFastResumeFile, fastResumeFile.get());
-        FileUtils.forceDelete(oldTorrentFile);
-        FileUtils.forceDelete(oldFastResumeFile);
+            FileUtils.copy(oldTorrentFile, torrentFile.get());
+            FileUtils.copy(oldFastResumeFile, fastResumeFile.get());
+            FileUtils.forceDelete(oldTorrentFile);
+            FileUtils.forceDelete(oldFastResumeFile);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     @Override
@@ -257,10 +269,15 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public void stop() {
-        if (started.get() && !cancelled.getAndSet(true)) {
-            torrentManager.removeTorrent(this);
+        lock.writeLock().lock();
+        try {
+            if (started.get() && !cancelled.getAndSet(true)) {
+                torrentManager.removeTorrent(this);
+            }
+            listeners.broadcast(TorrentEvent.STOPPED);
+        } finally {
+            lock.writeLock().unlock();
         }
-        listeners.broadcast(TorrentEvent.STOPPED);
     }
 
     @Override
@@ -312,7 +329,8 @@ public class TorrentImpl implements Torrent {
     @Override
     public void updateStatus(TorrentStatus torrentStatus) {
         if (!cancelled.get()) {
-            synchronized (TorrentImpl.this) {
+            lock.writeLock().lock();
+            try {
                 TorrentImpl.this.status.set(torrentStatus);
                 boolean newlyfinished = !complete.get() && torrentStatus.isFinished();
                 complete.set(torrentStatus.isFinished());
@@ -322,16 +340,21 @@ public class TorrentImpl implements Torrent {
                 } else {
                     listeners.broadcast(TorrentEvent.STATUS_CHANGED);
                 }
+            } finally {
+                lock.writeLock().unlock();
             }
         }
     }
 
     @Override
     public void alert(TorrentAlert alert) {
-        synchronized (TorrentImpl.this) {
+        lock.writeLock().lock();
+        try {
             if (alert.getCategory() == TorrentAlert.SAVE_RESUME_DATA_ALERT) {
                 listeners.broadcast(TorrentEvent.FAST_RESUME_FILE_SAVED);
             }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
@@ -341,24 +364,32 @@ public class TorrentImpl implements Torrent {
             return false;
         }
 
-        File torrent = torrentFile.get();
-        File torrentParent = torrent.getParentFile();
-        File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
-                .getTorrentDownloadFolder();
-        File torrentUploadFolder = torrentManager.getTorrentManagerSettings()
-                .getTorrentUploadsFolder();
-        if (!torrentParent.equals(torrentDownloadFolder)
-                && !torrentParent.equals(torrentUploadFolder)) {
-            // if the torrent file is not located in the incomplete or upload
-            // directories it should be copied to the directory the torrent is
-            // being downloaded to. This is to prevent the user from deleting
-            // the torrent which we need to initiate a download properly.
-            torrentDownloadFolder.mkdirs();
-            File newTorrentFile = new File(torrentDownloadFolder, getName() + ".torrent");
-            FileUtils.copy(torrentFile.get(), newTorrentFile);
-            torrentFile.set(newTorrentFile);
+        lock.writeLock().lock();
+        try {
+            File torrent = torrentFile.get();
+            File torrentParent = torrent.getParentFile();
+            File torrentDownloadFolder = torrentManager.getTorrentManagerSettings()
+                    .getTorrentDownloadFolder();
+            File torrentUploadFolder = torrentManager.getTorrentManagerSettings()
+                    .getTorrentUploadsFolder();
+            if (!torrentParent.equals(torrentDownloadFolder)
+                    && !torrentParent.equals(torrentUploadFolder)) {
+                // if the torrent file is not located in the incomplete or
+                // upload
+                // directories it should be copied to the directory the torrent
+                // is
+                // being downloaded to. This is to prevent the user from
+                // deleting
+                // the torrent which we need to initiate a download properly.
+                torrentDownloadFolder.mkdirs();
+                File newTorrentFile = new File(torrentDownloadFolder, getName() + ".torrent");
+                FileUtils.copy(torrentFile.get(), newTorrentFile);
+                torrentFile.set(newTorrentFile);
+            }
+            torrentManager.registerTorrent(this);
+        } finally {
+            lock.writeLock().unlock();
         }
-        torrentManager.registerTorrent(this);
         return true;
     }
 
@@ -373,12 +404,13 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public boolean isPrivate() {
-        return isPrivate;
+        return isPrivate.get();
     }
 
     @Override
     public List<TorrentFileEntry> getTorrentFileEntries() {
         if (cancelled.get()) {
+            //TODO change to isValid check.
             TorrentInfo torrentInfo = this.torrentInfo.get();
             if (torrentInfo == null) {
                 return Collections.emptyList();
@@ -406,7 +438,12 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public void setTorrenFileEntryPriority(TorrentFileEntry torrentFileEntry, int priority) {
-        torrentManager.setTorrenFileEntryPriority(this, torrentFileEntry, priority);
+        lock.writeLock().lock();
+        try {
+            torrentManager.setTorrenFileEntryPriority(this, torrentFileEntry, priority);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     @Override
