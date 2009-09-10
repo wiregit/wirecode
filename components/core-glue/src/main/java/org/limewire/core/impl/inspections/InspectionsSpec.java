@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +63,7 @@ public class InspectionsSpec {
      * @param interval delay (in seconds) between executions of inspections in this spec.
      */
     InspectionsSpec(List<String> inspectionPoints, long startDelay, long interval) {
-        this.inspectionPoints = new ArrayList<String>(inspectionPoints);
+        this.inspectionPoints = new ArrayList<String>(new LinkedHashSet<String>(inspectionPoints));
         this.startDelay = startDelay;
         this.interval = interval;
     }
@@ -91,7 +93,7 @@ public class InspectionsSpec {
             long startDelay = (Long) specMap.get("startdelay");
             long interval = (Long) specMap.get("interval");
             List<?> inspPointsEncoded = (List<?>) specMap.get("insp");
-            List<String> inspectionPoints = new ArrayList<String>();
+            Set<String> inspectionPoints = new LinkedHashSet<String>();
             for (Object inspPt : inspPointsEncoded) {
                 inspectionPoints.add(StringUtils.getUTF8String((byte[]) inspPt));
             }
