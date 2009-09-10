@@ -14,7 +14,7 @@ public class InspectionsSettings extends LimeProps {
      */
     public static final ProbabilisticBooleanSetting PUSH_INSPECTIONS_ON =
         FACTORY.createRemoteProbabilisticBooleanSetting("PUSH_INSPECTIONS_ON", 
-                0f, "Inspections.on", 0f, 1f);
+                0f, "Inspection.on", 0f, 1f);
     
     
     /**
