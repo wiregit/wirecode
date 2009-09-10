@@ -14,25 +14,27 @@ public class RemoteLibraryEvent extends DefaultSourceTypeEvent<RemoteLibrary, Re
 
     private final RemoteLibraryState state;
     private final Collection<SearchResult> addedResults;
+    private final int startIndex;
 
     public static enum Type { RESULTS_CLEARED, RESULTS_ADDED, STATE_CHANGED }
     
-    private RemoteLibraryEvent(RemoteLibrary source, Type type, Collection<SearchResult> addedResults) { 
+    private RemoteLibraryEvent(RemoteLibrary source, Type type, Collection<SearchResult> addedResults, int startIndex) { 
         super(source, type);
+        this.startIndex = startIndex;
         this.state = source.getState();
         this.addedResults = addedResults;
     }
     
     public static RemoteLibraryEvent createStateChangedEvent(RemoteLibrary remoteLibrary) {
-        return new RemoteLibraryEvent(remoteLibrary, Type.STATE_CHANGED, Collections.<SearchResult>emptyList());
+        return new RemoteLibraryEvent(remoteLibrary, Type.STATE_CHANGED, Collections.<SearchResult>emptyList(), -1);
     }
     
     public static RemoteLibraryEvent createResultsClearedEvent(RemoteLibrary remoteLibrary) {
-        return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_CLEARED, Collections.<SearchResult>emptyList());
+        return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_CLEARED, Collections.<SearchResult>emptyList(), -1);
     }
     
-    public static RemoteLibraryEvent createResultsAddedEvent(RemoteLibrary remoteLibrary, Collection<SearchResult> addedResults) {
-        return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_ADDED, addedResults);
+    public static RemoteLibraryEvent createResultsAddedEvent(RemoteLibrary remoteLibrary, Collection<SearchResult> addedResults, int startIndex) {
+        return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_ADDED, addedResults, startIndex);
     }
     
     /**
@@ -48,5 +50,13 @@ public class RemoteLibraryEvent extends DefaultSourceTypeEvent<RemoteLibrary, Re
      */
     public Collection<SearchResult> getAddedResults() {
         return addedResults;
+    }
+    
+    /**
+     * @return the start index in the {@link RemoteLibrary} for added results
+     * or -1 if it doesn't apply to the event type
+     */
+    public int getStartIndex() {
+        return startIndex;
     }
 }

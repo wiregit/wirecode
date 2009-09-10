@@ -400,15 +400,23 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
         @Override
         public void addNewResult(SearchResult file) {
-            results.add(file);
-            listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(this, Collections.singleton(file)));
+            int startIndex;
+            synchronized (results) {
+                startIndex = results.size();
+                results.add(file);
+            }
+            listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(this, Collections.singleton(file), startIndex));
         }
 
         @Override
         public void setNewResults(Collection<SearchResult> files) {
             clear();
-            results.addAll(files);
-            listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(this, files));
+            int startIndex;
+            synchronized (results) {
+                startIndex = results.size();
+                results.addAll(files);
+            }
+            listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(this, files, startIndex));
         }
         
         @Override
@@ -496,6 +504,11 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public boolean removeListener(EventListener<RemoteLibraryEvent> listener) {
             return listeners.removeListener(listener);
         }
+
+        @Override
+        public SearchResult get(int index) {
+            return results.get(index);
+        }
     }
     
     
@@ -551,7 +564,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 parent.updateState();
                 break;
             case RESULTS_ADDED:
-                listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(parent, event.getAddedResults()));
+                listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(parent, event.getAddedResults(), parent.size()));
                 break;
             case RESULTS_CLEARED:
                 if (parent.size() == 0) {

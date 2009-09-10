@@ -472,6 +472,20 @@ public class StringUtils {
         }
         return builder.toString();
     }
+    
+    public static <T> String explode(T object, String delimiter, int times) {
+        assert times >= 1;
+        if (times == 1) {
+            return String.valueOf(object);
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(object);
+        for (int i = 1; i < times; i++) {
+            builder.append(delimiter);
+            builder.append(object);
+        }
+        return builder.toString();
+    }
 
     /**
      * A wrapped version of {@link String#getBytes(String)} that changes the

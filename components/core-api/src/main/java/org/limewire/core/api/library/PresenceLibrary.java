@@ -1,5 +1,6 @@
 package org.limewire.core.api.library;
 
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.FriendPresence;
 
 /**
@@ -16,4 +17,6 @@ public interface PresenceLibrary extends RemoteLibrary {
 
     /** Sets the current state. */
     void setState(RemoteLibraryState newState);
+    
+    SearchResult get(int index);
 }
