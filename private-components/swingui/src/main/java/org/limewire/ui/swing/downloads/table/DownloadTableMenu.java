@@ -73,8 +73,7 @@ public class DownloadTableMenu extends JPopupMenu{
         DownloadState state = downloadItem.getState();
         
         if (state == DownloadState.DONE){
-            
-            add(createLaunchMenuItem());
+            add(createLaunchMenuItem()).setEnabled(downloadItem.isLaunchable());
             add(createRemoveMenuItem());
             addSeparator();
             add(createLocateOnDiskMenuItem());
