@@ -1,8 +1,10 @@
 package org.limewire.core.impl.search.store;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.search.store.StoreTrackResult;
@@ -13,19 +15,52 @@ import org.limewire.core.impl.MockURN;
  */
 public class MockStoreTrackResult implements StoreTrackResult {
 
-    private String extension;
+    private final Map<FilePropertyKey, Object> propertyMap = 
+        new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+
+    private String fileExtension;
+
+    private String fileName;
 
     private String price;
-
-    private Map<FilePropertyKey, Object> properties = new HashMap<FilePropertyKey, Object>();
 
     private long size;
     
     private MockURN urn;
     
+    /**
+     * Constructs a MockStoreTrackResult using the specified JSON object.
+     */
+    public MockStoreTrackResult(JSONObject jsonObj) throws JSONException {
+        // Get required attributes.
+        propertyMap.put(FilePropertyKey.TITLE, jsonObj.getString("title"));
+        fileName = jsonObj.getString("fileName");
+        fileExtension = getFileExtension(fileName);
+        urn = new MockURN(jsonObj.getString("URN"));
+
+        // Get optional attributes.
+        price = jsonObj.optString("price");
+        size = jsonObj.optLong("fileSize");
+
+        long length = jsonObj.optLong("length");
+        if (length > 0) propertyMap.put(FilePropertyKey.LENGTH, length);
+        
+        long quality = jsonObj.optLong("quality");
+        if (quality > 0) propertyMap.put(FilePropertyKey.QUALITY, quality);
+        
+        String artist = jsonObj.optString("artist");
+        if (artist.length() > 0) propertyMap.put(FilePropertyKey.AUTHOR, artist);
+        
+        String album = jsonObj.optString("album");
+        if (album.length() > 0) propertyMap.put(FilePropertyKey.ALBUM, album);
+        
+        String trackNumber = jsonObj.optString("trackNumber");
+        if (trackNumber.length() > 0) propertyMap.put(FilePropertyKey.TRACK_NUMBER, trackNumber);
+    }
+    
     @Override
     public String getFileExtension() {
-        return extension;
+        return fileExtension;
     }
 
     @Override
@@ -35,7 +70,7 @@ public class MockStoreTrackResult implements StoreTrackResult {
     
     @Override
     public Object getProperty(FilePropertyKey key) {
-        return properties.get(key);
+        return propertyMap.get(key);
     }
 
     @Override
@@ -47,24 +82,12 @@ public class MockStoreTrackResult implements StoreTrackResult {
     public URN getUrn() {
         return urn;
     }
-
-    public void setExtension(String extension) {
-        this.extension = extension;
-    }
     
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public void setProperty(FilePropertyKey key, Object value) {
-        properties.put(key, value);
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-    
-    public void setUrn(String string) {
-        urn = new MockURN(string);
+    private String getFileExtension(String fileName) {
+        int pos = fileName.lastIndexOf('.');
+        if (pos > -1) {
+            return fileName.substring(pos + 1);
+        }
+        return "";
     }
 }

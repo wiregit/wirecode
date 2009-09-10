@@ -1,26 +1,23 @@
 package org.limewire.core.impl.search.store;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.impl.MockURN;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.friend.api.FriendPresence;
@@ -32,30 +29,74 @@ public class MockStoreResult implements StoreResult {
 
     private final Category category;
     private final URN urn;
-    private final Map<FilePropertyKey, Object> propertyMap = 
-        new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
     private final RemoteHost remoteHost;
-    private final List<StoreTrackResult> resultList;
+    private final Map<FilePropertyKey, Object> propertyMap;
+    private final List<StoreTrackResult> trackList;
     
     private Icon albumIcon;
     private String fileExtension;
     private String fileName;
+    private String infoUri;
     private String price;
     private long size;
     
     /**
-     * Constructs a MockStoreResult with the specified URN and category.
+     * Constructs a MockStoreResult using the specified JSON object.
      */
-    public MockStoreResult(URN urn, Category category) {
-        this.urn = urn;
-        this.category = category;
+    public MockStoreResult(JSONObject jsonObj) throws JSONException {
+        this.category = getCategory(jsonObj);
+        this.urn = new MockURN(jsonObj.getString("URN"));
         this.remoteHost = new MockStoreHost();
-        this.resultList = new ArrayList<StoreTrackResult>();
+        this.propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+        this.trackList = new ArrayList<StoreTrackResult>();
+        
+        buildResult(jsonObj);
+        buildTracks(jsonObj);
+    }
+    
+    /**
+     * Sets result values using the specified JSON object.
+     */
+    private void buildResult(JSONObject jsonObj) throws JSONException {
+        // Get required attributes.
+        propertyMap.put(FilePropertyKey.AUTHOR, jsonObj.getString("artist"));
+        propertyMap.put(FilePropertyKey.ALBUM, jsonObj.getString("album"));
+        propertyMap.put(FilePropertyKey.TITLE, jsonObj.getString("title"));
+        fileName = jsonObj.getString("fileName");
+        fileExtension = getFileExtension(fileName);
+        infoUri = jsonObj.getString("infoPage");
+        
+        // Get optional attributes.
+        albumIcon = getAlbumIcon(jsonObj);
+        price = jsonObj.optString("price");
+        size = jsonObj.optLong("fileSize");
+        
+        long length = jsonObj.optLong("length");
+        if (length > 0) propertyMap.put(FilePropertyKey.LENGTH, length);
+        
+        long quality = jsonObj.optLong("quality");
+        if (quality > 0) propertyMap.put(FilePropertyKey.QUALITY, quality);
+        
+        String trackNumber = jsonObj.optString("trackNumber");
+        if (trackNumber.length() > 0) propertyMap.put(FilePropertyKey.TRACK_NUMBER, trackNumber);
+    }
+    
+    /**
+     * Sets album track values using the specified JSON object.
+     */
+    private void buildTracks(JSONObject jsonObj) throws JSONException {
+        JSONArray trackArr = jsonObj.optJSONArray("tracks");
+        if ((trackArr != null) && (trackArr.length() > 0)) {
+            for (int i = 0, len = trackArr.length(); i < len; i++) {
+                JSONObject trackObj = trackArr.getJSONObject(i);
+                trackList.add(new MockStoreTrackResult(trackObj));
+            }
+        }
     }
     
     @Override
     public boolean isAlbum() {
-        return (resultList.size() > 1);
+        return (trackList.size() > 0);
     }
     
     @Override
@@ -65,7 +106,7 @@ public class MockStoreResult implements StoreResult {
     
     @Override
     public List<StoreTrackResult> getAlbumResults() {
-        return resultList;
+        return trackList;
     }
     
     @Override
@@ -85,7 +126,7 @@ public class MockStoreResult implements StoreResult {
 
     @Override
     public String getInfoURI() {
-        return getClass().getResource("fileInfo.html").toString();
+        return infoUri;
     }
     
     @Override
@@ -118,83 +159,30 @@ public class MockStoreResult implements StoreResult {
         return urn;
     }
     
-    public void addAlbumResult(StoreTrackResult trackResult) {
-        resultList.add(trackResult);
-    }
-    
-    public void setAlbumIcon(Icon icon) {
-        this.albumIcon = icon;
-    }
-    
-    public void setFileExtension(String extension) {
-        this.fileExtension = extension;
-    }
-    
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-    
-    public void setPrice(String price) {
-        this.price = price;
-    }
-    
-    public void setProperty(FilePropertyKey key, Object value) {
-        propertyMap.put(key, value);
-    }
-    
-    public void setSize(long size) {
-        this.size = size;
-    }
-    
-    public static class MockAlbumIcon implements Icon {
-        private static final float SIZE_TO_THICKNESS = 7.0f;
-
-        private final Color color;
-        private final int size;
-
-        public MockAlbumIcon(Color color, int size) {
-            this.color = color;
-            this.size = size;
+    private Icon getAlbumIcon(JSONObject jsonObj) {
+        String url = jsonObj.optString("albumIcon");
+        if (url.length() > 0) {
+            return new ImageIcon(getClass().getResource(url));
         }
-
-        @Override
-        public int getIconHeight() {
-            return size;
+        return null;
+    }
+    
+    private Category getCategory(JSONObject jsonObj) throws JSONException {
+        String value = jsonObj.getString("category");
+        for (Category category : Category.values()) {
+            if (category.toString().equalsIgnoreCase(value)) {
+                return category;
+            }
         }
-
-        @Override
-        public int getIconWidth() {
-            return size;
+        throw new JSONException("Invalid result category");
+    }
+    
+    private String getFileExtension(String fileName) {
+        int pos = fileName.lastIndexOf('.');
+        if (pos > -1) {
+            return fileName.substring(pos + 1);
         }
-
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            // Create graphics.
-            Graphics2D g2d = (Graphics2D) g.create();
-            
-            // Set graphics to use anti-aliasing for smoothness.
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-            
-            // Fill background color.
-            g2d.setColor(Color.ORANGE);
-            g2d.fillRect(x, y, size, size);
-            
-            // Set line color and thickness.
-            float thickness = Math.max(size / SIZE_TO_THICKNESS, 1.0f);
-            g2d.setColor(color);
-            g2d.setStroke(new BasicStroke(thickness));
-
-            // Create shape.
-            Shape circle = new Ellipse2D.Double(0, 0, size / 2, size / 2);
-            
-            // Draw shape centered in icon.
-            g2d.translate(x + size / 4, y + size / 4);
-            g2d.draw(circle);
-
-            // Dispose graphics.
-            g2d.dispose();
-        }
+        return "";
     }
     
     private class MockStoreHost implements RemoteHost {

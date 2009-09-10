@@ -1,17 +1,16 @@
 package org.limewire.core.impl.search.store;
 
-import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.limewire.core.api.Category;
-import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.limewire.core.api.search.SearchDetails;
+import org.limewire.core.api.search.store.StoreConnectionFactory;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
@@ -19,9 +18,8 @@ import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreTrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
-import org.limewire.core.impl.MockURN;
-import org.limewire.core.impl.search.store.MockStoreResult.MockAlbumIcon;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
@@ -35,6 +33,13 @@ public class MockStoreManager implements StoreManager {
     
     private final Map<AttributeKey, Object> userAttributes = 
         Collections.synchronizedMap(new EnumMap<AttributeKey, Object>(AttributeKey.class));
+    
+    private final StoreConnectionFactory storeConnectionFactory;
+    
+    @Inject
+    public MockStoreManager(StoreConnectionFactory storeConnectionFactory) {
+        this.storeConnectionFactory = storeConnectionFactory;
+    }
     
     @Override
     public void addStoreListener(StoreListener listener) {
@@ -110,115 +115,69 @@ public class MockStoreManager implements StoreManager {
                 // Get query text.
                 String query = searchDetails.getSearchQuery();
                 
-                // Create mock store style.
-                StoreStyle storeStyle;
+                // Create store connection.
+                MockStoreConnection storeConnection = (MockStoreConnection) storeConnectionFactory.create();
+                
+                // Determine mock style type for connection.
+                Type styleType;
                 if (query.indexOf("monkey") > -1) {
-                    storeStyle = new MockStoreStyle(Type.STYLE_A);
+                    styleType = Type.STYLE_A;
                 } else if (query.indexOf("bear") > -1) {
-                    storeStyle = new MockStoreStyle(Type.STYLE_B);
+                    styleType = Type.STYLE_B;
                 } else if (query.indexOf("cat") > -1) {
-                    storeStyle = new MockStoreStyle(Type.STYLE_C);
+                    styleType = Type.STYLE_C;
                 } else if (query.indexOf("dog") > -1) {
-                    storeStyle = new MockStoreStyle(Type.STYLE_D);
+                    styleType = Type.STYLE_D;
                 } else {
-                    storeStyle = new MockStoreStyle(Type.STYLE_A);
+                    styleType = Type.STYLE_A;
                 }
+                storeConnection.setStyleType(styleType);
                 
-                // Create mock store results.
-                StoreResult[] storeResults = createStoreResults(0);
+                // Execute query.
+                String jsonStr = storeConnection.doQuery(query);
                 
-                // Fire event to update style.
-                storeSearchListener.styleUpdated(storeStyle);
-                
-                // Fire event to handle results.
-                storeSearchListener.resultsFound(storeResults);
+                try {
+                    // Parse JSON to create store style and results collection.
+                    JSONObject jsonObj = new JSONObject(jsonStr);
+                    StoreStyle storeStyle = extractStoreStyle(jsonObj);
+                    StoreResult[] storeResults = extractStoreResults(jsonObj);
+
+                    // Fire event to update style.
+                    storeSearchListener.styleUpdated(storeStyle);
+
+                    // Fire event to handle results.
+                    storeSearchListener.resultsFound(storeResults);
+                    
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
     }
     
     /**
-     * Creates an array of store results based on the specified index.
+     * Returns the store style contained in the specified JSON object.
      */
-    private StoreResult[] createStoreResults(int i) {
-        List<StoreResult> resultList = new ArrayList<StoreResult>();
-
-        // Create album with multiple tracks.
-        URN urn = new MockURN("www.store.limewire.com" + i);
-        MockStoreResult msr = new MockStoreResult(urn, Category.AUDIO);
-        msr.setAlbumIcon(new MockAlbumIcon(Color.RED, 50));
-        msr.setFileExtension("mp3");
-        msr.setFileName("Green Monkeys The Collection.mp3");
-        msr.setPrice("4 Credits");
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
-        msr.setProperty(FilePropertyKey.ALBUM, "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
-        msr.setProperty(FilePropertyKey.TITLE, "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
-        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(568));
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setSize(9 * 1024 * 1024);
-
-        MockStoreTrackResult mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 1));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
-        mstr.setProperty(FilePropertyKey.TITLE, "Heh?");
-        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(129));
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-
-        mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 2));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
-        mstr.setProperty(FilePropertyKey.TITLE, "Take Me To Space (Man)");
-        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(251));
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-
-        mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 3));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
-        mstr.setProperty(FilePropertyKey.TITLE, "Crush");
-        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(188));
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-
-        resultList.add(msr);
-
-        // Create single file result.
-        urn = new MockURN("www.store.limewire.com" + (i + 10));
-        msr = new MockStoreResult(urn, Category.AUDIO);
-        msr.setFileExtension("mp3");
-        msr.setFileName("Green Monkeys Chomp.mp3");
-        msr.setPrice("1 Credit");
-        msr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
-        msr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
-        msr.setProperty(FilePropertyKey.TITLE, "Chomp");
-        msr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(208));
-        msr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        msr.setSize(6 * 1024 * 1024);
-
-        mstr = new MockStoreTrackResult();
-        mstr.setExtension("mp3");
-        mstr.setUrn("www.store.limewire.com" + (i + 11));
-        mstr.setPrice("1 Credit");
-        mstr.setProperty(FilePropertyKey.AUTHOR, "Green Monkeys");
-        mstr.setProperty(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
-        mstr.setProperty(FilePropertyKey.TITLE, "Chomp");
-        mstr.setProperty(FilePropertyKey.LENGTH, Long.valueOf(208));
-        mstr.setProperty(FilePropertyKey.QUALITY, Long.valueOf(3));
-        mstr.setSize(3 * 1024 * 1024);
-        msr.addAlbumResult(mstr);
-
-        resultList.add(msr);
-
-        return resultList.toArray(new StoreResult[resultList.size()]);
+    private StoreStyle extractStoreStyle(JSONObject jsonObj) throws JSONException {
+        JSONObject styleObj = jsonObj.getJSONObject("storeStyle");
+        return new MockStoreStyle(styleObj);
+    }
+    
+    /**
+     * Returns an array of store results contained in the specified JSON object.
+     */
+    private StoreResult[] extractStoreResults(JSONObject jsonObj) throws JSONException {
+        // Retrieve JSON array of results.
+        JSONArray resultsArr = jsonObj.getJSONArray("storeResults");
+        
+        // Create StoreResult array.
+        StoreResult[] storeResults = new StoreResult[resultsArr.length()];
+        for (int i = 0, len = resultsArr.length(); i < len; i++) {
+            JSONObject resultObj = resultsArr.getJSONObject(i);
+            storeResults[i] = new MockStoreResult(resultObj);
+        }
+        
+        return storeResults;
     }
     
     private void fireLoginChanged(boolean loggedIn) {

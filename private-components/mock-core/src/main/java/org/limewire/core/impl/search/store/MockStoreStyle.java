@@ -2,14 +2,12 @@ package org.limewire.core.impl.search.store;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.limewire.core.api.search.store.StoreStyle;
 
 /**
@@ -18,7 +16,6 @@ import org.limewire.core.api.search.store.StoreStyle;
 public class MockStoreStyle implements StoreStyle {
 
     private final Type type;
-    private final Properties properties;
     
     private Color background;
     private Icon buyAlbumIcon;
@@ -51,59 +48,42 @@ public class MockStoreStyle implements StoreStyle {
     private boolean streamButtonVisible;
     
     /**
-     * Constructs a StoreStyle with the specified type.
+     * Constructs a StoreStyle using the specified JSON object.
      */
-    public MockStoreStyle(Type type) {
-        this.type = type;
-        this.properties = new Properties();
-        loadProperties();
+    public MockStoreStyle(JSONObject jsonObj) throws JSONException {
+        type = getType(jsonObj);
+        
+        background = getColor(jsonObj, "background");
+        buyAlbumIcon = getIcon(jsonObj, "buyAlbumIcon");
+        buyTrackIcon = getIcon(jsonObj, "buyTrackIcon");
+        downloadAlbumIcon = getIcon(jsonObj, "downloadAlbumIcon");
+        downloadTrackIcon = getIcon(jsonObj, "downloadTrackIcon");
+        headingFont = getFont(jsonObj, "headingFont");
+        headingForeground = getColor(jsonObj, "headingForeground");
+        infoFont = getFont(jsonObj, "infoFont");
+        infoForeground = getColor(jsonObj, "infoForeground");
+        priceBackground = getColor(jsonObj, "priceBackground");
+        priceBorderColor = getColor(jsonObj, "priceBorderColor");
+        priceFont = getFont(jsonObj, "priceFont");
+        priceForeground = getColor(jsonObj, "priceForeground");
+        showTracksFont = getFont(jsonObj, "showTracksFont");
+        showTracksForeground = getColor(jsonObj, "showTracksForeground");
+        streamIcon = getIcon(jsonObj, "streamIcon");
+        subHeadingFont = getFont(jsonObj, "subHeadingFont");
+        subHeadingForeground = getColor(jsonObj, "subHeadingForeground");
+        trackFont = getFont(jsonObj, "trackFont");
+        trackForeground = getColor(jsonObj, "trackForeground");
+        trackLengthFont = getFont(jsonObj, "trackLengthFont");
+        trackLengthForeground = getColor(jsonObj, "trackLengthForeground");
+        
+        downloadButtonVisible = getBoolean(jsonObj, "downloadButtonVisible");
+        priceButtonVisible = getBoolean(jsonObj, "priceButtonVisible");
+        priceVisible = getBoolean(jsonObj, "priceVisible");
+        showInfoOnHover = getBoolean(jsonObj, "showInfoOnHover");
+        showTracksOnHover = getBoolean(jsonObj, "showTracksOnHover");
+        streamButtonVisible = getBoolean(jsonObj, "streamButtonVisible");
     }
     
-    /**
-     * Loads style attributes from properties file.
-     */
-    private void loadProperties() {
-        try {
-            URL url = getClass().getResource("MockStoreStyle.properties");
-            properties.load(url.openStream());
-            
-            background = getColor("background");
-            buyAlbumIcon = getIcon("buyAlbumIcon");
-            buyTrackIcon = getIcon("buyTrackIcon");
-            downloadAlbumIcon = getIcon("downloadAlbumIcon");
-            downloadTrackIcon = getIcon("downloadTrackIcon");
-            headingFont = getFont("headingFont");
-            headingForeground = getColor("headingForeground");
-            infoFont = getFont("infoFont");
-            infoForeground = getColor("infoForeground");
-            priceBackground = getColor("priceBackground");
-            priceBorderColor = getColor("priceBorderColor");
-            priceFont = getFont("priceFont");
-            priceForeground = getColor("priceForeground");
-            showTracksFont = getFont("showTracksFont");
-            showTracksForeground = getColor("showTracksForeground");
-            streamIcon = getIcon("streamIcon");
-            subHeadingFont = getFont("subHeadingFont");
-            subHeadingForeground = getColor("subHeadingForeground");
-            trackFont = getFont("trackFont");
-            trackForeground = getColor("trackForeground");
-            trackLengthFont = getFont("trackLengthFont");
-            trackLengthForeground = getColor("trackLengthForeground");
-            
-            downloadButtonVisible = getBoolean("downloadButtonVisible");
-            priceButtonVisible = getBoolean("priceButtonVisible");
-            priceVisible = getBoolean("priceVisible");
-            showInfoOnHover = getBoolean("showInfoOnHover");
-            showTracksOnHover = getBoolean("showTracksOnHover");
-            streamButtonVisible = getBoolean("streamButtonVisible");
-            
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public Color getBackground() {
         return background;
@@ -250,30 +230,43 @@ public class MockStoreStyle implements StoreStyle {
     }
     
     /**
-     * Returns the color for the specified property key.
+     * Returns the boolean value for the specified property key.
      */
-    private boolean getBoolean(String propertyKey) {
-        return Boolean.parseBoolean(properties.getProperty(type + "." + propertyKey));
+    private boolean getBoolean(JSONObject jsonObj, String propertyKey) throws JSONException {
+        return jsonObj.getBoolean(propertyKey);
     }
     
     /**
      * Returns the color for the specified property key.
      */
-    private Color getColor(String propertyKey) {
-        return Color.decode(properties.getProperty(type + "." + propertyKey));
+    private Color getColor(JSONObject jsonObj, String propertyKey) throws JSONException {
+        return Color.decode(jsonObj.getString(propertyKey));
     }
     
     /**
      * Returns the font for the specified property key.
      */
-    private Font getFont(String propertyKey) {
-        return Font.decode(properties.getProperty(type + "." + propertyKey));
+    private Font getFont(JSONObject jsonObj, String propertyKey) throws JSONException {
+        return Font.decode(jsonObj.getString(propertyKey));
     }
     
     /**
      * Retrieves the icon for the specified property key.
      */
-    private Icon getIcon(String propertyKey) {
-        return new ImageIcon(getClass().getResource(properties.getProperty(type + "." + propertyKey)));
+    private Icon getIcon(JSONObject jsonObj, String propertyKey) throws JSONException {
+        return new ImageIcon(getClass().getResource(jsonObj.getString(propertyKey)));
+    }
+    
+    /**
+     * Retrieves the type from the specified JSON object.
+     */
+    private Type getType(JSONObject jsonObj) throws JSONException {
+        String value = jsonObj.getString("type");
+        for (Type type : Type.values()) {
+            if (type.toString().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        throw new JSONException("Invalid style type");
     }
 }
