@@ -2,16 +2,11 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -21,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.UrlAction;
@@ -37,6 +34,7 @@ class AboutWindow {
     
 	private final JDialog dialog;
 	private final ScrollingTextPane textPane;
+	private final JButton button;
 	private final JCheckBox scrollBox = new JCheckBox(I18n.tr("Automatically Scroll"));
 
 	/**
@@ -54,6 +52,10 @@ class AboutWindow {
 		dialog.setTitle(I18n.tr("About LimeWire"));
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		dialog.addWindowListener(new WindowAdapter() {
+		    @Override
+		    public void windowOpened(WindowEvent we) {
+		        button.requestFocusInWindow();
+		    }
 		    @Override
             public void windowClosed(WindowEvent we) {
 		        textPane.stopScroll();
@@ -84,6 +86,7 @@ class AboutWindow {
 
         //  set up scroll check box
 		scrollBox.setSelected(true);
+		scrollBox.setOpaque(false);
 		scrollBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				if (scrollBox.isSelected())
@@ -94,7 +97,7 @@ class AboutWindow {
 		});
 
         //  set up close button
-        JButton button = new JButton(I18n.tr("Close"));
+        button = new JButton(I18n.tr("Close"));
         dialog.getRootPane().setDefaultButton(button);
         button.setToolTipText(I18n.tr("Close This Window"));
         button.addActionListener(GuiUtils.getDisposeAction());
@@ -103,55 +106,15 @@ class AboutWindow {
 		JComponent pane = (JComponent)dialog.getContentPane();
 		GuiUtils.addHideAction(pane);
 		
-		pane.setLayout(new GridBagLayout());
-        pane.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 1;
-		gbc.insets = new Insets(0,0,0,0);
-        gbc.gridwidth = 2;
-		gbc.gridy = 0;
+		pane.setLayout(new MigLayout("insets 4 4 4 4, fill"));
+		pane.setBackground(GuiUtils.getMainFrame().getBackground());
         
-//		LogoPanel logo = new LogoPanel();
-//		logo.setSearching(true);
-//		pane.add(logo, gbc);
-
-        gbc.gridy = 1;
-        pane.add(Box.createVerticalStrut(4), gbc);
-        
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridy = 2;
-        pane.add(client, gbc);
-
-        gbc.gridy = 3;
-		pane.add(java, gbc);
-        
-        gbc.gridy = 4;
-		pane.add(url, gbc);
-		
-        gbc.gridy = 5;
-        pane.add(Box.createVerticalStrut(4), gbc);
-
-		gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridy = 6;
-		pane.add(textPane, gbc);
-
-        gbc.gridy = 7;
-		gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        pane.add(Box.createVerticalStrut(4), gbc);
-        
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridwidth = 1;
-        gbc.gridy = 8;
-		pane.add(scrollBox, gbc);
-
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		gbc.anchor = GridBagConstraints.EAST;
-		pane.add(button, gbc);
-		
+        pane.add(client, "span, growx, wrap");
+        pane.add(java, "span, growx, wrap");
+        pane.add(url, "span, growx, wrap");
+        pane.add(textPane, "grow, wrap");
+        pane.add(scrollBox, "split 2, growx, push");
+        pane.add(button, "alignx right");	
 	}
 
 	private ScrollingTextPane createScrollingPane() {
