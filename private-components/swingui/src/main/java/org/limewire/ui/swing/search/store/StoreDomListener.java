@@ -109,6 +109,14 @@ public class StoreDomListener extends LimeDomListener {
         }
     }
     
+//    // TODO REMOVE
+//    private void printCookies(String url, List<Cookie> cookieList) {
+//        System.out.println("cookies=" + cookieList.size() + ", url=" + url);
+//        for (Cookie cookie : cookieList) {
+//            System.out.println("-> " + cookie);
+//        }
+//    }
+    
     /**
      * Returns an attribute Node for the specified element node and attribute
      * key.
@@ -153,6 +161,20 @@ public class StoreDomListener extends LimeDomListener {
         }
         
         return cookieList;
+    }
+    
+    /**
+     * Removes the specified list of cookies from the browser.
+     */
+    public static void removeCookies(List<Cookie> cookieList) {
+        // Get cookie manager.
+        nsICookieManager cookieManager = XPCOMUtils.getServiceProxy(
+                "@mozilla.org/cookiemanager;1", nsICookieManager.class);
+        
+        // Remove cookies.
+        for (Cookie cookie : cookieList) {
+            cookieManager.remove(cookie.getDomain(), cookie.getName(), cookie.getPath(), false);
+        }
     }
     
     /**

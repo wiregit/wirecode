@@ -29,7 +29,6 @@ import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 import org.mozilla.browser.impl.ChromeAdapter;
-import org.mozilla.interfaces.nsICookieManager;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMWindow2;
 
@@ -135,11 +134,8 @@ public class StorePanel extends JPanel {
                     browser.reload();
 
                 } else if (!loggedIn && loginCookieFound) {
-                    // Get cookie manager and clear browser cookies.
-                    nsICookieManager cookieManager = XPCOMUtils.getServiceProxy(
-                            "@mozilla.org/cookiemanager;1", nsICookieManager.class);
-                    cookieManager.removeAll();
-
+                    // Remove browser cookies.
+                    StoreDomListener.removeCookies(cookieList);
                     // Reload home page.
                     loadDefaultUrl();
                 }
