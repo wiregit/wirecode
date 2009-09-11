@@ -12,7 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import org.apache.http.cookie.Cookie;
-import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.UriAction;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -45,7 +45,7 @@ public class StoreBrowserPanel extends Browser {
     
     private VisualStoreResult visualStoreResult;
     
-    private StoreTrackResult trackResult;
+    private TrackResult trackResult;
     
     /**
      * Constructs a StoreBrowserPanel using the specified services.
@@ -161,7 +161,7 @@ public class StoreBrowserPanel extends Browser {
     /**
      * Displays the confirm download dialog for the specified result.
      */
-    public void showConfirm(StoreTrackResult trackResult) {
+    public void showConfirm(TrackResult trackResult) {
         // Save result.
         this.trackResult = trackResult;
         visualStoreResult = null;

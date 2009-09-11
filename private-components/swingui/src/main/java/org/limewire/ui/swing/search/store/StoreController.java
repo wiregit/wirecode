@@ -7,7 +7,7 @@ import org.apache.http.cookie.Cookie;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreManager;
-import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreManager.AttributeKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
@@ -128,7 +128,7 @@ public class StoreController {
     /**
      * Initiates downloading of the specified store track result.
      */
-    public void downloadTrack(StoreTrackResult str) {
+    public void downloadTrack(TrackResult str) {
         if (!storeManager.isLoggedIn()) {
             startLogin();
             // TODO review this - maybe login success starts download approval automatically
@@ -155,7 +155,7 @@ public class StoreController {
     /**
      * Performs download of specified store track result.
      */
-    void doDownloadTrack(StoreTrackResult str) {
+    void doDownloadTrack(TrackResult str) {
         // TODO implement
         System.out.println("StoreController.doDownloadTrack: " + str.getProperty(FilePropertyKey.TITLE));
     }
@@ -171,7 +171,7 @@ public class StoreController {
     /**
      * Initiates streaming of the specified store track result.
      */
-    public void streamTrack(StoreTrackResult str) {
+    public void streamTrack(TrackResult str) {
         // TODO implement
         System.out.println("StoreController.streamTrack: " + str.getProperty(FilePropertyKey.TITLE));
     }
@@ -187,7 +187,7 @@ public class StoreController {
     /**
      * Initiates the download approval process for the specified track result.
      */
-    private void startApproval(StoreTrackResult trackResult) {
+    private void startApproval(TrackResult trackResult) {
         StoreBrowserPanel browserPanel = new StoreBrowserPanel(this);
         browserPanel.showConfirm(trackResult);
     }
