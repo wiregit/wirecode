@@ -17,7 +17,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.store.StoreStyle;
-import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.ui.swing.components.CustomLineBorder;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
@@ -143,7 +143,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
     /**
      * Creates a component to display an album track.
      */
-    protected abstract Component createTrackComponent(StoreTrackResult result);
+    protected abstract Component createTrackComponent(TrackResult result);
     
     /**
      * Installs the popup and selection listener on the specified component.
@@ -255,8 +255,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
         if (vsr.getStoreResult().isAlbum()) {
             if (vsr.isShowTracks()) {
                 albumTrackPanel.setVisible(true);
-                List<StoreTrackResult> trackList = vsr.getStoreResult().getAlbumResults();
-                for (StoreTrackResult result : trackList) {
+                List<TrackResult> trackList = vsr.getStoreResult().getAlbumResults();
+                for (TrackResult result : trackList) {
                     Component comp = createTrackComponent(result);
                     albumTrackPanel.add(comp, "align left, gapbottom 1, growx, wrap");
                 }
@@ -307,9 +307,9 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * Action to download store track result.
      */
     protected class DownloadTrackAction extends AbstractAction {
-        private final StoreTrackResult trackResult;
+        private final TrackResult trackResult;
 
-        public DownloadTrackAction(StoreTrackResult trackResult) {
+        public DownloadTrackAction(TrackResult trackResult) {
             this.trackResult = trackResult;
         }
         
@@ -336,9 +336,9 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * Action to stream store track result.
      */
     protected class StreamTrackAction extends AbstractAction {
-        private final StoreTrackResult trackResult;
+        private final TrackResult trackResult;
 
-        public StreamTrackAction(StoreTrackResult trackResult) {
+        public StreamTrackAction(TrackResult trackResult) {
             this.trackResult = trackResult;
         }
         

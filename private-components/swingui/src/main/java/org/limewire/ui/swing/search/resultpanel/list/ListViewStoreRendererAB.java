@@ -18,7 +18,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreStyle;
-import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
@@ -258,7 +258,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
     }
     
     @Override
-    protected Component createTrackComponent(StoreTrackResult result) {
+    protected Component createTrackComponent(TrackResult result) {
         JXPanel trackPanel = new JXPanel();
         trackPanel.setOpaque(true);
         trackPanel.setBackground(Color.WHITE);
