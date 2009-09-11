@@ -16,7 +16,7 @@ import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
-import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 
 import com.google.inject.Inject;
@@ -67,7 +67,7 @@ public class MockStoreManager implements StoreManager {
     }
 
     @Override
-    public boolean isDownloadApproved(StoreTrackResult trackResult) {
+    public boolean isDownloadApproved(TrackResult trackResult) {
         return false;
     }
 

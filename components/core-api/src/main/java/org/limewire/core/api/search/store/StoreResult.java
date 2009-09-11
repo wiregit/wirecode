@@ -31,7 +31,7 @@ public interface StoreResult {
     /**
      * Returns a List of media files associated with the result.
      */
-    List<StoreTrackResult> getAlbumResults();
+    List<TrackResult> getAlbumResults();
     
     /**
      * Returns the category for the result.

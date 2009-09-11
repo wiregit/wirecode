@@ -43,7 +43,7 @@ public interface StoreManager {
      * Returns true if the specified track result can be downloaded without
      * further user prompts.
      */
-    boolean isDownloadApproved(StoreTrackResult trackResult);
+    boolean isDownloadApproved(TrackResult trackResult);
     
     /**
      * Returns true if the user is logged in to the store.

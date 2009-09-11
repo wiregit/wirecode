@@ -17,35 +17,35 @@ public class MockStoreStyle implements StoreStyle {
 
     private final Type type;
     
-    private Color background;
-    private Icon buyAlbumIcon;
-    private Icon buyTrackIcon;
-    private Icon downloadAlbumIcon;
-    private Icon downloadTrackIcon;
-    private Font headingFont;
-    private Color headingForeground;
-    private Font infoFont;
-    private Color infoForeground;
-    private Color priceBackground;
-    private Color priceBorderColor;
-    private Font priceFont;
-    private Color priceForeground;
-    private Font showTracksFont;
-    private Color showTracksForeground;
-    private Icon streamIcon;
-    private Font subHeadingFont;
-    private Color subHeadingForeground;
-    private Font trackFont;
-    private Color trackForeground;
-    private Font trackLengthFont;
-    private Color trackLengthForeground;
+    private final Color background;
+    private final Icon buyAlbumIcon;
+    private final Icon buyTrackIcon;
+    private final Icon downloadAlbumIcon;
+    private final Icon downloadTrackIcon;
+    private final Font headingFont;
+    private final Color headingForeground;
+    private final Font infoFont;
+    private final Color infoForeground;
+    private final Color priceBackground;
+    private final Color priceBorderColor;
+    private final Font priceFont;
+    private final Color priceForeground;
+    private final Font showTracksFont;
+    private final Color showTracksForeground;
+    private final Icon streamIcon;
+    private final Font subHeadingFont;
+    private final Color subHeadingForeground;
+    private final Font trackFont;
+    private final Color trackForeground;
+    private final Font trackLengthFont;
+    private final Color trackLengthForeground;
     
-    private boolean downloadButtonVisible;
-    private boolean priceButtonVisible;
-    private boolean priceVisible;
-    private boolean showInfoOnHover;
-    private boolean showTracksOnHover;
-    private boolean streamButtonVisible;
+    private final boolean downloadButtonVisible;
+    private final boolean priceButtonVisible;
+    private final boolean priceVisible;
+    private final boolean showInfoOnHover;
+    private final boolean showTracksOnHover;
+    private final boolean streamButtonVisible;
     
     /**
      * Constructs a StoreStyle using the specified JSON object.

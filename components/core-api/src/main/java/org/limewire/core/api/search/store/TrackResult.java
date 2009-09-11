@@ -6,12 +6,17 @@ import org.limewire.core.api.URN;
 /**
  * Defines a track result for a Lime Store result.
  */
-public interface StoreTrackResult {
+public interface TrackResult {
 
     /**
      * Returns the file extension for the result.
      */
     String getFileExtension();
+    
+    /**
+     * Returns the file name for the result.
+     */
+    String getFileName();
     
     /**
      * Returns the price for the result.

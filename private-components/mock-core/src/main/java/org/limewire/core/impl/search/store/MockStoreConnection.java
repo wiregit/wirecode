@@ -107,16 +107,18 @@ public class MockStoreConnection implements StoreConnection {
         // Create album.
         StringBuilder album = new StringBuilder(JSON_OBJ);
         insertNameValue(album, "artist", "GreenMonkeys");
-        insertNameValue(album, "album", "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
         insertNameValue(album, "title", "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
+        insertNameValue(album, "album", "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
         insertNameValue(album, "albumIcon", "albumCover.png");
+        insertNameValue(album, "bitRate", String.valueOf(128));
         insertNameValue(album, "category", Category.AUDIO.toString());
         insertNameValue(album, "fileName", "Green Monkeys The Collection.mp3");
         insertNameValue(album, "fileSize", String.valueOf(9 * 1024 * 1024));
+        insertNameValue(album, "genre", "Jazz");
         insertNameValue(album, "infoPage", getClass().getResource("fileInfo.html").toString());
         insertNameValue(album, "length", String.valueOf(568));
-        insertNameValue(album, "quality", String.valueOf(3));
         insertNameValue(album, "price", "4 Credits");
+        insertNameValue(album, "quality", String.valueOf(3));
         insertNameValue(album, "URN", "www.store.limewire.com" + i);
         
         // Create tracks.
@@ -124,33 +126,39 @@ public class MockStoreConnection implements StoreConnection {
         StringBuilder track = new StringBuilder(JSON_OBJ);
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Heh?");
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
+        insertNameValue(track, "bitRate", String.valueOf(128));
         insertNameValue(track, "fileName", "Green Monkeys - Heh.mp3");        
+        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
         insertNameValue(track, "length", String.valueOf(129));
-        insertNameValue(track, "quality", String.valueOf(3));
         insertNameValue(track, "price", "1 Credit");
+        insertNameValue(track, "quality", String.valueOf(3));
+        insertNameValue(track, "trackNumber", String.valueOf(1));
         insertNameValue(track, "URN", "www.store.limewire.com" + (i + 1));
         insertValue(trackArr, track.toString());
 
         track = new StringBuilder(JSON_OBJ);
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Take Me To Space (Man)");
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
+        insertNameValue(track, "bitRate", String.valueOf(128));
         insertNameValue(track, "fileName", "Green Monkeys - Take Me To Space (Man).mp3");        
+        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
         insertNameValue(track, "length", String.valueOf(251));
-        insertNameValue(track, "quality", String.valueOf(3));
         insertNameValue(track, "price", "1 Credit");
+        insertNameValue(track, "quality", String.valueOf(3));
+        insertNameValue(track, "trackNumber", String.valueOf(2));
         insertNameValue(track, "URN", "www.store.limewire.com" + (i + 2));
         insertValue(trackArr, track.toString());
 
         track = new StringBuilder(JSON_OBJ);
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Crush");
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
+        insertNameValue(track, "bitRate", String.valueOf(128));
         insertNameValue(track, "fileName", "Green Monkeys - Crush.mp3");        
+        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
         insertNameValue(track, "length", String.valueOf(188));
-        insertNameValue(track, "quality", String.valueOf(3));
         insertNameValue(track, "price", "1 Credit");
+        insertNameValue(track, "quality", String.valueOf(3));
+        insertNameValue(track, "trackNumber", String.valueOf(3));
         insertNameValue(track, "URN", "www.store.limewire.com" + (i + 3));
         insertValue(trackArr, track.toString());
         
@@ -161,15 +169,17 @@ public class MockStoreConnection implements StoreConnection {
         // Create single file result.
         StringBuilder media = new StringBuilder(JSON_OBJ);
         insertNameValue(media, "artist", "GreenMonkeys");
-        insertNameValue(media, "album", "Premonitions, Echoes & Science");
         insertNameValue(media, "title", "Chomp");
+        insertNameValue(media, "album", "Premonitions, Echoes & Science");
+        insertNameValue(media, "bitRate", String.valueOf(256));
         insertNameValue(media, "category", Category.AUDIO.toString());
+        insertNameValue(media, "genre", "Jazz");
         insertNameValue(media, "fileName", "Green Monkeys Chomp.mp3");
         insertNameValue(media, "fileSize", String.valueOf(3 * 1024 * 1024));
         insertNameValue(media, "infoPage", getClass().getResource("fileInfo.html").toString());
         insertNameValue(media, "length", String.valueOf(208));
-        insertNameValue(media, "quality", String.valueOf(3));
         insertNameValue(media, "price", "1 Credit");
+        insertNameValue(media, "quality", String.valueOf(3));
         insertNameValue(media, "URN", "www.store.limewire.com" + (i + 10));
         
         // Add file to results.

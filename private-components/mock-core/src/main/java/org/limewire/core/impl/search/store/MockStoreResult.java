@@ -16,80 +16,82 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.store.StoreResult;
-import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.impl.MockURN;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.util.FileUtils;
 
 /**
  * Implementation of StoreResult for the mock core.
  */
 public class MockStoreResult implements StoreResult {
 
-    private final Category category;
-    private final URN urn;
-    private final RemoteHost remoteHost;
     private final Map<FilePropertyKey, Object> propertyMap;
-    private final List<StoreTrackResult> trackList;
+    private final List<TrackResult> trackList;
     
-    private Icon albumIcon;
-    private String fileExtension;
-    private String fileName;
-    private String infoUri;
-    private String price;
-    private long size;
+    private final Icon albumIcon;
+    private final Category category;
+    private final RemoteHost remoteHost;
+    private final String fileExtension;
+    private final String fileName;
+    private final String infoUri;
+    private final String price;
+    private final long size;
+    private final URN urn;
     
     /**
      * Constructs a MockStoreResult using the specified JSON object.
      */
     public MockStoreResult(JSONObject jsonObj) throws JSONException {
-        this.category = getCategory(jsonObj);
-        this.urn = new MockURN(jsonObj.getString("URN"));
-        this.remoteHost = new MockStoreHost();
-        this.propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
-        this.trackList = new ArrayList<StoreTrackResult>();
+        propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+        trackList = new ArrayList<TrackResult>();
         
-        buildResult(jsonObj);
-        buildTracks(jsonObj);
+        albumIcon = getAlbumIcon(jsonObj);
+        category = getCategory(jsonObj);
+        fileName = jsonObj.getString("fileName");
+        fileExtension = FileUtils.getFileExtension(fileName);
+        infoUri = jsonObj.getString("infoPage");
+        price = jsonObj.optString("price");
+        remoteHost = new MockStoreHost();
+        size = jsonObj.getLong("fileSize");
+        urn = new MockURN(jsonObj.getString("URN"));
+        
+        initProperties(jsonObj);
+        initTracks(jsonObj);
     }
     
     /**
      * Sets result values using the specified JSON object.
      */
-    private void buildResult(JSONObject jsonObj) throws JSONException {
+    private void initProperties(JSONObject jsonObj) throws JSONException {
         // Get required attributes.
         propertyMap.put(FilePropertyKey.AUTHOR, jsonObj.getString("artist"));
         propertyMap.put(FilePropertyKey.ALBUM, jsonObj.getString("album"));
         propertyMap.put(FilePropertyKey.TITLE, jsonObj.getString("title"));
-        fileName = jsonObj.getString("fileName");
-        fileExtension = getFileExtension(fileName);
-        infoUri = jsonObj.getString("infoPage");
+        propertyMap.put(FilePropertyKey.BITRATE, jsonObj.getLong("bitRate"));
+        propertyMap.put(FilePropertyKey.GENRE, jsonObj.getString("genre"));
+        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.getLong("length"));
+        propertyMap.put(FilePropertyKey.QUALITY, jsonObj.getLong("quality"));
         
         // Get optional attributes.
-        albumIcon = getAlbumIcon(jsonObj);
-        price = jsonObj.optString("price");
-        size = jsonObj.optLong("fileSize");
-        
-        long length = jsonObj.optLong("length");
-        if (length > 0) propertyMap.put(FilePropertyKey.LENGTH, length);
-        
-        long quality = jsonObj.optLong("quality");
-        if (quality > 0) propertyMap.put(FilePropertyKey.QUALITY, quality);
-        
         String trackNumber = jsonObj.optString("trackNumber");
         if (trackNumber.length() > 0) propertyMap.put(FilePropertyKey.TRACK_NUMBER, trackNumber);
+        
+        long year = jsonObj.optLong("year");
+        if (year > 0) propertyMap.put(FilePropertyKey.YEAR, year);
     }
     
     /**
      * Sets album track values using the specified JSON object.
      */
-    private void buildTracks(JSONObject jsonObj) throws JSONException {
+    private void initTracks(JSONObject jsonObj) throws JSONException {
         JSONArray trackArr = jsonObj.optJSONArray("tracks");
         if ((trackArr != null) && (trackArr.length() > 0)) {
             for (int i = 0, len = trackArr.length(); i < len; i++) {
                 JSONObject trackObj = trackArr.getJSONObject(i);
-                trackList.add(new MockStoreTrackResult(trackObj));
+                trackList.add(new MockTrackResult(trackObj));
             }
         }
     }
@@ -105,7 +107,7 @@ public class MockStoreResult implements StoreResult {
     }
     
     @Override
-    public List<StoreTrackResult> getAlbumResults() {
+    public List<TrackResult> getAlbumResults() {
         return trackList;
     }
     
@@ -175,14 +177,6 @@ public class MockStoreResult implements StoreResult {
             }
         }
         throw new JSONException("Invalid result category");
-    }
-    
-    private String getFileExtension(String fileName) {
-        int pos = fileName.lastIndexOf('.');
-        if (pos > -1) {
-            return fileName.substring(pos + 1);
-        }
-        return "";
     }
     
     private class MockStoreHost implements RemoteHost {
