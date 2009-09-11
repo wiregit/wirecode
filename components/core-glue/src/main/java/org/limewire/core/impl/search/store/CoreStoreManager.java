@@ -11,7 +11,7 @@ import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreSearchListener;
-import org.limewire.core.api.search.store.StoreTrackResult;
+import org.limewire.core.api.search.store.TrackResult;
 
 import com.google.inject.Singleton;
 
@@ -56,7 +56,7 @@ public class CoreStoreManager implements StoreManager {
     }
 
     @Override
-    public boolean isDownloadApproved(StoreTrackResult trackResult) {
+    public boolean isDownloadApproved(TrackResult trackResult) {
         // TODO implement
         return false;
     }
