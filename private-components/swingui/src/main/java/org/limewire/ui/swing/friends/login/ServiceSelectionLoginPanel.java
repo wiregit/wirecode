@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.limewire.core.settings.FacebookSettings;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
@@ -124,7 +125,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
         selectionPanel.setOpaque(false);
         
         FriendAccountConfiguration config = accountManager.getConfig("Facebook");
-        if (config != null) {
+        if (config != null && FacebookSettings.FACEBOOK_ENABLED.getValue()) {
             loginAction = facebookLoginActionFactory.create((FacebookFriendAccountConfiguration)config);
             loginActions.put(accountManager.getConfig("Facebook"), loginAction);
             JXButton facebookButton = new JXButton(loginAction);
