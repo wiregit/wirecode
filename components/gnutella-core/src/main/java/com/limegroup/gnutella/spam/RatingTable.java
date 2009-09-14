@@ -2,8 +2,6 @@ package com.limegroup.gnutella.spam;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,7 +18,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -321,35 +318,25 @@ public class RatingTable implements Service {
         return new File(CommonUtils.getUserSettingsDir(), "spam.dat");
     }
 
-    /** Inspectable that returns a hash and rating of the tokens */
-    @InspectionPoint(value = "spam rating table token hashes", category = DataCategory.USAGE)
+    /** Inspectable that returns the number of each type of token */
+    @InspectionPoint(value = "spam token counts", category = DataCategory.USAGE)
     @SuppressWarnings("unused")
-    private final Inspectable TOKEN_HASH = new Inspectable() {
+    final Inspectable TOKEN_COUNTS = new Inspectable() {
         @Override
         public Object inspect() {
+            Map<String, Object> m = new HashMap<String, Object>();
+            m.put("ver",1);
             synchronized(RatingTable.this) {
-                Map<String, Object> m = new HashMap<String, Object>();
-                m.put("ver",1);
-                final float spamThreshold = SearchSettings.FILTER_SPAM_RESULTS.getValue();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                DataOutputStream daos = new DataOutputStream(baos);
-                try {
-                    for (Token t : tokenMap.values()) {
-                        // 8 bytes per entry
-                        float rating = t.getRating();
-                        if (rating < spamThreshold)
-                            break;
-                        daos.writeFloat(rating);
-                        daos.writeInt(t.hashCode());
-                    }
-                    daos.flush();
-                    daos.close();
-                    m.put("dump", baos.toByteArray());
-                } catch (IOException impossible) {
-                    m.put("error", impossible.toString());
+                for(Token t : tokenMap.values()) {
+                    String clazz = t.getClass().getSimpleName();
+                    Integer i = (Integer)m.get(clazz);
+                    if(i == null)
+                        m.put(clazz, 1);
+                    else
+                        m.put(clazz, i + 1);
                 }
-                return m;
             }
+            return m;
         }
     };
 }

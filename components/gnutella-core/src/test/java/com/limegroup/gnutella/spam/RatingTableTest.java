@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.spam;
 
 import java.net.UnknownHostException;
+import java.util.Map;
 
 import junit.framework.Test;
 
@@ -91,6 +92,34 @@ public class RatingTableTest extends LimeTestCase {
         assertEquals(60, table.size());
         // Check that the least-recently-used token hasn't changed
         assertEquals(t, table.getLeastRecentlyUsed());
+    }
+    
+    public void testInspection() throws Exception {
+        RatingTable table = manager.getRatingTable();
+        // Create some tokens with non-default ratings
+        for(int i = 0; i < 10; i++) {
+            String address = "1.2.3." + i;
+            String name = "foo" + i + "." + i; // Unique name and extension
+            RemoteFileDesc rfd = createRFD(address, i + 1024, name, i * 1000);
+            manager.handleUserMarkedSpam(new RemoteFileDesc[]{rfd});
+        }
+        // There should be six tokens for each RFD: address, name, ext, size,
+        // approx size, client GUID
+        assertEquals(60, table.size());
+        // There should be 10 tokens of each type
+        Map<?, ?> m = (Map) table.TOKEN_COUNTS.inspect();
+        String[] types = {
+                "AddressToken",
+                "KeywordToken",
+                "FileExtensionToken",
+                "SizeToken",
+                "ApproximateSizeToken",
+                "ClientGUIDToken"
+        };
+        for(String type : types) {
+            Integer count = (Integer)m.get(type);
+            assertEquals(10, count.intValue());
+        }
     }
 
     private RemoteFileDesc createRFD(String addr, int port, String name,
