@@ -345,7 +345,7 @@ public class FriendLibraries {
                 connection = DriverManager.getConnection(connectionUrl, "sa", "");
                 statement = connection.createStatement();
 
-                // drop tables for testing
+                // drop tables since HSQLDB doesn't get cleaned up properly in test environment
                 statement.execute("drop table properties if exists");
                 statement.execute("drop table suggestions if exists");
                 
