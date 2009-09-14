@@ -36,7 +36,7 @@ public class PresenceLibraryImplTest extends BaseTestCase {
     
     public void testAddNewResult() {
         context.checking(new Expectations() {{
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary, Collections.singleton(searchResult1)))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary, Collections.singleton(searchResult1), 0))));
         }});
         presenceLibrary.addNewResult(searchResult1);
         assertEquals(1, presenceLibrary.size());
@@ -46,7 +46,7 @@ public class PresenceLibraryImplTest extends BaseTestCase {
     public void testSetNewResults() {
         context.checking(new Expectations() {{
             one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsClearedEvent(presenceLibrary))));
-            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary, Arrays.asList(searchResult1, searchResult2)))));
+            one(listener).handleEvent(with(new RemoteLibraryEventMatcher(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary, Arrays.asList(searchResult1, searchResult2), 0))));
         }});
         presenceLibrary.setNewResults(Arrays.asList(searchResult1, searchResult2));
         assertEquals(2, presenceLibrary.size());
@@ -117,9 +117,10 @@ public class PresenceLibraryImplTest extends BaseTestCase {
         @Override
         public boolean matchesSafely(RemoteLibraryEvent event) {
             return expectedEvent.getSource() == event.getSource() &&
-                expectedEvent.getType() == event.getType() && 
-                expectedEvent.getState() == event.getState() &&
-                expectedEvent.getAddedResults().equals(event.getAddedResults());
+            expectedEvent.getType() == event.getType() && 
+            expectedEvent.getState() == event.getState() &&
+            expectedEvent.getAddedResults().equals(event.getAddedResults()) &&
+            expectedEvent.getStartIndex() == event.getStartIndex();
         }   
 
         @Override
