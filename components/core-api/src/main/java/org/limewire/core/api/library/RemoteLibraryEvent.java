@@ -57,6 +57,7 @@ public class RemoteLibraryEvent extends DefaultSourceTypeEvent<RemoteLibrary, Re
      * or -1 if it doesn't apply to the event type
      */
     public int getStartIndex() {
+        assert startIndex != -1 : "index should not be used";
         return startIndex;
     }
 }
