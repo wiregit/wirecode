@@ -33,6 +33,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.ReadOnlyList;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,6 +53,10 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     private final EventListenerList<RemoteLibraryEvent> listeners = new EventListenerList<RemoteLibraryEvent>();
     private final AllFriendsLibraryImpl allFriendsLibrary = new AllFriendsLibraryImpl();
     private final PropagatingEventListener propagatingEventListener = new PropagatingEventListener(allFriendsLibrary, listeners);
+    /**
+     * Common lock for all glazed lists in here.
+     */
+    private final ReadWriteLock listLock = LockFactory.DEFAULT.createReadWriteLock();
 
     @SuppressWarnings("unused")
     @InspectableContainer
@@ -61,7 +66,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
-                readOnlyFriendLibraries.getReadWriteLock().readLock().lock();
+                listLock.readLock().lock();
                 try {
                     List<Integer> sizes = new ArrayList<Integer>(readOnlyFriendLibraries.size());
                     for (FriendLibrary friendLibrary : readOnlyFriendLibraries) {
@@ -69,7 +74,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                     }
                     data.put("sizes", sizes);
                 } finally {
-                    readOnlyFriendLibraries.getReadWriteLock().readLock().unlock();
+                    listLock.readLock().unlock();
                 }
                 return data;
             }
@@ -78,7 +83,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     
     @Inject
     public RemoteLibraryManagerImpl() {
-        allFriendLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>(LockFactory.DEFAULT.createReadWriteLock()));
+        allFriendLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>(listLock));
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries); 
     }
     
@@ -95,55 +100,59 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     @Override
     public boolean addPresenceLibrary(FriendPresence presence) {
         assert !presence.getFriend().isAnonymous();
-        FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());
-        return friendLibrary.addPresenceLibrary(presence);
+        listLock.writeLock().lock();
+        try {
+            FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());
+            return friendLibrary.addPresenceLibrary(presence);
+        } finally {
+            listLock.writeLock().unlock();
+        }
     }
     
     @Override
     public PresenceLibrary getPresenceLibrary(FriendPresence presence) {
-        FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
-        if(friendLibrary != null) {
-            return friendLibrary.getPresenceLibrary(presence);
-        } else {
-            return null;
+        listLock.readLock().lock();
+        try {
+            FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
+            if(friendLibrary != null) {
+                return friendLibrary.getPresenceLibrary(presence);
+            } else {
+                return null;
+            }
+        } finally {
+            listLock.readLock().unlock();
         }
     }
     
     private void removeFriendLibrary(FriendLibraryImpl friendLibrary) {
         LOG.debugf("removing friend library for {0}", friendLibrary.getFriend());
-        allFriendLibraries.getReadWriteLock().writeLock().lock();
+        listLock.writeLock().lock();
         try {
             friendLibrary.removeListener(propagatingEventListener);
             allFriendLibraries.remove(friendLibrary);
         } finally {
-            allFriendLibraries.getReadWriteLock().writeLock().unlock();
+            listLock.writeLock().unlock();
         }
     }
 
     @Override
     public void removePresenceLibrary(FriendPresence presence) {
-        allFriendLibraries.getReadWriteLock().writeLock().lock();
+        listLock.writeLock().lock();
         try {
             FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
             if (friendLibrary != null) {
-                EventList<PresenceLibrary> presenceLibraryList = friendLibrary.getPresenceLibraryList();
-                presenceLibraryList.getReadWriteLock().writeLock().lock();
-                try {
-                    friendLibrary.removePresenceLibrary(presence); 
-                    if (friendLibrary.getPresenceLibraryList().isEmpty()) {
-                        removeFriendLibrary(friendLibrary);
-                    }
-                } finally {
-                    presenceLibraryList.getReadWriteLock().writeLock().unlock();
+                friendLibrary.removePresenceLibrary(presence); 
+                if (friendLibrary.getPresenceLibraryList().isEmpty()) {
+                    removeFriendLibrary(friendLibrary);
                 }
             }
         } finally {
-            allFriendLibraries.getReadWriteLock().writeLock().unlock();
+            listLock.writeLock().unlock();
         }
     }
 
     private FriendLibraryImpl getOrCreateFriendLibrary(Friend friend) {
-        allFriendLibraries.getReadWriteLock().writeLock().lock();
+        listLock.writeLock().lock();
         try {
             FriendLibraryImpl friendLibrary = getFriendLibrary(friend);
             if(friendLibrary == null) {
@@ -154,7 +163,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             }
             return friendLibrary;
         } finally {
-            allFriendLibraries.getReadWriteLock().writeLock().unlock();
+            listLock.writeLock().unlock();
         }
     }
 
@@ -165,7 +174,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     
     @Override
     public FriendLibraryImpl getFriendLibrary(Friend friend) {
-        allFriendLibraries.getReadWriteLock().readLock().lock();
+        listLock.readLock().lock();
         try { 
             for(FriendLibrary library : allFriendLibraries) {
                 if(library.getFriend().getId().equals(friend.getId())) {
@@ -174,7 +183,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             }
             return null;
         } finally {
-            allFriendLibraries.getReadWriteLock().readLock().unlock();
+            listLock.readLock().unlock();
         }
     }
 
@@ -185,7 +194,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         @Override
         public int size() {
-            allFriendLibraries.getReadWriteLock().readLock().lock();
+            listLock.readLock().lock();
             try {
                 int sum = 0;
                 for (RemoteLibrary remoteLibrary : allFriendLibraries) {
@@ -193,7 +202,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 }
                 return sum;
             } finally {
-                allFriendLibraries.getReadWriteLock().readLock().unlock();
+                listLock.readLock().unlock();
             }
         }
         
@@ -242,7 +251,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
     }
 
-    private static class FriendLibraryImpl implements FriendLibrary, ParentRemoteLibrary {
+    private class FriendLibraryImpl implements FriendLibrary, ParentRemoteLibrary {
 
         private final Friend friend;
         private final EventList<PresenceLibrary> allPresenceLibraries;
@@ -254,7 +263,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         public FriendLibraryImpl(Friend friend) {
             this.friend = friend;
-            allPresenceLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>(LockFactory.DEFAULT.createReadWriteLock()));
+            allPresenceLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>(listLock));
             readOnlyPresenceLibraries = GlazedListsFactory.readOnlyList(allPresenceLibraries);
         }
         
@@ -282,7 +291,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
         
         private PresenceLibraryImpl getPresenceLibrary(FriendPresence presence) {
-            allPresenceLibraries.getReadWriteLock().readLock().lock();
+            listLock.readLock().lock();
             try {
                 for(PresenceLibrary library : allPresenceLibraries) {
                     if(library.getPresence().getPresenceId().equals(presence.getPresenceId())) {
@@ -291,12 +300,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 }
                 return null;
             } finally {
-                allPresenceLibraries.getReadWriteLock().readLock().unlock();
+                listLock.readLock().unlock();
             }
         }
         
         private boolean addPresenceLibrary(FriendPresence presence) {
-            allPresenceLibraries.getReadWriteLock().writeLock().lock();
+            listLock.writeLock().lock();
             try {
                 PresenceLibraryImpl library = getPresenceLibrary(presence);
                 if(library == null) {
@@ -309,12 +318,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                     return false;
                 }
             } finally {
-                allPresenceLibraries.getReadWriteLock().writeLock().unlock();
+               listLock.writeLock().unlock();
             }
         }
 
         private void removePresenceLibrary(FriendPresence presence) {
-            allPresenceLibraries.getReadWriteLock().writeLock().lock();
+           listLock.writeLock().lock();
             try {
                 PresenceLibraryImpl presenceLibrary = getPresenceLibrary(presence);
                 if(presenceLibrary != null) {
@@ -323,13 +332,13 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                     allPresenceLibraries.remove(presenceLibrary);
                 }
             } finally {
-                allPresenceLibraries.getReadWriteLock().writeLock().unlock();
+                listLock.writeLock().unlock();
             }
         }
 
         @Override
         public int size() {
-            readOnlyPresenceLibraries.getReadWriteLock().readLock().lock();
+            listLock.readLock().lock();
             try {
                 int sum = 0;
                 for (PresenceLibrary presenceLibrary : readOnlyPresenceLibraries) {
@@ -337,7 +346,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 }
                 return sum;
             } finally {
-                readOnlyPresenceLibraries.getReadWriteLock().readLock().unlock();
+                listLock.readLock().unlock();
             }
         }
 
@@ -564,7 +573,9 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 parent.updateState();
                 break;
             case RESULTS_ADDED:
-                listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(parent, event.getAddedResults(), parent.size()));
+                listeners.broadcast(RemoteLibraryEvent.createResultsAddedEvent(parent, event.getAddedResults(),
+                        // it's difficult to know the exact offset in the parent library, so let's not expose it
+                        -1));
                 break;
             case RESULTS_CLEARED:
                 if (parent.size() == 0) {
