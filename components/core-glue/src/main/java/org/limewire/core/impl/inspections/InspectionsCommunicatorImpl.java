@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
@@ -116,17 +117,32 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
         }
         inspectionsSpecs.removeAll(inspSpecs);    
     }
-
-    private byte[] queryInspectionsServer(String serverUrl, HttpEntity entity) throws IOException {
-        boolean usage = ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.get();
-        serverUrl = httpClientInstanceUtils.addClientInfoToUrl(serverUrl) + "&urs=" + Boolean.toString(usage);
-        HttpPost httpPost = new HttpPost(serverUrl);
+    
+    private byte[] requestInspectionsFromServer() throws IOException {
+        String requestUrl = inspectionsServerUrls.get().get(
+            InspectionsServerUrls.INSPECTION_SPEC_REQUEST_URL).get();
+        HttpGet httpGet = new HttpGet(addClientInfoToUrl(requestUrl));
+        httpGet.addHeader("Accept-Encoding", "gzip");
+        httpGet.addHeader("Connection", "close");
+        return executeRequest(httpGet);    
+    }
+    
+    private byte[] sendInspectionsResultsToServer(byte[] bytesToPost) throws IOException {
+        String submitUrl = inspectionsServerUrls.get().get(
+                InspectionsServerUrls.INSPECTION_SPEC_SUBMIT_URL).get();
+        HttpEntity postContent = new ByteArrayEntity(bytesToPost);
+        HttpPost httpPost = new HttpPost(addClientInfoToUrl(submitUrl));
         httpPost.addHeader("Accept-Encoding", "gzip");
         httpPost.addHeader("Connection", "close");
-        if (entity != null) {
-            httpPost.setEntity(entity);
-        }
+        httpPost.addHeader("Content-Encoding", "gzip");
+        httpPost.addHeader("Content-Type", "binary/octet-stream");
+        httpPost.setEntity(postContent);
         return executeRequest(httpPost);
+    }
+    
+    private String addClientInfoToUrl(String serverUrl) {
+        boolean usage = ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.get();
+        return httpClientInstanceUtils.addClientInfoToUrl(serverUrl) + "&urs=" + Boolean.toString(usage);    
     }
     
     
@@ -174,9 +190,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
                     // contact server, get insp. instructions
                     List<InspectionsSpec> specs = Collections.emptyList();
                     try {
-                        String requestUrl = inspectionsServerUrls.get().get(
-                        InspectionsServerUrls.INSPECTION_SPEC_REQUEST_URL).get();
-                        byte[] rawInspectionSpecs = queryInspectionsServer(requestUrl, null);
+                        byte[] rawInspectionSpecs = requestInspectionsFromServer();
                         specs = parser.parseInspectionSpecs(rawInspectionSpecs);
                     } catch (IOException e) {
                         LOG.error("Error in getting inspections specifications from server", e); 
@@ -218,9 +232,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
         public void inspectionsPerformed(InspectionDataContainer insps) throws InspectionProcessingException {
             try {
                 byte[] bytesToSend = parser.inspectionResultToByteArray(insps);
-                String submitUrl = inspectionsServerUrls.get().get(
-                InspectionsServerUrls.INSPECTION_SPEC_SUBMIT_URL).get();
-                queryInspectionsServer(submitUrl, new ByteArrayEntity(bytesToSend));
+                sendInspectionsResultsToServer(bytesToSend);
             } catch (IOException e) {
                 LOG.debug("Error sending inspections results to server", e);
                 throw new InspectionProcessingException(e);
