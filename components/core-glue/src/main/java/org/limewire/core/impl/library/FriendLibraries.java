@@ -126,6 +126,7 @@ public class FriendLibraries {
                                                 item.getPresence().getPresenceId());
                                         LibraryListener listener = listeners.remove(item.getPresence().getPresenceId());
                                         item.removeListener(listener);
+                                        listener.clear();
                                     }
 
                                     @Override
@@ -343,6 +344,10 @@ public class FriendLibraries {
                 
                 connection = DriverManager.getConnection(connectionUrl, "sa", "");
                 statement = connection.createStatement();
+
+                // drop tables for testing
+                statement.execute("drop table properties if exists");
+                statement.execute("drop table suggestions if exists");
                 
                 // create tables and indices
                 statement.execute("CREATE CACHED TABLE properties (keyword VARCHAR(200), i INT, presence INT, category INT, fileproperty INT)");
@@ -509,7 +514,7 @@ public class FriendLibraries {
                     indexProperty(presenceId, index, newFile, filePropertyKey, sentence);
                 }
             }
-            watch.resetAndLog("indexing " + newFile.getFileNameWithoutExtension());
+            watch.resetAndLog("indexing " + newFile);
         }
         
         /**

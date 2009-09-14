@@ -91,7 +91,7 @@ public class FriendLibraryPropertyAutoCompleterTest extends BaseTestCase {
      * Test the getPrefixedBy function and ensure it returns the right list and
      *  at least an equivalent one (if not the same which it does right now).
      */
-    public void testGetPrefixedBy() {
+    public void testGetPrefixedBy() throws Exception {
         Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};

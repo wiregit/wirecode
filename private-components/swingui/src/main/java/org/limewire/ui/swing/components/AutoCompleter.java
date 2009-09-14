@@ -2,6 +2,8 @@ package org.limewire.ui.swing.components;
 
 import javax.swing.JComponent;
 
+import org.limewire.concurrent.ListeningFuture;
+
 /** A component that can offer autocomplete suggestions. */
 public interface AutoCompleter {
     
@@ -11,8 +13,16 @@ public interface AutoCompleter {
     /** 
      * Sets the new input to the autocompleter.  This can change what is
      * currently visible as suggestions.
+     * 
+     * The returned Future returns true if the lookup for autocompletions
+     * completed succesfully.  True does not indicate autocompletions are
+     * available.  It merely indicates that the lookup completed.
+     * 
+     * Because AutoCompleters are allowed to be asynchronous, one should
+     * use Future.get or listen to the future in order to see when
+     * the future has completed.
      */
-    void setInput(String input);
+    ListeningFuture<Boolean> setInput(String input);
 
     /**
      * Returns true if any autocomplete suggestions are currently available, based the data

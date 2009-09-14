@@ -67,15 +67,15 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
         int count = 0;
         for (SearchResult searchResult : allFriendsLibrary) {
             remoteFileItems.add(searchResult);
-//            if (++count % 100 == 0) {
-//                long now = System.currentTimeMillis();
-//                if (now - start >= 100) {
-//                    for (SearchListener listener : searchListeners) {
-//                        listener.handleSearchResults(this, remoteFileItems);
-//                    }
-//                    remoteFileItems = new ArrayList<SearchResult>();
-//                }
-//            }
+            if (++count % 100 == 0) {
+                long now = System.currentTimeMillis();
+                if (now - start >= 100) {
+                    for (SearchListener listener : searchListeners) {
+                        listener.handleSearchResults(this, remoteFileItems);
+                    }
+                    remoteFileItems = new ArrayList<SearchResult>();
+                }
+            }
         }
         watch.resetAndLog("addAll");
         

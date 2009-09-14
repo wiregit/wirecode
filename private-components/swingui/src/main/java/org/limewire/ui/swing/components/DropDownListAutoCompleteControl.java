@@ -20,6 +20,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.AutoCompleter.AutoCompleterCallback;
 
 
@@ -112,12 +116,23 @@ public class DropDownListAutoCompleteControl {
                 public void run() {
                     String input = textField.getText();
                     if (input != null && input.length() > 0) {
-                        autoCompleter.setInput(input);
-                        if(autoCompleter.isAutoCompleteAvailable()) {
-                            showPopup();
-                        } else {
+                        ListeningFuture<Boolean> future = autoCompleter.setInput(input);
+                        // If it finished immediately, don't hide it!
+                        if(!future.isDone()) {
                             hidePopup();
                         }
+                        future.addFutureListener(new EventListener<FutureEvent<Boolean>>() {
+                            @Override
+                            @SwingEDTEvent
+                            public void handleEvent(FutureEvent<Boolean> event) {
+                                // == Boolean.TRUE to prevent NPE on unbox if result is null
+                                if(event.getResult() == Boolean.TRUE) {
+                                    showPopup();
+                                } else {
+                                    hidePopup();
+                                }
+                            }
+                        });
                     } else {
                         hidePopup();
                     }
@@ -259,8 +274,16 @@ public class DropDownListAutoCompleteControl {
                         autoCompleter.decrementSelection();
                     } else {
                         String input = textField.getText();
-                        autoCompleter.setInput(input);
-                        showPopup();
+                        autoCompleter.setInput(input).addFutureListener(new EventListener<FutureEvent<Boolean>>() {
+                            @Override
+                            @SwingEDTEvent
+                            public void handleEvent(FutureEvent<Boolean> event) {
+                                // == Boolean.TRUE to prevent NPE on unbox if result is null
+                                if(event.getResult() == Boolean.TRUE) {
+                                    showPopup();
+                                }
+                            }
+                        });
                     }
                     break;
                 case KeyEvent.VK_DOWN:
@@ -268,8 +291,16 @@ public class DropDownListAutoCompleteControl {
                         autoCompleter.incrementSelection();
                     } else { 
                         String input = textField.getText();
-                        autoCompleter.setInput(input);
-                        showPopup();
+                        autoCompleter.setInput(input).addFutureListener(new EventListener<FutureEvent<Boolean>>() {
+                            @Override
+                            @SwingEDTEvent
+                            public void handleEvent(FutureEvent<Boolean> event) {
+                                // == Boolean.TRUE to prevent NPE on unbox if result is null
+                                if(event.getResult() == Boolean.TRUE) {
+                                    showPopup();
+                                }
+                            }
+                        });
                     }
                     break;
                 case KeyEvent.VK_LEFT:

@@ -52,7 +52,7 @@ public class FriendAutoCompleterFactoryImplTest extends BaseTestCase {
     /**
      * Test the dictionary create method with a FileProperyKey.
      */
-    public void testGetDictionaryWithFileProp() {
+    public void testGetDictionaryWithFileProp() throws Exception {
         Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};

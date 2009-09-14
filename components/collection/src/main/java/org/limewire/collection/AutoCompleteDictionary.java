@@ -24,6 +24,10 @@ import java.util.Collection;
  *       AutoCompleteTextField use.
  */
 public interface AutoCompleteDictionary extends Iterable<String> {
+    
+    /** Returns true if the dictionary can immediately return results.  False if it will block for any reason. */
+    public boolean isImmediate();
+    
     /**
      * Adds an entry to the dictionary.
      *
@@ -54,7 +58,7 @@ public interface AutoCompleteDictionary extends Iterable<String> {
     /**
      * Returns an iterator of potential matches from the given string.
      */
-    public Collection<String> getPrefixedBy(String s);
+    public Collection<String> getPrefixedBy(String s) throws InterruptedException;
     
     /**
      * Clears the dictionary.

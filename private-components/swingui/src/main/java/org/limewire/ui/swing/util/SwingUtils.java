@@ -11,6 +11,22 @@ import org.limewire.util.ExceptionUtils;
 public class SwingUtils {
     
     private SwingUtils() {}
+    
+    /**
+     * Calls {@link SwingUtilities#invokeAndWait(Runnable)}
+     * only if this is not currently on the Swing thread.
+     */
+    public static void invokeAndWaitWithInterrupted(Runnable runnable) throws InterruptedException {
+        if (EventQueue.isDispatchThread()) {
+            runnable.run();
+        } else {
+            try {
+                EventQueue.invokeAndWait(runnable);
+            } catch (InvocationTargetException ite) {
+                ExceptionUtils.rethrow(ite.getCause());
+            }
+        }
+    }
 
     /**
      * Calls {@link SwingUtilities#invokeAndWait(Runnable)}
