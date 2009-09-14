@@ -53,7 +53,6 @@ public class FriendLibraries {
     private static final Log LOG = LogFactory.getLog(FriendLibraries.class);
     
     private static final Stopwatch watch = new Stopwatch(LOG);
-
     /**
      * Keeps track of whether the database based index has already been
      * initialized.
@@ -74,7 +73,7 @@ public class FriendLibraries {
      * which doesn't have any results. Once the first presence library is added
      * the index will be switched to the {@link DatabaseIndex}.
      */
-    private Index index = new EmptyIndex();
+    private volatile Index index = new EmptyIndex();
     /**
      * The list map of {@link LibraryListener} indexed by the presence id of the
      * presence library they're listening to.
@@ -87,14 +86,15 @@ public class FriendLibraries {
      * @return the currently active index 
      */
     private Index getIndex(boolean initializeDbIndex) {
-        synchronized (indexLock) {
-            if (initializeDbIndex) {
-                if (!databaseIndexInitialized.getAndSet(true)) {
+        if (initializeDbIndex && !databaseIndexInitialized.get()) {
+            synchronized (indexLock) {
+                if (!databaseIndexInitialized.get()) {
                     index = new DatabaseIndex(); 
+                    databaseIndexInitialized.set(true);
                 }
             }
-            return index;
         }
+        return index;
     }
     
     @Inject
@@ -366,13 +366,15 @@ public class FriendLibraries {
                 for (File file : files) {
                     file.deleteOnExit();
                 }
+                // file does not exist yet, but add delete hook for it nevertheless
+                new File(folder, "friend-indices.backup").deleteOnExit();
             } catch (SQLException sql) {
                 throw new RuntimeException(sql);
             }
         }
 
         /**
-         * Uses a intersect to link all keywords together.
+         * Uses an intersect query to link all keywords together.
          */
         @Override
         public Collection<SearchResult> getMatchingItems(SearchDetails searchDetails) {
