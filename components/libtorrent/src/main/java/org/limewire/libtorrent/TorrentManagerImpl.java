@@ -405,22 +405,22 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public boolean isManagedTorrent(File torrentFile) {
+    public Torrent getTorrent(File torrentFile) {
         if (torrentFile != null) {
             synchronized (torrents) {
                 for (Torrent torrent : torrents.values()) {
                     if (torrentFile.equals(torrent.getTorrentFile())) {
-                        return true;
+                        return torrent;
                     }
                 }
             }
         }
-        return false;
+        return null;
     }
 
     @Override
-    public boolean isManagedTorrent(String sha1) {
-        return torrents.containsKey(sha1);
+    public Torrent getTorrent(String sha1) {
+        return torrents.get(sha1);
     }
 
     /**
@@ -586,5 +586,14 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public boolean isInitialized() {
         return isValid();
+    }
+
+    @Override
+    public List<Torrent> getTorrents() {
+        List<Torrent> torrents = null;
+        synchronized (this.torrents) {
+             torrents = new ArrayList<Torrent>(this.torrents.values());    
+        }
+        return torrents;
     }
 }

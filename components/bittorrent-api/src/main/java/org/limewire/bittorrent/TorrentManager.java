@@ -41,16 +41,14 @@ public interface TorrentManager {
     void registerTorrent(Torrent torrent);
 
     /**
-     * Returns true if the torrent manager currently has a torrent registered
-     * from the specified torrent file.
+     * Returns the torrent for the given torrent file if found. null otherwise.
      */
-    public boolean isManagedTorrent(File torrentFile);
+    public Torrent getTorrent(File torrentFile);
 
     /**
-     * Returns true if the torrent manager currently has a torrent with the
-     * specified sha1.
+     * Returns the torrent for the given sha1 if found. null otherwise.
      */
-    public boolean isManagedTorrent(String sha1);
+    public Torrent getTorrent(String sha1);
 
     /**
      * Returns true if the TorrentManager loaded properly and is in a valid
@@ -127,4 +125,9 @@ public interface TorrentManager {
      * Returns true if the torrent manager is initialized.
      */
     public boolean isInitialized();
+    
+    /**
+     * Returns a snapshot list of the torrents that are currently in the torrent manager.
+     */
+    public List<Torrent> getTorrents();
 }

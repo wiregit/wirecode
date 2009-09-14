@@ -33,13 +33,13 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public boolean isManagedTorrent(File torrentFile) {
-        return false;
+    public Torrent getTorrent(File torrentFile) {
+        return null;
     }
 
     @Override
-    public boolean isManagedTorrent(String sha1) {
-        return false;
+    public Torrent getTorrent(String sha1) {
+        return null;
     }
 
     @Override
@@ -131,5 +131,10 @@ public class MockTorrentManager implements TorrentManager {
     @Override
     public boolean isInitialized() {
         return false;
+    }
+
+    @Override
+    public List<Torrent> getTorrents() {
+        return Collections.emptyList();
     }
 }

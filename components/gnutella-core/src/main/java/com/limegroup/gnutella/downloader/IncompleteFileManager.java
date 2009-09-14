@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.Range;
@@ -595,7 +596,8 @@ public class IncompleteFileManager  {
                 String name = incompleteFile.getName();
                 
                 if(isTorrentFile(incompleteFile)) {
-                    return !torrentManager.get().isManagedTorrent(incompleteFile);
+                    Torrent torrent = torrentManager.get().getTorrent(incompleteFile); 
+                    return torrent == null;
                 } else {
                     if(!name.startsWith(INCOMPLETE_PREFIX)) {
                         return false;

@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
@@ -93,23 +94,23 @@ public class LazyTorrentManager implements TorrentManager, Service {
     }
 
     @Override
-    public boolean isManagedTorrent(File torrentFile) {
+    public Torrent getTorrent(File torrentFile) {
         if (!initialized) {
-            return false;
+            return null;
         }
 
         setupTorrentManager();
-        return torrentManager.get().isManagedTorrent(torrentFile);
+        return torrentManager.get().getTorrent(torrentFile);
     }
 
     @Override
-    public boolean isManagedTorrent(String sha1) {
+    public Torrent getTorrent(String sha1) {
         if (!initialized) {
-            return false;
+            return null;
         }
 
         setupTorrentManager();
-        return torrentManager.get().isManagedTorrent(sha1);
+        return torrentManager.get().getTorrent(sha1);
     }
 
     @Override
@@ -238,5 +239,15 @@ public class LazyTorrentManager implements TorrentManager, Service {
     @Override
     public boolean isInitialized() {
        return initialized;
+    }
+
+    @Override
+    public List<Torrent> getTorrents() {
+        if (!initialized) {
+            return Collections.emptyList();
+        }
+
+        setupTorrentManager();
+        return torrentManager.get().getTorrents();
     }
 }

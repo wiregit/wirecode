@@ -917,13 +917,18 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     }
 
     private void checkIfAlreadyManagedTorrent(BTDownloader ret) throws DownloadException {
-        if (torrentManager.get().isManagedTorrent(ret.getTorrentFile())) {
-            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
-                    .getSaveFile());
-        } else if (torrentManager.get().isManagedTorrent(
-                StringUtils.toHexString(ret.getSha1Urn().getBytes()))) {
-            throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
-                    .getSaveFile());
+        Torrent torrent = torrentManager.get().getTorrent(ret.getTorrentFile());
+        if(torrent == null) {
+            torrent = torrentManager.get().getTorrent(
+                    StringUtils.toHexString(ret.getSha1Urn().getBytes()));
+        }
+        
+        if(torrent != null) {
+            if(!torrent.isFinished()) {
+                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret.getSaveFile());
+            } else {
+                throw new DownloadException(ErrorCode.FILE_ALREADY_UPLOADING, ret.getSaveFile());
+            }
         }
     }
 

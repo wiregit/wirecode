@@ -140,6 +140,9 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
         Object message = null;
 
         switch (e.getErrorCode()) {
+        case FILE_ALREADY_UPLOADING:
+            message = I18n.tr("Sorry, this file is already being uploaded.");
+            break;
         case FILE_ALREADY_DOWNLOADING:
             message = I18n.tr("Sorry, this file is already being downloaded.");
             break;

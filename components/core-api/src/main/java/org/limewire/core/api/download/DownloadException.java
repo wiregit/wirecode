@@ -73,7 +73,11 @@ public class DownloadException extends IOException {
         /**
          * Thrown when trying to escape the add download logic because the user cancelled the download.
          */
-        DOWNLOAD_CANCELLED
+        DOWNLOAD_CANCELLED, 
+        /**
+         * Thrown when the user tries to download an already uploading torrent file. 
+         */
+        FILE_ALREADY_UPLOADING
     }
 
     /**
