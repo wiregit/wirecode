@@ -356,6 +356,63 @@ public class InspectionsIntegrationTest extends LimeTestCase {
         assertEquals(0, listInspDataEncoded.size());        
     }
     
+    // test that server redirects are followed.
+    public void testRedirectsFollowed() throws Exception {
+    
+        // start server which returns inspections specs
+        List<InspectionsSpec> inspSpecs = new ArrayList<InspectionsSpec>();
+        List<String> inspections = Collections.singletonList(
+                "org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE");
+        inspSpecs.add(new InspectionsSpec(inspections, 3, 0));
+        ServerController serverController = startServerWithInspectionSpecs(inspSpecs);
+
+        // start server which redirects to inspections server
+        ResourceHandler requestHandler = new ResourceHandler() {
+            public void handleGet(org.mortbay.http.HttpRequest httpRequest,
+                              org.mortbay.http.HttpResponse httpResponse,
+                              String s, java.lang.String s1,
+                              org.mortbay.util.Resource resource) throws java.io.IOException {
+                String path = httpRequest.getURI().getPath();
+                String urlRedirect = "http://localhost:8123" + path + "?" + httpRequest.getQuery();
+                httpResponse.sendRedirect(urlRedirect);
+                httpResponse.commit();
+                httpRequest.setHandled(true);
+            }
+        };
+        
+        HttpServer redirectingServer = new HttpServer();
+        SocketListener listener = new SocketListener();
+        listener.setPort(8124);
+        listener.setMinThreads(1);
+        redirectingServer.addListener(listener);
+        HttpContext context = redirectingServer.addContext("");
+        context.setResourceBase("");
+        requestHandler.setAcceptRanges(true);
+        requestHandler.setDirAllowed(true);
+        context.addHandler(requestHandler);
+        context.addHandler(new NotFoundHandler());
+        redirectingServer.start();
+        
+        
+        // modify settings so that client points to redirecting server for request URL only
+        // inspections submissions to the server currently do not redirect
+        InspectionsSettings.INSPECTION_SPEC_REQUEST_URL.set("http://localhost:8124/request");
+       
+        // start inspections communicator
+        startInspectionsCommunicator();
+        
+        // wait for inspection to be performed, and results sent to the redirecting server
+        Thread.sleep(5000);
+        
+        // verify inspections results from inspections server are what we expect
+        List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
+        assertEquals(1, listInspDataEncoded.size());
+        InspectionDataContainer listInspData1 = parseInspectionData(listInspDataEncoded.get(0));
+        assertEquals(1, listInspData1.getResultCount());
+        assertEquals(Integer.valueOf(1), Integer.valueOf(new String((byte[])listInspData1.getData(
+                inspections.get(0)))));
+    }
+    
     private ServerController startServerWithContent(byte[] bytes) throws Exception {
         String serverDir = _baseDir.getAbsolutePath();
         writeFile(bytes, serverDir + "/" + SPEC_FILENAME);
