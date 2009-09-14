@@ -18,5 +18,6 @@ public interface PresenceLibrary extends RemoteLibrary {
     /** Sets the current state. */
     void setState(RemoteLibraryState newState);
     
+    /** Returns the search result at <code>index</code> or throws {@link IndexOutOfBoundsException}. */
     SearchResult get(int index);
 }
