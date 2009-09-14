@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,7 +11,6 @@ import java.util.StringTokenizer;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
-
 
 public class QueryUtils {
     
@@ -52,20 +53,20 @@ public class QueryUtils {
      * @return
      */
     public static final Set<String> extractKeywords(String str, boolean allowNumbers) {
-    	
+
         //Separate by whitespace and _, etc.
         Set<String> ret=new LinkedHashSet<String>();
     
         StringTokenizer st = new StringTokenizer(str, DELIMITERS_AND_ILLEGAL);
-        while (st.hasMoreTokens()) {
+        while(st.hasMoreTokens()) {
             String currToken = st.nextToken().toLowerCase();
             if(!allowNumbers) {
                 try {                
                     Double.parseDouble(currToken); //NFE if number
                     continue;
-                } catch (NumberFormatException normalWord) {}
+                } catch(NumberFormatException normalWord) {}
             }
-    		if (!TRIVIAL_WORDS.contains(currToken))
+            if(!TRIVIAL_WORDS.contains(currToken))
                 ret.add(currToken);
         }
         return ret;
@@ -80,7 +81,7 @@ public class QueryUtils {
     static final Set<String> extractKeywordsFromFileName(String fileName) {
     	return extractKeywords(ripExtension(fileName), false);
     }
-
+    
     /**
      * Removes illegal characters from the name, inserting spaces instead.
      */
@@ -95,8 +96,8 @@ public class QueryUtils {
         while(st.hasMoreTokens())
             ret += st.nextToken().trim() + " ";
         return ret.trim();
-    }
-
+        }
+    
     /**
      * Strips an extension off of a file's filename.
      */
@@ -188,4 +189,16 @@ public class QueryUtils {
         return Arrays.binarySearch(DELIMITERS_CHARACTERS, c) >= 0;
     }
     
+    /**
+     * Mutates a query string by shuffling the words and removing trivial words.
+     * The returned string may or may not differ from the argument.
+     */
+    public static String mutateQuery(String query) {
+        ArrayList<String> words =
+            new ArrayList<String>(extractKeywords(query, true));
+        if(words.size() <= 1)
+            return query;
+        Collections.shuffle(words);
+        return StringUtils.explode(words, " ");
+    }
 }

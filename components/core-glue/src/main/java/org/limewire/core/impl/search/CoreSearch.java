@@ -157,7 +157,8 @@ public class CoreSearch implements Search {
             advancedQuery = compositeQueryBuilder.createXMLQueryString(advancedSearch, searchDetails.getSearchCategory().getCategory());
         }
         
-        searchServices.query(searchGuid, query, advancedQuery,
+        String mutated = searchServices.mutateQuery(query);
+        searchServices.query(searchGuid, mutated, advancedQuery,
                 MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
         
         backgroundExecutor.execute(new Runnable() {
@@ -239,12 +240,10 @@ public class CoreSearch implements Search {
             listener.searchStopped(CoreSearch.this);
         }
     }
-
-
+    
     public GUID getQueryGuid() {
         return new GUID(searchGuid);
     }
-
     
     private void handleSponsoredResults(SponsoredResult... sponsoredResults) {
         List<SponsoredResult> resultList =  Arrays.asList(sponsoredResults);

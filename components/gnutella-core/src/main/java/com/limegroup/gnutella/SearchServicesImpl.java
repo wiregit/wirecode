@@ -5,9 +5,9 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.inspection.DataCategory;
 import org.limewire.io.GUID;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.I18NConvert;
@@ -175,7 +175,6 @@ public class SearchServicesImpl implements SearchServices {
                     qr = queryRequestFactory.get().createQuery(guid, query, richQuery, type);
                 }
             
-            
                 recordAndSendQuery(qr, type);
                 if (type != null) {
                     searchesByType.count(type.getSchema());
@@ -212,7 +211,16 @@ public class SearchServicesImpl implements SearchServices {
             GUID.timeStampGuid(ret);
         return ret;
     }
-
+    
+    /**
+     * Mutates a query string by shuffling the words and removing trivial words.
+     * The returned string may or may not differ from the argument.
+     */
+    @Override
+    public String mutateQuery(String query) {
+        return QueryUtils.mutateQuery(query);
+    }
+    
     @Override
     public BrowseHostHandler doAsynchronousBrowseHost(final FriendPresence friendPresence, GUID guid, final BrowseListener browseListener) {
         final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid);

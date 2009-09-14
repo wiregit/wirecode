@@ -102,6 +102,12 @@ public interface SearchServices {
     public byte[] newQueryGUID();
 
     /**
+     * Mutates a query string by shuffling the words and removing trivial words.
+     * The returned string may or may not differ from the argument.
+     */
+    public String mutateQuery(String query);
+
+    /**
      * Initiates a non-blocking browse of <code>address</code> with
      * session guid <code>browseGuid</code>.
      */

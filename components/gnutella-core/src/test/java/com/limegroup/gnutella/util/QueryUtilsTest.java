@@ -8,12 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.util.BaseTestCase;
+import junit.framework.Test;
+
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
-
-import junit.framework.Test;
+import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -159,5 +159,13 @@ public class QueryUtilsTest extends BaseTestCase {
         for (char c : "203fklj\t|03fklj?=".toCharArray()) {
             assertFalse("considered a delimiter: " + c, QueryUtils.isDelimiter(c));
         }
+    }
+    
+    public void testMutateQuery() {
+        String query = "abc 123 \u6771\u4eac"; // abc 123 tokyo
+        query = QueryUtils.mutateQuery(query);
+        assertTrue(query.contains("abc"));
+        assertTrue(query.contains("123"));
+        assertTrue(query.contains("\u6771\u4eac"));
     }
 }
