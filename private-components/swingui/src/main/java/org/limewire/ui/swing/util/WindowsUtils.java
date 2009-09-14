@@ -28,11 +28,16 @@ public class WindowsUtils {
         if(!isLoginStatusAvailable())
             return;
         
-        
-        File src = new File("LimeWire On Startup.lnk");
         File homeDir = CommonUtils.getUserHomeDir();
         File startup = new File(homeDir, "Start Menu\\Programs\\Startup");
         File dst = new File(startup, "LimeWire On Startup.lnk");
+        
+        // No need to copy if the link is already there
+        if (dst.exists())
+            return;
+        
+        File src = new File("LimeWire On Startup.lnk");
+                
         
         if(allow)
             FileUtils.copy(src, dst);

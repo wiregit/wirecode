@@ -45,6 +45,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LocaleUtils;
 import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.ui.swing.wizard.IntentDialog;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.I18NConvert;
@@ -179,6 +180,11 @@ public final class Initializer {
         // Start the core & run any queued control requests, and load DAAP.
         startCore();
         runQueuedRequests();
+        
+        // Make sure startup on startup is configured
+        if (OSUtils.isWindows() && StartupSettings.RUN_ON_STARTUP.getValue()) {
+            WindowsUtils.setLoginStatus(true);
+        }
         
         // Run any after-init tasks.
         postinit();        
