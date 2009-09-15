@@ -2,7 +2,8 @@ package org.limewire.ui.swing.search;
 
 import java.awt.event.ActionEvent;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -62,11 +63,11 @@ public class BlockUserMenuFactory {
     }
 
     private JMenu createBlockMenu(Collection<RemoteHost> allHosts, final BlockHandler blockHandler) {
-        final Collection<Friend> p2pUsers = new HashSet<Friend>();
+        final Map<String, Friend> p2pUsers = new TreeMap<String, Friend>();
         for (RemoteHost host : allHosts) {
             Friend friend = host.getFriendPresence().getFriend();
             if (friend.isAnonymous()) {
-                p2pUsers.add(friend);
+                p2pUsers.put(friend.getRenderName(), friend);
             }
         }
 
@@ -81,7 +82,7 @@ public class BlockUserMenuFactory {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (blockHandler.confirmBlockAll(p2pUsers.size())) {
-                        for (Friend user : p2pUsers) {
+                        for (Friend user : p2pUsers.values()) {
                             spamManager.addToBlackList(user.getName());
                         }
                         blockHandler.handleSideEffects();
@@ -91,7 +92,7 @@ public class BlockUserMenuFactory {
             blockMenu.addSeparator();
         }
 
-        for (final Friend user : p2pUsers) {
+        for (final Friend user : p2pUsers.values()) {
             blockMenu.add(new AbstractAction(user.getRenderName()) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
