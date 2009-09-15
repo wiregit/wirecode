@@ -19,7 +19,7 @@ public class VisualSearchResultTextFilterator implements TextFilterator<VisualSe
         list.add(vsr.getFileExtension());
         
         // Add non-null values for all indexable keys.
-        for(FilePropertyKey key : FilePropertyKey.getIndexableKeys()) {
+        for(FilePropertyKey key : FilePropertyKey.getFilterableKeys()) {
             String value = vsr.getPropertyString(key);
             if(value != null) {
                 list.add(value);

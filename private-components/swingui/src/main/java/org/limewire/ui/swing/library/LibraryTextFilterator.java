@@ -13,7 +13,7 @@ class LibraryTextFilterator<T extends FileItem> implements TextFilterator<T> {
         list.add(fileItem.getName());
         list.add(String.valueOf(fileItem.getSize()));
 
-        for (FilePropertyKey key : FilePropertyKey.getIndexableKeys()) {
+        for (FilePropertyKey key : FilePropertyKey.getFilterableKeys()) {
             Object value = fileItem.getProperty(key);
             if (value != null) {
                 list.add(value.toString());
