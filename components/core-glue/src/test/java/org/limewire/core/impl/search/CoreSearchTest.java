@@ -23,6 +23,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.geocode.GeocodeInformation;
@@ -66,6 +67,7 @@ public class CoreSearchTest extends BaseTestCase {
         final QueryReplyListenerList listenerList = context.mock(QueryReplyListenerList.class);
         final PromotionSearcher promotionSearcher = context.mock(PromotionSearcher.class);
         final FriendSearcher friendSearcher = context.mock(FriendSearcher.class);
+        final StoreManager storeManager = context.mock(StoreManager.class);
         final Provider<GeocodeInformation> geoLocation = context.mock(Provider.class);
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
@@ -76,7 +78,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
+                promotionSearcher, friendSearcher, storeManager, geoLocation, backgroundExecutor,
                 searchEventBroadcaster, null, null, null);
 
         context.checking(new Expectations() {{
@@ -166,6 +168,7 @@ public class CoreSearchTest extends BaseTestCase {
         final QueryReplyListenerList listenerList = context.mock(QueryReplyListenerList.class);
         final PromotionSearcher promotionSearcher = context.mock(PromotionSearcher.class);
         final FriendSearcher friendSearcher = context.mock(FriendSearcher.class);
+        final StoreManager storeManager = context.mock(StoreManager.class);
         final Provider<GeocodeInformation> geoLocation = context.mock(Provider.class);
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
@@ -177,7 +180,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<FriendSearchListener> friendSearchListener = new AtomicReference<FriendSearchListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
+                promotionSearcher, friendSearcher, storeManager, geoLocation, backgroundExecutor,
                 searchEventBroadcaster, null, clock, null);
 
         context.checking(new Expectations() {{
@@ -241,6 +244,7 @@ public class CoreSearchTest extends BaseTestCase {
         final QueryReplyListenerList listenerList = context.mock(QueryReplyListenerList.class);
         final PromotionSearcher promotionSearcher = context.mock(PromotionSearcher.class);
         final FriendSearcher friendSearcher = context.mock(FriendSearcher.class);
+        final StoreManager storeManager = context.mock(StoreManager.class);
         final Provider<GeocodeInformation> geoLocation = context.mock(Provider.class);
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
@@ -252,7 +256,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
+                promotionSearcher, friendSearcher, storeManager, geoLocation, backgroundExecutor,
                 searchEventBroadcaster, null, clock, null);
 
         final GeocodeInformation geocodeInformation = null;
@@ -439,7 +443,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchServices searchServices = context.mock(SearchServices.class);
         final SearchListener listener = context.mock(SearchListener.class);
         
-        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null, null);
+        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, null, searchEventBroadcaster, null, null, null);
         
         context.checking(new Expectations() {
             {
@@ -473,7 +477,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener listener = context.mock(SearchListener.class);
         final SearchDetails details = context.mock(SearchDetails.class);
         
-        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null, null);
+        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null, null, null, null, searchEventBroadcaster, null, null, null);
         
         context.checking(new Expectations() {
             {
@@ -520,7 +524,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchDetails searchDetails = context.mock(SearchDetails.class);
         
         final CoreSearch coreSearch = new CoreSearch(searchDetails, null, null, null, null, null, 
-                null, null, null, null, null);
+                null, null, null, null, null, null);
         
         context.checking(new Expectations() {{
             one(searchDetails).getSearchCategory();
@@ -537,7 +541,7 @@ public class CoreSearchTest extends BaseTestCase {
     
     public void testGetQueryGuid() {
         final CoreSearch coreSearch = new CoreSearch(null, null, null, null, null, null, 
-                null, null, null, null, null);
+                null, null, null, null, null, null);
         
         coreSearch.searchGuid = new byte[] {4,3,2,1,'q','x','x','x','x','x','x','x','x','x','x','x'};
         

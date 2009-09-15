@@ -18,6 +18,10 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.api.search.store.StoreManager;
+import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreSearchListener;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.core.settings.PromotionSettings;
@@ -46,6 +50,7 @@ public class CoreSearch implements Search {
     private final QueryReplyListenerList listenerList;
     private final PromotionSearcher promotionSearcher;
     private final FriendSearcher friendSearcher;
+    private final StoreManager storeManager;
     private final Provider<GeocodeInformation> geoLocation;
 
     /**
@@ -77,6 +82,7 @@ public class CoreSearch implements Search {
             QueryReplyListenerList listenerList,
             PromotionSearcher promotionSearcher,
             FriendSearcher friendSearcher,
+            StoreManager storeManager,
             Provider<GeocodeInformation> geoLocation,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             EventBroadcaster<SearchEvent> searchEventBroadcaster,
@@ -88,6 +94,7 @@ public class CoreSearch implements Search {
         this.listenerList = listenerList;
         this.promotionSearcher = promotionSearcher;
         this.friendSearcher = friendSearcher;
+        this.storeManager = storeManager;
         this.geoLocation = geoLocation;
         this.backgroundExecutor = backgroundExecutor;
         this.searchEventBroadcaster = searchEventBroadcaster;
@@ -137,6 +144,8 @@ public class CoreSearch implements Search {
             doWhatsNewSearch(initial);
             break;
         }
+        
+        doStoreSearch(initial);
     }
     
     private void doWhatsNewSearch(boolean initial) {
@@ -206,6 +215,32 @@ public class CoreSearch implements Search {
     }
     
     /**
+     * Performs store search based on initial indicator.
+     */
+    private void doStoreSearch(boolean initial) {
+        // For now, we only perform store search on initial search.
+        if (initial) {
+            // Create listener for store results.
+            StoreSearchListener storeSearchListener = new StoreSearchListener() {
+                @Override
+                public void resultsFound(StoreResult[] storeResults) {
+                    for (StoreResult storeResult : storeResults) {
+                        handleStoreResult(storeResult);
+                    }
+                }
+                
+                @Override
+                public void styleUpdated(StoreStyle storeStyle) {
+                    handleStoreStyle(storeStyle);
+                }
+            };
+            
+            // Start store search.
+            storeManager.startSearch(searchDetails, storeSearchListener);
+        }
+    }
+    
+    /**
      * Stops current search and repeats search.
      * 
      * @throws IllegalStateException If search processing has already begun (started or stopped)
@@ -250,6 +285,18 @@ public class CoreSearch implements Search {
         List<SponsoredResult> resultList =  Arrays.asList(sponsoredResults);
         for(SearchListener listener : searchListeners) {
             listener.handleSponsoredResults(CoreSearch.this, resultList);
+        }
+    }
+    
+    private void handleStoreResult(StoreResult storeResult) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleStoreResult(this, storeResult);
+        }
+    }
+    
+    private void handleStoreStyle(StoreStyle storeStyle) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleStoreStyle(this, storeStyle);
         }
     }
     
