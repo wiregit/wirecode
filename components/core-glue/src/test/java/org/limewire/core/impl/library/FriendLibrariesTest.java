@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jmock.Expectations;
@@ -38,7 +40,7 @@ public class FriendLibrariesTest extends LimeTestCase {
      * a single friend and presence in this instance.
      */
     @SuppressWarnings("unchecked")
-    public void testIndexing1FriendLibraryAndFileByFileNameOnly() {
+    public void testIndexing1FriendLibraryAndFileByFileNameOnly() throws Throwable {
 
         Mockery context = new Mockery();
 
@@ -96,7 +98,8 @@ public class FriendLibrariesTest extends LimeTestCase {
         presenceLibraryList1.add(presenceLibrary1);
 
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
-
+        waitForProcessingQueue(friendLibraries);
+        
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
         assertEquals(1, suggestions.size());
@@ -150,6 +153,7 @@ public class FriendLibrariesTest extends LimeTestCase {
         
         // now clear presence library and assert that no suggestions are found
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsClearedEvent(presenceLibrary1));
+        waitForProcessingQueue(friendLibraries);
         
         suggestions = friendLibraries.getSuggestions("name", SearchCategory.AUDIO);
         assertEquals(0, suggestions.size());
@@ -157,12 +161,23 @@ public class FriendLibrariesTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
 
+    private void waitForProcessingQueue(FriendLibraries friendLibraries) throws Throwable {
+        final CountDownLatch latch = new CountDownLatch(1);
+        friendLibraries.processingQueue.execute(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            } 
+        });
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+    }
+
     /**
      * Tests search for remote file items in the friends library by name. Using
      * a single friend and presence in this instance.
      */
     @SuppressWarnings("unchecked")
-    public void testIndexing1FriendLibraryAndMultipleFilesByFileNameOnly() {
+    public void testIndexing1FriendLibraryAndMultipleFilesByFileNameOnly() throws Throwable {
 
         Mockery context = new Mockery();
 
@@ -248,6 +263,7 @@ public class FriendLibrariesTest extends LimeTestCase {
 
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -319,6 +335,7 @@ public class FriendLibrariesTest extends LimeTestCase {
         
         // now remove presence library to ensure completion items are gone too
         presenceLibraryList1.remove(presenceLibrary1);
+        waitForProcessingQueue(friendLibraries);
         
         suggestions = friendLibraries.getSuggestions("name", SearchCategory.AUDIO);
         assertEquals(0, suggestions.size());
@@ -333,7 +350,7 @@ public class FriendLibrariesTest extends LimeTestCase {
      * a multiple friends and presences.
      */
     @SuppressWarnings("unchecked")
-    public void testIndexingMultipleFriendLibraryAndMultipleFilesByFileNameOnly() {
+    public void testIndexingMultipleFriendLibraryAndMultipleFilesByFileNameOnly() throws Throwable {
 
         Mockery context = new Mockery();
 
@@ -443,6 +460,7 @@ public class FriendLibrariesTest extends LimeTestCase {
 
         indexListener1.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
         indexListener2.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -518,7 +536,7 @@ public class FriendLibrariesTest extends LimeTestCase {
      * Testing search for friends files by metadata.
      */
     @SuppressWarnings("unchecked")
-    public void testIndexingFileMetaData() {
+    public void testIndexingFileMetaData() throws Throwable {
 
         Mockery context = new Mockery();
 
@@ -583,6 +601,7 @@ public class FriendLibrariesTest extends LimeTestCase {
         presenceLibraryList1.add(presenceLibrary1);
 
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -675,7 +694,7 @@ public class FriendLibrariesTest extends LimeTestCase {
      * Testing search for friends files with advancedDetails.
      */
     @SuppressWarnings("unchecked")
-    public void testAdvancedSearch() {
+    public void testAdvancedSearch() throws Throwable {
 
         Mockery context = new Mockery();
 
@@ -764,6 +783,7 @@ public class FriendLibrariesTest extends LimeTestCase {
 
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Map<FilePropertyKey, String> advancedDetails1 = new HashMap<FilePropertyKey, String>();
         advancedDetails1.put(FilePropertyKey.AUTHOR, "n");
@@ -842,7 +862,7 @@ public class FriendLibrariesTest extends LimeTestCase {
      * matches are found based on indexing all of the parts of the phrase.
      */
     @SuppressWarnings("unchecked")
-    public void testIndexingPhrases() {
+    public void testIndexingPhrases() throws Throwable {
 
         Mockery context = new Mockery();
 
@@ -931,6 +951,7 @@ public class FriendLibrariesTest extends LimeTestCase {
 
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
         indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("", SearchCategory.ALL);
         assertEquals(4, suggestions.size());

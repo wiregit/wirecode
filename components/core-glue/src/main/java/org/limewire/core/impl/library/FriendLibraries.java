@@ -18,10 +18,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.collection.glazedlists.AbstractListEventListener;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
@@ -30,7 +32,6 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -79,6 +80,13 @@ public class FriendLibraries {
      * presence library they're listening to.
      */
     private final Map<String, LibraryListener> listeners = new ConcurrentHashMap<String, LibraryListener>();
+    /**
+     * Processing queue for writes into database to not hold up event dispatcher. An explicit
+     * reference is needed to allow scheduling of calls to clear in order after inserts.
+     * 
+     * Non-private for testing purposes.
+     */
+    final Executor processingQueue = ExecutorsHelper.newProcessingQueue("friend-library-index-queue");
     
     /**
      * @param initializeDbIndex true to ensure the returned index is the {@link DatabaseIndex}
@@ -124,9 +132,13 @@ public class FriendLibraries {
                                             EventList<PresenceLibrary> source) {
                                         LOG.debugf("removing library for presence {0} from index",
                                                 item.getPresence().getPresenceId());
-                                        LibraryListener listener = listeners.remove(item.getPresence().getPresenceId());
+                                        final LibraryListener listener = listeners.remove(item.getPresence().getPresenceId());
                                         item.removeListener(listener);
-                                        listener.clear();
+                                        processingQueue.execute(new Runnable() {
+                                            public void run() {
+                                                listener.clear();
+                                            }
+                                        });
                                     }
 
                                     @Override
@@ -234,22 +246,25 @@ public class FriendLibraries {
         }
         
         @Override
-        @BlockingEvent(queueName="friend-library-index-queue")
-        public void handleEvent(RemoteLibraryEvent event) {
-            switch (event.getType()) {
-            case STATE_CHANGED:
-                break;
-            case RESULTS_ADDED:
-                Collection<SearchResult> results = event.getAddedResults();
-                int index = event.getStartIndex();
-                for (SearchResult result : results) {
-                    index(index++, result);
+        public void handleEvent(final RemoteLibraryEvent event) {
+            processingQueue.execute(new Runnable() {
+                public void run() {
+                    switch (event.getType()) {
+                    case STATE_CHANGED:
+                        break;
+                    case RESULTS_ADDED:
+                        Collection<SearchResult> results = event.getAddedResults();
+                        int index = event.getStartIndex();
+                        for (SearchResult result : results) {
+                            index(index++, result);
+                        }
+                        break;
+                    case RESULTS_CLEARED:
+                        clear();
+                        break;
+                    }
                 }
-                break;
-            case RESULTS_CLEARED:
-                clear();
-                break;
-            }
+            });
         }
     }
           
@@ -451,10 +466,10 @@ public class FriendLibraries {
             try {
                 PreparedStatement statement; 
                 if (category == SearchCategory.ALL) {
-                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? group by keyword order by count(*) desc limit 10");
+                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? group by keyword order by count(*) desc limit 8");
                     statement.setString(1, prefix + "%");
                 } else {
-                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? and category = ? group by keyword order by count(*) desc limit 10");
+                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? and category = ? group by keyword order by count(*) desc limit 8");
                     statement.setString(1, prefix + "%");
                     statement.setInt(2, category.getId());
                 }
@@ -484,11 +499,11 @@ public class FriendLibraries {
             try {
                 PreparedStatement statement;
                 if (category == SearchCategory.ALL) {
-                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? and fileproperty = ? group by keyword order by count(*) desc limit 10");
+                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? and fileproperty = ? group by keyword order by count(*) desc limit 8");
                     statement.setString(1, prefix + "%");
                     statement.setInt(2, filePropertyKey.ordinal());
                 } else {
-                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? and fileproperty = ? and category = ? group by keyword order by count(*) desc limit 10");
+                    statement = connection.prepareStatement("select keyword from suggestions where keyword LIKE ? and fileproperty = ? and category = ? group by keyword order by count(*) desc limit 8");
                     statement.setString(1, prefix + "%");
                     statement.setInt(2, filePropertyKey.ordinal());
                     statement.setInt(3, category.getId());
@@ -536,20 +551,25 @@ public class FriendLibraries {
                 for (String keyword : phrase.split("\\s")) {
                     keywords.add(canonicalize(keyword));
                 }
-                for (String keyword : keywords) {
-                    int i = 1;
-                    insertPropertiesStmt.setString(i++, keyword);
-                    insertPropertiesStmt.setInt(i++, index);
-                    insertPropertiesStmt.setInt(i++, presenceId);
-                    insertPropertiesStmt.setInt(i++, category.getId());
-                    insertPropertiesStmt.setInt(i++, filePropertyKey.ordinal());
-                    insertPropertiesStmt.addBatch();
-                }
-                insertPropertiesStmt.executeBatch();
+                insertWordsIntoPropertiesIndex(insertPropertiesStmt, keywords, index, presenceId, category, filePropertyKey);
                 insertWordIntoSuggestionsIndex(insertSuggestionsStmt, phrase, presenceId, category, filePropertyKey);
             } catch (SQLException sql) {
                 throw new RuntimeException(sql);
             }
+        }
+        
+        private void insertWordsIntoPropertiesIndex(PreparedStatement statement, Collection<String> keywords, int index, int presenceId, SearchCategory category, FilePropertyKey filePropertyKey) throws SQLException {
+            for (String keyword : keywords) {
+                int i = 1;
+                statement.setString(i++, keyword);
+                statement.setInt(i++, index);
+                statement.setInt(i++, presenceId);
+                statement.setInt(i++, category.getId());
+                statement.setInt(i++, filePropertyKey.ordinal());
+                statement.addBatch();
+            }
+            insertPropertiesStmt.executeBatch();
+        
         }
         
         private void insertWordIntoSuggestionsIndex(PreparedStatement statement, String keyword, int presenceId,
