@@ -1,13 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Comparators;
 import org.limewire.core.settings.FilterSettings;
 
 import com.google.inject.Inject;
@@ -102,14 +102,12 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
         // FIXME move into IPFilter
         // FIXME synchronize access to setting properly?
         String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.get();
-        Arrays.sort(bannedIPs, Comparators.stringComparator());
-
-        if (Arrays.binarySearch(bannedIPs, host, Comparators.stringComparator()) < 0) {
-            String[] more_banned = new String[bannedIPs.length + 1];
-            System.arraycopy(bannedIPs, 0, more_banned, 0, bannedIPs.length);
-            more_banned[bannedIPs.length] = host;
-            FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(more_banned);
-            reloadSpamFilters();
+        List<String> bannedList = new ArrayList<String>(Arrays.asList(bannedIPs));
+        if(!bannedList.contains(host)) {
+            bannedList.add(host);
+            bannedIPs = bannedList.toArray(bannedIPs);
+            FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(bannedIPs);
+            reloadIPFilter();
         }
     }
 
@@ -119,9 +117,10 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
         // FIXME synchronize access to setting properly?
         String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.get();
         List<String> bannedList = Arrays.asList(bannedIPs);
-        if (bannedList.remove(host)) {
-            FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(bannedList.toArray(new String[0]));
-            reloadSpamFilters();
+        if(bannedList.remove(host)) {
+            bannedIPs = bannedList.toArray(bannedIPs);
+            FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(bannedIPs);
+            reloadIPFilter();
         }
     }
 
