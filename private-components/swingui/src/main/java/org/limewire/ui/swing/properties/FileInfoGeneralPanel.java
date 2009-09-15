@@ -152,7 +152,11 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
 
         createLocation();
     }
-    
+
+    /**
+     * If a torrent download that is in error. The internal error message will be displayed, 
+     * to help debug the situation.
+     */
     private void createError() {
         if(propertiableFile instanceof DownloadItem) {
             DownloadItem downloadItem = (DownloadItem) propertiableFile;
