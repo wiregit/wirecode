@@ -10,4 +10,9 @@ public class EmptyJabberSettings implements JabberSettings {
     public boolean isDoNotDisturbSet() {
         return false;
     }
+
+    @Override
+    public boolean advertiseLimeWireStatus() {
+        return true;
+    }
 }

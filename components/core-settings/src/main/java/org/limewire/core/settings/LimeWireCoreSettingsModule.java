@@ -1,9 +1,9 @@
 package org.limewire.core.settings;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Collections;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.facebook.service.settings.ChatChannel;
@@ -18,7 +18,6 @@ import org.limewire.geocode.GeocodeUrl;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inject.MutableProvider;
 import org.limewire.setting.StringSetting;
-import org.limewire.xmpp.client.impl.XMPPAdvertiseLimeWireStatus;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -38,7 +37,6 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<Boolean>(){}).annotatedWith(FacebookReportBugs.class).toProvider(FacebookSettings.REPORT_BUGS);
         bind(new TypeLiteral<Map<String, Provider<String>>>(){}).annotatedWith(FacebookURLs.class).toProvider(FacebookURLsMapProvider.class);
         bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);
-        bind(new TypeLiteral<Boolean>(){}).annotatedWith(XMPPAdvertiseLimeWireStatus.class).toProvider(XMPPSettings.XMPP_ADVERTISE_LIMEWIRE_STATUS);
     }
 
     @Singleton

@@ -44,14 +44,16 @@ import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.listener.AsynchronousEventMulticaster;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.xmpp.activity.XmppActivityEvent;
+import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.client.impl.features.NoSaveFeatureInitializer;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListenerFactory;
@@ -71,11 +73,8 @@ import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.nosave.NoSaveIQ;
-import org.limewire.xmpp.activity.XmppActivityEvent;
-import org.limewire.xmpp.api.client.JabberSettings;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -127,8 +126,6 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private final ListenerSupport<XmppActivityEvent> xmppActivitySupport;
     private EventListener<XmppActivityEvent> xmppActivityListener;
 
-    private final Provider<Boolean> advertiseLimeWireStatus;
-
     @Inject
     public XMPPFriendConnectionImpl(@Assisted FriendConnectionConfiguration configuration,
                                     @Assisted ListeningExecutorService executorService,
@@ -147,8 +144,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                                     FeatureRegistry featureRegistry,
                                     IdleStatusMonitorFactory idleStatusMonitorFactory,
                                     JabberSettings jabberSettings,
-                                    ListenerSupport<XmppActivityEvent> xmppActivitySupport,
-                                    @XMPPAdvertiseLimeWireStatus Provider<Boolean> advertiseLimeWireStatus) {
+                                    ListenerSupport<XmppActivityEvent> xmppActivitySupport) {
         this.configuration = configuration;
         this.friendRequestBroadcaster = friendRequestBroadcaster;
         this.connectionMulticaster = connectionMulticaster;
@@ -166,7 +162,6 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         this.idleStatusMonitorFactory = idleStatusMonitorFactory;
         this.jabberSettings = jabberSettings;
         this.xmppActivitySupport = xmppActivitySupport;
-        this.advertiseLimeWireStatus = advertiseLimeWireStatus;
         rosterListeners = new EventListenerList<RosterEvent>();
         // FIXME: this is only used by tests
         if(configuration.getRosterListener() != null) {
@@ -213,7 +208,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         org.jivesoftware.smack.packet.Presence presence = new org.jivesoftware.smack.packet.Presence(
                 org.jivesoftware.smack.packet.Presence.Type.available);
         presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.name()));
-        if (advertiseLimeWireStatus.get()) {
+        if (jabberSettings.advertiseLimeWireStatus()) {
             presence.setStatus("on LimeWire");
         }
         return presence;

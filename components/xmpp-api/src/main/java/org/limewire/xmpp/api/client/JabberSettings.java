@@ -8,4 +8,9 @@ public interface JabberSettings {
      * Returns true if the user has decided to set the do not disturb option. 
      */
     public boolean isDoNotDisturbSet();
+    /**
+     * Returns whether or not the client should advertise itself in the jabber 
+     * status text.
+     */
+    boolean advertiseLimeWireStatus();
 }
