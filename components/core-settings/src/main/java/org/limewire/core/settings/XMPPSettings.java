@@ -12,9 +12,8 @@ public class XMPPSettings extends LimeProps {
     private XMPPSettings() {}
 
     /**
-     * This setting tracks whether or not the user should be in do not disturb mode. 
-     * It should be remembered across xmpp sessions.
+     * Remote setting whether to set the xmpp status text automatically or not.
      */
-    public static final BooleanSetting XMPP_DO_NOT_DISTURB =
-        (BooleanSetting)FACTORY.createBooleanSetting("XMPP_DO_NOT_DISTURB", false).setPrivate(true);
+    public static final BooleanSetting XMPP_ADVERTISE_LIMEWIRE_STATUS =
+        FACTORY.createRemoteBooleanSetting("XMPP_ADVERTISE_LIMEWIRE_STATUS", true, "XMPP.advertiseLimeWireStatus");
 }

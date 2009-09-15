@@ -75,6 +75,7 @@ import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -126,6 +127,8 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private final ListenerSupport<XmppActivityEvent> xmppActivitySupport;
     private EventListener<XmppActivityEvent> xmppActivityListener;
 
+    private final Provider<Boolean> advertiseLimeWireStatus;
+
     @Inject
     public XMPPFriendConnectionImpl(@Assisted FriendConnectionConfiguration configuration,
                                     @Assisted ListeningExecutorService executorService,
@@ -144,7 +147,8 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                                     FeatureRegistry featureRegistry,
                                     IdleStatusMonitorFactory idleStatusMonitorFactory,
                                     JabberSettings jabberSettings,
-                                    ListenerSupport<XmppActivityEvent> xmppActivitySupport) {
+                                    ListenerSupport<XmppActivityEvent> xmppActivitySupport,
+                                    @XMPPAdvertiseLimeWireStatus Provider<Boolean> advertiseLimeWireStatus) {
         this.configuration = configuration;
         this.friendRequestBroadcaster = friendRequestBroadcaster;
         this.connectionMulticaster = connectionMulticaster;
@@ -162,6 +166,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         this.idleStatusMonitorFactory = idleStatusMonitorFactory;
         this.jabberSettings = jabberSettings;
         this.xmppActivitySupport = xmppActivitySupport;
+        this.advertiseLimeWireStatus = advertiseLimeWireStatus;
         rosterListeners = new EventListenerList<RosterEvent>();
         // FIXME: this is only used by tests
         if(configuration.getRosterListener() != null) {
@@ -208,6 +213,9 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         org.jivesoftware.smack.packet.Presence presence = new org.jivesoftware.smack.packet.Presence(
                 org.jivesoftware.smack.packet.Presence.Type.available);
         presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.name()));
+        if (advertiseLimeWireStatus.get()) {
+            presence.setStatus("on LimeWire");
+        }
         return presence;
     }
 
