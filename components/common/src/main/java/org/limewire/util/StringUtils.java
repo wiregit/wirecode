@@ -473,6 +473,12 @@ public class StringUtils {
         return builder.toString();
     }
     
+    /**
+     * Concatenates the string representation of <code>object</code> 
+     * <code>times</code> times together, separating it with <code>delimiter</code>.
+     * 
+     * @throws AssertionError whent times is smaller than 1
+     */
     public static <T> String explode(T object, String delimiter, int times) {
         assert times >= 1;
         if (times == 1) {

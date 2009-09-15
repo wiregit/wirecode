@@ -300,6 +300,22 @@ public class StringUtilsTest extends BaseTestCase {
         assertEquals("5,4,4,4", StringUtils.explode(in, ","));
     }
     
+    public void testTimesExplode() {
+        assertEquals("hello hello hello", StringUtils.explode("hello", " ", 3));
+        
+        assertEquals("1,1,1", StringUtils.explode(1, ",", 3));
+        
+        assertEquals("1", StringUtils.explode(1, "dfdf", 1));
+        
+        assertEquals("null", StringUtils.explode(null, "", 1));
+        
+        try {
+            StringUtils.explode("1", "", 0);
+            fail("no assertion error thrown");
+        } catch (AssertionError ae) {
+        }
+    }
+    
     public void testToString() {
         AllFields fields = new AllFields();
         String result = fields.toString();
