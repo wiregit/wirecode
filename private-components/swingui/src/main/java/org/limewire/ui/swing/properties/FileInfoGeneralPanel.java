@@ -29,9 +29,12 @@ import javax.swing.text.JTextComponent;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MetaDataException;
@@ -141,12 +144,27 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     private void init() {
         component.setOpaque(false);
         
+        createError();
+
         if(propertiableFile.getCategory() != Category.OTHER) {
             createEditableDetails();
         }
+
         createLocation();
     }
     
+    private void createError() {
+        if(propertiableFile instanceof DownloadItem) {
+            DownloadItem downloadItem = (DownloadItem) propertiableFile;
+            Torrent torrent = (Torrent) downloadItem.getDownloadProperty(DownloadPropertyKey.TORRENT);
+            TorrentStatus status = torrent != null ? torrent.getStatus() : null;
+            if(status != null && status.isError()) {
+                component.add(createHeaderLabel(I18n.tr("Error")), "span, gaptop 15, wrap");
+                component.add(createLabelField(status.getError()), "span, growx, wrap");
+            }
+        }
+    }
+
     private void createEditableDetails() {
         component.add(createHeaderLabel(I18n.tr("Details")), "span, wrap");
         

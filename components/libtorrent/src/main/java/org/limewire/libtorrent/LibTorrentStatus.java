@@ -214,6 +214,11 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     public boolean isError() {
         return !StringUtils.isEmpty(error);
     }
+    
+    @Override
+    public String getError() {
+        return error;
+    }
 
     @Override
     public TorrentState getState() {
