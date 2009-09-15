@@ -114,9 +114,12 @@ class ChatPopupMenu extends JPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
             final int id = sharedFileListManager.get().createNewSharedFileList(I18n.tr("Untitled"));
-            SharedFileList list = sharedFileListManager.get().getModel().get(id);
-            list.addFriend(chatFriend.getID());
-            library.get().selectAndRenameSharedList(list);
+            for(SharedFileList list : sharedFileListManager.get().getModel()) {
+                if(list.getId() == id) {
+                    list.addFriend(chatFriend.getID());
+                    library.get().selectAndRenameSharedList(list);
+                }
+            }            
         }
     } 
     
