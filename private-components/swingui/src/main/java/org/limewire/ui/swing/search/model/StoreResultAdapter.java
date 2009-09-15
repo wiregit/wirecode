@@ -36,7 +36,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
     private String heading;
     private String subHeading;
     private boolean preExistingDownload;    
-    private boolean showTracks = true;
+    private boolean showTracks;
     private RowDisplayResult rowDisplayResult;
     
     /**
