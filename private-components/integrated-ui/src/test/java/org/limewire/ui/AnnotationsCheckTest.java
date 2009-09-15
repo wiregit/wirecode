@@ -72,8 +72,8 @@ public class AnnotationsCheckTest extends BaseTestCase {
                     validFailure = ie.getRequirements().size() > 0 && !ie.getRequirements().contains(InspectionRequirement.OS_WINDOWS);
                 }
                 if(!validFailure) {
-//                    fail("failed on key: " + key + ", value: " + results.get(key), ie);
-                    System.out.println("failed on key: " + key + ", value: " + results.get(key) + ie);
+                    fail("failed on key: " + key + ", value: " + results.get(key), ie);
+//                    System.out.println("failed on key: " + key + ", value: " + results.get(key) + ie);
                 }
             }
         }
