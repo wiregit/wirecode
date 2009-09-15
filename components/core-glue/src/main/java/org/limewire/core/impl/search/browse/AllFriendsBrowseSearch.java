@@ -16,18 +16,16 @@ import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.Stopwatch;
 
 class AllFriendsBrowseSearch extends AbstractBrowseSearch {
     
+    @SuppressWarnings("unused")
     private static final Log LOG = LogFactory.getLog(AllFriendsBrowseSearch.class);
     
     private final RemoteLibraryManager remoteLibraryManager;
     private final ExecutorService backgroundExecutor;
     private final AllFriendsListEventListener listEventListener = new AllFriendsListEventListener();
 
-    private final Stopwatch watch = new Stopwatch(LOG);
-    
     public AllFriendsBrowseSearch(RemoteLibraryManager remoteLibraryManager, ExecutorService backgroundExecutor) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.backgroundExecutor = backgroundExecutor;
@@ -62,22 +60,9 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
     private void loadSnapshot() {
         RemoteLibrary allFriendsLibrary = remoteLibraryManager.getAllFriendsLibrary();
         List<SearchResult> remoteFileItems = new ArrayList<SearchResult>(allFriendsLibrary.size());
-        watch.reset();
-        long start = System.currentTimeMillis();
-        int count = 0;
         for (SearchResult searchResult : allFriendsLibrary) {
             remoteFileItems.add(searchResult);
-            if (++count % 100 == 0) {
-                long now = System.currentTimeMillis();
-                if (now - start >= 100) {
-                    for (SearchListener listener : searchListeners) {
-                        listener.handleSearchResults(this, remoteFileItems);
-                    }
-                    remoteFileItems = new ArrayList<SearchResult>();
-                }
-            }
         }
-        watch.resetAndLog("addAll");
         
         //add all files
         for (SearchListener listener : searchListeners) {
