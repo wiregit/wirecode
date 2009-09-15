@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -16,6 +15,7 @@ import org.jmock.Mockery;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.inspection.InspectionException;
 import org.limewire.inspection.Inspector;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
@@ -93,7 +93,6 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         }};
     }
     
-    @SuppressWarnings("unchecked")
     public void testRespondsToRequest() throws Exception {
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         mockery.checking(createExpectations(request, false, "inspected"));
@@ -108,12 +107,42 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.finished();
         byte [] uncompressed = new byte[1024];
         i.inflate(uncompressed);
-        Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
+        Map o = (Map)Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
-        assertTrue(Arrays.equals(StringUtils.toUTF8Bytes("inspected"),(byte[])o.get("0")));
+        assertEquals(StringUtils.toUTF8Bytes("inspected"), (byte[])o.get("0"));
     }
     
-    @SuppressWarnings("unchecked")
+    public void testInspectionExceptionReturnsMagicValue() throws Exception {
+        final InspectionRequest request = mockery.mock(InspectionRequest.class);
+        mockery.checking(new Expectations() {{
+            allowing(inspector).load(with(Matchers.any(File.class)));
+            one(request).getRequestedFields();
+            will(returnValue(new String[]{"asdf"}));
+            one(request).requestsTimeStamp();
+            will(returnValue(Boolean.TRUE));
+            allowing(request).supportsEncoding();
+            will(returnValue(false));
+            allowing(request).getGUID();
+            will(returnValue(new GUID().bytes()));
+            one(inspector).inspect("asdf", true);
+            will(throwException(new InspectionException()));
+        }});
+        InspectionResponseFactory factory = injector.getInstance(InspectionResponseFactoryImpl.class);
+        InspectionResponse[] resp = factory.createResponses(request);
+        mockery.assertIsSatisfied();
+        assertEquals(1, resp.length);
+        assertNotNull(resp[0]);
+        byte [] payload = resp[0].getPayload();
+        Inflater i = new Inflater();
+        i.setInput(payload);
+        i.finished();
+        byte [] uncompressed = new byte[1024];
+        i.inflate(uncompressed);
+        Map o = (Map)Token.parse(new ReadBufferChannel(uncompressed));
+        assertTrue(o.containsKey("-1"));
+        assertEquals(StringUtils.toUTF8Bytes("InspectionException"), (byte[])o.get("0"));
+    }
+    
     public void testTooSmallNotEncoded() throws Exception {
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         mockery.checking(createExpectations(request, true, "inspected"));
@@ -128,12 +157,11 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.finished();
         byte [] uncompressed = new byte[1024];
         i.inflate(uncompressed);
-        Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
+        Map o = (Map)Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
-        assertTrue(Arrays.equals(StringUtils.toUTF8Bytes("inspected"),(byte[])o.get("0")));
+        assertEquals(StringUtils.toUTF8Bytes("inspected"), (byte[])o.get("0"));
     }
     
-    @SuppressWarnings("unchecked")
     public void testNotSupported() throws Exception {
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         byte [] data = new byte[10000];
@@ -151,9 +179,9 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.finished();
         byte [] uncompressed = new byte[1024 * 20];
         i.inflate(uncompressed);
-        Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
+        Map o = (Map)Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
-        assertTrue(Arrays.equals(data,(byte[])o.get("0")));
+        assertEquals(data, (byte[])o.get("0"));
     }
     
     public void testEncoded() throws Exception {
@@ -189,7 +217,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
             // make sure its definitely smaller than the fragmentation limit
             assertLessThan(1400, response.getTotalLength());
             assertEquals(2, response.getVersion());
-            assertTrue(Arrays.equals(guid, response.getGUID()));
+            assertEquals(guid, response.getGUID());
             
             GGEP g = new GGEP(response.getPayload(),0);
             assertEquals(i, g.getInt("I")); // chunk id
