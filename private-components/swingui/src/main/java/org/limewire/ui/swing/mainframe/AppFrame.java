@@ -271,7 +271,7 @@ public class AppFrame extends SingleFrameApplication {
         delayedShutdownHandler.shutdownAfterTransfers();
     }
     
-    public Injector createUiInjector() {
+    private Injector createUiInjector() {
         Module thiz = new AbstractModule() {
             @Override
             protected void configure() {
