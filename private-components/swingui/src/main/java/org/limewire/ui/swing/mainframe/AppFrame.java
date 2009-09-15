@@ -138,7 +138,7 @@ public class AppFrame extends SingleFrameApplication {
     }
    
     @Override
-    protected void startup() { 
+    protected void startup() {         
         String title = getContext().getResourceMap().getString("Application.title");
         JFrame frame = new FirstVizIgnorer(title);
         frame.setName("mainFrame");

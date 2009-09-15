@@ -6,6 +6,12 @@ import org.limewire.service.ErrorCallback;
 
 /** Forwards error messages to the BugManager on the Swing thread. */
 public final class ErrorHandler implements ErrorCallback {
+    private final BugManager bugManager;
+    
+    public ErrorHandler(BugManager bugManager) {
+        this.bugManager = bugManager;
+    }
+    
     /** Displays the error to the user. */
     public void error(Throwable problem) {
         error(problem, null);
@@ -24,7 +30,7 @@ public final class ErrorHandler implements ErrorCallback {
     }
 
     /** This class handles error callbacks. */
-    private static class Error implements Runnable {
+    private class Error implements Runnable {
         /** The stack trace of the error. */
         private final Throwable PROBLEM;
         /** An extra message associated with the error. */
@@ -42,7 +48,7 @@ public final class ErrorHandler implements ErrorCallback {
             try {
                 // TODO: Deal with startup dialogs?
                 //GUIMediator.closeStartupDialogs();
-                BugManager.instance().handleBug(PROBLEM, CURRENT_THREAD_NAME, MESSAGE);
+                bugManager.handleBug(PROBLEM, CURRENT_THREAD_NAME, MESSAGE);
             } catch(Throwable ignored) {
                 ignored.printStackTrace();
             }

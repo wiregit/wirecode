@@ -137,7 +137,7 @@ public final class Initializer {
         
         // Creates LimeWire itself.
         Injector injector = createLimeWire();
-       
+        
         // Various tasks that can be done after core is glued & started.
         glueCore();        
         validateEarlyCore();
@@ -322,14 +322,16 @@ public final class Initializer {
     
     /** Installs all callbacks & listeners. */
     private void setupCallbacksAndListeners() {
+        final AtomicReference<BugManager> bugManager = new AtomicReference<BugManager>();
+        // Construct it on the Swing thread, 'cause it instantiates Swing things.
         SwingUtils.invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                BugManager.instance();
+                bugManager.set(new BugManager());
             }
         });
         // Set the error handler so we can receive core errors.
-        ErrorService.setErrorCallback(new ErrorHandler());
+        ErrorService.setErrorCallback(new ErrorHandler(bugManager.get()));
 
         // set error handler for uncaught exceptions originating from non-LW
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandlerImpl());

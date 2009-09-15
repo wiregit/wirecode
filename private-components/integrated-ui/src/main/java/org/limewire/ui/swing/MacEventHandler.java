@@ -63,16 +63,6 @@ public class MacEventHandler {
                 handleOpenFile(file);
             }
         });
-
-        MRJAdapter.addReopenApplicationListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
-                Action action = map.get("restoreView");
-                if (action != null) {
-                    action.actionPerformed(evt);
-                }
-            }
-        });
     }
 
     @Inject
@@ -95,6 +85,17 @@ public class MacEventHandler {
         MRJAdapter.addAboutListener(aboutAction);
 
         MRJAdapter.addQuitApplicationListener(exitAction);
+
+        // Must be added after the UI is created, otherwise it'll create the application too soon!
+        MRJAdapter.addReopenApplicationListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
+                Action action = map.get("restoreView");
+                if (action != null) {
+                    action.actionPerformed(evt);
+                }
+            }
+        });
     }
 
     /**

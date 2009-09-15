@@ -42,6 +42,7 @@ import javax.swing.SwingUtilities;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
+import org.limewire.core.impl.support.LocalClientInfoImpl;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
@@ -75,9 +76,6 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 public final class BugManager {
 
     @Inject private static volatile LocalClientInfoFactory localClientInfoFactory;
-
-    /** The instance of BugManager -- follows a singleton pattern. */
-    private static BugManager INSTANCE;
     
     /**
      * The width of the internal error dialog box.
@@ -142,12 +140,6 @@ public final class BugManager {
      */
     private boolean dirty = false;
     
-    public static synchronized BugManager instance() {
-        if(INSTANCE == null)
-            INSTANCE = new BugManager();
-        return INSTANCE;
-    }
-    
     /** Inspectable to allow pulling of bug reports. */
     @SuppressWarnings("unused")
     @InspectionPoint("bug report")
@@ -164,12 +156,7 @@ public final class BugManager {
             return info.getShortParamList();
         }
     };
-    
-    /**
-     * Private to ensure that only this class can construct a 
-     * <tt>BugManager</tt>, thereby ensuring that only one instance is created.
-     */
-    private BugManager() {
+    public BugManager() {
         loadOldBugs();
     }
     
@@ -202,7 +189,12 @@ public final class BugManager {
         bug.printStackTrace();
         
         // Build the LocalClientInfo out of the info ...
-        LocalClientInfo info = localClientInfoFactory.createLocalClientInfo(bug, threadName, detail, false);
+        LocalClientInfo info;
+        if(localClientInfoFactory == null) {
+            info = new LocalClientInfoImpl(bug, threadName, detail, false, new NoSessionInfo());
+        } else {
+            info = localClientInfoFactory.createLocalClientInfo(bug, threadName, detail, false);
+        }
 
         if( BugSettings.LOG_BUGS_LOCALLY.getValue() ) {
             logBugLocally(info);
