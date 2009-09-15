@@ -455,7 +455,7 @@ public class FriendLibraries {
         }
 
         /**
-         * Returns the 10 most indexed keywords matching the prefix and category
+         * Returns the 8 most indexed keywords matching the prefix and category
          * of the query.
          */
         @Override
@@ -488,7 +488,7 @@ public class FriendLibraries {
         }
 
         /**
-         * Returns the 10 most indexed keywords matching the prefix and category
+         * Returns the 8 most indexed keywords matching the prefix and category
          * of the query.
          */
         @Override
