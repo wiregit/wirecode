@@ -177,7 +177,7 @@ public class UpdatePanel extends JPanel {
                       Application.getInstance().exit(e);
                 
             } else {
-                NativeLaunchUtils.openURL(application.addClientInfoToUrl(updateInformation.getUpdateURL()));
+                NativeLaunchUtils.openURL(updateInformation.getUpdateURL());
             }
             
             close();
