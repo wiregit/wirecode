@@ -353,10 +353,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return getSaveFile();
         }
 
-        if (!isLaunchable()) {
-            return null;
-        }
-
         TorrentInfo torrentInfo = torrent.getTorrentInfo();
         if (torrentInfo == null || torrentInfo.getTorrentFileEntries().size() > 1) {
             return null;
