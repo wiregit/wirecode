@@ -116,6 +116,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         initMediaComponent();
         
         // Initialize popup listener.
+        installPopupListener(this);
         installPopupListener(albumPanel);
         installPopupListener(mediaPanel);
         

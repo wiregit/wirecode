@@ -82,7 +82,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     protected void initAlbumComponent() {
         albumPanel.setOpaque(false);
         
-        albumCoverButton = new IconButton();
+        albumCoverButton = new IconButton(downloadAction);
         
         JXPanel albumTextPanel = new JXPanel() {
             @Override
@@ -120,6 +120,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
                 }
             }
         });
+        installPopupListener(albumHeadingLabel);
         
         albumSubHeadingLabel = new NoDancingHtmlLabel();
         albumSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
@@ -137,8 +138,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         albumDownloadButton = new IconButton();
         albumDownloadButton.removeActionHandListener();
+        installPopupListener(albumDownloadButton);
         
         albumPriceButton = new PriceButton();
+        installPopupListener(albumPriceButton);
         
         // Layout components in container.
         albumHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding, hidemode 3"));
@@ -200,6 +203,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
                 }
             }
         });
+        installPopupListener(mediaHeadingLabel);
         
         mediaSubHeadingLabel = new NoDancingHtmlLabel();
         mediaSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
@@ -212,8 +216,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         mediaDownloadButton = new IconButton();
         mediaDownloadButton.removeActionHandListener();
+        installPopupListener(mediaDownloadButton);
         
         mediaPriceButton = new PriceButton();
+        installPopupListener(mediaPriceButton);
         
         // Layout components in container.
         mediaHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));

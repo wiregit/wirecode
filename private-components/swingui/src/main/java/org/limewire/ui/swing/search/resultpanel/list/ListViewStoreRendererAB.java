@@ -85,7 +85,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
     protected void initAlbumComponent() {
         albumPanel.setOpaque(false);
         
-        albumCoverButton = new IconButton();
+        albumCoverButton = new IconButton(downloadAction);
         
         JXPanel albumTextPanel = new JXPanel();
         albumTextPanel.setOpaque(false);
@@ -117,6 +117,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
                 }
             }
         });
+        installPopupListener(albumHeadingLabel);
         
         albumSubHeadingLabel = new NoDancingHtmlLabel();
         albumSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
@@ -183,7 +184,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
     protected void initMediaComponent() {
         mediaPanel.setOpaque(false);
         
-        mediaIconButton = new IconButton();
+        mediaIconButton = new IconButton(downloadAction);
         
         JXPanel mediaTextPanel = new JXPanel();
         mediaTextPanel.setOpaque(false);
@@ -215,6 +216,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
                 }
             }
         });
+        installPopupListener(mediaHeadingLabel);
         
         mediaSubHeadingLabel = new NoDancingHtmlLabel();
         mediaSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
