@@ -40,6 +40,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.core.api.Application;
 import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.core.impl.support.LocalClientInfoImpl;
@@ -76,6 +77,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 public final class BugManager {
 
     @Inject private static volatile LocalClientInfoFactory localClientInfoFactory;
+    @Inject private static volatile Application application;
     
     /**
      * The width of the internal error dialog box.
@@ -492,7 +494,11 @@ public final class BugManager {
             url = "http://www.limewire.com/client_redirect/?page=betaTesting";
         else
             url = "http://www.limewire.com/client_redirect/?page=usingLimeWire5";
-        helpLink.addActionListener(new UrlAction(url));
+        if(application != null) {
+            helpLink.addActionListener(new UrlAction(url, application));
+        } else {
+            helpLink.addActionListener(new UrlAction(url));
+        }
         
         // the "always use this answer" checkbox
         final JCheckBox alwaysuseThisAnswer = new JCheckBox(I18n.tr("Send bugs without asking me in the future"));

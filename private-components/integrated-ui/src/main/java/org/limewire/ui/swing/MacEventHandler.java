@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.browser.ExternalControl;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class handles Macintosh specific events. The handled events include the
@@ -45,7 +46,6 @@ public class MacEventHandler {
     private volatile boolean enabled;
 
     @Inject private volatile ExternalControl externalControl = null;
-    @Inject private volatile Initializer initializer = null;
     @Inject private volatile DownloadManager downloadManager = null;
     @Inject private volatile LifeCycleManager lifecycleManager = null;
     @Inject private volatile ActivityCallback activityCallback = null;
@@ -112,7 +112,7 @@ public class MacEventHandler {
     private void runFileOpen(final File file) {
         String filename = file.getPath();
         if (filename.endsWith("limestart")) {
-            initializer.setStartup();
+            LimeWireUtils.setAutoStartupLaunch(true);
         } else if (filename.endsWith("torrent")) {
             if (!lifecycleManager.isStarted()) {
                 externalControl.enqueueControlRequest(file.getAbsolutePath());

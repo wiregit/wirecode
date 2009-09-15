@@ -24,6 +24,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.Application;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
@@ -70,6 +71,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     private final Provider<MiscOptionPanel> miscOptionPanel;
     private final Provider<AdvancedOptionPanel> advancedOptionPanel;
     private final UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager;
+    private final Application application;
     
     private final Map<String, OptionTabItem> cards = new HashMap<String,OptionTabItem>();
     private final Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
@@ -90,11 +92,13 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     public OptionsDialog(Provider<LibraryOptionPanel> libraryOptionPanel, Provider<SearchOptionPanel> searchOptionPanel,
             Provider<DownloadOptionPanel> downloadOptionPanel,
             Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel,
-            BarPainterFactory barPainterFactory, UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager) {
+            BarPainterFactory barPainterFactory, UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager,
+            Application application) {
         super(GuiUtils.getMainFrame(), I18n.tr("Options"), true);
 
         GuiUtils.assignResources(this); 
         
+        this.application = application;
         this.libraryOptionPanel = libraryOptionPanel;
         this.searchOptionPanel = searchOptionPanel;
         this.downloadOptionPanel = downloadOptionPanel;
@@ -210,7 +214,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         footerPanel.setLayout(new MigLayout("insets 0 15 0 15, aligny 50%"));
         footerPanel.setBackground(backgroundColor);
         
-        helpButton = new JButton(new HelpAction());
+        helpButton = new JButton(new HelpAction(application));
         
         okButton = new JButton(I18n.tr("OK"));
         okButton.addActionListener(new ApplyOptionAction(this));

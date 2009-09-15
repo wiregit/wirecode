@@ -14,6 +14,7 @@ import javax.swing.JToggleButton;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Application;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -37,14 +38,16 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
     private static final Log LOG = LogFactory.getLog(DownloadExceptionHandlerImpl.class);
 
     private final SaveLocationManager saveLocationManager;
+    private final Application application;
 
     /**
      * Constructs a DownloadExceptionHandler with the specified
      * SaveLocationManager.
      */
     @Inject
-    public DownloadExceptionHandlerImpl(SaveLocationManager saveLocationManager) {
+    public DownloadExceptionHandlerImpl(SaveLocationManager saveLocationManager, Application application) {
         this.saveLocationManager = saveLocationManager;
+        this.application = application;
     }
 
     /**
@@ -160,7 +163,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
                 new HyperlinkButton(I18n.tr(
                         "You can also ask for help on the forums."));
             help.addActionListener(new UrlAction(
-                    "http://www.limewire.com/client_redirect/?page=bitTorrentBugs"));
+                    "http://www.limewire.com/client_redirect/?page=bitTorrentBugs", application));
             JPanel panel = new JPanel();
             panel.setOpaque(false);
             panel.setLayout(new MigLayout("gapy 15"));

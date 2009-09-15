@@ -15,6 +15,7 @@ import javax.swing.JRadioButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.Application;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.LibrarySettings;
@@ -41,6 +42,7 @@ public class LibraryOptionPanel extends OptionPanel {
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
     
+    private final Application application;
     private final UsePlayerPanel playerPanel;
     private final CategoriesPanel categoryPanel;
     private final OptionPanel iTunesPanel;
@@ -56,8 +58,9 @@ public class LibraryOptionPanel extends OptionPanel {
     public LibraryOptionPanel(LibraryManager libraryManager,
             Provider<UnsafeTypeOptionPanel> unsafeTypeOptionPanelProvider,
             Provider<ITunesOptionPanel> iTunesOptionPanelProvider,
-            Provider<UnsafeTypeOptionPanelStateManager> stateManager) {
-        
+            Provider<UnsafeTypeOptionPanelStateManager> stateManager,
+            Application application) {
+        this.application = application;
         this.libraryManager = libraryManager;
         this.unsafeOptionPanelProvider = unsafeTypeOptionPanelProvider;
         this.iTunesOptionPanelProvider = iTunesOptionPanelProvider;
@@ -278,12 +281,12 @@ public class LibraryOptionPanel extends OptionPanel {
                     unsafeTypeOptionPanel, I18n.tr("Unsafe File Sharing"),
                     I18n.tr("Configure..."), I18n.tr("Configure unsafe file sharing settings")));
             final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
-            HyperlinkButton learnMoreButton = new LearnMoreButton(learnMoreUrl);
+            HyperlinkButton learnMoreButton = new LearnMoreButton(learnMoreUrl, application);
             
             addModifyInfo();                        
             
             add(shareP2PdownloadedFilesCheckBox);
-            add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"), "gapleft 15, wrap");
+            add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo", application), "gapleft 15, wrap");
             
             unsafeMessageLabel = new JLabel();
             add(unsafeMessageLabel);

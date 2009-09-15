@@ -176,8 +176,9 @@ public class UpdatePanel extends JPanel {
                 if (restartNow == JOptionPane.YES_OPTION)
                       Application.getInstance().exit(e);
                 
-            } else
-                NativeLaunchUtils.openURL(updateInformation.getUpdateURL());
+            } else {
+                NativeLaunchUtils.openURL(application.addClientInfoToUrl(updateInformation.getUpdateURL()));
+            }
             
             close();
         }

@@ -14,6 +14,7 @@ import javax.swing.JList;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.AutoCompleteDictionary;
+import org.limewire.core.api.Application;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.ContentSettings;
@@ -52,8 +53,8 @@ public class SearchOptionPanel extends OptionPanel {
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
             SpamManager spamManager,
             UnsafeTypeOptionPanel unsafeOptionPanel,
-            Provider<UnsafeTypeOptionPanelStateManager> stateManager) {
-        
+            Provider<UnsafeTypeOptionPanelStateManager> stateManager, 
+            Application application) {
         this.spamManager = spamManager;
         this.searchHistory = searchHistory;
         this.unsafeOptionPanel = unsafeOptionPanel;
@@ -67,7 +68,7 @@ public class SearchOptionPanel extends OptionPanel {
         add(getFilteringPanel(), "growx, wrap");
         
         add(groupSimilarResults);
-        add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=groupSimilarResults"), "wrap");
+        add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=groupSimilarResults", application), "wrap");
     }
 
     private OptionPanel getSearchBarPanel() {

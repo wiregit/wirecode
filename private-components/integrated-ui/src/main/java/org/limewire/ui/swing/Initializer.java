@@ -82,9 +82,6 @@ public final class Initializer {
     /** Refuse to start after this date */
     private final long EXPIRATION_DATE = Long.MAX_VALUE;
     
-    /** True if is running from a system startup. */
-    private volatile boolean isStartup = false;
-    
     /** The start memory -- only set if debugging. */
     private long startMemory;
     
@@ -380,10 +377,11 @@ public final class Initializer {
             stopwatch.resetAndLog("Thread yield");
         }
         
-        if (args.length >= 1 && "-startup".equals(args[0]))
-            isStartup = true;
+        if (args.length >= 1 && "-startup".equals(args[0])) {
+            LimeWireUtils.setAutoStartupLaunch(true);
+        }
         
-        if (isStartup) {
+        if (LimeWireUtils.isAutoStartupLaunch()) {
             args = null; // reset for later Active check
             // if the user doesn't want to start on system startup, exit the
             // JVM immediately
@@ -503,7 +501,7 @@ public final class Initializer {
             @Override
             public void run() {
                 splashRef.set(new SplashWindow(splashImage, isPro, LocaleUtils.getCurrentLocale(), 4));
-                if(!isStartup) {
+                if(!LimeWireUtils.isAutoStartupLaunch()) {
                     splashRef.get().begin();
                     stopwatch.resetAndLog("begin splash window");
                 }
@@ -576,7 +574,7 @@ public final class Initializer {
         stopwatch.resetAndLog("update splash for UI");
         
         DefaultErrorCatcher.storeCaughtBugs();
-        String[] launchParams = isStartup ? new String[] { AppFrame.STARTUP } : new String[0];
+        String[] launchParams = LimeWireUtils.isAutoStartupLaunch() ? new String[] { AppFrame.STARTUP } : new String[0];
         Application.launch(AppFrame.class, launchParams);
         // Initialize late tasks, like Icon initialization & install listeners.
         loadLateTasksForUI();
@@ -642,13 +640,6 @@ public final class Initializer {
             LOG.trace("STOP Initializer, using: " + stopMemory +
                       " memory, consumed: " + (stopMemory - startMemory));
         }
-    }
-    
-    /**
-     * Sets the startup property to be true.
-     */
-    void setStartup() {
-        isStartup = true;
     }
     
     /** Fails because alpha expired. */

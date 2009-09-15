@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -62,8 +63,7 @@ public class MiscOptionPanel extends OptionPanel {
     private final JCheckBox shareUsageDataCheckBox;
 
     @Inject
-
-    public MiscOptionPanel(Provider<FriendAccountConfigurationManager> accountManager) {
+    public MiscOptionPanel(Provider<FriendAccountConfigurationManager> accountManager, Application application) {
         this.accountManager = accountManager;
         
         GuiUtils.assignResources(this);
@@ -73,7 +73,7 @@ public class MiscOptionPanel extends OptionPanel {
         comboLabel = new JLabel(I18n.tr("Language:"));
         languageDropDown = new LanguageComboBox();
         
-        translateButton = new HyperlinkButton(new UrlAction(I18n.tr("Help translate LimeWire!"), TRANSLATE_URL));
+        translateButton = new HyperlinkButton(new UrlAction(I18n.tr("Help translate LimeWire!"), TRANSLATE_URL, application));
         
         add(comboLabel);
         add(languageDropDown);

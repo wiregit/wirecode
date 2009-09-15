@@ -81,7 +81,7 @@ class AboutWindow {
         
         //  set up limewire.com label
         HyperlinkButton url = new HyperlinkButton("http://www.limewire.com");
-        url.addActionListener(new UrlAction("http://www.limewire.com"));
+        url.addActionListener(new UrlAction("http://www.limewire.com", application));
         url.setHorizontalAlignment(SwingConstants.CENTER);
 
         //  set up scroll check box

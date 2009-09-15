@@ -109,6 +109,9 @@ public final class LimeWireUtils {
 
     /** Whether or not a temporary directory is in use. */
     private static boolean temporaryDirectoryInUse;
+    
+    /** Whether or not LW started up because it was auto-launched from "start on startup" */
+    private static volatile boolean autoStartupLaunch;
 
 	/**
 	 * Make sure the constructor can never be called.
@@ -430,7 +433,9 @@ public final class LimeWireUtils {
             "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +
             "&os="   + EncodingUtils.encode(OSUtils.getOS()) +
             "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
-            "&sc="   + ApplicationSettings.SESSIONS.getValue();
+            "&sc="   + ApplicationSettings.SESSIONS.getValue() +
+            "&al="   + autoStartupLaunch + 
+            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch());
                
         return url;
     }
@@ -445,10 +450,19 @@ public final class LimeWireUtils {
         return SettingsFactory.hasLoadSaveFailure();
     }
 
-
     /** Sets whether or not a temporary directory is in use. */
     public static void setTemporaryDirectoryInUse(boolean inUse) {
         temporaryDirectoryInUse = inUse;
+    }
+    
+    /** Sets whether or not LW started up from auto-launch. */
+    public static void setAutoStartupLaunch(boolean autoStartup) {
+        LimeWireUtils.autoStartupLaunch = autoStartup;
+    }
+    
+    /** Returns true if this started up automatically from a start-on-startup. */
+    public static boolean isAutoStartupLaunch() {
+        return autoStartupLaunch;
     }
     
     public static void resetSettingsLoadSaveFailures() {

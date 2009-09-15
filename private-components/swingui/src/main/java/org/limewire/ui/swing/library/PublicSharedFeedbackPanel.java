@@ -13,6 +13,7 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.Application;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.LearnMoreButton;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -24,17 +25,21 @@ import com.google.inject.Inject;
  * Gives feedback about the Public Shared panel
  */
 class PublicSharedFeedbackPanel {
+    
+    private final Application application;    
 
-    @Resource Icon publicSharedIcon;
-    @Resource Color backgroundColor;
-    @Resource Color foregroundColor;
-    @Resource Color borderColor;
-    @Resource Font labelFont;
+    private @Resource Icon publicSharedIcon;
+    private @Resource Color backgroundColor;
+    private @Resource Color foregroundColor;
+    private @Resource Color borderColor;
+    private @Resource Font labelFont;
     
     private final JPanel component;
     
     @Inject
-    public PublicSharedFeedbackPanel() {
+    public PublicSharedFeedbackPanel(Application application) {
+        this.application = application;
+        
         GuiUtils.assignResources(this);
         
         component = new JPanel(new MigLayout("insets 0 5 0 0", "", "[25!]"));
@@ -52,7 +57,7 @@ class PublicSharedFeedbackPanel {
         component.add(label);
         
         final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=publicSharing";
-        HyperlinkButton learnMoreButton = new LearnMoreButton(learnMoreUrl);
+        HyperlinkButton learnMoreButton = new LearnMoreButton(learnMoreUrl, application);
         component.add(learnMoreButton);
     }
     
