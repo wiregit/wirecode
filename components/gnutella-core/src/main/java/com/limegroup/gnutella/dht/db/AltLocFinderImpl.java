@@ -101,6 +101,7 @@ class AltLocFinderImpl implements AltLocFinder {
                     listener.searchFailed();
                 } else {
                     AlternateLocation alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, urn);
+                    altLocManager.add(alternateLocation, this);
                     listener.handleResult(alternateLocation);
                 }
             }
