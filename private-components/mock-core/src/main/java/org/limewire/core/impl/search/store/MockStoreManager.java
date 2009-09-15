@@ -180,6 +180,10 @@ public class MockStoreManager implements StoreManager {
         return storeResults;
     }
     
+    /**
+     * Notifies registered store listeners that the login state has changed
+     * to the specified value.
+     */
     private void fireLoginChanged(boolean loggedIn) {
         for (StoreListener listener : listenerList) {
             listener.loginChanged(loggedIn);
