@@ -371,8 +371,9 @@ public class FriendLibraries {
                 for (File file : files) {
                     file.deleteOnExit();
                 }
-                // file does not exist yet, but add delete hook for it nevertheless
+                // files do not exist yet, but add delete hook for it nevertheless
                 new File(folder, "friend-indices.backup").deleteOnExit();
+                new File(folder, "friend-indices.script").deleteOnExit();
             } catch (SQLException sql) {
                 throw new RuntimeException(sql);
             }
@@ -463,7 +464,8 @@ public class FriendLibraries {
                     String suggestion = result.getString(1);
                     suggestions.add(suggestion);
                 }
-                watch.resetAndLog("query for " + prefix);
+                if (LOG.isTraceEnabled())
+                    watch.resetAndLog("query for " + prefix);
                 return suggestions;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -497,7 +499,8 @@ public class FriendLibraries {
                     String suggestion = result.getString(1);
                     suggestions.add(suggestion);
                 }
-                watch.resetAndLog("query for " + prefix);
+                if (LOG.isTraceEnabled())
+                    watch.resetAndLog("query for " + prefix);
                 return suggestions;
             } catch (SQLException sql) {
                 throw new RuntimeException(sql);
@@ -514,7 +517,8 @@ public class FriendLibraries {
                     indexProperty(presenceId, index, newFile, filePropertyKey, sentence);
                 }
             }
-            watch.resetAndLog("indexing " + newFile);
+            if (LOG.isTraceEnabled())
+                watch.resetAndLog("indexing " + newFile);
         }
         
         /**
@@ -542,13 +546,13 @@ public class FriendLibraries {
                     insertPropertiesStmt.addBatch();
                 }
                 insertPropertiesStmt.executeBatch();
-                insertWordIntoPropertiesIndex(insertSuggestionsStmt, phrase, presenceId, category, filePropertyKey);
+                insertWordIntoSuggestionsIndex(insertSuggestionsStmt, phrase, presenceId, category, filePropertyKey);
             } catch (SQLException sql) {
                 throw new RuntimeException(sql);
             }
         }
         
-        private void insertWordIntoPropertiesIndex(PreparedStatement statement, String keyword, int presenceId,
+        private void insertWordIntoSuggestionsIndex(PreparedStatement statement, String keyword, int presenceId,
                 SearchCategory category, FilePropertyKey filePropertyKey) throws SQLException {
             statement.setString(1, canonicalize(keyword));
             statement.setInt(2, presenceId);
