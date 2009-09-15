@@ -97,6 +97,8 @@ public class CoreSearchTest extends BaseTestCase {
                 one(listenerList).addQueryReplyListener(with(equal(searchGuid)),
                         with(any(QueryReplyListener.class)));
                 will(new AssignParameterAction<QueryReplyListener>(queryReplyListener, 1));
+                one(searchServices).mutateQuery(searchQuery);
+                will(returnValue(searchQuery));
                 one(searchServices).query(searchGuid, searchQuery, "",
                         MediaType.getAnyTypeMediaType());
                 one(backgroundExecutor).execute(with(any(Runnable.class)));
@@ -104,8 +106,7 @@ public class CoreSearchTest extends BaseTestCase {
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
                         with(any(FriendSearchListener.class)));
                 one(searchListener).searchStarted(coreSearch);
-            }
-        });
+        }});
 
         coreSearch.addSearchListener(searchListener);
 
@@ -197,6 +198,8 @@ public class CoreSearchTest extends BaseTestCase {
             will(returnValue(searchGuid));
             one(listenerList).addQueryReplyListener(with(equal(searchGuid)),
                     with(any(QueryReplyListener.class)));
+            one(searchServices).mutateQuery(searchQuery);
+            will(returnValue(searchQuery));
             one(searchServices).query(searchGuid, searchQuery, "",
                     MediaType.getAnyTypeMediaType());
             one(backgroundExecutor).execute(with(any(Runnable.class)));
@@ -280,6 +283,8 @@ public class CoreSearchTest extends BaseTestCase {
                 one(listenerList).addQueryReplyListener(with(equal(searchGuid)),
                         with(any(QueryReplyListener.class)));
                 will(new AssignParameterAction<QueryReplyListener>(queryReplyListener, 1));
+                one(searchServices).mutateQuery(searchQuery);
+                will(returnValue(searchQuery));
                 one(searchServices).query(searchGuid, searchQuery, "",
                         MediaType.getAnyTypeMediaType());
                 exactly(2).of(backgroundExecutor).execute(with(any(Runnable.class)));
