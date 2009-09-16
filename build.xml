@@ -20,7 +20,7 @@
     
     <!-- BEGIN GETTEXT TASKS -->
 
-    <property name="translation.cutoff" value="60"/>
+    <property name="translation.cutoff" value="70"/>
     <property name="gettexttasks.jar" value="${limewire.lib.jars.ant}/gettext-ant-tasks.jar"/>
 
 	<target name="init.gettext" description="Loads the gettext ant tasks">
