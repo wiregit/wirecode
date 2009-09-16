@@ -13,6 +13,7 @@ import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
+import org.limewire.ui.swing.mainframe.ChangeLanguageAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -29,13 +30,15 @@ class ViewMenu extends MnemonicMenu {
     
     private final Provider<ShowHideDownloadTrayAction> showHideDownloadTrayActionProvider;
     private final Provider<ChatMediator> chatFrameProvider;
+    private final Provider<ChangeLanguageAction> changeLanguageActionProvider;
     
     @Inject
     public ViewMenu(Provider<LoginPopupPanel> friendsSignInPanel, 
             Provider<AutoLoginService> autoLoginServiceProvider,
             EventBean<FriendConnectionEvent> friendConnectionEventBean,
             Provider<ShowHideDownloadTrayAction> showHideDownloadTrayAction,
-            Provider<ChatMediator> chatFrameProvider) {
+            Provider<ChatMediator> chatFrameProvider,
+            Provider<ChangeLanguageAction> changeLanguageActionProvider) {
         
         super(I18n.tr("&View"));
         
@@ -45,12 +48,15 @@ class ViewMenu extends MnemonicMenu {
         
         this.showHideDownloadTrayActionProvider = showHideDownloadTrayAction;
         this.chatFrameProvider = chatFrameProvider;
+        this.changeLanguageActionProvider = changeLanguageActionProvider;
     }
     
     @Override
     public void createMenuItems() {
         add(buildShowHideChatWindowAction(chatFrameProvider));
         add(showHideDownloadTrayActionProvider.get());
+        addSeparator();
+        add(changeLanguageActionProvider.get());
     }
     
     /**
