@@ -320,7 +320,6 @@ public class RatingTable implements Service {
 
     /** Inspectable that returns the number of each type of token */
     @InspectionPoint(value = "spam token counts", category = DataCategory.USAGE)
-    @SuppressWarnings("unused")
     final Inspectable TOKEN_COUNTS = new Inspectable() {
         @Override
         public Object inspect() {
