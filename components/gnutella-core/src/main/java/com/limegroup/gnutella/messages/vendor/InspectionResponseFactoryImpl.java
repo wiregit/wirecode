@@ -92,9 +92,7 @@ public class InspectionResponseFactoryImpl implements InspectionResponseFactory 
         for (int i = 0; i < requested.length; i++) {
             try {
                 responses.put(i, inspector.inspect(requested[i], ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.get()));
-            } catch (InspectionException skip) {
-                responses.put(i, "InspectionException");
-            }
+            } catch (InspectionException skip) {}
         }
         
         if (responses.isEmpty())
