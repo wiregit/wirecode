@@ -281,10 +281,9 @@ public class InspectionUtils {
     
     /** Resolves a binding to the ultimate destination, ensuring we can check the scope of the proper link. */
     private static Binding<?> resolveBinding(final Injector injector, Binding<?> binding) {
-        BindingTargetVisitor<Object, Binding<?>> resolver = new Resolver(injector, binding);        
         Binding resolved;
         while(true) {
-            resolved = binding.acceptTargetVisitor(resolver);
+            resolved = binding.acceptTargetVisitor(new Resolver(injector, binding));
             if(resolved == binding) {
                 return binding;
             } else {
