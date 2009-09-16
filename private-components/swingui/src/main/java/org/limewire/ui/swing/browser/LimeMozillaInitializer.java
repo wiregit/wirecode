@@ -28,7 +28,7 @@ public class LimeMozillaInitializer {
     }
     
     public static boolean shouldInitialize() {
-        return (OSUtils.isWindows()|| OSUtils.isLinux()) &&
+        return (OSUtils.isWindows()|| OSUtils.isLinux() || OSUtils.isMacOSX()) && "i386".equals(OSUtils.getOSArch()) &&
             MozillaSettings.USE_MOZILLA.getValue();
     }
 
@@ -134,6 +134,8 @@ public class LimeMozillaInitializer {
             return "xulrunner-win32.zip";
         } else if (OSUtils.isLinux()) {
             return "xulrunner-linux.zip";
+        } else if(OSUtils.isMacOSX()) {
+            return "xulrunner-macosx-i386.zip";
         } else {
             throw new IllegalStateException("no resource for OS: " + OSUtils.getOS());
         }
