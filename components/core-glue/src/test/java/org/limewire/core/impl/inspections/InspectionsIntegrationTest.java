@@ -368,6 +368,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
 
         // start server which redirects to inspections server
         ResourceHandler requestHandler = new ResourceHandler() {
+            @Override
             public void handleGet(org.mortbay.http.HttpRequest httpRequest,
                               org.mortbay.http.HttpResponse httpResponse,
                               String s, java.lang.String s1,
