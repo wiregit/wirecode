@@ -334,55 +334,46 @@ public class InspectionUtils {
         
         @Override
         public Binding<?> visit(InstanceBinding<? extends Object> link) {
-            System.out.println("a - " + link);
             return binding;
         }
 
         @Override
         public Binding<?> visit(ProviderInstanceBinding<? extends Object> link) {
-            System.out.println("b - " + link);
             return binding;
         }
 
         @Override
         public Binding<?> visit(ProviderKeyBinding<? extends Object> link) {
-            System.out.println("c - " + link);
             return injector.getBinding(link.getProviderKey());
         }
 
         @Override
         public Binding<?> visit(LinkedKeyBinding<? extends Object> link) {
-            System.out.println("d - " + link);
             return injector.getBinding(link.getLinkedKey());
         }
 
         @Override
         public Binding<?> visit(ExposedBinding<? extends Object> link) {
-            System.out.println("e - " + link);
             return binding;
         }
 
         @Override
         public Binding<?> visit(UntargettedBinding<? extends Object> link) {
-            System.out.println("f - " + link);
             return binding;
         }
 
         @Override
         public Binding<?> visit(ConstructorBinding<? extends Object> link) {
-            System.out.println("g - " + link);
             return binding;
         }
 
         @Override
         public Binding<?> visit(ConvertedConstantBinding<? extends Object> link) {
-            System.out.println("h - " + link);
             return binding;
         }
 
         @Override
         public Binding<?> visit(ProviderBinding<? extends Object> link) {
-            System.out.println("i - " + link);
             return injector.getBinding(link.getProvidedKey());
         }            
     };

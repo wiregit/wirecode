@@ -32,7 +32,6 @@ public class Modules {
                     Binding<?> binding = entry.getValue();
                     Scope scope = MoreScopes.getLinkedScope(binding);
                     if(!key.equals(loggerKey) && !key.equals(injectorKey) && !key.equals(stageKey)) {
-                        System.out.println("Binding: " + key + ", to: " + binding.getProvider() + ", in scope: " + scope);
                         binder.bind(key).toProvider(binding.getProvider()).in(scope) ;
                     }
                 }
