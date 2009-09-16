@@ -6,7 +6,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.limewire.common.LimeWireCommonModule;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
@@ -18,6 +17,8 @@ import org.limewire.core.settings.LimeWireCoreSettingsModule;
 import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
+import org.limewire.inject.EagerSingleton;
+import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LimeWireIOModule;
@@ -46,12 +47,11 @@ import org.limewire.security.SettingsProvider;
 import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.LimeWireBittorrentModule;
@@ -296,13 +296,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(MessageRouter.class).to(StandardMessageRouter.class);
         bind(UploadSlotManager.class).to(UploadSlotManagerImpl.class);
         bind(BandwidthManager.class).to(BandwidthManagerImpl.class);
-        bind(SecureMessageVerifier.class).toProvider(SecureMessageVerifierProvider.class);
-        bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).toProvider(InspectionVerifierProvider.class);
         bind(PongCacher.class).to(PongCacherImpl.class);        
         bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(UploadManager.class);     // For NodeAssigner.
         bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class); // For NodeAssigner.
-        bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
-        bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
         bind(ResponseVerifier.class).to(ResponseVerifierImpl.class);
         bind(HandshakeServices.class).to(HandshakeServicesImpl.class);
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
@@ -322,16 +318,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(MulticastService.class).to(MulticastServiceImpl.class);
         bind(NetworkUpdateSanityChecker.class).to(NetworkUpdateSanityCheckerImpl.class);
         
-        bindAll(Names.named("fastExecutor"), ScheduledExecutorService.class, FastExecutorProvider.class, ExecutorService.class, Executor.class);
-        bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);
-        bindAll(Names.named("backgroundExecutor"), ScheduledListeningExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class, ScheduledExecutorService.class);
-        bindAll(Names.named("dhtExecutor"), ListeningExecutorService.class, DHTExecutorProvider.class, Executor.class, ExecutorService.class);
-        bindAll(Names.named("messageExecutor"), ListeningExecutorService.class, MessageExecutorProvider.class, Executor.class, ExecutorService.class);
-        bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
-        
-        
-        Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");
-        
+        Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");        
         AsynchronousCachingEventMulticasterImpl<FirewallTransferStatusEvent> asyncTransferMulticaster 
             = new AsynchronousCachingEventMulticasterImpl<FirewallTransferStatusEvent>(fwtEventExecutor, BroadcastPolicy.IF_NOT_EQUALS);
         bind(new TypeLiteral<EventBean<FirewallTransferStatusEvent>>(){}).toInstance(asyncTransferMulticaster);
@@ -363,69 +350,75 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(PushEndpointSerializer.class).asEagerSingleton();
     }
     
-    
-    @Singleton
-    private static class SecureMessageVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
-        @Override
-        protected SecureMessageVerifier createObject() {
-            return new SecureMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAHR2O6ZOZA4SFMDNGGUC7PDA7W7HMUGEA32R7SCKAANQXFWMOD6KJE43YM53HIPVADVKFL5FA6MKL5GHTBHIURAWGGQTXPEGPLXB7KYTMC6TAPUPFYGNWB4THDQVN4PDARIU3UGXQKFHNAQFL6TUJBA6KXTBLAJBSXD54J6NUVIECRUOA7R57AH6GWGO7VOBDRTIYBXPSY7FTI",
-                        null);    
-        }
+    @Provides @Singleton SecureMessageVerifier smv() {        
+        return new SecureMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAHR2O6ZOZA4SFMDNGGUC7PDA7W7HMUGEA32R7SCKAANQXFWMOD6KJE43YM53HIPVADVKFL5FA6MKL5GHTBHIURAWGGQTXPEGPLXB7KYTMC6TAPUPFYGNWB4THDQVN4PDARIU3UGXQKFHNAQFL6TUJBA6KXTBLAJBSXD54J6NUVIECRUOA7R57AH6GWGO7VOBDRTIYBXPSY7FTI",
+                    null);    
     };
     
-    @Singleton
-    private static class InspectionVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
-        @Override
-        protected SecureMessageVerifier createObject() {
-            return new SecureMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAEYRDUD6O2YID3ORGATJV7UQLUEJORGPY4ETQUH3SKDGITTQENVN6IRZBDJOUZLD6UKX2APFEEA6IJVMCURT4VWBICX5L7GKAUYU325AMMNR7PW6GWGXHR24D5HVTIO6JZ2VRMTOIE7GIZPINPOJXWYDUZQG57ZVBII6XHW2KGITQKQLODJTZGRJHELY6BRXL7VHHQDGCIBWYU",
-                        null);
-        }
+    @Provides @Singleton @Named("inspection") SecureMessageVerifier imv() {
+        return new SecureMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAEYRDUD6O2YID3ORGATJV7UQLUEJORGPY4ETQUH3SKDGITTQENVN6IRZBDJOUZLD6UKX2APFEEA6IJVMCURT4VWBICX5L7GKAUYU325AMMNR7PW6GWGXHR24D5HVTIO6JZ2VRMTOIE7GIZPINPOJXWYDUZQG57ZVBII6XHW2KGITQKQLODJTZGRJHELY6BRXL7VHHQDGCIBWYU",
+                    null);
     }
     
-    @Singleton
-    private static class UnlimitedExecutorProvider extends AbstractLazySingletonProvider<ListeningExecutorService> {
-        @Override
-        protected ListeningExecutorService createObject() {
-            return ExecutorsHelper.newThreadPool(ExecutorsHelper.daemonThreadFactory("IdleThread"));
-        }
+    private static final String UNLIMITED = "unlimitedExecutor";
+    @Provides @LazySingleton @Named(UNLIMITED) ListeningExecutorService unlimitedLES() {
+        return ExecutorsHelper.newThreadPool(ExecutorsHelper.daemonThreadFactory("IdleThread"));
+    }
+    @Provides @LazySingleton @Named(UNLIMITED) ExecutorService unlimitedES(@Named(UNLIMITED) ListeningExecutorService les) {
+        return les;
+    }
+    @Provides @LazySingleton @Named(UNLIMITED) Executor unlimitedE(@Named(UNLIMITED) ListeningExecutorService les) {
+        return les;
     }
     
-    @Singleton
-    private static class FastExecutorProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
-        @Override
-        protected ScheduledThreadPoolExecutor createObject() {
-            ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("ScheduledThread"));
-            return stpe;
-        }
+    private static final String FAST = "fastExecutor";
+    @Provides @LazySingleton @Named(FAST) ScheduledExecutorService fastSES() {
+        return new ScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("FastExecutor")); 
+    }
+    @Provides @LazySingleton @Named(FAST) ExecutorService fastES(@Named(FAST) ScheduledExecutorService ses) {
+        return ses;
+    }
+    @Provides @LazySingleton @Named(FAST) Executor fastE(@Named(FAST) ScheduledExecutorService ses) {
+        return ses;
+    }
+    
+    private static final String BACKGROUND = "backgroundExecutor";
+    @Provides @LazySingleton @Named(BACKGROUND) ScheduledListeningExecutorService backgroundSLES() {
+        return new SimpleTimer(true);
     }    
-    
-    @Singleton
-    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledListeningExecutorService> {
-        @Override
-        protected ScheduledListeningExecutorService createObject() {
-            return new SimpleTimer(true);
-        }
+    @Provides @LazySingleton @Named(BACKGROUND) ScheduledExecutorService backgroundSES(@Named(BACKGROUND) ScheduledListeningExecutorService lses) {
+        return lses;
+    }
+    @Provides @LazySingleton @Named(BACKGROUND) ExecutorService backgroundES(@Named(BACKGROUND) ScheduledListeningExecutorService lsel) {
+        return lsel;
+    }
+    @Provides @LazySingleton @Named(BACKGROUND) Executor backgroundE(@Named(BACKGROUND) ScheduledListeningExecutorService lsel) {
+        return lsel;
     }
     
-    @Singleton
-    private static class MessageExecutorProvider extends AbstractLazySingletonProvider<ListeningExecutorService> {
-        @Override
-        protected ListeningExecutorService createObject() {
-            return ExecutorsHelper.newProcessingQueue("Message-Executor");
-        }
+    private static final String MESSAGE = "messageExecutor";
+    @Provides @LazySingleton @Named(MESSAGE) ListeningExecutorService messageLES() {
+        return ExecutorsHelper.newProcessingQueue("Message-Executor");
     }
-
-    @Singleton
-    private static class DHTExecutorProvider extends AbstractLazySingletonProvider<ListeningExecutorService> {
-        @Override
-        protected ListeningExecutorService createObject() {
-            return ExecutorsHelper.newProcessingQueue("DHT-Executor");
-        }
-    } 
+    @Provides @LazySingleton @Named(MESSAGE) ExecutorService messageES(@Named(MESSAGE) ListeningExecutorService les) {
+        return les;
+    }
+    @Provides @LazySingleton @Named(MESSAGE) Executor messageE(@Named(MESSAGE) ListeningExecutorService les) {
+        return les;
+    }
     
-    @Provides
-    @ExternalIP
-    public byte[] get(NetworkManager networkManager) {
+    private static final String DHT = "dhtExecutor";
+    @Provides @LazySingleton @Named(DHT) ListeningExecutorService dhtLES() {
+        return ExecutorsHelper.newProcessingQueue("DHT-Executor");
+    }
+    @Provides @LazySingleton @Named(DHT) ExecutorService dhtES(@Named(DHT) ListeningExecutorService les) {
+        return les;
+    }
+    @Provides @LazySingleton @Named(DHT) Executor dhtE(@Named(DHT) ListeningExecutorService les) {
+        return les;
+    }
+    
+    @Provides @ExternalIP byte[] externalAddr(NetworkManager networkManager) {
         return networkManager.getExternalAddress();
     }
     
@@ -433,40 +426,24 @@ public class LimeWireCoreModule extends AbstractModule {
     /// BELOW ARE ALL HACK PROVIDERS THAT NEED TO BE UPDATED TO CONSTRUCT OBJECTS!
     // (This needs to wait till components are injected and stop using singletons too.)
     
-    @Singleton
-    private static class NIODispatcherProvider implements Provider<NIODispatcher> {
-        public NIODispatcher get() {
-            return NIODispatcher.instance();
-        }
-    };
+    @Provides @EagerSingleton NIODispatcher nd() {
+        return NIODispatcher.instance();
+    }
     
-    @Singleton
-    private static class ByteBufferCacheProvider implements Provider<ByteBufferCache> {
-        private final Provider<NIODispatcher> nioDispatcher;
-        
-        @Inject
-        public ByteBufferCacheProvider(Provider<NIODispatcher> nioDispatcher) {
-            this.nioDispatcher = nioDispatcher;
-        }
-        
-        public ByteBufferCache get() {
-            return nioDispatcher.get().getBufferCache();
-        }
-    };
+    @Provides @LazySingleton ByteBufferCache bbc(NIODispatcher nd) {
+        return nd.getBufferCache();
+    }
     
-    @Singleton
-    private static class NIOScheduledExecutorServiceProvider implements Provider<ScheduledExecutorService> {
-        private final Provider<NIODispatcher> nioDispatcher;
-        
-        @Inject
-        public NIOScheduledExecutorServiceProvider(Provider<NIODispatcher> nioDispatcher) {
-            this.nioDispatcher = nioDispatcher;
-        }
-        
-        public ScheduledExecutorService get() {
-            return nioDispatcher.get().getScheduledExecutorService();
-        }
-    };
+    private static final String NIO = "nioExecutor";
+    @Provides @LazySingleton @Named(NIO) ScheduledExecutorService nioSES(NIODispatcher nd) {
+        return nd.getScheduledExecutorService(); 
+    }
+    @Provides @LazySingleton @Named(NIO) ExecutorService nioES(NIODispatcher nd) {
+        return nd.getScheduledExecutorService();
+    }
+    @Provides @LazySingleton @Named(NIO) Executor nioE(NIODispatcher nd) {
+        return nd.getScheduledExecutorService();
+    }
         
     ///////////////////////////////////////////////////////////////
     // !!! DO NOT ADD THINGS BELOW HERE !!!  PUT THEM ABOVE THE HACKS!

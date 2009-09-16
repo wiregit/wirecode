@@ -73,7 +73,7 @@ public class AnnotationsCheckTest extends BaseTestCase {
                 }
                 if(!validFailure) {
                     fail("failed on key: " + key + ", value: " + results.get(key), ie);
-//                    System.out.println("failed on key: " + key + ", value: " + results.get(key) + ie);
+//                    System.out.println("failed on key: " + key + ", value: " + results.get(key) + " -- " + ie);
                 }
             }
         }
@@ -133,6 +133,7 @@ public class AnnotationsCheckTest extends BaseTestCase {
         
         Inspector inspector = injectorRef.get().getInstance(Inspector.class);
         inspector.setInjector(injectorRef.get());
+        
         runInspectorTests(inspector, results);
     }
 }
