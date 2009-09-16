@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-14 11:30-0400\n"
-"PO-Revision-Date: 2009-09-02 09:49+0000\n"
-"Last-Translator: Ahmed Adel <Unknown>\n"
+"PO-Revision-Date: 2009-09-15 19:41+0000\n"
+"Last-Translator: shortiya92 <shortiya92@windowslive.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n % 100 >= "
 "3 && n % 100 <= 10 ? 3 : n % 100 >= 11 && n % 100 <= 99 ? 4 : 5;\n"
-"X-Launchpad-Export-Date: 2009-09-15 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-09-16 19:05+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -30,7 +30,7 @@ msgstr "كل الأنواع"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:127
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
 msgid "Documents"
-msgstr "الوثائق"
+msgstr "وثائق"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:42
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
@@ -79,7 +79,7 @@ msgstr "أخرى"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:87
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:34
 msgid "Videos"
-msgstr "فيديو"
+msgstr "مرئيات"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:123
@@ -89,7 +89,7 @@ msgstr "صورة"
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 msgid "Document"
-msgstr "مستند"
+msgstr "وثيقة"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
 msgid "Program"
@@ -101,11 +101,11 @@ msgstr "هناك خطأ في القرص"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
 msgid "The file is corrupted"
-msgstr "الملف معطوب"
+msgstr "الملف غير صالح"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:35
 msgid "This file is not shareable"
-msgstr "هذا الملف لا يمكن أن يكون مشتركا"
+msgstr "هذا الملف غير صالح للمشاركة"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:36
 msgid "Trouble connecting to people"
@@ -116,7 +116,7 @@ msgstr "خطأ في الإتصال مع الأشخاص"
 #. 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
 msgid "No problems."
-msgstr "لا توجد مشكلة"
+msgstr "الملف المحمل لليس في حالة خطأ"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
@@ -135,7 +135,7 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
-"إذا قمت بإيقاف الرفع , فسوف يتم إيقاف تحميل ملف التورنت , فهل تريد الإستمرار"
+"إذا قمت بإيقاف الرفع تنزيل التورنت سيتوقف. هل أنت متأكد من القيام بذلك?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
@@ -168,16 +168,16 @@ msgstr "متاح  للدردشة"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 msgid "Available"
-msgstr "متاح"
+msgstr "موجود"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:111
 msgid "Away"
-msgstr "بعيد عن الجهاز"
+msgstr "بالخارج"
 
 #. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:112
 msgid "Away for a while"
-msgstr "غائب لفترة"
+msgstr "بعيد لفترة"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:113
 msgid "Do not disturb"
@@ -187,7 +187,7 @@ msgstr "الرجاء عدم الإزعاج"
 msgid ""
 "This torrent may have been designed to damage your computer.\n"
 "LimeWire has cancelled the download for your protection."
-msgstr ""
+msgstr "هذا التورنت ممكن أن يكون صنع لتدمير حاسوبك"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:306
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
@@ -240,9 +240,9 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
-"عذرا، LimeWire لا يستطيع قراءة التحميلات القديمة . يمكنك إستئنافهم بالنقر "
-"على \"إعادة المحاولة\" في التحميلات . وعندما يقوم  LimeWire بإيجاد مصدرا "
-"للملف ، التحميل سيعود من أين توقف."
+"عذرا، LimeWire لا يستطيع قراءة التحميلات القديمة . يمكنك إعادة تشغيلهم "
+"بالنقر على \"إعادة المحاولة\" في التحميلات . وعندما يقوم LimeWire بإيجاد "
+"مصدرا للملف ، التحميل سيعود من حيث توقف."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:281
 msgid ""
@@ -250,9 +250,9 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
-"عذرا، LimeWire لا يستطيع قراءة بعض التحميلات القديمة . يمكنك إستئنافهم "
-"بالنقر على \"إعادة المحاولة\" في التحميلات . وعندما يقوم  LimeWire بإيجاد "
-"مصدرا للملف ، التحميل سيعود من أين توقف."
+"عذرا، LimeWire لا يستطيع قراءة بعض التحميلات القديمة . يمكنك إعادة تشغيلهم "
+"بالنقر على \"إعادة المحاولة\" في التحميلات . وعندما يقوم LimeWire بإيجاد "
+"مصدرا للملف ، التحميل سيعود من حيث توقف."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -280,7 +280,7 @@ msgstr "إدارة الشبكة"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:210
 msgid "Ultrapeer/DHT Management"
-msgstr ""
+msgstr "Ultrapeer/إدارة DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
 msgid "Peer Listener"
@@ -292,7 +292,7 @@ msgstr "نظام الترقية"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
 msgid "Directed Querier"
-msgstr "السؤال الموجه"
+msgstr "سؤال موجه"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
 msgid "Content Management"
@@ -312,6 +312,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
+"LimeWire لم يكن قادر على إعادة تشغيل خدمة تشغيل البروتكول الصوتي الرقمي "
+"(لمشاركة الملفات في iTunes). هذه الخدمة ستطفأ. يمكنك إعادة تشغيلها من "
+"الخيارات, في قائمة المتطور >> الملفات >> iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:177
 msgid "What's New"
@@ -319,15 +322,15 @@ msgstr "ما الجديد"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:178
 msgid "Creative Commons"
-msgstr "Creative العامة"
+msgstr "إبداع العامة"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:141
 msgid "Mojito DHT"
-msgstr "موهيتو DHT"
+msgstr "موهيتو دي اهتش تي"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:179
 msgid "LimeWire Store Integration"
-msgstr ""
+msgstr "دمج محل LimeWire"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
@@ -339,7 +342,7 @@ msgstr "الملفات المشتركة"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
 msgid "OOB Query Handler"
-msgstr ""
+msgstr "مسئول أو أو بي للأسئلة"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
