@@ -12,10 +12,12 @@ import java.util.Set;
 
 import org.limewire.core.impl.CoreGlueModule;
 import org.limewire.core.settings.InspectionsSettings;
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.DataCategory;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.StringUtils;
 import org.mortbay.http.HttpContext;
@@ -47,6 +49,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
     @InspectionPoint("test inspectable") public static Inspectable INSPECTION_TWO;
     @InspectionPoint("throwing inspectable") public static Inspectable INSPECTION_THROW;
     @InspectionPoint("null inspectable") public static Inspectable INSPECTION_NULL;
+    @InspectablePrimitive(value="usage category", category= DataCategory.USAGE) public static int INSPECTION_USAGE;
 
     protected Injector injector;
     private HttpServer server;
@@ -94,6 +97,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
 
     private void initializeInspectionPoints() {
         INSPECTION_ONE = 1;
+        INSPECTION_USAGE = 2;
         INSPECTION_TWO = new Inspectable() {
             public int count = 0;
 
@@ -354,6 +358,46 @@ public class InspectionsIntegrationTest extends LimeTestCase {
         
         // expecting no inspections results
         assertEquals(0, listInspDataEncoded.size());        
+    }
+
+    /**
+     * Test usage inspections results when {@link ApplicationSettings#ALLOW_ANONYMOUS_STATISTICS_GATHERING}
+     * is on/off.
+     * 
+     * @throws Exception not caught for integration test
+     */
+    public void testUsageSettingFalseWhilePerformingUsageInspection() throws Exception {
+        ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.set(false);                
+        List<String> inspections = 
+            Collections.singletonList("org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_USAGE");
+        long timeToStartInsp = 1L;
+        long interval = 3L;
+        List<InspectionsSpec> specs = Arrays.asList(new InspectionsSpec(inspections, timeToStartInsp, interval));
+        
+        // start web server and lw services
+        ServerController serverController = startServerWithInspectionSpecs(specs);
+        startInspectionsCommunicator();
+
+        Thread.sleep(2000);
+        ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.set(true);                
+        Thread.sleep(3000);
+        
+        List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
+        assertEquals(2, listInspDataEncoded.size());
+        
+        // 1st result should be error because ALLOW_ANONYMOUS_STATISTICS_GATHERING is false
+        InspectionDataContainer listInspData1 = parseInspectionData(listInspDataEncoded.get(0));
+        assertEquals(1, listInspData1.getResultCount());
+        Map<?, ?> map = (Map<?, ?>)listInspData1.getData(inspections.get(0));
+        assertEquals(1, map.size());
+        assertTrue(StringUtils.toUTF8String((byte[])map.get("error")).endsWith(
+            " is usage data, but usage data collection not allowed"));
+        
+        // 2nd result should be correct inspection result, because setting has been changed to true
+        InspectionDataContainer listInspData2 = parseInspectionData(listInspDataEncoded.get(1));
+        assertEquals(1, listInspData2.getResultCount());
+        listInspData2.getData(inspections.get(0));
+        assertEquals(Integer.valueOf(2), Integer.valueOf(new String((byte[])listInspData2.getData(inspections.get(0)))));
     }
     
     // test that server redirects are followed.
