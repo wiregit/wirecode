@@ -420,6 +420,12 @@ public class LimeComboBox extends JXButton {
     }
 
     @Override
+    public void setIcon(Icon icon) {
+        super.setIcon(icon);
+        ResizeUtils.updateSize(this, actions);
+    }
+    
+    @Override
     public Icon getRolloverIcon() {
         Icon icon = super.getRolloverIcon();
         if (icon == null) {

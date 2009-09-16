@@ -36,23 +36,44 @@ public class PainterUtils {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }
 
+    public static Color lighten(Color orig, int intensity) {
+        return lighten(orig, Color.WHITE, intensity);
+    }
+    
     /**
      * Produces a new lightened colour value by a given intensity from a base colour.
      */
-    public static Color lighten(Color orig, int intensity) {
-        try {
-            return new Color(orig.getRed() + intensity,
-                orig.getGreen() + intensity,
-                orig.getBlue() + intensity);
-        } catch (IllegalArgumentException e) {
-            if (intensity > 0) {
-                // Return transparent if the colour is brightened by too much
-                return new Color(0,0,0,0);
-            } else {
-                // Return black if colour is darkened by too much
-                return Color.BLACK;
-            }
+    public static Color lighten(Color orig, Color threshold, int intensity) {
+
+        if (TRASPARENT.equals(orig)) {
+        	if (intensity >= 0) {
+	            return TRASPARENT;
+	        } else {
+	        	return lighten(threshold, threshold, intensity);
+	        }
+        } 
+
+        int red = orig.getRed() + intensity;
+        int green = orig.getGreen() + intensity;
+        int blue = orig.getBlue() + intensity;
+        
+        if (intensity>0) {
+            red = Math.min(red, 255);
+            green = Math.min(green, 255);
+            blue = Math.min(blue, 255);
+        } 
+        else {
+            red = Math.max(red, 0);
+            green = Math.max(green, 0);
+            blue = Math.max(blue, 0);
         }
+        
+        if (intensity>0 && red>=threshold.getRed() && green>=threshold.getGreen() &&
+                blue>=threshold.getBlue()) {
+            return TRASPARENT;
+        }
+        
+        return new Color(red, green, blue);
     }
 
     /** 

@@ -82,10 +82,10 @@ public class ResizeUtils {
         // If text is explicitly set, layout that text.
         if(comp.getText() != null && !comp.getText().isEmpty()) {
             SwingUtilities.layoutCompoundLabel(
-                    comp, fm, comp.getText(), null,
-                    SwingConstants.CENTER, SwingConstants.CENTER,
-                    SwingConstants.CENTER, SwingConstants.TRAILING,
-                    viewR, iconR, textR, (comp.getText() == null ? 0 : 4)
+                    comp, fm, comp.getText(), comp.getIcon(),
+                    comp.getVerticalAlignment(), comp.getHorizontalAlignment(),
+                    comp.getVerticalTextPosition(), comp.getHorizontalTextPosition(),
+                    viewR, iconR, textR, comp.getIconTextGap()
             );
             Rectangle r = iconR.union(textR);
             largest = r;

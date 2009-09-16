@@ -25,6 +25,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.BusyPainter;
+import org.jdesktop.swingx.painter.Painter;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
@@ -34,6 +35,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.actions.BrowseFriendsAction;
 import org.limewire.ui.swing.friends.actions.FriendServiceItem;
@@ -95,7 +97,8 @@ public class FriendsButton extends LimeComboBox {
             Provider<LogoutAction> logoutActionProvider,
             AutoLoginService autoLoginService,
             EventBean<FriendConnectionEvent> friendConnectionEventBean,
-            AllFriendsRefreshManager allFriendsRefreshManager) {
+            AllFriendsRefreshManager allFriendsRefreshManager,
+            ButtonDecorator decorator) {
         
         this.serviceItemProvider = serviceItemProvider;
         this.browseFriendsActionProvider = browseFriendsActionProvider;
@@ -107,32 +110,10 @@ public class FriendsButton extends LimeComboBox {
         
         GuiUtils.assignResources(this);                
         
-        comboBoxDecorator.decorateIconComboBox(this);
-        setToolTipText(I18n.tr("Friends"));
-        setText(null);
-        setIconTextGap(1);
-
-        setForegroundPainter(new AbstractPainter<JXButton>() {
-            @Override
-            protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
-                Icon icon = null;
-                if (object.getModel().isPressed()) {
-                    icon = object.getPressedIcon();
-                }
-                if (icon == null) {
-                    icon = object.getIcon();
-                }
-                icon.paintIcon(object, g, 0, (height-icon.getIconHeight())/2);
-                
-                // the width/heigth offset is very specific to the loading img.
-                if(busy != null) {
-                    g.translate(21, 22);
-                    busyPainter.paint(g, object, width, height);
-                    g.translate(-21, -22);
-                }
-            }
-        });
+        setText(I18n.tr("Friends"));
         
+        decorator.decorateDropDownHeaderButton(this);
+
         busyPainter = new BusyPainter() {
             @Override
             protected void init(Shape point, Shape trajectory, Color b, Color h) {
@@ -141,6 +122,21 @@ public class FriendsButton extends LimeComboBox {
                         Color.decode("#acacac"),  Color.decode("#545454"));
             }
         };
+        
+        final Painter<JXButton> originalPainter = getForegroundPainter();
+        setForegroundPainter(new AbstractPainter<JXButton>() {
+            @Override
+            protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
+                originalPainter.paint(g, object, width, height);
+                
+                // the width/heigth offset is very specific to the loading img.
+                if(busy != null) {
+                    g.translate(26, 16);
+                    busyPainter.paint(g, object, width, height);
+                    g.translate(-26, -26);
+                }
+            }
+        });
         
         addMouseListener(new ActionHandListener());
         
@@ -181,13 +177,14 @@ public class FriendsButton extends LimeComboBox {
                 else {
                     g.setColor(serviceItem.getBackground());
                 }
-                g.drawLine(0, 0, getPressedIcon().getIconWidth()-2, 0);
+                int dividerWidth = FriendsButton.this.getWidth()-2;
+                g.drawLine(0, 0, dividerWidth, 0);
                 
                 g.setColor(borderForeground);
                 g.drawLine(0, 0, 0, height-1);
                 g.drawLine(0, height-1, width-1, height-1);
                 g.drawLine(width-1, height-1, width-1, 0);
-                g.drawLine(getPressedIcon().getIconWidth()-1, 0, width-1, 0);
+                g.drawLine(dividerWidth+1, 0, width-1, 0);
                 g.setColor(borderInsideRightForeground);
                 g.drawLine(width-2, height-2, width-2, 1);
                 g.drawLine(width-1, height-1, width-1, height-1);
@@ -198,7 +195,7 @@ public class FriendsButton extends LimeComboBox {
             }
         });
         
-        setPopupPosition(new Point(0, -4));
+       setPopupPosition(new Point(0, -1));
     }
     
     private void populateMenu() {

@@ -6,11 +6,14 @@ import java.awt.Font;
 import java.awt.Paint;
 
 import javax.swing.BorderFactory;
+import javax.swing.SwingConstants;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.painter.ButtonForegroundPainter;
+import org.limewire.ui.swing.painter.DropDownHeaderButtonBackgroundPainter;
+import org.limewire.ui.swing.painter.HeaderButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
@@ -49,6 +52,9 @@ public class ButtonDecorator {
     
     @Resource private Font flatTextFont;
     @Resource private Color flatTextForeground;
+    
+    @Resource private Font headerTextFont;
+    @Resource private Color headerTextForeground;
     
     @Inject
     ButtonDecorator(ButtonPainterFactory painterFactory) {
@@ -201,7 +207,42 @@ public class ButtonDecorator {
         
         button.setBorder(BorderFactory.createEmptyBorder(0,8,0,8));
     }
+
+    /**
+     * Decorates a button using the header's strechable icon above text style.
+     */
+    public void decorateBasicHeaderButton(JXButton button) {
+        button.setBackgroundPainter(new HeaderButtonBackgroundPainter());
         
+        decorateHeaderGeneral(button);
+        
+        button.setBorder(BorderFactory.createEmptyBorder(0,6,0,6));    
+    }
+    
+    /**
+     * Decorates a button using the header's strechable icon above text style with 
+     *  a tabbed drop down look and feel.
+     */
+    public void decorateDropDownHeaderButton(JXButton button) {
+        button.setBackgroundPainter(new DropDownHeaderButtonBackgroundPainter());
+        
+        decorateHeaderGeneral(button);
+        
+        button.setBorder(BorderFactory.createEmptyBorder(0,5,0,6));    
+    }
+    
+    private void decorateHeaderGeneral(JXButton button) {
+        decorateGeneral(button);
+        
+        button.setFont(headerTextFont);
+        button.setForeground(headerTextForeground);
+        
+        button.setVerticalTextPosition(SwingConstants.BOTTOM);
+        button.setHorizontalTextPosition(SwingConstants.CENTER);
+        button.setIconTextGap(0);
+        
+    }
+    
     private static void decorateGeneral(JXButton button) {
         button.setOpaque(false);
         button.setFocusPainted(false);

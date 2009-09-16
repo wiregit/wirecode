@@ -12,8 +12,8 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -37,9 +37,10 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
-import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
+import org.limewire.ui.swing.components.SelectableJXButton;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
@@ -127,7 +128,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     Provider<KeywordAssistedSearchBuilder> keywordAssistedSearchBuilder,
                     Provider<AdvancedSearchPanel> advancedSearchPanel,
                     Provider<FriendsButton> friendsButtonProvider,
-                    AllFriendsRefreshManager allFriendsRefreshManager) {        
+                    AllFriendsRefreshManager allFriendsRefreshManager,
+                    ButtonDecorator buttonDecorator) {        
         GuiUtils.assignResources(this);
         this.searchHandler = searchHandler;
         this.searchBar = searchBar;
@@ -144,38 +146,41 @@ class TopPanel extends JXPanel implements SearchNavigator {
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME, homeMediator);
         
         libraryNav = navigator.createNavItem(NavCategory.LIBRARY, LibraryMediator.NAME, myLibraryMediator);
-        JButton libraryButton = new IconButton(NavigatorUtils.getNavAction(libraryNav));
+        JXButton libraryButton = new SelectableJXButton(NavigatorUtils.getNavAction(libraryNav));
+        
         libraryButton.setName("WireframeTop.libraryButton");
-        libraryButton.setToolTipText(I18n.tr("My Files"));
-        libraryButton.setText(null);
-        libraryButton.setIconTextGap(1);
         
+        libraryButton.setText(I18n.tr("My Files"));
+        buttonDecorator.decorateBasicHeaderButton(libraryButton);
+                
         friendButton = friendsButtonProvider.get();
-        friendButton.setName("WireframeTop.friendButton");
+        friendButton.setName("WireframeTop.friendsButton");
         
-        JButton storeButton;
+        JXButton storeButton = null;
         if(MozillaInitialization.isInitialized()) {
             NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME, storeMediator);
-            storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
-        } else {
-            storeButton = new IconButton();
-        }
-        storeButton.setName("WireframeTop.storeButton");
-        storeButton.setToolTipText(I18n.tr("LimeWire Store"));
-        storeButton.setText(null);
-        storeButton.setIconTextGap(1);
-        storeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                storeVisited++;
-                if(storeMediator.getComponent().isVisible()) {
-                    storeMediator.getComponent().loadDefaultUrl();
-                } else {
-                    storeMediator.getComponent().loadCurrentUrl();
+            storeButton = new SelectableJXButton(NavigatorUtils.getNavAction(storeNav));
+            
+            storeButton.setName("WireframeTop.storeButton");
+            
+            storeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    storeVisited++;
+                    if(storeMediator.getComponent().isVisible()) {
+                        storeMediator.getComponent().loadDefaultUrl();
+                    } else {
+                        storeMediator.getComponent().loadCurrentUrl();
+                    }
                 }
-            }
-        });
-     
+            });
+            
+            storeButton.setText(I18n.tr("Store"));
+            buttonDecorator.decorateBasicHeaderButton(storeButton);
+            storeButton.setBorder(BorderFactory.createEmptyBorder(0,8,0,8));   
+            
+        } 
+        
         searchList = tabListFactory.create();
         searchList.setName("WireframeTop.SearchList");
         searchList.setCloseAllText(I18n.tr("Close All Searches"));
@@ -187,17 +192,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setTabInsets(new Insets(0,10,2,10));
         
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
-        add(libraryButton, "gapleft 12, gapbottom 2, gaptop 0");
-        add(storeButton, "gapleft 1, gapbottom 2, gaptop 0, hidemode 3");
-        add(friendButton, "gapleft 6, gapbottom 2, gaptop 0");
-
-        add(searchBar, "gapleft 11, gapbottom 2, gaptop 0");
-        add(searchList, "gapleft 10, gaptop 3, gapbottom 1, grow, push");
-        
-        // Do not show store if mozilla failed to load.
-        if(!MozillaInitialization.isInitialized()) {
-            storeButton.setVisible(false);
+        add(libraryButton, "gapleft 5, gapbottom 2, gaptop 0");
+        if (storeButton != null) {
+            add(storeButton, "gapleft 3, gapbottom 2, gaptop 0");
         }
+        add(friendButton, "gapleft 3, gapbottom 2, gaptop 0");
+
+        add(searchBar, "gapleft 11, gapbottom 2, gaptop 1");
+        add(searchList, "gapleft 10, gaptop 4, gapbottom 0, grow, push");
         
         navigator.addNavigationListener(new NavigationListener() {
             @Override
@@ -217,7 +219,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 }
             }
       });
-    };
+
+    }
     
     @Override
     public boolean requestFocusInWindow() {
@@ -647,5 +650,5 @@ class TopPanel extends JXPanel implements SearchNavigator {
         } 
     }
     
-    
+
 }
