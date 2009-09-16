@@ -140,7 +140,6 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.inflate(uncompressed);
         Map o = (Map)Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
-        assertEquals(StringUtils.toUTF8Bytes("InspectionException"), (byte[])o.get("0"));
     }
     
     public void testTooSmallNotEncoded() throws Exception {
