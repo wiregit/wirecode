@@ -6,6 +6,7 @@ import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LogUtils;
 
 import com.google.inject.Inject;
@@ -41,7 +42,7 @@ public class ConsolePanel extends TabPanel {
             add(console, BorderLayout.CENTER);
             
         } else {
-            naLabel.setText("Console not available");
+            naLabel.setText(I18n.tr("Console not available"));
             naLabel.setHorizontalAlignment(JLabel.CENTER);
             naLabel.setVerticalAlignment(JLabel.CENTER);
             add(naLabel, BorderLayout.CENTER);

@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 
 import org.limewire.core.api.mojito.MojitoManager;
 import org.limewire.ui.swing.plugin.SwingUiPlugin;
+import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -142,7 +143,7 @@ class MojitoPanel extends TabPanel {
         removeAll();
         dhtRenderer = null;
         JLabel naLabel = new JLabel();
-        naLabel.setText("Mojito Arcs View not available");
+        naLabel.setText(I18n.tr("Mojito Arcs View not available"));
         naLabel.setHorizontalAlignment(JLabel.CENTER);
         naLabel.setVerticalAlignment(JLabel.CENTER);
         add(naLabel, BorderLayout.CENTER);
