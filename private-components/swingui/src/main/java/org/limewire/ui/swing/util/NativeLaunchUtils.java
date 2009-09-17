@@ -299,10 +299,11 @@ public final class NativeLaunchUtils {
             } 
             
             if(file.isDirectory()) {
-                return exec(new String[] { "explorer", explorePath });
+                SystemUtils.openFile("explorer", explorePath);
+                
             } else {
                 // launches explorer and highlights the file
-                return exec(new String[] { "explorer", "/select,", explorePath });
+                SystemUtils.openFile("explorer", "/select, " + explorePath);
             }
             
         } else if (OSUtils.isMacOSX()) {
@@ -346,11 +347,7 @@ public final class NativeLaunchUtils {
      * @return an int for the exit code of the native method
      */
     private static int launchFileWindows(String path) throws IOException {
-        try {
-            return SystemUtils.openFile(path);
-        } catch(IOException iox) {
-            throw new LaunchException(iox, path);
-        }
+        return SystemUtils.openFile(path);
     }
 
     /**
