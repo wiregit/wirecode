@@ -351,8 +351,8 @@ public final class Initializer {
             // Raise the number of allowed concurrent open files to 1024.
             SystemUtils.setOpenFileLimit(1024);
             stopwatch.resetAndLog("Open file limit raise");     
-
-            MacEventHandler.instance();
+            //TODO add back in
+            //MacEventHandler.instance();
             stopwatch.resetAndLog("MacEventHandler instance");
         }
     }
@@ -449,7 +449,8 @@ public final class Initializer {
         if(OSUtils.isMacOSX()) {
             GURLHandler.getInstance().enable(externalControl.get());
             stopwatch.resetAndLog("Enable GURL");
-            injector.injectMembers(MacEventHandler.instance());
+            //TODO add back in
+            //injector.injectMembers(MacEventHandler.instance());
             stopwatch.resetAndLog("Enable macEventHandler");
         }
         
@@ -547,8 +548,9 @@ public final class Initializer {
                 Locale.setDefault(Locale.ENGLISH);
             }
             try {
-                LimeMozillaInitializer.initialize();
-                mozillaOverrides.get().overrideMozillaDefaults();
+                //TODO add back in
+                //LimeMozillaInitializer.initialize();
+                //mozillaOverrides.get().overrideMozillaDefaults();
             } catch (Exception e) {
                 // If it failed, don't keep the wrong locale active.
                 Locale.setDefault(locale);

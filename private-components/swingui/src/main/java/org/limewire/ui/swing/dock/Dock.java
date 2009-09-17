@@ -24,14 +24,11 @@ public class Dock {
     static {
         boolean hasDock = false;
         if (OSUtils.isMacOSX()) {
-            String osArch = OSUtils.getOSArch();
-            if(osArch != null && "x86_64".equals(osArch)) {
-                try {
-                    System.loadLibrary("Dock");
-                    hasDock = true;
-                } catch (UnsatisfiedLinkError err) {
-                    ErrorService.error(err);
-                }
+            try {
+                System.loadLibrary("Dock");
+                hasDock = true;
+            } catch (UnsatisfiedLinkError err) {
+                ErrorService.error(err);
             }
         }
         HAS_DOCK = hasDock;
