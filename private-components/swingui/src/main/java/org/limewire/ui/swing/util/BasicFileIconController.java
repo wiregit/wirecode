@@ -28,10 +28,8 @@ public class BasicFileIconController extends NonBlockFileIconController {
             return null;
         
         String extension = FileUtils.getFileExtension(f);
-        if(!extension.isEmpty())
-            return getIconForExtension(extension);
-        else
-            return null;
+        
+        return getIconForExtension(extension);
     }
     
     /** Returns the icon associated with the extension. */

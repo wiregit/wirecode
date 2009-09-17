@@ -19,7 +19,6 @@ import com.google.inject.Singleton;
  * Manages finding native icons for files and file types.
  */
 @Singleton
-//TODO: need to convert this back to a LazySingleton and load it after startup
 public class IconManager {
     
     /** The original basic file icon controller. **/
