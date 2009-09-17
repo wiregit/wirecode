@@ -600,7 +600,8 @@ public final class Initializer {
     
     private void enablePreferences() {        
         if (OSUtils.isMacOSX()) {
-            MacEventHandler.instance().enablePreferences();
+           //TODO return this!!!
+            //MacEventHandler.instance().enablePreferences();
         }
     }
     
