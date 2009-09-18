@@ -60,8 +60,8 @@ public class UpdatePanel extends JPanel {
         
         setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6"));
                 
-        add(createTopLabel(updateInformation.getUpdateTitle()), "alignx 50%, wrap");
-        add(createContentArea(updateInformation.getUpdateText()), "grow, wrap");
+        add(createTopLabel(updateInformation.getUpdateTitle()), "alignx 50%, gapbottom 7, wrap");
+        add(createContentArea(updateInformation.getUpdateText()), "grow, wrap, gapbottom 10");
         add(createLeftButton(new FirstButtonAction()), "alignx 50%, split, gapright 10");
         add(createRightButton(new SecondButtonAction()), "alignx 50%");
     }
@@ -97,13 +97,13 @@ public class UpdatePanel extends JPanel {
         //must be false to view the background image
         pane.setOpaque(false);
         //shift the text so as to not paint over the image
-        pane.setMargin( new Insets(10,130,0,0));
+        pane.setMargin( new Insets(10,115,0,0));
         ImageViewPort imageViewPort = new ImageViewPort(((ImageIcon)backgroundIcon).getImage());
         imageViewPort.setView(pane);
         
         JScrollPane scroller = new JScrollPane();
         scroller.setViewport(imageViewPort);
-        scroller.setPreferredSize(new Dimension(356, 126));
+        scroller.setPreferredSize(new Dimension(355, 156));
         scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scroller.setBorder(BorderFactory.createEmptyBorder());
