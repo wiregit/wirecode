@@ -39,6 +39,8 @@ import org.limewire.ui.swing.search.resultpanel.classic.ClassicDoubleClickHandle
 import org.limewire.ui.swing.search.resultpanel.classic.DocumentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.ImageTableFormat;
+import org.limewire.ui.swing.search.resultpanel.classic.NameRendererDelegate;
+import org.limewire.ui.swing.search.resultpanel.classic.NameRendererDelegateFactory;
 import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ResultEnterAction;
@@ -112,6 +114,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private final RemoteHostWidgetFactory fromWidgetfactory;
     private final SearchResultMenuFactory menuFactory;
     private final Provider<IconLabelRendererFactory> iconLabelRendererFactory;
+    private final Provider<NameRendererDelegateFactory> nameRendererDelegateFactory;
     private final DownloadHandler downloadHandler;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
@@ -130,6 +133,8 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private ColorHighlighter resultsColorHighlighter;
     private Scrollable visibleComponent;
     
+    private NameRendererDelegate nameRendererDelegate;
+    
     private StyleListener styleListener;
     private StoreListener storeListener;
 
@@ -145,6 +150,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             RemoteHostWidgetFactory fromWidgetFactory,
             SearchResultMenuFactory menuFactory,
             Provider<IconLabelRendererFactory> iconLabelRendererFactory,
+            Provider<NameRendererDelegateFactory> nameRendererDelegateFactory,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer, 
             Provider<CalendarRenderer> calendarRenderer,
@@ -159,6 +165,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         this.rowHeightRule = rowHeightRule;
         this.fromWidgetfactory = fromWidgetFactory;
         this.iconLabelRendererFactory = iconLabelRendererFactory;
+        this.nameRendererDelegateFactory = nameRendererDelegateFactory;
         this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryMediator);
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
@@ -191,6 +198,9 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 SwingUtils.invokeLater(new Runnable() {
                     public void run() {
                         resultsList.setStoreStyle(storeStyle);
+                        if (nameRendererDelegate != null) {
+                            nameRendererDelegate.setStoreStyle(storeStyle);
+                        }
                     }
                 });
             }
@@ -435,7 +445,9 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
         SearchCategory selectedCategory = searchResultsModel.getSelectedCategory();
         
-        TableCellRenderer nameRenderer = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
+        // Create Name column renderer.
+        TableCellRenderer iconRenderer = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
+        nameRendererDelegate = nameRendererDelegateFactory.get().create(iconRenderer, (selectedCategory == SearchCategory.ALL));
         
         int columnCount = tableFormat.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
@@ -449,7 +461,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 setCellRenderer(i, calendarRenderer.get());
                 setCellEditor(i, null);
             } else if (i == tableFormat.getNameColumn()) {
-                setCellRenderer(i, nameRenderer);
+                setCellRenderer(i, nameRendererDelegate);
                 setCellEditor(i, null);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
                 setCellRenderer(i, new FromTableCellRenderer(fromWidgetfactory.create(RemoteWidgetType.TABLE)));
@@ -571,6 +583,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             if(currentCategory != null && listConfiguredFor != currentCategory) {
                 configureList();
             }
+            resultsList.updateRowSizes();
             this.visibleComponent = resultsList;
             break;
         case TABLE:
