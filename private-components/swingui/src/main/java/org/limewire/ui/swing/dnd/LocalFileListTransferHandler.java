@@ -27,7 +27,7 @@ import org.limewire.ui.swing.warnings.LibraryWarningController;
  */
 public abstract class LocalFileListTransferHandler extends TransferHandler {
     private static final Log LOG = LogFactory.getLog(LocalFileListTransferHandler.class);
-    
+
     private final WeakHashMap<Transferable, Map<LocalFileList, Boolean>> canImportCache = new WeakHashMap<Transferable, Map<LocalFileList, Boolean>>();
 
     private final LibraryWarningController librarySupport;
@@ -40,7 +40,8 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
     protected Transferable createTransferable(JComponent c) {
         List<File> files = getSelectedFiles();
         if (!files.isEmpty()) {
-            return new LocalFileListTransferable(getLocalFileList(), files.toArray(new File[files.size()]));
+            return new LocalFileListTransferable(getLocalFileList(), files.toArray(new File[files
+                    .size()]));
         } else {
             return null;
         }
@@ -59,21 +60,31 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport info) {
-        Transferable t = info.getTransferable();
-        LocalFileList localFileList = getLocalFileList();
-        Map<LocalFileList, Boolean> canImportMap = canImportCache.get(t);
-        if (canImportMap == null) {
-            canImportMap = new HashMap<LocalFileList, Boolean>();
-            canImportCache.put(t, canImportMap);
-        }
+        try {
+            Transferable t = info.getTransferable();
+            LocalFileList localFileList = getLocalFileList();
+            Map<LocalFileList, Boolean> canImportMap = canImportCache.get(t);
+            if (canImportMap == null) {
+                canImportMap = new HashMap<LocalFileList, Boolean>();
+                canImportCache.put(t, canImportMap);
+            }
 
-        Boolean canImport = canImportMap.get(localFileList);
-        if (canImport == null) {
-            canImport = canImportInternal(info);
-            canImportMap.put(localFileList, canImport);
+            Boolean canImport = canImportMap.get(localFileList);
+            if (canImport == null) {
+                canImport = canImportInternal(info);
+                canImportMap.put(localFileList, canImport);
+            }
+            return canImport;
+        } catch (RuntimeException e) {
+            // catching and logging since internal sun code will just eat the
+            // exception, its better that we can at least turn on logging to
+            // find out what is going on.
+            LOG.error("Error importing drop data.", e);
+            throw e;
+        } catch (Error e) {
+            LOG.error("Error importing drop data.", e);
+            throw e;
         }
-        
-        return canImport;
     }
 
     private boolean canImportInternal(TransferHandler.TransferSupport info) {
@@ -81,12 +92,13 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
             return false;
         }
 
-        //don't allow dragging and dropping ot the same list.
+        // don't allow dragging and dropping ot the same list.
         Transferable t = info.getTransferable();
-        if(t.isDataFlavorSupported(LocalFileListTransferable.LOCAL_FILE_LIST_DATA_FLAVOR)) {
+        if (t.isDataFlavorSupported(LocalFileListTransferable.LOCAL_FILE_LIST_DATA_FLAVOR)) {
             try {
-                LocalFileList localFileList = (LocalFileList) t.getTransferData(LocalFileListTransferable.LOCAL_FILE_LIST_DATA_FLAVOR);
-                if(localFileList == getLocalFileList()) {
+                LocalFileList localFileList = (LocalFileList) t
+                        .getTransferData(LocalFileListTransferable.LOCAL_FILE_LIST_DATA_FLAVOR);
+                if (localFileList == getLocalFileList()) {
                     return false;
                 }
             } catch (IOException e) {
@@ -105,9 +117,9 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
                 return true;
             }
         }
-       
+
         LocalFileList localFileList = getLocalFileList();
-        
+
         for (File file : files) {
             if (localFileList.isFileAddable(file)) {
                 return true;
@@ -119,24 +131,35 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
 
     @Override
     public boolean importData(TransferHandler.TransferSupport info) {
-        if (!info.isDrop()) {
-            return false;
-        }
-
-        Transferable t = info.getTransferable();
-        canImportCache.remove(t);
-
-        List<File> files = Collections.emptyList();
-        if (DNDUtils.containsFileFlavors(info)) {
-            try {
-                files = Arrays.asList(DNDUtils.getFiles(t));
-            } catch (Throwable failed) {
+        try {
+            if (!info.isDrop()) {
                 return false;
             }
-        }
 
-        handleFiles(files);
-        return true;
+            Transferable t = info.getTransferable();
+            canImportCache.remove(t);
+
+            List<File> files = Collections.emptyList();
+            if (DNDUtils.containsFileFlavors(info)) {
+                try {
+                    files = Arrays.asList(DNDUtils.getFiles(t));
+                } catch (Throwable failed) {
+                    return false;
+                }
+            }
+
+            handleFiles(files);
+            return true;
+        } catch (RuntimeException e) {
+            // catching and logging since internal sun code will just eat the
+            // exception, its better that we can at least turn on logging to
+            // find out what is going on.
+            LOG.error("Error importing drop data.", e);
+            throw e;
+        } catch (Error e) {
+            LOG.error("Error importing drop data.", e);
+            throw e;
+        }
     }
 
     private void handleFiles(final List<File> files) {
