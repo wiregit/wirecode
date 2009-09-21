@@ -26,6 +26,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
+import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
@@ -155,8 +156,9 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
         SearchServices searchServices = injector.getInstance(SearchServices.class);
         QueryReplyListenerList queryReplyListenerList = injector.getInstance(QueryReplyListenerList.class);
+        RemoteFileDescAdapter.Factory rfdaFactory = injector.getInstance(RemoteFileDescAdapter.Factory.class);
 
-        CoreBrowse coreBrowse = new CoreBrowse(presence, searchServices, queryReplyListenerList, null);
+        CoreBrowse coreBrowse = new CoreBrowse(presence, searchServices, queryReplyListenerList, rfdaFactory);
 
         BrowseResultsCollector browser = new BrowseResultsCollector();
         coreBrowse.start(browser);
