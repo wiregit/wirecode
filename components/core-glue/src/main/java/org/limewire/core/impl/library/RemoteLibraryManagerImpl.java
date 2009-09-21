@@ -568,7 +568,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         @Override
         public void handleEvent(RemoteLibraryEvent event) {
-            System.out.println(parent.size() + ": " + event);
             switch (event.getType()) {
             case STATE_CHANGED:
                 parent.updateState();
