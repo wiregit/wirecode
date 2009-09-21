@@ -6,7 +6,6 @@ import java.util.Locale;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.JComboBox;
 import javax.swing.JList;
 
 import org.jdesktop.application.Resource;
@@ -17,7 +16,7 @@ import org.limewire.ui.swing.util.LanguageUtils;
  * A ComboBox for displaying and selecting the language to translate
  * text to.
  */
-public class LanguageComboBox extends JComboBox {
+public class LanguageComboBox extends NonNullJComboBox {
 
     @Resource
     private Font font;

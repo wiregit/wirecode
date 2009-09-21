@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.ui.swing.components.NonNullJComboBox;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.StoreTemplateProcessor;
@@ -54,8 +55,8 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
         setLayout(new MigLayout("insets 10 10 10 10"));
         
         cancelAction.setOptionPanel(this);
-        subFolderComboBox = new JComboBox(getSubDirectoryTemplatesArray());
-        fileNameComboBox = new JComboBox(getFileNameTemplatesArray());
+        subFolderComboBox = new NonNullJComboBox(getSubDirectoryTemplatesArray());
+        fileNameComboBox = new NonNullJComboBox(getFileNameTemplatesArray());
         okButton = new JButton(okAction);
         cancelButton = new JButton(cancelAction);
         

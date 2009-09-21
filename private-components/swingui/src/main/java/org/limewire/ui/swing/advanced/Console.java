@@ -62,6 +62,7 @@ import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.service.ErrorService;
+import org.limewire.ui.swing.components.NonNullJComboBox;
 import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.settings.ConsoleSettings;
@@ -164,8 +165,8 @@ public class Console extends JPanel {
                     }
                 });
 
-        loggerComboBox = new JComboBox(new LoggerComboBoxModel());
-        levelComboBox = new JComboBox(new LevelComboBoxModel());
+        loggerComboBox = new NonNullJComboBox(new LoggerComboBoxModel());
+        levelComboBox = new NonNullJComboBox(new LevelComboBoxModel());
         
         loggerComboBox.setAutoscrolls(true);
         loggerComboBox.setMaximumRowCount(20);
