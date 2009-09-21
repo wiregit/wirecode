@@ -29,7 +29,7 @@ import com.limegroup.gnutella.uploader.UploadType;
 
 class CoreUploadItem implements UploadItem {
     
-    public static interface Factory {
+    static interface Factory {
         CoreUploadItem create(@Assisted Uploader uploader, @Assisted FriendPresence friendPresence);
     }
 
@@ -44,7 +44,7 @@ class CoreUploadItem implements UploadItem {
     private UploadRemoteHost uploadRemoteHost;
     
     @Inject
-    public CoreUploadItem(@Assisted Uploader uploader, @Assisted FriendPresence friendPresence, CategoryManager categoryManager) {
+    CoreUploadItem(@Assisted Uploader uploader, @Assisted FriendPresence friendPresence, CategoryManager categoryManager) {
         this.categoryManager = categoryManager;
         this.uploader = uploader;
         this.friendPresence = friendPresence;

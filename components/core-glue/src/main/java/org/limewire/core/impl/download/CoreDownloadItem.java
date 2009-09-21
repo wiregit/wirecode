@@ -42,7 +42,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem {
     
-    public static interface Factory {
+    static interface Factory {
         CoreDownloadItem create(Downloader downloader, QueueTimeCalculator calculator);
     }
    
