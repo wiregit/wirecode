@@ -240,8 +240,8 @@ public class LimeWireSwingUI extends JPanel {
                 JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
                 dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
                 dialog.getRootPane().setDefaultButton(updatePanel.getDefaultButton());
-                dialog.setSize(new Dimension(500, 300));
                 dialog.setModal(false);
+                dialog.pack();
                 dialog.setVisible(true);
             }
         });

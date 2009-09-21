@@ -5,8 +5,6 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -38,14 +36,6 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
  */
 public class UpdatePanel extends JPanel {
 
-    /**
-     * Percentage of where the text starts compared to the left hand edge of
-     * the Component. Since the dialog is resizeable and we don't want the text to
-     * cover the left hand part of the image, whenever the dialog is resized, we
-     * recalculate where the text should start based on the current width of the 
-     * component and this percentage value
-     */
-    private static final float textPercentShift = .375f;
     
     @Resource
     private Icon backgroundIcon;
@@ -70,8 +60,8 @@ public class UpdatePanel extends JPanel {
         
         setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6"));
                 
-        add(createTopLabel(updateInformation.getUpdateTitle()), "alignx 50%, wrap");
-        add(createContentArea(updateInformation.getUpdateText()), "grow, wrap");
+        add(createTopLabel(updateInformation.getUpdateTitle()), "alignx 50%, gapbottom 7, wrap");
+        add(createContentArea(updateInformation.getUpdateText()), "grow, wrap, gapbottom 10");
         add(createLeftButton(new FirstButtonAction()), "alignx 50%, split, gapright 10");
         add(createRightButton(new SecondButtonAction()), "alignx 50%");
     }
@@ -107,14 +97,13 @@ public class UpdatePanel extends JPanel {
         //must be false to view the background image
         pane.setOpaque(false);
         //shift the text so as to not paint over the image
-        pane.setMargin( new Insets(0,130,0,0));
-        pane.addComponentListener( new ResizeListener(pane));
+        pane.setMargin( new Insets(10,115,0,0));
         ImageViewPort imageViewPort = new ImageViewPort(((ImageIcon)backgroundIcon).getImage());
         imageViewPort.setView(pane);
         
         JScrollPane scroller = new JScrollPane();
         scroller.setViewport(imageViewPort);
-        scroller.setPreferredSize(new Dimension(400, 100));
+        scroller.setPreferredSize(new Dimension(355, 156));
         scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scroller.setBorder(BorderFactory.createEmptyBorder());
@@ -164,7 +153,6 @@ public class UpdatePanel extends JPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            
             String updateCommand = updateInformation.getUpdateCommand();
 
             if (updateCommand != null) {
@@ -188,7 +176,6 @@ public class UpdatePanel extends JPanel {
      * Action for the button on the right.
      */
     private class SecondButtonAction extends AbstractAction {
-
         public SecondButtonAction() {
             String text;
             if(updateInformation.getButton2Text() != null && updateInformation.getButton2Text().length() > 0)
@@ -204,23 +191,5 @@ public class UpdatePanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             close();
         }
-    }
-    
-    private static class ResizeListener implements ComponentListener {
-
-        private final JEditorPane c;
-        
-        public ResizeListener(JEditorPane c){
-            this.c = c;
-        }
-        
-        public void componentShown(ComponentEvent e) {}
-        public void componentHidden(ComponentEvent e) {}
-        public void componentMoved(ComponentEvent e) {}
-
-        public void componentResized(ComponentEvent e) {
-            int labelStartPos = (int) (c.getWidth() * textPercentShift);
-            c.setMargin(new Insets(24, labelStartPos, 0, 0));
-        }       
     }
 }
