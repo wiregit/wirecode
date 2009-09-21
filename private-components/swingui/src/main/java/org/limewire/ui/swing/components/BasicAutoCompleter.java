@@ -3,6 +3,7 @@ package org.limewire.ui.swing.components;
 import java.awt.AWTEvent;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.swing.JComponent;
 import javax.swing.JList;
@@ -16,14 +17,23 @@ import javax.swing.UIManager;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.AutoCompleteDictionary;
+import org.limewire.collection.NECallable;
 import org.limewire.collection.StringTrieSet;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.SimpleFuture;
+import org.limewire.ui.swing.util.SwingUtils;
 
 /** An autocompleter that shows its suggestions in a list and can have new suggestions added. */
 public class BasicAutoCompleter implements AutoCompleter {
     
+    private final ListeningExecutorService queue = ExecutorsHelper.newProcessingQueue("AutoCompleteQueue");
+    
     private final JPanel entryPanel;
     private final AutoCompleteList entryList;
     
+    private ListeningFuture<Boolean> lastFuture;
     private AutoCompleterCallback callback;
     private String currentText;
     private AutoCompleteDictionary dictionary;
@@ -85,13 +95,45 @@ public class BasicAutoCompleter implements AutoCompleter {
     }
 
     @Override
-    public void setInput(String input) {
+    public ListeningFuture<Boolean> setInput(String input) {
         if(input == null) {
             input = "";
         }
         
         currentText = input;
-        Collection<String> suggestions = dictionary.getPrefixedBy(currentText);        
+        
+        NECallable<Boolean> runner = new NECallable<Boolean>() {
+            @Override
+            public Boolean call() {
+                try {
+                    final Collection<String> suggestions = dictionary.getPrefixedBy(currentText);
+                    SwingUtils.invokeAndWaitWithInterrupted(new Runnable() {
+                        @Override
+                        public void run() {
+                            setSuggestions(suggestions);
+                        }
+                    });
+                    return true;
+                } catch (InterruptedException ignored) {
+                    return false;
+                }
+            }
+        };
+        
+        if(dictionary.isImmediate()) {
+            runner.call();
+            return new SimpleFuture<Boolean>(true);
+        } else {
+            if(lastFuture != null) {
+                lastFuture.cancel(true);
+            }
+            setSuggestions(Collections.<String>emptyList());
+            lastFuture = queue.submit(runner);
+            return lastFuture;
+        }
+    }
+    
+    private void setSuggestions(Collection<String> suggestions) {
         ListModel model = entryList.getModel();
         boolean different = suggestions.size() != model.getSize();
         if(!different) {

@@ -22,6 +22,11 @@ class FriendLibraryPropertyAutoCompleter implements AutoCompleteDictionary {
         this.filePropertyKey = filePropertyKey;
     }
     
+    @Override
+    public boolean isImmediate() {
+        return false;
+    }
+    
     public void addEntry(String entry) {
         throw new UnsupportedOperationException();
     }
@@ -31,17 +36,25 @@ class FriendLibraryPropertyAutoCompleter implements AutoCompleteDictionary {
     }
 
     public String lookup(String prefix) {
-        Iterator<String> it = getPrefixedBy(prefix).iterator();
-        if (!it.hasNext())
-            return null;
-        return it.next();
+        try {
+            Iterator<String> it = getPrefixedBy(prefix).iterator();
+            if (!it.hasNext())
+                return null;
+            return it.next();
+        } catch(InterruptedException ie) {
+            throw new IllegalStateException(ie);
+        }
     }
 
     public Iterator<String> iterator() {
-        return getPrefixedBy("").iterator();
+        try {
+            return getPrefixedBy("").iterator();
+        } catch(InterruptedException ie) {
+            throw new IllegalStateException(ie);
+        }
     }
 
-    public Collection<String> getPrefixedBy(String prefix) {
+    public Collection<String> getPrefixedBy(String prefix) throws InterruptedException {
         return friendLibraries.getSuggestions(prefix, category, filePropertyKey);
     }
 

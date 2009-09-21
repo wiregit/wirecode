@@ -29,12 +29,6 @@ public interface RemoteLibraryManager {
     void removePresenceLibrary(FriendPresence presence);
     
     /**
-     * Removes the given the entire FriendLibrary for the given Friend,
-     * including all contained PresenceLibraries.
-     */
-    void removeFriendLibrary(Friend friend);
-    
-    /**
      * Returns an {@link EventList} composed of {@link FriendLibrary FriendLibraries}.
      */
     EventList<FriendLibrary> getFriendLibraryList();
@@ -44,11 +38,8 @@ public interface RemoteLibraryManager {
      */
     boolean hasFriendLibrary(Friend friend);
 
-    /** A list of all friends' libraries suitable for use in Swing. */
-    EventList<FriendLibrary> getSwingFriendLibraryList();
-    
-    /** Returns a SearchResultList that is a concatenation of all friends libraries. */
-    SearchResultList getAllFriendsFileList();
+    /** Returns a remote library that is an aggregate of all friends libraries. */
+    RemoteLibrary getAllFriendsLibrary();
     
     /** 
      * Returns the FriendLibrary for this friend if one exists, null 

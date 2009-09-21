@@ -9,7 +9,7 @@ import org.limewire.listener.EventListener;
 public interface LibraryFileList extends LocalFileList {
 
     /** Returns the current state of the library. */
-    LibraryState getState();
+    RemoteLibraryState getState();
  
     /** Notifies LibraryFileList that the file has been renamed. */
     void fileRenamed(File oldFile, File newFile);

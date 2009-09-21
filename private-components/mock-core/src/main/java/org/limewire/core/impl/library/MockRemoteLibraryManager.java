@@ -2,8 +2,8 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
+import org.limewire.core.api.library.RemoteLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.api.library.SearchResultList;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 
@@ -19,7 +19,7 @@ public class MockRemoteLibraryManager implements RemoteLibraryManager {
     }
     
     @Override
-    public SearchResultList getAllFriendsFileList() {
+    public RemoteLibrary getAllFriendsLibrary() {
         return new SearchResultListAdapter();
     }
 
@@ -35,20 +35,10 @@ public class MockRemoteLibraryManager implements RemoteLibraryManager {
     }
     
     @Override
-    public EventList<FriendLibrary> getSwingFriendLibraryList() {
-        return new BasicEventList<FriendLibrary>();
-    }
-    
-    @Override
     public boolean addPresenceLibrary(FriendPresence presence) {
         return false;
     }
     
-    @Override
-    public void removeFriendLibrary(Friend friend) {
-        // TODO Auto-generated method stub
-        
-    }
     @Override
     public void removePresenceLibrary(FriendPresence presence) {
         // TODO Auto-generated method stub

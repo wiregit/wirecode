@@ -1,8 +1,13 @@
 package org.limewire.core.impl.library;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -10,17 +15,21 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
+import org.limewire.core.api.library.RemoteLibraryEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.util.BaseTestCase;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.listener.EventListener;
+import org.limewire.util.AssignParameterAction;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
-public class FriendLibrariesTest extends BaseTestCase {
+public class FriendLibrariesTest extends LimeTestCase {
 
     public FriendLibrariesTest(String name) {
         super(name);
@@ -30,13 +39,13 @@ public class FriendLibrariesTest extends BaseTestCase {
      * Tests search for remote file items in the friends library by name. Using
      * a single friend and presence in this instance.
      */
-    public void testIndexing1FriendLibraryAndFileByFileNameOnly() {
+    @SuppressWarnings("unchecked")
+    public void testIndexing1FriendLibraryAndFileByFileNameOnly() throws Throwable {
 
         Mockery context = new Mockery();
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -48,6 +57,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -56,14 +66,16 @@ public class FriendLibrariesTest extends BaseTestCase {
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
-                allowing(remoteFileItem1).getFileNameWithoutExtension();
+                
+                allowing(remoteFileItem1).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
                 will(returnValue(category1));
@@ -72,6 +84,9 @@ public class FriendLibrariesTest extends BaseTestCase {
                     allowing(remoteFileItem1).getProperty(filePropertyKey);
                     will(returnValue(null));
                 }
+                
+                exactly(4).of(presenceLibrary1).get(0);
+                will(returnValue(remoteFileItem1));
             }
         });
 
@@ -82,8 +97,9 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
-
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
+        waitForProcessingQueue(friendLibraries);
+        
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
         assertEquals(1, suggestions.size());
@@ -134,20 +150,39 @@ public class FriendLibrariesTest extends BaseTestCase {
                 SearchCategory.ALL));
         assertEquals(1, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
+        
+        // now clear presence library and assert that no suggestions are found
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsClearedEvent(presenceLibrary1));
+        waitForProcessingQueue(friendLibraries);
+        
+        suggestions = friendLibraries.getSuggestions("name", SearchCategory.AUDIO);
+        assertEquals(0, suggestions.size());
+                
         context.assertIsSatisfied();
+    }
+
+    private void waitForProcessingQueue(FriendLibraries friendLibraries) throws Throwable {
+        final CountDownLatch latch = new CountDownLatch(1);
+        friendLibraries.processingQueue.execute(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            } 
+        });
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
     }
 
     /**
      * Tests search for remote file items in the friends library by name. Using
      * a single friend and presence in this instance.
      */
-    public void testIndexing1FriendLibraryAndMultipleFilesByFileNameOnly() {
+    @SuppressWarnings("unchecked")
+    public void testIndexing1FriendLibraryAndMultipleFilesByFileNameOnly() throws Throwable {
 
         Mockery context = new Mockery();
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -167,6 +202,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -174,25 +210,28 @@ public class FriendLibrariesTest extends BaseTestCase {
                 will(returnValue(presenceLibraryList1));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
-
+                
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
-                allowing(remoteFileItem1).getFileNameWithoutExtension();
+                one(presenceLibrary1).removeListener(with(any(EventListener.class)));
+                
+                allowing(remoteFileItem1).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
                 will(returnValue(category1));
 
-                allowing(remoteFileItem2).getFileNameWithoutExtension();
+                allowing(remoteFileItem2).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name2));
                 allowing(remoteFileItem2).getCategory();
                 will(returnValue(category2));
 
-                allowing(remoteFileItem3).getFileNameWithoutExtension();
+                allowing(remoteFileItem3).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name3));
                 allowing(remoteFileItem3).getCategory();
                 will(returnValue(category3));
@@ -205,6 +244,13 @@ public class FriendLibrariesTest extends BaseTestCase {
                     allowing(remoteFileItem3).getProperty(filePropertyKey);
                     will(returnValue(null));
                 }
+                
+                exactly(4).of(presenceLibrary1).get(0);
+                will(returnValue(remoteFileItem1));
+                exactly(4).of(presenceLibrary1).get(1);
+                will(returnValue(remoteFileItem2));
+                exactly(1).of(presenceLibrary1).get(2);
+                will(returnValue(remoteFileItem3));
             }
         });
 
@@ -215,9 +261,9 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList1.add(remoteFileItem2);
-        remoteFileItemList1.add(remoteFileItem3);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -286,6 +332,16 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertEquals(2, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
         assertContains(matchingItems, remoteFileItem2);
+        
+        // now remove presence library to ensure completion items are gone too
+        presenceLibraryList1.remove(presenceLibrary1);
+        waitForProcessingQueue(friendLibraries);
+        
+        suggestions = friendLibraries.getSuggestions("name", SearchCategory.AUDIO);
+        assertEquals(0, suggestions.size());
+        suggestions = friendLibraries.getSuggestions("bl", SearchCategory.AUDIO);
+        assertEquals(0, suggestions.size());
+        
         context.assertIsSatisfied();
     }
 
@@ -293,16 +349,15 @@ public class FriendLibrariesTest extends BaseTestCase {
      * Tests search for remote file items in the friends library by name. Using
      * a multiple friends and presences.
      */
-    public void testIndexingMultipleFriendLibraryAndMultipleFilesByFileNameOnly() {
+    @SuppressWarnings("unchecked")
+    public void testIndexingMultipleFriendLibraryAndMultipleFilesByFileNameOnly() throws Throwable {
 
         Mockery context = new Mockery();
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final EventList<PresenceLibrary> presenceLibraryList2 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList2 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -328,6 +383,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence2 = context.mock(FriendPresence.class);
         final String presenceId2 = "2";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener1 = new AtomicReference<EventListener<RemoteLibraryEvent>>();
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener2 = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -336,36 +393,40 @@ public class FriendLibrariesTest extends BaseTestCase {
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener1));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
+                
                 allowing(friendLibrary2).getPresenceLibraryList();
                 will(returnValue(presenceLibraryList2));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary2).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener2));
+                allowing(presenceLibrary2).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary2).getPresence();
                 will(returnValue(presence2));
                 allowing(presence2).getPresenceId();
                 will(returnValue(presenceId2));
-                allowing(presenceLibrary2).getModel();
-                will(returnValue(remoteFileItemList2));
-
-                allowing(remoteFileItem1).getFileNameWithoutExtension();
+                
+                allowing(remoteFileItem1).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
                 will(returnValue(category1));
 
-                allowing(remoteFileItem2).getFileNameWithoutExtension();
+                allowing(remoteFileItem2).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name2));
                 allowing(remoteFileItem2).getCategory();
                 will(returnValue(category2));
 
-                allowing(remoteFileItem3).getFileNameWithoutExtension();
+                allowing(remoteFileItem3).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name3));
                 allowing(remoteFileItem3).getCategory();
                 will(returnValue(category3));
@@ -378,6 +439,13 @@ public class FriendLibrariesTest extends BaseTestCase {
                     allowing(remoteFileItem3).getProperty(filePropertyKey);
                     will(returnValue(null));
                 }
+                
+                exactly(4).of(presenceLibrary1).get(0);
+                will(returnValue(remoteFileItem1));
+                exactly(4).of(presenceLibrary2).get(1);
+                will(returnValue(remoteFileItem2));
+                exactly(1).of(presenceLibrary2).get(2);
+                will(returnValue(remoteFileItem3));
             }
         });
 
@@ -390,9 +458,9 @@ public class FriendLibrariesTest extends BaseTestCase {
         friendLibraryList.add(friendLibrary2);
         presenceLibraryList2.add(presenceLibrary2);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList2.add(remoteFileItem2);
-        remoteFileItemList2.add(remoteFileItem3);
+        indexListener1.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
+        indexListener2.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Arrays.asList(remoteFileItem2, remoteFileItem3), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -467,13 +535,13 @@ public class FriendLibrariesTest extends BaseTestCase {
     /**
      * Testing search for friends files by metadata.
      */
-    public void testIndexingFileMetaData() {
+    @SuppressWarnings("unchecked")
+    public void testIndexingFileMetaData() throws Throwable {
 
         Mockery context = new Mockery();
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -488,6 +556,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -495,15 +564,17 @@ public class FriendLibrariesTest extends BaseTestCase {
                 will(returnValue(presenceLibraryList1));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
-
+                
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
-
-                allowing(remoteFileItem1).getFileNameWithoutExtension();
+                
+                allowing(remoteFileItem1).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
                 will(returnValue(category1));
@@ -516,6 +587,9 @@ public class FriendLibrariesTest extends BaseTestCase {
                         will(returnValue(null));
                     }
                 }
+                
+                exactly(5).of(presenceLibrary1).get(0);
+                will(returnValue(remoteFileItem1));
             }
         });
 
@@ -526,7 +600,8 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("name",
                 SearchCategory.AUDIO);
@@ -618,13 +693,13 @@ public class FriendLibrariesTest extends BaseTestCase {
     /**
      * Testing search for friends files with advancedDetails.
      */
-    public void testAdvancedSearch() {
+    @SuppressWarnings("unchecked")
+    public void testAdvancedSearch() throws Throwable {
 
         Mockery context = new Mockery();
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
 
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
@@ -646,6 +721,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -653,15 +729,17 @@ public class FriendLibrariesTest extends BaseTestCase {
                 will(returnValue(presenceLibraryList1));
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
-
+                
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
 
-                allowing(remoteFileItem1).getFileNameWithoutExtension();
+                allowing(remoteFileItem1).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
                 will(returnValue(category1));
@@ -675,7 +753,7 @@ public class FriendLibrariesTest extends BaseTestCase {
                     }
                 }
 
-                allowing(remoteFileItem2).getFileNameWithoutExtension();
+                allowing(remoteFileItem2).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name2));
                 allowing(remoteFileItem2).getCategory();
                 will(returnValue(category2));
@@ -688,6 +766,11 @@ public class FriendLibrariesTest extends BaseTestCase {
                         will(returnValue(null));
                     }
                 }
+                
+                exactly(7).of(presenceLibrary1).get(0);
+                will(returnValue(remoteFileItem1));
+                exactly(8).of(presenceLibrary1).get(1);
+                will(returnValue(remoteFileItem2));
             }
         });
 
@@ -698,8 +781,9 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList1.add(remoteFileItem2);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Map<FilePropertyKey, String> advancedDetails1 = new HashMap<FilePropertyKey, String>();
         advancedDetails1.put(FilePropertyKey.AUTHOR, "n");
@@ -777,14 +861,14 @@ public class FriendLibrariesTest extends BaseTestCase {
      * Testing indexing phrases. Suggestions only index the phrase, while the
      * matches are found based on indexing all of the parts of the phrase.
      */
-    public void testIndexingPhrases() {
+    @SuppressWarnings("unchecked")
+    public void testIndexingPhrases() throws Throwable {
 
         Mockery context = new Mockery();
 
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
-        final EventList<SearchResult> remoteFileItemList1 = new BasicEventList<SearchResult>();
-
+     
         final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
         final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
         final PresenceLibrary presenceLibrary1 = context.mock(PresenceLibrary.class);
@@ -805,6 +889,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
+        final AtomicReference<EventListener<RemoteLibraryEvent>> indexListener = new AtomicReference<EventListener<RemoteLibraryEvent>>();
 
         context.checking(new Expectations() {
             {
@@ -813,14 +898,16 @@ public class FriendLibrariesTest extends BaseTestCase {
                 allowing(remoteLibraryManager).getFriendLibraryList();
                 will(returnValue(friendLibraryList));
 
+                allowing(presenceLibrary1).addListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<RemoteLibraryEvent>>(indexListener));
+                allowing(presenceLibrary1).getState();
+                will(returnValue(RemoteLibraryState.LOADING));
                 allowing(presenceLibrary1).getPresence();
                 will(returnValue(presence1));
                 allowing(presence1).getPresenceId();
                 will(returnValue(presenceId1));
-                allowing(presenceLibrary1).getModel();
-                will(returnValue(remoteFileItemList1));
 
-                allowing(remoteFileItem1).getFileNameWithoutExtension();
+                allowing(remoteFileItem1).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name1));
                 allowing(remoteFileItem1).getCategory();
                 will(returnValue(category1));
@@ -834,7 +921,7 @@ public class FriendLibrariesTest extends BaseTestCase {
                     }
                 }
 
-                allowing(remoteFileItem2).getFileNameWithoutExtension();
+                allowing(remoteFileItem2).getProperty(FilePropertyKey.NAME);
                 will(returnValue(name2));
                 allowing(remoteFileItem2).getCategory();
                 will(returnValue(category2));
@@ -847,6 +934,11 @@ public class FriendLibrariesTest extends BaseTestCase {
                         will(returnValue(null));
                     }
                 }
+                
+                exactly(9).of(presenceLibrary1).get(0);
+                will(returnValue(remoteFileItem1));
+                exactly(10).of(presenceLibrary1).get(1);
+                will(returnValue(remoteFileItem2));
             }
         });
 
@@ -857,8 +949,9 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         presenceLibraryList1.add(presenceLibrary1);
 
-        remoteFileItemList1.add(remoteFileItem1);
-        remoteFileItemList1.add(remoteFileItem2);
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem1), 0));
+        indexListener.get().handleEvent(RemoteLibraryEvent.createResultsAddedEvent(presenceLibrary1, Collections.singleton(remoteFileItem2), 1));
+        waitForProcessingQueue(friendLibraries);
 
         Collection<String> suggestions = friendLibraries.getSuggestions("", SearchCategory.ALL);
         assertEquals(4, suggestions.size());

@@ -28,7 +28,8 @@ public enum FilePropertyKey {
     YEAR(true);
     
     private final static Collection<FilePropertyKey> indexableKeys = EnumSet.noneOf(FilePropertyKey.class); 
-    private final static Collection<FilePropertyKey> editableKeys = EnumSet.noneOf(FilePropertyKey.class); 
+    private final static Collection<FilePropertyKey> editableKeys = EnumSet.noneOf(FilePropertyKey.class);
+    private final static Collection<FilePropertyKey> filterableKeys = EnumSet.noneOf(FilePropertyKey.class);
     
     private final boolean isLongKey;
     
@@ -43,11 +44,21 @@ public enum FilePropertyKey {
         indexableKeys.add(AUTHOR);
         indexableKeys.add(DESCRIPTION);
         indexableKeys.add(COMPANY);
-        indexableKeys.add(GENRE);
         indexableKeys.add(NAME);
         indexableKeys.add(PLATFORM);
     };
 
+    static {
+        filterableKeys.add(ALBUM);
+        filterableKeys.add(TITLE);
+        filterableKeys.add(AUTHOR);
+        filterableKeys.add(DESCRIPTION);
+        filterableKeys.add(COMPANY);
+        filterableKeys.add(GENRE);
+        filterableKeys.add(NAME);
+        filterableKeys.add(PLATFORM);
+    };
+    
     static {
         editableKeys.add(ALBUM);
         editableKeys.add(AUTHOR);
@@ -66,6 +77,13 @@ public enum FilePropertyKey {
      */
     public static Collection<FilePropertyKey> getIndexableKeys() {
         return indexableKeys;
+    }
+    
+    /**
+     * Returns a Collection of the keys which are supposed to be filtered.
+     */
+    public static Collection<FilePropertyKey> getFilterableKeys() {
+        return filterableKeys;
     }
     
     /**

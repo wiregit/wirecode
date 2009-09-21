@@ -472,6 +472,26 @@ public class StringUtils {
         }
         return builder.toString();
     }
+    
+    /**
+     * Concatenates the string representation of <code>object</code> 
+     * <code>times</code> times together, separating it with <code>delimiter</code>.
+     * 
+     * @throws AssertionError whent times is smaller than 1
+     */
+    public static <T> String explode(T object, String delimiter, int times) {
+        assert times >= 1;
+        if (times == 1) {
+            return String.valueOf(object);
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(object);
+        for (int i = 1; i < times; i++) {
+            builder.append(delimiter);
+            builder.append(object);
+        }
+        return builder.toString();
+    }
 
     /**
      * A wrapped version of {@link String#getBytes(String)} that changes the

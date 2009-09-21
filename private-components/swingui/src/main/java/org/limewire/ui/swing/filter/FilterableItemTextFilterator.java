@@ -18,7 +18,7 @@ class FilterableItemTextFilterator<E extends FilterableItem> implements TextFilt
         // Add file extension to list.
         baseList.add(item.getFileExtension());
         
-        for(FilePropertyKey key : FilePropertyKey.getIndexableKeys()) {
+        for(FilePropertyKey key : FilePropertyKey.getFilterableKeys()) {
             String value = item.getPropertyString(key);
             if (value != null) {
                 baseList.add(value);

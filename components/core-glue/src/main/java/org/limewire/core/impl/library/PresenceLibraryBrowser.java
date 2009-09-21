@@ -14,7 +14,7 @@ import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.FriendLibrary;
-import org.limewire.core.api.library.LibraryState;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
@@ -139,7 +139,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
     void browse(final PresenceLibrary presenceLibrary) {
         
         // TODO: Is this needed again?  We should already be in loading
-        presenceLibrary.setState(LibraryState.LOADING);
+        presenceLibrary.setState(RemoteLibraryState.LOADING);
         
         final FriendPresence friendPresence = presenceLibrary.getPresence();
         
@@ -164,7 +164,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 int size = presenceLibrary.size();
                 if(size == 0) {
                     transitList = null;
-                } else if (remoteLibraryManager.getAllFriendsFileList().size() > 5000) {
+                } else if (remoteLibraryManager.getAllFriendsLibrary().size() > 5000) {
                     // can run low on memory, so clear old list & add as new ones come.
                     presenceLibrary.clear();
                     transitList = null;
@@ -194,9 +194,9 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 }
                 
                 if(success) {
-                    presenceLibrary.setState(LibraryState.LOADED);
+                    presenceLibrary.setState(RemoteLibraryState.LOADED);
                 } else {
-                    presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
+                    presenceLibrary.setState(RemoteLibraryState.FAILED_TO_LOAD);
                     LOG.debugf("browse failed: {0}", presenceLibrary);
                 }
             }
@@ -214,7 +214,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      * when this method is called
      */
     void tryToResolveAndBrowse(final PresenceLibrary presenceLibrary, final int startConnectivityRevision) {
-        presenceLibrary.setState(LibraryState.LOADING);
+        presenceLibrary.setState(RemoteLibraryState.LOADING);
         final FriendPresence friendPresence = presenceLibrary.getPresence();
         AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
         if (addressFeature == null) {
@@ -264,7 +264,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      */
     private void handleFailedResolution(PresenceLibrary presenceLibrary, int startRevision) { 
         LOG.debugf("failed resolution for:{0} revision:{1}", presenceLibrary.getPresence().getPresenceId(), startRevision);
-        presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
+        presenceLibrary.setState(RemoteLibraryState.FAILED_TO_LOAD);
         
         boolean retry;
         synchronized (librariesToBrowse) {

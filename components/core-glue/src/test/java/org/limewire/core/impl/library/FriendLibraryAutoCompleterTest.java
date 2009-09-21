@@ -58,7 +58,7 @@ public class FriendLibraryAutoCompleterTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
-    public void testGetByPrefix() {
+    public void testGetByPrefix() throws Exception {
         Mockery context = new Mockery() {
             {
                 setImposteriser(ClassImposteriser.INSTANCE);

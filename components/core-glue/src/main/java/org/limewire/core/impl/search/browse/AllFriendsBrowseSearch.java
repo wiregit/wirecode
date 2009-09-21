@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import org.limewire.core.api.library.RemoteLibrary;
+import org.limewire.core.api.library.RemoteLibraryEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.RemoteLibraryEvent.Type;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
+import org.limewire.listener.EventListener;
 
 class AllFriendsBrowseSearch extends AbstractBrowseSearch {
     
     private final RemoteLibraryManager remoteLibraryManager;
     private final ExecutorService backgroundExecutor;
-    private final ListEventListener<SearchResult> listEventListener = new AllFriendsListEventListener<SearchResult>();
+    private final AllFriendsListEventListener listEventListener = new AllFriendsListEventListener();
 
-  
     public AllFriendsBrowseSearch(RemoteLibraryManager remoteLibraryManager, ExecutorService backgroundExecutor) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.backgroundExecutor = backgroundExecutor;
@@ -53,13 +53,10 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
 
 
     private void loadSnapshot() {
-        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>();
-        
-        remoteLibraryManager.getAllFriendsFileList().getModel().getReadWriteLock().readLock().lock();
-        try {        
-            remoteFileItems.addAll(remoteLibraryManager.getAllFriendsFileList().getModel());
-        } finally {
-            remoteLibraryManager.getAllFriendsFileList().getModel().getReadWriteLock().readLock().unlock();
+        RemoteLibrary allFriendsLibrary = remoteLibraryManager.getAllFriendsLibrary();
+        List<SearchResult> remoteFileItems = new ArrayList<SearchResult>(allFriendsLibrary.size());
+        for (SearchResult searchResult : allFriendsLibrary) {
+            remoteFileItems.add(searchResult);
         }
         
         //add all files
@@ -82,26 +79,32 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
     }
     
     private void installListener(){
-        remoteLibraryManager.getAllFriendsFileList().getModel().addListEventListener(listEventListener);
+        remoteLibraryManager.getAllFriendsLibrary().addListener(listEventListener);
     }
     
     private void removeListener(){
-        remoteLibraryManager.getAllFriendsFileList().getModel().removeListEventListener(listEventListener);        
+        remoteLibraryManager.getAllFriendsLibrary().removeListener(listEventListener);        
     }
     
-    private class AllFriendsListEventListener<E> implements ListEventListener<E> {
+    private class AllFriendsListEventListener implements EventListener<RemoteLibraryEvent> {
         @Override
-        public void listChanged(ListEvent listChanges) {
-            BrowseStatus status = new BrowseStatus(AllFriendsBrowseSearch.this, BrowseState.UPDATED);
-            for (BrowseStatusListener listener : browseStatusListeners){
-                listener.statusChanged(status);
+        public void handleEvent(RemoteLibraryEvent event) {
+            if (event.getType() != Type.STATE_CHANGED) {
+                BrowseStatus status = new BrowseStatus(AllFriendsBrowseSearch.this, BrowseState.UPDATED);
+                for (BrowseStatusListener listener : browseStatusListeners){
+                    listener.statusChanged(status);
+                }
             }
         }        
     }
 
     @Override
     public void repeat() {
-        loadSnapshot();
+        backgroundExecutor.execute(new Runnable() {
+            public void run() {
+                loadSnapshot();
+            }
+        });
     }
 
 }

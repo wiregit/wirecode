@@ -37,6 +37,11 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
             map = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         }
     }
+    
+    @Override
+    public boolean isImmediate() {
+        return true;
+    }
 
     /**
      * Adds a value to the set.  Different letter case of values is always

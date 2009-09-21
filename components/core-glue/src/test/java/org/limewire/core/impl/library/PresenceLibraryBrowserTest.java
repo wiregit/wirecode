@@ -9,7 +9,7 @@ import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.FriendLibrary;
-import org.limewire.core.api.library.LibraryState;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -100,7 +100,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         context.checking(new Expectations() {{
             // Assertions
             exactly(1).of(socketsManager).addListener(with(socketsListenerCollector));
-            exactly(1).of(presenceLibrary).setState(LibraryState.LOADING);
+            exactly(1).of(presenceLibrary).setState(RemoteLibraryState.LOADING);
             
             // Allow the browse to unfold minimally as it must
             allowing(presenceLibrary);
@@ -265,7 +265,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             will(returnValue(0));
             
             // TODO: why two?  
-            exactly(2).of(presenceLibrary).setState(LibraryState.LOADING);
+            exactly(2).of(presenceLibrary).setState(RemoteLibraryState.LOADING);
             
             FriendPresence friendPresence = context.mock(FriendPresence.class);
             allowing(presenceLibrary).getPresence();
@@ -299,7 +299,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             exactly(1).of(presenceLibraryEventList).addListEventListener(with(listenerCollector));
             exactly(1).of(browse).start(with(browseListenerCollector));
             exactly(1).of(presenceLibrary).size();
-            exactly(1).of(presenceLibrary).setState(LibraryState.LOADED);
+            exactly(1).of(presenceLibrary).setState(RemoteLibraryState.LOADED);
         }});
         
         // Register the initial listener to listen for new remote libraries to manage browsing
@@ -359,7 +359,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         context.checking(new Expectations() {{
             
-            allowing(presenceLibrary).setState(with(any(LibraryState.class)));
+            allowing(presenceLibrary).setState(with(any(RemoteLibraryState.class)));
                         
             FriendPresence presence = context.mock(FriendPresence.class);
             allowing(presenceLibrary).getPresence();

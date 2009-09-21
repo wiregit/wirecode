@@ -6,16 +6,14 @@ import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Timer;
 
+import org.limewire.core.api.library.RemoteLibraryEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.search.DefaultSearchRepeater;
 import org.limewire.ui.swing.search.SearchRepeater;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 
@@ -47,17 +45,16 @@ public class AllFriendsRefreshManager implements SearchRepeater{
     
     @Inject
     public void register(){
-        remoteLibraryManager.getAllFriendsFileList().getSwingModel().addListEventListener(new ListEventListener<SearchResult>() {
-            public void listChanged(ListEvent<SearchResult> listChanges) {
-                while(listChanges.next()) {
-                    if(listChanges.getType() == ListEvent.INSERT) {
-                        hasInsert = true;
-                    } else if (listChanges.getType() == ListEvent.DELETE){
-                        hasDelete = true;
-                    }
-                    if(hasInsert & hasDelete) {
-                        break; 
-                    }
+        remoteLibraryManager.getAllFriendsLibrary().addListener(new EventListener<RemoteLibraryEvent>() {
+            public void handleEvent(RemoteLibraryEvent event) {
+                switch (event.getType()) {
+                case RESULTS_ADDED:
+                    hasInsert = true;
+                    break;
+                case RESULTS_CLEARED:
+                case RESULTS_REMOVED:
+                    hasDelete = true;
+                    break;
                 }
                 fireCurrentStatus();               
             }; 
@@ -140,7 +137,7 @@ public class AllFriendsRefreshManager implements SearchRepeater{
     }
     
     public boolean hasSharedFiles(){
-        return remoteLibraryManager.getAllFriendsFileList().getSwingModel().size() > 0;
+        return remoteLibraryManager.getAllFriendsLibrary().size() > 0;
     }
     
     

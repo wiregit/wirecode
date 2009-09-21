@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -24,7 +25,12 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.collection.AutoCompleteDictionary;
+import org.limewire.collection.NECallable;
 import org.limewire.collection.StringTrieSet;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.ui.swing.components.AutoCompleter;
 import org.limewire.ui.swing.components.CollectionBackedListModel;
 import org.limewire.ui.swing.components.ExtendedCompoundBorder;
@@ -32,12 +38,17 @@ import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 /** An autocompleter that shows its suggestions in a list and can have new suggestions added. */
 public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     
+    private final ListeningExecutorService queue = ExecutorsHelper.newProcessingQueue("AutoCompleteQueue");
+    
     @Resource private Color selectionBackground;
     @Resource private Font font;
+    
+    private ListeningFuture<Boolean> lastFuture;
     
     private final JPanel entryPanel;
     
@@ -121,21 +132,54 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     }
 
     @Override
-    public void setInput(String input) {
+    public ListeningFuture<Boolean> setInput(String input) {
         if(input == null) {
             input = "";
         }
         
-        currentText = input;
-        
-        Collection<String> histories = historyDictionary.getPrefixedBy(currentText);
-        ArrayList<Entry> items = new ArrayList<Entry>(histories.size());
+        currentText = input;        
+        // Only if both are immediate can we immediately show.
+        if(historyDictionary.isImmediate() && suggestionDictionary.isImmediate()) {
+            try {
+                lookupAndSetItems(currentText);
+            } catch(InterruptedException error) {
+                throw new IllegalStateException(error);
+            }
+            return new SimpleFuture<Boolean>(true);
+        } else {
+            if(lastFuture != null) {
+                lastFuture.cancel(true);
+            }
+            setItems(Collections.<Entry>emptyList());
+            final String lookupText = currentText;
+            lastFuture = queue.submit(new NECallable<Boolean>() {
+                @Override
+                public Boolean call() {
+                    if(Thread.interrupted()) {
+                        return false;
+                    }
+                    
+                    try {
+                        lookupAndSetItems(lookupText);
+                        return true;
+                    } catch (InterruptedException ignored) {
+                        return false;
+                    }
+                }
+            });
+            return lastFuture;
+        }
+    }
+    
+    private void lookupAndSetItems(final String lookupText) throws InterruptedException {
+        Collection<String> histories = historyDictionary.getPrefixedBy(lookupText);
+        final ArrayList<Entry> items = new ArrayList<Entry>(histories.size());
         for(String string : histories) {
             items.add(new Entry(string, Entry.Reason.HISTORY));
         }
         
         if(showSuggestions) {
-            Collection<String> suggestions = suggestionDictionary.getPrefixedBy(currentText);
+            Collection<String> suggestions = suggestionDictionary.getPrefixedBy(lookupText);
             items.ensureCapacity(items.size() + suggestions.size());
             boolean needFirstSuggestion = true;
             for(String string : suggestions) {
@@ -148,6 +192,15 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             }
         }
         
+        SwingUtils.invokeAndWaitWithInterrupted(new Runnable() {
+            @Override
+            public void run() {
+                setItems(items);
+            }
+        });
+    }
+    
+    private void setItems(Collection<Entry> items) {
         entryList.setModel(new CollectionBackedListModel(items));
         entryList.setVisibleRowCount(Math.min(8, items.size()));
     }

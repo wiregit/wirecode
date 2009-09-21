@@ -253,7 +253,7 @@ class LimeSessionInfo implements SessionInfo {
 
     @Override
     public int getAllFriendsFileListSize() {
-        return remoteLibraryManager.getAllFriendsFileList().size();
+        return remoteLibraryManager.getAllFriendsLibrary().size();
     }
 
     @Override

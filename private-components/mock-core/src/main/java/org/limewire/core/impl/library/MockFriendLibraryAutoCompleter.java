@@ -18,6 +18,11 @@ public class MockFriendLibraryAutoCompleter implements AutoCompleteDictionary {
     public String lookup(String s) {
         return "";
     }
+    
+    @Override
+    public boolean isImmediate() {
+        return true;
+    }
 
     public Iterator<String> iterator() {
         return new Iterator<String>() {
