@@ -14,13 +14,8 @@ import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.listener.EventListener;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 
 class AllFriendsBrowseSearch extends AbstractBrowseSearch {
-    
-    @SuppressWarnings("unused")
-    private static final Log LOG = LogFactory.getLog(AllFriendsBrowseSearch.class);
     
     private final RemoteLibraryManager remoteLibraryManager;
     private final ExecutorService backgroundExecutor;

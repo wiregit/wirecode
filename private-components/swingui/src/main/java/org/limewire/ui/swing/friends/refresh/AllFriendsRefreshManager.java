@@ -48,11 +48,11 @@ public class AllFriendsRefreshManager implements SearchRepeater{
         remoteLibraryManager.getAllFriendsLibrary().addListener(new EventListener<RemoteLibraryEvent>() {
             public void handleEvent(RemoteLibraryEvent event) {
                 switch (event.getType()) {
-                // TODO verify logic!!!!
                 case RESULTS_ADDED:
                     hasInsert = true;
                     break;
                 case RESULTS_CLEARED:
+                case RESULTS_REMOVED:
                     hasDelete = true;
                     break;
                 }

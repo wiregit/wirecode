@@ -568,6 +568,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         @Override
         public void handleEvent(RemoteLibraryEvent event) {
+            System.out.println(parent.size() + ": " + event);
             switch (event.getType()) {
             case STATE_CHANGED:
                 parent.updateState();
@@ -581,9 +582,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 if (parent.size() == 0) {
                     listeners.broadcast(RemoteLibraryEvent.createResultsClearedEvent(parent));
                 } else {
-                    // TODO: strictly, a FILES_CLEARED event from a presence library would have to be forwarded
-                    // as a FILES_REMOVED event in this case
+                    listeners.broadcast(RemoteLibraryEvent.createResultsRemovedEvent(parent));
                 }
+                break;
+            case RESULTS_REMOVED:
+                listeners.broadcast(RemoteLibraryEvent.createResultsRemovedEvent(parent));
+                break;
             }
         }
     }

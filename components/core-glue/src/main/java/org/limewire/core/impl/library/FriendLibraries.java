@@ -276,6 +276,12 @@ public class FriendLibraries {
         Collection<String> getSuggestions(String prefix, SearchCategory category);
         Collection<String> getSuggestions(String prefix, SearchCategory category, FilePropertyKey filePropertyKey);
         Collection<SearchResult> getMatchingItems(SearchDetails searchDetails);
+        /**
+         * Indexes the properties of <code>newFile</code> for suggestions and
+         * retrieval. 
+         * @param presenceId presence id internal to FriendLibraries
+         * @param index of the result in its presence library
+         */
         void index(int presenceId, int index, SearchResult newFile);
         void clear(int presenceId);
     }

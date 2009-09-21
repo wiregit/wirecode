@@ -16,7 +16,7 @@ public class RemoteLibraryEvent extends DefaultSourceTypeEvent<RemoteLibrary, Re
     private final Collection<SearchResult> addedResults;
     private final int startIndex;
 
-    public static enum Type { RESULTS_CLEARED, RESULTS_ADDED, STATE_CHANGED }
+    public static enum Type { RESULTS_CLEARED, RESULTS_ADDED, RESULTS_REMOVED, STATE_CHANGED }
     
     private RemoteLibraryEvent(RemoteLibrary source, Type type, Collection<SearchResult> addedResults, int startIndex) { 
         super(source, type);
@@ -31,6 +31,10 @@ public class RemoteLibraryEvent extends DefaultSourceTypeEvent<RemoteLibrary, Re
     
     public static RemoteLibraryEvent createResultsClearedEvent(RemoteLibrary remoteLibrary) {
         return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_CLEARED, Collections.<SearchResult>emptyList(), -1);
+    }
+    
+    public static RemoteLibraryEvent createResultsRemovedEvent(RemoteLibrary remoteLibrary) {
+        return new RemoteLibraryEvent(remoteLibrary, Type.RESULTS_REMOVED, Collections.<SearchResult>emptyList(), -1);
     }
     
     public static RemoteLibraryEvent createResultsAddedEvent(RemoteLibrary remoteLibrary, Collection<SearchResult> addedResults, int startIndex) {
