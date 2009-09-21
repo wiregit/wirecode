@@ -24,6 +24,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
+import org.limewire.ui.swing.components.NonNullJComboBox;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.search.resultpanel.LicenseWarningDownloadPreprocessor;
@@ -208,7 +209,7 @@ public class MiscOptionPanel extends OptionPanel {
                 }
             });
 
-            serviceComboBox = new JComboBox();
+            serviceComboBox = new NonNullJComboBox();
             for(String label : accountManager.get().getLabels()) {
                 if(!label.equals("Facebook")) {
                     serviceComboBox.addItem(label);

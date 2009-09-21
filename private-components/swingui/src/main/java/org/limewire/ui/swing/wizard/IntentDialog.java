@@ -32,6 +32,7 @@ import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.NonNullJComboBox;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -209,7 +210,7 @@ public class IntentDialog extends LimeJDialog {
      *  and sets the application locale to that match.
      */
     private JComboBox createLanguageDropDown(Font normalFont) {
-        final JComboBox languageDropDown = new JComboBox();
+        final JComboBox languageDropDown = new NonNullJComboBox();
         Locale[] locales = LanguageUtils.getLocales(normalFont);
         languageDropDown.setRenderer(new LocaleRenderer());
         languageDropDown.setFont(smallFont);

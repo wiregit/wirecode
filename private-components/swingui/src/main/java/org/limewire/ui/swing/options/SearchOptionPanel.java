@@ -22,6 +22,7 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.Setting;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.NonNullJComboBox;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
@@ -129,7 +130,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
 
         private void createComponents() {
-            defaultSearchSpinner = new JComboBox(SearchCategory.values());
+            defaultSearchSpinner = new NonNullJComboBox(SearchCategory.values());
             defaultSearchSpinner.setRenderer(new CategoryCellRenderer());
             defaultSearchSpinner.removeItem(SearchCategory.OTHER);
 
