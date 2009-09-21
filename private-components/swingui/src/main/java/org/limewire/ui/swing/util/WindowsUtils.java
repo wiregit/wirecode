@@ -2,10 +2,9 @@ package org.limewire.ui.swing.util;
 
 import java.io.File;
 
+import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
-import org.limewire.util.SystemUtils;
-import org.limewire.util.SystemUtils.SpecialLocations;
 
 
 /**
@@ -29,7 +28,8 @@ public class WindowsUtils {
         if(!isLoginStatusAvailable())
             return;
         
-        File startup = new File(SystemUtils.getSpecialPath(SpecialLocations.START_MENU_STARTUP));
+        File homeDir = CommonUtils.getUserHomeDir();
+        File startup = new File(homeDir, "Start Menu\\Programs\\Startup");
         File dst = new File(startup, "LimeWire On Startup.lnk");
         
         // No need to copy if the link is already there
@@ -37,6 +37,7 @@ public class WindowsUtils {
             return;
         
         File src = new File("LimeWire On Startup.lnk");
+                
         
         if(allow)
             FileUtils.copy(src, dst);
