@@ -7,11 +7,9 @@ import java.util.Set;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.impl.friend.FileMetaDataConverterImpl;
-import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
+import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AddressFeature;
@@ -19,10 +17,10 @@ import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
+import org.limewire.io.IpPort;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.BaseTestCase;
 
-import com.google.common.collect.Iterables;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -49,7 +47,8 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
         final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
-        
+        final RemoteFileDescAdapter.Factory rfdaFactory = context.mock(RemoteFileDescAdapter.Factory.class);
+        final RemoteFileDescAdapter rfda = context.mock(RemoteFileDescAdapter.class);
         final long creationTime = 199400120012L;
         
         final FriendPresence presence = context.mock(FriendPresence.class);
@@ -59,7 +58,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         final FileMetaDataConverterImpl factory
             = new FileMetaDataConverterImpl(
                     new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
-                    remoteFileDescFactory);
+                    remoteFileDescFactory, rfdaFactory);
         
         context.checking(new Expectations() {{
             allowing(presence).hasFeatures(AddressFeature.ID);
@@ -89,16 +88,19 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             will(returnValue(Collections.singleton(sha1)));
             allowing(initialRFD);
             
+            allowing(rfdaFactory).create(initialRFD, IpPort.EMPTY_SET, presence);
+            will(returnValue(rfda));
+            
         }});
         
         SearchResult item = factory.create(presence, fileMetaData);
-        assertNotNull(item);
+        assertSame(rfda, item);
         
-        // Ensure the the creation time persisted into the RemoteFileItem.
-        assertEquals(creationTime, item.getProperty(FilePropertyKey.DATE_CREATED));
-        
-        // Ensure the correct presence was swapped into the RemoteFileItem
-        assertEquals(presence, Iterables.get(item.getSources(), 0).getFriendPresence());
+//        // Ensure the the creation time persisted into the RemoteFileItem.
+//        assertEquals(creationTime, item.getProperty(FilePropertyKey.DATE_CREATED));
+//        
+//        // Ensure the correct presence was swapped into the RemoteFileItem
+//        assertEquals(presence, Iterables.get(item.getSources(), 0).getFriendPresence());
       
         context.assertIsSatisfied();
     }
@@ -115,6 +117,8 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
         final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
+        final RemoteFileDescAdapter.Factory rfdaFactory = context.mock(RemoteFileDescAdapter.Factory.class);
+        final RemoteFileDescAdapter rfda = context.mock(RemoteFileDescAdapter.class);
         
         final long creationTime = 199400120012L;
         
@@ -126,7 +130,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         final FileMetaDataConverterImpl factory
             = new FileMetaDataConverterImpl(
                     new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
-                    remoteFileDescFactory);
+                    remoteFileDescFactory, rfdaFactory);
         
         context.checking(new Expectations() {{
             allowing(presence).hasFeatures(AddressFeature.ID);
@@ -162,18 +166,21 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             will(returnValue(Collections.singleton(sha1)));
             allowing(initialRFD);
             
+            allowing(rfdaFactory).create(initialRFD, IpPort.EMPTY_SET, presence);
+            will(returnValue(rfda));
+            
         }});
         
         SearchResult item = factory.create(presence, fileMetaData);
-        assertNotNull(item);
+        assertSame(rfda, item);
         
-        // Ensure the the creation time persisted into the RemoteFileItem.
-        assertEquals(creationTime, item.getProperty(FilePropertyKey.DATE_CREATED));
-        
-        // Ensure, in a round-about fashion, the correct presence was swapped into the RemoteFileItem
-        //  and that it has the matching address
-        assertEquals(swapAddress,
-                Iterables.get(item.getSources(), 0).getFriendPresence().getFeature(AddressFeature.ID).getFeature());
+//        // Ensure the the creation time persisted into the RemoteFileItem.
+//        assertEquals(creationTime, item.getProperty(FilePropertyKey.DATE_CREATED));
+//        
+//        // Ensure, in a round-about fashion, the correct presence was swapped into the RemoteFileItem
+//        //  and that it has the matching address
+//        assertEquals(swapAddress,
+//                Iterables.get(item.getSources(), 0).getFriendPresence().getFeature(AddressFeature.ID).getFeature());
         
         context.assertIsSatisfied();
     }
@@ -191,6 +198,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
         final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
+        final RemoteFileDescAdapter.Factory rfdaFactory = context.mock(RemoteFileDescAdapter.Factory.class);
         
         final long creationTime = 199400120012L;
         
@@ -201,7 +209,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
         final FileMetaDataConverterImpl factory
             = new FileMetaDataConverterImpl(
                     new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
-                    remoteFileDescFactory);
+                    remoteFileDescFactory, rfdaFactory);
         
         context.checking(new Expectations() {{
             allowing(presence).hasFeatures(AddressFeature.ID);

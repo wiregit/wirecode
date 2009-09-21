@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.inject.EagerSingleton;
@@ -27,11 +29,11 @@ class PlaylistManagerImpl implements PlaylistManager {
      * Constructs a PlaylistManager using the specified managed file list.
      */
     @Inject
-    public PlaylistManagerImpl(Library managedList) {
+    public PlaylistManagerImpl(Library managedList, CategoryManager categoryManager) {
         this.managedList = managedList;
         
         // Create the only playlist currently supported.
-        this.defaultPlaylist = new PlaylistImpl("Quicklist");
+        this.defaultPlaylist = new PlaylistImpl("Quicklist", categoryManager.getFilterForCategory(Category.AUDIO));
         this.playlistList = Arrays.asList(new Playlist[] {
                 defaultPlaylist
         });

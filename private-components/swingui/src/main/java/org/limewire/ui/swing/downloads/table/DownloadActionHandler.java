@@ -11,6 +11,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.search.SearchCategory;
@@ -67,12 +68,14 @@ public class DownloadActionHandler {
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final SearchHandler searchHandler;
     private final Provider<KeywordAssistedSearchBuilder> searchBuilder;
+    private final CategoryManager categoryManager;
     
     @Inject
     public DownloadActionHandler(DownloadListManager downloadListManager, 
             LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
-            SearchHandler searchHandler, Provider<KeywordAssistedSearchBuilder> searchBuilder){
+            SearchHandler searchHandler, Provider<KeywordAssistedSearchBuilder> searchBuilder,
+            CategoryManager categoryManager){
         this.downloadListManager = downloadListManager;
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
@@ -80,6 +83,7 @@ public class DownloadActionHandler {
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.searchHandler = searchHandler;
         this.searchBuilder = searchBuilder;
+        this.categoryManager = categoryManager;
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){
@@ -96,7 +100,7 @@ public class DownloadActionHandler {
            // NativeLaunchUtils.openURL(ERROR_URL);
         } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND || actionCommmand == PLAY_COMMAND){
             if (item.isLaunchable()) {
-                DownloadItemUtils.launch(item);
+                DownloadItemUtils.launch(item, categoryManager);
                 if(actionCommmand != PREVIEW_COMMAND){
                     downloadsLaunched++;
                 }

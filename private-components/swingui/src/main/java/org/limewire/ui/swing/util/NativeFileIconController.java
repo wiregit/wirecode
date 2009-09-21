@@ -2,6 +2,7 @@ package org.limewire.ui.swing.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -20,13 +21,16 @@ import javax.swing.plaf.FileChooserUI;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.collection.FixedsizeForgetfulHashSet;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
+
+import com.google.inject.Inject;
 
 
 /** A FileIconController that attempts to return native icons. */
@@ -44,12 +48,16 @@ public class NativeFileIconController implements FileIconController {
      */
     private final Icon NULL = new ImageIcon();
     
+    private final CategoryManager categoryManager;
+    
     /**
      * Constructs the NativeFileIconController.
      * This constructor may block as the JFileChooser
      * is constructed.
      */
-    NativeFileIconController() {
+    @Inject
+    NativeFileIconController(CategoryManager categoryManager) {
+        this.categoryManager = categoryManager;
         SmartFileView view = getNativeFileView();
         if(view == null) {
             VIEW = null;
@@ -227,12 +235,12 @@ public class NativeFileIconController implements FileIconController {
      */
     private void preload() {
         ExecutorService queue = ExecutorsHelper.newProcessingQueue("IconLoader");
-        final MediaType[] types = MediaType.getDefaultMediaTypes();
+        Category[] categories = Category.values();
         final AtomicBoolean continueLoading = new AtomicBoolean(true);
-        for(int i = 0; i < types.length && continueLoading.get(); i++) {
-            final Set exts = types[i].getExtensions();
-            for(Iterator j = exts.iterator(); j.hasNext() && continueLoading.get(); ) {
-                final String next = (String)j.next();
+        for(int i = 0; i < categories.length && continueLoading.get(); i++) {
+            final Collection<String> exts = categoryManager.getExtensionsForCategory(categories[i]);
+            for(Iterator<String> j = exts.iterator(); j.hasNext() && continueLoading.get(); ) {
+                final String next = j.next();
                 queue.execute(new Runnable() {
                     public void run() {
                         SwingUtils.invokeAndWait(new Runnable() {

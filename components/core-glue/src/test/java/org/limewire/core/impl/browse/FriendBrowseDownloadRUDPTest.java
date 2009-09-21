@@ -156,7 +156,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         SearchServices searchServices = injector.getInstance(SearchServices.class);
         QueryReplyListenerList queryReplyListenerList = injector.getInstance(QueryReplyListenerList.class);
 
-        CoreBrowse coreBrowse = new CoreBrowse(presence, searchServices, queryReplyListenerList);
+        CoreBrowse coreBrowse = new CoreBrowse(presence, searchServices, queryReplyListenerList, null);
 
         BrowseResultsCollector browser = new BrowseResultsCollector();
         coreBrowse.start(browser);

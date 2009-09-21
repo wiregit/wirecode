@@ -5,8 +5,8 @@ import java.io.File;
 import javax.swing.Icon;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 
@@ -16,10 +16,12 @@ import com.google.inject.Inject;
 public class BasicFileIconController extends NonBlockFileIconController {
     
     private final CategoryIconManager categoryIconManager;
+    private final CategoryManager categoryManager;
     
     @Inject
-    public BasicFileIconController(CategoryIconManager categoryIconManager) {
+    public BasicFileIconController(CategoryIconManager categoryIconManager, CategoryManager categoryManager) {
         this.categoryIconManager = categoryIconManager;
+        this.categoryManager = categoryManager;
     }
     
     /** Returns the icon associated with the extension of the file. */
@@ -34,11 +36,11 @@ public class BasicFileIconController extends NonBlockFileIconController {
     
     /** Returns the icon associated with the extension. */
     public Icon getIconForExtension(String ext) {
-        MediaType mt = null;
-        if (ext != null)
-            mt = MediaType.getMediaTypeForExtension(ext);
+        Category category = null;
+        if (ext != null) {
+            category = categoryManager.getCategoryForExtension(ext);
+        }
         
-        Category category = CategoryUtils.getCategory(mt);        
         return this.categoryIconManager.getIcon(category);
     }
 

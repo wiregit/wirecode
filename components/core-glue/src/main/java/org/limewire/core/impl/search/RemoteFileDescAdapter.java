@@ -8,6 +8,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
@@ -21,7 +22,8 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.common.collect.ImmutableList;
-import com.limegroup.gnutella.CategoryConverter;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -30,7 +32,22 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A class to generate a compatible {@link SearchResult} for the ui using an anonymous or non 
  *  anonymous {@link FriendPresence} a {@link RemoteFileDesc} and a list of alternate locations (AltLocs).
  */
+@SuppressWarnings("deprecation")
 public class RemoteFileDescAdapter implements SearchResult {
+    
+    public interface Factory {
+        /**
+         * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella presence based on the rfd's
+         *  address and a set of altlocs. 
+         */
+        RemoteFileDescAdapter create(RemoteFileDesc rfd, Set<? extends IpPort> locs);
+        
+        /**
+         * Constructs {@link RemoteFileDescAdapter} with a specific and possibly non anonymous presence
+         *  and a set of altlocs. 
+         */
+        RemoteFileDescAdapter create(RemoteFileDesc rfd, Set<? extends IpPort> locs, FriendPresence friendPresence);
+    }
    
     /**
      * AltLocs are given a weight of one since we do not really know anything about them but
@@ -60,23 +77,29 @@ public class RemoteFileDescAdapter implements SearchResult {
      * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella presence based on the rfd's
      *  address and a set of altlocs. 
      */
-    public RemoteFileDescAdapter(RemoteFileDesc rfd,
-                                 Set<? extends IpPort> locs) {
-        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()));
+    // we're using the old AssistedInject because it works with multiple constructors
+    @AssistedInject
+    RemoteFileDescAdapter(@Assisted RemoteFileDesc rfd,
+            @Assisted Set<? extends IpPort> locs,
+            CategoryManager categoryManager) {
+        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()), categoryManager);
     }
     
     /**
      * Constructs {@link RemoteFileDescAdapter} with a specific and possibly non anonymous presence
      *  and a set of altlocs. 
      */
-    public RemoteFileDescAdapter(RemoteFileDesc rfd,
-            Set<? extends IpPort> locs,
-            FriendPresence friendPresence) {    
+    // we're using the old AssistedInject because it works with multiple constructors
+    @AssistedInject
+    RemoteFileDescAdapter(@Assisted RemoteFileDesc rfd,
+            @Assisted Set<? extends IpPort> locs,
+            @Assisted FriendPresence friendPresence, 
+            CategoryManager categoryManager) {    
         this.rfd = rfd;
         this.locs = ImmutableList.copyOf(locs);
         this.friendPresence = friendPresence;
         this.extension = FileUtils.getFileExtension(rfd.getFileName());
-        this.category = CategoryConverter.categoryForExtension(extension);
+        this.category = categoryManager.getCategoryForExtension(extension);
         this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
     }
     

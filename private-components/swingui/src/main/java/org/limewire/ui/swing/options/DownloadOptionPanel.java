@@ -15,6 +15,7 @@ import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.FileSetting;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -28,7 +29,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.ui.swing.util.SaveDirectoryHandler;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -203,12 +203,12 @@ public class DownloadOptionPanel extends OptionPanel {
          * Updates the save location for all media types.
          */
         private void updateMediaSaveDirectories(String oldSaveDir, String newSaveDir) {
-            updateMediaSaveDirectory(MediaType.getAudioMediaType(), oldSaveDir, newSaveDir);
-            updateMediaSaveDirectory(MediaType.getVideoMediaType(), oldSaveDir, newSaveDir);
-            updateMediaSaveDirectory(MediaType.getImageMediaType(), oldSaveDir, newSaveDir);
-            updateMediaSaveDirectory(MediaType.getDocumentMediaType(), oldSaveDir, newSaveDir);
-            updateMediaSaveDirectory(MediaType.getProgramMediaType(), oldSaveDir, newSaveDir);
-            updateMediaSaveDirectory(MediaType.getOtherMediaType(), oldSaveDir, newSaveDir);
+            updateMediaSaveDirectory(Category.AUDIO, oldSaveDir, newSaveDir);
+            updateMediaSaveDirectory(Category.VIDEO, oldSaveDir, newSaveDir);
+            updateMediaSaveDirectory(Category.IMAGE, oldSaveDir, newSaveDir);
+            updateMediaSaveDirectory(Category.DOCUMENT, oldSaveDir, newSaveDir);
+            updateMediaSaveDirectory(Category.PROGRAM, oldSaveDir, newSaveDir);
+            updateMediaSaveDirectory(Category.OTHER, oldSaveDir, newSaveDir);
         }
         
         /**
@@ -216,9 +216,9 @@ public class DownloadOptionPanel extends OptionPanel {
          * save location is equal to the old or new default location, then the
          * media setting is reverted to the default setting.
          */
-        private void updateMediaSaveDirectory(MediaType mediaType, 
+        private void updateMediaSaveDirectory(Category category, 
                 String oldSaveDir, String newSaveDir) {
-            FileSetting mediaSetting = SharingSettings.getFileSettingForMediaType(mediaType);
+            FileSetting mediaSetting = SharingSettings.getFileSettingForCategory(category);
             if (!mediaSetting.isDefault()) {
                 String mediaSaveDir = mediaSetting.get().getAbsolutePath();
                 if (oldSaveDir.equals(mediaSaveDir) || newSaveDir.equals(mediaSaveDir)) {

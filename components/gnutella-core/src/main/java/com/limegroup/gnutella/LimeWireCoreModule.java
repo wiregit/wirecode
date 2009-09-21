@@ -13,6 +13,7 @@ import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LimeWireCoreSettingsModule;
 import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
@@ -317,6 +318,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
         bind(MulticastService.class).to(MulticastServiceImpl.class);
         bind(NetworkUpdateSanityChecker.class).to(NetworkUpdateSanityCheckerImpl.class);
+        bind(CategoryManager.class).to(CategoryManagerImpl.class);
         
         Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");        
         AsynchronousCachingEventMulticasterImpl<FirewallTransferStatusEvent> asyncTransferMulticaster 

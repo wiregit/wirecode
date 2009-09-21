@@ -17,6 +17,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
@@ -25,6 +27,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -56,11 +59,13 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     private static Log LOG = LogFactory.getLog(OldDownloadConverterImpl.class);
     private final PushEndpointFactory pushEndpointFactory;
     private final AddressFactory addressFactory;
+    private final CategoryManager categoryManager;
     
     @Inject
-    public OldDownloadConverterImpl(PushEndpointFactory pushEndpointFactory, AddressFactory addressFactory) {
+    public OldDownloadConverterImpl(PushEndpointFactory pushEndpointFactory, AddressFactory addressFactory, CategoryManager categoryManager) {
         this.pushEndpointFactory = pushEndpointFactory;
         this.addressFactory = addressFactory;
+        this.categoryManager = categoryManager;
     }
     
     public List<DownloadMemento> readAndConvertOldDownloads(File inputFile) throws IOException {
@@ -253,7 +258,8 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
             if(saveFile != null) {
                 String defaultName = (String)download.getProperties().get("defaultFileName");
                 if(defaultName != null) {
-                    saveFile = new File(SharingSettings.getSaveDirectory(defaultName), defaultName);
+                    Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(defaultName)); 
+                    saveFile = new File(SharingSettings.getSaveDirectory(category), defaultName);
                 }
             }
 

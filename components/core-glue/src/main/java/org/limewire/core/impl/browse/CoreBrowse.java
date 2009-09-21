@@ -25,6 +25,7 @@ class CoreBrowse implements Browse {
     private final SearchServices searchServices;
     private final FriendPresence friendPresence;
     private final QueryReplyListenerList listenerList;
+    private final RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private volatile byte[] browseGuid;
@@ -32,10 +33,11 @@ class CoreBrowse implements Browse {
 
     @Inject
     public CoreBrowse(@Assisted FriendPresence friendPresence, SearchServices searchServices,
-            QueryReplyListenerList listenerList) {
+            QueryReplyListenerList listenerList, RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
         this.friendPresence = Objects.nonNull(friendPresence, "friendPresence");
         this.searchServices = searchServices;
         this.listenerList = listenerList;
+        this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
     }
 
     @Override
@@ -89,7 +91,7 @@ class CoreBrowse implements Browse {
         }
     }
 
-    private static class BrowseResultAdapter implements QueryReplyListener {
+    private class BrowseResultAdapter implements QueryReplyListener {
         private final BrowseListener browseListener;
 
         public BrowseResultAdapter(BrowseListener browseListener) {
@@ -98,7 +100,7 @@ class CoreBrowse implements Browse {
 
         @Override
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply, Set<? extends IpPort> locs) {
-            browseListener.handleBrowseResult(new RemoteFileDescAdapter(rfd, locs));
+            browseListener.handleBrowseResult(remoteFileDescAdapterFactory.create(rfd, locs));
         }
     }
 }

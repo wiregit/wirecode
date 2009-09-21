@@ -6,11 +6,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -32,11 +33,13 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     private final EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster;
     private final List<String> defaultFriendIds;
     private final boolean publicCollection;
+    private final CategoryManager categoryManager;
 
     @Inject
     public SharedFileCollectionImpl(Provider<LibraryFileData> data, LibraryImpl managedList, 
                                     SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster,
                                     EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
+                                    CategoryManager categoryManager,
                                     @Assisted int id, HashTreeCache treeCache,
                                     @Assisted boolean publicCollection,
                                     @Assisted String... defaultFriendIds) {
@@ -46,6 +49,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         this.treeCache = treeCache;
         this.sharedBroadcaster = sharedCollectionBroadcaster;
         this.publicCollection = publicCollection;
+        this.categoryManager = categoryManager;
         if(defaultFriendIds.length == 0) {
             this.defaultFriendIds = Collections.emptyList();
         } else {
@@ -219,8 +223,8 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         }
         
         if(isPublic()) {
-            MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
-            if(MediaType.getDocumentMediaType().equals(mediaType) && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
+            Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
+            if(category == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 return false;
             }
         }

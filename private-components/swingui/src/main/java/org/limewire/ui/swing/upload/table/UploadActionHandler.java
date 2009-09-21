@@ -2,6 +2,7 @@ package org.limewire.ui.swing.upload.table;
 
 import javax.swing.JDialog;
 
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
@@ -11,7 +12,9 @@ import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
-public class UploadActionHandler {
+import com.google.inject.Inject;
+
+class UploadActionHandler {
 
     public final static String PLAY_COMMAND = "play";
     public final static String CANCEL_COMMAND = "cancel";
@@ -25,12 +28,16 @@ public class UploadActionHandler {
     private final UploadListManager uploadListManager;
     private final FileInfoDialogFactory fileInfoFactory;
     private final LibraryMediator libraryMediator;
+    private final CategoryManager categoryManager;
     
-    public UploadActionHandler(UploadListManager uploadListManager, LibraryMediator libraryMediator,
-            FileInfoDialogFactory fileInfoFactory){
+    @Inject UploadActionHandler(UploadListManager uploadListManager,
+            LibraryMediator libraryMediator,
+            FileInfoDialogFactory fileInfoFactory, 
+            CategoryManager categoryManager) {
         this.uploadListManager = uploadListManager;
         this.libraryMediator = libraryMediator;
         this.fileInfoFactory = fileInfoFactory;
+        this.categoryManager = categoryManager;
     }
 
     public void performAction(final String actionCommmand, final UploadItem item){
@@ -50,9 +57,9 @@ public class UploadActionHandler {
         } else if (actionCommmand == LIBRARY_COMMAND){
             libraryMediator.selectInLibrary(item.getFile());
         } else if (actionCommmand == LAUNCH_COMMAND){
-            NativeLaunchUtils.safeLaunchFile(item.getFile());
+            NativeLaunchUtils.safeLaunchFile(item.getFile(), categoryManager);
         } else if (actionCommmand == PLAY_COMMAND){
-            PlayerUtils.playOrLaunch(item.getFile());
+            PlayerUtils.playOrLaunch(item.getFile(), categoryManager);
         }
     }
 }

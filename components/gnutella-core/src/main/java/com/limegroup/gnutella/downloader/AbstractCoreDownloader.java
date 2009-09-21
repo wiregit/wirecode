@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.download.DownloadException.ErrorCode;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.CommonUtils;
@@ -50,9 +52,11 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	private String defaultFileName;
 
 	private final SaveLocationManager saveLocationManager;
+	private final CategoryManager categoryManager;
 	
-	protected AbstractCoreDownloader(SaveLocationManager saveLocationManager) {
+	protected AbstractCoreDownloader(SaveLocationManager saveLocationManager, CategoryManager categoryManager) {
 	    this.saveLocationManager = Objects.nonNull(saveLocationManager, "saveLocationManager");
+	    this.categoryManager = Objects.nonNull(categoryManager, "categoryManager");
 	}
 	
 	/* (non-Javadoc)
@@ -109,8 +113,13 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	        fileName = getDefaultFileName();
 	    }
 	    
+	    Category category = null;
+	    if(fileName != null) {
+	        category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(fileName));
+	    }
+	    
 	    if (saveDirectory == null) {
-	        saveDirectory = SharingSettings.getSaveDirectory(fileName);
+	        saveDirectory = SharingSettings.getSaveDirectory(category);
 	    }
 	    
 	    // Forcibly create the save directory, if it doesn't exist.

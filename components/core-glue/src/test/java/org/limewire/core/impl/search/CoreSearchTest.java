@@ -38,7 +38,6 @@ import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.Clock;
 import org.limewire.util.ExecuteRunnableAction;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -70,6 +69,7 @@ public class CoreSearchTest extends BaseTestCase {
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
         final EventBroadcaster<SearchEvent> searchEventBroadcaster = context.mock(EventBroadcaster.class);
+        final RemoteFileDescAdapter.Factory rfdaFactory = context.mock(RemoteFileDescAdapter.Factory.class);
 
         final byte[] searchGuid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
         
@@ -77,7 +77,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster, null, null, null);
+                searchEventBroadcaster, null, null, null, rfdaFactory);
 
         context.checking(new Expectations() {{
                 allowing(searchDetails).getSearchQuery();
@@ -100,7 +100,7 @@ public class CoreSearchTest extends BaseTestCase {
                 one(searchServices).mutateQuery(searchQuery);
                 will(returnValue(searchQuery));
                 one(searchServices).query(searchGuid, searchQuery, "",
-                        MediaType.getAnyTypeMediaType());
+                        SearchCategory.ALL);
                 one(backgroundExecutor).execute(with(any(Runnable.class)));
                 will(new ExecuteRunnableAction());
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
@@ -123,6 +123,7 @@ public class CoreSearchTest extends BaseTestCase {
         final QueryReply queryReply1 = context.mock(QueryReply.class);
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final Address address1 = context.mock(Address.class);
+        final RemoteFileDescAdapter rfda = context.mock(RemoteFileDescAdapter.class);
         final byte[] guid1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
         final String fileName1 = "remote file name 1.txt";
         context.checking(new Expectations() {
@@ -143,8 +144,10 @@ public class CoreSearchTest extends BaseTestCase {
                 will(returnValue(5678L));
                 allowing(remoteFileDesc1).getSHA1Urn();
                 will(returnValue(null));
+                allowing(rfdaFactory).create(remoteFileDesc1, ipPorts);
+                will(returnValue(rfda));
                 one(searchListener).handleSearchResult(with(same(coreSearch)),
-                        with(new SearchResultMatcher(fileName1)));
+                        with(same(rfda)));
             }
         });
         queryReplyListener.get().handleQueryReply(remoteFileDesc1, queryReply1, ipPorts);
@@ -179,7 +182,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<FriendSearchListener> friendSearchListener = new AtomicReference<FriendSearchListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster, null, clock, null);
+                searchEventBroadcaster, null, clock, null, null);
 
         context.checking(new Expectations() {{
             allowing(searchDetails).getSearchQuery();
@@ -201,7 +204,7 @@ public class CoreSearchTest extends BaseTestCase {
             one(searchServices).mutateQuery(searchQuery);
             will(returnValue(searchQuery));
             one(searchServices).query(searchGuid, searchQuery, "",
-                    MediaType.getAnyTypeMediaType());
+                    SearchCategory.ALL);
             one(backgroundExecutor).execute(with(any(Runnable.class)));
             will(new ExecuteRunnableAction());
             one(friendSearcher).doSearch(with(equal(searchDetails)),
@@ -256,7 +259,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster, null, clock, null);
+                searchEventBroadcaster, null, clock, null, null);
 
         final GeocodeInformation geocodeInformation = null;
 
@@ -286,7 +289,7 @@ public class CoreSearchTest extends BaseTestCase {
                 one(searchServices).mutateQuery(searchQuery);
                 will(returnValue(searchQuery));
                 one(searchServices).query(searchGuid, searchQuery, "",
-                        MediaType.getAnyTypeMediaType());
+                        SearchCategory.ALL);
                 exactly(2).of(backgroundExecutor).execute(with(any(Runnable.class)));
                 will(new ExecuteRunnableAction());
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
@@ -381,26 +384,6 @@ public class CoreSearchTest extends BaseTestCase {
         }
     }
 
-    private final class SearchResultMatcher extends BaseMatcher<SearchResult> {
-        private final String fileName1;
-
-        private SearchResultMatcher(String fileName1) {
-            this.fileName1 = fileName1;
-        }
-
-        @Override
-        public boolean matches(Object item) {
-            SearchResult searchResult = (SearchResult) item;
-            assertEquals(fileName1, searchResult.getFileName());
-            return true;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-
-        }
-    }
-
     private final class SponsoredResultMatcher extends BaseMatcher<List<SponsoredResult>> {
         private final String title;
 
@@ -444,7 +427,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchServices searchServices = context.mock(SearchServices.class);
         final SearchListener listener = context.mock(SearchListener.class);
         
-        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null, null);
+        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null, null, null);
         
         context.checking(new Expectations() {
             {
@@ -478,7 +461,8 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener listener = context.mock(SearchListener.class);
         final SearchDetails details = context.mock(SearchDetails.class);
         
-        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null, null);
+        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null,
+                null, null, searchEventBroadcaster, null, null, null, null);
         
         context.checking(new Expectations() {
             {
@@ -492,7 +476,7 @@ public class CoreSearchTest extends BaseTestCase {
                 exactly(1).of(listenerList).addQueryReplyListener(with(same(guid2)),
                         with(any(QueryReplyListener.class)));
                 exactly(1).of(searchServices).queryWhatIsNew(with(same(guid2)),
-                        with(same(MediaType.getOtherMediaType())));
+                        with(same(SearchCategory.OTHER)));
                 
                 allowing(searchServices).newQueryGUID();
                 will(returnValue(guid2));
@@ -525,7 +509,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchDetails searchDetails = context.mock(SearchDetails.class);
         
         final CoreSearch coreSearch = new CoreSearch(searchDetails, null, null, null, null, null, 
-                null, null, null, null, null);
+                null, null, null, null, null, null);
         
         context.checking(new Expectations() {{
             one(searchDetails).getSearchCategory();
@@ -542,7 +526,7 @@ public class CoreSearchTest extends BaseTestCase {
     
     public void testGetQueryGuid() {
         final CoreSearch coreSearch = new CoreSearch(null, null, null, null, null, null, 
-                null, null, null, null, null);
+                null, null, null, null, null, null);
         
         coreSearch.searchGuid = new byte[] {4,3,2,1,'q','x','x','x','x','x','x','x','x','x','x','x'};
         

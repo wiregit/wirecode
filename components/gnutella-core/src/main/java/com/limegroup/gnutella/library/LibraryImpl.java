@@ -32,6 +32,7 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureTask;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.filter.Filter;
@@ -48,7 +49,6 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -80,6 +80,7 @@ class LibraryImpl implements Library, FileCollection {
     private final EventListenerList<FileProcessingEvent> fileProcessingListeners;
     private final XmlController xmlController;
     private final URNFilter urnFilter;
+    private final CategoryManager categoryManager;
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -117,7 +118,7 @@ class LibraryImpl implements Library, FileCollection {
     private final Map<URN, IntSet> urnMap;
     
     /** All the library data for this library -- loaded on-demand. */
-    private final LibraryFileData fileData = new LibraryFileData();  
+    private final LibraryFileData fileData;  
     
     /** The validator to ask if URNs are OK. */
     private final UrnValidator urnValidator;
@@ -153,7 +154,9 @@ class LibraryImpl implements Library, FileCollection {
                 XmlController xmlController,
                 @DiskIo ListeningExecutorService diskIoService,
                 EventListenerList<FileProcessingEvent> processingListenerList,
-                URNFilter urnFilter) {
+                URNFilter urnFilter, CategoryManager categoryManager,
+                LibraryFileData libraryFileData) {
+        this.fileData = libraryFileData;
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
@@ -171,6 +174,7 @@ class LibraryImpl implements Library, FileCollection {
         this.diskIoService = diskIoService;
         this.fileProcessingListeners = processingListenerList;
         this.urnFilter = urnFilter;
+        this.categoryManager = categoryManager;
     }
     
     @Override
@@ -523,7 +527,7 @@ class LibraryImpl implements Library, FileCollection {
             return new SimpleFuture<FileDesc>(createFailureException(file, oldFileDesc, FileViewChangeFailedException.Reason.NOT_MANAGEABLE));
         }
         
-        if (!LibraryUtils.isFileAllowedToBeManaged(file)) {
+        if (!LibraryUtils.isFileAllowedToBeManaged(file, categoryManager)) {
             LOG.debugf("Not adding {0} because files of this type are not allowed to be managed", file);
             dispatchFailure(file, oldFileDesc);
             return new SimpleFuture<FileDesc>(createFailureException(file, oldFileDesc, FileViewChangeFailedException.Reason.FILE_TYPE_NOT_ALLOWED));
@@ -1263,8 +1267,8 @@ class LibraryImpl implements Library, FileCollection {
             return isDirectoryAllowed(file);
         }
         
-        MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
-        if(MediaType.getProgramMediaType().equals(mediaType) && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+        Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
+        if(category == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             return false;
         }
         return true;

@@ -14,6 +14,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -23,7 +24,6 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.ByteUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 
@@ -1064,7 +1064,7 @@ public final class QueryRequestTest extends LimeTestCase {
         {
             QueryRequest query = 
                 queryRequestFactory.createQuery(GUID.makeGuid(), "whatever", "",
-                                         MediaType.getAudioMediaType());
+                        SearchCategory.AUDIO);
             
             assertTrue(query.desiresAudio());
             assertFalse(query.desiresVideo());
@@ -1077,7 +1077,7 @@ public final class QueryRequestTest extends LimeTestCase {
             QueryRequest query = 
                 queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "whatever", 
                                                   "",
-                                                  MediaType.getVideoMediaType());
+                                                  SearchCategory.VIDEO);
             
             assertFalse(query.desiresAudio());
             assertTrue(query.desiresVideo());
@@ -1089,7 +1089,7 @@ public final class QueryRequestTest extends LimeTestCase {
         {
             QueryRequest query = 
                 queryRequestFactory.createQuery(GUID.makeGuid(), "whatever", "",
-                                         MediaType.getImageMediaType());
+                        SearchCategory.IMAGE);
             
             assertFalse(query.desiresAudio());
             assertFalse(query.desiresVideo());
@@ -1101,7 +1101,7 @@ public final class QueryRequestTest extends LimeTestCase {
         {
             QueryRequest query = 
                 queryRequestFactory.createWhatIsNewQuery(GUID.makeGuid(), (byte) 2,
-                                               MediaType.getDocumentMediaType());
+                        SearchCategory.DOCUMENT);
             
             assertFalse(query.desiresAudio());
             assertFalse(query.desiresVideo());
@@ -1113,7 +1113,7 @@ public final class QueryRequestTest extends LimeTestCase {
         {
             QueryRequest query = 
                 queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte) 2,
-                                               MediaType.getProgramMediaType());
+                        SearchCategory.PROGRAM);
             
             assertFalse(query.desiresAudio());
             assertFalse(query.desiresVideo());
@@ -1264,7 +1264,7 @@ public final class QueryRequestTest extends LimeTestCase {
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
-        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", SearchCategory.AUDIO);
         assertTrue(request.isSecurityTokenRequired());
         
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
@@ -1276,7 +1276,7 @@ public final class QueryRequestTest extends LimeTestCase {
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
-        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, SearchCategory.DOCUMENT);
         assertTrue(request.isSecurityTokenRequired());
         
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
@@ -1329,7 +1329,7 @@ public final class QueryRequestTest extends LimeTestCase {
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.desiresPartialResults());
         
-        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", SearchCategory.AUDIO);
         assertTrue(request.desiresPartialResults());
         
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
@@ -1341,7 +1341,7 @@ public final class QueryRequestTest extends LimeTestCase {
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.desiresPartialResults());
         
-        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, SearchCategory.DOCUMENT);
         assertTrue(request.desiresPartialResults());
         
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
@@ -1362,7 +1362,7 @@ public final class QueryRequestTest extends LimeTestCase {
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertFalse(fromNetwork.desiresPartialResults());
         
-        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", SearchCategory.AUDIO);
         assertFalse(request.desiresPartialResults());
         
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
@@ -1374,7 +1374,7 @@ public final class QueryRequestTest extends LimeTestCase {
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertFalse(fromNetwork.desiresPartialResults());
         
-        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, SearchCategory.DOCUMENT);
         assertFalse(request.desiresPartialResults());
         
         fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
@@ -1399,7 +1399,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.isWhatIsNewRequest(), copy.isWhatIsNewRequest());
         assertEquals(query.getGUID(), copy.getGUID());
         
-        query = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        query = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, SearchCategory.DOCUMENT);
         assertDesiresOutOfBand(query);
         
         copy = queryRequestFactory.unmarkOOBQuery(query);

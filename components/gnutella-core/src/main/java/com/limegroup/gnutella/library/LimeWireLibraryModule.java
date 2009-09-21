@@ -76,10 +76,6 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(new TypeLiteral<EventListenerList<FileProcessingEvent>>(){}).toInstance(processingList);
         bind(new TypeLiteral<EventBroadcaster<FileProcessingEvent>>(){}).toInstance(processingList);
     }
-    
-    @Provides LibraryFileData libraryFileData(LibraryImpl library) {
-        return library.getLibraryData();
-    }
         
     @Provides @GnutellaFiles FileCollection gnetFileCollection(FileCollectionManagerImpl manager) {
         return manager.getGnutellaCollection();

@@ -10,10 +10,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 public class LibraryUtils {
@@ -175,8 +176,8 @@ public class LibraryUtils {
     /** 
      * @return <code>isFilePhysicallyManagable(file) && isFileAllowedToBeManaged(file))</code>
      */
-    public static boolean isFileManagable(File file) {
-        return isFilePhysicallyManagable(file) && isFileAllowedToBeManaged(file);
+    public static boolean isFileManagable(File file, CategoryManager categoryManager) {
+        return isFilePhysicallyManagable(file) && isFileAllowedToBeManaged(file, categoryManager);
     }
 
     /**
@@ -203,12 +204,12 @@ public class LibraryUtils {
      * share, returns false if the file is a program. Otherwise returns false
      * if the file's extension is banned. Otherwise returns true.
      */
-    public static boolean isFileAllowedToBeManaged(File file) {
-        String ext = FileUtils.getFileExtension(file).toLowerCase(Locale.US);
+    public static boolean isFileAllowedToBeManaged(File file, CategoryManager categoryManager) {
         if(!LibrarySettings.ALLOW_PROGRAMS.getValue() && !LibraryUtils.isForcedShare(file)) {
-            MediaType type = MediaType.getMediaTypeForExtension(ext);
-            if(type == MediaType.getProgramMediaType())
+            Category category = categoryManager.getCategoryForFile(file);
+            if(category == Category.PROGRAM) {
                 return false;
+            }
         }
         
 // TODO: This generated a small # of complaints (and broke some tests, but not hard to fix those)

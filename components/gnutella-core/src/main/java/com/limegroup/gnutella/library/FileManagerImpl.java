@@ -35,6 +35,7 @@ class FileManagerImpl implements FileManager, Service {
     private final ScheduledExecutorService backgroundExecutor;
     
     private final Provider<LibraryFileData> fileData;
+    private final Provider<LibraryConverter> libraryConverter;
     
     private final FileCollectionManagerImpl fileCollectionManagerImpl;
 
@@ -45,11 +46,13 @@ class FileManagerImpl implements FileManager, Service {
     public FileManagerImpl(LibraryImpl managedFileList,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<LibraryFileData> libraryFileData,
+            Provider<LibraryConverter> libraryConverter,
             FileCollectionManagerImpl collectionManager) {        
         this.backgroundExecutor = backgroundExecutor;
         this.library = managedFileList;
         this.fileData = libraryFileData;
         this.fileCollectionManagerImpl = collectionManager;
+        this.libraryConverter = libraryConverter;
     }
 
     @Override
@@ -69,7 +72,7 @@ class FileManagerImpl implements FileManager, Service {
 
     @Override
     public void start() {
-        LibraryConverter converter = new LibraryConverter();
+        LibraryConverter converter = libraryConverter.get();
         if(converter.isOutOfDate()) {
             library.fireLoading();
             converter.convert(fileData.get());

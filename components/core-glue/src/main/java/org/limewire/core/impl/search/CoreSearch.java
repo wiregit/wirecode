@@ -47,6 +47,7 @@ public class CoreSearch implements Search {
     private final PromotionSearcher promotionSearcher;
     private final FriendSearcher friendSearcher;
     private final Provider<GeocodeInformation> geoLocation;
+    private final RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory;
 
     /**
      * A search is considered processed when it is acted upon (started or stopped)
@@ -82,7 +83,8 @@ public class CoreSearch implements Search {
             EventBroadcaster<SearchEvent> searchEventBroadcaster,
             LimeXMLDocumentFactory xmlDocumentFactory,
             Clock clock,
-            AdvancedQueryStringBuilder compositeQueryBuilder) {
+            AdvancedQueryStringBuilder compositeQueryBuilder,
+            RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
@@ -93,6 +95,7 @@ public class CoreSearch implements Search {
         this.searchEventBroadcaster = searchEventBroadcaster;
         this.clock = clock;
         this.compositeQueryBuilder = compositeQueryBuilder;
+        this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
     }
     
     @Override
@@ -141,7 +144,7 @@ public class CoreSearch implements Search {
     
     private void doWhatsNewSearch(boolean initial) {
         searchServices.queryWhatIsNew(searchGuid,
-                MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
+                searchDetails.getSearchCategory());
         
         // TODO: Search friends too.
     }
@@ -159,7 +162,7 @@ public class CoreSearch implements Search {
         
         String mutated = searchServices.mutateQuery(query);
         searchServices.query(searchGuid, mutated, advancedQuery,
-                MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
+                searchDetails.getSearchCategory());
         
         backgroundExecutor.execute(new Runnable() {
             @Override
@@ -257,7 +260,7 @@ public class CoreSearch implements Search {
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
                 Set<? extends IpPort> locs) {
             
-            RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
+            RemoteFileDescAdapter rfdAdapter = remoteFileDescAdapterFactory.create(rfd, locs);
             
             for (SearchListener listener : searchListeners) {
                 listener.handleSearchResult(CoreSearch.this, rfdAdapter);

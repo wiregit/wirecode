@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import org.limewire.core.api.Category;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
@@ -14,7 +15,6 @@ import org.limewire.setting.Setting;
 import org.limewire.setting.StringSetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
@@ -29,7 +29,7 @@ public class SharingSettings extends LimeProps {
 
     /**
      * Stores the download directory file settings for each media type by its
-     * description key {@link MediaType#getDescriptionKey()}. The settings are
+     * description key {@link Category#getSchemaName()}. The settings are
      * loaded lazily during the first request.
      */
     private static final Hashtable<String, FileSetting> downloadDirsByDescription = new Hashtable<String, FileSetting>();
@@ -217,22 +217,16 @@ public class SharingSettings extends LimeProps {
      * Retrieves the default save directory for a given file name. Getting the
      * save directory for null will result in the default save directory.
      */
-    public static final File getSaveDirectory(String fileName) {
-        if (fileName == null) {
+    public static final File getSaveDirectory(Category category) {
+        if(category == null) {
             return DIRECTORY_FOR_SAVING_FILES.get();
+        } else {
+            FileSetting fs = getFileSettingForCategory(category);
+            if (fs.isDefault()) {
+                return DIRECTORY_FOR_SAVING_FILES.get();
+            }
+            return fs.get();
         }
-        String extension = FileUtils.getFileExtension(fileName);
-        if (extension.equals("")) {
-            return DIRECTORY_FOR_SAVING_FILES.get();
-        }
-        MediaType type = MediaType.getMediaTypeForExtension(extension);
-        if (type == null)
-            return DIRECTORY_FOR_SAVING_FILES.get();
-        FileSetting fs = getFileSettingForMediaType(type);
-        if (fs.isDefault()) {
-            return DIRECTORY_FOR_SAVING_FILES.get();
-        }
-        return fs.get();
     }
 
     public static final File getSaveDirectory() {
@@ -400,12 +394,13 @@ public class SharingSettings extends LimeProps {
      * @param type the mediatype for which to look up the file setting
      * @return the filesetting for the media type
      */
-    public static final FileSetting getFileSettingForMediaType(MediaType type) {
-        FileSetting setting = downloadDirsByDescription.get(type.getSchema());
+    public static final FileSetting getFileSettingForCategory(Category category) {
+        String schema = category.getSchemaName();
+        FileSetting setting = downloadDirsByDescription.get(schema);
         if (setting == null) {
-            setting = FACTORY.createProxyFileSetting("DIRECTORY_FOR_SAVING_" + type.getSchema()
+            setting = FACTORY.createProxyFileSetting("DIRECTORY_FOR_SAVING_" + schema
                     + "_FILES", DIRECTORY_FOR_SAVING_FILES);
-            downloadDirsByDescription.put(type.getSchema(), setting);
+            downloadDirsByDescription.put(schema, setting);
         }
         return setting;
     }

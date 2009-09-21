@@ -12,13 +12,11 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectionPoint;
 
-
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.Library;
 
 @Singleton
 class LibraryManagerImpl implements LibraryManager {
@@ -62,9 +60,9 @@ class LibraryManagerImpl implements LibraryManager {
     }
     
     @Inject
-    public LibraryManagerImpl(Library managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
-        this.libraryList = new LibraryFileListImpl(managedList, coreLocalFileItemFactory);
-        this.libraryData = new LibraryDataImpl(managedList);
+    public LibraryManagerImpl(LibraryFileListImpl libraryFileListImpl, LibraryData libraryData) {
+        this.libraryList = libraryFileListImpl;
+        this.libraryData = libraryData;
     }
     
     @Override

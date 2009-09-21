@@ -24,6 +24,7 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.download.DownloadException.ErrorCode;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -545,6 +546,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	    }};
 	    
 	    final SaveLocationManager saveLocationManager = context.mock(SaveLocationManager.class);
+	    final CategoryManager categoryManager = context.mock(CategoryManager.class);
 	    final RequeryManager requeryManager = context.mock(RequeryManager.class);
 	    final RequeryManagerFactory requeryManagerFactory = context.mock(RequeryManagerFactory.class);
 	    final ListeningExecutorService downloadProcessingQueue = context.mock(ListeningExecutorService.class);
@@ -564,7 +566,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null, null);
+                    null, null, null, categoryManager);
 	    managedDownloaderImpl1.addListener(downloadListener1);
         
         ManagedDownloaderImpl managedDownloaderImpl2 =
@@ -572,7 +574,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null, null);
+                    null, null, null, categoryManager);
         managedDownloaderImpl2.addListener(downloadListener2);
         
 	    context.checking(new Expectations() {{

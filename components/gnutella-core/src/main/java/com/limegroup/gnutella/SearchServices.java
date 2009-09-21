@@ -1,9 +1,9 @@
 package com.limegroup.gnutella;
 
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.io.GUID;
-import org.limewire.util.MediaType;
 
 public interface SearchServices {
 
@@ -51,7 +51,7 @@ public interface SearchServices {
      * 
      * @return The SearchResultStats corresponding to the guid.
      */
-    public void queryWhatIsNew(final byte[] guid, final MediaType type);
+    public void queryWhatIsNew(final byte[] guid, final SearchCategory type);
 
     /**
      * Searches the network for files with the given metadata.
@@ -63,7 +63,7 @@ public interface SearchServices {
      * @return The SearchResultStats corresponding to the guid.
      */
     public void query(final byte[] guid, final String query,
-            final String richQuery, final MediaType type);
+            final String richQuery, final SearchCategory  type);
 
     /** 
      * Searches the network for files with the given query string and 
@@ -92,7 +92,7 @@ public interface SearchServices {
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
      */
-    public void query(byte[] guid, String query, MediaType type);
+    public void query(byte[] guid, String query, SearchCategory type);
 
     /** 
      * Returns a new GUID for passing to query.

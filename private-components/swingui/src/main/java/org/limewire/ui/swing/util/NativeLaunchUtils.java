@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -168,8 +169,8 @@ public final class NativeLaunchUtils {
      * Launches the specified file.  If the file's Category is PROGRAM or OTHER, this delegates to 
      * <code>launchExplorer(file)</code>
      */
-    public static void safeLaunchFile(File file){
-        Category category = CategoryUtils.getCategory(file);
+    public static void safeLaunchFile(File file, CategoryManager categoryManager){
+        Category category = categoryManager.getCategoryForFile(file);
         if(category == Category.PROGRAM || category == Category.OTHER){
             launchExplorer(file);
         } else {

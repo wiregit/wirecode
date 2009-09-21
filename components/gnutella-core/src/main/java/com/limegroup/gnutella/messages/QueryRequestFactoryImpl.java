@@ -2,12 +2,12 @@ package com.limegroup.gnutella.messages;
 
 import java.util.Set;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -165,7 +165,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createOutOfBandQuery(byte[], java.lang.String, java.lang.String, com.limegroup.gnutella.MediaType)
      */
     public QueryRequest createOutOfBandQuery(byte[] guid, String query,
-            String xmlQuery, MediaType type) {
+            String xmlQuery, SearchCategory type) {
         if (query == null) {
             throw new NullPointerException("null query");
         }
@@ -201,7 +201,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createWhatIsNewQuery(byte[], byte, com.limegroup.gnutella.MediaType)
      */
     public QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl,
-            MediaType type) {
+            SearchCategory type) {
         if (ttl < 1)
             throw new IllegalArgumentException("Bad TTL.");
         return createQueryRequest(guid, ttl,
@@ -221,7 +221,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createWhatIsNewOOBQuery(byte[], byte, com.limegroup.gnutella.MediaType)
      */
     public QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl,
-            MediaType type) {
+            SearchCategory type) {
         if (ttl < 1)
             throw new IllegalArgumentException("Bad TTL.");
         return createQueryRequest(guid, ttl,
@@ -276,7 +276,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQuery(byte[], java.lang.String, java.lang.String, com.limegroup.gnutella.MediaType)
      */
     public QueryRequest createQuery(byte[] guid, String query, String xmlQuery,
-            MediaType type) {
+            SearchCategory type) {
         if (guid == null) {
             throw new NullPointerException("null guid");
         }
@@ -523,7 +523,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
-            String richQuery, MediaType type) {
+            String richQuery, SearchCategory type) {
         return createQueryRequest(guid, ttl, query, richQuery, URN.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, false, 0, false, getMetaFlag(type));
@@ -553,26 +553,26 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
-            String richQuery, boolean canReceiveOutOfBandReplies, MediaType type) {
+            String richQuery, boolean canReceiveOutOfBandReplies, SearchCategory type) {
         return createQueryRequest(guid, ttl, query, richQuery, URN.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, canReceiveOutOfBandReplies, 0, false,
                 getMetaFlag(type));
     }
 
-    private int getMetaFlag(MediaType type) {
+    private int getMetaFlag(SearchCategory type) {
         int metaFlag = 0;
         if (type == null)
             ;
-        else if (type == MediaType.getAudioMediaType())
+        else if (type == SearchCategory.AUDIO)
             metaFlag |= QueryRequest.AUDIO_MASK;
-        else if (type == MediaType.getVideoMediaType())
+        else if (type == SearchCategory.VIDEO)
             metaFlag |= QueryRequest.VIDEO_MASK;
-        else if (type == MediaType.getImageMediaType())
+        else if (type == SearchCategory.IMAGE)
             metaFlag |= QueryRequest.IMAGE_MASK;
-        else if (type == MediaType.getDocumentMediaType())
+        else if (type == SearchCategory.DOCUMENT)
             metaFlag |= QueryRequest.DOC_MASK;
-        else if (type == MediaType.getProgramMediaType()) {
+        else if (type == SearchCategory.PROGRAM) {
             if (OSUtils.isLinux() || OSUtils.isMacOSX())
                 metaFlag |= QueryRequest.LIN_PROG_MASK;
             else if (OSUtils.isWindows())

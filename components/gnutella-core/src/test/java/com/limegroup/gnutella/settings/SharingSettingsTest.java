@@ -2,11 +2,11 @@ package com.limegroup.gnutella.settings;
 
 import java.io.File;
 
+import junit.framework.Test;
+
+import org.limewire.core.api.Category;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.util.MediaType;
-
-import junit.framework.Test;
 
 
 public class SharingSettingsTest extends LimeTestCase {
@@ -27,11 +27,11 @@ public class SharingSettingsTest extends LimeTestCase {
      * Tests if all settings are set to the default save directory.
      */
 	public void testUnsetMediaTypeDirectories() {
-		MediaType[] types = MediaType.getDefaultMediaTypes();
-		for (int i = 0; i < types.length; i++) {
+		Category[] categories = Category.values();
+		for (int i = 0; i < categories.length; i++) {
 			assertEquals("Should be the save directory", 
-					SharingSettings.getSaveDirectory(null),
-					SharingSettings.getFileSettingForMediaType(types[i]).get());
+					SharingSettings.getSaveDirectory( null),
+					SharingSettings.getFileSettingForCategory(categories[i]).get());
 							
 		}
 	}
@@ -45,31 +45,31 @@ public class SharingSettingsTest extends LimeTestCase {
 		dir.deleteOnExit();
 		
 		// set all mediatype directories
-		MediaType[] types = MediaType.getDefaultMediaTypes();
+		Category[] types = Category.values();
 		for (int i = 0; i < types.length; i++) {
-			SharingSettings.getFileSettingForMediaType(types[i]).set(dir);
+			SharingSettings.getFileSettingForCategory(types[i]).set(dir);
 		}
 		
 		// test if they are all set
 		for (int i = 0; i < types.length; i++) {
 			assertEquals("Should be the set directory", 
 					dir,
-					SharingSettings.getFileSettingForMediaType(types[i]).get());
+					SharingSettings.getFileSettingForCategory(types[i]).get());
 		}
 		
 		// revert them
 		for (int i = 0; i < types.length; i++) {
-			SharingSettings.getFileSettingForMediaType(types[i]).revertToDefault();
+			SharingSettings.getFileSettingForCategory(types[i]).revertToDefault();
 		}
 		
 		// check if they are reverted
 		for (int i = 0; i < types.length; i++) {
 			assertTrue("Should be default", 
-					SharingSettings.getFileSettingForMediaType(
+					SharingSettings.getFileSettingForCategory(
 							types[i]).isDefault());
 			assertEquals("Should be the save directory", 
 					SharingSettings.getSaveDirectory(null),
-					SharingSettings.getFileSettingForMediaType(types[i]).get());
+					SharingSettings.getFileSettingForCategory(types[i]).get());
 		}
 	}
 	
@@ -94,8 +94,4 @@ public class SharingSettingsTest extends LimeTestCase {
                 SharingSettings.getSaveLWSDirectory(),
                 SharingSettings.DEFAULT_SAVE_LWS_DIR);
     }
-	
-	public void testGetSaveDirectoryForNoFilenameLabel() {
-		assertEquals(SharingSettings.getSaveDirectory(null), SharingSettings.getSaveDirectory("No Filename"));
-	}
 }

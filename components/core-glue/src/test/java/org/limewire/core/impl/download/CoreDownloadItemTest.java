@@ -12,6 +12,8 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
+import org.limewire.core.api.file.CategoryManager;
+import org.limewire.friend.api.FriendManager;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
@@ -28,6 +30,8 @@ public class CoreDownloadItemTest extends BaseTestCase {
     private Downloader downloader;
 
     private QueueTimeCalculator queueTimeCalculator;
+    private CategoryManager categoryManager;
+    private FriendManager friendManager;
 
     private CoreDownloadItem coreDownloadItem;
 
@@ -66,6 +70,9 @@ public class CoreDownloadItemTest extends BaseTestCase {
         downloader = context.mock(Downloader.class);
         queueTimeCalculator = context.mock(QueueTimeCalculator.class);
         document = context.mock(LimeXMLDocument.class);
+        friendManager = context.mock(FriendManager.class);
+        categoryManager = context.mock(CategoryManager.class);
+        
 
         context.checking(new Expectations() {
             {
@@ -91,7 +98,7 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
 
-        coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator, null);
+        coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager, categoryManager);
 
     }
 
@@ -129,21 +136,29 @@ public class CoreDownloadItemTest extends BaseTestCase {
      * getFile is available or cases where only getSaveFile is available.
      */
     public void testGetCategory() {
+        final File file = new File("test.mp3");
         context.checking(new Expectations() {
             {
                 one(downloader).getFile();
-                will(returnValue(new File("test.mp3")));
+                will(returnValue(file));
+                
+                one(categoryManager).getCategoryForFile(file);
+                will(returnValue(Category.AUDIO));
             }
         });
         Category testCategory1 = coreDownloadItem.getCategory();
         assertEquals(Category.AUDIO, testCategory1);
 
+        final File file2 = new File("test.txt");
         context.checking(new Expectations() {
             {
                 one(downloader).getFile();
                 will(returnValue(null));
                 one(downloader).getSaveFile();
-                will(returnValue(new File("test.txt")));
+                will(returnValue(file2));
+                
+                one(categoryManager).getCategoryForFile(file2);
+                will(returnValue(Category.DOCUMENT));
             }
         });
         Category testCategory2 = coreDownloadItem.getCategory();
@@ -364,16 +379,19 @@ public class CoreDownloadItemTest extends BaseTestCase {
     }
 
     public void testGetProperties() {
+        final File file = new File("test.mp3");
         context.checking(new Expectations() {
             {
                 allowing(downloader).getAttribute("LimeXMLDocument");
                 will(returnValue(document));
                 allowing(downloader).getSaveFile();
-                will(returnValue(new File("test.mp3")));
+                will(returnValue(file));
                 allowing(downloader).getFile();
-                will(returnValue(new File("test.mp3")));
+                will(returnValue(file));
                 allowing(downloader).getContentLength();
                 will(returnValue(1234L));
+                allowing(categoryManager).getCategoryForFile(file);
+                will(returnValue(Category.AUDIO));
             }
         });
 

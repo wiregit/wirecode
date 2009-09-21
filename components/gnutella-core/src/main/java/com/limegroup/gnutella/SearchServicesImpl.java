@@ -1,7 +1,9 @@
 package com.limegroup.gnutella;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.friend.api.FriendPresence;
@@ -11,7 +13,6 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.I18NConvert;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -119,7 +120,7 @@ public class SearchServicesImpl implements SearchServices {
      * @return The new stats object for this query.
      */
     private void recordAndSendQuery(final QueryRequest qr, 
-                                           final MediaType type) {
+                                           final SearchCategory type) {
         queryStats.get().recordQuery();
         responseVerifier.get().record(qr, type);
         searchResultHandler.get().addQuery(qr); // so we can leaf guide....
@@ -129,7 +130,7 @@ public class SearchServicesImpl implements SearchServices {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#queryWhatIsNew(byte[], com.limegroup.gnutella.MediaType)
      */
-    public void queryWhatIsNew(final byte[] guid, final MediaType type) {
+    public void queryWhatIsNew(final byte[] guid, final SearchCategory type) {
             QueryRequest qr = null;
             if (GUID.addressesMatch(guid, networkManager.get().getAddress(), networkManager.get().getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
@@ -156,7 +157,7 @@ public class SearchServicesImpl implements SearchServices {
     public void query(final byte[] guid, 
     						 String query, 
     						 final String richQuery, 
-    						 final MediaType type) {
+    						 final SearchCategory type) {
             QueryRequest qr = null;
             query = QueryUtils.removeIllegalChars(query);
             query = I18NConvert.instance().getNorm(query);
@@ -176,8 +177,9 @@ public class SearchServicesImpl implements SearchServices {
                 }
             
                 recordAndSendQuery(qr, type);
-                if (type != null) {
-                    searchesByType.count(type.getSchema());
+                Category category = type.getCategory();
+                if (category != null) {
+                    searchesByType.count(category.getSchemaName());
                 } else {
                     searchesByType.count("no type");
                 }
@@ -194,7 +196,7 @@ public class SearchServicesImpl implements SearchServices {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String, com.limegroup.gnutella.MediaType)
      */
-    public void query(byte[] guid, String query, MediaType type) {
+    public void query(byte[] guid, String query, SearchCategory type) {
     	query(guid, query, "", type);
     }
 

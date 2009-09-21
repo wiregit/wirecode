@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
@@ -86,7 +87,8 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             Provider<MetaDataFactory> metaDataFactory, 
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
-            SpamManager spamManager, Library library) {
+            SpamManager spamManager, Library library,
+            CategoryManager categoryManager) {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -96,7 +98,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
                 backgroundExecutor, messageRouter, tigerTreeCache,
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
-                dangerousFileChecker, spamManager, library);
+                dangerousFileChecker, spamManager, library, categoryManager);
         this.metaDataFactory = metaDataFactory;
     }
 

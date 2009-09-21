@@ -6,11 +6,11 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -84,7 +84,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         drainAll();
         
         GUID guid = new GUID();
-        searchServices.queryWhatIsNew(guid.bytes(), MediaType.getAnyTypeMediaType());
+        searchServices.queryWhatIsNew(guid.bytes(), SearchCategory.ALL);
         
         assertQuery(testUP[0], guid);
         

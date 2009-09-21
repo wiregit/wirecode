@@ -4,12 +4,12 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.util.MediaType;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -178,7 +178,7 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
             return true;
         }
 
-        public void record(QueryRequest qr, MediaType type) {
+        public void record(QueryRequest qr, SearchCategory type) {
         }
 
         public void record(QueryRequest qr) {

@@ -23,6 +23,7 @@ import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.DataCategory;
@@ -107,8 +108,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             @GnutellaFiles FileCollection gnutellaFileCollection,
             Provider<TorrentUploadManager> torrentUploadManager,
             Provider<DangerousFileChecker> dangerousFileChecker,
-            Provider<DownloadCallback> downloadCallback) {
-        super(saveLocationManager);
+            Provider<DownloadCallback> downloadCallback,
+            CategoryManager categoryManager) {
+        super(saveLocationManager, categoryManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();

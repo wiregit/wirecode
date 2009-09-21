@@ -17,6 +17,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadCancelRendererEditor;
@@ -65,13 +66,15 @@ public class DownloadTable extends MouseableTable {
     private DownloadTableModel model;
 
     private EventList<DownloadItem> selectedItems;
+    
+    private final CategoryManager categoryManager;
 
     @Inject
 	public DownloadTable(DownloadTitleRenderer downloadTitleRenderer, DownloadProgressRenderer downloadProgressRenderer, 
 	        DownloadMessageRenderer downloadMessageRenderer, DownloadCancelRendererEditor cancelEditor,
 	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, DownloadPopupHandlerFactory downloadPopupHandlerFactory,
-	        @Assisted EventList<DownloadItem> downloadItems, DownloadableTransferHandler downloadableTransferHandler) {
-        
+	        @Assisted EventList<DownloadItem> downloadItems, DownloadableTransferHandler downloadableTransferHandler, CategoryManager categoryManager) {
+        this.categoryManager = categoryManager;
         GuiUtils.assignResources(this);
                 
         initialize(downloadItems, buttonEditor, cancelEditor, downloadPopupHandlerFactory);
@@ -188,7 +191,7 @@ public class DownloadTable extends MouseableTable {
     private void launch(int row){
         DownloadItem item = getDownloadItem(row);
         if(item != null && item.isLaunchable()) {
-            DownloadItemUtils.launch(item);
+            DownloadItemUtils.launch(item, categoryManager);
         }
     }
     

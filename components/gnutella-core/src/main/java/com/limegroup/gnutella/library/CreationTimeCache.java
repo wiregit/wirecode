@@ -37,8 +37,10 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.inject.Inject;
-import com.limegroup.gnutella.MediaTypeAggregator;
+import com.limegroup.gnutella.QueryCategoryFilterer;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -81,13 +83,15 @@ public class CreationTimeCache {
 
     private final Library library;
     private final FileView gnutellaFileView;
+    private final QueryCategoryFilterer mediaTypeAggregator;
 
     private final Future<Maps> deserializer;
 
     @Inject
-    CreationTimeCache(Library library, @GnutellaFiles FileView gnutellaFileView) {
+    CreationTimeCache(Library library, @GnutellaFiles FileView gnutellaFileView, QueryCategoryFilterer mediaTypeAggregator) {
         this.gnutellaFileView = gnutellaFileView;
         this.library = library;
+        this.mediaTypeAggregator = mediaTypeAggregator;
         this.deserializer = deserializeQueue.submit(new Callable<Maps>() {
             public Maps call() throws Exception {
                 Map<URN, Long> urnToTime = createMap();
@@ -326,8 +330,9 @@ public class CreationTimeCache {
         synchronized (this) {
             if (max < 1)
                 throw new IllegalArgumentException("bad max = " + max);
-            MediaTypeAggregator.Aggregator filter = request == null ? null : MediaTypeAggregator
-                    .getAggregator(request);
+            Predicate<String> filter = request == null ? 
+                    Predicates.<String>alwaysTrue() :
+                        mediaTypeAggregator.getPredicateForQuery(request);
 
             // may be non-null at loop end
             List<URN> toRemove = null;
@@ -356,7 +361,7 @@ public class CreationTimeCache {
                         continue;
                     }
 
-                    if (filter == null || filter.allow(fd.getFileName())) {
+                    if (filter.apply(fd.getFileName())) {
                         urnList.add(currURN);
                     }
                 }

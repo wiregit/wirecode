@@ -12,9 +12,10 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
-import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -32,6 +33,7 @@ import com.limegroup.gnutella.messages.Message.Network;
 public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     @Inject private QueryRequestFactory queryRequestFactory;
+    @Inject private QueryCategoryFilterer mediaTypeAggregator;
 
     public ServerSideMetaQueryTest(String name) {
         super(name);
@@ -95,8 +97,8 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "whatever", "", null, null, true, Network.TCP, false, 0, false, 0);
        
-        MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(query);
-        assertNull(filter);
+        Predicate<String> predicate = mediaTypeAggregator.getPredicateForQuery(query);
+        assertSame(Predicates.alwaysTrue(), predicate); // a little too strict.
         }
 
         int[] flags = new int[6];
@@ -136,10 +138,8 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
                 "whatever", "", null, null, true, Network.TCP, false, 0, false,
                 flag);
        
-        MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(query);
-        assertNotNull(filter);
-        List filterList = (List) PrivilegedAccessor.getValue(filter, 
-                                                             "_filters");
+        Predicate<String> predicate = mediaTypeAggregator.getPredicateForQuery(query);
+        assertNotSame(Predicates.alwaysTrue(), predicate); // not testing too much
         int numFilters = 0;
         if ((flag & QueryRequest.AUDIO_MASK) > 0) numFilters++;
         if ((flag & QueryRequest.VIDEO_MASK) > 0) numFilters++;
@@ -147,19 +147,18 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         if ((flag & QueryRequest.IMAGE_MASK) > 0) numFilters++;
         if ((flag & QueryRequest.WIN_PROG_MASK) > 0) numFilters++;
         if ((flag & QueryRequest.LIN_PROG_MASK) > 0) numFilters++;
-        assertEquals(numFilters, filterList.size());
         assertEquals(((flag & QueryRequest.AUDIO_MASK) > 0),
-                     filter.allow("susheel.mp3"));
+                     predicate.apply("susheel.mp3"));
         assertEquals(((flag & QueryRequest.VIDEO_MASK) > 0),
-                     filter.allow("susheel.wmv"));
+                predicate.apply("susheel.wmv"));
         assertEquals(((flag & QueryRequest.DOC_MASK) > 0),
-                     filter.allow("susheel.txt"));
+                predicate.apply("susheel.txt"));
         assertEquals(((flag & QueryRequest.IMAGE_MASK) > 0),
-                     filter.allow("susheel.png"));
+                predicate.apply("susheel.png"));
         assertEquals(((flag & QueryRequest.WIN_PROG_MASK) > 0),
-                     filter.allow("susheel.exe"));
+                predicate.apply("susheel.exe"));
         assertEquals(((flag & QueryRequest.LIN_PROG_MASK) > 0),
-                     filter.allow("susheel.csh"));
+                predicate.apply("susheel.csh"));
     }
 
     

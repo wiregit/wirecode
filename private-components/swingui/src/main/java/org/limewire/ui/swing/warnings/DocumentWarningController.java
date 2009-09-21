@@ -5,12 +5,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.util.CategoryUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -42,10 +42,12 @@ public class DocumentWarningController implements ComponentListener {
     private boolean showing = false;
 
     private final Provider<DocumentWarningPanel> documentWarningPanel;
+    private final CategoryManager categoryManager;
 
     @Inject
-    public DocumentWarningController(Provider<DocumentWarningPanel> documentWarningPanel) {
+    public DocumentWarningController(Provider<DocumentWarningPanel> documentWarningPanel, CategoryManager categoryManager) {
         this.documentWarningPanel = documentWarningPanel;
+        this.categoryManager = categoryManager;
     }
 
     @Inject
@@ -61,8 +63,7 @@ public class DocumentWarningController implements ComponentListener {
                             LocalFileItem localFileItem = listChanges
                                     .getSourceList()
                                     .get(listChanges.getIndex());
-                            if (CategoryUtils.getCategory(localFileItem
-                                    .getFile()) == Category.DOCUMENT
+                            if (categoryManager.getCategoryForFile(localFileItem.getFile()) == Category.DOCUMENT
                                     && SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD
                                             .getValue()) {
                                 showDocumentSharingWarning();

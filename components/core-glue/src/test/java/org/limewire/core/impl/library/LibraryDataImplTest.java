@@ -8,6 +8,7 @@ import java.util.Map;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.library.Library;
@@ -22,6 +23,7 @@ public class LibraryDataImplTest extends BaseTestCase {
         Mockery context = new Mockery();
 
         final Library managedList = context.mock(Library.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
 
         final Collection<String> testExtensions = new ArrayList<String>();
         context.checking(new Expectations() {
@@ -31,7 +33,7 @@ public class LibraryDataImplTest extends BaseTestCase {
             }
         });
 
-        LibraryDataImpl libraryDataImpl = new LibraryDataImpl(managedList);
+        LibraryDataImpl libraryDataImpl = new LibraryDataImpl(managedList, categoryManager);
         Collection<String> defaultExtensions = libraryDataImpl.getDefaultExtensions();
         assertEquals(testExtensions, defaultExtensions);
         context.assertIsSatisfied();
@@ -41,6 +43,7 @@ public class LibraryDataImplTest extends BaseTestCase {
         Mockery context = new Mockery();
 
         final Library managedList = context.mock(Library.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
 
         final Map<Category, Collection<String>> testCategoryExtensions = new HashMap<Category, Collection<String>>();
         context.checking(new Expectations() {
@@ -50,7 +53,7 @@ public class LibraryDataImplTest extends BaseTestCase {
             }
         });
 
-        LibraryDataImpl libraryDataImpl = new LibraryDataImpl(managedList);
+        LibraryDataImpl libraryDataImpl = new LibraryDataImpl(managedList, categoryManager);
         Map<Category, Collection<String>> categoryExtensions = libraryDataImpl
                 .getExtensionsPerCategory();
         assertEquals(testCategoryExtensions, categoryExtensions);

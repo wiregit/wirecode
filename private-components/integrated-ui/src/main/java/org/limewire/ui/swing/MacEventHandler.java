@@ -13,6 +13,7 @@ import net.roydesign.mac.MRJAdapter;
 import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.ui.swing.mainframe.AboutAction;
 import org.limewire.ui.swing.mainframe.OptionsAction;
@@ -52,6 +53,7 @@ public class MacEventHandler {
     @Inject private volatile AboutAction aboutAction = null;
     @Inject private volatile OptionsAction optionsAction = null;
     @Inject private volatile ExitAction exitAction = null;
+    @Inject private volatile CategoryManager categoryManager = null;
 
     /** Creates a new instance of MacEventHandler */
     @Inject
@@ -137,7 +139,7 @@ public class MacEventHandler {
                 }
             }
         } else {
-            NativeLaunchUtils.safeLaunchFile(file);
+            NativeLaunchUtils.safeLaunchFile(file, categoryManager);
         }
     }
 }

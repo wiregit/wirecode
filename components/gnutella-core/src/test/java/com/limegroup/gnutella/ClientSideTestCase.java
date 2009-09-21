@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
@@ -83,6 +84,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     @Inject protected Library library;
     @Inject @GnutellaFiles protected FileView gnutellaFileView;
     @Inject @GnutellaFiles protected FileCollection gnutellaFileCollection;
+    @Inject protected CategoryManager categoryManager;
     protected FileDesc berkeleyFD;
     protected FileDesc susheelFD;
     

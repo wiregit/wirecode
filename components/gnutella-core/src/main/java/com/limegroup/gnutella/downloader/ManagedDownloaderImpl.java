@@ -27,7 +27,9 @@ import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -477,6 +479,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final DangerousFileChecker dangerousFileChecker;
     protected final SpamManager spamManager;
     protected final Library library;
+    protected final CategoryManager categoryManager;
 
     private final SocketsManager socketsManager;
 
@@ -490,6 +493,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * You must set initial source via {@link #addInitialSources},
      * set the save file via {@link #setSaveFile(File, String, boolean)},
      * and call {@link #initialize} prior to starting this download.
+     * @param categoryManager TODO
      */
     @Inject
     protected ManagedDownloaderImpl(SaveLocationManager saveLocationManager,
@@ -509,8 +513,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                                                  SocketsManager socketsManager,
                                                  @Named("downloadStateProcessingQueue")ListeningExecutorService downloadStateProcessingQueue,
                                                  DangerousFileChecker dangerousFileChecker,
-                                                 SpamManager spamManager, Library library) {
-        super(saveLocationManager);
+                                                 SpamManager spamManager, Library library, CategoryManager categoryManager) {
+        super(saveLocationManager, categoryManager);
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
         this.gnutellaFileCollection = gnutellaFileCollection;
@@ -540,6 +544,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.dangerousFileChecker = dangerousFileChecker;
         this.spamManager = spamManager;
         this.library = library;
+        this.categoryManager = categoryManager;
     }
 
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -1829,7 +1834,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     @Override
     protected File getDefaultSaveFile() {
         String fileName = getDefaultFileName();
-        return new File(SharingSettings.getSaveDirectory(fileName), fileName);
+        Category category = null;
+        if(fileName != null) {
+            category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(fileName));
+        }
+        return new File(SharingSettings.getSaveDirectory(category), fileName);
     }
 
     //////////////////////////// Core Downloading Logic /////////////////////

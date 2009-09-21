@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibraryInspectionUtils;
@@ -27,16 +28,19 @@ class LaunchFileAction extends AbstractAction {
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     private final Provider<LibraryNavigatorPanel> libraryNavProvider;
     private final Provider<PlayerMediator> playerProvider;
+    private final CategoryManager categoryManager;
     
     @Inject
     public LaunchFileAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems,
         Provider<LibraryNavigatorPanel> libraryNavProvider,
-        Provider<PlayerMediator> playerProvider) {
+        Provider<PlayerMediator> playerProvider,
+        CategoryManager categoryManager) {
         super(I18n.tr("Play/Open"));
 
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryNavProvider = libraryNavProvider;
         this.playerProvider = playerProvider;
+        this.categoryManager = categoryManager;
     }
 
     @Override
@@ -52,7 +56,7 @@ class LaunchFileAction extends AbstractAction {
                 playerProvider.get().setActivePlaylist(libraryNavProvider.get().getSelectedNavItem());
                 playerProvider.get().play(fileItem);
             } else {    
-                NativeLaunchUtils.safeLaunchFile(fileItem.getFile());
+                NativeLaunchUtils.safeLaunchFile(fileItem.getFile(), categoryManager);
             }
         }
     }

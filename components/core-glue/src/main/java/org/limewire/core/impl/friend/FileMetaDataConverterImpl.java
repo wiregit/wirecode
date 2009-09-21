@@ -26,17 +26,21 @@ import com.limegroup.gnutella.util.DataUtils;
 class FileMetaDataConverterImpl implements FileMetaDataConverter {
 
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory;
 
     @Inject
-    public FileMetaDataConverterImpl(FriendRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
+    public FileMetaDataConverterImpl(FriendRemoteFileDescDeserializer remoteFileDescDeserializer,
+            RemoteFileDescFactory remoteFileDescFactory,
+            RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
         this.remoteFileDescFactory = remoteFileDescFactory;
+        this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
     }
 
     public SearchResult create(FriendPresence presence, FileMetaData fileMetaData) throws InvalidDataException, DownloadException {
         FriendAddress presenceAddress = getAddressFromPresence(presence);
 
         RemoteFileDesc remoteFileDesc = createRfdFromChatResult(presenceAddress, fileMetaData);
-        RemoteFileDescAdapter remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDesc,
+        RemoteFileDescAdapter remoteFileDescAdapter = remoteFileDescAdapterFactory.create(remoteFileDesc,
                 IpPort.EMPTY_SET, presence);
         return remoteFileDescAdapter;
     }

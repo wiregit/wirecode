@@ -10,18 +10,20 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistItem;
 import org.limewire.core.api.playlist.PlaylistListener;
-import org.limewire.util.MediaType;
+import org.limewire.util.FileUtils;
 
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+
+import com.google.common.base.Predicate;
 
 /**
  * Live implementation of Playlist.
  */
 class PlaylistImpl implements Playlist {
 
-    private final MediaType mediaType;
+    private final Predicate<String> extensionMatcher;
     private final List<PlaylistItem> itemList;
     private final PlaylistMatcherEditor matcherEditor;
     private final List<PlaylistListener> playlistListeners;
@@ -31,8 +33,8 @@ class PlaylistImpl implements Playlist {
     /**
      * Constructs a Playlist with the specified name.
      */
-    public PlaylistImpl(String name) {
-        this.mediaType = MediaType.getAudioMediaType();
+    public PlaylistImpl(String name, Predicate<String> extensionMatcher) {
+        this.extensionMatcher = extensionMatcher;
         this.itemList = Collections.synchronizedList(new ArrayList<PlaylistItem>());
         this.matcherEditor = new PlaylistMatcherEditor();
         this.playlistListeners = new CopyOnWriteArrayList<PlaylistListener>(); 
@@ -131,7 +133,7 @@ class PlaylistImpl implements Playlist {
     
     @Override
     public boolean canAdd(File file) {
-        return mediaType.matches(file.getName());
+        return extensionMatcher.apply(FileUtils.getFileExtension(file));
     }
     
     @Override

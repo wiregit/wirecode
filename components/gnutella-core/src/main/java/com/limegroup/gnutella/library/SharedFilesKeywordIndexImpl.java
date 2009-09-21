@@ -14,6 +14,7 @@ import org.limewire.collection.IdentityHashSet;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
+import org.limewire.core.api.Category;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
@@ -24,13 +25,13 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.I18NConvert;
-import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.MediaTypeAggregator;
+import com.limegroup.gnutella.QueryCategoryFilterer;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
@@ -87,6 +88,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private final ActivityCallback activityCallback;
 
     private final Provider<LimeXMLSchemaRepository> schemaRepository;
+    private final QueryCategoryFilterer mediaTypeAggregator;
 
     @Inject
     public SharedFilesKeywordIndexImpl(Library library,
@@ -95,7 +97,8 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
             ActivityCallback activityCallback, Provider<LimeXMLSchemaRepository> schemaRepository,
             @GnutellaFiles FileView gnutellaFileView,
-            @IncompleteFiles FileView incompleteFileView) {
+            @IncompleteFiles FileView incompleteFileView,
+            QueryCategoryFilterer mediaTypeAggregator) {
         this.library = library;
         this.creationTimeCache = creationTimeCache;
         this.responseFactory = responseFactory;
@@ -104,6 +107,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         this.schemaRepository = schemaRepository;
         this.incompleteFileView = incompleteFileView;
         this.gnutellaFileView = gnutellaFileView;
+        this.mediaTypeAggregator = mediaTypeAggregator;
     }
     
     @Inject void register(ServiceRegistry registry, final ListenerSupport<FileDescChangeEvent> fileDescSupport) {
@@ -214,7 +218,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             return Collections.emptySet();
 
         Set<Response> responses = new HashSet<Response>();
-        final MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(request);
+        Predicate<String> filter = mediaTypeAggregator.getPredicateForQuery(request);
         LimeXMLDocument doc = request.getRichQuery();
 
         // Iterate through our hit indices to create a list of results.
@@ -227,7 +231,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             if(desc != null) {
                 //desc can bet null if items were removed after the IntSet matches were built
-                if ((filter != null) && !filter.allow(desc.getFileName()))
+                if (!filter.apply(desc.getFileName()))
                     continue;
 
                 activityCallback.handleSharedFileUpdate(desc.getFile());
@@ -571,19 +575,17 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     }
 
     private Collection<LimeXMLReplyCollection> getReplyCollections(QueryRequest request) {
-        MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(request);
+        List<Category> categoriesRequested = mediaTypeAggregator.getRequestedCategories(request);
         SchemaReplyCollectionMapper mapper = schemaReplyCollectionMapper.get();
-        if (filter == null) {
+        if (categoriesRequested == null) {
             return mapper.getCollections();
         }
-        Collection<MediaType> mediaTypes = filter.getMediaTypes();
-        List<LimeXMLReplyCollection> collections = new ArrayList<LimeXMLReplyCollection>(mediaTypes
-                .size());
-        for (MediaType mt : mediaTypes) {
+        List<LimeXMLReplyCollection> collections = new ArrayList<LimeXMLReplyCollection>(categoriesRequested.size());
+        for (Category category : categoriesRequested) {
 
             // get schema uri from media type
-            LimeXMLReplyCollection col = mapper.getReplyCollection(getSchemaUriFromMimeType(mt
-                    .getSchema()));
+            LimeXMLReplyCollection col = mapper.getReplyCollection(
+                    getSchemaUriFromMimeType(category.getSchemaName()));
 
             if (col != null) {
                 collections.add(col);

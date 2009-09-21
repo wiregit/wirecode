@@ -38,7 +38,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         library = context.mock(Library.class);
         sharedFileList = context.mock(FileView.class);
         incompleteFileList = context.mock(FileView.class);
-        keywordIndex = new SharedFilesKeywordIndexImpl(library, null, null, null, null, null, sharedFileList, incompleteFileList);
+        keywordIndex = new SharedFilesKeywordIndexImpl(library, null, null, null, null, null, sharedFileList, incompleteFileList, null);
     }
     
     @SuppressWarnings("unchecked")

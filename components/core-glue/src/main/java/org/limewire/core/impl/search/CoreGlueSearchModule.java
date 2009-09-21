@@ -19,6 +19,8 @@ public class CoreGlueSearchModule extends AbstractModule {
         EventMulticaster<SearchEvent> searchMulticaster = new EventMulticasterImpl<SearchEvent>();
         bind(new TypeLiteral<EventBroadcaster<SearchEvent>>(){}).toInstance(searchMulticaster);
         bind(new TypeLiteral<ListenerSupport<SearchEvent>>(){}).toInstance(searchMulticaster);
+        
+        bind(RemoteFileDescAdapter.Factory.class).toProvider(FactoryProvider.newFactory(RemoteFileDescAdapter.Factory.class, RemoteFileDescAdapter.class));
     }
 
 }

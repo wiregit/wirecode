@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.settings.SharingSettings;
@@ -28,6 +29,10 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.uploader.UploadType;
 
+//TODO: This class is implicitly also testing CoreUploadItem
+//because it doesn't mock out CoreUploadItem.
+//It was too much of a PITA to fix that now, so I just created
+//a temporary factory that hand-creates them.  But that's a bad idea.
 public class CoreUploadListManagerTest extends BaseTestCase {
     
     public CoreUploadListManagerTest(String name) {
@@ -48,7 +53,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
         
         final MatchAndCopy<Runnable> runnableMatcher = new MatchAndCopy<Runnable>(Runnable.class);
         
@@ -79,10 +84,11 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final Uploader uploader = context.mock(Uploader.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);        
         
         final long testSize = 777;
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
         {   
@@ -132,8 +138,9 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final Uploader uploaderSettingDisabled = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
             {   
@@ -163,14 +170,14 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         manager.uploadAdded(uploaderInternal);
         assertEmpty(items);
         
-        items.add(new CoreUploadItem(uploaderNotComplete, presence));
+        items.add(new CoreUploadItem(uploaderNotComplete, presence, null));
         manager.uploadRemoved(uploaderNotComplete);
         assertGreaterThan(-1, items.size());   // Can't use assertNotEmpty() since it calls toString() on elements!
         items.clear();
         
         boolean clearUploadOriginal = SharingSettings.CLEAR_UPLOAD.getValue();
         SharingSettings.CLEAR_UPLOAD.setValue(false);
-        items.add(new CoreUploadItem(uploaderSettingDisabled, presence));
+        items.add(new CoreUploadItem(uploaderSettingDisabled, presence, null));
         manager.uploadRemoved(uploaderSettingDisabled);
         SharingSettings.CLEAR_UPLOAD.setValue(clearUploadOriginal);
         assertGreaterThan(-1, items.size());   // Can't use assertNotEmpty() since it calls toString() on elements!
@@ -193,7 +200,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         // Do we really need this dependence in CoreUploadListManager? 
         final UploadServices uploadServices = context.mock(UploadServices.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(uploadServices, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(uploadServices, friendManager, null);
         
         context.checking(new Expectations() {
             {   
@@ -245,8 +252,9 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final Uploader uploader = context.mock(Uploader.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
         {   
@@ -299,7 +307,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final UploadItem uploadUploading3 = context.mock(UploadItem.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
                 
         context.checking(new Expectations() {
             {   
@@ -375,8 +383,9 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final Uploader uploader = context.mock(Uploader.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
             {   
@@ -436,7 +445,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final CoreUploadItem item3 = context.mock(CoreUploadItem.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
         
         context.checking(new Expectations() {
             {
@@ -476,6 +485,19 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         manager.update();
         
         context.assertIsSatisfied();
+    }
+    
+    private static class CUIFactory implements CoreUploadItem.Factory {
+        private final CategoryManager categoryManager;
+        
+        public CUIFactory(CategoryManager categoryManager) {
+            this.categoryManager = categoryManager;
+        }
+        
+        @Override
+        public CoreUploadItem create(Uploader uploader, FriendPresence friendPresence) {
+            return new CoreUploadItem(uploader, friendPresence, categoryManager);
+        }
     }
 }
 

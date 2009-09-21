@@ -6,6 +6,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -15,6 +16,7 @@ import org.limewire.util.NameValue;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
@@ -161,6 +163,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     @Singleton
     private static class StubVerifier extends ResponseVerifierImpl {
+        
+        
+        @Inject
+        public StubVerifier(CategoryManager categoryManager) {
+            super(categoryManager);
+        }
 
         @Override
         public synchronized boolean matchesQuery(byte[] guid, Response response) {

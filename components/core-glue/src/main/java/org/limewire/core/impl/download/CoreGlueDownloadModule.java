@@ -19,5 +19,6 @@ public class CoreGlueDownloadModule extends AbstractModule {
         bind(ResultDownloader.class).to(CoreDownloadListManager.class);
         bind(ItunesDownloadListenerFactory.class).toProvider(FactoryProvider.newFactory(ItunesDownloadListenerFactory.class, ItunesDownloadListener.class));
         bind(TorrentDownloadListenerFactory.class).toProvider(FactoryProvider.newFactory(TorrentDownloadListenerFactory.class, TorrentDownloadListener.class));
+        bind(CoreDownloadItem.Factory.class).toProvider(FactoryProvider.newFactory(CoreDownloadItem.Factory.class, CoreDownloadItem.class));
     }
 }

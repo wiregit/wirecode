@@ -15,6 +15,7 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.download.listener.ItunesDownloadListener;
@@ -41,6 +42,10 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
+// TODO: This class is implicitly also testing CoreDownloadItem
+//       because it doesn't mock out CoreDownloadItem.
+//       It was too much of a PITA to fix that now, so I just created
+//       a temporary factory that hand-creates them.  But that's a bad idea.
 public class CoreDownloadListManagerTest extends BaseTestCase {
 
     public CoreDownloadListManagerTest(String name) {
@@ -82,7 +87,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
+                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
 
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
@@ -280,7 +285,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
+                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
 
         coreDownloadListManager.registerDownloadListener(listenerList);
 
@@ -416,7 +421,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
+                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
 
         coreDownloadListManager.registerDownloadListener(listenerList);
 
@@ -474,7 +479,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final MagnetLinkImpl magnetLink = context.mock(MagnetLinkImpl.class);
@@ -565,7 +570,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -630,7 +635,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -696,7 +701,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -788,5 +793,21 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         assertEquals(downloadItem, downloadItemResult);
         
         context.assertIsSatisfied();
+    }
+
+    // TODO: Remove this -- see note at top of file.
+    private static class CDIFactory implements CoreDownloadItem.Factory {
+        private final FriendManager friendManager;
+        private final CategoryManager categoryManager;
+        
+        public CDIFactory(FriendManager friendManager, CategoryManager categoryManager) {
+            this.friendManager = friendManager;
+            this.categoryManager = categoryManager;
+        }
+        
+        @Override
+        public CoreDownloadItem create(Downloader downloader, QueueTimeCalculator calculator) {
+            return new CoreDownloadItem(downloader, calculator, friendManager, categoryManager);
+        }
     }
 }

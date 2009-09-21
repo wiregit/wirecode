@@ -31,10 +31,8 @@ import org.limewire.core.impl.download.listener.RecentDownloadListener;
 import org.limewire.core.impl.download.listener.TorrentDownloadListenerFactory;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
-import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.friend.api.FriendManager;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
@@ -67,8 +65,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private final RemoteFileDescFactory remoteFileDescFactory;
     private final SpamManager spamManager;
     private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
-    private final FriendManager friendManager;
     private final TorrentDownloadListenerFactory torrentDownloadListenerFactory;
+    private final CoreDownloadItem.Factory coreDownloadItemFactory;
     
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     /**the base list - all removing and adding must be done from here.*/
@@ -81,15 +79,16 @@ public class CoreDownloadListManager implements DownloadListManager {
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
             RemoteFileDescFactory remoteFileDescFactory, SpamManager spamManager, 
-            ItunesDownloadListenerFactory itunesDownloadListenerFactory, FriendManager friendManager, 
-            TorrentDownloadListenerFactory torrentDownloadListenerFactory) {
+            ItunesDownloadListenerFactory itunesDownloadListenerFactory, 
+            TorrentDownloadListenerFactory torrentDownloadListenerFactory,
+            CoreDownloadItem.Factory coreDownloadItemFactory) {
 	    
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
         this.spamManager = spamManager;
         this.itunesDownloadListenerFactory = itunesDownloadListenerFactory;
-        this.friendManager = friendManager;
         this.torrentDownloadListenerFactory = torrentDownloadListenerFactory;
+        this.coreDownloadItemFactory = coreDownloadItemFactory;
         
         threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
@@ -191,8 +190,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         // and only pass it through if directory is different from default
         // save directory == !isDefault()
         //if (saveDir == null &&) {
-            FileSetting fs = SharingSettings.getFileSettingForMediaType
-            (MediaTypeConverter.toMediaType(category));
+            FileSetting fs = SharingSettings.getFileSettingForCategory(category);
             if (!fs.isDefault()) {
                 saveDir = fs.get();
             }
@@ -287,7 +285,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             if(downloader.getAttribute(DownloadItem.DOWNLOAD_START_DATE)== null){
                 downloader.setAttribute(DownloadItem.DOWNLOAD_START_DATE, new Date(), true);
             }
-            DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager);
+            DownloadItem item = coreDownloadItemFactory.create(downloader, queueTimeCalculator);
             downloader.setAttribute(DownloadItem.DOWNLOAD_ITEM, item, false);
             downloader.addListener(torrentDownloadListenerFactory.createListener(downloader, list));
             downloader.addListener(new RecentDownloadListener(downloader));

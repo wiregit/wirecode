@@ -14,8 +14,10 @@ import junit.framework.Test;
 
 import org.apache.http.params.BasicHttpParams;
 import org.limewire.bittorrent.Torrent;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -28,6 +30,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 import org.limewire.util.Visitor;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -451,6 +454,32 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                 return true;
             }
 
+        }, new CategoryManager() {
+            @Override
+            public Category getCategoryForExtension(String extension) {
+                return null;
+            }
+            @Override
+            public Predicate<String> getFilterForCategory(Category category) {
+                 return null;
+            }
+            @Override
+            public Predicate<String> getOsxAndLinuxProgramsFilter() {
+                return null;
+            }
+            @Override
+            public Predicate<String> getWindowsProgramsFilter() {
+                return null;
+            }
+            @Override
+            public Collection<String> getExtensionsForCategory(Category category) {
+                return null;
+            }
+            
+            @Override
+            public Category getCategoryForFile(File file) {
+                return null;
+            }
         });
         
         torrentFileDownloaderImpl.initDownloadInformation(uri, true);

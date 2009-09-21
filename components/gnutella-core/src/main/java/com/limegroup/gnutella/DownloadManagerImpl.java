@@ -23,6 +23,7 @@ import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadException.ErrorCode;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -149,6 +150,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     private final DownloadSerializer downloadSerializer;
     private final IncompleteFileManager incompleteFileManager;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final CategoryManager categoryManager;
 
     private final PushEndpointFactory pushEndpointFactory;
 
@@ -164,7 +166,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             CoreDownloaderFactory coreDownloaderFactory, DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
             RemoteFileDescFactory remoteFileDescFactory, PushEndpointFactory pushEndpointFactory,
-            Provider<TorrentManager> torrentManager, Provider<TorrentUploadManager> torrentUploadManager) {
+            Provider<TorrentManager> torrentManager, Provider<TorrentUploadManager> torrentUploadManager,
+            CategoryManager categoryManager) {
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
@@ -177,6 +180,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         this.pushEndpointFactory = pushEndpointFactory;
         this.torrentManager = torrentManager;
         this.torrentUploadManager = torrentUploadManager;
+        this.categoryManager = categoryManager;
     }
 
     /* (non-Javadoc)
@@ -934,7 +938,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
     public synchronized Downloader downloadFromMozilla(MozillaDownload listener) {
         
-        CoreDownloader downloader = new MozillaDownloaderImpl(this, listener);
+        CoreDownloader downloader = new MozillaDownloaderImpl(this, categoryManager, listener);
         
         downloader.initialize();
         callback(downloader).addDownload(downloader);

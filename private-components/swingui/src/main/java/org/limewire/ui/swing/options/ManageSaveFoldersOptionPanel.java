@@ -2,7 +2,7 @@ package org.limewire.ui.swing.options;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.Action;
@@ -23,7 +23,6 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
@@ -37,7 +36,7 @@ import com.google.inject.assistedinject.Assisted;
 public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
     /** Map containing initial save directories for various media types. */
-    private Map<MediaType, String> mediaDirectoryMap = new HashMap<MediaType, String>();
+    private Map<Category, String> mediaDirectoryMap = new EnumMap<Category, String>(Category.class);
     
     private LabelTextField audioTextField;
 
@@ -147,12 +146,12 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        applyOption(MediaType.getAudioMediaType(), audioTextField);
-        applyOption(MediaType.getVideoMediaType(), videoTextField);
-        applyOption(MediaType.getImageMediaType(), imageTextField);
-        applyOption(MediaType.getDocumentMediaType(), documentTextField);
-        applyOption(MediaType.getProgramMediaType(), programTextField);
-        applyOption(MediaType.getOtherMediaType(), otherTextField);
+        applyOption(Category.AUDIO, audioTextField);
+        applyOption(Category.VIDEO, videoTextField);
+        applyOption(Category.IMAGE, imageTextField);
+        applyOption(Category.DOCUMENT, documentTextField);
+        applyOption(Category.PROGRAM, programTextField);
+        applyOption(Category.OTHER, otherTextField);
         return false;
     }
     
@@ -171,36 +170,36 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
     
     boolean isConfigCustom() {
         File defaultLocation = SharingSettings.getSaveDirectory();
-        if (!SharingSettings.getFileSettingForMediaType(MediaType.getAudioMediaType()).get()
+        if (!SharingSettings.getFileSettingForCategory(Category.AUDIO).get()
                 .equals(defaultLocation)) {
             return true;
         }
-        if (!SharingSettings.getFileSettingForMediaType(MediaType.getVideoMediaType()).get()
+        if (!SharingSettings.getFileSettingForCategory(Category.VIDEO).get()
                 .equals(defaultLocation)) {
             return true;
         }
-        if (!SharingSettings.getFileSettingForMediaType(MediaType.getImageMediaType()).get()
+        if (!SharingSettings.getFileSettingForCategory(Category.IMAGE).get()
                 .equals(defaultLocation)) {
             return true;
         }
-        if (!SharingSettings.getFileSettingForMediaType(MediaType.getDocumentMediaType()).get()
+        if (!SharingSettings.getFileSettingForCategory(Category.DOCUMENT).get()
                 .equals(defaultLocation)) {
             return true;
         }
-        if (!SharingSettings.getFileSettingForMediaType(MediaType.getProgramMediaType()).get()
+        if (!SharingSettings.getFileSettingForCategory(Category.PROGRAM).get()
                 .equals(defaultLocation)) {
             return true;
         }
-        if (!SharingSettings.getFileSettingForMediaType(MediaType.getOtherMediaType()).get()
+        if (!SharingSettings.getFileSettingForCategory(Category.OTHER).get()
                 .equals(defaultLocation)) {
             return true;
         }
         return false;
     }
     
-    private void applyOption(MediaType mediaType, LabelTextField textField) {
+    private void applyOption(Category mediaType, LabelTextField textField) {
         if (hasChanged(mediaType, textField)) {
-            FileSetting saveDirSetting = SharingSettings.getFileSettingForMediaType(mediaType);
+            FileSetting saveDirSetting = SharingSettings.getFileSettingForCategory(mediaType);
             String newSaveDirString = textField.getText();
             // Apply media save directory.  If the new value is equal to the
             // default save directory, then revert the setting to the default. 
@@ -216,15 +215,15 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
     
     @Override
     boolean hasChanged() {
-        return hasChanged(MediaType.getAudioMediaType(), audioTextField)
-                || hasChanged(MediaType.getVideoMediaType(), videoTextField)
-                || hasChanged(MediaType.getImageMediaType(), imageTextField)
-                || hasChanged(MediaType.getDocumentMediaType(), documentTextField)
-                || hasChanged(MediaType.getProgramMediaType(), programTextField)
-                || hasChanged(MediaType.getOtherMediaType(), otherTextField);
+        return hasChanged(Category.AUDIO, audioTextField)
+                || hasChanged(Category.VIDEO, videoTextField)
+                || hasChanged(Category.IMAGE, imageTextField)
+                || hasChanged(Category.DOCUMENT, documentTextField)
+                || hasChanged(Category.PROGRAM, programTextField)
+                || hasChanged(Category.OTHER, otherTextField);
     }
 
-    private boolean hasChanged(MediaType mediaType, LabelTextField textField) {
+    private boolean hasChanged(Category mediaType, LabelTextField textField) {
         // Compare text field to initial value.  We cannot compare to the 
         // FileSetting value because it may change if the default save
         // directory is updated.
@@ -235,16 +234,16 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
     @Override
     public void initOptions() {
-        initField(MediaType.getAudioMediaType(), audioTextField);
-        initField(MediaType.getVideoMediaType(), videoTextField);
-        initField(MediaType.getImageMediaType(), imageTextField);
-        initField(MediaType.getDocumentMediaType(), documentTextField);
-        initField(MediaType.getProgramMediaType(), programTextField);
-        initField(MediaType.getOtherMediaType(), otherTextField);
+        initField(Category.AUDIO, audioTextField);
+        initField(Category.VIDEO, videoTextField);
+        initField(Category.IMAGE, imageTextField);
+        initField(Category.DOCUMENT, documentTextField);
+        initField(Category.PROGRAM, programTextField);
+        initField(Category.OTHER, otherTextField);
     }
 
-    private void initField(MediaType mediaType, LabelTextField textField) {
-        FileSetting saveDirSetting = SharingSettings.getFileSettingForMediaType(mediaType);
+    private void initField(Category mediaType, LabelTextField textField) {
+        FileSetting saveDirSetting = SharingSettings.getFileSettingForCategory(mediaType);
         File saveDir = saveDirSetting.get();
         String saveDirString = saveDir.getAbsolutePath();
         textField.setText(saveDirString);

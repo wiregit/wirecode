@@ -11,6 +11,7 @@ import org.limewire.ui.swing.table.MouseableTable;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class UploadTable extends MouseableTable {
     private DefaultEventTableModel<UploadItem> model;
@@ -18,7 +19,8 @@ public class UploadTable extends MouseableTable {
     @Inject
     public UploadTable(UploadListManager uploadListManager, LibraryMediator libraryMediator, 
             LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
-            UploadTableRendererEditor editor, UploadTableRendererEditor renderer) {
+            UploadTableRendererEditor editor, UploadTableRendererEditor renderer,
+            Provider<UploadActionHandler> uploadActionHandlerFactory) {
         model = new DefaultEventTableModel<UploadItem>(uploadListManager.getSwingThreadSafeUploads(), new LimeSingleColumnTableFormat<UploadItem>(UploadItem.class));
         setModel(model);
         
@@ -26,8 +28,7 @@ public class UploadTable extends MouseableTable {
         setEmptyRowsPainted(false);
         setFillsViewportHeight(false);
         
-        UploadActionHandler actionHandler = new UploadActionHandler(uploadListManager, libraryMediator, fileInfoFactory);
-        
+        UploadActionHandler actionHandler = uploadActionHandlerFactory.get();        
         editor.setActionHandler(actionHandler);
         getColumn(0).setCellEditor(editor);
         getColumn(0).setCellRenderer(renderer);

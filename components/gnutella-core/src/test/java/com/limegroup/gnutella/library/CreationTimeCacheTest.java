@@ -20,6 +20,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.limegroup.gnutella.MediaTypeAggregatorStub;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -100,13 +101,13 @@ public class CreationTimeCacheTest extends LimeTestCase {
         oos.close();
         
         // now have the CreationTimeCache read it in
-        CreationTimeCache ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub);
+        CreationTimeCache ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
         Map map = getUrnToTime(ctCache);
         assertEquals(toSerialize, map);
     }
     
     public void testMapCreationNoExistingMap() throws Exception {
-        CreationTimeCache creationTimeCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub);
+        CreationTimeCache creationTimeCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
         Map<URN, Long> map = creationTimeCache.createMap();
         assertTrue(map.isEmpty());
     }
@@ -132,7 +133,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         oos.close();
         
         // now have the CreationTimeCache read it in
-        CreationTimeCache ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub);
+        CreationTimeCache ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
         // is everything mapped correctly from URN to Long?
         assertEquals(ctCache.getCreationTime(hash1), middle);
         assertEquals(ctCache.getCreationTime(hash2), young);
@@ -207,7 +208,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         
         // should be a empty cache
         // ---------------------------
-        CreationTimeCache ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub);
+        CreationTimeCache ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
         assertFalse(ctCache.getFiles().iterator().hasNext());
 
         TIME_MAP = getUrnToTime(ctCache);
@@ -224,7 +225,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         // should have one value
         // ---------------------------
-        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub); // test the deserialization.
+        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub()); // test the deserialization.
         iter = ctCache.getFiles().iterator();
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
@@ -251,7 +252,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         // should have three values
         // ---------------------------
-        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub); // test the deserialization.
+        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub()); // test the deserialization.
         iter = ctCache.getFiles().iterator();
         assertEquals(hash3, iter.next());
         assertEquals(hash4, iter.next());
@@ -267,7 +268,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         // should have two values but exclude one
         // ---------------------------
         gnutellaFileCollectionStub.remove(fd4);
-        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub); // test the deserialization.
+        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub()); // test the deserialization.
         iter = ctCache.getFiles().iterator();
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
@@ -288,7 +289,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         
         // should be a empty cache
         // ---------------------------
-        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub);
+        ctCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
         assertFalse(ctCache.getFiles().iterator().hasNext());
 
         TIME_MAP = getUrnToTime(ctCache);
@@ -337,7 +338,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         deleteCacheFile();
         assertTrue("cache should not be present", !cacheExists() );
         
-        CreationTimeCache cache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub);
+        CreationTimeCache cache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
         Collection<URN> sha1s = createLotsOfSha1s(cache);
         assertNotNull("should have some file descs", sha1s);
         assertGreaterThan("should have some file descs", 0, sha1s.size());

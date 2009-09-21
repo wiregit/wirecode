@@ -8,11 +8,15 @@ import java.util.Set;
 
 import org.limewire.collection.ForgetfulHashMap;
 import org.limewire.collection.MultiIterable;
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.GUID;
-import org.limewire.util.MediaType;
+import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -32,15 +36,15 @@ public class ResponseVerifierImpl implements ResponseVerifier {
         /** The keywords of the original query, lowercased. */
         final List<String> queryWords;
         /** The type of the original query. */
-        final MediaType type;
+        final SearchCategory type;
         /** Whether this is a what is new query */
         final boolean whatIsNew;
 
-        RequestData(String query, MediaType type) {
+        RequestData(String query, SearchCategory type) {
             this(query, null, type, false);
         }
 
-        RequestData(String query, LimeXMLDocument richQuery, MediaType type, boolean whatIsNew) {
+        RequestData(String query, LimeXMLDocument richQuery, SearchCategory type, boolean whatIsNew) {
             this.query=query;
             this.richQuery=richQuery;
             this.queryWords=getSearchTerms(query, richQuery);
@@ -62,6 +66,13 @@ public class ResponseVerifierImpl implements ResponseVerifier {
     private static final String DELIMITERS="+ ";
     /** The size of a Mandragore worm response, i.e., 8KB. */
     private static final long Mandragore_SIZE=8*1024l;
+    
+    private final CategoryManager categoryManager;
+    
+    @Inject
+    public ResponseVerifierImpl(CategoryManager categoryManager) {
+        this.categoryManager = categoryManager;
+    }
 
     /** Same as record(qr, null). */
     public synchronized void record(QueryRequest qr) {
@@ -74,7 +85,7 @@ public class ResponseVerifierImpl implements ResponseVerifier {
      *   responses later.  If type!=null, also memorizes that qr was for the given
      *   media type; otherwise, this is assumed to be for any type.
      */
-    public synchronized void record(QueryRequest qr, MediaType type){
+    public synchronized void record(QueryRequest qr, SearchCategory type){
         byte[] guid = qr.getGUID();
         mapper.put(new GUID(guid),new RequestData(qr.getQuery(), 
                                                   qr.getRichQuery(),
@@ -151,7 +162,13 @@ public class ResponseVerifierImpl implements ResponseVerifier {
         if (request == null || request.type==null)
             return true;
         String reply = response.getName();
-        return request.type.matches(reply);
+        Category category = request.type.getCategory();
+        if(category != null) {
+            String extension = FileUtils.getFileExtension(reply);
+            return categoryManager.getFilterForCategory(category).apply(extension);
+        } else {
+            return true;
+        } 
     }
 
     /**

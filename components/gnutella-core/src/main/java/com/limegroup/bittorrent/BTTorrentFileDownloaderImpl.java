@@ -23,6 +23,7 @@ import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
@@ -78,8 +79,8 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
             SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
-            ActivityCallback activityCallback) {
-        super(saveLocationManager);
+            ActivityCallback activityCallback, CategoryManager categoryManager) {
+        super(saveLocationManager, categoryManager);
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.httpExecutor = Objects.nonNull(httpExecutor, "httpExecutor");
 

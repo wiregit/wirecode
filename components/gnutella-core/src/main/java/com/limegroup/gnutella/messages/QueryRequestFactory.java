@@ -2,8 +2,8 @@ package com.limegroup.gnutella.messages;
 
 import java.util.Set;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.security.AddressSecurityToken;
-import org.limewire.util.MediaType;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -123,7 +123,7 @@ public interface QueryRequestFactory {
      *         argument is zero-length (empty)
      */
     public QueryRequest createOutOfBandQuery(byte[] guid, String query,
-            String xmlQuery, MediaType type);
+            String xmlQuery, SearchCategory type);
 
     /**
      * Creates a new query for the specified file name, with no XML.
@@ -154,7 +154,7 @@ public interface QueryRequestFactory {
      * @param ttl the desired ttl of the query.
      */
     public QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl,
-            MediaType type);
+            SearchCategory type);
 
     /**
      * Creates a new 'What is new'? OOB query with the specified guid and ttl.
@@ -171,7 +171,7 @@ public interface QueryRequestFactory {
      * @param ttl the desired ttl of the query.
      */
     public QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl,
-            MediaType type);
+            SearchCategory type);
 
     /**
      * Creates a new query for the specified file name, with no XML.
@@ -238,7 +238,7 @@ public interface QueryRequestFactory {
      *         appear to be valid
      */
     public QueryRequest createQuery(byte[] guid, String query, String xmlQuery,
-            MediaType type);
+            SearchCategory type);
 
     /**
      * Creates a new OOBquery from the existing query with the specified guid

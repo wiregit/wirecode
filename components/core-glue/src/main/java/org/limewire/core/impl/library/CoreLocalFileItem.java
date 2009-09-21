@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.InvalidURN;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
@@ -17,7 +18,6 @@ import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.CreationTimeCache;
@@ -34,11 +34,11 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     @Inject
     public CoreLocalFileItem(@Assisted FileDesc fileDesc, LocalFileDetailsFactory detailsFactory,
-            CreationTimeCache creationTimeCache) {
+            CreationTimeCache creationTimeCache, CategoryManager categoryManager) {
         this.fileDesc = fileDesc;
         this.detailsFactory = detailsFactory;
         this.creationTimeCache = creationTimeCache;
-        this.category = CategoryConverter.categoryForFile(fileDesc.getFile());
+        this.category = categoryManager.getCategoryForFile(fileDesc.getFile());
     }
 
     @Override

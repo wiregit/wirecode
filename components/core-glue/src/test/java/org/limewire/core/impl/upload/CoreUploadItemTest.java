@@ -8,8 +8,10 @@ import java.io.IOException;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
@@ -19,7 +21,6 @@ import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTUploader;
-import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
@@ -40,16 +41,19 @@ public class CoreUploadItemTest extends BaseTestCase {
         
         final Uploader uploader = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
         context.checking(new Expectations() {
             {
-                allowing(uploader).getFileName();
+                one(uploader).getFileName();
                 will(returnValue("thing.bmp"));
+                one(categoryManager).getCategoryForExtension("bmp");
+                will(returnValue(Category.IMAGE));
             }});
         
-        CoreUploadItem upload = new CoreUploadItem(uploader, presence);
+        CoreUploadItem upload = new CoreUploadItem(uploader, presence, categoryManager);
         
-        assertEquals(upload.getCategory(), CategoryConverter.categoryForExtension("bmp"));
+        assertEquals(Category.IMAGE, upload.getCategory());
         context.assertIsSatisfied();
     }
     
@@ -72,7 +76,7 @@ public class CoreUploadItemTest extends BaseTestCase {
                 allowing(uploader);
             }});
         
-        CoreUploadItem upload = new CoreUploadItem(uploader, presence);
+        CoreUploadItem upload = new CoreUploadItem(uploader, presence, null);
         
         upload.addPropertyChangeListener(changeListener);
                 
@@ -97,10 +101,10 @@ public class CoreUploadItemTest extends BaseTestCase {
                 allowing(uploader2);
             }});
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(null, presence);
-        CoreUploadItem upload4 = new CoreUploadItem(null, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(null, presence, null);
+        CoreUploadItem upload4 = new CoreUploadItem(null, presence, null);
         
         assertEquals(upload1, upload1);
         assertNotEquals(upload1, upload2);
@@ -138,7 +142,7 @@ public class CoreUploadItemTest extends BaseTestCase {
                 allowing(uploader);
             }});
         
-        CoreUploadItem upload = new CoreUploadItem(uploader, presence);
+        CoreUploadItem upload = new CoreUploadItem(uploader, presence, null);
         
         upload.addPropertyChangeListener(changeListener);
         upload.removePropertyChangeListener(changeListener);
@@ -165,7 +169,7 @@ public class CoreUploadItemTest extends BaseTestCase {
             will(returnValue(true));
         }});
         
-        CoreUploadItem upload = new CoreUploadItem(uploader, presence);
+        CoreUploadItem upload = new CoreUploadItem(uploader, presence, null);
         RemoteHost remoteHost = upload.getRemoteHost();
         
         assertNotNull(remoteHost);
@@ -195,7 +199,7 @@ public class CoreUploadItemTest extends BaseTestCase {
             will(returnValue(true));
         }});
         
-        CoreUploadItem upload = new CoreUploadItem(uploader, presence);
+        CoreUploadItem upload = new CoreUploadItem(uploader, presence, null);
         RemoteHost remoteHost = upload.getRemoteHost();
         
         assertNotNull(remoteHost);
@@ -232,7 +236,7 @@ public class CoreUploadItemTest extends BaseTestCase {
                 allowing(uploader);
             }});
         
-        CoreUploadItem upload = new CoreUploadItem(uploader, presence);
+        CoreUploadItem upload = new CoreUploadItem(uploader, presence, null);
         
         assertEquals(type, upload.getBrowseType());
    
@@ -274,9 +278,9 @@ public class CoreUploadItemTest extends BaseTestCase {
             { 
             }});
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploaderNormal, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploaderBittorrent, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(null, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploaderNormal, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploaderBittorrent, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(null, presence, null);
         
         assertEquals(UploadItemType.GNUTELLA, upload1.getUploadItemType());
         assertEquals(UploadItemType.BITTORRENT, upload2.getUploadItemType());
@@ -306,9 +310,9 @@ public class CoreUploadItemTest extends BaseTestCase {
                 will(returnValue(queuePos3));
             }});
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
         
         assertEquals(queuePos1, upload1.getQueuePosition());
         assertEquals(queuePos2, upload2.getQueuePosition());
@@ -338,9 +342,9 @@ public class CoreUploadItemTest extends BaseTestCase {
                 will(returnValue(numConnections3));
             }});
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
         
         assertEquals(numConnections1, upload1.getNumUploadConnections());
         assertEquals(numConnections2, upload2.getNumUploadConnections());
@@ -370,9 +374,9 @@ public class CoreUploadItemTest extends BaseTestCase {
                 will(returnValue(file3));
             }});
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
         
         assertEquals(file1, upload1.getFile());
         assertEquals(file2, upload2.getFile());
@@ -412,10 +416,10 @@ public class CoreUploadItemTest extends BaseTestCase {
                 will(returnValue(speed3));
             }});
         
-        CoreUploadItem uploadException = new CoreUploadItem(uploaderException, presence);
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence);
+        CoreUploadItem uploadException = new CoreUploadItem(uploaderException, presence, null);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
         
         assertEquals(0f, uploadException.getUploadSpeed());
         assertEquals(speed1, upload1.getUploadSpeed());
@@ -489,11 +493,11 @@ public class CoreUploadItemTest extends BaseTestCase {
                 will(returnValue(progress4));
              }});
          
-        CoreUploadItem uploadException = new CoreUploadItem(uploaderException, presence);
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence);
-        CoreUploadItem upload4 = new CoreUploadItem(uploader4, presence);
+        CoreUploadItem uploadException = new CoreUploadItem(uploaderException, presence, null);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
+        CoreUploadItem upload4 = new CoreUploadItem(uploader4, presence, null);
          
         assertEquals(CoreUploadItem.UNKNOWN_TIME, uploadException.getRemainingUploadTime());
         assertEquals(CoreUploadItem.UNKNOWN_TIME, upload1.getRemainingUploadTime());
@@ -512,12 +516,12 @@ public class CoreUploadItemTest extends BaseTestCase {
         final Uploader uploader3 = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence);
-        CoreUploadItem upload4 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload5 = new CoreUploadItem(null, presence);
-        CoreUploadItem upload6 = new CoreUploadItem(null, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
+        CoreUploadItem upload4 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload5 = new CoreUploadItem(null, presence, null);
+        CoreUploadItem upload6 = new CoreUploadItem(null, presence, null);
         
         assertEquals(upload1.hashCode(), upload1.hashCode());
         assertNotEquals(upload2.hashCode(), upload1.hashCode());
@@ -553,8 +557,8 @@ public class CoreUploadItemTest extends BaseTestCase {
         
         final URN urn = URN.createUrnFromString("urn:sha1:NETZHKEJKTCM74ZQQALJWSLWQHQJ7N6Q");
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
         
         context.checking(new Expectations() {
             { 
@@ -581,10 +585,10 @@ public class CoreUploadItemTest extends BaseTestCase {
         final Uploader uploader4 = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence);
-        CoreUploadItem upload4 = new CoreUploadItem(uploader4, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
+        CoreUploadItem upload4 = new CoreUploadItem(uploader4, presence, null);
         
         context.checking(new Expectations() {
             { 
@@ -617,8 +621,8 @@ public class CoreUploadItemTest extends BaseTestCase {
             }};
         
         final Uploader uploader1 = context.mock(Uploader.class);
-        final Uploader uploader2 = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
         final FileDesc fd1 = context.mock(FileDesc.class);
         final LimeXMLDocument doc1 = context.mock(LimeXMLDocument.class);
@@ -626,41 +630,56 @@ public class CoreUploadItemTest extends BaseTestCase {
         final String obj1 = "erica";
         final String defReturn1 = "eliefynafgrd";
         
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader1, presence);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, categoryManager);
 
-        context.checking(new Expectations() {
-            {   allowing(uploader1).getFileDesc();
-                will(returnValue(fd1));
-                
-                allowing(uploader2).getFileDesc();
-                will(returnValue(null));
-                
-                allowing(fd1).getFileName();
-                will(returnValue("booc.ogg"));
-                
-                allowing(fd1).getFileSize();
-                will(returnValue(888l));
-                
-                allowing(fd1).getFile();
-                will(returnValue(new File("asdsa")));
-                
-                allowing(fd1).getXMLDocument();
+        context.checking(new Expectations() {{
+                one(uploader1).getFileDesc();
+                will(returnValue(fd1));                
+                one(fd1).getFileName();
+                will(returnValue("booc.ogg"));                
+                one(categoryManager).getCategoryForExtension("ogg");
+                will(returnValue(Category.AUDIO));
+                one(fd1).getXMLDocument();
                 will(returnValue(doc1));
-                
-                allowing(doc1).getValue(LimeXMLNames.AUDIO_ARTIST);
+                one(doc1).getValue(LimeXMLNames.AUDIO_ARTIST);
                 will(returnValue(obj1));
-                
-                allowing(doc1).getValue(with(any(String.class)));
-                will(returnValue(defReturn1));
-                
-            }});
-        
+        }});
         assertEquals(obj1, upload1.getPropertyString(FilePropertyKey.AUTHOR));
-        assertEquals(defReturn1, upload1.getPropertyString(FilePropertyKey.GENRE));
-        assertNull(upload1.getPropertyString(FilePropertyKey.HEIGHT));
-        assertNull(upload2.getPropertyString(FilePropertyKey.BITRATE));
+        context.assertIsSatisfied();
         
-       context.assertIsSatisfied();
+        context.checking(new Expectations() {{
+            one(uploader1).getFileDesc();
+            will(returnValue(fd1));                
+            one(fd1).getFileName();
+            will(returnValue("booc.ogg"));                
+            one(categoryManager).getCategoryForExtension("ogg");
+            will(returnValue(Category.AUDIO));
+            one(fd1).getXMLDocument();
+            will(returnValue(doc1));
+            one(doc1).getValue(LimeXMLNames.AUDIO_GENRE);
+            will(returnValue(defReturn1));
+        }});        
+        assertEquals(defReturn1, upload1.getPropertyString(FilePropertyKey.GENRE));
+        context.assertIsSatisfied();
+        
+        context.checking(new Expectations() {{
+            one(uploader1).getFileDesc();
+            will(returnValue(fd1));                
+            one(fd1).getFileName();
+            will(returnValue("booc.ogg"));                
+            one(categoryManager).getCategoryForExtension("ogg");
+            will(returnValue(Category.AUDIO));
+            one(fd1).getXMLDocument();
+            will(returnValue(doc1));
+        }});        
+        assertNull(upload1.getPropertyString(FilePropertyKey.HEIGHT));
+        context.assertIsSatisfied();
+        
+        context.checking(new Expectations() {{
+            one(uploader1).getFileDesc();
+            will(returnValue(null));
+        }});        
+        assertNull(upload1.getPropertyString(FilePropertyKey.BITRATE));
+        context.assertIsSatisfied();   
     }
 }

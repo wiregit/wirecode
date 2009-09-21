@@ -14,6 +14,7 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.table.LibraryPopupMenu;
@@ -40,13 +41,17 @@ public class ImageList extends JXList implements Disposable {
     private Color backgroundListcolor;
     
     private final ImageCellRenderer imageCellRenderer;
+    private final CategoryManager categoryManager;
     
     private DefaultEventListModel cachedEventListModel;
     private DefaultEventSelectionModel<LocalFileItem> cachedEventSelectionModel;
     
     @Inject
-    public ImageList(final ImageCellRenderer imageCellRenderer, Provider<LibraryPopupMenu> libraryPopupMenu) {
+    public ImageList(final ImageCellRenderer imageCellRenderer, 
+            Provider<LibraryPopupMenu> libraryPopupMenu,
+            CategoryManager categoryManager) {
         this.imageCellRenderer = imageCellRenderer;
+        this.categoryManager = categoryManager;
         
         GuiUtils.assignResources(this); 
         
@@ -135,7 +140,7 @@ public class ImageList extends JXList implements Disposable {
      * This class listens for double clicks inside of the ImageList.
      * When a double click is detected, the relevant item in the list is launched.
      */
-    private final static class ImageDoubleClickMouseListener extends MouseAdapter {
+    private final class ImageDoubleClickMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
@@ -144,7 +149,7 @@ public class ImageList extends JXList implements Disposable {
                 if(index >= 0) {
                     LocalFileItem val = (LocalFileItem) imageList.getElementAt(index);
                     File file = val.getFile();
-                    NativeLaunchUtils.safeLaunchFile(file);
+                    NativeLaunchUtils.safeLaunchFile(file, categoryManager);
                 }
             }
         }

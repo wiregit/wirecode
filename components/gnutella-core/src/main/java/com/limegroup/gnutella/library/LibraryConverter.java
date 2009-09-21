@@ -7,10 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
+
+import com.google.inject.Inject;
 
 
 /**
@@ -19,6 +22,12 @@ import org.limewire.util.MediaType;
  */
 @SuppressWarnings("deprecation")
 class LibraryConverter {
+    
+    private final CategoryManager categoryManager;
+    
+    @Inject public LibraryConverter(CategoryManager categoryManager) {
+        this.categoryManager = categoryManager;
+    }
     
     boolean isOutOfDate() {
         return LibrarySettings.VERSION.get() == LibrarySettings.LibraryVersion.FOUR_X.name();
@@ -77,7 +86,7 @@ class LibraryConverter {
             public void addFile(File file) {
                 addManagedFile(newData, file);
             }
-        });
+        }, categoryManager);
         helper.convertSaveDirectories(excludedFolders, excludedFiles, convertedDirectories);
 
         LibrarySettings.VERSION.set(LibrarySettings.LibraryVersion.FIVE_0_0.name());
@@ -95,8 +104,8 @@ class LibraryConverter {
      * Returns true if the files was not a document, false otherwise. 
      */
     private boolean addManagedFile(LibraryFileData newData, File file) {
-        MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
-        if(!MediaType.getDocumentMediaType().equals(mediaType) && !MediaType.getProgramMediaType().equals(mediaType)) {
+        Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
+        if(category != Category.DOCUMENT && category != Category.PROGRAM) {
             newData.addManagedFile(file);
             return true;
         }
@@ -113,7 +122,7 @@ class LibraryConverter {
                    data.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
                }
             } 
-        });
+        }, categoryManager);
         
         for (File directory : sharedFolders) {
             helper.convertDirectory(directory, extensions, excludedFolders, excludedFiles, convertedDirectories, true);

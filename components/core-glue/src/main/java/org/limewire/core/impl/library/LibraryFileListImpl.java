@@ -18,6 +18,7 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
@@ -28,6 +29,7 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     private volatile LibraryState libraryState = LibraryState.LOADING;
     
+    @Inject
     LibraryFileListImpl(Library managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
         super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);
         this.managedList = managedList;

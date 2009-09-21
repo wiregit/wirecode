@@ -5,22 +5,27 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LibraryData;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
 
 class LibraryDataImpl implements LibraryData {
 
     private final Library library;
+    private final CategoryManager categoryManager;
     
-    public LibraryDataImpl(Library fileList) {
+    @Inject
+    public LibraryDataImpl(Library fileList, CategoryManager categoryManager) {
         this.library = fileList;
+        this.categoryManager = categoryManager;
     }
     
     @Override
     public boolean isFileManageable(File f) {
-        return LibraryUtils.isFileManagable(f);
+        return LibraryUtils.isFileManagable(f, categoryManager);
     }
     
     @Override

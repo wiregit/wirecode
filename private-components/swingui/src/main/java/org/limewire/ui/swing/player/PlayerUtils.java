@@ -3,6 +3,7 @@ package org.limewire.ui.swing.player;
 import java.io.File;
 import java.util.Locale;
 
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
@@ -17,8 +18,8 @@ import com.google.inject.Provider;
  */
 public class PlayerUtils {
 
-    @Inject
-    private static Provider<PlayerMediator> playerProvider;
+    // TODO: This is terrible.  Never use static injection!
+    @Inject private static Provider<PlayerMediator> playerProvider;
 
     private static void play(File audioFile){
         playerProvider.get().play(audioFile);
@@ -45,12 +46,12 @@ public class PlayerUtils {
      * 
      * @return true if file is played internally, false if played in native player
      */
-    public static boolean playOrLaunch(File file) {
+    public static boolean playOrLaunch(File file, CategoryManager categoryManager) {
         if (SwingUiSettings.PLAYER_ENABLED.getValue() && isPlayableFile(file)) {
             play(file);
             return true;
         } else {    
-            NativeLaunchUtils.safeLaunchFile(file);
+            NativeLaunchUtils.safeLaunchFile(file, categoryManager);
             return false;
         }
 

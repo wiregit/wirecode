@@ -30,6 +30,7 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
@@ -108,6 +109,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     @Inject private Library library;
     @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
     @Inject @GnutellaFiles private FileView gnutellaFileView;
+    @Inject private CategoryManager categoryManager;
 
     public QueryReplyTest(String name) {
 		super(name);
@@ -1495,7 +1497,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
 
         File[] testFiles = testDir.listFiles(new FileFilter() {
             public boolean accept(File file) {
-                return LibraryUtils.isFileManagable(file);
+                return LibraryUtils.isFileManagable(file, categoryManager);
             }
         });
 

@@ -4,9 +4,9 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GUID;
-import org.limewire.util.MediaType;
 
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -350,7 +350,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         String queryString = "one two tree";
         QueryRequest queryAudio =
                 queryRequestFactory.createQuery(GUID.makeGuid(), queryString, "",
-                        MediaType.getAudioMediaType());
+                        SearchCategory.AUDIO);
         Response[] responses = keywordIndex.query(queryAudio);
         assertEquals(1, responses.length);
         assertEquals(audioMetaData.getXMLString(), responses[0].getDocument().getXMLString());
@@ -359,7 +359,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         // media type "video" should only match the file named "videoFile".
         QueryRequest queryVideo =
                 queryRequestFactory.createQuery(GUID.makeGuid(), queryString, "",
-                        MediaType.getVideoMediaType());
+                        SearchCategory.VIDEO);
         responses = keywordIndex.query(queryVideo);
         assertEquals(1, responses.length);
         assertEquals(videoMetaData.getXMLString(), responses[0].getDocument().getXMLString());
@@ -368,7 +368,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         // media type "video" should only match the file named "videoFile".
         QueryRequest queryPrograms =
                 queryRequestFactory.createQuery(GUID.makeGuid(), queryString, "",
-                        MediaType.getProgramMediaType());
+                        SearchCategory.PROGRAM);
         responses = keywordIndex.query(queryPrograms);
         assertEquals(0, responses.length);
     }

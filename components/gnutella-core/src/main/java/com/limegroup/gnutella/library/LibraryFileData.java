@@ -24,8 +24,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.AbstractSettingsGroup;
@@ -35,13 +37,15 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
-import com.limegroup.gnutella.CategoryConverter;
+import com.google.inject.Inject;
 
+@LazySingleton
 class LibraryFileData extends AbstractSettingsGroup {
     
     private static final Log LOG = LogFactory.getLog(LibraryFileData.class);
     
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final CategoryManager categoryManager;
     
     /** Default file extensions. */
     private final String DEFAULT_MANAGED_EXTENSIONS_STRING =
@@ -98,9 +102,9 @@ class LibraryFileData extends AbstractSettingsGroup {
     private volatile Set<String> managedExtensions = Collections.unmodifiableSet(new HashSet<String>());
     private volatile Set<String> extensionsInManagedCategories = Collections.unmodifiableSet(new HashSet<String>());
     
-    
 
-    LibraryFileData() {
+    @Inject LibraryFileData(CategoryManager categoryManager) {
+        this.categoryManager = categoryManager;
         SettingsGroupManager.instance().addSettingsGroup(this);
         updateManagedExtensions();
     }
@@ -224,7 +228,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                        fileDataFinal.put(createKey(file), Collections.<Integer>emptyList());
                    }
                 }
-            });
+            }, categoryManager);
             
             //add save directories to library
             Set<File> convertedDirectories = new HashSet<File>();
@@ -540,7 +544,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
         
         for(String ext : extensions) {
-            extByCategory.get(CategoryConverter.categoryForExtension(ext)).add(ext);
+            extByCategory.get(categoryManager.getCategoryForExtension(ext)).add(ext);
         }
         
         return extByCategory;

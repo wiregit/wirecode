@@ -8,6 +8,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
@@ -17,8 +18,9 @@ import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.limegroup.bittorrent.BTUploader;
-import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -26,17 +28,24 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.uploader.UploadType;
 
 class CoreUploadItem implements UploadItem {
+    
+    public static interface Factory {
+        CoreUploadItem create(@Assisted Uploader uploader, @Assisted FriendPresence friendPresence);
+    }
 
     private final Uploader uploader;    
     private final FriendPresence friendPresence;
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
+    private final CategoryManager categoryManager;
     
     public final static long UNKNOWN_TIME = Long.MAX_VALUE;
     private final UploadItemType uploadItemType;
     private boolean isFinished = false;
     private UploadRemoteHost uploadRemoteHost;
     
-    public CoreUploadItem(Uploader uploader, FriendPresence friendPresence) {
+    @Inject
+    public CoreUploadItem(@Assisted Uploader uploader, @Assisted FriendPresence friendPresence, CategoryManager categoryManager) {
+        this.categoryManager = categoryManager;
         this.uploader = uploader;
         this.friendPresence = friendPresence;
         uploadItemType = uploader instanceof BTUploader ? UploadItemType.BITTORRENT : UploadItemType.GNUTELLA;
@@ -180,7 +189,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public Category getCategory() {
-        return CategoryConverter.categoryForFileName(getFileName());
+        return categoryManager.getCategoryForExtension(FileUtils.getFileExtension(getFileName()));
     }
 
     @Override
@@ -266,7 +275,7 @@ class CoreUploadItem implements UploadItem {
             case FILE_SIZE:
                 return fd.getFileSize();            
             default:
-                Category category = CategoryConverter.categoryForFileName(fd.getFileName());
+                Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(fd.getFileName()));
                 return FilePropertyKeyPopulator.get(category, property, fd.getXMLDocument());
             }
         } else {

@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -19,7 +20,7 @@ public class DownloadItemUtils {
      * Launches the download, loading the launchable portion in the background
      * if necessary.
      */
-    public static void launch(final DownloadItem downloadItem) {
+    public static void launch(final DownloadItem downloadItem, final CategoryManager categoryManager) {
         assert EventQueue.isDispatchThread();
         assert downloadItem.isLaunchable();
         GuiUtils.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -36,7 +37,7 @@ public class DownloadItemUtils {
                 try {
                     file = get();
                     if(file != null) {
-                        PlayerUtils.playOrLaunch(file);
+                        PlayerUtils.playOrLaunch(file, categoryManager);
                     }
                 } catch (InterruptedException ignored) {
                 } catch (ExecutionException e) {

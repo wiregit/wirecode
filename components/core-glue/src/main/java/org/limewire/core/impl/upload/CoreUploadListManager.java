@@ -38,6 +38,7 @@ import com.limegroup.gnutella.Uploader;
 @EagerSingleton
 public class CoreUploadListManager implements UploadListener, UploadListManager {
 
+    private final CoreUploadItem.Factory cuiFactory;
     private final UploadServices uploadServices;
     private final FriendManager friendManager;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
@@ -50,7 +51,8 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     private static final int PERIOD = 1000;
 
     @Inject
-    public CoreUploadListManager(UploadServices uploadServices, FriendManager friendManager) {
+    public CoreUploadListManager(UploadServices uploadServices, FriendManager friendManager, CoreUploadItem.Factory cuiFactory) {
+        this.cuiFactory = cuiFactory;
         this.uploadServices = uploadServices;
         this.friendManager = friendManager;
         
@@ -131,7 +133,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     @Override
     public void uploadAdded(Uploader uploader) {
         if (!uploader.getUploadType().isInternal()) {
-            UploadItem item = new CoreUploadItem(uploader, getFriendPresence(uploader));
+            UploadItem item = cuiFactory.create(uploader, getFriendPresence(uploader));
             threadSafeUploadItems.add(item);
             item.addPropertyChangeListener(new UploadPropertyListener(item));
         }
@@ -140,7 +142,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
  // This is called when uploads complete - should be renamed?
     @Override
     public void uploadRemoved(Uploader uploader) {
-        CoreUploadItem item = new CoreUploadItem(uploader, getFriendPresence(uploader));
+        CoreUploadItem item = cuiFactory.create(uploader, getFriendPresence(uploader));
         //alert item that it really is finished so that getState() will be correct
         item.finish();
          

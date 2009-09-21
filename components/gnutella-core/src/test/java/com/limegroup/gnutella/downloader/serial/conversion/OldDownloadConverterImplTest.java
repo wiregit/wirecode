@@ -12,6 +12,7 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.Range;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.Address;
@@ -42,6 +43,7 @@ public class OldDownloadConverterImplTest extends LimeTestCase {
     private OldDownloadConverterImpl oldDownloadConverter;
     private AddressFactory addressFactory;
     private PushEndpointFactory pushEndpointFactory;
+    private CategoryManager categoryManager;
     private Mockery context;
 
 
@@ -60,6 +62,7 @@ public class OldDownloadConverterImplTest extends LimeTestCase {
         oldDownloadConverter = (OldDownloadConverterImpl) injector.getInstance(OldDownloadConverter.class);
         addressFactory = injector.getInstance(AddressFactory.class);
         pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        categoryManager = injector.getInstance(CategoryManager.class);
 //        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         context = new Mockery();
     }
@@ -185,7 +188,7 @@ public class OldDownloadConverterImplTest extends LimeTestCase {
     public void testConversionForRanges() throws Exception {
         File file = TestUtils.getResourceInPackage("allKindsOfRanges.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
+        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory, categoryManager);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(6, mementos.size());
         
@@ -388,7 +391,7 @@ public class OldDownloadConverterImplTest extends LimeTestCase {
     public void testMagnet() throws Exception {
         File file = TestUtils.getResourceInPackage("magnet.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
+        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory, categoryManager);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(1, mementos.size());
         
@@ -414,7 +417,7 @@ public class OldDownloadConverterImplTest extends LimeTestCase {
     public void testXml() throws Exception {
         File file = TestUtils.getResourceInPackage("xml.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
+        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory, categoryManager);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(1, mementos.size());
         

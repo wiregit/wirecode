@@ -28,6 +28,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.LibrarySettings;
@@ -41,10 +42,8 @@ import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeList
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionEvent;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionListener;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -77,6 +76,7 @@ public final class FileTypeOptionPanelManager implements Disposable {
     private final Collection<String> originalExtensions;
 
     private final CategoryIconManager categoryIconManager;
+    private final CategoryManager categoryManager;
     private final Provider<IconManager> iconManager;
     private final LibraryData libraryData;
     private JButton addButton;
@@ -96,8 +96,8 @@ public final class FileTypeOptionPanelManager implements Disposable {
     
     @Inject
     public FileTypeOptionPanelManager(CategoryIconManager categoryIconManager,
-            Provider<IconManager> iconManager, LibraryManager libraryManager) {
-        
+            Provider<IconManager> iconManager, LibraryManager libraryManager, CategoryManager categoryManager) {
+        this.categoryManager = categoryManager;
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
         this.libraryData = libraryManager.getLibraryData();
@@ -175,8 +175,8 @@ public final class FileTypeOptionPanelManager implements Disposable {
         Collection<String> allExts = new TreeSet<String>();
         removableExts = new HashSet<String>();
         
-        for ( MediaType type : MediaType.getDefaultMediaTypes() ) {
-            allExts.addAll(type.getExtensions());
+        for ( Category type : Category.values()) {
+            allExts.addAll(categoryManager.getExtensionsForCategory(type));
         }
         
         allExts.addAll(libraryData.getDefaultExtensions());
@@ -313,7 +313,7 @@ public final class FileTypeOptionPanelManager implements Disposable {
         }
         
         if (contains(libraryData.getDefaultExtensions(), text)) {
-            Category type = CategoryUtils.getCategory(MediaType.getMediaTypeForExtension(text));
+            Category type = categoryManager.getCategoryForExtension(text);
             
             if (type == null) {
                 type = Category.OTHER;
@@ -358,10 +358,7 @@ public final class FileTypeOptionPanelManager implements Disposable {
     private Map<Category, List<String>> createExtensionsMap(Collection<String> extensions) {
         Map<Category, List<String>> extensionsByType = new LinkedHashMap<Category, List<String>>();
         for (String extension : extensions) { 
-            Category category = CategoryUtils.getCategory(MediaType.getMediaTypeForExtension(extension));
-            if (category == null) {
-                category = CategoryUtils.getCategory(MediaType.getOtherMediaType());
-            }
+            Category category = categoryManager.getCategoryForExtension(extension);
             if (!extensionsByType.containsKey(category)) {
                 extensionsByType.put(category, new ArrayList<String>(8));
             }
@@ -438,7 +435,7 @@ public final class FileTypeOptionPanelManager implements Disposable {
     }  
     
     private static class PanelsCheckChangeListener implements
-    CheckBoxListCheckChangeListener<MediaType> {
+    CheckBoxListCheckChangeListener<Category> {
 
         private FileTypeOptionPanelManager parent;
 
@@ -446,7 +443,7 @@ public final class FileTypeOptionPanelManager implements Disposable {
             this.parent = parent;
         }
 
-        public void valueChanged(CheckBoxListCheckChangeEvent<MediaType> e) {
+        public void valueChanged(CheckBoxListCheckChangeEvent<Category> e) {
             this.parent.refreshSidePanel();
         }
     }  

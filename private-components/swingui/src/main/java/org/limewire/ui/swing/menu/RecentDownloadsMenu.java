@@ -13,25 +13,26 @@ import java.util.List;
 import javax.swing.JMenuItem;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.player.PlayerUtils;
-import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 
 class RecentDownloadsMenu extends MnemonicMenu {
-    private static final String emptyText = I18n.tr("(empty)"); 
+    private static final String emptyText = I18n.tr("(empty)");
+    
+    private final CategoryManager categoryManager;
 
     @Inject
-    public RecentDownloadsMenu(final LibraryManager libraryManager) {
+    public RecentDownloadsMenu(CategoryManager categoryManager) {
         super(I18n.tr("&Recent Downloads"));
+        this.categoryManager = categoryManager;
     }
 
     @Override
@@ -63,18 +64,15 @@ class RecentDownloadsMenu extends MnemonicMenu {
         add(new AbstractAction(file.getName()) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils
-                        .getFileExtension(file));
-                Category category = CategoryUtils.getCategory(mediaType);
-
+                Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
                 switch (category) {
                 case AUDIO:
-                    PlayerUtils.playOrLaunch(file);
+                    PlayerUtils.playOrLaunch(file, categoryManager);
                     break;
                 case DOCUMENT:
                 case IMAGE:
                 case VIDEO:
-                    NativeLaunchUtils.safeLaunchFile(file);
+                    NativeLaunchUtils.safeLaunchFile(file, categoryManager);
                     break;
                 case PROGRAM:
                 case OTHER:

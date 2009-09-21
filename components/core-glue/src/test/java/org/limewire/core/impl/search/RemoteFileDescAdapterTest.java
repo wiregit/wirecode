@@ -13,6 +13,7 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.AltLocRemoteHost;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.RfdRemoteHost;
 import org.limewire.friend.api.Friend;
@@ -41,6 +42,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         Mockery context = new Mockery();
 
         final RemoteFileDesc remoteFileDesc1 = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final Address address1 = context.mock(Address.class);
         final byte[] guid1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
@@ -57,8 +59,10 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
                 allowing(address1).getAddressDescription();
                 will(returnValue("address 1 description"));
                 allowing(remoteFileDesc1).getFileName();
-
                 will(returnValue(fileName1));
+                allowing(categoryManager).getCategoryForExtension("txt");
+                will(returnValue(Category.DOCUMENT));
+
                 allowing(remoteFileDesc1).getSize();
                 will(returnValue(fileSize));
                 allowing(remoteFileDesc1).getXMLDocument();
@@ -73,7 +77,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         });
 
         RemoteFileDescAdapter remoteFileDescAdapter1 = new RemoteFileDescAdapter(remoteFileDesc1,
-                ipPorts);
+                ipPorts, categoryManager);
 
         assertEquals(Category.DOCUMENT, remoteFileDescAdapter1.getCategory());
         assertEquals("txt", remoteFileDescAdapter1.getFileExtension());
@@ -135,6 +139,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             final boolean canBrowseHost, final int altlocs, final boolean firstAltLocConnectable) {
         
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         final FriendPresence friendPresence;
@@ -185,6 +190,9 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
                 will(returnValue(canBrowseHost));
                 
                 allowing(rfd);
+                
+                allowing(categoryManager).getCategoryForExtension("");
+                will(returnValue(Category.OTHER));
             }
         });
     
@@ -192,11 +200,11 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         
         if (!anonymous) {
             rfdAdapter = new RemoteFileDescAdapter(rfd,
-                locs, friendPresence);
+                locs, friendPresence, categoryManager);
         } 
         else {
             rfdAdapter = new RemoteFileDescAdapter(rfd,
-                    locs);
+                    locs, categoryManager);
         }
         
         return rfdAdapter;
@@ -212,15 +220,18 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         }};
     
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         context.checking(new Expectations() {{
             allowing(rfd).getClientGUID();
             will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
             allowing(rfd);
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs) {
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager) {
             @Override
             public List<RemoteHost> getSources() {
                 List<RemoteHost> list = new LinkedList<RemoteHost>();
@@ -256,6 +267,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         }};
     
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final FriendPresence friendPresence = context.mock(FriendPresence.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
@@ -274,6 +286,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(address));
             allowing(address);
             allowing(rfd);
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
             
             allowing(connectable);
             
@@ -286,7 +300,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         // Make sure the sources list contains a RemoteHost for the rfd and the single altloc
         //  ensure the address' are correctly set.  Use a Connectable for the altloc.        
         locs.add(connectable);
-        RemoteFileDescAdapter anonRfdAdapter = new RemoteFileDescAdapter(rfd, locs);
+        RemoteFileDescAdapter anonRfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager);
         Iterable<RemoteHost> hosts1 = anonRfdAdapter.getSources();
         locs.remove(connectable);
         boolean rfdRemoteHostFound = false;
@@ -307,7 +321,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         // Make sure the sources list contains a RemoteHost for the friend and the single altloc
         //  ensure the address' are correctly set.  Use a regular IpPort instead of Connectable.
         locs.add(ipPort);
-        RemoteFileDescAdapter friendRfdAdapter = new RemoteFileDescAdapter(rfd, locs, friendPresence);
+        RemoteFileDescAdapter friendRfdAdapter = new RemoteFileDescAdapter(rfd, locs, friendPresence, categoryManager);
         Iterable<RemoteHost> hosts2 = friendRfdAdapter.getSources();
         locs.remove(ipPort);
         rfdRemoteHostFound = false;
@@ -371,6 +385,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final Mockery context = new Mockery();
     
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         context.checking(new Expectations() {{
@@ -379,11 +394,12 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             
             allowing(rfd).getFileName();
             will(returnValue("Giant Guitar.JPG"));
-            
+            allowing(categoryManager).getCategoryForExtension("JPG");
+            will(returnValue(Category.IMAGE));
             allowing(rfd);
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager);
         
         assertEquals("JPG", rfdAdapter.getFileExtension());
         assertEquals("Giant Guitar.JPG", rfdAdapter.getFileName());
@@ -403,6 +419,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfdWithNull1 = context.mock(RemoteFileDesc.class);
         final RemoteFileDesc rfdWithNull2 = context.mock(RemoteFileDesc.class);
         final RemoteFileDesc rfdGood = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         context.checking(new Expectations() {{
@@ -429,15 +446,17 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfdWithNull1);
             allowing(rfdWithNull2);
             allowing(rfdGood);
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapterWithNull1 = new RemoteFileDescAdapter(rfdWithNull1, locs);
+        RemoteFileDescAdapter rfdAdapterWithNull1 = new RemoteFileDescAdapter(rfdWithNull1, locs, categoryManager);
         assertFalse(rfdAdapterWithNull1.isLicensed());
         
-        RemoteFileDescAdapter rfdAdapterWithNull2 = new RemoteFileDescAdapter(rfdWithNull2, locs);
+        RemoteFileDescAdapter rfdAdapterWithNull2 = new RemoteFileDescAdapter(rfdWithNull2, locs, categoryManager);
         assertFalse(rfdAdapterWithNull2.isLicensed());
         
-        RemoteFileDescAdapter rfdAdapterGood = new RemoteFileDescAdapter(rfdGood, locs);
+        RemoteFileDescAdapter rfdAdapterGood = new RemoteFileDescAdapter(rfdGood, locs, categoryManager);
         assertTrue(rfdAdapterGood.isLicensed());
         
         context.assertIsSatisfied();
@@ -451,6 +470,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         context.checking(new Expectations() {{
@@ -466,9 +486,11 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(false));
             
             allowing(rfd);
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager);
         
         assertSame(rfd, rfdAdapter.getRfd());
         assertEquals(Long.MAX_VALUE-3, rfdAdapter.getSize());
@@ -486,6 +508,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         final URN urn = URN.createSHA1Urn("urn:sha1:XXSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
@@ -498,9 +521,11 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(urn));
             
             allowing(rfd);
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager);
         
         assertEquals(urn, rfdAdapter.getUrn());
         
@@ -515,15 +540,18 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
         context.checking(new Expectations() {{
             allowing(rfd).getClientGUID();
             will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
             
             allowing(rfd);
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager);
         
         assertNotNull(rfdAdapter.getMagnetURL());
         assertGreaterThan(0, rfdAdapter.getMagnetURL().length());
@@ -536,15 +564,18 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
         context.checking(new Expectations() {{
             allowing(rfd).getClientGUID();
             will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
             
             allowing(rfd);
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs);
+        RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs, categoryManager);
         
         assertNotNull(rfdAdapter1.toString());
     }

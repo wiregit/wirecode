@@ -13,11 +13,12 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.impl.RemoteHostRFD;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
@@ -29,8 +30,9 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.limegroup.bittorrent.BTDownloader;
-import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -39,6 +41,10 @@ import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem {
+    
+    public static interface Factory {
+        CoreDownloadItem create(Downloader downloader, QueueTimeCalculator calculator);
+    }
    
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
     private final Downloader downloader;
@@ -56,11 +62,15 @@ class CoreDownloadItem implements DownloadItem {
     private final QueueTimeCalculator queueTimeCalculator;
     private final FriendManager friendManager;
     private final DownloadItemType downloadItemType;
+    private final CategoryManager categoryManager;
     
-    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator, FriendManager friendManager) {
+    
+    @Inject
+    public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, FriendManager friendManager, CategoryManager categoryManager) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
         this.friendManager = friendManager;
+        this.categoryManager = categoryManager;
         this.downloadItemType = downloader instanceof BTDownloader ? DownloadItemType.BITTORRENT : DownloadItemType.GNUTELLA;
         
         downloader.addListener(new EventListener<DownloadStateEvent>() {
@@ -119,10 +129,10 @@ class CoreDownloadItem implements DownloadItem {
     public Category getCategory() {
         File file = downloader.getFile();
         if(file != null) {
-            return CategoryConverter.categoryForFile(file);
+            return categoryManager.getCategoryForFile(file);
         } else {
             // TODO: See if it's OK to always use save file.
-            return CategoryConverter.categoryForFile(downloader.getSaveFile());
+            return categoryManager.getCategoryForFile(downloader.getSaveFile());
         }
     }
 
@@ -441,7 +451,7 @@ class CoreDownloadItem implements DownloadItem {
         default:
             LimeXMLDocument doc = (LimeXMLDocument)downloader.getAttribute("LimeXMLDocument");
             if(doc != null) {
-                Category category = CategoryConverter.categoryForFile(getSaveFile());
+                Category category = categoryManager.getCategoryForFile(getSaveFile());
                 return FilePropertyKeyPopulator.get(category, property, doc);
             } else {
                 return null;

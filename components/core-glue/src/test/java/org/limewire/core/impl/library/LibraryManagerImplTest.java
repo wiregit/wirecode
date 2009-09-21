@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.listener.EventListener;
@@ -25,6 +26,7 @@ public class LibraryManagerImplTest extends BaseTestCase {
         Mockery context = new Mockery();
 
         final Library managedList = context.mock(Library.class);
+        final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final CoreLocalFileItemFactory coreLocalFileItemFactory = context
                 .mock(CoreLocalFileItemFactory.class);
 
@@ -39,8 +41,8 @@ public class LibraryManagerImplTest extends BaseTestCase {
                 will(new AssignParameterAction<PropertyChangeListener>(propertyChangeListener, 0));
             }
         });
-        LibraryManagerImpl libraryManagerImpl = new LibraryManagerImpl(managedList,
-                coreLocalFileItemFactory);
+        LibraryManagerImpl libraryManagerImpl = new LibraryManagerImpl(new LibraryFileListImpl(managedList, coreLocalFileItemFactory),
+                new LibraryDataImpl(managedList, categoryManager));
 
         LibraryData libraryData = libraryManagerImpl.getLibraryData();
         assertNotNull(libraryData);

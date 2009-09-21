@@ -11,20 +11,22 @@ import org.limewire.i18n.I18nMarker;
  */
 public enum Category {
 
-    AUDIO(I18nMarker.marktr("Audio"), I18nMarker.marktr("Audio")),
-    VIDEO(I18nMarker.marktr("Video"), I18nMarker.marktr("Videos")),
-    IMAGE(I18nMarker.marktr("Image"), I18nMarker.marktr("Images")),
-    DOCUMENT(I18nMarker.marktr("Document"), I18nMarker.marktr("Documents")),
-    PROGRAM(I18nMarker.marktr("Program"), I18nMarker.marktr("Programs")),
-    OTHER(I18nMarker.marktr("Other"), I18nMarker.marktr("Other")),
+    AUDIO(I18nMarker.marktr("Audio"), I18nMarker.marktr("Audio"), "audio"),
+    VIDEO(I18nMarker.marktr("Video"), I18nMarker.marktr("Videos"), "video"),
+    IMAGE(I18nMarker.marktr("Image"), I18nMarker.marktr("Images"), "image"),
+    DOCUMENT(I18nMarker.marktr("Document"), I18nMarker.marktr("Documents"), "document"),
+    PROGRAM(I18nMarker.marktr("Program"), I18nMarker.marktr("Programs"), "application"),
+    OTHER(I18nMarker.marktr("Other"), I18nMarker.marktr("Other"), "other"),
     ;
     
     private final String plural;
     private final String singular;
+    private final String schemaName;
     
-    Category(String singular, String plural) {
+    Category(String singular, String plural, String schemaName) {
         this.singular = singular;
         this.plural = plural;
+        this.schemaName = schemaName;
     }
     
     /**
@@ -39,6 +41,15 @@ public enum Category {
      */
     public String getPluralName() {
         return plural;
+    }
+    
+    /**
+     * Returns the schema associated with this category.
+     * This is associated with XML, and is better of unused unless
+     * absolutely necessary.
+     */
+    public String getSchemaName() {
+        return schemaName;
     }
     
     @Override

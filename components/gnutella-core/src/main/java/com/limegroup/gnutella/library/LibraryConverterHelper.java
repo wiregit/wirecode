@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
 /**
  * Helper class used for library conversion.
@@ -23,9 +24,11 @@ class LibraryConverterHelper {
     }
 
     private final FileAdder fileAdder;
+    private final CategoryManager categoryManager;
 
-    LibraryConverterHelper(FileAdder fileAdder) {
+    LibraryConverterHelper(FileAdder fileAdder, CategoryManager categoryManager) {
         this.fileAdder = fileAdder;
+        this.categoryManager = categoryManager;
     }
 
     /**
@@ -46,20 +49,18 @@ class LibraryConverterHelper {
             Set<File> convertedDirectories) {
         convertDirectory(SharingSettings.getSaveDirectory(), null, excludedFolders, excludedFiles,
                 convertedDirectories, false);
-        convertDirectory(SharingSettings.getFileSettingForMediaType(MediaType.getAudioMediaType())
+        convertDirectory(SharingSettings.getFileSettingForCategory(Category.AUDIO)
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
-        convertDirectory(SharingSettings.getFileSettingForMediaType(MediaType.getVideoMediaType())
+        convertDirectory(SharingSettings.getFileSettingForCategory(Category.VIDEO)
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
-        convertDirectory(SharingSettings.getFileSettingForMediaType(MediaType.getImageMediaType())
+        convertDirectory(SharingSettings.getFileSettingForCategory(Category.IMAGE)
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
-        convertDirectory(SharingSettings.getFileSettingForMediaType(MediaType.getOtherMediaType())
+        convertDirectory(SharingSettings.getFileSettingForCategory(Category.OTHER)
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
-        convertDirectory(SharingSettings
-                .getFileSettingForMediaType(MediaType.getProgramMediaType()).get(), null,
-                excludedFolders, excludedFiles, convertedDirectories, false);
-        convertDirectory(SharingSettings.getFileSettingForMediaType(
-                MediaType.getDocumentMediaType()).get(), null, excludedFolders, excludedFiles,
-                convertedDirectories, false);
+        convertDirectory(SharingSettings.getFileSettingForCategory(Category.PROGRAM)
+                .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
+        convertDirectory(SharingSettings.getFileSettingForCategory(Category.DOCUMENT)
+                .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
         convertDirectory(SharingSettings.getSaveLWSDirectory(), Collections.singletonList("mp3"),
                 excludedFolders, excludedFiles, convertedDirectories, true);
     }
@@ -90,7 +91,7 @@ class LibraryConverterHelper {
         File[] fileList = directory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return LibraryUtils.isFileManagable(file)
+                return LibraryUtils.isFileManagable(file, categoryManager)
                         && (extensions == null || extensions.contains(FileUtils.getFileExtension(
                                 file).toLowerCase(Locale.US))) && !excludedFiles.contains(file);
             }

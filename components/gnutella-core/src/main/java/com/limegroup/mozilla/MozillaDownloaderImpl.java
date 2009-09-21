@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
@@ -32,9 +34,11 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     private AtomicBoolean shouldBeRemoved = new AtomicBoolean(false);
 
     private final DownloadManager downloadManager;
+    private final CategoryManager categoryManager;
 
-    public MozillaDownloaderImpl(DownloadManager downloadManager, MozillaDownload download) {
-        super(downloadManager);
+    public MozillaDownloaderImpl(DownloadManager downloadManager, CategoryManager categoryManager, MozillaDownload download) {
+        super(downloadManager, categoryManager);
+        this.categoryManager = categoryManager;
         this.downloadManager = downloadManager;
         this.download = download;
         this.download.addListener(this);
@@ -177,7 +181,8 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     @Override
     public File getSaveFile() {
         String fileName = getIncompleteFile().getName();
-        File saveFile = new File(SharingSettings.getSaveDirectory(fileName), fileName);
+        Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(fileName));
+        File saveFile = new File(SharingSettings.getSaveDirectory(category), fileName);
         return saveFile;
     }
     

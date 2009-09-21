@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.Objects;
 
@@ -81,7 +82,8 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager,
-            Library library) {
+            Library library,
+            CategoryManager categoryManager) {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -91,7 +93,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
                 backgroundExecutor, messageRouter, tigerTreeCache,
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
-                dangerousFileChecker, spamManager, library);
+                dangerousFileChecker, spamManager, library, categoryManager);
     }
     
     /* (non-Javadoc)

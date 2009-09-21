@@ -13,6 +13,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 /**
@@ -24,13 +25,15 @@ public class IconManager {
     /** The original basic file icon controller. **/
     private final FileIconController originalFileController;
     
+    
     /** The current FileIconController. */
     private FileIconController fileController;
     
     private Icon blankIcon;
     
     @Inject
-    IconManager(NonBlockFileIconController nonBlockFileIconController) {
+    IconManager(NonBlockFileIconController nonBlockFileIconController,
+                final Provider<NativeFileIconController> nativeFileIconControllerFactory) {
         // Always begin with the basic controller,
         // whose construction can never block.
         this.originalFileController = nonBlockFileIconController;
@@ -41,8 +44,7 @@ public class IconManager {
         if (OSUtils.isMacOSX() || OSUtils.isWindows()) {
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
-                    final FileIconController newController =
-                        new NativeFileIconController();
+                    final FileIconController newController = nativeFileIconControllerFactory.get();
                     if (newController.isValid()) {
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
