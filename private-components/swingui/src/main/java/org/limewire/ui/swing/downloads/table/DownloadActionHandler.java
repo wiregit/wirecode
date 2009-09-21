@@ -109,7 +109,7 @@ public class DownloadActionHandler {
             if(item.getState() != DownloadState.DONE) {
                 JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
                 dialog.setVisible(true);
-            } else {
+            } else if(item.getLaunchableFile() != null) {
                 // if finished downloading, try showing all the information from the localFileItem
                 LocalFileItem localItem = libraryManager.getLibraryManagedList().getFileItem(item.getLaunchableFile());
                 if(localItem != null) {
@@ -119,6 +119,9 @@ public class DownloadActionHandler {
                     JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
                     dialog.setVisible(true);
                 }
+            } else { // if can't find the localFileItem, revert to the downloadItem
+                JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+                dialog.setVisible(true);
             }
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadListManager.remove(item);
