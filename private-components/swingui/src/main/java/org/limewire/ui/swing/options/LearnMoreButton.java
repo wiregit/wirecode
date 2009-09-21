@@ -8,7 +8,7 @@ import org.limewire.ui.swing.util.I18n;
 public class LearnMoreButton extends HyperlinkButton {
     
     public LearnMoreButton(String learnMoreUrl, Application application) {
-        super(new UrlAction(I18n.tr("Learn more", learnMoreUrl, application)));
+        super(new UrlAction(I18n.tr("Learn more"), learnMoreUrl, application));
     }
     
     public LearnMoreButton(String learnMoreUrl) {
