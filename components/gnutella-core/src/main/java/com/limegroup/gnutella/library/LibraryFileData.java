@@ -27,7 +27,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.AbstractSettingsGroup;
@@ -37,9 +36,6 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
-import com.google.inject.Inject;
-
-@LazySingleton
 class LibraryFileData extends AbstractSettingsGroup {
     
     private static final Log LOG = LogFactory.getLog(LibraryFileData.class);
@@ -100,10 +96,9 @@ class LibraryFileData extends AbstractSettingsGroup {
     private volatile boolean loaded = false;
 
     private volatile Set<String> managedExtensions = Collections.unmodifiableSet(new HashSet<String>());
-    private volatile Set<String> extensionsInManagedCategories = Collections.unmodifiableSet(new HashSet<String>());
-    
+    private volatile Set<String> extensionsInManagedCategories = Collections.unmodifiableSet(new HashSet<String>());    
 
-    @Inject LibraryFileData(CategoryManager categoryManager) {
+    LibraryFileData(CategoryManager categoryManager) {
         this.categoryManager = categoryManager;
         SettingsGroupManager.instance().addSettingsGroup(this);
         updateManagedExtensions();
@@ -851,14 +846,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     boolean isGnutellaDocumentSharingAllowed() {
         return LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
     }
-    
-    boolean isCollectionSmartAddEnabled(int id, Category category) {
-        return false; // TODO: What's going on with this?
-    }
-
-    void setCollectionSmartAddEnabled(int collectionId, Category image, boolean enabled) {
-        // TODO: What's going on with this?
-    }    
     
     private Collection<String> lowercase(Collection<String> extensions) {
         Set<String> exts = new HashSet<String>(extensions.size());

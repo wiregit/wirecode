@@ -154,9 +154,9 @@ class LibraryImpl implements Library, FileCollection {
                 XmlController xmlController,
                 @DiskIo ListeningExecutorService diskIoService,
                 EventListenerList<FileProcessingEvent> processingListenerList,
-                URNFilter urnFilter, CategoryManager categoryManager,
-                LibraryFileData libraryFileData) {
-        this.fileData = libraryFileData;
+                URNFilter urnFilter, CategoryManager categoryManager
+                ) {
+        this.fileData = new LibraryFileData(categoryManager);
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
@@ -454,17 +454,17 @@ class LibraryImpl implements Library, FileCollection {
     
     @Override
     public Collection<String> getDefaultManagedExtensions() {
-        return fileData.getDefaultManagedExtensions();
+        return getLibraryData().getDefaultManagedExtensions();
     }
     
     @Override
     public Map<Category, Collection<String>> getExtensionsPerCategory() {
-        return fileData.getExtensionsPerCategory();
+        return getLibraryData().getExtensionsPerCategory();
     }
     
     @Override
     public Collection<Category> getManagedCategories() {
-        return fileData.getManagedCategories();
+        return getLibraryData().getManagedCategories();
     }
     
     @Override
