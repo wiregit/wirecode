@@ -409,15 +409,20 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public List<TorrentFileEntry> getTorrentFileEntries() {
-        if (cancelled.get()) {
-            //TODO change to isValid check.
-            TorrentInfo torrentInfo = this.torrentInfo.get();
-            if (torrentInfo == null) {
-                return Collections.emptyList();
+        lock.readLock().lock();
+        try {
+            if (cancelled.get()) {
+                //TODO change to isValid check.
+                TorrentInfo torrentInfo = this.torrentInfo.get();
+                if (torrentInfo == null) {
+                    return Collections.emptyList();
+                }
+                return torrentInfo.getTorrentFileEntries();
             }
-            return torrentInfo.getTorrentFileEntries();
+            return torrentManager.getTorrentFileEntries(this);
+        } finally {
+            lock.readLock().unlock();
         }
-        return torrentManager.getTorrentFileEntries(this);
     }
 
     @Override
