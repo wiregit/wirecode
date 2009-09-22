@@ -116,17 +116,60 @@ public class ServiceRegistryImplTest extends BaseTestCase {
         
     }
     
-    public void testAsyncStop() {
-        ASynchStopServiceStub a1 = new ASynchStopServiceStub(1, 5000);
-        
-        ServiceRegistry registry = new ServiceRegistryImpl();        
-        registry.register(a1);        
-        registry.initialize();        
+    public void testAsyncStopJoinStyleNONE() {
+        DontJoinServiceStub a1 = new DontJoinServiceStub(1, 5000);
+
+        ServiceRegistry registry = new ServiceRegistryImpl();
+        registry.register(a1);
+        registry.initialize();
         registry.start();
-        
+
         long beforeStop = System.currentTimeMillis();
         registry.stop();
-        assertGreaterThanOrEquals(5000, System.currentTimeMillis() - beforeStop);  
+        assertLessThan(5000, System.currentTimeMillis() - beforeStop);
+    }
+    
+    public void testAsyncStopJoinStyleINFINITE() {
+        InfiniteJoinServiceStub a1 = new InfiniteJoinServiceStub(1, 5000);
+
+        ServiceRegistry registry = new ServiceRegistryImpl();
+        registry.register(a1);
+        registry.initialize();
+        registry.start();
+
+        long beforeStop = System.currentTimeMillis();
+        registry.stop();
+        assertGreaterThanOrEquals(5000, System.currentTimeMillis() - beforeStop);
+    }
+
+    public void testAsyncStopJoinStyleTIMEOUTWaitLongerThanTask() {
+        LongJoinServiceStub a1 = new LongJoinServiceStub(1, 5000);
+
+        ServiceRegistry registry = new ServiceRegistryImpl();
+        registry.register(a1);
+        registry.initialize();
+        registry.start();
+
+        long beforeStop = System.currentTimeMillis();
+        registry.stop();
+        long finished = System.currentTimeMillis();
+        assertGreaterThanOrEquals(5000, finished - beforeStop);
+        assertLessThan(10000, finished - beforeStop);
+    }
+
+    public void testAsyncStopJoinStyleTIMEOUTWaitShorterThanTask() {
+        ShortJoinServiceStub a1 = new ShortJoinServiceStub(1, 5000);
+
+        ServiceRegistry registry = new ServiceRegistryImpl();
+        registry.register(a1);
+        registry.initialize();
+        registry.start();
+
+        long beforeStop = System.currentTimeMillis();
+        registry.stop();
+        long finished = System.currentTimeMillis();
+        assertGreaterThanOrEquals(2000, finished - beforeStop);
+        assertLessThan(5000, finished - beforeStop);
     }
     
     private void checkInit(int expected, int increment, ServiceStub... services) {
@@ -183,16 +226,15 @@ public class ServiceRegistryImplTest extends BaseTestCase {
         }
     }
     
-    private class ASynchStopServiceStub extends ServiceStub {
+    private class LongRunningServiceStub extends ServiceStub {
         private final long timeToSleep;
 
-        ASynchStopServiceStub(int id, long timeToSleep) {
+        LongRunningServiceStub(int id, long timeToSleep) {
             super(id);
             this.timeToSleep = timeToSleep;
         }
-        
+
         @Override
-        @Asynchronous 
         public void stop() {
             super.stop();
             try {
@@ -201,6 +243,58 @@ public class ServiceRegistryImplTest extends BaseTestCase {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private class DontJoinServiceStub extends LongRunningServiceStub {
+
+        DontJoinServiceStub(int id, long timeToSleep) {
+            super(id, timeToSleep);
+        }
+
+        @Override
+        @Asynchronous(join = Join.NONE)
+        public void stop() {
+            super.stop();
+        }
+    }
+    
+    private class InfiniteJoinServiceStub extends LongRunningServiceStub {
+
+        InfiniteJoinServiceStub(int id, long timeToSleep) {
+            super(id, timeToSleep);
+        }
+
+        @Override
+        @Asynchronous(join = Join.INFINITE)
+        public void stop() {
+            super.stop();
+        }
+    }
+
+    private class LongJoinServiceStub extends LongRunningServiceStub {
+
+        LongJoinServiceStub(int id, long timeToSleep) {
+            super(id, timeToSleep);
+        }
+
+        @Override
+        @Asynchronous(join = Join.TIMEOUT, timeout = 10)
+        public void stop() {
+            super.stop();
+        }
+    }
+
+    private class ShortJoinServiceStub extends LongRunningServiceStub {
+
+        ShortJoinServiceStub(int id, long timeToSleep) {
+            super(id, timeToSleep);
+        }
+
+        @Override
+        @Asynchronous(join = Join.TIMEOUT, timeout = 2)
+        public void stop() {
+            super.stop();
         }
     }
     

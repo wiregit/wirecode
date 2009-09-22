@@ -184,16 +184,16 @@ class ServiceRegistryImpl implements ServiceRegistry {
 
         private class AnnotatedService implements Service {
             private final Service service;
-            private Thread serviceExecutor;
-            
+            private volatile Thread serviceExecutor;
+            private volatile Asynchronous asynchronous;
+
             AnnotatedService(Service service) {
                 this.service = service;
             }
             
             void join() throws InterruptedException {
-                if(serviceExecutor != null) {
-                    serviceExecutor.join();
-                    serviceExecutor = null;
+                if(asynchronous != null) {
+                    asynchronous.join().join(serviceExecutor, asynchronous.timeout());
                 }
             }
 
@@ -206,7 +206,8 @@ class ServiceRegistryImpl implements ServiceRegistry {
             }
 
             public void start() {
-                if(isAsyncStart()) {
+                asynchronous = getAsynchronousAnnotation("start");
+                if(asynchronous != null) {
                     serviceExecutor = asyncStart();
                 } else {
                     service.start();
@@ -214,7 +215,6 @@ class ServiceRegistryImpl implements ServiceRegistry {
             }
             
             private Thread asyncStart() {
-                Asynchronous asynchronous = getStartAsynchronous();
                 Thread startThread = ThreadExecutor.newManagedThread(new Runnable() {
                     public void run() {
                         // TODO LOG
@@ -223,21 +223,31 @@ class ServiceRegistryImpl implements ServiceRegistry {
                     }
                 }, "ServiceRegistry-start-" + service.getServiceName());
                 startThread.setDaemon(asynchronous.daemon());
-                startThread = wrapWithWaitingThreadIfNeeded(startThread, asynchronous);
                 startThread.start();
                 return startThread;
             }
 
             public void stop() {
-                if(isAsyncStop()) {
+                joinOnStart();
+                asynchronous = getAsynchronousAnnotation("stop");
+                if(asynchronous != null) {
                     serviceExecutor = asyncStop();
                 } else {
                     service.stop();
                 }
             }
-            
+
+            private void joinOnStart() {
+                if(asynchronous != null) { // annotation on the "start" method
+                    try {
+                        serviceExecutor.join();
+                    } catch (InterruptedException e) {
+                        LOG.debug("interrupted while join()'ing on start: ", e);
+                    }
+                }
+            }
+
             private Thread asyncStop() {
-                Asynchronous asynchronous = getStopAsynchronous();
                 Thread stopThread = ThreadExecutor.newManagedThread(new Runnable() {
                     public void run() {
                         // TODO LOG
@@ -246,25 +256,8 @@ class ServiceRegistryImpl implements ServiceRegistry {
                     }
                 }, "ServiceRegistry-stop-" + service.getServiceName());
                 stopThread.setDaemon(asynchronous.daemon());
-                stopThread = wrapWithWaitingThreadIfNeeded(stopThread, asynchronous);
-                stopThread.start(); 
+                stopThread.start();
                 return stopThread;
-            }
-            
-            private boolean isAsyncStop() {
-                return getAsynchronousAnnotation("stop") != null;                
-            }
-            
-            private boolean isAsyncStart() {
-                return getAsynchronousAnnotation("start") != null;                
-            }
-            
-            private Asynchronous getStopAsynchronous() {
-                return getAsynchronousAnnotation("stop");
-            }
-            
-            private Asynchronous getStartAsynchronous() {
-                return getAsynchronousAnnotation("start");
             }
             
             private Asynchronous getAsynchronousAnnotation(String methodName){
@@ -273,27 +266,6 @@ class ServiceRegistryImpl implements ServiceRegistry {
                 } catch (NoSuchMethodException e) {
                     throw new IllegalStateException(e);
                 }
-            }
-            
-            private Thread wrapWithWaitingThreadIfNeeded(final Thread methodThread, final Asynchronous asynchronous) {
-                Thread toReturn;
-                if(asynchronous.timeout() > 0) {
-                    Thread waitingThread = ThreadExecutor.newManagedThread(new Runnable() {
-                        public void run() {
-                            // TODO LOG
-                            methodThread.start();
-                            try {
-                                methodThread.join(asynchronous.timeout() * 1000);
-                            } catch (InterruptedException ignore) {}
-                            // TODO LOG
-                        }
-                    }, "ServiceRegistry-waiting-thread-" + service.getServiceName());
-                    waitingThread.setDaemon(false); // TODO is this necessary?
-                    toReturn = waitingThread;
-                } else {
-                    toReturn = methodThread;
-                }
-                return toReturn;
             }
         }
     }

@@ -29,6 +29,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.lifecycle.Join;
 import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -382,7 +383,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
                 bindAndStartUpnp();
             }
             
-            @Asynchronous (timeout = 30, daemon = true)
+            @Asynchronous (join = Join.TIMEOUT, timeout = 30, daemon = true)
             public void stop() {
                 upnpManager.get().clearMappings();
             }

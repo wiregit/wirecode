@@ -16,8 +16,13 @@ import java.lang.annotation.Target;
 public @interface Asynchronous {
 
     /**
+     * @return How an asynchronous task should be join()'ed.  Default is <code>Join.INFINITE</code>.
+     */
+    Join join() default Join.INFINITE;
+    
+    /**
      * @return how long to wait for this asynchronous task to complete.  
-     * Units are in seconds. Positive values indicate a timeout, negative values indicate no waiting is necessary. 
+     * Units are in seconds. Use only in conjunction with <code>Join.TIMEOUT</code>. 
      */
     int timeout() default -1;
 
