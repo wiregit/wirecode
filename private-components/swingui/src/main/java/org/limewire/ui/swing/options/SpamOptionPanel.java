@@ -30,7 +30,7 @@ public class SpamOptionPanel extends OptionPanel {
     public SpamOptionPanel(SpamManager spamManager) {   
         this.spamManager = spamManager;
         
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("insets 15, fillx, wrap"));
         setOpaque(false);
         
         add(getClearPanel(), "pushx, growx");
@@ -39,7 +39,7 @@ public class SpamOptionPanel extends OptionPanel {
     private JPanel getClearPanel() {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
-        p.setLayout(new MigLayout("gapy 10"));
+        p.setLayout(new MigLayout("fillx"));
         p.setOpaque(false);
         
         clearSpamButton = new JButton(I18n.tr("Clear Filter"));
@@ -52,7 +52,7 @@ public class SpamOptionPanel extends OptionPanel {
             }
         });
         
-        p.add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
+        p.add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap, gapbottom 10");
         p.add(clearSpamButton);
         
         return p;

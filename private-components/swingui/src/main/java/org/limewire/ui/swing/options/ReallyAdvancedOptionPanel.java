@@ -57,7 +57,7 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
         providers.put(FILTERING, filteringOptionPanel);
         providers.put(SPAM, spamOptionPanel);
         
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, gapy 10", "fill", "fill"));
+        setLayout(new MigLayout("insets 15, fill, gapy 10","[][grow]" ,"[][]"));
         
         setOpaque(false);
         

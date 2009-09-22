@@ -65,7 +65,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     private JPanel getNetworkPanel() {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
-        p.setLayout(new MigLayout("gapy 10"));
+        p.setLayout(new MigLayout("fillx, gapy 10"));
         p.setOpaque(false);
         
         limewireChooseRadioButton = new JRadioButton(I18n.tr("Let LimeWire choose my network interface (Recommended)"));

@@ -33,11 +33,11 @@ public class FirewallOptionPanel extends OptionPanel {
         super();
         this.networkManager = networkManager;
         
-        setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));
+        setLayout(new MigLayout("insets 10, fillx, wrap"));
         setOpaque(false);
         
-        add(getListeningPortPanel(), "pushx, grow");
-        add(getRouterConfigPanel(), "pushx, grow");
+        add(getListeningPortPanel(), "growx");
+        add(getRouterConfigPanel(), "growx");
     }
     
     private OptionPanel getListeningPortPanel() {
@@ -84,7 +84,7 @@ public class FirewallOptionPanel extends OptionPanel {
             
             portField = new NumericTextField(5, 1, 0xFFFF);
             
-            add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
+            add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap");
             
             add(new JLabel(I18n.tr("Listen on port:")), "split");
             add(portField);
@@ -156,13 +156,13 @@ public class FirewallOptionPanel extends OptionPanel {
             starLabel.setVisible(false);
             
             
-            add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
+            add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap");
             
             add(plugAndPlayRadioButton, "split, wrap");
             
             add(portForwardRadioButton, "split");
-            add(portTextField,"split");
-            add(starLabel, "wrap");
+            add(portTextField,"wrap");
+            add(starLabel, "gapleft 85, wrap, hidemode 2");
             
             add(doNothingRadioButton, "split");
             

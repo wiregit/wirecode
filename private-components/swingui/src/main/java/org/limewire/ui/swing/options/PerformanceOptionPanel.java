@@ -46,7 +46,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     private JPanel getPerformancePanel() {
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
-        p.setLayout(new MigLayout());
+        p.setLayout(new MigLayout("fillx"));
         p.setOpaque(false);
         
         disableUltraPeerCheckBox = new JCheckBox(I18n.tr("Disable Ultrapeer capabilities"));
@@ -59,17 +59,17 @@ public class PerformanceOptionPanel extends OptionPanel {
         disableTLS.setOpaque(false);
         disableOutOfBandSearchCheckBox.setOpaque(false);
         
-        p.add(new MultiLineLabel(firstMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
+        p.add(new MultiLineLabel(firstMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap");
         
         p.add(disableUltraPeerCheckBox, "gapleft 25, split, wrap");
         
         p.add(disableMojitoCheckBox, "gapleft 25, split, wrap");
         
-        p.add(new MultiLineLabel(secondMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "gaptop 18, wrap");
+        p.add(new MultiLineLabel(secondMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, gaptop 18, wrap");
         
         p.add(disableTLS, "gapleft 25, split, wrap");
         
-        p.add(new MultiLineLabel(thirdMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "gaptop 18, wrap");
+        p.add(new MultiLineLabel(thirdMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, gaptop 18, wrap");
         
         p.add(disableOutOfBandSearchCheckBox, "gapleft 25, split, wrap");
         
