@@ -190,7 +190,7 @@ public class SearchServicesImpl implements SearchServices {
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String)
      */
     public void query(byte[] guid, String query) {
-        query(guid, query, null);
+        query(guid, query, SearchCategory.ALL);
     }
 
     /* (non-Javadoc)
