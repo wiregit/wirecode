@@ -148,17 +148,17 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         if ((flag & QueryRequest.WIN_PROG_MASK) > 0) numFilters++;
         if ((flag & QueryRequest.LIN_PROG_MASK) > 0) numFilters++;
         assertEquals(((flag & QueryRequest.AUDIO_MASK) > 0),
-                     predicate.apply("susheel.mp3"));
+                     predicate.apply("mp3"));
         assertEquals(((flag & QueryRequest.VIDEO_MASK) > 0),
-                predicate.apply("susheel.wmv"));
+                predicate.apply("wmv"));
         assertEquals(((flag & QueryRequest.DOC_MASK) > 0),
-                predicate.apply("susheel.txt"));
+                predicate.apply("txt"));
         assertEquals(((flag & QueryRequest.IMAGE_MASK) > 0),
-                predicate.apply("susheel.png"));
+                predicate.apply("png"));
         assertEquals(((flag & QueryRequest.WIN_PROG_MASK) > 0),
-                predicate.apply("susheel.exe"));
+                predicate.apply("exe"));
         assertEquals(((flag & QueryRequest.LIN_PROG_MASK) > 0),
-                predicate.apply("susheel.csh"));
+                predicate.apply("csh"));
     }
 
     

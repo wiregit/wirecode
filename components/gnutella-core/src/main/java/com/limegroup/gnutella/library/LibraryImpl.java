@@ -1267,7 +1267,7 @@ class LibraryImpl implements Library, FileCollection {
             return isDirectoryAllowed(file);
         }
         
-        Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
+        Category category = categoryManager.getCategoryForFile(file);
         if(category == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             return false;
         }

@@ -11,7 +11,6 @@ import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.SourcedEventMulticaster;
-import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -223,7 +222,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         }
         
         if(isPublic()) {
-            Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
+            Category category = categoryManager.getCategoryForFile(file);
             if(category == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 return false;
             }

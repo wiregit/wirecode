@@ -1836,7 +1836,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         String fileName = getDefaultFileName();
         Category category = null;
         if(fileName != null) {
-            category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(fileName));
+            category = categoryManager.getCategoryForFilename(fileName);
         }
         return new File(SharingSettings.getSaveDirectory(category), fileName);
     }

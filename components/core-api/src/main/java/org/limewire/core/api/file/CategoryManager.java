@@ -26,10 +26,13 @@ public interface CategoryManager {
      * Returns a filter that allows only files for the given category. The
      * filter matches against extension only, not on the full filename.
      */
-    Predicate<String> getFilterForCategory(Category category);
+    Predicate<String> getExtensionFilterForCategory(Category category);
     
     /** Returns the category that best matches the given extension. */
     Category getCategoryForExtension(String extension);
+    
+    /** Returns the category that best matches the given filename. */
+    Category getCategoryForFilename(String filename);
     
     /** Returns the category that best matches the given file. */
     Category getCategoryForFile(File file);

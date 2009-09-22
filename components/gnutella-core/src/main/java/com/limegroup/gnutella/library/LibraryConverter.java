@@ -104,7 +104,7 @@ class LibraryConverter {
      * Returns true if the files was not a document, false otherwise. 
      */
     private boolean addManagedFile(LibraryFileData newData, File file) {
-        Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
+        Category category = categoryManager.getCategoryForFile(file);
         if(category != Category.DOCUMENT && category != Category.PROGRAM) {
             newData.addManagedFile(file);
             return true;

@@ -35,6 +35,7 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
+import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.google.common.base.Predicate;
@@ -361,7 +362,7 @@ public class CreationTimeCache {
                         continue;
                     }
 
-                    if (filter.apply(fd.getFileName())) {
+                    if (filter.apply(FileUtils.getFileExtension(fd.getFileName()))) {
                         urnList.add(currURN);
                     }
                 }

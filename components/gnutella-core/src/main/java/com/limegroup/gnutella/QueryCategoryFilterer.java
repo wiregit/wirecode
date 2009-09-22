@@ -64,16 +64,16 @@ public class QueryCategoryFilterer {
             predicates.add(categoryManager.getWindowsProgramsFilter());
         }
         if (query.desiresDocuments()) {
-            predicates.add(categoryManager.getFilterForCategory(Category.DOCUMENT));
+            predicates.add(categoryManager.getExtensionFilterForCategory(Category.DOCUMENT));
         }
         if (query.desiresAudio()) {
-            predicates.add(categoryManager.getFilterForCategory(Category.AUDIO));
+            predicates.add(categoryManager.getExtensionFilterForCategory(Category.AUDIO));
         }
         if (query.desiresVideo()) {
-            predicates.add(categoryManager.getFilterForCategory(Category.VIDEO));
+            predicates.add(categoryManager.getExtensionFilterForCategory(Category.VIDEO));
         }
         if (query.desiresImages()) {
-            predicates.add(categoryManager.getFilterForCategory(Category.IMAGE));
+            predicates.add(categoryManager.getExtensionFilterForCategory(Category.IMAGE));
         }
         
         return Predicates.or(predicates);

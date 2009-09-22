@@ -24,6 +24,7 @@ import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 
@@ -229,10 +230,11 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 desc = incompleteFileView.getFileDescForIndex(i);
             }
 
+            //desc can be null if items were removed after the IntSet matches were built
             if(desc != null) {
-                //desc can bet null if items were removed after the IntSet matches were built
-                if (!filter.apply(desc.getFileName()))
+                if (!filter.apply(FileUtils.getFileExtension(desc.getFileName()))) {
                     continue;
+                }
 
                 activityCallback.handleSharedFileUpdate(desc.getFile());
     

@@ -20,7 +20,6 @@ import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 
@@ -64,7 +63,7 @@ class RecentDownloadsMenu extends MnemonicMenu {
         add(new AbstractAction(file.getName()) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(file));
+                Category category = categoryManager.getCategoryForFile(file);
                 switch (category) {
                 case AUDIO:
                     PlayerUtils.playOrLaunch(file, categoryManager);

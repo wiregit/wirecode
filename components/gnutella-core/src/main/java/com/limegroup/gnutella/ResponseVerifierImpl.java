@@ -13,7 +13,6 @@ import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.GUID;
-import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -164,8 +163,7 @@ public class ResponseVerifierImpl implements ResponseVerifier {
         String reply = response.getName();
         Category category = request.type.getCategory();
         if(category != null) {
-            String extension = FileUtils.getFileExtension(reply);
-            return categoryManager.getFilterForCategory(category).apply(extension);
+            return categoryManager.getCategoryForFilename(reply) == category;
         } else {
             return true;
         } 

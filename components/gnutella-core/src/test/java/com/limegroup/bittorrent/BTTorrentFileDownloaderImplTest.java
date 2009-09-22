@@ -460,7 +460,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                 return null;
             }
             @Override
-            public Predicate<String> getFilterForCategory(Category category) {
+            public Predicate<String> getExtensionFilterForCategory(Category category) {
                  return null;
             }
             @Override
@@ -478,6 +478,11 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             
             @Override
             public Category getCategoryForFile(File file) {
+                return null;
+            }
+            
+            @Override
+            public Category getCategoryForFilename(String filename) {
                 return null;
             }
         });

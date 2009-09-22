@@ -33,7 +33,7 @@ class PlaylistManagerImpl implements PlaylistManager {
         this.managedList = managedList;
         
         // Create the only playlist currently supported.
-        this.defaultPlaylist = new PlaylistImpl("Quicklist", categoryManager.getFilterForCategory(Category.AUDIO));
+        this.defaultPlaylist = new PlaylistImpl("Quicklist", categoryManager.getExtensionFilterForCategory(Category.AUDIO));
         this.playlistList = Arrays.asList(new Playlist[] {
                 defaultPlaylist
         });

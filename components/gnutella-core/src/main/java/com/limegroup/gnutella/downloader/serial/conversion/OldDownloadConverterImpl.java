@@ -27,7 +27,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -258,7 +257,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
             if(saveFile != null) {
                 String defaultName = (String)download.getProperties().get("defaultFileName");
                 if(defaultName != null) {
-                    Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(defaultName)); 
+                    Category category = categoryManager.getCategoryForFilename(defaultName); 
                     saveFile = new File(SharingSettings.getSaveDirectory(category), defaultName);
                 }
             }

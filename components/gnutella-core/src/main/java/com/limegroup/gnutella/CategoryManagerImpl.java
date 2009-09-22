@@ -115,6 +115,12 @@ class CategoryManagerImpl implements CategoryManager {
             return Category.OTHER;
         }
     }
+    
+    @Override
+    public Category getCategoryForFilename(String filename) {
+        String extension = FileUtils.getFileExtension(filename);
+        return getCategoryForExtension(extension);
+    }
 
     @Override
     public Category getCategoryForFile(File file) {
@@ -145,7 +151,7 @@ class CategoryManagerImpl implements CategoryManager {
     }
 
     @Override
-    public Predicate<String> getFilterForCategory(Category category) {
+    public Predicate<String> getExtensionFilterForCategory(Category category) {
         switch(category) {
         case AUDIO:
             return audioPred;

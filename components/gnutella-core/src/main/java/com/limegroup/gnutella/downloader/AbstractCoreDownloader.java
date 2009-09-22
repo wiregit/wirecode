@@ -115,7 +115,7 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	    
 	    Category category = null;
 	    if(fileName != null) {
-	        category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(fileName));
+	        category = categoryManager.getCategoryForFilename(fileName);
 	    }
 	    
 	    if (saveDirectory == null) {

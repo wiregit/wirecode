@@ -189,7 +189,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public Category getCategory() {
-        return categoryManager.getCategoryForExtension(FileUtils.getFileExtension(getFileName()));
+        return categoryManager.getCategoryForFilename(getFileName());
     }
 
     @Override
@@ -275,7 +275,7 @@ class CoreUploadItem implements UploadItem {
             case FILE_SIZE:
                 return fd.getFileSize();            
             default:
-                Category category = categoryManager.getCategoryForExtension(FileUtils.getFileExtension(fd.getFileName()));
+                Category category = categoryManager.getCategoryForFilename(fd.getFileName());
                 return FilePropertyKeyPopulator.get(category, property, fd.getXMLDocument());
             }
         } else {
