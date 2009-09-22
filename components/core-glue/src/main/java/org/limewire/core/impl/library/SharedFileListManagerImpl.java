@@ -17,7 +17,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.filter.Filter;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -31,6 +30,7 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.FileView;
@@ -341,9 +341,9 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         try {
             for (SharedFileList sharedFileList : shareLists) {
                 if (sharedFileList.isPublic()) {
-                    sharedFileList.removeFiles(new Filter<LocalFileItem>() {
+                    sharedFileList.removeFiles(new Predicate<LocalFileItem>() {
                         @Override
-                        public boolean allow(LocalFileItem localFileItem) {
+                        public boolean apply(LocalFileItem localFileItem) {
                             return localFileItem.getCategory() == Category.DOCUMENT;
                         }
                     });

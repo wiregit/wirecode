@@ -12,16 +12,17 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
-import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.filter.Filter;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
+
+import com.google.common.base.Predicate;
 
 public class FileListAdapter implements LocalFileList, LibraryFileList {
 
@@ -129,7 +130,7 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
 
     @Override
-    public void removeFiles(Filter<LocalFileItem> fileFilter) {
+    public void removeFiles(Predicate<LocalFileItem> fileFilter) {
         
     }
 

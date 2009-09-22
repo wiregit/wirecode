@@ -35,7 +35,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.filter.Filter;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -50,6 +49,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
@@ -1197,7 +1197,7 @@ class LibraryImpl implements Library, FileCollection {
     }
 
     /** Removes all items from an IntSet that do not pass the filter. */
-    void filterIndexes(IntSet indexes, Filter<FileDesc> filter) {
+    void filterIndexes(IntSet indexes, Predicate<FileDesc> filter) {
         List<Integer> removeList = null;
         rwLock.readLock().lock();
         try {
@@ -1205,7 +1205,7 @@ class LibraryImpl implements Library, FileCollection {
             for(; iter.hasNext(); ) {
                 int i = iter.next();
                 FileDesc fd = files.get(i);
-                if(!filter.allow(fd)) {
+                if(!filter.apply(fd)) {
                     if(removeList == null) {
                         removeList = new ArrayList<Integer>();
                     }

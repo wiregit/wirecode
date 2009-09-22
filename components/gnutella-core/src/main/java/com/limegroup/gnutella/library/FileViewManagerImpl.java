@@ -17,7 +17,6 @@ import org.limewire.collection.Comparators;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.IntSet.IntSetIterator;
 import org.limewire.core.settings.MessageSettings;
-import org.limewire.filter.Filter;
 import org.limewire.friend.api.Friend;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
@@ -34,6 +33,7 @@ import org.limewire.statistic.StatsUtils;
 import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 import com.limegroup.gnutella.routing.HashFunction;
@@ -925,9 +925,9 @@ class FileViewManagerImpl implements FileViewManager {
                 }
             }
             
-            library.filterIndexes(newItems, new Filter<FileDesc>() {
+            library.filterIndexes(newItems, new Predicate<FileDesc>() {
                 @Override
-                public boolean allow(FileDesc t) {
+                public boolean apply(FileDesc t) {
                     return isFileAddable(t);
                 }
             });

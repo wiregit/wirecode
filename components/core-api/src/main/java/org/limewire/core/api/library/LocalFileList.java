@@ -5,7 +5,8 @@ import java.util.List;
 
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.URN;
-import org.limewire.filter.Filter;
+
+import com.google.common.base.Predicate;
 
 /** A list of FileItems that are locally stored on disk. */
 public interface LocalFileList extends FileList<LocalFileItem> {
@@ -52,7 +53,7 @@ public interface LocalFileList extends FileList<LocalFileItem> {
     /**
      * Removes all files from the list that match the specified filter. 
      */
-    public void removeFiles(Filter<LocalFileItem> fileFilter);
+    public void removeFiles(Predicate<LocalFileItem> fileFilter);
 
     /**
      * Removes all files from the list

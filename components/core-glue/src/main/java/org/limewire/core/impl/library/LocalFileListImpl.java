@@ -12,7 +12,6 @@ import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.filter.Filter;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -20,6 +19,7 @@ import org.limewire.logging.LogFactory;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 
+import com.google.common.base.Predicate;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
@@ -250,13 +250,13 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     @Override
-    public void removeFiles(Filter<LocalFileItem> filter) {
+    public void removeFiles(Predicate<LocalFileItem> filter) {
         List<LocalFileItem> files = new ArrayList<LocalFileItem>();
         
         getModel().getReadWriteLock().readLock().lock();
         try {
             for (LocalFileItem localFileItem : getModel()) {
-                if (filter.allow(localFileItem)) {
+                if (filter.apply(localFileItem)) {
                     files.add(localFileItem);
                 }
             }

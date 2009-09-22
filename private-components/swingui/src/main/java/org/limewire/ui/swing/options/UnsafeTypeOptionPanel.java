@@ -16,13 +16,13 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.filter.Filter;
 import org.limewire.setting.Setting;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
@@ -92,9 +92,9 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         	Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
         	managedCategories.remove(Category.PROGRAM);
         	libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(managedCategories);
-            libraryManager.getLibraryManagedList().removeFiles(new Filter<LocalFileItem>() {
+            libraryManager.getLibraryManagedList().removeFiles(new Predicate<LocalFileItem>() {
                @Override
-                public boolean allow(LocalFileItem localFileItem) {
+                public boolean apply(LocalFileItem localFileItem) {
                     return localFileItem.getCategory() == Category.PROGRAM;
                 } 
             });
