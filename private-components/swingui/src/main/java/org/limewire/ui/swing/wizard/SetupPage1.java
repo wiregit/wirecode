@@ -2,6 +2,8 @@ package org.limewire.ui.swing.wizard;
 
 import javax.swing.JCheckBox;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.ui.swing.settings.InstallSettings;
@@ -9,12 +11,11 @@ import org.limewire.ui.swing.settings.StartupSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.OSUtils;
-
-import net.miginfocom.swing.MigLayout;
 
 public class SetupPage1 extends WizardPage {
 
@@ -131,7 +132,12 @@ public class SetupPage1 extends WizardPage {
             if (OSUtils.isMacOSX())
                 MacOSXUtils.setLoginStatus(launchAtStartupCheckBox.isSelected());
             else if (WindowsUtils.isLoginStatusAvailable())
-                WindowsUtils.setLoginStatus(launchAtStartupCheckBox.isSelected());
+                BackgroundExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        WindowsUtils.setLoginStatus(launchAtStartupCheckBox.isSelected());
+                    }
+                });
 
             StartupSettings.RUN_ON_STARTUP.setValue(launchAtStartupCheckBox.isSelected());
         } else

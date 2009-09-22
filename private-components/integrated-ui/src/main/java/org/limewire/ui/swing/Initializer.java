@@ -178,10 +178,8 @@ public final class Initializer {
         startCore();
         runQueuedRequests();
         
-        // Make sure startup on startup is configured
-        if (OSUtils.isWindows() && StartupSettings.RUN_ON_STARTUP.getValue()) {
-            WindowsUtils.setLoginStatus(true);
-        }
+        // Make sure start on startup is configured
+        ensureStartupSettingsConfigured();
         
         // Run any after-init tasks.
         postinit();        
@@ -481,6 +479,13 @@ public final class Initializer {
             }
         });
         stopwatch.resetAndLog("set locale");
+    }
+    
+    /** Verify that the start on startup setting is being properly honoured **/
+    private void ensureStartupSettingsConfigured() {
+        if (OSUtils.isWindows() && StartupSettings.RUN_ON_STARTUP.getValue()) {
+            WindowsUtils.setLoginStatus(true);
+        }
     }
     
     /** Starts any early core-related functionality. */
