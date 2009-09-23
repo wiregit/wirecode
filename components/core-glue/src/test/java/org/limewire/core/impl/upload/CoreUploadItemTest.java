@@ -42,12 +42,13 @@ public class CoreUploadItemTest extends BaseTestCase {
         final Uploader uploader = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
+        final String fileName = "thing.bmp";
         
         context.checking(new Expectations() {
             {
                 one(uploader).getFileName();
-                will(returnValue("thing.bmp"));
-                one(categoryManager).getCategoryForExtension("bmp");
+                will(returnValue(fileName));
+                one(categoryManager).getCategoryForFilename(fileName);
                 will(returnValue(Category.IMAGE));
             }});
         
@@ -631,13 +632,14 @@ public class CoreUploadItemTest extends BaseTestCase {
         final String defReturn1 = "eliefynafgrd";
         
         CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, categoryManager);
-
+        final String fileName = "booc.ogg";
+        
         context.checking(new Expectations() {{
                 one(uploader1).getFileDesc();
                 will(returnValue(fd1));                
                 one(fd1).getFileName();
-                will(returnValue("booc.ogg"));                
-                one(categoryManager).getCategoryForExtension("ogg");
+                will(returnValue(fileName));                
+                one(categoryManager).getCategoryForFilename(fileName);
                 will(returnValue(Category.AUDIO));
                 one(fd1).getXMLDocument();
                 will(returnValue(doc1));
@@ -651,8 +653,8 @@ public class CoreUploadItemTest extends BaseTestCase {
             one(uploader1).getFileDesc();
             will(returnValue(fd1));                
             one(fd1).getFileName();
-            will(returnValue("booc.ogg"));                
-            one(categoryManager).getCategoryForExtension("ogg");
+            will(returnValue(fileName));                
+            one(categoryManager).getCategoryForFilename(fileName);
             will(returnValue(Category.AUDIO));
             one(fd1).getXMLDocument();
             will(returnValue(doc1));
@@ -666,8 +668,8 @@ public class CoreUploadItemTest extends BaseTestCase {
             one(uploader1).getFileDesc();
             will(returnValue(fd1));                
             one(fd1).getFileName();
-            will(returnValue("booc.ogg"));                
-            one(categoryManager).getCategoryForExtension("ogg");
+            will(returnValue(fileName));                
+            one(categoryManager).getCategoryForFilename(fileName);
             will(returnValue(Category.AUDIO));
             one(fd1).getXMLDocument();
             will(returnValue(doc1));
