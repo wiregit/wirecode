@@ -26,17 +26,21 @@ public class LimeMozillaInitializer {
 
     private LimeMozillaInitializer() {
     }
-    
+
     public static boolean shouldInitialize() {
-        return (OSUtils.isWindows()|| OSUtils.isLinux()) &&
-            MozillaSettings.USE_MOZILLA.getValue();
+        return (OSUtils.isWindows() || OSUtils.isLinux() || OSUtils.isMacOSX())
+                && is32BitProcess() && MozillaSettings.USE_MOZILLA.getValue();
+    }
+
+    private static boolean is32BitProcess() {
+        return "i386".equals(OSUtils.getOSArch()) || "x86".equals(OSUtils.getOSArch());
     }
 
     public static void initialize() {
-        if(!shouldInitialize()) {
+        if (!shouldInitialize()) {
             return;
         }
-        
+
         File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
         // Check to see if the correct version of XUL exists.
         File xulFile = new File(xulInstallPath, "xul-v2.0b2.4-do-not-remove");
@@ -134,6 +138,8 @@ public class LimeMozillaInitializer {
             return "xulrunner-win32.zip";
         } else if (OSUtils.isLinux()) {
             return "xulrunner-linux.zip";
+        } else if (OSUtils.isMacOSX()) {
+            return "xulrunner-macosx-i386.zip";
         } else {
             throw new IllegalStateException("no resource for OS: " + OSUtils.getOS());
         }
