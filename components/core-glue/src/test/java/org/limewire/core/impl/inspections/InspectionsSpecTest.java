@@ -16,9 +16,17 @@ import org.limewire.io.InvalidDataException;
  */
 public class InspectionsSpecTest extends LimeTestCase {
     
+    private static final int MIN_INSP_INTERVAL = 5;
+    
 
     public InspectionsSpecTest(String name) {
         super(name);
+    }
+    
+    @Override
+    public void setUp() {
+        // set values for settings
+        InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.setValue(MIN_INSP_INTERVAL);
     }
     
     public void testInvalidWireFormatToInspectionsSpecFailure() throws Exception {
@@ -47,9 +55,8 @@ public class InspectionsSpecTest extends LimeTestCase {
     }
 
     public void testWireFormatToInspectionsSpecSuccess() throws Exception {
-        InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.set(0);
-        InspectionsSpec spec = new InspectionsSpec(Arrays.asList("one", "two", "three"), 5, 3);
-        InspectionsSpec spec2 = new InspectionsSpec(Arrays.asList("four", "five", "six"), 6, 4);
+        InspectionsSpec spec = new InspectionsSpec(Arrays.asList("one", "two", "three"), 5, 500);
+        InspectionsSpec spec2 = new InspectionsSpec(Arrays.asList("four", "five", "six"), 6, 4000);
         byte[] encoded = InspectionsTestUtils.getGzippedAndBencoded(Arrays.asList(spec, spec2));
         
         InspectionsParser parser = new InspectionsParser();
@@ -78,7 +85,7 @@ public class InspectionsSpecTest extends LimeTestCase {
     }
     
     public void testWireFormatToInspectionsSpecInvalidInterval() throws Exception {
-        InspectionsSpec spec = new InspectionsSpec(Arrays.asList("one", "two", "three"), 5, 3);
+        InspectionsSpec spec = new InspectionsSpec(Arrays.asList("one", "two", "three"), 5, MIN_INSP_INTERVAL - 1);
         byte[] encoded = InspectionsTestUtils.getGzippedAndBencoded(Arrays.asList(spec));
         
         InspectionsParser parser = new InspectionsParser();
