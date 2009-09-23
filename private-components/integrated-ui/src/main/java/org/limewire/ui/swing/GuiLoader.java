@@ -24,7 +24,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.ui.support.FatalBugManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
-class GuiLoader {
+final class GuiLoader {
 
     /** 
      * Creates an {@link Initializer} instance that constructs the 

@@ -74,7 +74,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
 
 /** Initializes (creates, starts, & displays) the LimeWire Core & UI. */
-public final class Initializer {
+final class Initializer {
 
     /** The log -- set only after Log4J can be determined. */
     private final Log LOG;

@@ -91,6 +91,10 @@ public class HTMLPane extends JEditorPane {
     public boolean isLastRequestSuccessful() {
         return pageLoaded;
     }
+
+    public boolean isRequestInProgress() {
+        return currentLoad != null && !currentLoad.isDone();
+    }    
     
     @Override
     public void setPage(final URL page) throws IOException {
@@ -323,6 +327,6 @@ public class HTMLPane extends JEditorPane {
             checkInterrupted();
             super.reset();
         }
-    }    
+    }
     
 }

@@ -40,6 +40,7 @@ public class Browser extends MozillaPanel {
     private final Listener listener = new Listener();
     
     private volatile boolean lastRequestFailed = true;
+    private volatile boolean requestInProgress;
     
     private final VisibilityMode loadStatus;
     
@@ -101,6 +102,10 @@ public class Browser extends MozillaPanel {
             add(loadingPane, BorderLayout.SOUTH);
         }
     }
+
+    public boolean isRequestInProgress() {
+        return requestInProgress;
+    }
     
     /** Returns true if the last request is currently in progress or succeeded. */
     public boolean isLastRequestSuccessful() {
@@ -143,6 +148,7 @@ public class Browser extends MozillaPanel {
     
     public void pageLoadStarted() {
         lastRequestFailed = false;
+        requestInProgress = true;
         if(loadStatus == VisibilityMode.DEFAULT) {
             SwingUtils.invokeLater(new Runnable() {
                 @Override
@@ -155,6 +161,7 @@ public class Browser extends MozillaPanel {
 
     public void pageLoadStopped(boolean failed) {
         lastRequestFailed = failed;
+        requestInProgress = false;
         if(loadStatus == VisibilityMode.DEFAULT) {
             SwingUtils.invokeLater(new Runnable() {
                 @Override
