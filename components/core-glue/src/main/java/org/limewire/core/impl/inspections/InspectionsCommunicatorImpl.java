@@ -28,6 +28,8 @@ import org.limewire.inspection.Inspector;
 import org.limewire.io.InvalidDataException;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.lifecycle.Join;
+import org.limewire.lifecycle.Asynchronous;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.StringSetting;
@@ -180,29 +182,25 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
     /**
      * async because we contact the http server, retrying upon failure
      */
+    @Asynchronous(join = Join.NONE)
     @Override
     public void start() {
         if (InspectionsSettings.PUSH_INSPECTIONS_ON.getBoolean()) {
             started.set(true);
-            scheduler.execute(new Runnable(){
-                @Override
-                public void run() {
-                    // contact server, get insp. instructions
-                    List<InspectionsSpec> specs = Collections.emptyList();
-                    try {
-                        byte[] rawInspectionSpecs = requestInspectionsFromServer();
-                        specs = parser.parseInspectionSpecs(rawInspectionSpecs);
-                    } catch (IOException e) {
-                        LOG.error("Error in getting inspections specifications from server", e); 
-                    } catch (InvalidDataException e) {
-                        LOG.error("Error in getting inspections specifications from server", e);
-                    }
-                    
-                    if (!specs.isEmpty()) {
-                        initInspectionSpecs(specs);
-                    }
-                }
-            });            
+            // contact server, get insp. instructions
+            List<InspectionsSpec> specs = Collections.emptyList();
+            try {
+                byte[] rawInspectionSpecs = requestInspectionsFromServer();
+                specs = parser.parseInspectionSpecs(rawInspectionSpecs);
+            } catch (IOException e) {
+                LOG.error("Error in getting inspections specifications from server", e);
+            } catch (InvalidDataException e) {
+                LOG.error("Error in getting inspections specifications from server", e);
+            }
+
+            if (!specs.isEmpty()) {
+                initInspectionSpecs(specs);
+            }
         }
     }
 
