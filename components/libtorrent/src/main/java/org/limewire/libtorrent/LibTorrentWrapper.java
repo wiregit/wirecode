@@ -1,5 +1,6 @@
 package org.limewire.libtorrent;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.TorrentException;
@@ -11,6 +12,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
 
 import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
 import com.sun.jna.ptr.IntByReference;
@@ -35,8 +37,10 @@ class LibTorrentWrapper {
         try {
 
             this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
-
+            NativeLibrary lib = NativeLibrary.getInstance("torrent-wrapper");
+            validate(lib);
             init(torrentSettings);
+            //TODO add get_version method to the wrapper that can be checked here as well.
             loaded.set(true);
         } catch (Throwable e) {
             LOG.error("Failure loading the libtorrent libraries.", e);
@@ -46,6 +50,20 @@ class LibTorrentWrapper {
         }
     }
 
+    /**
+     * Validates that all of the expected functions exist in the library.
+     */
+    private void validate(NativeLibrary lib) {
+        for (Method method : LibTorrent.class.getMethods()) {
+            // throws exception if there is an error finding the function
+            lib.getFunction(method.getName());
+        }
+    }
+
+    /**
+     * Returns true if the native library was found and was able to load
+     * successfully.
+     */
     public boolean isLoaded() {
         return loaded.get();
     }
@@ -243,17 +261,6 @@ class LibTorrentWrapper {
     }
 
     /**
-     * Returns the file priority for the given index.
-     */
-    public int get_file_priority(String id, int fileIndex) {
-        LOG.debugf("before get_file_priority");
-        IntByReference priority = new IntByReference();
-        catchWrapperException(libTorrent.get_file_priority(id, fileIndex, priority));
-        LOG.debugf("after get_file_priority");
-        return priority.getValue();
-    }
-
-    /**
      * Sets the file priority for the given index.
      */
     public void set_file_priorities(String id, int[] priorities) {
@@ -310,8 +317,7 @@ class LibTorrentWrapper {
         LOG.debugf("after set_file_priority: {0} - index: {1} - priority: {2}", sha1, index,
                 priority);
     }
-    
-    
+
     public boolean has_metadata(String id) {
         LOG.debugf("before has_metadata: {0}", id);
         IntByReference has_metadata = new IntByReference(0);

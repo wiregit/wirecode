@@ -153,11 +153,6 @@ interface LibTorrent extends Library {
     public WrapperStatus set_seed_ratio(String id, float seed_ratio);
 
     /**
-     * Returns the file priority for the given index.
-     */
-    public WrapperStatus get_file_priority(String id, int fileIndex, IntByReference priority);
-
-    /**
      * Sets the file priorities for the given torrent.
      */
     public WrapperStatus set_file_priorities(String id, int[] priorities, int num_priorities);
