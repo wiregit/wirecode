@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -57,8 +58,8 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     @Override
-    public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder) {
-        return new ListWrapper((getCoreCollection().addFolder(folder, null)));
+    public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder, FileFilter fileFilter) {
+        return new ListWrapper((getCoreCollection().addFolder(folder, fileFilter)));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.limewire.core.api.library;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
 
 import org.limewire.concurrent.ListeningFuture;
@@ -25,14 +26,15 @@ public interface LocalFileList extends FileList<LocalFileItem> {
     void removeFile(File file);
     
     /**
-     * Adds all files in the folder to the list.
+     * Adds all the files in the folder to the list that can pass
+     * through the FileFilter.
      * <p>
      * Returns a {@link ListeningFuture} that will notify
      * when a List of potential {@link LocalFileItem LocalFileItems}
      * have been created from this folder.
      */
-    ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder);
-    
+    ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder, FileFilter fileFilter);
+       
     /** Returns true if the list contains this file. */
     boolean contains(File file);
 

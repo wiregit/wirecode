@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddFails;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAdds;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddsFolder;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertContainsFiles;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChangedFails;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChanges;
@@ -11,14 +12,17 @@ import static com.limegroup.gnutella.library.FileManagerTestUtils.assertLoads;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createFakeTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createHiddenTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewExtensionTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createPartialCopy;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.getUrn;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import junit.framework.Test;
@@ -27,6 +31,7 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -43,6 +48,7 @@ public class LibraryTest extends LimeTestCase {
     private Injector injector;
 
     private File f1, f2, f3, f4, f5;
+    private File subFolder;
     private List<FileDesc> fds;
 
     public LibraryTest(String name) {
@@ -59,6 +65,13 @@ public class LibraryTest extends LimeTestCase {
         fileList = (LibraryImpl) injector.getInstance(Library.class);
         urnValidator = injector.getInstance(UrnValidator.class);
         fileList.initialize();
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown(); 
+        if(subFolder != null)
+            FileUtils.deleteRecursive(subFolder);
     }
 
     public void testNoManagedFiles() {
@@ -329,6 +342,126 @@ public class LibraryTest extends LimeTestCase {
             it.next();
             fail("should have thrown");
         } catch(NoSuchElementException expected) {}
+    }
+    
+    public void testAddFolder() throws Exception {
+        f1 = createNewExtensionTestFile(1, "png", _scratchDir);
+        f2 = createNewExtensionTestFile(3, "mov", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, null);
+        assertEquals(3, list.size());
+    }
+    
+    public void testAddFolderExtensionFilter() throws Exception {
+        f1 = createNewExtensionTestFile(1, "png", _scratchDir);
+        f2 = createNewExtensionTestFile(3, "mov", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, new FileFilter(){
+            @Override
+            public boolean accept(File pathname) {
+                String ext = FileUtils.getFileExtension(pathname).toLowerCase(Locale.US);
+                return ext.equals("png") || ext.equals("mov");
+            }}
+        );
+        assertEquals(2, list.size());
+        assertFalse(fileList.contains(f3));
+    }
+    
+    public void testAddFolderRecursive() throws Exception {
+        f1 = createNewExtensionTestFile(1, "png", _scratchDir);
+        f2 = createNewExtensionTestFile(3, "mov", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        subFolder = new File(_scratchDir, "subDir");
+        subFolder.deleteOnExit();
+        assertTrue("subFolder created", subFolder.mkdir());
+        f4 = createNewExtensionTestFile(14, "wav", subFolder);
+        f5 = createNewExtensionTestFile(15, "png", subFolder);
+        
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, null);
+        assertEquals(5, list.size());
+        
+        assertTrue(fileList.contains(f4));
+        assertTrue(fileList.contains(f5));
+    }
+    
+    public void testAddFolderNonRecursive() throws Exception {
+        f1 = createNewExtensionTestFile(1, "png", _scratchDir);
+        f2 = createNewExtensionTestFile(3, "mov", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        subFolder = new File(_scratchDir, "subDir");
+        subFolder.deleteOnExit();
+        assertTrue("subFolder created", subFolder.mkdir());
+        f4 = createNewExtensionTestFile(14, "wav", subFolder);
+        f5 = createNewExtensionTestFile(15, "png", subFolder);
+        
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, new FileFilter(){
+            @Override
+            public boolean accept(File pathname) {
+                return !pathname.isDirectory();
+            }}
+        );
+        assertEquals(3, list.size());
+        assertFalse(fileList.contains(f4));
+        assertFalse(fileList.contains(f5));
+    }
+    
+    public void testAddFolderRecursiveExtensionFilter() throws Exception {
+        f1 = createNewExtensionTestFile(1, "png", _scratchDir);
+        f2 = createNewExtensionTestFile(3, "mov", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        subFolder = new File(_scratchDir, "subDir");
+        subFolder.deleteOnExit();
+        assertTrue("subFolder created", subFolder.mkdir());
+        f4 = createNewExtensionTestFile(14, "wav", subFolder);
+        f5 = createNewExtensionTestFile(15, "png", subFolder);
+        
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, new FileFilter(){
+            @Override
+            public boolean accept(File pathname) {
+                if(pathname.isDirectory()) {
+                    return true;
+                } else {
+                    String ext = FileUtils.getFileExtension(pathname).toLowerCase(Locale.US);
+                    return ext.equals("png") || ext.equals("mov");
+                }
+            }}
+        );
+        assertEquals(3, list.size());
+        assertTrue(fileList.contains(f5));
+        assertFalse(fileList.contains(f4));
+        assertFalse(fileList.contains(f3));
+    }
+    
+    public void testAddFolderNonRecursiveExtensionFilter() throws Exception {
+        f1 = createNewExtensionTestFile(1, "png", _scratchDir);
+        f2 = createNewExtensionTestFile(3, "mov", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        subFolder = new File(_scratchDir, "subDir");
+        subFolder.deleteOnExit();
+        assertTrue("subFolder created", subFolder.mkdir());
+        f4 = createNewExtensionTestFile(14, "wav", subFolder);
+        f5 = createNewExtensionTestFile(15, "png", subFolder);
+        
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, new FileFilter(){
+            @Override
+            public boolean accept(File pathname) {
+                String ext = FileUtils.getFileExtension(pathname).toLowerCase(Locale.US);
+                if(pathname.isDirectory())
+                    return false;
+                else
+                    return ext.equals("png") || ext.equals("mov");
+            }}
+        );
+        assertEquals(2, list.size());
+        assertFalse(fileList.contains(f4));
+        assertFalse(fileList.contains(f5));
+        assertFalse(fileList.contains(f3));
     }
     
 }

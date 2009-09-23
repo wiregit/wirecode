@@ -50,6 +50,10 @@ public class LibrarySettings extends LimeProps {
     public static final BooleanSetting ASK_ABOUT_FOLDER_DROP_CATEGORIES =
         FACTORY.createBooleanSetting("ASK_ABOUT_FOLDER_DROP_CATEGORIES", true);
 
+    /** When adding a folder, will recursively add subfolders if true, otherwise will just add top level folder. */
+    public static final BooleanSetting RECURSIVELY_ADD_FOLDERS = 
+        FACTORY.createBooleanSetting("RECURSIVELY_ADD_FOLDERS", true);
+    
     public static enum LibraryVersion {
         FOUR_X, FIVE_0_0;
     }

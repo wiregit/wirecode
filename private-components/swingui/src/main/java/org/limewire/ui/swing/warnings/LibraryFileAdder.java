@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.warnings;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,11 @@ class LibraryFileAdder {
         this.libraryNavigatorTable = libraryNavigatorTable;
     }
 
-    void addFilesInner(final LocalFileList fileList, final List<File> files) {
+    void addFilesInner(LocalFileList fileList, List<File> files) {
+        addFilesInner(fileList, files, null);
+    }
+    
+    void addFilesInner(final LocalFileList fileList, final List<File> files, final FileFilter fileFilter) {
         
         //only clear the filters if the library has been initialized
         if(libraryMediator.get().isInitialized()) {
@@ -42,24 +47,25 @@ class LibraryFileAdder {
                 libraryMediator.get().clearFilters();
             }
         }
+        
         List<File> rejectedFiles = new ArrayList<File>();
-        for (File file : files) {
-            if (fileList.isFileAddable(file)) {
-                if (file.isDirectory()) {
-                    fileList.addFolder(file);
+        for(File file : files) {
+            if(fileList.isFileAddable(file)) {
+                if(file.isDirectory()) {
+                    fileList.addFolder(file, fileFilter);
                 } else {
                     fileList.addFile(file);
                 }
             } else {
-                rejectedFiles.add(file);
+            	rejectedFiles.add(file);
             }
         }
+        
         // if anything was rejected notify user
         if(rejectedFiles.size() > 0) {
             FocusJOptionPane.showMessageDialog(null, getRejectedMessage(rejectedFiles), 
                     I18n.trn("File/Folder not added", "File(s)/Folder(s) not added", rejectedFiles.size()), JOptionPane.INFORMATION_MESSAGE);
-
-        }
+        }     
     }
     
     /**

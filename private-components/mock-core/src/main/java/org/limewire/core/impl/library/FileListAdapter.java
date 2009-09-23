@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.Collections;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
     
     @Override
-    public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder) {
+    public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder, FileFilter fileFilter) {
         List<ListeningFuture<LocalFileItem>> list = Collections.emptyList();
         return new SimpleFuture<List<ListeningFuture<LocalFileItem>>>(list);
     }

@@ -7,6 +7,7 @@ import static org.limewire.util.AssertComparisons.assertInstanceof;
 import static org.limewire.util.AssertComparisons.assertNotNull;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -124,8 +125,8 @@ public class FileManagerTestUtils {
         assertTrue("contained unexpected files: " + files, files.size() == 0);
     }
     
-    public static List<FileDesc> assertAddsFolder(FileCollection fileList, File folder) throws Exception {
-        return assertFutureListFinishes(fileList.addFolder(folder, null), 5, TimeUnit.SECONDS);
+    public static List<FileDesc> assertAddsFolder(FileCollection fileList, File folder, FileFilter filter) throws Exception {
+        return assertFutureListFinishes(fileList.addFolder(folder, filter), 5, TimeUnit.SECONDS);
     }
     
     /**

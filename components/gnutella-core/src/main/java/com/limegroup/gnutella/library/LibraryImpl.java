@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1230,20 +1231,19 @@ class LibraryImpl implements Library, FileCollection {
             
             @Override
             public List<ListeningFuture<FileDesc>> call() throws Exception {
-                addFolderInternal(folder);
+                if(folder != null && folder.isDirectory() && isDirectoryAllowed(folder)) {
+                    File[] files = folder.listFiles(filter);
+                    addFiles(new ArrayList<File>(Arrays.asList(files)));
+                }
                 return futures;
             }
             
-            private void addFolderInternal(File folderOrFile) {
-                //TODO try to make non-recursive
-                if(folderOrFile != null ) {
+            private void addFiles(List<File> accumulator) {
+                while(accumulator.size() > 0) {
+                    File folderOrFile = accumulator.remove(0);
                     if(folderOrFile.isDirectory() && isDirectoryAllowed(folderOrFile)) {
                         File[] files = folderOrFile.listFiles(filter);
-                        if(files != null) {
-                            for(File file : files) {
-                                addFolderInternal(file);
-                            }
-                        }
+                        accumulator.addAll(Arrays.asList(files));
                     } else {
                         futures.add(collection.add(folderOrFile));
                     }
