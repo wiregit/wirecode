@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.limewire.concurrent.ManagedThread;
 import org.limewire.ui.support.FatalBugManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -35,35 +34,29 @@ final class GuiLoader {
      * @param args the array of command line arguments
      * @param frame the splash screen; null, if no splash is displayed
      */
-    public void load(final String args[], final Frame splashFrame, final Image splashImage) {
-        new ManagedThread("Initializer Thread") {
-            @Override
-            public void run() {
-                try { 
-                    //sanityCheck();
-                    Initializer initializer = new Initializer();
-                    initializer.initialize(args, splashFrame, splashImage);
-                } catch(StartupFailedException sfe) {
-                    GuiUtils.hideAndDisposeAllWindows();
-                    showCorruptionError(sfe);
-                    System.exit(1);
-                } catch(Throwable err) {
-                    GuiUtils.hideAndDisposeAllWindows();
-                    try {
-                        FatalBugManager.handleFatalBug(err);
-                    } catch(Throwable t) {
-                        Throwable error = err;
-                        try {
-                            t.initCause(err);
-                            error = t;
-                        } catch(Throwable ignored) {}
-                        showCorruptionError(error);
-                        System.exit(1);
-                    }
-                }
+    public void load(String args[], Frame splashFrame, Image splashImage) {
+        try { 
+            //sanityCheck();
+            Initializer initializer = new Initializer();
+            initializer.initialize(args, splashFrame, splashImage);
+        } catch(StartupFailedException sfe) {
+            GuiUtils.hideAndDisposeAllWindows();
+            showCorruptionError(sfe);
+            System.exit(1);
+        } catch(Throwable err) {
+            GuiUtils.hideAndDisposeAllWindows();
+            try {
+                FatalBugManager.handleFatalBug(err);
+            } catch(Throwable t) {
+                Throwable error = err;
+                try {
+                    t.initCause(err);
+                    error = t;
+                } catch(Throwable ignored) {}
+                showCorruptionError(error);
+                System.exit(1);
             }
-        }.start();
-
+        }
     }
 
     /**
