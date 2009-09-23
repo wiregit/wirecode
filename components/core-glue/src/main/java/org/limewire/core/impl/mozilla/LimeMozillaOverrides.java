@@ -22,8 +22,8 @@ public class LimeMozillaOverrides {
     }
 
     public void overrideMozillaDefaults() {
-        // Using asynchronous executor synchronous executor blocks indefinitely
-        // on osx while bootstrapping
+        // Using asynchronous executor because the synchronous executor blocks
+        // indefinitely on osx while bootstrapping
         MozillaExecutor.mozAsyncExec(new Runnable() {
             @Override
             public void run() {
