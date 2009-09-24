@@ -28,7 +28,6 @@ public class CachedGeoLocationIntegrationTest extends LimeTestCase {
         assertTrue(latch.await(5, TimeUnit.SECONDS));
         GeocodeInformation info = GeocodeInformation.fromProperties(GeocodeSettings.GEO_LOCATION.get());
         assertEquals("US", info.getProperty(Property.CountryCode));
-        assertNotNull(info.getProperty(Property.City));
         assertNotNull(info.getProperty(Property.Ip));
         assertNotNull(info.getProperty(Property.Longitude));
         assertNotNull(info.getProperty(Property.Latitude));
