@@ -60,4 +60,11 @@ public class ProbabilisticBooleanSetting extends FloatSetting {
         super.loadValue(sValue);
         value = Math.random() < getValue();
     }
+
+    /**
+     * @return reevaluated boolean based on value of float setting
+     */
+    public boolean evaluateBoolean() {
+        return Math.random() < getValue();
+    }
 }

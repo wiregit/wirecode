@@ -373,4 +373,18 @@ public final class ConnectionSettings extends LimeProps {
 
     public static final IntSetting STABLE_TOTAL_MESSAGES_THRESHOLD = FACTORY.createIntSetting(
             "STABLE_TOTAL_MESSAGES_THRESHOLD", 45);
+    
+    /**
+     * Minimum number of bytes to have been received between two connection
+     * watch dog checks for the watchdog not to close the connection.
+     */
+    public static final IntSetting MIN_BYTES_RECEIVED = FACTORY.createRemoteIntSetting(
+            "MIN_BYTES_RECEIVED", 1024, "ConnectionSettings.minBytesReceived", -1, Integer.MAX_VALUE);
+    
+    /**
+     * Minimum number of bytes to have been sent between two connection
+     * watch dog checks for the watchdog not to close the connection.
+     */
+    public static final IntSetting MIN_BYTES_SENT = FACTORY.createRemoteIntSetting(
+            "MIN_BYTES_SENT", 1024, "ConnectionSettings.minBytesSent", -1, Integer.MAX_VALUE);
 }

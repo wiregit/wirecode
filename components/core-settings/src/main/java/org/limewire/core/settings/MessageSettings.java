@@ -3,6 +3,7 @@ package org.limewire.core.settings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
+import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
@@ -83,4 +84,12 @@ public class MessageSettings extends LimeProps {
      */
     public static final IntSetting MAX_BUFFERED_OOB_REPLIES =
         FACTORY.createIntSetting("MAX_BUFFERED_OOB_REPLIES", 250);
+
+    /**
+     * Probabilistic setting if a signed message with same version number as local
+     * one should be rerequested from new connections, to verify signatures
+     * against each other.
+     */
+    public static final ProbabilisticBooleanSetting REREQUEST_SIGNED_MESSAGE =
+        FACTORY.createRemoteProbabilisticBooleanSetting("REREQUEST_SIGNED_MESSAGE", 0.2f, "MessageSettings.rerequestSignedMessage", 0.0f, 1.0f);
 }
