@@ -164,15 +164,9 @@ public class InspectionsIntegrationTest extends LimeTestCase {
         
         // verify each inspection result
         // TODO make test less fragile and remove sleeps
-//        assertEquals(3, Math.round(((listInspData1.getTimestamp()-origTime)/1000.0)));
-        assertEquals(Integer.valueOf(1), Integer.valueOf(new String((byte[])listInspData1.getData(
-                "org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE"))));
-        //assertEquals(8, Math.round(((listInspData2.getTimestamp()-origTime)/1000.0)));
-        assertEquals(Integer.valueOf(2), Integer.valueOf(new String((byte[])listInspData2.getData(
-                "org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE"))));
-        //assertEquals(13, Math.round(((listInspData3.getTimestamp()-origTime)/1000.0)));
-        assertEquals(Integer.valueOf(3), Integer.valueOf(new String((byte[])listInspData3.getData(
-                "org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE"))));
+        assertEquals(Integer.valueOf(1), Integer.valueOf(new String((byte[])listInspData1.getData(inspections.get(0)))));
+        assertEquals(Integer.valueOf(2), Integer.valueOf(new String((byte[])listInspData2.getData(inspections.get(0)))));
+        assertEquals(Integer.valueOf(3), Integer.valueOf(new String((byte[])listInspData3.getData(inspections.get(0)))));
     }
     
     public void testMultipleInspectionsInOneInspectionsSpec() throws Exception {
@@ -299,9 +293,10 @@ public class InspectionsIntegrationTest extends LimeTestCase {
     public void testInvalidInterval() throws Exception {
         List<String> inspections = 
             Collections.singletonList("org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE");
+        
+        InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.set(60);
         List<InspectionsSpec> specs = Arrays.asList(new InspectionsSpec(inspections, 0, 5));
         
-        InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.revertToDefault(); // client side should enforce this
         // start web server and lw services
         ServerController serverController = startServerWithInspectionSpecs(specs);
         startInspectionsCommunicator();       
