@@ -211,8 +211,10 @@ public class LibraryPanel extends JPanel {
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
                 selectedNavItem = libraryNavigatorPanel.getSelectedNavItem();
-                eventList = libraryList.getSwingModel();
-                selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
+                if (eventList == null) {
+                    eventList = libraryList.getSwingModel();
+                    selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
+                }
                 configureEnclosingScrollPane(libraryScrollPane);
             }
         });        
