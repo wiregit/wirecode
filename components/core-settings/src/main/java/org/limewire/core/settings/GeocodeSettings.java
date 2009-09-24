@@ -19,7 +19,7 @@ public class GeocodeSettings extends LimeProps {
         FACTORY.createRemoteStringSetting("GEOCODE_URL", "http://geo.links.limewire.com/geo/", "GeocodeSettings.geocodeUrlV2");    
     
     /** Last recorded geo location. */
-    static final PropertiesSetting GEO_LOCATION =
+    public static final PropertiesSetting GEO_LOCATION =
         FACTORY.createPropertiesSetting("GEO_LOCATION", new Properties());
 
 }

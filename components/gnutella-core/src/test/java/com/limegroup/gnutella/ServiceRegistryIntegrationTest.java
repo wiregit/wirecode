@@ -89,8 +89,8 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "urncache persister", "ScheduledService",
         "TorrentManager", "LazyTorrentManager",
         "Settings Saver", "SettingsSaverService",
-        "URNBlacklistManager", "URNBlacklistManagerImpl"
-        
+        "URNBlacklistManager", "URNBlacklistManagerImpl",
+        "GeocodeLocation", "CachedGeoLocationImpl"
         };
         
         List<String> missing = new ArrayList<String>();

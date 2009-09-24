@@ -5,14 +5,14 @@ import junit.framework.Test;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.util.BaseTestCase;
 
-public class GeocodeInformationTestCase extends BaseTestCase {
+public class GeocodeInformationTest extends BaseTestCase {
    
-    public GeocodeInformationTestCase(String name) {
+    public GeocodeInformationTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(GeocodeInformationTestCase.class);
+        return buildTestSuite(GeocodeInformationTest.class);
     }
     
     private GeocodeInformation info;

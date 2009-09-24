@@ -1,5 +1,6 @@
 package org.limewire.geocode;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -11,9 +12,9 @@ import java.util.Map.Entry;
  * basically a map from property names to values. Access to these values is
  * through the method {@link #getProperty(GeocodeInformation.Property)}.
  */
-public final class GeocodeInformation {
+public class GeocodeInformation {
 
-    private final Map<Property, String> names2values = new HashMap<Property, String>();
+    private final Map<Property, String> names2values = new EnumMap<Property, String>(Property.class);
 
     /**
      * Maps {@link Property} names to values so that we can turn {@link String}s
@@ -28,6 +29,20 @@ public final class GeocodeInformation {
      * in {@link GeocodeInformation}.
      */
     private final static Map<String, Property> STRINGS2PROPERTIES = new HashMap<String, Property>();
+    
+    /**
+     * Immutable empty geo code information.
+     */
+    public static final GeocodeInformation EMPTY_GEO_INFO = new GeocodeInformation() {
+        @Override
+        public void setProperty(Property arg0, String arg1) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public void setProperty(String arg0, String arg1) {
+            throw new UnsupportedOperationException();
+        }
+    };
 
     /**
      * The various values.
@@ -125,6 +140,13 @@ public final class GeocodeInformation {
         return names2values.get(p);
     }
 
+    /**
+     * @return whether or not there is no information in this object
+     */
+    public boolean isEmpty() {
+        return names2values.isEmpty();
+    }
+    
     public void setProperty(String name, String value) {
         Property prop = getStrings2Properties().get(name);
         if (prop != null) {
@@ -156,13 +178,23 @@ public final class GeocodeInformation {
        return props;
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof GeocodeInformation) {
+            return names2values.equals(((GeocodeInformation)obj).names2values);
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return names2values.hashCode();
+    }
+    
     /**
-     * @return null if there is an error
+     * @return empty geo code information if <code>props</code> are empty
      */
     public static GeocodeInformation fromProperties(Properties props) {
-        if (props.isEmpty()) {
-            return null;
-        }
         GeocodeInformation info = new GeocodeInformation();
         for (Property property : Property.values()) {
             String value = props.getProperty(property.getValue());

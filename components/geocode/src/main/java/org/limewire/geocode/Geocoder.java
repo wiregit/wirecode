@@ -34,42 +34,10 @@ package org.limewire.geocode;
 public interface Geocoder {
 
     /**
-     * Loads geo location information and saves it for access via
-     * {@link #getGeocodeInformation()}.
-     */
-    void initialize();
-
-    /**
-     * Returns the {@link GeocodeInformationImpl} obtained from
-     * {@link #initialize()}.
+     * Returns geo code information.
      * 
-     * @return the {@link GeocodeInformationImpl} obtained from
-     *         {@link #initialize()}
+     * @return empty {@link GeocodeInformation} if there was an error
      */
     GeocodeInformation getGeocodeInformation();
 
-    /**
-     * Returns <code>true</code> if {@link getGeocodeInformation()} will
-     * return a non-null value or {@link #hasFailed()} is <code>true</code>.
-     * 
-     * @return <code>true</code> if {@link getGeocodeInformation()} will
-     *         return a non-null value or {@link #hasFailed()} is
-     *         <code>true</code>
-     */
-    boolean isReady();
-
-    /**
-     * Returns <code>true</code> if we've called {@link #initialize()} and
-     * something happened.
-     * 
-     * @return <code>true</code> if we've called {@link #initialize()} and
-     *         something happened
-     */
-    boolean hasFailed();
-
-    /**
-     * Clears the saved information, including that in the client. This is
-     * mainly used for testing.
-     */
-    void clear();
 }

@@ -3,17 +3,20 @@ package org.limewire.geocode;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
+import junit.framework.TestCase;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.geocode.GeocodeInformation.Property;
 import org.limewire.inject.MutableProvider;
+import org.limewire.inject.MutableProviderImpl;
 import org.limewire.inject.Providers;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.AddressEvent.Type;
 import org.limewire.util.AssignParameterAction;
-
-import com.google.inject.Provider;
-
-import junit.framework.TestCase;
 
 public class CachedGeoLocationImplTest extends TestCase {
 
@@ -21,85 +24,90 @@ public class CachedGeoLocationImplTest extends TestCase {
     private Geocoder geocoder;
     private CachedGeoLocationImpl geoLocation;
     private MutableProvider<Properties> geoLocationSetting;
-    private AddressProvider addressProvider;
+    private MutableProvider<byte[]> addressProvider;
 
     public CachedGeoLocationImplTest(String name) {
         super(name);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
         geocoder = context.mock(Geocoder.class);
-        geoLocationSetting = context.mock(MutableProvider.class);
-        addressProvider = new AddressProvider();
+        geoLocationSetting = new MutableProviderImpl<Properties>(new GeocodeInformation().toProperties());
+        addressProvider = new MutableProviderImpl<byte[]>(new byte[0]);
         geoLocation = new CachedGeoLocationImpl(geoLocationSetting, Providers.of(geocoder), addressProvider);
     }
     
-    public void testGetGeocodeInformationWillTriggerInitializeOnlyOnce() {
+    public void testInitializeWillUseValueFromSetting() {
+        addressProvider.set(new byte[] { (byte)129, 0, 0, 1 });
+        GeocodeInformation info = new GeocodeInformation();
+        info.setProperty(Property.Ip, "129.0.0.1");
+        geoLocationSetting.set(info.toProperties());
         context.checking(new Expectations() {{
-            one(geocoder).initialize();
-            one(geocoder).getGeocodeInformation();
-            will(returnValue(null));
-            allowing(geoLocationSetting).get();
-            will(returnValue(new Properties()));
+            never(geocoder).getGeocodeInformation();
         }});
         
-        // called twice
-        assertNull(geoLocation.get());
-        assertNull(geoLocation.get());
+        geoLocation.initialize();
+        GeocodeInformation result = geoLocation.get();
+        assertEquals(info, result);
         
         context.assertIsSatisfied();
     }
     
-    public void testGetGeocodeInformationWillUseValueFromSetting() {
-        addressProvider.address = new byte[] { (byte)129, 0, 0, 1 };
+    public void testInitializeWillDiscardValueFromSettingIfNoIp() {
+        addressProvider.set(new byte[] { (byte)128, 0, 0, 1 });
         GeocodeInformation info = new GeocodeInformation();
-        info.setProperty(Property.Ip, NetworkUtils.ip2string(addressProvider.address));
-        final Properties properties = new Properties();
-        properties.putAll(info.toProperties());
+        info.setProperty(Property.CountryCode, "US");
+        geoLocationSetting.set(info.toProperties());
         context.checking(new Expectations() {{
-            never(geocoder).initialize();
             never(geocoder).getGeocodeInformation();
-            allowing(geoLocationSetting).get();
-            will(returnValue(properties));
         }});
         
+        geoLocation.initialize();
         GeocodeInformation result = geoLocation.get();
-        assertEquals(info.getProperty(Property.Ip), result.getProperty(Property.Ip));
+        assertTrue(result.isEmpty());
         
         context.assertIsSatisfied();
     }
+    
 
-    public void testInitializeSavesNewValueToSetting() {
-        final AtomicReference<Properties> properties = new AtomicReference<Properties>(null);
+    public void testStartSavesNewValueToSetting() {
         final GeocodeInformation info = new GeocodeInformation();
         info.setProperty(Property.Ip, "129.0.0.1");
         context.checking(new Expectations() {{
-            one(geocoder).initialize();
             one(geocoder).getGeocodeInformation();
             will(returnValue(info));
-            allowing(geoLocationSetting).get();
-            will(returnValue(new Properties()));
-            allowing(geoLocationSetting).set(with(any(Properties.class)));
-            will(new AssignParameterAction<Properties>(properties, 0));
         }});
         
-        geoLocationSetting.set(new Properties());
-        GeocodeInformation result = geoLocation.get();
-        assertSame(info, result);
-        
-        assertEquals("129.0.0.1", properties.get().getProperty(Property.Ip.getValue()));
+        geoLocation.start();
+        assertEquals(info.toProperties(), geoLocationSetting.get());
+        context.assertIsSatisfied();
     }
-    
-    private static class AddressProvider implements Provider<byte []> {
+
+    @SuppressWarnings("unchecked")
+    public void testAddressEventTriggersGeoLocationToBeRefetched() {
+        final GeocodeInformation newInfo = new GeocodeInformation();
+        newInfo.setProperty(Property.Ip, "100.0.0.1");
+        addressProvider.set(new byte[] { 100, 0, 0, 1 });
+        final GeocodeInformation savedInfo = new GeocodeInformation();
+        savedInfo.setProperty(Property.Ip, "129.0.0.1");
+        geoLocationSetting.set(savedInfo.toProperties());
+        final ListenerSupport<AddressEvent> listenerSupport = context.mock(ListenerSupport.class);
+        final AtomicReference<EventListener<AddressEvent>> eventListener = new AtomicReference<EventListener<AddressEvent>>();
         
-        byte [] address;
+        context.checking(new Expectations() {{
+            one(geocoder).getGeocodeInformation();
+            will(returnValue(newInfo));
+            one(listenerSupport).addListener(with(any(EventListener.class)));
+            will(new AssignParameterAction<EventListener<AddressEvent>>(eventListener, 0));
+        }});
         
-        @Override
-        public byte[] get() {
-            return address;
-        }
+        geoLocation.register(listenerSupport);
+        geoLocation.initialize();
+        eventListener.get().handleEvent(new AddressEvent(ConnectableImpl.INVALID_CONNECTABLE, Type.ADDRESS_CHANGED));
+        
+        assertEquals("100.0.0.1", geoLocation.get().getProperty(Property.Ip));
+        context.assertIsSatisfied();
     }
 }

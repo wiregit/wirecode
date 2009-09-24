@@ -101,11 +101,6 @@ public class GeocoderTest extends BaseTestCase {
             will(returnValue(new BasicHeader("Content-Type", HTTP.DEFAULT_CONTENT_TYPE)));
             allowing(httpClient).releaseConnection(with(same(response)));
         }});
-        // Test some state information
-        assertFalse(geo.isReady());
-        geo.initialize();
-        assertTrue(geo.isReady());
-        assertFalse(geo.hasFailed());
         GeocodeInformation info = geo.getGeocodeInformation();
         
         // Make sure we have all the correct properties
@@ -114,11 +109,13 @@ public class GeocoderTest extends BaseTestCase {
         }
     }
     
-    public void testWantNull() {
+    public void testReturnsEmpty() {
+        mockery.checking(new Expectations() {{
+            allowing(geoCodeURL).get();
+            will(returnValue(""));
+        }});
         GeocodeInformation info = geo.getGeocodeInformation();
-        assertNull(info);
-        assertFalse("geo.isReady()", geo.isReady());
-        assertFalse("geo.hasFailed()", geo.hasFailed());
+        assertTrue(info.isEmpty());
     }
     
     private final class StringInputStream extends InputStream {

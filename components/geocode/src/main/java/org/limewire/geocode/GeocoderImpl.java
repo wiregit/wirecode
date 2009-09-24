@@ -12,18 +12,18 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 final class GeocoderImpl implements Geocoder {
     
-  //  private static final Log LOG = LogFactory.getLog(GeocoderImpl.class);
+    private static final Log LOG = LogFactory.getLog(GeocoderImpl.class);
 
     private final Provider<String> geoCodeURL;
     private final Provider<LimeHttpClient> httpClient;
-    private GeocodeInformation info;
-    private boolean failed;
 
     @Inject
     public GeocoderImpl(@GeocodeUrl Provider<String> geoCodeURL,
@@ -32,51 +32,31 @@ final class GeocoderImpl implements Geocoder {
         this.httpClient = client;
     }
 
-    public void initialize() {
+    public GeocodeInformation getGeocodeInformation() {
         String url = geoCodeURL.get();
-        if(url == null || url.equals("")) {
-            failed = true;
-            return;
+        if (url.isEmpty()) {
+            return new GeocodeInformation();
         }
         
         HttpGet get = new HttpGet(url);        
         LimeHttpClient client = httpClient.get();
         HttpResponse response = null;
         try {
-            //System.out.println("GeocodeImpl.initialize: calling client.execute");
             // TODO: The following call seems to hang on some systems.
             response = client.execute(get);
-            //System.out.println("GeocodeImpl.initialize: response = " + response);
             if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 HttpEntity entity = response.getEntity();
                 if(entity != null) {
                     String charset = EntityUtils.getContentCharSet(entity);
-                    setGeocodeInformation(entity.getContent(), charset != null ? charset : HTTP.DEFAULT_CONTENT_CHARSET);
-                    return;
+                    return parseGeoInfo(entity.getContent(), charset != null ? charset : HTTP.DEFAULT_CONTENT_CHARSET);
                 }
             }            
-            failed = true;
         } catch (IOException e) {
-            failed = true;
+            LOG.debug("error parsing", e);
         } finally {
             client.releaseConnection(response);
         }
-    }
-
-    public GeocodeInformation getGeocodeInformation() {
-        return info;
-    }
-
-    public boolean isReady() {
-        return hasFailed() || info != null;
-    }
-
-    public boolean hasFailed() {
-        return failed;
-    }
-
-    public void clear() {
-        info = null;
+        return GeocodeInformation.EMPTY_GEO_INFO;
     }
 
     /**
@@ -96,18 +76,17 @@ final class GeocoderImpl implements Geocoder {
      * @param charset
      * @throws java.io.IOException 
      */
-    protected void setGeocodeInformation(InputStream is, String charset) throws IOException {
+    private GeocodeInformation parseGeoInfo(InputStream is, String charset) throws IOException {
 
         GeocodeInformation res = new GeocodeInformation();
 
         String separator = "\t";
 
         BufferedReader in = new BufferedReader(new InputStreamReader(is, charset));
-        in.readLine(); // ignore the first line
         
         String line;
         while ((line = in.readLine()) != null) {
-            if (line.equals("") || line.startsWith("#")) {
+            if (line.isEmpty() || line.startsWith("#")) {
                 continue;
             }
             String[] parts = line.split(separator);
@@ -118,6 +97,6 @@ final class GeocoderImpl implements Geocoder {
             String value = parts[1];
             res.setProperty(name, value);
         }
-        this.info = res;
+        return res;
     }
 }
