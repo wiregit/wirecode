@@ -14,12 +14,13 @@ import com.google.inject.Provider;
 public class SetupWizard {
 
     private Wizard wizard;
+    private final Application application;
 
 
     @Inject
     public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory,
-            Provider<LibraryManager> libraryManager) {
-
+            Provider<LibraryManager> libraryManager, Application application) {
+        this.application = application;
         createWizard(decoratorFactory.get(), libraryManager.get().getLibraryData());
     }
 
@@ -54,10 +55,10 @@ public class SetupWizard {
         wizard = new Wizard(decorator);
 
         if (shouldShowPage1()) {
-            wizard.addPage(new SetupPage1(decorator));
+            wizard.addPage(new SetupPage1(decorator, application));
         }
         
-        wizard.addPage(new SetupPage2(decorator));
+        wizard.addPage(new SetupPage2(decorator, application));
     }
 
     private static boolean shouldShowPage1() {

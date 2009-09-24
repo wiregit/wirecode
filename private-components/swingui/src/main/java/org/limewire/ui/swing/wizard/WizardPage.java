@@ -6,6 +6,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.limewire.core.api.Application;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.ToggleExtenderListener;
@@ -14,8 +15,11 @@ import org.limewire.ui.swing.options.LearnMoreButton;
 public abstract class WizardPage extends JPanel {
     
     private final SetupComponentDecorator decorator;
-    public WizardPage(SetupComponentDecorator decorator) {
+    private final Application application;
+    
+    public WizardPage(SetupComponentDecorator decorator, Application application) {
         this.decorator = decorator;
+        this.application = application;
     }
     
     public abstract void applySettings();
@@ -56,7 +60,7 @@ public abstract class WizardPage extends JPanel {
     }
     
     protected HyperlinkButton createAndDecorateHyperlink(final String url) {
-        HyperlinkButton learnMoreButton = new LearnMoreButton(url);
+        HyperlinkButton learnMoreButton = new LearnMoreButton(url, application);
         decorator.decorateLink(learnMoreButton);
         return learnMoreButton;
     }

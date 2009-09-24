@@ -42,6 +42,7 @@ public class SearchOptionPanel extends OptionPanel {
 
     private final AutoCompleteDictionary searchHistory;
     private final SpamManager spamManager;
+    private final Application application;
     
     private final UnsafeTypeOptionPanel unsafeOptionPanel;
     private final Provider<UnsafeTypeOptionPanelStateManager> unsafeTypeOptionPanelStateManagerProvider;
@@ -56,6 +57,7 @@ public class SearchOptionPanel extends OptionPanel {
             UnsafeTypeOptionPanel unsafeOptionPanel,
             Provider<UnsafeTypeOptionPanelStateManager> stateManager, 
             Application application) {
+        this.application = application;
         this.spamManager = spamManager;
         this.searchHistory = searchHistory;
         this.unsafeOptionPanel = unsafeOptionPanel;
@@ -250,7 +252,7 @@ public class SearchOptionPanel extends OptionPanel {
             add(configureButton, "wrap");
             
             add(copyrightContentCheckBox);
-            add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=copyright"), "wrap");
+            add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=copyright", application), "wrap");
             add(adultContentCheckBox, "wrap");
             
             add(filterKeywordsButton, "gapright 10, alignx left");

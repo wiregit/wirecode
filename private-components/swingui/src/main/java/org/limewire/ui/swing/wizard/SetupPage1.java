@@ -4,6 +4,7 @@ import javax.swing.JCheckBox;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.ui.swing.settings.InstallSettings;
@@ -24,8 +25,8 @@ public class SetupPage1 extends WizardPage {
     private final JCheckBox shareUsageDataCheckBox;
     private final JCheckBox contentFilterCheckBox;
     
-    public SetupPage1(SetupComponentDecorator decorator){
-        super(decorator);
+    public SetupPage1(SetupComponentDecorator decorator, Application application){
+        super(decorator, application);
         
         setOpaque(false);
         setLayout(new MigLayout("insets 0 14 0 0, gap 0"));       

@@ -11,6 +11,7 @@ import javax.swing.JSeparator;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -27,8 +28,8 @@ public class SetupPage2 extends WizardPage {
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
 
-    public SetupPage2(SetupComponentDecorator decorator) {
-        super(decorator);
+    public SetupPage2(SetupComponentDecorator decorator, Application application) {
+        super(decorator, application);
 
         GuiUtils.assignResources(this);
 
