@@ -86,7 +86,7 @@ public class MiscOptionPanel extends OptionPanel {
         shareUsageDataCheckBox = new JCheckBox((I18n.tr("Help improve LimeWire by sending us anonymous usage data")));
         shareUsageDataCheckBox.setOpaque(false);
         add(shareUsageDataCheckBox);
-        add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=anonymousDataCollection"), "wrap");
+        add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=anonymousDataCollection", application), "wrap");
     }
 
     private OptionPanel getNotificationsPanel() {
