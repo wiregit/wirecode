@@ -71,6 +71,7 @@ import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
+import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -173,6 +174,7 @@ public class LibraryPanel extends JPanel {
         tableListPanel = new JPanel(tableListLayout);
         
         libraryTable.setTransferHandler(transferHandler);
+        DNDUtils.fixDnDforKDE(libraryTable);
         libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
         configureEnclosingScrollPane(libraryScrollPane);
@@ -211,8 +213,10 @@ public class LibraryPanel extends JPanel {
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
                 selectedNavItem = libraryNavigatorPanel.getSelectedNavItem();
-                eventList = libraryList.getSwingModel();
-                selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
+                if (eventList == null) {
+                    eventList = libraryList.getSwingModel();
+                    selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
+                }
                 configureEnclosingScrollPane(libraryScrollPane);
             }
         });        
@@ -341,6 +345,7 @@ public class LibraryPanel extends JPanel {
     private void createImageList() {
         libraryImagePanel = libraryImagePanelProvider.get();
         libraryImagePanel.setTransferHandler(transferHandler);
+        // setTransferHandler() is overriden so kde hack not needed
         tableListPanel.add(libraryImagePanel, LIST); 
     }
     
