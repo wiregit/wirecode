@@ -59,7 +59,7 @@ class DeleteAction extends AbstractAction {
         else if (OSUtils.isMacOSX() && OSUtils.supportsTrash()) {
             title = I18n.trn("Move File to the Trash", "Move Files to the Trash", selectedItems.size());
             message = I18n.trn("Move this file to the Trash?", 
-                    "Move this file to the Trash?", selectedItems.size());
+                    "Move these files to the Trash?", selectedItems.size());
             yesText = I18n.tr("Move to Trash");
         }
         else {
