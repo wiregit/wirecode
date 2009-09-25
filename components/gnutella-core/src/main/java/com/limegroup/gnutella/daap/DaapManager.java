@@ -1089,7 +1089,7 @@ public class DaapManager {
         public void close() {
             unregisterService();
             zeroConf.close();
-        }
+        }   
     }
 
     /**
@@ -1097,16 +1097,11 @@ public class DaapManager {
      */
     private void handleManagedListStatusEvent(final LibraryStatusEvent evt) {
         
-        // if Daap isn't enabled ignore events
-        if(!DaapSettings.DAAP_ENABLED.getValue())
-            return;
-        
         DAAP_EVENT_QUEUE.execute(new Runnable(){
             public void run(){
                 switch(evt.getType()) {
                     case LOAD_COMPLETE:
                         setEnabled(true);
-                        return;
                 }
             }
         });
