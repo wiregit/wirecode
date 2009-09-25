@@ -92,15 +92,22 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
      * 
      * @param showEditingMode whether to open the panel up in friends editing mode.
      */
-    public void showSharedFileList(SharedFileList list, boolean showEditingMode) {
+    public void showSharedFileList(final SharedFileList list, final boolean showEditingMode) {
         NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, NAME);
         item.select();
-        getComponent().selectLocalFileList(list);
+        getComponent();
         
-        // if sharedList can be edited, enable it
-        if (showEditingMode) {
-            getComponent().showEditMode();
-        }
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run() {
+                getComponent().selectLocalFileList(list);
+                
+                // if sharedList can be edited, enable it
+                if (showEditingMode) {
+                    getComponent().showEditMode();
+                }                
+            }
+        });
     }
 
     /**
