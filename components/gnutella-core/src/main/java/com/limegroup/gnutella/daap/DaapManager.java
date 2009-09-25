@@ -25,7 +25,9 @@ import org.limewire.inject.EagerSingleton;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
+import org.limewire.lifecycle.Join;
 import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceStage;
 import org.limewire.listener.EventListener;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
@@ -115,11 +117,13 @@ public class DaapManager {
     @Inject
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(new Service() {
+            @Asynchronous(join = Join.NONE)
             public void start() {
                 if (DaapSettings.DAAP_ENABLED.getValue()) {
                     try {
                         DaapManager.this.start();
                     } catch (IOException err) {
+                        LOG.debug("error starting DAAP", err);
                         MessageService.showError(I18nMarker.marktr("LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under Advanced -> Files -> iTunes."));
                         DaapSettings.DAAP_ENABLED.setValue(false);
                     }
@@ -149,7 +153,7 @@ public class DaapManager {
             public String getServiceName() {
                 return "DAAP";
             }
-        });
+        }).in(ServiceStage.VERY_LATE);
     }
     
     /**

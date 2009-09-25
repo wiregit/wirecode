@@ -276,8 +276,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
     /** Runs all tasks that can be done in the background while the gui inits. */
     private void doBackgroundTasks() {
-        serviceRegistry.start("SuperEarly");
-        serviceRegistry.start("EarlyBackground");
+        serviceRegistry.start("SuperEarly"); // Load settings and simpp message
+        serviceRegistry.start("EarlyBackground"); // Open listening ports and load spam filter
         backgroundDone.set(true);
     }
 

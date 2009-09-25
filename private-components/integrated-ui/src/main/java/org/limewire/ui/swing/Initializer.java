@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.io.IOUtils;
@@ -67,7 +66,6 @@ import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
-import com.limegroup.gnutella.UPnPManager;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.connection.ConnectionReporter;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -97,7 +95,6 @@ final class Initializer {
     @Inject private Provider<LifecycleManager> lifecycleManager;
     @Inject private Provider<LimeCoreGlue> limeCoreGlue;
     @Inject private Provider<NIODispatcher> nioDispatcher;
-    @Inject private Provider<UPnPManager> upnpManager;
     @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
     @Inject private Provider<ConnectionReporter> connectionReporter;
     
@@ -623,11 +620,6 @@ final class Initializer {
         // but it needs to be constructed at this point  
         lifecycleManager.get().start();
         stopwatch.resetAndLog("lifecycle manager start");
-        
-        if (!ConnectionSettings.DISABLE_UPNP.getValue()) {
-            upnpManager.get().start();
-            stopwatch.resetAndLog("start UPnPManager");
-        }
     }
     
     /** Runs control requests that we queued early in initializing. */

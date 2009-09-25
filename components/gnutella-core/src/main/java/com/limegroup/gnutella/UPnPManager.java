@@ -23,14 +23,17 @@ import org.cybergarage.upnp.DeviceList;
 import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.lifecycle.ServiceStage;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 
 /**
@@ -77,9 +80,8 @@ import com.google.inject.Singleton;
  * After we discover a router or give up on trying to, we should call stop().
  * 
  */
-@Singleton
-public class UPnPManager  {
-    // TODO convert to Service
+@EagerSingleton
+public class UPnPManager implements org.limewire.lifecycle.Service {
     // TODO move to net
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
@@ -149,27 +151,41 @@ public class UPnPManager  {
 	    for(UPnPListener listener : listeners) 
 	        listener.natFound();
 	}
-    
-    public void start() {
-        // TODO Service.start()
-        if (!started.getAndSet(true)) {
-            startTime = System.currentTimeMillis();
-            LOG.debug("Starting UPnP Manager.");
-            controlPoint.addDeviceChangeListener(new DeviceListener());
 
-            synchronized (DEVICE_LOCK) {
-                try {
-                    controlPoint.start();
-                } catch (Exception bad) {
-                    configuration.setEnabled(false);
-                    ErrorService.error(bad);
+    @Inject
+    void register(ServiceRegistry registry) {
+        registry.register(this).in(ServiceStage.VERY_LATE);
+    }
+
+    @Override
+    public void initialize() {
+    }
+
+    @Override
+    public String getServiceName() {
+        return "UPnPManager";
+    }
+
+    public void start() {
+        if (!ConnectionSettings.DISABLE_UPNP.getValue()) {
+            if (!started.getAndSet(true)) {
+                startTime = System.currentTimeMillis();
+                LOG.debug("Starting UPnP Manager.");
+                controlPoint.addDeviceChangeListener(new DeviceListener());
+
+                synchronized (DEVICE_LOCK) {
+                    try {
+                        controlPoint.start();
+                    } catch (Exception bad) {
+                        configuration.setEnabled(false);
+                        ErrorService.error(bad);
+                    }
                 }
             }
         }
     }
     
     public void stop() {
-        // TODO Service.stop()
         controlPoint.stop();
     }
 	

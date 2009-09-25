@@ -5,6 +5,7 @@ bcel.version=
 cglib-nodep.version=
 clink.version=
 commons-codec.version=1.3
+commons-lang=2.2
 commons-logging.version=
 commons-math.version=1.2
 daap.version=

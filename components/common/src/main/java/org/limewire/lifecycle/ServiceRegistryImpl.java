@@ -6,11 +6,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.ClassUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
+import org.limewire.util.Stopwatch;
 
 @EagerSingleton
 class ServiceRegistryImpl implements ServiceRegistry {
@@ -73,20 +75,20 @@ class ServiceRegistryImpl implements ServiceRegistry {
     }
     
     public void start() {
-        initialize();        
+        initialize();
+        Stopwatch stopwatch = new Stopwatch(LOG);        
         for(ServiceStage stage : getStagesInOrder()) {
-            startStage(stage);            
+            startStage(stage);
         }
+        stopwatch.resetAndLog("started ServiceRegistry");
     }
     
     private void startStage(Object stage) {
+        Stopwatch stopwatch = new Stopwatch(LOG);
         List<ServiceHolder> servicedStages = services.get(stage);
         if(servicedStages != null) {
             for(Iterator<ServiceHolder> iter = servicedStages.iterator(); iter.hasNext(); ) {
                 ServiceHolder service = iter.next();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("starting service: " + service.service.service.getClass().getSimpleName());
-                }
                 try {
                     service.start();
                     startedServices.add(service);
@@ -105,13 +107,14 @@ class ServiceRegistryImpl implements ServiceRegistry {
                 }
             }
         }
+        if(LOG.isTraceEnabled()) {
+            stopwatch.resetAndLog("started stage " + stage.toString());
+        }
     }
     
     public void stop() {
+        Stopwatch stopwatch = new Stopwatch(LOG);       
         for(int i = startedServices.size()-1; i >= 0; i--) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("stopping service: " + startedServices.get(i).service.service.getClass().getSimpleName());
-            }
             startedServices.get(i).stop();
         }
         for(int i = startedServices.size()-1; i >= 0; i--) {
@@ -121,6 +124,9 @@ class ServiceRegistryImpl implements ServiceRegistry {
                 e.printStackTrace();  // TODO log, throw?
             }
             startedServices.remove(i);
+        }
+        if(LOG.isTraceEnabled()) {
+            stopwatch.resetAndLog("stopped ServiceRegistry");
         }
     }
     
@@ -135,7 +141,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
     }
 
     ServiceStage[] getStagesInOrder() {
-        return new ServiceStage[] { ServiceStage.EARLY, ServiceStage.NORMAL, ServiceStage.LATE };
+        return new ServiceStage[] { ServiceStage.EARLY, ServiceStage.NORMAL, ServiceStage.LATE, ServiceStage.VERY_LATE };
     }
     
     private class ServiceHolder {
@@ -200,7 +206,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
             public void initialize() {
                 service.initialize();
             }
-
+                  
             public String getServiceName() {
                 return service.getServiceName();
             }
@@ -210,16 +216,22 @@ class ServiceRegistryImpl implements ServiceRegistry {
                 if(asynchronous != null) {
                     serviceExecutor = asyncStart();
                 } else {
+                    Stopwatch stopwatch = new Stopwatch(LOG);
                     service.start();
+                    if(LOG.isTraceEnabled()) {
+                        stopwatch.resetAndLog("started " + ClassUtils.getShortClassName(service.getClass()));
+                    }
                 }
             }
-            
+
             private Thread asyncStart() {
                 Thread startThread = ThreadExecutor.newManagedThread(new Runnable() {
                     public void run() {
-                        // TODO LOG
+                        Stopwatch stopwatch = new Stopwatch(LOG);
                         service.start();
-                        // TODO LOG
+                        if(LOG.isTraceEnabled()) {
+                            stopwatch.resetAndLog("started " + ClassUtils.getShortClassName(service.getClass()));
+                        }
                     }
                 }, "ServiceRegistry-start-" + service.getServiceName());
                 startThread.setDaemon(asynchronous.daemon());
@@ -233,7 +245,11 @@ class ServiceRegistryImpl implements ServiceRegistry {
                 if(asynchronous != null) {
                     serviceExecutor = asyncStop();
                 } else {
+                    Stopwatch stopwatch = new Stopwatch(LOG);
                     service.stop();
+                    if(LOG.isTraceEnabled()) {
+                        stopwatch.resetAndLog("stopped " + ClassUtils.getShortClassName(service.getClass()));
+                    }
                 }
             }
 
@@ -250,9 +266,11 @@ class ServiceRegistryImpl implements ServiceRegistry {
             private Thread asyncStop() {
                 Thread stopThread = ThreadExecutor.newManagedThread(new Runnable() {
                     public void run() {
-                        // TODO LOG
+                        Stopwatch stopwatch = new Stopwatch(LOG);
                         service.stop();
-                        // TODO LOG
+                        if(LOG.isTraceEnabled()) {
+                            stopwatch.resetAndLog("stopped " + ClassUtils.getShortClassName(service.getClass()));
+                        }
                     }
                 }, "ServiceRegistry-stop-" + service.getServiceName());
                 stopThread.setDaemon(asynchronous.daemon());
