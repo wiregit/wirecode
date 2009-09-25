@@ -23,7 +23,7 @@ public abstract class OptionPanel extends JPanel {
                 TitledBorder.DEFAULT_JUSTIFICATION, 
                 TitledBorder.DEFAULT_POSITION, 
                 new Font("Dialog", Font.BOLD, 12), new Color(0x313131)));
-        setLayout(new MigLayout("insets 4, fill"));
+        setLayout(new MigLayout("insets 4, fill, nogrid"));
         setOpaque(false);
     }
 
