@@ -137,7 +137,7 @@ public interface Torrent {
     /**
      * Updates this torrents internal state using the given LibTorrentAlerts.
      */
-    public void alert(TorrentAlert alert);
+    public void handleFastResumeAlert(TorrentAlert alert);
 
     /**
      * Registers the torrent with the torrent manager.

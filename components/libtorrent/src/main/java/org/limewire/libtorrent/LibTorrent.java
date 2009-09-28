@@ -45,9 +45,10 @@ interface LibTorrent extends Library {
 
     /**
      * Reads any stored alerts in the session, having there data coming in
-     * through the callback.
+     * through the callback.  Use the mask to filter and discard alerts
+     * that do not match.
      */
-    public WrapperStatus get_alerts(AlertCallback alertCallback);
+    public WrapperStatus get_alerts(AlertCallback alertCallback, int mask);
 
     /**
      * Fills in the Libtorrent status struct for the torrent with the given sha1
@@ -189,4 +190,10 @@ interface LibTorrent extends Library {
      */
     public WrapperStatus has_metadata(String sha1, IntByReference has_metadata);
 
+    /**
+     * Sets the global alert mask and enables creation of the various events
+     *  that match with the mask.  
+     */
+    public WrapperStatus set_alert_mask(int mask);
+    
 }

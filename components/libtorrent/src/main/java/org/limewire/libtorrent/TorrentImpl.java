@@ -347,12 +347,12 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public void alert(TorrentAlert alert) {
+    public void handleFastResumeAlert(TorrentAlert alert) {
         lock.writeLock().lock();
         try {
-            if (alert.getCategory() == TorrentAlert.SAVE_RESUME_DATA_ALERT) {
-                listeners.broadcast(TorrentEvent.FAST_RESUME_FILE_SAVED);
-            }
+            
+            listeners.broadcast(TorrentEvent.FAST_RESUME_FILE_SAVED);
+
         } finally {
             lock.writeLock().unlock();
         }

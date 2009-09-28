@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -45,11 +47,19 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
 
+    private static final int GLOBAL_ALERT_MASK = LibTorrentAlert.storage_notification 
+                                               | LibTorrentAlert.progress_notification
+                                               | LibTorrentAlert.status_notification;
+    
+    private static final int CALLBACK_ALERT_MASK = GLOBAL_ALERT_MASK;
+    
     private final ScheduledExecutorService fastExecutor;
 
     private final LibTorrentWrapper libTorrent;
 
     private final Map<String, Torrent> torrents;
+    
+    private final BasicAlertCallback alertCallback = new BasicAlertCallback();
 
     private final AtomicReference<TorrentManagerSettings> torrentSettings = new AtomicReference<TorrentManagerSettings>(
             null);
@@ -367,8 +377,6 @@ public class TorrentManagerImpl implements TorrentManager {
         if (isValid()) {
             lock.writeLock().lock();
             try {
-                torrentFuture = fastExecutor.scheduleWithFixedDelay(new EventPoller(), 1000, 500,
-                        TimeUnit.MILLISECONDS);
                 alertFuture = fastExecutor.scheduleWithFixedDelay(new AlertPoller(), 1000, 500,
                         TimeUnit.MILLISECONDS);
                 resumeFileFuture = fastExecutor.scheduleWithFixedDelay(new ResumeDataScheduler(),
@@ -395,7 +403,7 @@ public class TorrentManagerImpl implements TorrentManager {
             }
 
             if (isValid()) {
-                libTorrent.freeze_and_save_all_fast_resume_data(new BasicAlertCallback());
+                libTorrent.freeze_and_save_all_fast_resume_data(alertCallback);
                 libTorrent.abort_torrents();
             }
             torrents.clear();
@@ -429,6 +437,8 @@ public class TorrentManagerImpl implements TorrentManager {
      */
     private class BasicAlertCallback implements AlertCallback {
 
+        private final Set<String> updatedTorrents = new HashSet<String>();
+        
         @Override
         public void callback(LibTorrentAlert alert) {
             if (LOG.isDebugEnabled()) {
@@ -437,11 +447,28 @@ public class TorrentManagerImpl implements TorrentManager {
 
             String sha1 = alert.getSha1();
             if (sha1 != null) {
-                Torrent torrent = torrents.get(sha1);
-                if (torrent != null) {
-                    torrent.alert(alert);
+                updatedTorrents.add(sha1);
+                
+                if (alert.getCategory() == LibTorrentAlert.status_notification) {
+                    Torrent torrent = torrents.get(sha1);
+                    if (torrent != null) {
+                        torrent.handleFastResumeAlert(alert);
+                    }
                 }
             }
+        }
+        
+        /** 
+         * Updates the status of all torrents that have recently recieved an event
+         */
+        public void updateAlertedTorrents() {
+            for ( String sha1 : updatedTorrents ) {
+                Torrent torrent = torrents.get(sha1);
+                if (torrent != null) {
+                    updateStatus(torrent);
+                }
+            }
+            updatedTorrents.clear();
         }
     }
 
@@ -450,29 +477,14 @@ public class TorrentManagerImpl implements TorrentManager {
      * the java code through the alertCallback interface.
      */
     private class AlertPoller implements Runnable {
-        private final BasicAlertCallback callback = new BasicAlertCallback();
 
         @Override
         public void run() {
-            libTorrent.get_alerts(callback);
-        }
-    }
-
-    /**
-     * Iterates through the torrents updating the status of each one to the
-     * correct current state.
-     */
-    private class EventPoller implements Runnable {
-
-        @Override
-        public void run() {
-            pumpStatus();
-        }
-
-        private void pumpStatus() {
-            for (Torrent torrent : torrents.values()) {
-                updateStatus(torrent);
-            }
+            // Handle any alerts for fastresume/progress/status changes
+            libTorrent.get_alerts(alertCallback, CALLBACK_ALERT_MASK);
+            
+            // Update status of alerted torrents
+            alertCallback.updateAlertedTorrents();
         }
     }
 
@@ -524,6 +536,7 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void setTorrentManagerSettings(TorrentManagerSettings settings) {
         validateLibrary();
+        libTorrent.set_alert_mask(GLOBAL_ALERT_MASK);
         torrentSettings.set(settings);
         libTorrent.update_settings(settings);
         limitSeedingTorrents();

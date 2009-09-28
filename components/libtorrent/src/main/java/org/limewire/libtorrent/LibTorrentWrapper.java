@@ -88,9 +88,9 @@ class LibTorrentWrapper {
         LOG.debug("after get_alerts");
     }
 
-    public void get_alerts(AlertCallback alertCallback) {
+    public void get_alerts(AlertCallback alertCallback, int mask) {
         LOG.debug("before get_alerts");
-        catchWrapperException(libTorrent.get_alerts(alertCallback));
+        catchWrapperException(libTorrent.get_alerts(alertCallback, mask));
         LOG.debug("after get_alerts");
     }
 
@@ -324,5 +324,11 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.has_metadata(id, has_metadata));
         LOG.debugf("after has_metadata: {0}", id);
         return has_metadata.getValue() != 0;
+    }
+    
+    public void set_alert_mask(int mask) {
+        LOG.debugf("before set_alert_mask: {0}", mask);
+        catchWrapperException(libTorrent.set_alert_mask(mask));
+        LOG.debugf("after set_alert_mask: {0}", mask);
     }
 }
