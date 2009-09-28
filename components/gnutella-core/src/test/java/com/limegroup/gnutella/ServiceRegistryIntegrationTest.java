@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.Test;
-
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lifecycle.Service;
@@ -15,6 +13,8 @@ import org.limewire.lifecycle.ServiceStage;
 import org.limewire.lifecycle.StagedRegisterBuilder;
 
 import com.google.inject.AbstractModule;
+
+import junit.framework.Test;
 
 public class ServiceRegistryIntegrationTest extends LimeTestCase {
     
@@ -90,7 +90,8 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "TorrentManager", "LazyTorrentManager",
         "Settings Saver", "SettingsSaverService",
         "URNBlacklistManager", "URNBlacklistManagerImpl",
-        "GeocodeLocation", "CachedGeoLocationImpl"
+        "GeocodeLocation", "CachedGeoLocationImpl",
+        "UPnPManager", "UPnPManager"
         };
         
         List<String> missing = new ArrayList<String>();
