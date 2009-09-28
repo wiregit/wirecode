@@ -637,7 +637,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
     
     private File createMaximumPathLengthDirectory() throws IOException {
         File tmpFile = File.createTempFile("temp", "file");
-        File tmpDir = tmpFile.getParentFile();
+        // canonicalize, since tmpFile could be a symlink to a longer directory
+        File tmpDir = tmpFile.getParentFile().getCanonicalFile();
         tmpFile.delete();
         
         char[] dirName = new char[OSUtils.getMaxPathLength() - tmpDir.getAbsolutePath().length()];
