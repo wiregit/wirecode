@@ -164,6 +164,7 @@ public class ListViewTable extends ResultsTable<VisualSearchResult> {
      */
     public void updateRowSizes() {
         DefaultEventTableModel model = getEventTableModel();
+        if (model == null) return;
         
         setIgnoreRepaints(true);
         
