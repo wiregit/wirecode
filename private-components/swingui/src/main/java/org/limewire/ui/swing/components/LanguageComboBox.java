@@ -41,7 +41,14 @@ public class LanguageComboBox extends NonNullJComboBox {
             
             if (value instanceof Locale) {
                 Locale locale = (Locale) value;
-                setText(locale.getDisplayName(locale));
+                
+                String language = locale.getDisplayName(locale);
+                if (language.equals("Gallegan")) {                
+                    setText("galego");
+                } 
+                else {
+                    setText(language);
+                }
             } else {
                 setIcon(null);
             }
