@@ -42,7 +42,8 @@ class LibTorrentWrapper {
             NativeLibrary lib = NativeLibrary.getInstance("torrent-wrapper");
             validate(lib);
             init(torrentSettings);
-            //TODO add get_version method to the wrapper that can be checked here as well.
+            // TODO add get_version method to the wrapper that can be checked
+            // here as well.
             loaded.set(true);
         } catch (Throwable e) {
             LOG.error("Failure loading the libtorrent libraries.", e);
@@ -327,7 +328,7 @@ class LibTorrentWrapper {
         LOG.debugf("after has_metadata: {0}", id);
         return has_metadata.getValue() != 0;
     }
-    
+
     public boolean is_valid(String id) {
         LOG.debugf("before is_valid: {0}", id);
         IntByReference is_valid = new IntByReference(0);
@@ -345,7 +346,7 @@ class LibTorrentWrapper {
         LOG.debugf("after get_torrent_info: {0}", id);
         return new TorrentInfoImpl(info, files);
     }
-    
+
     public void free_torrent_info(LibTorrentInfo info) {
         LOG.debugf("before free_torrent_info: {0}", info);
         catchWrapperException(libTorrent.free_torrent_info(info.getPointer()));
