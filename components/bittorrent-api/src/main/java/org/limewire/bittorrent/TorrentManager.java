@@ -130,4 +130,19 @@ public interface TorrentManager {
      * Returns a snapshot list of the torrents that are currently in the torrent manager.
      */
     public List<Torrent> getTorrents();
+    
+    /**
+     * Returns true if the given torrent is valid.
+     */
+    public boolean isValid(Torrent torrent);
+    
+    /**
+     * Returns true if the given torrent has metadata. 
+     */
+    public boolean hasMetaData(Torrent torrent);
+
+    /**
+     * Returns the torrent info for the given torrent.  
+     */
+    public TorrentInfo getTorrentInfo(Torrent torrent);
 }

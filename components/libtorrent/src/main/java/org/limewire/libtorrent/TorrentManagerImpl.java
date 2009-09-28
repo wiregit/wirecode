@@ -238,20 +238,8 @@ public class TorrentManagerImpl implements TorrentManager {
         try {
             LibTorrentStatus torrentStatus = getStatus(torrent);
             torrent.updateStatus(torrentStatus);
-            addMetaData(torrent);
         } finally {
             lock.readLock().unlock();
-        }
-    }
-
-    private void addMetaData(Torrent torrent) {
-        if (!torrent.hasMetaData() && libTorrent.has_metadata(torrent.getSha1())) {
-            // TODO add more data to the torrentInfo object
-            List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
-            if (fileEntries.size() > 0) {
-                TorrentInfo torrentInfo = new TorrentInfo(fileEntries);
-                torrent.setTorrentInfo(torrentInfo);
-            }
         }
     }
 
@@ -592,8 +580,39 @@ public class TorrentManagerImpl implements TorrentManager {
     public List<Torrent> getTorrents() {
         List<Torrent> torrents = null;
         synchronized (this.torrents) {
-             torrents = new ArrayList<Torrent>(this.torrents.values());    
+            torrents = new ArrayList<Torrent>(this.torrents.values());
         }
         return torrents;
+    }
+
+    @Override
+    public boolean isValid(Torrent torrent) {
+        lock.readLock().lock();
+        try {
+            String sha1 = torrent.getSha1();
+            return torrents.containsKey(sha1) && libTorrent.is_valid(sha1);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean hasMetaData(Torrent torrent) {
+        lock.readLock().lock();
+        try {
+            return libTorrent.has_metadata(torrent.getSha1());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public TorrentInfo getTorrentInfo(Torrent torrent) {
+        lock.readLock().lock();
+        try {
+            return libTorrent.get_torrent_info(torrent.getSha1());
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 }

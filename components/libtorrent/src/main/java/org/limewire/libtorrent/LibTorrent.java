@@ -188,5 +188,20 @@ interface LibTorrent extends Library {
      * Checks if the given torrent has metadata yet. 
      */
     public WrapperStatus has_metadata(String sha1, IntByReference has_metadata);
+    
+    /**
+     * Checks if the given torrent is Valid. 
+     */
+    public WrapperStatus is_valid(String sha1, IntByReference is_valid);
+    
+    /**
+     * Returns the TorrentInfo for the given torrent.
+     */
+    public WrapperStatus get_torrent_info(String sha1, LibTorrentInfo torrentInfo);
+
+    /**
+     * Frees memory for the torrent info. 
+     */
+    public WrapperStatus free_torrent_info(Pointer pointer);
 
 }

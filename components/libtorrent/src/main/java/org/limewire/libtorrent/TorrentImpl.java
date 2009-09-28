@@ -7,6 +7,7 @@ import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,6 +43,8 @@ import com.google.inject.name.Named;
  * back to the TorrentManager.
  */
 public class TorrentImpl implements Torrent {
+    private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+
     private final AsynchronousEventMulticaster<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;
@@ -272,6 +275,10 @@ public class TorrentImpl implements Torrent {
         lock.writeLock().lock();
         try {
             if (started.get() && !cancelled.getAndSet(true)) {
+                // updating the torrent info object 1 last time.
+                TorrentInfo ti = torrentManager.getTorrentInfo(this);
+                torrentInfo.set(ti);
+                // removing the torrent handle from libtorrent.
                 torrentManager.removeTorrent(this);
             }
             listeners.broadcast(TorrentEvent.STOPPED);
@@ -411,14 +418,14 @@ public class TorrentImpl implements Torrent {
     public List<TorrentFileEntry> getTorrentFileEntries() {
         lock.readLock().lock();
         try {
-            if (cancelled.get()) {
-                //TODO change to isValid check.
+            if (!isValid()) {
                 TorrentInfo torrentInfo = this.torrentInfo.get();
                 if (torrentInfo == null) {
                     return Collections.emptyList();
                 }
                 return torrentInfo.getTorrentFileEntries();
             }
+
             return torrentManager.getTorrentFileEntries(this);
         } finally {
             lock.readLock().unlock();
@@ -457,18 +464,31 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public void setTorrentInfo(TorrentInfo torrentInfo) {
-        this.torrentInfo.set(torrentInfo);
-        listeners.broadcast(TorrentEvent.META_DATA_UPDATED);
-    }
-
-    @Override
     public boolean hasMetaData() {
-        return torrentInfo.get() != null;
+        return torrentInfo.get() != null || torrentManager.hasMetaData(this);
     }
 
     @Override
     public TorrentInfo getTorrentInfo() {
+        if (isValid() && hasMetaData() && torrentInfo.get() == null) {
+            TorrentInfo ti = torrentManager.getTorrentInfo(this);
+            torrentInfo.set(ti);
+        }
         return torrentInfo.get();
+    }
+
+    @Override
+    public Object getProperty(String key) {
+        return properties.get(key);
+    }
+
+    @Override
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    @Override
+    public boolean isValid() {
+        return torrentManager.isValid(this);
     }
 }

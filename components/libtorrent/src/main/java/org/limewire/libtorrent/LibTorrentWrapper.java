@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.TorrentException;
+import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.libtorrent.callback.AlertCallback;
@@ -324,5 +326,29 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.has_metadata(id, has_metadata));
         LOG.debugf("after has_metadata: {0}", id);
         return has_metadata.getValue() != 0;
+    }
+    
+    public boolean is_valid(String id) {
+        LOG.debugf("before is_valid: {0}", id);
+        IntByReference is_valid = new IntByReference(0);
+        catchWrapperException(libTorrent.is_valid(id, is_valid));
+        LOG.debugf("after is_valid: {0}", id);
+        return is_valid.getValue() != 0;
+    }
+
+    public TorrentInfo get_torrent_info(String id) {
+        LOG.debugf("before get_torrent_info: {0}", id);
+        LibTorrentInfo info = new LibTorrentInfo();
+        catchWrapperException(libTorrent.get_torrent_info(id, info));
+        free_torrent_info(info);
+        TorrentFileEntry[] files = get_files(id);
+        LOG.debugf("after get_torrent_info: {0}", id);
+        return new TorrentInfoImpl(info, files);
+    }
+    
+    public void free_torrent_info(LibTorrentInfo info) {
+        LOG.debugf("before free_torrent_info: {0}", info);
+        catchWrapperException(libTorrent.free_torrent_info(info.getPointer()));
+        LOG.debugf("after free_torrent_info: {0}", info);
     }
 }
