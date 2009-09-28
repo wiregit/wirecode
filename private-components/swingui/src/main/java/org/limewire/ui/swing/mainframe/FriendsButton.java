@@ -215,7 +215,7 @@ public class FriendsButton extends LimeComboBox {
             browseFriendMenuItem = new ActionLabel(browseFriendsActionProvider.get());
         }
         else {
-            browseFriendMenuItem = new JLabel(BrowseFriendsAction.DISPLAY_TEXT);
+            browseFriendMenuItem = new JLabel(I18n.tr(BrowseFriendsAction.DISPLAY_TEXT));
             browseFriendMenuItem.setEnabled(false);
         }
         menu.add(decorateItem(browseFriendMenuItem));
