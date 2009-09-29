@@ -29,7 +29,14 @@ public class WindowsUtils {
         if(!isLoginStatusAvailable())
             return;
         
-        File startup = new File(SystemUtils.getSpecialPath(SpecialLocations.START_MENU_STARTUP));
+        String path = SystemUtils.getSpecialPath(SpecialLocations.START_MENU_STARTUP);
+        
+        // Could not get a path for any reason including not loading SystemUtilities.dll
+        if (path == null) {
+            return;
+        }
+        
+        File startup = new File(path);
         File dst = new File(startup, "LimeWire On Startup.lnk");
         
         // No need to copy if the link is already there
