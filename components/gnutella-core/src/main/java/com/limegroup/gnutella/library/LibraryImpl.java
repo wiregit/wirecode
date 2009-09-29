@@ -777,7 +777,8 @@ class LibraryImpl implements Library, FileCollection {
      * (because the URN validator says it's not valid, for example).
      */
     private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
-        if(urnValidator.isInvalid(UrnSet.getSha1(urns))) {
+        if(urnValidator.isInvalid(UrnSet.getSha1(urns)) ||
+                urnFilter.isBlacklisted(UrnSet.getSha1(urns))) {
             return null;
         } else {
             return fileDescFactory.createFileDesc(file, urns, index);
