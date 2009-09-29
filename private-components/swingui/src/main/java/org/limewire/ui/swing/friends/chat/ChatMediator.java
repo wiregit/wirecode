@@ -280,6 +280,11 @@ public class ChatMediator {
             public void actionPerformed(ActionEvent e) {
                 ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
                 map.get("restoreView").actionPerformed(e);
+                
+                if(message.getType() != Message.Type.SERVER && message.getFriendID() != null)
+                    startOrSelectConversation(message.getFriendID());
+                else
+                    setVisible(true);
             }
         });
         return notification;
