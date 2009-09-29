@@ -67,7 +67,8 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.player.PlayerMediatorListener;
-import org.limewire.ui.swing.player.PlayerPanel;
+import org.limewire.ui.swing.player.PlayerControlPanel;
+import org.limewire.ui.swing.player.PlayerControlPanelFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -85,6 +86,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 @LazySingleton
 public class LibraryPanel extends JPanel {
@@ -128,7 +130,7 @@ public class LibraryPanel extends JPanel {
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryFilterPanel libraryFilterPanel,
-            PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
+            PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerControlPanelFactory playerPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryTransferHandler transferHandler,
             Provider<LibraryImageTable> libraryImagePanelProvider,
             LibrarySharingAction libraryAction) {
@@ -147,13 +149,13 @@ public class LibraryPanel extends JPanel {
         GuiUtils.assignResources(this);
         this.lockableUI = new LockedUI();
         
-        layoutComponents(headerBarDecorator, playerPanel, addFileAction, libraryAction);
+        layoutComponents(headerBarDecorator, playerPanel.createAudioControlPanel(), addFileAction, libraryAction);
 
         eventList = new BasicEventList<LocalFileItem>();
         selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
     }
     
-    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
+    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerControlPanel playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
         createAddFilesButton(addFileAction, libraryAction);
@@ -205,7 +207,7 @@ public class LibraryPanel extends JPanel {
     }
     
     @Inject
-    void register(LibraryManager libraryManager, final PlayerMediator playerMediator) {        
+    void register(LibraryManager libraryManager, final @Named("audio")PlayerMediator playerMediator) {        
         //Loads the Library after Component has been realized.
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         SwingUtilities.invokeLater(new Runnable(){

@@ -150,6 +150,14 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
+    public void showTemporaryPanel(){
+        
+    }
+    
+    public void removeTemporaryPanel(){
+        
+    }
+    
    private LimeSplitPane createSplitPane(final JComponent top, final MainDownloadPanel bottom, JComponent divider) {
         final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
         splitPane.setDividerSize(0);

@@ -51,12 +51,12 @@ public class MiniPlayerPanel extends JPanel {
 
     private MarqueeButton statusButton;
     
-    private final Provider<PlayerMediator> playerMediator;
+    private final Provider<AudioPlayerMediator> playerMediator;
     private final LibraryMediator libraryMediator;
     private boolean isInitialized = false;
 
     @Inject
-    public MiniPlayerPanel(Provider<PlayerMediator> playerMediator, LibraryMediator libraryMediator) {
+    public MiniPlayerPanel(Provider<AudioPlayerMediator> playerMediator, LibraryMediator libraryMediator) {
         super(new MigLayout("insets 0", "4[][]", "0[]0"));
 
         this.playerMediator = playerMediator;
@@ -120,7 +120,7 @@ public class MiniPlayerPanel extends JPanel {
     private class ShowPlayerListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            File currentFile = playerMediator.get().getCurrentSongFile();
+            File currentFile = playerMediator.get().getCurrentMediaFile();
             
             if (currentFile != null) { 
                 libraryMediator.selectInLibrary(currentFile);

@@ -224,34 +224,42 @@ public class LibraryOptionPanel extends OptionPanel {
     /** Do you want to use the LW player? */
     private static class UsePlayerPanel extends OptionPanel {
 
-        private JCheckBox useLimeWirePlayer;
+        private JCheckBox useLimeWireAudioPlayer;
+        private JCheckBox useLimeWireVideoPlayer;
 
         public UsePlayerPanel() {
             super("");
             setBorder(BorderFactory.createEmptyBorder());
             setLayout(new MigLayout("ins 0 0 0 0, gap 0"));
 
-            useLimeWirePlayer = new JCheckBox(I18n
+            useLimeWireAudioPlayer = new JCheckBox(I18n
                     .tr("Use the LimeWire player when I play Audio files"));
-            useLimeWirePlayer.setOpaque(false);
+            useLimeWireAudioPlayer.setOpaque(false);
+            useLimeWireVideoPlayer = new JCheckBox(I18n
+                    .tr("Use the LimeWire player when I play Video files"));
+            useLimeWireVideoPlayer.setOpaque(false);
 
-            add(useLimeWirePlayer);
+            add(useLimeWireAudioPlayer, "wrap");
+            add(useLimeWireVideoPlayer);
         }
 
         @Override
         boolean applyOptions() {
-            SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWirePlayer.isSelected());
+            SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWireAudioPlayer.isSelected());
+            SwingUiSettings.VIDEO_PLAYER_ENABLED.setValue(useLimeWireVideoPlayer.isSelected());
             return false;
         }
 
         @Override
         boolean hasChanged() {
-            return useLimeWirePlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue();
+            return useLimeWireAudioPlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue()
+                    || useLimeWireVideoPlayer.isSelected() != SwingUiSettings.VIDEO_PLAYER_ENABLED.getValue();
         }
 
         @Override
         public void initOptions() {
-            useLimeWirePlayer.setSelected(SwingUiSettings.PLAYER_ENABLED.getValue());
+            useLimeWireAudioPlayer.setSelected(SwingUiSettings.PLAYER_ENABLED.getValue());
+            useLimeWireVideoPlayer.setSelected(SwingUiSettings.VIDEO_PLAYER_ENABLED.getValue());
         }
     }
     

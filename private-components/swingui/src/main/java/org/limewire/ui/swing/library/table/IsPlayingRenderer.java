@@ -16,6 +16,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 @LazySingleton
 class IsPlayingRenderer extends DefaultTableCellRenderer {
@@ -26,7 +27,7 @@ class IsPlayingRenderer extends DefaultTableCellRenderer {
     private final Border emptyBorder;
     
     @Inject
-    public IsPlayingRenderer(Provider<PlayerMediator> playerMediator) {
+    public IsPlayingRenderer(@Named("audio")Provider<PlayerMediator> playerMediator) {
         GuiUtils.assignResources(this);
         
         this.playerMediator = playerMediator;

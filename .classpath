@@ -161,5 +161,6 @@
 	<classpathentry kind="lib" path="lib/jars/guice-2.0-snapshot20090814.jar" sourcepath="lib/sources/guice-2.0-snapshot20090814-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-assistedinject-snapshot20090814.jar" sourcepath="lib/sources/guice-assistedinject-snapshot20090512-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/tests/inspTool-0.4.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
