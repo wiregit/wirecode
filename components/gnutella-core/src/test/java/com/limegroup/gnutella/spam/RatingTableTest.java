@@ -127,7 +127,7 @@ public class RatingTableTest extends LimeTestCase {
         RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(
                 new ConnectableImpl(addr, port, false), 1, name, size,
                 GUID.makeGuid(), 3, 3, false, null, URN.NO_URN_SET, false,
-                "ALT", 0L);
+                "ALT", 0L, false, null);
         // This would normally be called by the SearchResultHandler
         manager.calculateSpamRating(rfd);
         return rfd;

@@ -69,4 +69,9 @@ public interface RemoteFileDesc extends RemoteFileDetails {
 
     public Address getAddress();
 
+    /**
+     * Returns the query GUID if this RemoteFileDesc was constructed from a
+     * query reply, otherwise null.
+     */
+    public byte[] getQueryGUID();
 }

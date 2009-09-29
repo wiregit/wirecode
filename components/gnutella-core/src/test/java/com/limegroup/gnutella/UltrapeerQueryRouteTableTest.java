@@ -188,5 +188,8 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
             return FilterSettings.MIN_MATCHING_WORDS.getValue() + 10 ;
         }
         
+        public String getQueryString(byte[] guid) {
+            return null;
+        }
     }
 }

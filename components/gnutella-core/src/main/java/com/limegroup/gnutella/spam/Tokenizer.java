@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -51,12 +52,14 @@ public class Tokenizer {
      * multi-byte chars when truncating
      */
     private int MAX_KEYWORD_LENGTH = 8;
-
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final ResponseVerifier responseVerifier;
 
     @Inject
-    Tokenizer(NetworkInstanceUtils networkInstanceUtils) {
+    Tokenizer(NetworkInstanceUtils networkInstanceUtils,
+            ResponseVerifier responseVerifier) {
         this.networkInstanceUtils = networkInstanceUtils;
+        this.responseVerifier = responseVerifier;
     }
 
     /**
@@ -98,6 +101,15 @@ public class Tokenizer {
             LOG.debug("Tokenizing result from " + addr);
         }
         String name = desc.getFileName();
+        byte[] queryGUID = desc.getQueryGUID();
+        if(queryGUID != null) {
+            String query = responseVerifier.getQueryString(queryGUID);
+            if(query != null) {
+                TemplateToken tt = TemplateToken.create(query, name);
+                if(tt != null)
+                    set.add(tt);
+            }
+        }
         getKeywordTokens(FileUtils.getFilenameNoExtension(name), set);
         String ext = FileUtils.getFileExtension(name);
         if (!ext.equals(""))
@@ -121,7 +133,8 @@ public class Tokenizer {
     }
 
     /**
-     * Tokenizes a QueryReply. Filenames and XML metadata are ignored.
+     * Tokenizes a QueryReply. Keywords from the filenames and XML metadata are
+     * ignored, but templates are extracted from the filenames.
      * 
      * @param qr the QueryReply that should be tokenized
      * @return a non-empty set of Tokens
@@ -130,6 +143,7 @@ public class Tokenizer {
         if (LOG.isDebugEnabled())
             LOG.debug("Tokenizing query reply from " + qr.getIP());
         Set<Token> set = new HashSet<Token>();
+        String query = responseVerifier.getQueryString(qr.getGUID());
         // Client GUID
         set.add(new ClientGUIDToken(Base32.encode(qr.getClientGUID())));
         // Responder's address, unless private
@@ -138,6 +152,12 @@ public class Tokenizer {
             set.add(new AddressToken(ip));
         try {
             for (Response r : qr.getResultsArray()) {
+                // Template
+                if(query != null) {
+                    TemplateToken tt = TemplateToken.create(query, r.getName());
+                    if(tt != null)
+                        set.add(tt);
+                }
                 // URNs
                 for (URN urn : r.getUrns())
                     set.add(new UrnToken(urn.toString()));
@@ -146,8 +166,7 @@ public class Tokenizer {
                 set.add(new SizeToken(size));
                 set.add(new ApproximateSizeToken(size));
             }
-        } catch (BadPacketException ignored) {
-        }
+        } catch (BadPacketException ignored) {}
         return set;
     }
 

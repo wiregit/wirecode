@@ -31,7 +31,7 @@ class UrlRemoteFileDescImpl extends RemoteFileDescImpl implements RemoteFileDesc
     UrlRemoteFileDescImpl(Address address, String filename, long size,
             Set<? extends URN> urns, URL url, AddressFactory addressFactory) {
         super(address, 1, filename, size, DataUtils.EMPTY_GUID, SpeedConstants.T3_SPEED_INT, 3, false, null, 
-                urns, false, "", -1, false, addressFactory);
+                urns, false, "", -1, false, addressFactory, null);
         this._url = url;
     }
 

@@ -182,6 +182,18 @@ public class ResponseVerifierImpl implements ResponseVerifier {
         return response.getSize()==Mandragore_SIZE 
                    && response.getName().equals(request.query+".exe");
     }
+    
+    /**
+     * Returns the query string corresponding to the given query GUID, or
+     * null if the GUID is unknown or has expired from the cache.
+     */
+    @Override
+    public synchronized String getQueryString(byte[] guid) {
+        RequestData request = mapper.get(new GUID(guid));
+        if(request == null)
+            return null;
+        return request.query;
+    }
 
     @Override
     public String toString() {

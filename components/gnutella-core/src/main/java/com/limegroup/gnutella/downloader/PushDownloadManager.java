@@ -227,7 +227,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         RemoteFileDesc fakeRFD = 
             remoteFileDescFactory.createRemoteFileDesc(pushEndpoint, SPECIAL_INDEX, "fake",
                 0, pushEndpoint.getClientGUID(), 0, 0, false, null, URN.NO_URN_SET, false, "", -1,
-                true);
+                true, null);
         connect(fakeRFD, observer);
     }
     
@@ -235,7 +235,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         RemoteFileDesc fakeRFD = 
             remoteFileDescFactory.createRemoteFileDesc(address, SPECIAL_INDEX, "fake",
                 0, address.getClientGuid().bytes(), 0, 0, false, null, URN.NO_URN_SET, false, "", -1,
-                true);
+                true, null);
         connect(fakeRFD, observer);
     }
     

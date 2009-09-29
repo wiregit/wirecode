@@ -63,9 +63,11 @@ public interface RemoteFileDescFactory {
      * @throws <tt>NullPointerException</tt> if the host argument is 
      *  <tt>null</tt> or if the file name is <tt>null</tt>
      */
-    public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor, long createTime);
+    public RemoteFileDesc createRemoteFileDesc(Address address, long index,
+            String filename, long size, byte[] clientGUID, int speed,
+            int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime);
     
     /** 
      * Constructs a new RemoteFileDescImpl with metadata.
@@ -80,16 +82,18 @@ public interface RemoteFileDescFactory {
      * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
      * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
      * @param replyToMulticast true if its from a reply to a multicast query
-     *
+     * @param queryGUID the GUID of the query if the RFD comes from a query
+     *  reply, otherwise null
      * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
      *  not valid
      * @throws <tt>NullPointerException</tt> if the host argument is 
      *  <tt>null</tt> or if the file name is <tt>null</tt>
      */
-    public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor, long createTime,
-            boolean http1);
+    public RemoteFileDesc createRemoteFileDesc(Address address, long index,
+            String filename, long size, byte[] clientGUID, int speed,
+            int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime, boolean http1, byte[] queryGUID);
 
     /**
      * Constructs a URLRemoteFileDesc, looking up the size from the URL if no size is known.<p>

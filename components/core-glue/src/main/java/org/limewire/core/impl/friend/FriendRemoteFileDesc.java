@@ -231,6 +231,11 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
     public byte[] getClientGUID() {
         return clientGUID;
     }
+    
+    @Override
+    public byte[] getQueryGUID() {
+        return null;
+    }
 
     @Override
     public int getQuality() {

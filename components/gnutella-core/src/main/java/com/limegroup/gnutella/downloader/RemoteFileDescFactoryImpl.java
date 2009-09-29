@@ -139,11 +139,14 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     }
 
     @Override
-    public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+    public RemoteFileDesc createRemoteFileDesc(Address address, long index,
+            String filename, long size, byte[] clientGUID, int speed,
+            int quality, boolean browseHost, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, boolean replyToMulticast, String vendor,
             long createTime) {
-        return createRemoteFileDesc(address, index, filename, size, clientGUID, speed, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, !urns.isEmpty());
+        return createRemoteFileDesc(address, index, filename, size, clientGUID,
+                speed, quality, browseHost, xmlDoc, urns, replyToMulticast,
+                vendor, createTime, !urns.isEmpty(), null);
     }
 
     private RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
@@ -183,7 +186,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
         return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, quality,
                 browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, 
-                http11, addressFactory);
+                http11, addressFactory, null);
     }
 
     public RemoteFileDesc createUrlRemoteFileDesc(Address address, String filename,
@@ -294,17 +297,22 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     }
 
     @Override
-    public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+    public RemoteFileDesc createRemoteFileDesc(Address address, long index,
+            String filename, long size, byte[] clientGUID, int speed,
+            int quality, boolean browseHost, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, boolean replyToMulticast, String vendor,
-            long createTime, boolean http1) {
+            long createTime, boolean http1, byte[] queryGUID) {
         for (RemoteFileDescCreator creator : creators) {
             if (creator.canCreateFor(address)) {
-                return creator.create(address, index, filename, size, clientGUID, speed, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, http1);
+                return creator.create(address, index, filename, size,
+                        clientGUID, speed, quality, browseHost, xmlDoc, urns,
+                        replyToMulticast, vendor, createTime, http1);
             }
         }
-        return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, quality, browseHost,
-                xmlDoc, urns, replyToMulticast, vendor, createTime, http1, addressFactory);
+        return new RemoteFileDescImpl(address, index, filename, size,
+                clientGUID, speed, quality, browseHost, xmlDoc, urns,
+                replyToMulticast, vendor, createTime, http1, addressFactory,
+                queryGUID);
     }
 
     @Override

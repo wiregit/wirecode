@@ -36,6 +36,8 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
     private final long _index;
 
     private final byte[] _clientGUID;
+    
+    private final byte[] queryGUID;
 
     private final int _speed;
 
@@ -102,7 +104,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
     public RemoteFileDescImpl(Address address, long index, String filename, long size,
             byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, boolean replyToMulticast, String vendor, long createTime,
-            boolean http11, AddressFactory addressFactory) {
+            boolean http11, AddressFactory addressFactory, byte[] queryGUID) {
         this.addressFactory = addressFactory;
         this.address = Objects.nonNull(address, "address");
         if ((speed & 0xFFFFFFFF00000000L) != 0)
@@ -127,6 +129,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
         _xmlDoc = xmlDoc;
         _http11 = http11;
         _urns = UrnSet.resolve(urns);
+        this.queryGUID = queryGUID;
     }
 
     /** Returns true if the host supports TLS. */
@@ -208,6 +211,11 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
      */
     public final byte[] getClientGUID() {
         return _clientGUID;
+    }
+    
+    @Override
+    public final byte[] getQueryGUID() {
+        return queryGUID;
     }
 
     /*

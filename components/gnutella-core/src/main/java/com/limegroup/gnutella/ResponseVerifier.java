@@ -42,5 +42,11 @@ public interface ResponseVerifier {
      * returns false.
      */
     public boolean isMandragoreWorm(byte[] guid, Response response);
+    
+    /**
+     * Returns the query string corresponding to the given query GUID, or
+     * null if the GUID is unknown or has expired from the cache.
+     */
+    public String getQueryString(byte[] guid);
 }
 
