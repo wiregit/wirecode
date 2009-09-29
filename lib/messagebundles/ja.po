@@ -8,17 +8,21 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-14 11:30-0400\n"
-"PO-Revision-Date: 2009-09-14 15:37+0000\n"
-"Last-Translator: doragura <Unknown>\n"
+"PO-Revision-Date: 2009-09-29 02:10+0000\n"
+"Last-Translator: finaldata <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2009-09-16 19:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-29 19:56+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Japanese\n"
 "X-Poedit-SourceCharset: utf-8\n"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:54
+msgid "You are behind a firewall and support firewall transfers"
+msgstr "あなたはファイアウォールの外にいて、ファイアウォールの転送をサポートしています"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
@@ -31,7 +35,7 @@ msgstr "全種類"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:127
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
 msgid "Documents"
-msgstr "ドキュメント"
+msgstr "文書"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:42
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
@@ -56,7 +60,7 @@ msgstr "オーディオ"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:117
 msgid "Video"
-msgstr "ビデオ"
+msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:45
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
@@ -102,22 +106,22 @@ msgstr "ディスクに問題があります"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
 msgid "The file is corrupted"
-msgstr "ファイルが破損している"
+msgstr "ファイルが破損しています"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:35
 msgid "This file is not shareable"
-msgstr "共有できません"
+msgstr "このファイルは共有できません"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:36
 msgid "Trouble connecting to people"
-msgstr "Trouble connecting to people"
+msgstr "人とのコネクトに問題があります"
 
 #. *
 #. * The DownloadItem is not in an error state.
 #. 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
 msgid "No problems."
-msgstr "最適です"
+msgstr "問題ありません"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
@@ -126,21 +130,23 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
-"<html><b>あなたのLimeWireは、ウイルスまたはtrojanによって崩壊したかもしれません！!</b><br><br><a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a>を訪問して、LimeWire"
-"で最新公式バージョンをダウンロードしてください。</html>"
+"あなたのLimeWireは、ウィルスまたはtrojanによって破壊されたかもしれません！\r\n"
+"！!</b><br><br><a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a>のサイトに行き、LimeWi"
+"reで最新公式バージョンをダウンロードしてください。</html>"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:284
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
-msgstr "アップロードを止めると、ダウンロードは停止します。アップロードをやめますか？"
+msgstr "アップロードを止めると、ダウンロードは停止します。アップロードを中止しますか？"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
-msgstr "このアップロードは高速で、まだ十分なアップロードをしていません。 アップロードをもっとするべきです。 アップロードをやめてもいいですか？"
+msgstr ""
+"このアップロードは高速です。あなたはまだ十分なアップロードをしていないので、さらにアップロードをすべきです。アップロードをしますか、それともやめますか？"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -161,7 +167,7 @@ msgstr[1] ""
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
 msgid "Free to chat"
-msgstr "暇"
+msgstr "チャットする時間があります"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 msgid "Available"
@@ -169,16 +175,16 @@ msgstr "有効"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:111
 msgid "Away"
-msgstr "退席中"
+msgstr "席をはずしています"
 
 #. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:112
 msgid "Away for a while"
-msgstr "長期退席中"
+msgstr "しばらく席をはずしています"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:113
 msgid "Do not disturb"
-msgstr "取り込み中"
+msgstr "邪魔をしないでください"
 
 #: components/gnutella-core/src/main/java/com/limegroup/bittorrent/BTDownloaderImpl.java:74
 msgid ""
@@ -205,19 +211,19 @@ msgstr "ブラウズ管理者"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:55
 msgid "Connection Dispatching"
-msgstr "高速接続中"
+msgstr "接続発信中"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:396
 msgid "Connection Management"
-msgstr "コネクション管理"
+msgstr "接続管理"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:66
 msgid "Stale Connection Management"
-msgstr "古い接続の管理"
+msgstr "接続管理無効"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:99
 msgid "Various Core Services"
-msgstr "いろいろなコアサービス"
+msgstr "多様なコアサービス"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:104
 msgid "Gnutella Connections"
@@ -245,7 +251,8 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
-"LimeWireは古いダウンロードを読み込めませんでした。'再試行'をクリックしてください。LimeWireがファイルを見つけるとダウンロードを試みます。"
+"LimeWireはいくつかの古いダウンロードを読み込めませんでした。'再試行'をクリックしてください。LimeWireがファイルを見つけるとダウンロードを"
+"試みます。"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -285,7 +292,7 @@ msgstr "宣伝システム"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
 msgid "Directed Querier"
-msgstr "有向の質問者"
+msgstr "質問者"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
 msgid "Content Management"
@@ -520,11 +527,11 @@ msgstr "スタジオ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr "星の数"
+msgstr "スター"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr "サブタイトル"
+msgstr "字幕"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:47
@@ -559,7 +566,7 @@ msgstr "幅"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:26
 msgid "Description"
-msgstr "概要"
+msgstr "詳細"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -652,7 +659,8 @@ msgid ""
 "LimeWire cannot open a necessary file because the filename contains "
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
-msgstr "ファイル名にお使いのシステムで対応していない文字があるため、このファイルを開くことができませんでした。"
+msgstr ""
+"ご使用のシステムで対応していない文字がファイル名にあるため、このファイルを開くことができません。LimeWireが予期せぬ動作をする可能性があります。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:61
 msgid ""
@@ -692,11 +700,11 @@ msgstr "ファイアーウォール管理"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 msgid "Statistic Management"
-msgstr "転送速度管理"
+msgstr "統計管理"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "Oops!"
-msgstr "おおおおお、なんてこったい!"
+msgstr "あっ！"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "A problem occurred..."
@@ -709,8 +717,8 @@ msgid ""
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
-"おっと！私たちがまだ予期していないことをしました。LimeWireはまだ動作していますが、'バグを送信'で私たちに知らせてください。'バグを表示'で送信さ"
-"れる情報を見ることが出来ます。"
+"あっ！あなたは、私たちがまだ予期していないことをされました。LimeWireはまだ動作していますが、'バグを送信'で私たちに知らせてください。'バグを表示"
+"'で、送信される情報を見ることができます。"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
@@ -718,14 +726,14 @@ msgid ""
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
-"おっと！私たちがまだ予期していないことをしました。LimeWireはまだ動作していますが、'バグを送信'で私たちに知らせてください。'バグを表示'でエラー"
-"についての情報を見ることが出来ます。"
+"あっ！あなたは、私たちがまだ予期していないことをされました。LimeWireはまだ動作していますが、'バグを送信'で私たちに知らせてください。'バグを表示"
+"'でエラーについての情報を見ることができます。"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:412
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
-msgstr "LimeWireに問題が発生しました。LimeWireはまだ動作していますが、プログラムの修正のためにバグを送信してください。"
+msgstr "LimeWireに問題が発生しました。LimeWireはまだ動作していますが、プログラム修正のため、バグを送信してください。"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:414
 msgid ""
@@ -734,12 +742,12 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"LimeWireに内部エラーが発生しました。LimeWireが動作し続けていますが、ウィンドウを閉じてください。'バグを表示'でエラーの情報を見ることも出"
-"来ます。"
+"LimeWireに内部エラーが発生しました。LimeWireは通常通り動作を継続できますが、一度ウィンドウを閉じてください。'バグを表示'で、エラーの情報"
+"を見ることができます。"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:450
 msgid "Tell us what you were doing before LimeWire ran into this problem."
-msgstr "LimeWireに問題が発生する直前に何をしていたか教えてください。"
+msgstr "LimeWireに問題が発生する直前に、何をしていたか教えてください。"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:477
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
@@ -773,12 +781,12 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
-"LimeWireは、以下のバグリポートを送信するため、バグサーバーに接続できませんでした。更にヘルプが必要な場合、デバッギングのヘルプが必要な場合、www"
-".limewire.comに進み、｢サポート｣をクリックしてください。ありがとうございます。"
+"バグサーバーに接続し、以下のバグレポートを送信することができませんでした。更にヘルプが必要な場合、またはデバッギングのヘルプが必要な場合は、www.lim"
+"ewire.comに進み、｢サポート｣をクリックしてください。"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:632
 msgid "Copy Report"
-msgstr "リポートをコピーする"
+msgstr "レポートをコピー"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:640
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:215
@@ -791,15 +799,15 @@ msgstr "OK"
 #. Load up the HTML engine.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:516
 msgid "Muddling Mint..."
-msgstr "HTMLのエンジンは始めています"
+msgstr "HTMLエンジンを開始しました"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:533
 msgid "Scouring NYC for Limes..."
-msgstr "ライムを探してニューヨーク市を探し回っています,,,"
+msgstr "Limeを探しに、ニューヨーク中を駆け回っています,,,"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:567
 msgid "Squeezing Limes..."
-msgstr "ライムを絞っています"
+msgstr "Limeを絞っています..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:604
@@ -853,8 +861,8 @@ msgid ""
 "down all other instances of LimeWire before continuing. If this problem "
 "persists, please restart your computer."
 msgstr ""
-"ライムワイヤの別のインスタンスを実行しているようです。続行する前にライムワイヤの他のすべてのインスタンスを完全にシャットダウンします。この問題が続く場合は"
-"、コンピュータを再起動してください。"
+"LimeWireの別のインスタンスを実行しているようです。続行する前に、LimeWireの他の全てのインスタンスを完全にシャットダウンしてください。それで"
+"も問題が続く場合は、コンピューターを再起動してください。"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:694
 msgid "LimeWire is already running"
@@ -877,14 +885,14 @@ msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
-"LimeWireは\"settings\"フォルダを作成できなかったので、テンポラリフォルダを使用しています。あなたの設定はおそらくLimeWireを使用"
-"していないときに削除されました。 "
+"LimeWireは設定フォルダを作成できなかったので、テンポラリフォルダを使用しています。あなたの設定は、LimeWireを使用していない時に削除される可"
+"能性があります。 "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:32
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
-msgstr "LimeWireは設定の変更中に問題が発生しました。 あなたの行った設定の変更は保存されないでしょう。"
+msgstr "LimeWireは設定の変更中に問題が発生しました。 あなたの行った設定の変更は、シャットダウンの際、保存されないでしょう。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 msgid "More File Info"
@@ -959,7 +967,7 @@ msgstr "Mojito"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "View incoming and outgoing DHT messages"
-msgstr "出入DHTメッセージを表示"
+msgstr "受信・送信DHTメッセージを表示"
 
 #. * Identifier for Advanced Tools window.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:74
@@ -1035,7 +1043,7 @@ msgstr "ファイルを表示できません。ホストに未接続です。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:51
 msgid "You are an Ultrapeer node"
-msgstr "お客様は超ピア（系列）ノードです。"
+msgstr "お客様はウルトラピア・ノードです"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:52
 msgid "You are a Leaf node"
@@ -1045,17 +1053,13 @@ msgstr "お客様は末端ノードです"
 msgid "You are not behind a firewall"
 msgstr "ファイアウォールの内側にいます"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:54
-msgid "You are behind a firewall and support firewall transfers"
-msgstr "あなたはファイアウォールの後にいて、ファイアウォール移動を支持します"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:55
 msgid "You are behind a firewall and do not support firewall transfers"
-msgstr "あなたはファイアウォールの後にいて、ファイアウォール移動を支持しません"
+msgstr "あなたはファイアウォールの後にいるので、ファイアウォールの転送をサポートしていません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:56
 msgid "why"
-msgstr "何で"
+msgstr "なぜ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:57
 msgid "Connected to:"
@@ -1085,7 +1089,7 @@ msgstr "標準"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:64
 msgid "Ultrapeers"
-msgstr "超ピア（系列）"
+msgstr "ウルトラピア（接続中）"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:234
 msgid ""
@@ -1095,23 +1099,23 @@ msgstr "LimeWireはNATもしくはファイアウォールの外部IPアドレ�
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:236
 msgid "LimeWire has not received any incoming UDP messages"
-msgstr "LimeWireはUDPメッセージを受信していません。"
+msgstr "LimeWireはUDP通信をを受信していません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:238
 msgid ""
 "LimeWire was not able to support firewall transfers in a previous session"
-msgstr "LimeWireは以前のセッションでファイアウォール経由の送受信をサポートしていませんでした。"
+msgstr "LimeWireは、前のセッションで、ファイアウォール経由の送受信をサポートできませんでした"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:240
 msgid ""
 "LimeWire is behind a NAT or firewall that assigns a different external port "
 "to each connection"
-msgstr "LimeWireはNAT やファイヤーウォールの後ろにいます。それぞれに外向きのポート番号を設定して下さい。"
+msgstr "LimeWireはNAT やファイヤーウォールの後ろにおり、異なる外向きポートを各接続に設定します"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:243
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerMediator.java:507
 msgid "Unknown"
-msgstr "未知"
+msgstr "不明"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:57
 msgid "Revert To Default"
@@ -1123,14 +1127,14 @@ msgstr "自動的に分類する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:59
 msgid "Extended Tooltips"
-msgstr "ツールに関するヒントの拡大版"
+msgstr "ツールチップの拡張"
 
 #. Set up table header to display context menu to configure visible
 #. columns.  As recommended in the API Javadoc for isPopupTrigger(),
 #. we check both the mousePressed and mouseReleased events.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:76
 msgid "Right-click to select columns to display"
-msgstr "右クリックして表示する列を選択します"
+msgstr "右クリックし、表示する列を選択します"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:301
 msgid "More Options"
@@ -1146,12 +1150,12 @@ msgstr "接続中…"
 #. * String for outgoing status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:32
 msgid "Outgoing"
-msgstr "送信中"
+msgstr "送信"
 
 #. * String for incoming status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:34
 msgid "Incoming"
-msgstr "受信中"
+msgstr "受信"
 
 #. * String for 'Connected on' tooltip
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:36
@@ -1164,7 +1168,7 @@ msgstr "末端"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:39
 msgid "Ultrapeer"
-msgstr "超ピア（系列）"
+msgstr "ウルトラピア（接続中）"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:40
 msgid "Peer"
@@ -1179,39 +1183,39 @@ msgstr "状態"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:72
 msgid "Messages (I/O)"
-msgstr "メッセージ (I/O)"
+msgstr "メッセージ（受/送）"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:74
 msgid "Messages In"
-msgstr "受信メッセージ"
+msgstr "メッセージ受信"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:76
 msgid "Messages Out"
-msgstr "送信メッセージ"
+msgstr "メッセージ送信"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:78
 msgid "Bandwidth (I/O)"
-msgstr "バンド幅 (I/O)"
+msgstr "帯域 (I/O)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:80
 msgid "Bandwidth In"
-msgstr "受信バンド幅"
+msgstr "下り帯域"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:82
 msgid "Bandwidth Out"
-msgstr "送信バンド幅"
+msgstr "上り帯域"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:84
 msgid "Dropped (I/O)"
-msgstr "ドロップ (I/O)"
+msgstr "取りこぼし (入/出)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:86
 msgid "Dropped In"
-msgstr "受信ドロップ"
+msgstr "取りこぼし (入)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:88
 msgid "Dropped Out"
-msgstr "送信ドロップ"
+msgstr "取りこぼし (出)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:90
 msgid "Protocol"
@@ -1269,7 +1273,7 @@ msgstr "読み込んでいます…"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:103
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:58
 msgid "Warning"
-msgstr "注意"
+msgstr "警告"
 
 #. lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:56
@@ -1280,7 +1284,7 @@ msgstr "削除する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:625
 msgid "Marks all Items as Selected"
-msgstr "選択した項目すべてにマーキングします"
+msgstr "選択した項目すべてにマークをつけます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
 msgid "Deselect All"
@@ -1365,7 +1369,7 @@ msgstr[0] "人"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:194
 #, java-format
 msgid "{0} Friends"
-msgstr "{0}人友達"
+msgstr "友達{0}人"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:196
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceFilter.java:160
@@ -1373,7 +1377,7 @@ msgstr "{0}人友達"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/FriendsButton.java:111
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:150
 msgid "Friends"
-msgstr "友人"
+msgstr "友達"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:200
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:136
@@ -1478,7 +1482,7 @@ msgstr "並べ替え方法"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:100
 msgid "Order Added"
-msgstr "登録順"
+msgstr "追加順"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:102
 msgid "Progress"
@@ -1544,7 +1548,7 @@ msgstr "再開する"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:252
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:166
 msgid "Try Again"
-msgstr "再度試す"
+msgstr "再試行"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:259
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:62
@@ -1641,12 +1645,12 @@ msgstr "{0} と接続中"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:74
 #, java-format
 msgid "{0} of {1} ({2})"
-msgstr "{0}の{1} ({2}全)"
+msgstr "{1} ({2})のうち {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:79
 #, java-format
 msgid "{0} of {1} ({2}) from {3}"
-msgstr ""
+msgstr "{3}から{1} ({2})のうち{0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:89
 msgid "Error downloading torrent"
@@ -1696,7 +1700,7 @@ msgstr "1 P2P ユーザー"
 #, java-format
 msgid "{0} Friend"
 msgid_plural "{0} Friends"
-msgstr[0] "{0}人のフレンド"
+msgstr[0] "{0}人の友達"
 
 #. if(queueTime == DownloadItem.UNKNOWN_TIME){
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:176
@@ -1720,11 +1724,11 @@ msgstr "リセット"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/AdvancedFilterPanel.java:454
 msgid "more filters"
-msgstr "フィルタ項目を増やす"
+msgstr "条件を増やす"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/AdvancedFilterPanel.java:455
 msgid "fewer filters"
-msgstr "フィルタ項目を減らす"
+msgstr "条件を減らす"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/CategoryFilter.java:66
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/CategoryFilter.java:96
@@ -1760,7 +1764,7 @@ msgstr "全{0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/PropertyFilter.java:266
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:42
 msgid "Extensions"
-msgstr "拡張機能"
+msgstr "拡張子"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/PropertyFilter.java:271
 msgid "Artists"
@@ -1782,7 +1786,7 @@ msgstr "タイプ"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceFilter.java:352
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceFilter.java:446
 msgid "more"
-msgstr "もっと詳しく"
+msgstr "もっと"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/QualityFilterFormat.java:24
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:351
@@ -1837,7 +1841,7 @@ msgstr "P2Pユーザー"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceItem.java:16
 msgid "Any Friend"
-msgstr "友達のだれも"
+msgstr "どの友達でも"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:42
@@ -1865,7 +1869,7 @@ msgstr "{0}が友達になりたいと言っています"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/actions/AddFriendAction.java:31
 msgid "Add Friend..."
-msgstr "友人を追加"
+msgstr "友人を追加する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/actions/BrowseFriendsAction.java:14
 msgid "Browse Friends' Files"
@@ -1957,7 +1961,7 @@ msgstr "共有の一覧"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:9
 msgid "Facebook chat is not supported in this version of LimeWire."
-msgstr "Facebook チャットはこのバージョンではサポートされていません。"
+msgstr "Facebook チャットは、LimeWireのこのバージョンではサポートされていません。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:10
 msgid ""
@@ -1967,7 +1971,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:11
 msgid "Thank you for your patience."
-msgstr "もうしばらくお待ちくださいますようお願い申し上げます。"
+msgstr "もうしばらくお待ちください。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:280
 msgid "On the Record"
@@ -1979,7 +1983,7 @@ msgstr "オフレコ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:569
 msgid "File offer not sent because friend signed off."
-msgstr "友人がサインオフしたため、ファイルの転送要求は送られませんでした。"
+msgstr "友達がサインオフしたため、ファイルの転送要求は送られませんでした"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:570
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:588
@@ -1990,7 +1994,7 @@ msgstr "自分"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:14
 #, java-format
 msgid "Download it now, or get it from them {0}later{1}."
-msgstr "今すぐダウンロードする、もしくは彼ら{0}後に{1}から取得する。"
+msgstr "今すぐダウンロードするか、もしくは後で{1}彼ら{0}から取得する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:60
 #, java-format
@@ -2000,7 +2004,7 @@ msgstr "{0}とファイルを共有する"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:80
 #, java-format
 msgid "{0} wants to share a file with you"
-msgstr "{0}がお客様とのファイル共有を希望しています"
+msgstr "{0}が、お客様とのファイル共有を希望しています"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:81
 #, java-format
@@ -2027,11 +2031,11 @@ msgstr "{0}が{1}をダウンロードしました"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageWriterImpl.java:40
 msgid "Message not sent because friend signed off."
-msgstr "友人がサインオフしたため、メッセージは送られませんでした。"
+msgstr "友達がサインオフしたため、メッセージは送られませんでした"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/NoSaveStatusMessage.java:32
 msgid "Chat is now off the record"
-msgstr "現在オフレコモードです。"
+msgstr "現在オフレコモードです"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/NoSaveStatusMessage.java:33
 msgid "Chat is now on the record"
@@ -2044,7 +2048,7 @@ msgstr "別のアカウントを選択"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPopupPanel.java:62
 msgid "File sharing with friends"
-msgstr "友人と共有しているファイル"
+msgstr "友達と共有しているファイル"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:150
@@ -2054,7 +2058,7 @@ msgstr "共有する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:96
 msgid "Share with friends on LimeWire with the following:"
-msgstr "以下のファイルをLimeWireで友人と共有する："
+msgstr "以下のファイルをLimeWireで友達と共有する："
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:86
 msgid "Sign In"
@@ -2066,7 +2070,7 @@ msgstr "サインイン中"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:88
 msgid "Incorrect username or password."
-msgstr "ユーザー名またはパスワードが間違っています。"
+msgstr "ユーザー名、またはパスワードが間違っています"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:89
 msgid "Network error."
@@ -2075,7 +2079,7 @@ msgstr "ネットワーク・エラーです"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:131
 #, java-format
 msgid "Sign in with {0}"
-msgstr "{0} でサインイン"
+msgstr "{0} とサインイン"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:189
 msgid "Domain"
@@ -2131,7 +2135,7 @@ msgstr "{1}ファイル中{0}ファイル："
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/PublicSharedFeedbackPanel.java:49
 msgid "Files in this list are shared anonymously with the world."
-msgstr "このリストのファイルは匿名で共有されます"
+msgstr "このリストのファイルは、匿名で共有されます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:28
 msgid "Clear Files"
@@ -2153,14 +2157,14 @@ msgstr "{0}から全てのファイルを消去しますか？"
 msgid ""
 "Remove all files from your library?  This will remove all files you've "
 "downloaded and stop sharing every file you are sharing."
-msgstr "ライブラリからすべてのファイルを取り除きますか？ダウンロードしたすべてのファイルを取り除き、共有を停止することになります。"
+msgstr "ライブラリからすべてのファイルを消去ますか？ダウンロードした全てのファイルを消去し、共有を停止することになります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:47
 #, java-format
 msgid ""
 "Remove all files from {0}?  This will stop sharing all of these files with "
 "the world."
-msgstr "{0}からすべてのファイルを取り除きますか？ファイルのワールドとの共有を停止することになります。"
+msgstr "{0}からすべてのファイルを消去しますか？ファイルの共有を停止することになります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:33
 msgid "Delete List"
@@ -2171,7 +2175,7 @@ msgstr "リストを削除"
 msgid ""
 "Delete list {0}?  This will stop sharing all of these files, but won't "
 "delete them from disk."
-msgstr "{0}のリストを削除しますか？共有を停止することになりますが、ディスクから消去するわけではありません。"
+msgstr "{0}のリストを削除しますか？共有を停止することになりますが、ディスクから削除するわけではありません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:51
@@ -2184,7 +2188,7 @@ msgstr "{0}を削除しますか？"
 msgid ""
 "Delete list {0}?  This will stop sharing all of these files with the world, "
 "but won't delete them from disk."
-msgstr "{0}のリストを削除しますか？ 共有を停止することになりますが、ディスクから消去するわけではありません。"
+msgstr "{0}のリストを削除しますか？ 共有を停止することになりますが、ディスクから削除するわけではありません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ExportListAction.java:26
 msgid "Export List..."
@@ -2268,7 +2272,7 @@ msgstr "なし"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingFriendListPanel.java:164
 #, java-format
 msgid "{0} friends from other accounts"
-msgstr "他のアカウントから友人　{0}人"
+msgstr "他のアカウントから友達　{0}人"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingFriendListPanel.java:99
 msgid "Edit Sharing"
@@ -2293,7 +2297,9 @@ msgstr "ログイン中..."
 msgid ""
 "<a href={0}>Sign in</a> to share this list or edit sharing, or <a "
 "href={1}>stop sharing</a> it now."
-msgstr "<a href={0}>サインイン</a> このリストを共有、編集するため、または <a href={1}>共有中止するため</a> 。"
+msgstr ""
+"このリストを共有、共有を編集、あるいは共有を 今すぐ停止するには、<a href={0}>Sign in</a> サインイン</a>してください<a "
+"href={1}>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AddToListMenu.java:46
 msgid "Add to List"
@@ -2410,7 +2416,7 @@ msgstr "ライブラリから削除する"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:46
 msgid "Move File to the Recycle Bin or Remove from Library"
 msgid_plural "Move Files to the Recycle Bin or Remove from Library"
-msgstr[0] "ファイルをゴミ箱に移動またはライブラリから削除"
+msgstr[0] "ファイルをゴミ箱に移動、またはライブラリから削除"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:48
 msgid ""
@@ -2419,12 +2425,12 @@ msgid ""
 msgid_plural ""
 "Do you want to move this file to the Recycle Bin or just remove it from the "
 "Library?"
-msgstr[0] "このファイルをゴミ箱に移動またはライブラリから削除しますか？"
+msgstr[0] "このファイルをゴミ箱に移動、またはライブラリから削除しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:53
 msgid "Move File to the Trash or Remove from Library"
 msgid_plural "Move Files to the Trash or Remove from Library"
-msgstr[0] "ファイルをゴミ箱に移動またはライブラリから削除"
+msgstr[0] "ファイルをゴミ箱に移動、またはライブラリから削除"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:55
 msgid ""
@@ -2433,19 +2439,19 @@ msgid ""
 msgid_plural ""
 "Do you want to move this file to the Trash or just remove it from the "
 "Library?"
-msgstr[0] "このファイルをゴミ箱に移動またはライブラリから削除しますか？"
+msgstr[0] "このファイルをゴミ箱に移動、またはライブラリから削除しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:60
 msgid "Delete File or Remove from Library"
 msgid_plural "Delete Files or Remove from Library"
-msgstr[0] "ファイルを削除またはライブラリから削除"
+msgstr[0] "ファイルを削除、またはライブラリから削除"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:62
 msgid ""
 "Do you want to delete this file from disk or just remove it from the Library?"
 msgid_plural ""
 "Do you want to delete this file from disk or just remove it from the Library?"
-msgstr[0] "このファイルをディスクから削除またはライブラリから削除しますか？"
+msgstr[0] "このファイルをディスクから削除、またはライブラリから削除しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LaunchFileAction.java:35
 msgid "Play/Open"
@@ -2453,7 +2459,7 @@ msgstr "再生／開く"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:390
 msgid "This file is still processing."
-msgstr "このファイルは使用中です。"
+msgstr "このファイルは使用中です"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:392
 msgid "This file cannot be shared."
@@ -2480,7 +2486,7 @@ msgstr "リストからこのファイルを削除"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:28
 msgid "Remove from All Lists"
-msgstr "すべてのリストから削除"
+msgstr "全てのリストから削除"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:38
 msgid "Remove from Lists"
@@ -2488,12 +2494,12 @@ msgstr "リストから削除"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:55
 msgid "Remove this file from All Lists?"
-msgstr "リストからこのファイルを取り除きますか？"
+msgstr "全てのリストからこのファイルを削除しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:57
 #, java-format
 msgid "Remove {0} files from All Lists?"
-msgstr "{0} ファイルをすべてのリストから削除しますか？"
+msgstr "{0} ファイルを全てのリストから削除しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:158
@@ -2505,7 +2511,7 @@ msgstr[0] "ファイルを削除"
 #, java-format
 msgid ""
 "Remove \"{0}\" from Library? This will unshare this file with everyone."
-msgstr "\"{0}\"をライブラリから削除しますか？削除するとこのファイルは共有されません。"
+msgstr "\"{0}\"をライブラリから削除しますか？削除すると、このファイルは共有されません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:65
 #, java-format
@@ -2516,7 +2522,7 @@ msgstr "\"{0}\"をライブラリから削除しますか？"
 #, java-format
 msgid ""
 "Remove {0} files from Library? This will unshare these files with everyone."
-msgstr "\"{0}\"をライブラリから削除しますか？削除するとこれらのファイルは共有されません。"
+msgstr "\"{0}\"をライブラリから削除しますか？削除すると、これらのファイルは共有されません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:70
 #, java-format
@@ -2585,28 +2591,28 @@ msgid ""
 "also, of course, the result of the countless hours of work by LimeWire's "
 "developers:"
 msgstr ""
-"LimeWireのオーナー、マーク・ゴートンの影響からLimeWireのプロジェクトには世界中のプログラマーおよびリサーチャーとのコラボレーションになって"
-"います。<a href=\"http://www.limewire.org/\">open source effort</a> "
-"LimeWireはまたLimeWireの開発者の絶え間ない努力の成果でもあります："
+"LimeWireのオーナー、マーク・ゴートンの影響を受け、LimeWireのプロジェクトには世界中のプログラマーやリサーチャーが参画し、あらゆる才能を集結"
+"したコラボレーションとなっています。<a href=\"http://www.limewire.org/\">open source "
+"effort</a> 　また、同社の開発者の絶え間ない努力の成果でもあります："
 
 #. behind the scenes technical
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:152
 msgid "Providing key support:"
-msgstr "重要な支援を提供した人々："
+msgstr "影で重要なサポートをしたスタッフ"
 
 #. business developers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:163
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
-msgstr "戦略と日常的な出来事は、LimeWireのビジネスデベロッパーが陰で管理しています。"
+msgstr "ビジネス戦略と日常業務は、LimeWireのビジネス開発者たちによって行われています"
 
 #. previous developers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:170
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
-msgstr "また以下の個人はかつてLimeWireチームに携わっていましたが、現在は別のプロジェクトに関わっています："
+msgstr "また、以下のメンバーが過去にLimeWireのチームに関わり、現在は別のプロジェクトを担当しています"
 
 #. open source contributors
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:209
@@ -2616,8 +2622,9 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
-"LimeWireのオープンソース貢献者はプロジェクトに対し、重要なコードおよび多数のバグ修理サービス、アイデア、リサーチなどを提供しています。以下にリスト"
-"された人は、LimeWireの各バージョンと共に配信されるコードを書き込んだか、コード内に深刻なバグを検知したかのいずれかです。もしくは両方です："
+"また、LimeWireの多種多才なメンバーは、コード、バグ修理、アイデア、リサーチ等、このプロジェクトに対し多大な貢献をしてくれました。以下にリストされた"
+"人々は、LimeWireのあらゆるバージョンで配信可能となるようコード書き込みをしてくれたり、コード内で深刻なバグを検地してくれたり、あるいはその両方をし"
+"てくれたり、多大な貢献をしてくれました"
 
 #. internationalization contributors
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:247
@@ -2625,14 +2632,15 @@ msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
-msgstr "LimeWireは、アプリケーションおよびLimeWireウエブサイトの国際化プロジェクトに関わる多くの貢献者に感謝の意を表したいです。"
+msgstr ""
+"また、アプリケーションおよびウェブサイトの両面において、LimeWireのプロジェクトを国際化してくれた多くの貢献者に感謝の意を表したいと思います"
 
 #. community VIPs
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:251
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
-msgstr "グヌーテラ・コミュニティの同僚にも特別に感謝しています。以下の人たちです："
+msgstr "グヌーテラ・コミュニティの同僚に、特別に感謝の意を表します。以下がその人たちです："
 
 #. conclusion
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:272
@@ -2641,8 +2649,8 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the P2P Network would not exist."
 msgstr ""
-"LimeWireは、プロジェクトにアイデアを提供してくれた開発者、ユーザー、その他の人々にも感謝しています。LimeWireユーザーなくして、P2Pネット"
-"ワークは存在しません。"
+"最後に、このプロジェクトにアイデアを提供してくれた開発者、ユーザー、またその他の方々に、心から感謝申し上げます。LimeWireのユーザーなくして、P2P"
+"ネットワークは存在しません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:277
 msgid ""
@@ -2661,7 +2669,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:240
 msgid "New Version Available!"
-msgstr "新しいバージョンを利用できます！"
+msgstr "新しいバージョンが利用できます！"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/OptionsAction.java:16
 msgid "&Options..."
@@ -2669,11 +2677,11 @@ msgstr "&オプション..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:407
 msgid "Share with friends using your Private Shared list"
-msgstr "プライベート共有リストで友達と共有しますか？"
+msgstr "「プライベート共有」リストで、友達と共有しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:458
 msgid "Share this list with friends"
-msgstr "このリストを友人と共有する"
+msgstr "このリストを友達と共有する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:464
 msgid "Add files to it"
@@ -2749,7 +2757,7 @@ msgstr "ダウンロード後に終了"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FileMenu.java:33
 msgid "&File"
-msgstr "ファイル (&F)"
+msgstr "ファイル (&)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FixStalledDownloadsAction.java:25
 msgid "Fix Stalled Downloads"
@@ -2757,19 +2765,19 @@ msgstr "停止したダウンロードを処理する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendsMenu.java:47
 msgid "&Friends"
-msgstr "友人"
+msgstr "&友達"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:38
 msgid "&Help"
-msgstr "ヘルプ (&H)"
+msgstr "&ヘルプ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:50
 msgid "&Home Screen"
-msgstr "ホームスクリーン"
+msgstr "&ホームスクリーン"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:58
 msgid "&Using LimeWire"
-msgstr "LimeWire の使用について(&U)"
+msgstr "&LimeWire の使用について"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:60
 msgid "&FAQ"
@@ -2790,35 +2798,35 @@ msgstr "開く"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:87
 msgid "Enter a magnet or torrent link below:"
-msgstr "下にマグネットかトレントのリンクを入る："
+msgstr "下にマグネットかトレントのリンクを入力："
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:37
 msgid "&Open Torrent..."
-msgstr "Torrentファイルを開く(&O)"
+msgstr "&トレントを開く..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:45
 msgid "Open Torrent"
-msgstr "Torrent を開く"
+msgstr "トレントを開く"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:130
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:85
 msgid "\".torrent\" files"
-msgstr ".torrent拡張子ファイル"
+msgstr "\".トレント\"ファイル"
 
 #. {0}: name of file
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:85
 #, java-format
 msgid "The file {0} does not exist."
-msgstr "{0}は存在しません"
+msgstr "ファイル{0}は存在しません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:85
 msgid "Unable to open torrent"
-msgstr "torrentが開けません"
+msgstr "トレントが開けません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:44
 msgid "Open &Link..."
-msgstr "リンクを開く"
+msgstr "リンクを開く..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:67
@@ -2828,7 +2836,7 @@ msgstr "リンクを開く"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:67
 msgid "Magnet link is empty."
-msgstr "magnetリンクは空白です"
+msgstr "マグネットリンクは空白です"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/RecentDownloadsMenu.java:30
 msgid "(empty)"
@@ -2836,15 +2844,15 @@ msgstr "（空です）"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/RecentDownloadsMenu.java:34
 msgid "&Recent Downloads"
-msgstr "最近ダウンロードしたもの(&R)"
+msgstr "&最近ダウンロードしたもの"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/RecentDownloadsMenu.java:51
 msgid "Clear List"
-msgstr "一覧のクリア"
+msgstr "リストをクリア"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ShareListMenu.java:33
 msgid "&Share List"
-msgstr "リストを共有"
+msgstr "&リストを共有"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ShowHideDownloadTrayAction.java:18
 msgid "Show Download Tray"
@@ -2856,7 +2864,7 @@ msgstr "ダウンロードトレイを隠す"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:62
 msgid "&Tools"
-msgstr "ツール (&T)"
+msgstr "&ツール"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:76
 msgid "&Uploads"
@@ -2868,11 +2876,11 @@ msgstr "条件を指定して検索"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:101
 msgid "&Advanced Tools..."
-msgstr "上級者向けツール..."
+msgstr "&Advanced Tools..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:133
 msgid "&What's New Search"
-msgstr "最近検索されたもの"
+msgstr "&What's New Search"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:23
 msgid "Hide &Chat Window"
@@ -2884,7 +2892,7 @@ msgstr "チャットウィンドウを表示"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:40
 msgid "&View"
-msgstr "表示 (&V)"
+msgstr "&表示"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:39
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:41
@@ -2907,7 +2915,7 @@ msgstr "超上級者用"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BandWidthSlider.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SeedRatioSlider.java:29
 msgid "Unlimited"
-msgstr "制限なし"
+msgstr "無制限"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:79
 msgid "Upload torrents forever"
@@ -2915,15 +2923,15 @@ msgstr "永久にトレントをアップロードし続ける"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
 msgid "Limit torrent upload "
-msgstr "torrent アップロード制限 "
+msgstr "トレントのアップロードを制限 "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:128
 msgid "Seed a maximum of {c} torrents"
-msgstr ""
+msgstr "{c} トレントの最大シード数"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:131
 msgid "Seed until ratio of {c} OR after {c} days uploading"
-msgstr ""
+msgstr "共有比{c} まで、 またはアップロード日数 {c}までシードする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:137
 msgid "Use ports {c} to {c}"
@@ -2931,13 +2939,13 @@ msgstr "{c}番から {c}番のポートを使用する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:140
 msgid "Show torrent file dialog when starting new torrents"
-msgstr "新しいトレントを開始するときダイアログを表示する。"
+msgstr "新しいトレントを開始する際、ダイアログを表示する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:156
 msgid ""
 "There was an error loading bittorrent. You will not be able to use "
 "bittorrent capabilities until this is resolved."
-msgstr "ビットトレントをロードするときエラーが発生しました。問題解決するまでこの機能を使用できません。"
+msgstr "ビットトレントのロード中に、エラーが発生しました。問題が解決されるまで、この機能を使用できません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:108
 msgid "Connection Speed"
@@ -2957,7 +2965,7 @@ msgstr "接続スピードを設定してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:166
 msgid "Limit your download bandwidth"
-msgstr "ダウンロードのバンド幅を制限してください"
+msgstr "下り帯域を制限する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:173
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:232
@@ -2970,7 +2978,7 @@ msgstr "一度にダウンロードしたもの"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:223
 msgid "Limit your upload bandwidth"
-msgstr "アップロードのバンド幅を制限してください"
+msgstr "上り帯域を制限する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:225
 msgid "Clear uploads from list when finished"
@@ -2982,7 +2990,7 @@ msgstr "一度にアップロードしたもの"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:59
 msgid "Clear downloads from list when finished"
-msgstr "終了時にリストからダウンロードしたものを解除してください"
+msgstr "ダウンロード完了時にリストから削除する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:118
 msgid "Saving Files"
@@ -2998,7 +3006,7 @@ msgstr "ファイル種類ごとに異なるフォルダに保存する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:134
 msgid "If the file already exists, download it with a different name"
-msgstr "ファイルがすでに存在する場合、異なる名前を付けてダウンロードします。"
+msgstr "ファイルがすでに存在する場合、異なる名前をつけてダウンロードします"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:145
 msgid "Download Folders"
@@ -3017,7 +3025,7 @@ msgstr "異なるカテゴリーがどこに保存されるかを設定する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:192
 msgid "Could not save download directory, reverted to old directory"
-msgstr "ダウンロード・ディレクトリが保存できません。古いディレクトリに戻します。"
+msgstr "ダウンロード・ディレクトリが保存できません。古いディレクトリに戻します"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:193
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:174
@@ -3036,15 +3044,15 @@ msgstr "ファイルの拡張子"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:306
 msgid "The extension name was not valid, could not add."
-msgstr "拡張名が不正です。追加できませんでした。"
+msgstr "拡張名が無効なため、追加できませんでした"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:94
 msgid "File Extensions"
-msgstr "ファイル拡張子"
+msgstr "ファイルの拡張子"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:99
 msgid "Manage File Extensions"
-msgstr "ファイルの拡張子を管理する。"
+msgstr "ファイルの拡張子を管理する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:100
 msgid "Manage..."
@@ -3060,15 +3068,15 @@ msgstr "各カテゴリに入るファイル拡張子を選択する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:149
 msgid "Store File Organization"
-msgstr "LimeWireストアファイル構成"
+msgstr "ファイルの整理方法"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:150
 msgid "Configure File Organization..."
-msgstr "ファイル構成を設定"
+msgstr "整理方法を設定する..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:150
 msgid "Configure how files downloaded from the LimeWire Store are organized"
-msgstr "ライムワイヤーストアからダウンロードしたファイルをどのように管理するか設定する"
+msgstr "LimeWireストアからダウンロードしたファイルを、どのように管理するか設定する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:152
 msgid "Save Store downloads to:"
@@ -3086,7 +3094,7 @@ msgstr "拡張子を追加"
 msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
-msgstr "ライムワイヤーはあなたの検索結果に以下の拡張子のファイルを表示しません。"
+msgstr "LimeWireは、お客様の検索結果で以下の拡張子のファイルを表示しません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:262
@@ -3113,7 +3121,7 @@ msgstr "LimeWireは、お客様の検索結果で以下のキーワードを含�
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:100
 msgid "Use LimeWire's blacklist to protect you from harmful people"
-msgstr "危険な人物から身を守るためにLimeWireのブラックリストをお役立てください"
+msgstr "危険な人物から身を守るために、LimeWireのブラックリストをお役立てください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:103
 msgid "Block Hosts"
@@ -3172,7 +3180,7 @@ msgid ""
 "manually."
 msgstr ""
 "ユニバーサル・プラグアンドプレイを使えば、LimeWireで自動的にルーターもしくはファイアウオールを設定でき、性能を最適化できます。お客様のルーターがユ"
-"ニバーサル・プラグアンドプレイをサポートしない場合、LimeWireは手動で外部ポートの存在を知らせる設定を行います。"
+"ニバーサル・プラグアンドプレイをサポートしない場合、LimeWireは手動で外部ポートの存在を知らせる設定を行います"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:139
 msgid "Router Configuration"
@@ -3184,7 +3192,7 @@ msgstr "ユニバーサル・プラグアンドプレイをお使いください
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:142
 msgid "Manual Port Forward:"
-msgstr "手動でポートを稼動させる："
+msgstr "手動でポートフォワードする:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:143
 msgid "Do Nothing"
@@ -3196,13 +3204,13 @@ msgstr "* ルーター設定も行う必要があります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:37
 msgid "Add audio files I downloaded from LimeWire to iTunes"
-msgstr "私がLimeWireからiTunesまでダウンロードしたオーディオファイルを加えてください"
+msgstr "私がLimeWireからiTunesにダウンロードしたオーディオファイルを加える"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:84
 msgid ""
 "Share audio and video files in Public Shared list on my local network with "
 "iTunes"
-msgstr "iTunesでローカルネットワークの共有リスト内のオーディオ及びビデオファイルを共有"
+msgstr "iTunesのローカルネットワークの共有リスト内のオーディオ及びビデオファイルを共有する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:92
 msgid "Require password"
@@ -3210,7 +3218,7 @@ msgstr "パスワードが必要です"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:123
 msgid "Daap Password cannot be null, iTunes settings not saved"
-msgstr "Daap パスワードが空値になりません。ITunes設定が保存されていません。"
+msgstr "Daap パスワードが空値になりません。ITunes設定が保存されていません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:124
 msgid "iTunes Error"
@@ -3250,7 +3258,7 @@ msgstr "どの種類のファイルを追加するか尋ねる"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
 msgid "Always add the following kind of files:"
-msgstr "以下の種類のファイルは常に追加"
+msgstr "以下の種類のファイルを常に追加"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:143
 msgid "Warn me when I add a folder to a list that is shared."
@@ -3274,7 +3282,7 @@ msgstr "LimeWire と iTunes のインタラクション設定"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:232
 msgid "Use the LimeWire player when I play Audio files"
-msgstr "オーディオファイルを再生する時はライムワイヤー内蔵プレーヤーを使用する"
+msgstr "オーディオファイルを再生する時は、LimeWire内蔵プレーヤーを使用する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:270
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:39
@@ -3309,7 +3317,7 @@ msgstr "安全でない検索と共有を除外しています。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:60
 msgid "Select which file extensions belong in each category"
-msgstr "カテゴリに属する拡張子を選択して下さい"
+msgstr "各カテゴリに入るファイル拡張子を選択する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:110
 msgid "Choose where specific file types get saved"
@@ -3325,12 +3333,12 @@ msgstr "言語："
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:76
 msgid "Help translate LimeWire!"
-msgstr "ライムワイヤーを翻訳して下さい。"
+msgstr "LimeWireを翻訳して下さい!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:85
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:75
 msgid "Help improve LimeWire by sending us anonymous usage data"
-msgstr "匿名のユーザーデータを送ることで、ライムワイヤーの改良に役立ちます"
+msgstr "匿名のユーザーデータを送ることで、LimeWireの改良に役立ちます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:155
 msgid "Notifications and Warnings"
@@ -3350,11 +3358,11 @@ msgstr "警告メッセージをリセットする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:198
 msgid "Friends and Chat"
-msgstr "友人とチャット"
+msgstr "友だちとチャット"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:202
 msgid "Sign into Friends when LimeWire starts"
-msgstr "ライムワイヤー起動時に友人にサインインする"
+msgstr "LimeWire起動時に、友人にサインインする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:224
 msgid "Jabber Server:"
@@ -3362,7 +3370,7 @@ msgstr "ジャバーサーバー:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:234
 msgid "Using:"
-msgstr "使用:"
+msgstr "使用中"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:243
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:95
@@ -3399,7 +3407,7 @@ msgstr "上級用"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:132
 msgid ""
 "One or more options will take effect the next time LimeWire is restarted."
-msgstr "いくつかのオプションは、 LimeWire を再起動したときに反映される。"
+msgstr "選択したオプションは、 次回LimeWire が再起動されたときに有効になる"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:26
 msgid ""
@@ -3407,36 +3415,36 @@ msgid ""
 "\"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you "
 "notice performance issues."
 msgstr ""
-"お客様のコンピューターで高速スピードのインターネット接続が可能な場合、LimeWireは\"超ピア\" として作動し、Mojito "
-"DHTに接続します。性能上の問題に気づいたら、これらを無効にできます。"
+"お客様のコンピューターが高速インターネットに接続されているならば、LimeWireは\"ウルトラピア\" として作動し、Mojito "
+"DHTに接続します。パフォーマンス上の問題を感じたら、これらを無効にできます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:27
 msgid ""
 "LimeWire uses a secure communications mode called TLS, which may use more "
 "CPU resources."
-msgstr "LimeWireはTLSと呼ばれる安全な通信モードを使用しており、より多くのCPUリソースを使用することになります。"
+msgstr "LimeWireはTLSと呼ばれる安全な通信モードを使用しており、より多くのCPUリソースを使用します"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:28
 msgid ""
 "Out-of-band Searching helps deliver faster search results to you, but some "
 "internet connections may not work well with this feature."
-msgstr "帯域外検索によって、より速く検索結果を取得できます。しかしインターネット接続の中にはこの特性と相性の悪いものもあります。"
+msgstr "帯域外検索によって、より速く検索結果を取得できますが、インターネット接続の中にはこの特性と相性の悪いものもあります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:52
 msgid "Disable Ultrapeer capabilities"
-msgstr "超ピア機能を無効にする"
+msgstr "ウルトラピア機能を無効にする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:53
 msgid "Disable connecting to the Mojito DHT"
-msgstr "Mojito DHTへの接続を無効にします"
+msgstr "Mojito DHTへの接続を無効にする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:54
 msgid "Disable TLS capabilities"
-msgstr "TLS機能を無効にします"
+msgstr "TLS機能を無効にする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:55
 msgid "Disable Out-of-band searching"
-msgstr "帯域外検索を無効にします"
+msgstr "帯域外検索を無効にする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:63
 msgid "No Proxy"
@@ -3480,11 +3488,11 @@ msgstr "ネットワーク・インターフェイス"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ReallyAdvancedOptionPanel.java:35
 msgid "Performance"
-msgstr "性能"
+msgstr "パフォーマンス"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ReallyAdvancedOptionPanel.java:36
 msgid "BitTorrent"
-msgstr "BitTorrent"
+msgstr "ビットレント"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ReallyAdvancedOptionPanel.java:37
 msgid "Filtering"
@@ -3498,7 +3506,7 @@ msgstr "スパム"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ReallyAdvancedOptionPanel.java:77
 msgid ""
 "We recommend you don't touch these unless you really know what you're doing."
-msgstr "内容を完全に把握できない場合、これらに触ることはお勧めしません。"
+msgstr "内容を完全に把握できない場合、これらに触ることはお勧めしません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:62
 msgid "Group similar search results together"
@@ -3514,11 +3522,11 @@ msgstr "デフォルトにより検索する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:139
 msgid "Suggest files from friends"
-msgstr "友人からのファイルを提案"
+msgstr "友達からのファイルを提案"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:142
 msgid "Remember my recent searches"
-msgstr "私の最近の検索を忘れないでください"
+msgstr "最近の検索を記憶する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:145
 msgid "Clear Now"
@@ -3543,7 +3551,7 @@ msgstr "キーワードをフィルタリングする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:238
 msgid "Filter Keywords..."
-msgstr "キーワードによるフィルタ"
+msgstr "キーワードによるフィルタ..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:239
 msgid ""
@@ -3556,7 +3564,7 @@ msgstr "拡張子フィルター"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:243
 msgid "Filter File Extensions..."
-msgstr "拡張子によるフィルタ"
+msgstr "拡張子によるフィルタ..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:244
 msgid ""
@@ -3566,13 +3574,13 @@ msgstr "検索結果に指定した拡張子のファイルの表示を制限す
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:299
 msgid ""
 "You enabled showing Programs in search results. This can lead to viruses."
-msgstr "あなたは検索にプログラムが表示されるようにしました。ウイルスに感染する可能性が高くなります。"
+msgstr "あなたは検索にプログラムが表示されるようにしました。ウイルスに感染する可能性が高くなります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:302
 msgid ""
 "LimeWire is helping to prevent viruses by not showing Programs in search "
 "results."
-msgstr "ライムワイヤーはプログラムを検索に表示させないことで、あなたをウイルスから守ります。"
+msgstr "LimeWireはプログラムを検索に表示させないことで、あなたをウイルスから守ります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SpamOptionPanel.java:27
 msgid "Reset the Spam filter by clearing all files marked as spam"
@@ -3580,23 +3588,23 @@ msgstr "スパムとしてマークされたファイル全てを解除し、ス
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SpamOptionPanel.java:45
 msgid "Clear Filter"
-msgstr "フィルタをクリアする"
+msgstr "フィルターをクリアする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:48
 msgid "Tell me about Beta updates"
-msgstr "ベータ更新について知りたい"
+msgstr "ベータ更新についておしえてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:118
 msgid "File Associations"
-msgstr "アソシエーションをファイルする"
+msgstr "ファイルの関連づけ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:121
 msgid "\".magnet\" files"
-msgstr "\".magnet\" ファイル"
+msgstr "\".マグネット\" ファイル"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 msgid "Warn me when other programs want to automatically open these types"
-msgstr "他のプログラムが自動的にこれらのタイプを開けたいとき、私に警告してください"
+msgstr "他のプログラムが自動的にこれらのタイプを開けたい場合、私に警告してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:236
 msgid "Startup and Shutdown"
@@ -3604,7 +3612,7 @@ msgstr "起動と終了"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:239
 msgid "Run LimeWire on System Startup"
-msgstr "システム起動と同時にLimeWireを稼動する"
+msgstr "システム起動時にLimeWireを起動する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:241
 msgid "Minimize to system tray"
@@ -3624,31 +3632,31 @@ msgstr "バグ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
 msgid "Let me know about bugs before sending them"
-msgstr "彼らを送る前にバグを知らせてください"
+msgstr "送る前にバグについてを知らせてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 msgid "Always send bugs to Lime Wire"
-msgstr "常に、ライムワイヤーにバグを送ってください"
+msgstr "常にLime Wireにバグを送る"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
 msgid "Never send bugs to Lime Wire"
-msgstr "ライムワイヤーにバグを決して送らないでください"
+msgstr "決してLime Wireにバグを送らない"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:51
 msgid "Allow me to search for and share Programs with anyone"
-msgstr "プログラムの検索と任意の人との共有を許可"
+msgstr "プログラムの検索と任意の人との共有をさせてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:53
 msgid ""
 "Allow me to add Documents to my Public Shared list and share them with the "
 "world"
-msgstr "ドキュメントをパブリックシェアリストに追加し共有することを許可する"
+msgstr "ドキュメントをパブリックシェアリストに追加し共有させてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:61
 msgid ""
 "Enabling these settings makes you more prone to viruses and accidently "
 "sharing private documents. We strongly recommend you don't enable them."
-msgstr "これらの許可設定はウイルス感染や個人的な書類の予期せぬ公開に至りがちです。私たちは許可設定しないことを強く推奨します。"
+msgstr "これらの許可設定はウイルス感染や個人的な書類の予期せぬ公開につながる場合が多いので、許可設定をされないことをお勧めいたします"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:26
 #, java-format
@@ -3671,11 +3679,11 @@ msgstr "ブラウズする…"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:51
 msgid "Choose a different Save Location"
-msgstr "異なる保存場所を選択する"
+msgstr "別の保存場所を選択する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:17
 msgid "Undo any changes made"
-msgstr "変更点を元に戻す"
+msgstr "変更を元に戻す"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/HelpAction.java:18
 msgid "Help"
@@ -3687,7 +3695,7 @@ msgstr "もっと知りたい..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
 msgid "Keep any changes made"
-msgstr "変更点をそのままにする"
+msgstr "変更をそのままにする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/MiniPlayerPanel.java:89
 msgid "Nothing selected"
@@ -3723,15 +3731,15 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:102
 msgid "Turbo-charged downloads"
-msgstr ""
+msgstr "ターボチャージされたダウンロード"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:103
 msgid "More search results"
-msgstr ""
+msgstr "さらに検索する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:104
 msgid "Free tech support and upgrades"
-msgstr ""
+msgstr "無料の技術サポートとアップグレード"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:151
 msgid "Get LimeWire PRO Now"
@@ -3743,7 +3751,7 @@ msgstr "後で"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:174
 msgid "Get LimeWire PRO Later"
-msgstr "後でLimeWire PROを入手する。"
+msgstr "後でLimeWire PROを入手する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:188
 msgid "Why"
@@ -3760,7 +3768,7 @@ msgstr "PRO版にアップグレードしましょう！"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentOverviewPanel.java:77
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:166
 msgid "Size:"
-msgstr "大きさ"
+msgstr "サイズ："
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentOverviewPanel.java:79
 msgid "# files:"
@@ -3785,7 +3793,7 @@ msgstr "プロパティ {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:127
 msgid "Unable to save metadata changes."
-msgstr "メタデータの変更を保存しない"
+msgstr "メタデータの変更が保存できません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:128
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:233
@@ -3803,7 +3811,7 @@ msgstr "ブロックアドレス"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:126
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 msgid "Copy Link"
-msgstr "リンクをコピーする。"
+msgstr "リンクをコピーする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:173
 msgid "Length:"
@@ -3833,7 +3841,7 @@ msgstr "ハッシュ:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:89
 msgid "Sharing from these lists"
-msgstr "これらのリストを共有する。"
+msgstr "これらのリストからを共有する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:102
 #, java-format
@@ -3842,7 +3850,7 @@ msgstr "リスト{1}から{0} を取り除きますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:121
 msgid "This file is not shared"
-msgstr "このリストは共有されない。"
+msgstr "このリストは共有されない"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:159
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:190
@@ -3864,7 +3872,7 @@ msgstr "{0}% 完了"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentDownloadSelector.java:17
 msgid "Torrent Download"
-msgstr "トレントをダウンロードする。"
+msgstr "トレントをダウンロードする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:48
 msgid "Select files to download"
@@ -3872,7 +3880,7 @@ msgstr "ダウンロードするファイルを選択する。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:72
 msgid "Always ask before starting torrent"
-msgstr "トレントを開始する前にいつも尋ねる。"
+msgstr "常にトレント開始前にたずねる"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:80
 msgid "All P2P Users"
@@ -3894,7 +3902,7 @@ msgstr "P2Pユーザーをブロックしますか？"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:173
 #, java-format
 msgid "Block {0} P2P Users?"
-msgstr "P2Pユーザー{0}をブロックしますか。"
+msgstr "P2Pユーザー{0}をブロックしますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:132
 msgid "Retry"
@@ -3902,56 +3910,56 @@ msgstr "再試行"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:148
 msgid "When you sign on to LimeWire, your friends' files will appear here."
-msgstr "ライムワイヤーにサインインしたら、友達のファイルはここに見えます。"
+msgstr "LimeWireにサインオンすると、友達のファイルはここに表示されます"
 
 #. BrowseState.OFFLINE
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:150
 msgid "When you sign on to LimeWire, your friend's files will appear here."
-msgstr "ライムワイヤーにサインインしたら、友達のファイルはここに見えます。"
+msgstr "LimeWireにサインオンすると、友達のファイルはここに表示されます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:153
 msgid ""
 "When they sign on to LimeWire and share with you, their files will appear "
 "here."
-msgstr "彼らがライムワイヤーにサインオンし共有すれば、彼らのファイルはここに表示されます"
+msgstr "お友達がLimeWireにサインオンし共有すると、彼らのファイルはここに表示されます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:172
 msgid "<HTML><A href=\"\">Chat</A> and tell them to share.</HTML>"
-msgstr "<HTML><A href=\"\">チャット</A> と彼らに共有することを通知する</HTML>"
+msgstr "<HTML><A href=\"\">チャット</A> し、彼らに共有することを伝える</HTML>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:174
 msgid "<HTML><A href=\"\">Chat</A> and tell them to sign on.</HTML>"
-msgstr "<HTML><A href=\"\">チャット</A> と彼らにサインオンすることを通知する</HTML>"
+msgstr "<HTML><A href=\"\">チャット</A>し、彼らにサインオンすることを伝える</HTML>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:205
 msgid "No friends are sharing with you"
-msgstr "あなたと共有している友人は現在いません"
+msgstr "あなたと共有しているお友達は現在いません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:207
 msgid "No friends are on LimeWire"
-msgstr "友達のだれもライムワイヤーにサインインしていません"
+msgstr "お友達はどなたもLimeWireにサインインしていません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:212
 #, java-format
 msgid "{0} is not signed on to LimeWire."
-msgstr "{0}さんはライムワイヤーにサインインしていません"
+msgstr "{0}さんはにLimeWireサインオンしていません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:214
 msgid "These people are not signed on to LimeWire."
-msgstr "この人はライムワイヤーにサインインしていません"
+msgstr "この人達はLimeWireにサインオンしていません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:219
 #, java-format
 msgid "There was a problem browsing {0}."
-msgstr "{0} 参照中にエラーが発生しました。"
+msgstr "{0} 参照中にエラーが発生しました"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:221
 msgid "There was a problem viewing these people."
-msgstr "この人を見えるの問題があります。"
+msgstr "これらの人達を見えるの問題があります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:244
 msgid "You are offline."
-msgstr "あなたはオフラインです。"
+msgstr "あなたはオフラインです"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:104
 msgid "There are updates!"
@@ -3959,7 +3967,7 @@ msgstr "アップデートがあります！"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:163
 msgid "Unable to Browse"
-msgstr "見付けられない"
+msgstr "みつけることができません"
 
 #. text is lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:48
@@ -3968,7 +3976,7 @@ msgstr "閉じる"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:58
 msgid "Like the way search results used to look?"
-msgstr "前の出現方が好きですか。"
+msgstr "前の検索結果の方が好きですか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:63
 msgid "Switch to Classic View"
@@ -3976,15 +3984,15 @@ msgstr "伝統的なを選択する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:38
 msgid "New audio"
-msgstr "新しい音楽"
+msgstr "新しいオーディオ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:39
 msgid "New documents"
-msgstr "新しい種類"
+msgstr "新しいドキュメント"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:40
 msgid "New images"
-msgstr "新絵"
+msgstr "新しいイメージ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:41
 msgid "New programs"
@@ -4000,11 +4008,11 @@ msgstr "新しいファイル"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:113
 msgid "All Friends"
-msgstr "すべての友人"
+msgstr "全ての友達"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:240
 msgid "Friend Suggestions"
-msgstr "お勧めの友達"
+msgstr "お友達のお勧め"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/KeywordAssistedSearchBuilder.java:24
 msgid ":"
@@ -4012,22 +4020,23 @@ msgstr ":"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:20
 msgid "Downloading programs can result in viruses"
-msgstr "プログラムのダウンロードはウイルスに感染する可能性があります。"
+msgstr "プログラムのダウンロードはウイルスに感染する可能性があります"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:25
 msgid ""
 "We recommend you don't download programs using LimeWire. However, you can "
 "enable downloading programs via Preferences > Search > Search Filtering."
 msgstr ""
-"プログラムをダウンロードしないことを推奨しますが、設定 -> 検索 -> 検索フィルタ でプログラムのダウンロードを許可することができます。"
+"LimeWireを使ってプログラムのダウンロードをしないことをお勧めしますが、設定 -> 検索 -> 検索フィルタ "
+"でプログラムのダウンロードをすることができます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
 msgid ""
 "We recommend you don't download programs using LimeWire. However, you can "
 "enable downloading programs via Tools > Options > Search > Search Filtering."
 msgstr ""
-"プログラムをダウンロードしないことを推奨しますが、ツール -> オプション -> 検索 -> 検索フィルタ "
-"でプログラムのダウンロードを許可することができます。"
+"LimeWireを使ってプログラムのダウンロードをしないことをお勧めしますが、ツール -> オプション -> 検索 -> 検索フィルタ "
+"でプログラムのダウンロードをすることができます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:117
 msgid "Search..."
@@ -4036,11 +4045,11 @@ msgstr "検索…"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:126
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:199
 msgid "Search P2P Network"
-msgstr "P2Pネットワークで検索する"
+msgstr "P2Pネットワークを検索する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:196
 msgid "Search P2P Network and Friends"
-msgstr "P2Pネットワークと友達で検索する"
+msgstr "P2Pネットワークと友達を検索する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:29
 msgctxt "All (categories)"
@@ -4050,27 +4059,27 @@ msgstr "すべて"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:44
 msgctxt "&All (categories)"
 msgid "&All"
-msgstr "すべて(&A)"
+msgstr "&すべて"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:45
 msgid "A&udio"
-msgstr "サウンド(&U)"
+msgstr "&オーディオ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:46
 msgid "&Documents"
-msgstr "文書(&D)"
+msgstr "&ドキュメント"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:47
 msgid "&Images"
-msgstr "画像(&I)"
+msgstr "&画像"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:48
 msgid "&Programs"
-msgstr "プログラム(&P)"
+msgstr "&プログラム"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:49
 msgid "&Videos"
-msgstr "動画"
+msgstr "&動画"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:52
 msgid "&Other"
@@ -4122,67 +4131,67 @@ msgstr "{0}の検索結果 ({1})"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:329
 #, java-format
 msgid "All results for {0} - Showing {1} of {2}"
-msgstr "{0}の検索結果 - {1} / {2}"
+msgstr "{0}の検索結果 -　{2}の内{1}を表示"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:334
 #, java-format
 msgid "Audio results for {0} ({1})"
-msgstr "{0}で音楽検索した結果 ({1})件"
+msgstr "{0}のオーディオ検索結果 ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:336
 #, java-format
 msgid "Audio results for {0} - Showing {1} of {2}"
-msgstr "{0}で音楽検索した結果 ({1})件, {1}件目/{2}"
+msgstr "{0}のオーディオ検索結果 {2}の内{1}を表示"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:341
 #, java-format
 msgid "Video results for {0} ({1})"
-msgstr "{0}でビデオ検索した結果 ({1})件"
+msgstr "{0}のビデオ検索結果 ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:343
 #, java-format
 msgid "Video results for {0} - Showing {1} of {2}"
-msgstr "{0}でビデオ検索した結果 ({1})件, {1}件目/{2}"
+msgstr "{0}のビデオ検索結果　-　{2}の{1}を表示"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:348
 #, java-format
 msgid "Image results for {0} ({1})"
-msgstr "{0}で絵検索した結果 ({1})件"
+msgstr "{0}の画像検索した結果 ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:350
 #, java-format
 msgid "Image results for {0} - Showing {1} of {2}"
-msgstr "{0}で絵検索した結果 ({1})件,　{1}件目/{2}件"
+msgstr "{0}の画像検索した結果 -　{2}の{1}を表示"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:355
 #, java-format
 msgid "Document results for {0} ({1})"
-msgstr "{0}で文書検索した結果 ({1})件"
+msgstr "{0}の文書検索結果 ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:357
 #, java-format
 msgid "Document results for {0} - Showing {1} of {2}"
-msgstr "{0}で文書検索した結果 ({1})件, {1}件目/{2}"
+msgstr "{0}の文書検索結果  -　{2}の{1}を表示"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:362
 #, java-format
 msgid "Program results for {0} ({1})"
-msgstr "{0}でプログラム検索した結果 ({1})つ"
+msgstr "{0}のプログラム検索結果 ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:364
 #, java-format
 msgid "Program results for {0} - Showing {1} of {2}"
-msgstr "{0}でプログラム検索した結果 ({1})件, {1}つ目/{2}つ"
+msgstr "{0}のプログラム検索結果 -　{2}の{1}を表示"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:369
@@ -4198,11 +4207,11 @@ msgstr "{0}について他の検索結果- {2}のうち{1}を表示"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:581
 msgid "LimeWire will start your search right after it finishes loading."
-msgstr "ライムワイヤーはロード完了後すぐに検索を開始します"
+msgstr "LimeWireはロード完了後、すぐに検索を開始します"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:585
 msgid "You might not receive many results until LimeWire finishes loading..."
-msgstr "LimeWireが荷重を終えるまで、あなたは多くの結果を受けないかもしれません..."
+msgstr "LimeWireがロードを完了するまで、多くの結果が表示されないかもしれません..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:69
 msgid "Sort by:"
@@ -4249,7 +4258,7 @@ msgid ""
 "\n"
 "LimeWire cannot monitor or control the content of the P2P Network, so please "
 "respect your local copyright laws."
-msgstr "ライムワイヤーはこのファイルの権限を確認できません。それでもダウンロードしますか？"
+msgstr "LimeWireはこのファイルの許可を確認できません。それでもダウンロードしますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:45
 msgid "Do not warn me again"
@@ -4258,7 +4267,7 @@ msgstr "今後この警告を表示しない"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchHeadingDocumentBuilderImpl.java:13
 #, java-format
 msgid "{0} is marked as spam."
-msgstr "{0} がスパムと評価されています"
+msgstr "{0} がスパムと記録されています"
 
 #. Add Download menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:74
@@ -4277,11 +4286,11 @@ msgstr "名前をつけて保存"
 #. Add Mark/Unmark as Spam menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:113
 msgid "Unmark as Spam"
-msgstr "スパムと評価しない"
+msgstr "スパムと記録しない"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:113
 msgid "Mark as Spam"
-msgstr "スパムと評価する"
+msgstr "スパムとして記録"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:137
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:252
@@ -4292,7 +4301,7 @@ msgstr "よく似たファイルは表示しない"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:227
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:260
 msgid "Show Similar Files"
-msgstr "よく似たファイルも表示する。"
+msgstr "よく似たファイルを表示"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:53
@@ -4321,7 +4330,7 @@ msgstr "PROを購入して、LimeWireのP2Pネットワークをサポートし�
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:61
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "LimeWire PROを購入して、高速なダウンロードができるようにご援助お願いします"
+msgstr "LimeWire PROを購入し、高速ダウンロードをしてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
@@ -4344,37 +4353,37 @@ msgstr "最適なパフォーマンス向上にはLimeWire Pro！"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:77
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "インターネットをオープンな状態に保つ には、Proをご購入下さい"
+msgstr "LimeWire PROを購入し、インターネットをオープン状態にしよう"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:80
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "LimeWireのソフトウェア開発には費用がかかるので、 Proをご購入下さい"
+msgstr "LimeWire開発には費用がかかります。PROをご購入下さい"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"
-msgstr "\"magnet:\"拡張子リンク"
+msgstr "\"マグネット:\"　リンク"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
 msgid "Warn me when other programs take LimeWire associations"
-msgstr "他のプログラムがライムワイヤーの関連づけを変更する時は警告する"
+msgstr "他のプログラムがLimeWireの関連を変更する時は警告してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
 msgid ""
 "Torrent files and magnet links are no longer associated with LimeWire. Would "
 "you like LimeWire to re-associate them?"
-msgstr "トレントファイルとマグネットリンクは、現在ライムワイヤーと関連づけられていません。それらを再びライムワイヤーと関連づけしますか？"
+msgstr "トレントファイルとマグネットリンクは、現在LimeWireと関連されていません。再び関連させますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:80
 msgid ""
 "Torrent files are no longer associated with LimeWire. Would you like "
 "LimeWire to re-associate them?"
-msgstr "トレントファイルはライムワイヤーと関連付けされていません。再びライムワイヤーと関連付けしますか？"
+msgstr "トレントファイルは、もうLimeWireと関連されていません。再び関連させますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:84
 msgid ""
 "Magnet links are no longer associated with LimeWire. Would you like LimeWire "
 "to re-associate them?"
-msgstr "マグネットリンクは、現在ライムワイヤーと関連づけられていません。それらを再びライムワイヤーと関連づけしますか？"
+msgstr "マグネットリンクは、もうLimeWireと関連されていません。再び関連させますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:106
 msgid "No internet connection"
@@ -4390,7 +4399,7 @@ msgstr "接続できませんでした"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 msgid "You couldn't connect to LimeWire"
-msgstr "ライムワイヤーに接続できませんでした"
+msgstr "LimeWireに接続できませんでした"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:123
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:128
@@ -4418,7 +4427,7 @@ msgstr "完全な接続"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:145
 msgid "You are fully connected"
-msgstr "完全な接続をしています"
+msgstr "完全に接続しています"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 msgid "Turbo-charged connection"
@@ -4439,7 +4448,7 @@ msgstr "ファイルを追加する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPopupContentPanel.java:62
 msgid "Scanning..."
-msgstr "探索中..."
+msgstr "スキャン中..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPopupContentPanel.java:63
 msgid "stop"
@@ -4451,15 +4460,15 @@ msgstr "全て完了"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:37
 msgid "Want faster downloads?  Get LimeWire PRO."
-msgstr "さらに速いダウンロード速度が欲しいですか？ LimeWire PROを購入しましょう"
+msgstr "LimeWire PROを購入し、さらに高速なダウンロードをし ましょう"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:49
 msgid "For the best BitTorrent downloads, get LimeWire PRO."
-msgstr "さらに速いBitTorrentダウンロードのためにLimeWire PROを購入しましょう"
+msgstr "LimeWire PROを購入し、さらに高速なBitTorrentダウンロードをし ましょう"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:53
 msgid "LimeWire PRO comes with FREE tech support. "
-msgstr "LimeWire PROを購入すると無料のサポートが利用できます "
+msgstr "LimeWire PROを購入すると無料のテクニカルサポートが利用できます "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:65
 msgid "FREE updates and support - LimeWire PRO."
@@ -4488,11 +4497,11 @@ msgstr[0] "{0} ファイル"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPopupPanel.java:314
 msgid "Sign in to share with friends"
-msgstr "友人と共有するためにサインインしてください"
+msgstr "お友達と共有するためにサインインしてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:28
 msgid "LimeWire 5"
-msgstr "ライムワイヤー5"
+msgstr "LimeWire ５"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/Notification.java:57
 msgctxt "Launch Action Text (Notification)"
@@ -4502,7 +4511,7 @@ msgstr "実行する"
 #. restore
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:102
 msgid "Show LimeWire"
-msgstr "ライムワイヤーを見せる"
+msgstr "LimeWireを表示する"
 
 #. exit after transfers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:115
@@ -4517,7 +4526,7 @@ msgstr "終了する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:159
 msgid "Update Now"
-msgstr "いまアップデートする"
+msgstr "いますぐアップデートする"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:162
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:199
@@ -4531,7 +4540,7 @@ msgid ""
 "like to update now?"
 msgstr ""
 "LimeWireにアップデートをインストールするには、再起動が必要です。今アップデートしないのであれば、LimeWireはユーザーが終了すると自動的にアッ"
-"プデート。今すぐアップデートしますか？"
+"プデートします。今すぐアップデートしますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:174
 msgid "Update Ready"
@@ -4551,34 +4560,34 @@ msgstr "ライブラリがブラウズされました"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:251
 msgid "Done uploading"
-msgstr "ダウンロード完了"
+msgstr "アップロード完了"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:259
 #, java-format
 msgid "Connected to {0} P2P user, uploading at {1} - Ratio {2}"
-msgstr "{0} 人のP2Pユーザーに接続中、{1}でアップロード中- レシオ{2}"
+msgstr "{0} 人のP2Pユーザーに接続中、{1}でアップロード中　- 比率{2}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:261
 #, java-format
 msgid "Connected to {0} P2P users, uploading at {1} - Ratio {2}"
-msgstr "{0} 人のP2Pユーザーに接続中、{1}でアップロード中- レシオ{2}"
+msgstr "{0} 人のP2Pユーザーに接続中、{1}でアップロード中　-　比率 {2}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:264
 #, java-format
 msgid "Uploading - {0} of {1}({2})"
-msgstr ""
+msgstr "アップロード中　- {1}({2})のうち{0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:280
 msgid "Unable to upload: file error"
-msgstr "ダウンロードできません：ファイル・エラー"
+msgstr "アップロードできません：　ファイル・エラー"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:282
 msgid "Unable to upload: transfer interrupted"
-msgstr "ダウンロードできません：転送が阻止されました"
+msgstr "アップロードできません：　転送が阻止されました"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:284
 msgid "Unable to upload: upload limit reached"
-msgstr "ダウンロードできません：アップロードの上限に達しました"
+msgstr "アップロードできません：　アップロードの上限に達しました"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:118
 msgid "Save File As..."
@@ -4596,17 +4605,17 @@ msgstr "ここに保存は出来ません"
 msgid ""
 "Sorry, there is a problem with torrents.\n"
 "Please try reinstalling LimeWire to solve this problem."
-msgstr "torrentに問題があります。LimeWireを再インストールしてください。"
+msgstr "トレントに問題があります。LimeWireを再インストールしてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:158
 msgid "You can also ask for help on the forums."
-msgstr "フォーラムで質問することが出来ます"
+msgstr "フォーラムで質問することができます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:170
 msgid ""
 "Sorry, we are still loading your old downloads.\n"
 "Please wait to add a new download until we are done."
-msgstr "古いダウンロードを読み込んでいます。しばらくおまちください。"
+msgstr "古いダウンロードを読み込んでいます。しばらくおまちください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:173
 msgid "Sorry, there was a problem downloading your file."
@@ -4695,7 +4704,7 @@ msgstr "最高品質"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:53
 msgid "Invalid magnet option."
-msgstr "無効なmagnetオプション"
+msgstr "無効なマグネットオプション"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:109
 msgid "Unable to open URL"
@@ -4737,7 +4746,7 @@ msgid ""
 "permissions to write to it, or there may be another problem. Please choose a "
 "different folder."
 msgstr ""
-"保存先フォルダが無効です。削除されているか、フォルダのアクセス権がない、もしくはその他の問題がある可能性があります。別のフォルダを選択してください。"
+"保存先フォルダが無効です。削除されているか、フォルダのアクセス権がない、もしくはその他の問題がある可能性があります。別のフォルダを選択してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:50
 msgid "Invalid Folder"
@@ -4754,7 +4763,7 @@ msgid ""
 msgstr ""
 "{0} へ正しく保存できません\n"
 "{1}のサブフォルダに保存するプロパティを確認して下さい\n"
-"他の保存場所を選択したいですか？"
+"他の保存場所を選択しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:168
 msgid "Folder Warning"
@@ -4767,8 +4776,8 @@ msgid ""
 "Documents may contain personal information. <a href=\"{0}\">learn "
 "more</a></body></html>"
 msgstr ""
-"<html><body>警告:ドキュメントを共有しようとしています。　これらのファイルには個人情報が含まれている可能性があります。 <a "
-"href=\"{0}\">詳しく</a></body></html>"
+"<html><body>警告:ドキュメントを共有しようとしています。これらのファイルには個人情報が含まれている可能性があります。 <a "
+"href=\"{0}\">詳しくはこちら</a></body></html>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/DocumentWarningPanel.java:72
 msgid "Do you want to keep sharing Documents with the world?"
@@ -4785,7 +4794,7 @@ msgstr "共有しない"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryFileAdder.java:60
 msgid "File/Folder not added"
 msgid_plural "File(s)/Folder(s) not added"
-msgstr[0] "ファイル/フォルダは追加されない。"
+msgstr[0] "ファイル/フォルダは追加されません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryFileAdder.java:72
 #, java-format
@@ -4795,17 +4804,17 @@ msgstr "{0} をライブラリに追加することができない。"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryFileAdder.java:84
 #, java-format
 msgid "{0} folders and {1} files could not be added to the Library."
-msgstr "{0}フォルダと{1} ファイルをライブラリに追加することができない。"
+msgstr "{0}フォルダと{1} ファイルをライブラリに追加することができません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryFileAdder.java:86
 #, java-format
 msgid "{0} folders could not be added to the Library."
-msgstr "{0}フォルダをライブラリに追加することができない。"
+msgstr "{0}フォルダをライブラリに追加することができません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryFileAdder.java:88
 #, java-format
 msgid "{0} files could not be added to the Library."
-msgstr "{0} ファイルをライブラリに追加することができない。"
+msgstr "{0} ファイルをライブラリに追加することができません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:74
 msgid "Choose Categories"
@@ -4834,26 +4843,26 @@ msgstr "どの種類のファイルをこれらのフォルダとそのサブフ
 msgid ""
 "What kind of files do you want to <b>share with the world</b> from \"{0}\" "
 "and its subfolders?"
-msgstr "どの種類のファイルを\"{0}\"とそのサブフォルダ から<b>全世界と共有したい</b> ですか？"
+msgstr "どの種類のファイルを\"{0}\"とそのサブフォルダ から<b>共有したい</b> ですか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:183
 msgid ""
 "What kind of files do you want to <b>share with the world</b> from these "
 "folders and their subfolders?"
-msgstr "これらのフォルダとサブフォルダの中で、<b>共有したい</b>ファイルの種類は？"
+msgstr "これらのフォルダとサブフォルダの中で、<b>共有したい</b>ファイルの種類はどれですか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:189
 #, java-format
 msgid ""
 "What kind of files do you want to share with selected friends from \"{0}\" "
 "and its subfolders?"
-msgstr "どの種類のファイルを\"{0}\"とそのサブフォルダ から選ばれた友だちと共有したいですか？"
+msgstr "どの種類のファイルを\"{0}\"とそのサブフォルダ から選ばれたお友だちと共有したいですか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:193
 msgid ""
 "What kind of files do you want to share with selected friends from these "
 "folders and their subfolders?"
-msgstr "どの種類のファイルをこれらのフォルダとそのサブフォルダ から選ばれた友だちと共有したいですか？"
+msgstr "どの種類のファイルをこれらのフォルダとそのサブフォルダ から選ばれたお友だちと共有したいですか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:63
 msgid "Share files?"
@@ -4866,26 +4875,26 @@ msgstr "共有リストにフォルダを追加する前に警告する"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:121
 #, java-format
 msgid "Share files in \"{0}\" and its subfolders <b>with the world</b>?"
-msgstr "\"{0}\" とそのサブフォルダのファイルを<b>全世界と</b>共有しますか？"
+msgstr "\"{0}\" とそのサブフォルダのファイルを<b></b>共有しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:124
 msgid ""
 "Share files in these folders and their subfolders <b>with the world</b>?"
-msgstr "これらのフォルダとそのサブフォルダのファイルを<b>全世界と</b>共有しますか？"
+msgstr "これらのフォルダとそのサブフォルダのファイルを<b></b>共有しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:128
 #, java-format
 msgid "Share files in \"{0}\" and its subfolders with selected friends? "
-msgstr "\"{0}\" とそのサブフォルダのファイルを<b>選ばれた友だちと共有しますか？ "
+msgstr "\"{0}\" とそのサブフォルダのファイルを<b>選ばれたお友だちと共有しますか？ "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:132
 msgid ""
 "Share files in these folders and their subfolders with selected friends?"
-msgstr "これらのフォルダとそのサブフォルダのファイルを選ばれた友だちと共有しますか？"
+msgstr "これらのフォルダとそのサブフォルダのファイルを選ばれたお友だちと共有しますか？"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:264
 msgid "Some Legal Stuff"
-msgstr "法律の情報"
+msgstr "法律について"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:266
 #, java-format
@@ -4896,8 +4905,8 @@ msgid ""
 "href=\"{0}\">Copyright</a></body></html>."
 msgstr ""
 "<html><body>LimeWire Basic と LimeWire PRO "
-"は認可されたファイルのみの共有を目的としたP2Pプログラムです。著作権法は保護されたコンテンツの入手・公衆送信を禁止しています。さらに{0}についての情報"
-"が欲しいのなら<a href=\"{0}\">著作権</a></body></html>."
+"は認可されたファイルのみの共有を目的としたP2Pプログラムです。著作権法は保護されたコンテンツの入手・公衆送信を禁止しています。{0}に関する情報がさらに"
+"欲しい場合はこちらを参照ください<a href=\"{0}\">著作権</a></body></html>."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:267
 msgid "Copyright Infringement"
@@ -4913,8 +4922,8 @@ msgid ""
 "to the terms of the License Agreement and Privacy Policy. You also agree "
 "that you will not use LimeWire for copyright infringement."
 msgstr ""
-"同意をクリックすることで、ライセンス契約とプライバシーポリシーを読み、理解し、同意したと見なされます。また、LimeWireを著作権違反には使用しないこと"
-"にも同意したとみなされます。"
+"「同意」をクリックすることで、ライセンス契約と個人情報に関する規約を読み、理解し、同意したと見なされます。また、著作権違反にLimeWireを使用しないこ"
+"とにも同意したことになります。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:271
 msgid "Choose your language"
@@ -4922,7 +4931,7 @@ msgstr "言語を選択"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:272
 msgid "Policies Governing Your Use:"
-msgstr "あなたの使用を律するポリシー"
+msgstr "あなたの使用を規制する規約"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:281
 msgid "I Agree"
@@ -4930,11 +4939,11 @@ msgstr "同意する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:54
 msgid "File Associations and Startup"
-msgstr "ファイルの関連づけと起動"
+msgstr "ファイル関連と起動"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:59
 msgid "Associate .magnet and .torrent files with LimeWire"
-msgstr ".magnet拡張子ファイルと.torrent拡張子ファイルをLimeWireに関連付ける"
+msgstr ".マグネット拡張子ファイルと.トレント拡張子ファイルをLimeWireに関連づける"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:64
 msgid "Launch LimeWire at system startup"
@@ -4955,7 +4964,7 @@ msgstr "著作権所有者が共有しないように要求したファイルを
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:98
 msgid "Please take a minute to configure these options before moving on."
-msgstr "次へ進む前に、これらオプションの設定をします。"
+msgstr "次へ進む前に、これらオプションの設定をします"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:108
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:120
@@ -4965,7 +4974,7 @@ msgstr "全ての設定はあとでLimeWire→設定で変更できます"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:109
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:121
 msgid "All settings can be changed later in Tools > Options"
-msgstr "設定はツール→オプションで変更することが出来ます"
+msgstr "全ての設定はあとでツール→オプションで変更することが出来ます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:126
 msgid "Learn about sharing."
@@ -4977,13 +4986,13 @@ msgstr "全体に共有されるリストに入っているファイルは全世
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:147
 msgid "Add files I download from P2P Users to my Public Shared list."
-msgstr "ダウンロードしたファイルを共有するリストに追加する"
+msgstr "P2Pユーザーからダウンロードしたファイルを、共有するリストに追加する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:157
 msgid ""
 "LimeWire will add files you download from P2P Users into your Public Shared "
 "list."
-msgstr "LimeWireはダウンロードしたファイルを共有するリストに追加する"
+msgstr "LimeWireはP2Pユーザーからダウンロードしたファイルを、共有するリストに追加する"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:179
 msgid "To see or modify files in your Public Shared list, go to"
@@ -4993,7 +5002,7 @@ msgstr "共有するリストを見たり、設定するには、"
 msgid ""
 "Files shared with the P2P Network in your old version will be in your Public "
 "Shared list."
-msgstr "古いバージョンで共有されていたファイルは、共有するリストに追加されます"
+msgstr "古いバージョンのP2Pネットワークで共有されていたファイルは、共有するリストに追加されます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:202
 msgid ""
@@ -5002,7 +5011,7 @@ msgstr "古いバージョンで共有されていたファイルは、共有す
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:207
 msgid "Shared files from your Public Shared list will continue to be shared."
-msgstr "共有するリストにあるファイルは今後も共有され続けます"
+msgstr "共有するリストにあるファイルは、今後も共有され続けます"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 msgid "Continue"

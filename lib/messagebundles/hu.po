@@ -8,20 +8,20 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-14 11:30-0400\n"
-"PO-Revision-Date: 2009-09-13 07:32+0000\n"
-"Last-Translator: pro230 <Unknown>\n"
+"PO-Revision-Date: 2009-09-27 19:46+0000\n"
+"Last-Translator: kakukk <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-09-16 19:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-29 19:56+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
 msgid "All Types"
-msgstr "Összes típus"
+msgstr "Minden típus"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
@@ -46,7 +46,7 @@ msgstr "Programok"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:112
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:30
 msgid "Audio"
-msgstr "Audió"
+msgstr "Audio"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:44
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
@@ -124,26 +124,26 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
-"<html><b>A LimeWire-t v�rus vagy tr�jai fal� t�madta "
-"meg!</b><br><br>Halad�ktalanul l�togasd meg a <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a>-ot, �s "
-"t�ltsd le a leg�jabb hivatalos LimeWire-verzi�t.</html>"
+"<html><b>A LimeWire példányod valószínűleg meghibásodott egy vírus vagy egy "
+"trójai miatt!</b><br><br>Kérünk, látogasd meg a <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com-ot</a>, és "
+"töltsd le a LimeWire legfrissebb, hivatalos verzióját.</html>"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:284
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
-"Ha ezt a feltöltést megszakítod, a torrent letöltése is megszakad. Biztos "
-"ezt akarod tenni?"
+"Ha megállítod ezt a feltöltést, a torrent letöltése is megszakad. Biztosan "
+"ezt akarod?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
-"Ez a feltöltés egy torrent fájl és a seedelése nem volt elegendő. Többet "
-"kéne feltöltened. Biztos hogy megszakítod?"
+"Ez a feltöltés egy torrent-fájl és még nincs megfelelően feltöltve. Egy "
+"kicsivel többet kéne töltened. Biztosan le akarod állítani?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -158,13 +158,17 @@ msgid_plural ""
 "just shared {4} files with you on LimeWire. Start {0}LimeWire{1} or "
 "{2}download{3} it to get them."
 msgstr[0] ""
+"csak ossz meg egy fájlt a LimeWire segítségével. Indítsd el a {0}LimeWire{1}-"
+"t, vagy {2}töltsd le{3}, hogy megkapd a fájlt."
 msgstr[1] ""
+"csak ossz meg néhány {4} fájlt a LimeWire segítségével.  Indítsd el a "
+"{0}LimeWire{1}-t, vagy {2}töltsd le{3}, hogy megkapd a fájlokat."
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
 msgid "Free to chat"
-msgstr "Chatelés engedélyezett"
+msgstr "A chatelés engedélyezett"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 msgid "Available"
@@ -181,15 +185,15 @@ msgstr "Rögtön jön"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:113
 msgid "Do not disturb"
-msgstr "Ne zavarj"
+msgstr "Ne zavarj!"
 
 #: components/gnutella-core/src/main/java/com/limegroup/bittorrent/BTDownloaderImpl.java:74
 msgid ""
 "This torrent may have been designed to damage your computer.\n"
 "LimeWire has cancelled the download for your protection."
 msgstr ""
-"Ez a torrent veszélyes lehet a számítógépére.\n"
-"A LimeWire az Ön érdekében megakadályozta a letöltést."
+"Ez a torrent veszélyt jelenthet a számítógépedre.\n"
+"A védelmed érdekében a LimeWire megakadályozta a letöltését."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:306
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
@@ -202,19 +206,19 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:406
 msgid "Connection Listener"
-msgstr "Kapcsolatok felsorolása"
+msgstr "Kapcsolat-listázó"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 msgid "Browse Host Handler"
-msgstr "Böngésző Host kezelése"
+msgstr "Alapböngésző-kezelő"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:55
 msgid "Connection Dispatching"
-msgstr "Kapcsolat bontása"
+msgstr "Kapcsolat indítása"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:396
 msgid "Connection Management"
-msgstr "Kapcsolatok kezelése"
+msgstr "Kapcsolatkezelés"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:66
 msgid "Stale Connection Management"
@@ -222,15 +226,15 @@ msgstr "Elévült kapcsolat kezelése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:99
 msgid "Various Core Services"
-msgstr "Various Core szolgáltatás"
+msgstr "Különféle központi szolgáltatások"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:104
 msgid "Gnutella Connections"
-msgstr "Gnutella kapcsolódás"
+msgstr "Gnutella-kapcsolatok"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:203
 msgid "Old Downloads"
-msgstr "Régi letöltések"
+msgstr "Régebbi letöltések"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:228
 msgid "Download Management"
@@ -242,8 +246,10 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
-"Bocs, a LimeWire nem tudta beolvasni régebbi letöltéseidet. Próbáld meg "
-"mégegyszer (Try Again-gomb)!"
+"Elnézést, de a LimeWire nem tudja beolvasni a régebbi letöltéseidet. Újból "
+"elindíthatod a letöltéseket, ha a letöltéseknél az 'Újra próbál'-ra "
+"kattintasz. Ha a LimeWire közben megtalálná a fájl(ok) forrását, ahol "
+"lehetséges, a letöltés újraépül."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:281
 msgid ""
@@ -251,12 +257,14 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
-"Bocs, a LimeWire nem tudta beolvasni régebbi letöltéseidet. Próbáld meg "
-"mégegyszer (Try Again-gomb)!"
+"Elnézést, de a LimeWire nem tudja beolvasni a régebbi letöltéseid "
+"némelyikét. Újból elindíthatod a letöltéseket, ha a letöltéseknél az 'Újra "
+"próbál'-ra kattintasz. Ha a LimeWire közben megtalálná a fájl(ok) forrását, "
+"ahol lehetséges, a letöltés újraépül."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
-msgstr "HTTP válaszok listája"
+msgstr "HTTP-kérelem figyelés"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPUploadManager.java:233
 msgid "Upload Management"
@@ -264,7 +272,7 @@ msgstr "Feltöltés kezelése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HostCatcher.java:375
 msgid "Peer Locator"
-msgstr "Peer-érzékelő"
+msgstr "Kiszolgáló-kereső"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/LimeCoreGlue.java:107
 msgid "Core Glue"
@@ -272,11 +280,11 @@ msgstr "Mag kötés"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/MessageRouterImpl.java:559
 msgid "Message Routing"
-msgstr "Tömeges Üzenet"
+msgstr "Üzenet irányítása"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NetworkManagerImpl.java:166
 msgid "Network Management"
-msgstr "Hálózatfelügyelet"
+msgstr "Hálózat kezelése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:210
 msgid "Ultrapeer/DHT Management"
@@ -284,7 +292,7 @@ msgstr "Ultrapeer/DHT kezelése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
 msgid "Peer Listener"
-msgstr "Peer hallgató"
+msgstr "Kiszolgáló-figyelő"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/PromotionServicesImpl.java:35
 msgid "Promotion System"
@@ -300,11 +308,11 @@ msgstr "Tartalom kezelése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
-msgstr "Helyi kapcsolatok"
+msgstr "Helyi kapcsolat-figyelő"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
-msgstr "Magnet Processzor"
+msgstr "Magnet (mágnes-link) feldolgozó"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:123
 msgid ""
@@ -312,9 +320,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
-"LimeWire képtelen volt elindítani a digitális audio-elérési protokoll "
-"szolgáltatást ( iTunes-beli közzététel). Vissza tudsz fordulni a feltételek "
-"módosításához (Haladó -> Állományok -> iTunes)."
+"A LimeWire nem tudta elindítani a digitális audio hozzáférési protokoll "
+"szolgáltatást (közzététel az iTunes-ban). Ez a funkció ki lett kapcsolva. "
+"Visszakapcsolhatod az opcióknál: Haladó -> Fájlok -> iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:177
 msgid "What's New"
@@ -330,11 +338,11 @@ msgstr "Mojito DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:179
 msgid "LimeWire Store Integration"
-msgstr "LimeWare áruház beillesztése"
+msgstr "LimeWire készlet integrálás"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
-msgstr "Letöltés frissítés kezelő"
+msgstr "Frissítéskereső letöltése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:57
 msgid "Shared Files"
@@ -342,7 +350,7 @@ msgstr "Megosztott fájlok"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
 msgid "OOB Query Handler"
-msgstr "OOB Kérés Kezelő"
+msgstr "OOB-kérdés kezelő"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
@@ -350,15 +358,15 @@ msgstr "Általános üzenetek"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:194
 msgid "QRP Updater"
-msgstr "QRP Frissítés"
+msgstr "QRP frissítése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
 msgid "RUDP Message Routing"
-msgstr "RUDP Tömeges Üzenet"
+msgstr "RUDP-üzenet irányítása"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/settings/SettingsSaverService.java:37
 msgid "Settings Saver"
-msgstr "Beállítás-Mentő"
+msgstr "Beállítások elmentése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:101
 msgid "Spam Management"
@@ -366,7 +374,7 @@ msgstr "SPAM kezelése"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:62
 msgid "Uptime Statistics"
-msgstr "Statisztika nullázása"
+msgstr "Alkalmi statisztikák"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:77
@@ -375,7 +383,7 @@ msgstr "Tallózás"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:987
 msgid "Update Checks"
-msgstr "Frissítés ellenőrzése"
+msgstr "Frissítési ellenőrzések"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -504,7 +512,7 @@ msgstr "Művelet"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 msgid "Copyright"
-msgstr "Védjegy"
+msgstr "Szerzői jog"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -512,7 +520,7 @@ msgstr "Védjegy"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
-msgstr "Licensz típusa"
+msgstr "Licenc-típus"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
@@ -574,11 +582,11 @@ msgstr "Leírás"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:142
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:269
 msgid "License"
-msgstr "Licensz"
+msgstr "Licenc"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr "Témakör"
+msgstr "Téma"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:43
@@ -645,9 +653,8 @@ msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"A LimeWire nem tudott egy szükséges fájlt megnyitni, mert egy másik program "
-"zárolta azt. A LimeWire váratlan dolgokat produkálhat, amíg a fájl zárolva "
-"marad."
+"A LimeWire nem tudott megnyitni egy szükséges fájl, mivel azt egy másik "
+"program zárolta. A zárolás megszűnéséig a LimeWire nem várt módon működhet."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:55
 msgid ""
@@ -655,9 +662,9 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"A LimeWire nem tudott írni egy fontos fájlt, mivel nincsenek meg a szükséges "
-"engedélyeid. A beállításaid lehet, hogy elvesznek a következő LimeWire "
-"indításig, vagy a LimeWire furcsán viselkedhet."
+"A LimeWire nem tudott létrehozni egy szükséges fájlt, mivel nem rendelkezel "
+"a szükséges engedélyekkel. Előfordulhat, hogy a beállításaid elvesznek a "
+"LimeWire következő indításakor, vagy a program nem várt módon viselkedik."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:57
 msgid ""
@@ -665,25 +672,26 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
-"A LimeWire nem tudott megnyitni egy fontos fájlt, mert a fájlnév olyan "
+"A LimeWire nem tud megnyitni egy szükséges fájlt, mivel a fájlnév olyan "
 "karaktereket tartalmaz, amelyeket az operációs rendszered nem támogat. A "
-"LimeWire emiatt furcsán viselkedhet."
+"LimeWire nem várt módon viselkedhet."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:61
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"A LimeWire nem tudta letölteni a kijelölt fájlt, mert a merevlemez megtelt. "
-"Több fájl letöltéséhez helyet kell felszabadítanod a lemezen."
+"A LimeWire nem tudja letölteni a kijelölt fájlt, mert a merevlemez megtelt. "
+"További fájlok letöltéséhez helyet kell felszabadítanod a lemezen."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"A LimeWire nem tudta letölteni a kijelölt fájlt, mert egy másik program már "
-"használja a fájlt. Zárd be ezt a programot, majd próbálkozz újra."
+"A LimeWire nem tudta letölteni a kijelölt fájlt, mert azt jelenleg egy másik "
+"program használja. Kérjük, zárd be a másik programot és indítsd újra a "
+"letöltést."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
@@ -692,9 +700,10 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"A LimeWire nem tudott létrehozni vagy folytatni egy félkész fájlt a "
-"letoltéshez, mert nincs írasi jogod a félkész-mappához. A LimeWire "
-"használatának folytatásához válassz egy másik mentési mappát."
+"A LimeWire a kijelölt letöltéshez nem tudott létrehozni egy rész-fájlt vagy "
+"folytatni annak létrehozását, mivel nincs engedélyed fájlok létrehozására az "
+"adott mappában. A LimeWire használatának folytatásához és a mentéshez, "
+"kérünk, válassz egy másik mappát."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:67
 msgid ""
@@ -716,7 +725,7 @@ msgstr "Statisztika kezelése"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "Oops!"
-msgstr "Hiba"
+msgstr "Hoppá!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "A problem occurred..."

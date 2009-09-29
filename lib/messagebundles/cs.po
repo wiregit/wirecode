@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-14 11:30-0400\n"
-"PO-Revision-Date: 2009-08-05 09:15+0000\n"
-"Last-Translator: lada balek <Unknown>\n"
+"PO-Revision-Date: 2009-09-29 17:39+0000\n"
+"Last-Translator: houby <houby@centrum.cz>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2009-09-16 19:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-29 19:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -78,7 +78,7 @@ msgstr "Jiné"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:87
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:34
 msgid "Videos"
-msgstr ""
+msgstr "Videa"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:123
@@ -184,6 +184,8 @@ msgid ""
 "This torrent may have been designed to damage your computer.\n"
 "LimeWire has cancelled the download for your protection."
 msgstr ""
+"Torrent může být navržen tak, aby poškodil váš počítač.\n"
+"LimeWire zrušil stažení pro vaši ochranu."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:306
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
@@ -236,6 +238,9 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
+"Je nám líto, LimeWire nemůže číst vaše staré soubory ke stažení. Můžete je "
+"znovu spustit kliknutím na 'Try Again' na stahování. Když zjistí, LimeWire "
+"zdroj pro soubor, bude stahování pokračovat, kde bylo přerušeno"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:281
 msgid ""
@@ -302,6 +307,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
+"LimeWire nemohl spustit Digital Audio Access Protocol Service (pro sdílení "
+"souborů v iTunes). Tato funkce se ted vypne. Můžete znovu zapnout v "
+"možnostech, pod Rozšířené -> Files -> iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:177
 msgid "What's New"
@@ -729,6 +737,8 @@ msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
+"Je nám líto, LimeWire narazil na problém. LimeWire ještě bude běžet v "
+"pohodě, ale měli byste nám poslat zprávu o chybě, abychom ji mohli napravit."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:414
 msgid ""
@@ -741,19 +751,21 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:450
 msgid "Tell us what you were doing before LimeWire ran into this problem."
 msgstr ""
+"Řekněte nám, co jste dělali před spuštěním LimeWire, než narazili na tento "
+"problém."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:477
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
 msgid "Show Bug"
-msgstr ""
+msgstr "Zobrazit Bug"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:489
 msgid "Hide Bug"
-msgstr ""
+msgstr "skrýt Bug"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:497
 msgid "Ask for help on the forums"
-msgstr ""
+msgstr "Požádat o pomoc na fórech"
 
 #. the "always use this answer" checkbox
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:506
@@ -762,7 +774,7 @@ msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:509
 msgid "Send Bug"
-msgstr ""
+msgstr "poslat Bug"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:594
 msgid "Internal Error"
@@ -774,6 +786,8 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
+"LimeWire nebyl schopen připojit se k serveru.Pro další pomoc s podporu a "
+"laděním, navštivte www.limewire.com a klikněte na 'podpora'. Děkujeme vám."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:632
 msgid "Copy Report"
@@ -794,11 +808,11 @@ msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:533
 msgid "Scouring NYC for Limes..."
-msgstr ""
+msgstr "Čisticí NYC pro citrusy ..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:567
 msgid "Squeezing Limes..."
-msgstr ""
+msgstr "Stlačení Limety ..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:604
@@ -807,7 +821,7 @@ msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:648
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
+msgstr "Tato verze Alpha vypršela. Stiskněte tlačítko OK a zavřete okno. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:654
 msgid ""
@@ -816,6 +830,9 @@ msgid ""
 "connections on the local machine. Please allow LimeWire access to the "
 "internet and restart LimeWire."
 msgstr ""
+"LimeWire nemohl inicializovat a začít stahovat. Toto je obvykle kvůli "
+"firewallu,který  blokuje LimeWire přístup k internetu nebo loopback. "
+"Dovolte, aby měl LimeWire přístup k internetu a restartujte LimeWire."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:659
 msgid ""
@@ -828,6 +845,13 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"LimeWire nemůže vytvořit dočasnou složku preferencí.\n"
+"\n"
+"To je obvykle způsobena nedostatkem oprávnění. Ujistěte se, že LimeWire (a "
+"vy) mají přístup k vytváření souborů a adresářů v počítači. Pokud problém "
+"přetrvává, navštivte www.limewire.com a klikněte na 'Podpora' link.\n"
+"\n"
+"LimeWire bude nyní ukončen. Děkuji ti."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:669
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
@@ -835,7 +859,7 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:88
 msgid "Error"
-msgstr ""
+msgstr "Chyba"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:685
 msgid ""
@@ -843,10 +867,13 @@ msgid ""
 "down all other instances of LimeWire before continuing. If this problem "
 "persists, please restart your computer."
 msgstr ""
+"Jiný příklad LimeWire se zdá být spuštěn. Prosím, úplně vypnout všechny "
+"ostatní instance LimeWire než budete pokračovat. Pokud tento problém "
+"přetrvává, restartujte počítač."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:694
 msgid "LimeWire is already running"
-msgstr ""
+msgstr "Limwire je spuštěn."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
@@ -865,16 +892,20 @@ msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"LimeWire nemohl vytvořit nastavení složek. Vaše nastavení mohou být "
+"odstraněny při ukončení LimeWire. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:32
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
+"LimeWire se potýká s problémy při správě vašeho nastavení. Vaše nastavení "
+"změny mohou být uloženy na vypnutí."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 msgid "More File Info"
-msgstr ""
+msgstr "Detaily"
 
 #. *
 #. * The copy action.
@@ -886,7 +917,7 @@ msgstr "Kopírovat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAllAction.java:10
 msgid "Copy All"
-msgstr ""
+msgstr "Kopírovat vše"
 
 #. *
 #. * The cut action
@@ -933,7 +964,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
-msgstr ""
+msgstr "Konzole"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "View console messages"

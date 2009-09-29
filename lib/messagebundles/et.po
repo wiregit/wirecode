@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-14 11:30-0400\n"
-"PO-Revision-Date: 2009-09-12 20:57+0000\n"
-"Last-Translator: mpmt <raulkalev112@gmail.com>\n"
+"PO-Revision-Date: 2009-09-19 19:27+0000\n"
+"Last-Translator: lyyser <logard.1961@gmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-09-16 19:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-29 19:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -83,12 +83,12 @@ msgstr "Videod"
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 msgid "Image"
-msgstr "Pildid"
+msgstr "Pilt"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 msgid "Document"
-msgstr "Dokumendid"
+msgstr "Dokument"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
 msgid "Program"
@@ -108,7 +108,7 @@ msgstr "Fail Pole Jagatav"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:36
 msgid "Trouble connecting to people"
-msgstr "Probleem Ühendada Kasutajatega"
+msgstr "Ei saa ühendust teiste Kasutajatega"
 
 #. *
 #. * The DownloadItem is not in an error state.
@@ -125,25 +125,26 @@ msgid ""
 "the newest official version of LimeWire.</html>"
 msgstr ""
 "<html><b>Teie LimeWire programm võib olla vigane või viirusega "
-"nakatatud!</b><br><br>Palun külastage veebi lehekülge<a "
+"nakatatud!</b><br><br>Palun külastage veebilehte<a "
 "href=\"http://www.limewire.com/corrupted\"><u><b>Siit</b></u></a> ja laadige "
-"alla uusim LimeWire-i programm.</html>"
+"alla uusim LimeWire-i uusim ametlik versioon.</html>"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:284
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
-"Kui sa peatad selle üleslaadimise, siis torrenti allalaadimine peatub. Kas "
-"olete kindel, et tahate seda teha?"
+"Kui sa peatad selle faili üleslaadimise, siis torrenti faili laadimine "
+"lõppeb. Kas oled kindel et tahad seda teha."
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
-"See üleslaaditud fail on torrent, millel pole piisavalt allikaid. Sa peaksid "
-"sellel kauem üleslaadida lasta. Oled Sa kindel, et Sa soovid seda peatada?"
+"See üleslaaditud fail on torrent, mida pole veel piisavalt jagatud. Sa "
+"peaksid sellel kauem laskma üles laadida . Oled Sa kindel, et Sa soovid seda "
+"peatada?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -158,11 +159,11 @@ msgid_plural ""
 "just shared {4} files with you on LimeWire. Start {0}LimeWire{1} or "
 "{2}download{3} it to get them."
 msgstr[0] ""
-"Just jagasin faili sinuga LimeWire-s. Käivita {0}LimeWire{1} või {2}tõmba{3} "
-"see, et saada faili."
+"Just jagasin faili sinuga LimeWire-s. Käivita {0}LimeWire{1} või {2}laadi "
+"alla{3} see, et saada fail."
 msgstr[1] ""
-"Just jagasin {4} faili sinuga LimeWire-s. Käivita {0}LimeWire{1} või "
-"{2}tõmba{3}see, et saada need failid."
+"Just jagasint {4} faili sinuga LimeWire-s. Käivita {0}LimeWire{1} või "
+"{2}laadi alla{3} see, et saada fail."
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -3022,11 +3023,11 @@ msgstr "Piira torrenti üleslaadimine "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:128
 msgid "Seed a maximum of {c} torrents"
-msgstr ""
+msgstr "Jaga võimalikult palju torrentisi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:131
 msgid "Seed until ratio of {c} OR after {c} days uploading"
-msgstr ""
+msgstr "Jaga kuni väärtus on {c} või kuni {c} päeva on jagatud"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:137
 msgid "Use ports {c} to {c}"
@@ -3862,19 +3863,19 @@ msgstr "Uuenda Limewire Pro-le?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:101
 msgid "Upgrade to PRO today!"
-msgstr ""
+msgstr "Uuenda PRO versioonile juba täna!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:102
 msgid "Turbo-charged downloads"
-msgstr ""
+msgstr "Kiirendatud allalaadimised"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:103
 msgid "More search results"
-msgstr ""
+msgstr "Rohkem otsingu tulemusi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:104
 msgid "Free tech support and upgrades"
-msgstr ""
+msgstr "Tasuta tehnotugi ja uuendused"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:151
 msgid "Get LimeWire PRO Now"
@@ -5218,7 +5219,7 @@ msgstr "Seadistamine - samm {0} kõigist {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:207
 msgid "Setup"
-msgstr "Häälestus"
+msgstr "Seaded"
 
 #~ msgid "Launch"
 #~ msgstr "Käivita fail."

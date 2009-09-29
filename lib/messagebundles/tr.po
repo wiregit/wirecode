@@ -8,20 +8,20 @@ msgstr ""
 "Project-Id-Version: New\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-14 11:30-0400\n"
-"PO-Revision-Date: 2009-09-12 18:37+0000\n"
-"Last-Translator: ErayerA <erayera@gmail.com>\n"
+"PO-Revision-Date: 2009-09-29 17:48+0000\n"
+"Last-Translator: JohnBenjaminOsman <Unknown>\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2009-09-16 19:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-29 19:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
 msgid "All Types"
-msgstr "Tüm Türler"
+msgstr "Tüm Biçimler"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
@@ -37,7 +37,7 @@ msgstr "Belgeler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:132
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:33
 msgid "Programs"
-msgstr ""
+msgstr "Programlar"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:43
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -54,7 +54,7 @@ msgstr "Ses"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:117
 msgid "Video"
-msgstr "Görüntü"
+msgstr "Video"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:45
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
@@ -78,7 +78,7 @@ msgstr "Diğer"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:87
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:34
 msgid "Videos"
-msgstr "Görüntüler"
+msgstr "Videolar"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:123
@@ -92,7 +92,7 @@ msgstr "Belge"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
 msgid "Program"
-msgstr "Uygulama"
+msgstr "Program"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:33
 msgid "There is a disk problem"
@@ -104,11 +104,11 @@ msgstr "Dosya bozuk"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:35
 msgid "This file is not shareable"
-msgstr "Bu dosya paylaşılabilir değildir."
+msgstr "Bu dosya paylaşılamaz"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:36
 msgid "Trouble connecting to people"
-msgstr "Kişilere bağlanırken hata oluştu"
+msgstr "Kişilere bağlanılamıyor"
 
 #. *
 #. * The DownloadItem is not in an error state.
@@ -124,10 +124,10 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
-"<html><b>LimeWire bir virüs ya da truva atı tarafıdan zarar görmüş "
-"olabilir!</b><br><br>Son çıkan resmi LimeWire sürümünü indirmek için lütfen  "
-"<a href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> adresini "
-"ziyaret edin.</html>"
+"<html><b>LimeWire bir virüs ya da truva atı tarafından zarar görmüş "
+"olabilir!</b><br><br>Lütfen <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> adresini "
+"ziyaret edip, son çıkan resmi LimeWire sürümünü indirin.</html>"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:284
 msgid ""
@@ -168,7 +168,7 @@ msgstr "Sohbete hazır"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 msgid "Available"
-msgstr "Kullanılabilir"
+msgstr "Uygun"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:111
 msgid "Away"
@@ -188,8 +188,8 @@ msgid ""
 "This torrent may have been designed to damage your computer.\n"
 "LimeWire has cancelled the download for your protection."
 msgstr ""
-"Bu torrent bilgisayarınıza zarar vermek için tasarlanmış olabilir.\n"
-"LimeWire korunmanız için indirmeyi iptal etti."
+"Bu torrent bilgisayarınıza zarar vermek üzere tasarlanmış olabilir.\n"
+"LimeWire, güvenliğiniz için indirmeyi iptal etti."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:306
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
@@ -206,11 +206,11 @@ msgstr "Bağlantı Dinleyici"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 msgid "Browse Host Handler"
-msgstr "Bilgisayar Yöneticiye Gözat"
+msgstr "Sunucu İşleyiciye Gözat"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:55
 msgid "Connection Dispatching"
-msgstr "Bağlantı Sevkediliyor"
+msgstr "Bağlantı Dağıtımı"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:396
 msgid "Connection Management"
@@ -242,6 +242,9 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
+"Üzgünüz, LimeWire önceki indirmelerinizi okuyamadı. İndirmeler bölümündeki "
+"'Tekrar Dene' düğmesini tıklayarak yeniden başlatabilirsiniz. LimeWire, "
+"dosya için kaynak bulduğunda kaldığı yerden indirmeye devam edecektir."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:281
 msgid ""
@@ -249,9 +252,9 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
-"Üzgünüm, LimeWire eski indirmelerinizden bazılarını okuyamıyor. Onları "
-"indirmelerdeki 'Yeniden Dene' ye tıklayarak yeniden başlatabilirsiniz. "
-"LimeWire dosya için bir kaynak bulduğunda, indirme kaldığı yerden devam "
+"Üzgünüz, LimeWire önceki indirmelerinizden bazılarını okuyamadı. İndirmeler "
+"bölümündeki 'Tekrar Dene' düğmesini tıklayarak yeniden başlatabilirsiniz. "
+"LimeWire, dosya için kaynak bulduğunda kaldığı yerden indirmeye devam "
 "edecektir."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
@@ -300,11 +303,11 @@ msgstr "İçerik Yönetimi"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
-msgstr "Yerel yuva dinleyici"
+msgstr "Yerel Yuva Dinleyici"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
-msgstr "Magnet İşlemci"
+msgstr "Magnet İşlemcisi"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:123
 msgid ""
@@ -312,9 +315,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
-"LimeWire Dijital Ses Girişi Protokol Servisi'ni ( iTunes' da paylaşılan "
-"dosyalar için) başlatamadı. Bu özellik kapatılacak. Ayarlardan, Gelişmiş -> "
-"Dosyalar -> iTunes sekmelerini kullanarak yeniden açabilirsiniz."
+"LimeWire, Dijital Ses Girişi Protokol Servisi'ni ( iTunes' da dosya "
+"paylaşımı için) başlatamadı. Bu özellik kapatılacak. Ayarlar kısmında, "
+"Gelişmiş -> Dosyalar -> iTunes altında yeniden açabilirsiniz."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:177
 msgid "What's New"
@@ -334,7 +337,7 @@ msgstr "LimeWire Mağaza Bütünleşmesi"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
-msgstr "İndirme Güncelleştirme Görevi"
+msgstr "İndirme Yükseltimi Görevi"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:57
 msgid "Shared Files"
@@ -346,11 +349,11 @@ msgstr "OOB Sorgu İşleyici"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
-msgstr "Durağan İletiler"
+msgstr "Duruk İletiler"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:194
 msgid "QRP Updater"
-msgstr "QRP Güncelleştirici"
+msgstr "QRP Güncelleyici"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
 msgid "RUDP Message Routing"
@@ -375,7 +378,7 @@ msgstr "Gözat"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:987
 msgid "Update Checks"
-msgstr "Güncelleştirme Denetlemeleri"
+msgstr "Güncelleme Denetlemeleri"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -429,7 +432,7 @@ msgstr "Albüm"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:30
 msgid "Genre"
-msgstr ""
+msgstr "Tarz"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:57
@@ -499,7 +502,7 @@ msgstr "Açıklamalar"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
-msgstr "Eylem"
+msgstr "İşlem"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:117
@@ -528,7 +531,7 @@ msgstr "Stüdyo"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr "Yıldızlar"
+msgstr "Oyuncular"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
@@ -655,7 +658,7 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"Gerekli izinleriniz olmadığından LimeWire gerekli bir dosyaya yazamadı. "
+"Gerekli izinleriniz olmadığından LimeWire zorunlu bir dosyayı yazamadı. "
 "LimeWire programını tekrar açtığınızda tercihleriniz korunmayabilir veya "
 "LimeWire beklenmedik biçimlerde çalışabilir."
 
@@ -683,7 +686,7 @@ msgid ""
 "using the file. Please close the other program and retry the download."
 msgstr ""
 "Dosya başka bir program tarafından kullanıldığı için, LimeWire seçili "
-"dosyayı indiremedi. Lütfen diğer programı kapatık indirmeyi yeniden deneyin."
+"dosyayı indiremedi. Lütfen diğer programı kapatıp indirmeyi yeniden deneyin."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
@@ -716,7 +719,7 @@ msgstr "İstatistik Yönetimi"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "Oops!"
-msgstr "Amanın!"
+msgstr "Aman!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:381
 msgid "A problem occurred..."
@@ -729,10 +732,10 @@ msgid ""
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
-"Hop! Bizim henüz yazmadığımız bir şey yaptınız. LimeWire hala çalışmaya "
-"devam ediyor, ama lütfen 'Hata Gönder' seçeneğine tıklayarak bunu yazmamızı "
-"bize hatırlatınız. Eğer isterseniz, 'Hata Göster' seçeneğine tıklayarak hata "
-"hakkındaki bilgilere bakabilirsiniz."
+"Özür dileriz! Henüz yazmadığımız bir şey yaptınız. LimeWire doğru biçimde "
+"çalışmaya devam ediyor ama 'Hata Bildir' seçeneğine tıklayarak bunu "
+"yazmamızı lütfen bize hatırlatın. İsterseniz, 'Hata Göster' seçeneğine "
+"tıklayarak gönderilecek bilgilere bakabilirsiniz. Teşekkür ederiz!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
@@ -740,17 +743,17 @@ msgid ""
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
-"Hop! Bizim henüz yazmadığımız bir şey yaptınız. Bunun için üzgünüz. LimeWire "
-"hala çalışmaya devam ediyor, endişelenmeyin. Eğer isterseniz, 'Hata Göster' "
-"seçeneğine tıklayarak hata hakıındaki bilgilere bakabilirsiniz."
+"Özür dileriz! Henüz yazmadığımız bir şey yaptınız. LimeWire doğru biçimde "
+"çalışmaya devam ettiğinden endişelenmeyin. İsterseniz, 'Hata Göster' "
+"seçeneğine tıklayarak hata hakkındaki bilgilere bakabilirsiniz."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:412
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
-"Üzgünüz, LimeWire bir sorunla karşılaştı. LimeWire hala çalışılıyor; ancak "
-"sorunu bize bildirirseniz bu problemi çözebiliriz."
+"Üzgünüz, LimeWire bir sorunla karşılaştı. LimeWire doğru biçimde çalışmaya "
+"devam ediyor ancak sorunu bize bildirirseniz çözebiliriz."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:414
 msgid ""
@@ -759,9 +762,9 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"LimeWire bir dahili hatayla karşılaştı. Limewire bu hatayı düzeltebilir ve "
-"normal bir şekilde çalışmaya devam edebilir. Limewire kullanmaya devam etmek "
-"için, bu pencereyi kapatın. İstenildiği taktirde, 'Hata Göster' seçeneğine "
+"LimeWire dahili bir hatayla karşılaştı. Limewire bu hatayı düzeltebilir ve "
+"normal bir şekilde çalışmaya devam edebilir. Limewire'ı kullanmaya devam "
+"etmek için bu pencereyi kapatın. İsterseniz, 'Hata Göster' seçeneğine "
 "tıklayarak hata hakkındaki bilgilere bakabilirsiniz."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:450
@@ -771,11 +774,11 @@ msgstr "LimeWire bu sorunla karşılaşmadan önce bize ne yaptığınızı söy
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:477
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
 msgid "Show Bug"
-msgstr "Hatayı göster"
+msgstr "Hata Göster"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:489
 msgid "Hide Bug"
-msgstr "Hatayı gizle"
+msgstr "Hata Gizle"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:497
 msgid "Ask for help on the forums"
@@ -788,7 +791,7 @@ msgstr "İleride hata raporlarını bana sormadan gönder."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:509
 msgid "Send Bug"
-msgstr "Sorun Bildir"
+msgstr "Hata Bildir"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:594
 msgid "Internal Error"
@@ -802,7 +805,7 @@ msgid ""
 msgstr ""
 "LimeWire aşağıdaki hata raporunu göndermek için hata sunucusuna bağlanamadı. "
 "Daha fazla yardım ve hata ayıklamaya destek için lütfen www.limewire.com "
-"adresini ziyaret edin ve 'Destek'i tıklatın. Teşekkürler."
+"adresini ziyaret edip 'Destek' bağlantısına tıklayın. Teşekkürler."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:632
 msgid "Copy Report"
@@ -832,7 +835,7 @@ msgstr "Aşamalar Sıkıştırılıyor"
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:604
 msgid "Prepping Mojitos..."
-msgstr "Mojitolar Destekleniyor..."
+msgstr "Mojitolar Hazırlanıyor..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:648
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -846,6 +849,10 @@ msgid ""
 "connections on the local machine. Please allow LimeWire access to the "
 "internet and restart LimeWire."
 msgstr ""
+"LimeWire başlatılamadı. Bu genellikle, LimeWire programının Internet'e "
+"erişmesini  veya yerel makinedeki döngü sınaması bağlantılarını engelleyen "
+"bir güvenlik duvarı programından kaynaklanır. Lütfen LimeWire programının "
+"Internet'e erişmesine izin verin ve LimeWire'i tekrar başlatın."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:659
 msgid ""
@@ -861,11 +868,11 @@ msgstr ""
 "LimeWire geçici tercihler klasörü oluşturamadı.\n"
 "\n"
 "Bu genellikle izin yetersizliğinden kaynaklanır. Lütfen LimeWire programının "
-"(ve sizin) bilgisayarınızda dosya/klasör oluşturma izninizin bulunduğundan "
-"emin olun. Sorun devam ederse, lütfen www.limewire.com adresini ziyaret edin "
-"ve 'Destek' bağlantısını tıklatın.\n"
+"(ve sizin), bilgisayarınızda dosya/klasör oluşturma izni olduğundan emin "
+"olun. Sorun devam ederse, www.limewire.com adresini ziyaret edip 'Destek' "
+"bağlantısına tıklayın.\n"
 "\n"
-"LimeWire şimdi kapatılacak. Teşekkürler."
+"LimeWire şimdi kapatılacak. Teşekkür ederiz."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:669
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
@@ -881,13 +888,13 @@ msgid ""
 "down all other instances of LimeWire before continuing. If this problem "
 "persists, please restart your computer."
 msgstr ""
-"Bir başka LimeWire programı çalışıyor gibi gözükmektedir. Devam etmeden önce "
-"lütfen LimeWire ile ilgili diğer programları kapatınız. Eğer sorun devam "
-"ederse lütfen bilgisayarınızı yeniden başlatınız"
+"Başka LimeWire kopyasının çalıştığı görülüyor. Devam etmeden önce lütfen "
+"diğer tüm LimeWire kopyalarını tamamen kapatın. Sorun devam ederse "
+"bilgisayarınızı yeniden başlatın."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:694
 msgid "LimeWire is already running"
-msgstr "LimeWire zaten çalışmaktadır."
+msgstr "LimeWire zaten çalışıyor"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
@@ -906,16 +913,16 @@ msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
-"LimeWire ayarlar dosyası oluşturmayı başaramadı ve geçici bir dosya "
-"kullanıyor. LimeWire 'i kapattığınızda, ayarlarınız silinebilir. "
+"LimeWire ayarlar klasörünüzü oluşturamadı ve geçici bir klasör kullanıyor. "
+"LimeWire 'i kapattığınızda ayarlarınız silinebilir. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:32
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
-"LimeWire ayarlarınızı yapmakta sorunlarla karşılaştı. Ayar "
-"değişiklikleriniz, kapatılmada kaydedilmeyebilir."
+"LimeWire ayarlarınızı yaparken sorunlarla karşılaştı. Ayar "
+"değişiklikleriniz, kapatma sırasında kaydedilmeyebilir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 msgid "More File Info"
@@ -974,7 +981,7 @@ msgstr "Bağlantılar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 msgid "View connections to other P2P clients"
-msgstr "Diğer P2P alıcılarıyla olan bağlantıyı göster"
+msgstr "Diğer P2P istemcilerine olan bağlantıları göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
@@ -982,7 +989,7 @@ msgstr "Konsol"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "View console messages"
-msgstr "Destek mesajlarını görüntüle"
+msgstr "Konsol iletilerini göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "Mojito"
@@ -990,7 +997,7 @@ msgstr "Mojito"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "View incoming and outgoing DHT messages"
-msgstr "Gelen ve giden DHT mesajlarını görüntüle"
+msgstr "Gelen ve giden DHT iletilerini göster"
 
 #. * Identifier for Advanced Tools window.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:74
@@ -1015,7 +1022,7 @@ msgstr "Kaydet"
 #. updates).
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:212
 msgid "Delay: "
-msgstr "Geciktir: "
+msgstr "Gecikme: "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:644
 msgid "Save As"
@@ -1074,18 +1081,18 @@ msgstr "Yaprak düğümüsünüz"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:53
 msgid "You are not behind a firewall"
-msgstr "Bir güvenlik duvarı kullanmıyorsunuz."
+msgstr "Güvenlik duvarı kullanmıyorsunuz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:54
 msgid "You are behind a firewall and support firewall transfers"
 msgstr ""
-"Bir güvenlik duvarı kullanıyorsunuz ve güvenlik duvarı bulunan transferleri "
+"Bir güvenlik duvarı kullanıyorsunuz ve güvenlik duvarı transferlerini "
 "destekliyorsunuz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:55
 msgid "You are behind a firewall and do not support firewall transfers"
 msgstr ""
-"Bir güvenlik duvarı kullanıyorsunuz ve güvenlik duvarı bulunan transferleri "
+"Bir güvenlik duvarı kullanıyorsunuz ve güvenlik duvarı transferlerini "
 "desteklemiyorsunuz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:56
@@ -1094,11 +1101,11 @@ msgstr "Neden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:57
 msgid "Connected to:"
-msgstr "Buraya bağlandı:"
+msgstr "Bağlanılan yer:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:58
 msgid "Show hostnames of connected peers"
-msgstr "Diğer bağlı kullanıcıların IP numaralarını göster."
+msgstr "Bağlı eşlerin bilgisayar adlarını göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:60
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:28
@@ -1131,20 +1138,20 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:236
 msgid "LimeWire has not received any incoming UDP messages"
-msgstr "LimeWire, hiçbir UDP mesajı almadı"
+msgstr "LimeWire, herhangi bir gelen UDP iletisi almadı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:238
 msgid ""
 "LimeWire was not able to support firewall transfers in a previous session"
-msgstr "LimeWire, önceki oturumda güvenlik duvarlı aktarımı destekleyemedi"
+msgstr "LimeWire, önceki oturumda güvenlik duvarı transferini destekleyemedi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:240
 msgid ""
 "LimeWire is behind a NAT or firewall that assigns a different external port "
 "to each connection"
 msgstr ""
-"LimeWire, her bağlantıya başka bir harici port atayan bir NAT veya güvenlik "
-"duvarının arkasında"
+"LimeWire, her bağlantıya farklı bir harici bağlantı noktası atayan bir NAT "
+"veya güvenlik duvarının arkasında"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:243
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerMediator.java:507
@@ -1161,7 +1168,7 @@ msgstr "Otomatik Sırala"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:59
 msgid "Extended Tooltips"
-msgstr "Genişletilmiş Araç Bilgileri"
+msgstr "Genişletilmiş Araç İpuçları"
 
 #. Set up table header to display context menu to configure visible
 #. columns.  As recommended in the API Javadoc for isPopupTrigger(),
@@ -1194,7 +1201,7 @@ msgstr "Gelen"
 #. * String for 'Connected on' tooltip
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:36
 msgid "Connected on"
-msgstr "Buraya bağlandı"
+msgstr "Bağlanılan yer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:38
 msgid "Leaf"
@@ -1217,15 +1224,15 @@ msgstr "Durum"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:72
 msgid "Messages (I/O)"
-msgstr "Mesajlar (G/Ç)"
+msgstr "İletiler (G/Ç)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:74
 msgid "Messages In"
-msgstr "Gelen Mesajlar"
+msgstr "Gelen İletiler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:76
 msgid "Messages Out"
-msgstr "Giden Mesajlar"
+msgstr "Giden İletiler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:78
 msgid "Bandwidth (I/O)"
@@ -1241,15 +1248,15 @@ msgstr "Giden Bant Genişliği"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:84
 msgid "Dropped (I/O)"
-msgstr "Atlanan (G/Ç)"
+msgstr "Bırakılan (G/Ç)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:86
 msgid "Dropped In"
-msgstr "Gelen Atlanan"
+msgstr "Gelen Bırakılan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:88
 msgid "Dropped Out"
-msgstr "Giden Atlanan"
+msgstr "Giden Bırakılan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:90
 msgid "Protocol"
@@ -1277,15 +1284,15 @@ msgstr "Giden Sıkıştırılmış"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:102
 msgid "SSL Overhead (I/O)"
-msgstr "SSL Destek Bitleri (G/Ç)"
+msgstr "SSL Destek Biti (G/Ç)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:104
 msgid "SSL Overhead In"
-msgstr "Gelen SSL Destek Bitleri"
+msgstr "Gelen SSL Destek Biti"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:106
 msgid "SSL Overhead Out"
-msgstr "Giden SSL Destek Bitleri"
+msgstr "Giden SSL Destek Biti"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:108
 msgid "QRP (%)"
@@ -1318,7 +1325,7 @@ msgstr "kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:625
 msgid "Marks all Items as Selected"
-msgstr "Tüm Öğeleri Seçildi Olarak İşaretler"
+msgstr "Tüm Öğeleri, Seçildi olarak İşaretler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
 msgid "Deselect All"
@@ -1360,12 +1367,12 @@ msgstr "Hayır"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:292
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:85
 msgid "Chat"
-msgstr "Söyleşi"
+msgstr "Sohbet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:106
 #, java-format
 msgid "Chat with {0}"
-msgstr "{0} ile şöyleşi et"
+msgstr "{0} ile sohbet et"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:119
 #, java-format
@@ -1380,12 +1387,12 @@ msgstr "Kullanıcıyı Engelle"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:136
 #, java-format
 msgid "Block User {0}"
-msgstr "Engellenmiş Kullanıcılar {0}"
+msgstr "{0} Kullanıcısını Engelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:168
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:134
 msgid "nobody"
-msgstr "hiçkimse"
+msgstr "hiç kimse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:188
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:164
@@ -1444,7 +1451,7 @@ msgstr "Tüm İndirilenler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:30
 msgid "Cancel all downloads?"
-msgstr "Tüm yüklemeleri iptal et?"
+msgstr "Tüm indirilenler iptal edilsin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:36
@@ -1474,7 +1481,7 @@ msgstr "Tüm Hatalılar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:30
 msgid "Cancel all error downloads?"
-msgstr "Tüm hatalı indirmeleri iptal et?"
+msgstr "Tüm hatalı indirmeler iptal edilsin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllStalledDownloadAction.java:23
 msgid "All Stalled"
@@ -1482,7 +1489,7 @@ msgstr "Tüm Yarım Kalanlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllStalledDownloadAction.java:30
 msgid "Cancel all stalled downloads?"
-msgstr "Yarım kalan tüm indirmeleri iptal et?"
+msgstr "Yarım kalan tüm indirmeler iptal edilsin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/ClearFinishedDownloadAction.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:34
@@ -1494,7 +1501,7 @@ msgstr "Tamamlananları Temizle"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:163
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:62
 msgid "Downloads"
-msgstr "İndirmeler"
+msgstr "İndirilenler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPanel.java:147
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:94
@@ -1504,15 +1511,15 @@ msgstr "Seçenekler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPanel.java:178
 #, java-format
 msgid "Downloads({0})"
-msgstr "Yüklemeler({0})"
+msgstr "İndirilenler ({0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:67
 msgid "Clear When Finished"
-msgstr "Bittiğinde temizle"
+msgstr "Bittiğinde Temizle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:98
 msgid "Sort by"
-msgstr "Sıralama şekli"
+msgstr "Sıralama ölçütü"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:100
 msgid "Order Added"
@@ -1520,11 +1527,11 @@ msgstr "Eklenenleri Sırala"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:102
 msgid "Progress"
-msgstr "Yüzde"
+msgstr "İlerleme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:103
 msgid "Time Left"
-msgstr "Kalan Zaman"
+msgstr "Kalan Süre"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:104
 msgid "Speed"
@@ -1542,7 +1549,7 @@ msgstr "Dosya Uzantısı"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:119
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:126
 msgid "Reverse Order"
-msgstr "Yeniden düzenle"
+msgstr "Ters Sıra"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/FixStalledDownloadAction.java:19
 msgid "Fix Stalled"
@@ -1587,12 +1594,12 @@ msgstr "Yeniden Dene"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:259
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:62
 msgid "Launch File"
-msgstr "Dosyayı aç"
+msgstr "Dosyayı Aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:266
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:273
 msgid "Clear from Tray"
-msgstr "Ekrandan kaldır"
+msgstr "Tepsiden Kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:280
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LocateFileAction.java:28
@@ -1600,7 +1607,7 @@ msgstr "Ekrandan kaldır"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:297
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:74
 msgid "Locate on Disk"
-msgstr "Diskte Konumlandır"
+msgstr "Diskte Bul"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:287
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:234
@@ -1608,7 +1615,7 @@ msgstr "Diskte Konumlandır"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:126
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:54
 msgid "Locate in Library"
-msgstr "Kitaplık'ta Konumlandır"
+msgstr "Kitaplıkta Bul"
 
 #. Add View File Info menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:294
@@ -1637,7 +1644,7 @@ msgstr "Yeniden dene"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:59
 msgid "Resume download"
-msgstr "İndirmeye ara ver"
+msgstr "İndirmeyi sürdür"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:62
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:66
@@ -1654,7 +1661,7 @@ msgstr "İndirmeyi kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:54
 msgid "Resuming"
-msgstr "Ara veriliyor"
+msgstr "Sürdürülüyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:56
 msgid "Canceled"
@@ -1674,12 +1681,12 @@ msgstr "Tamamlandı"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:67
 #, java-format
 msgid "Connecting to {0}"
-msgstr "{0} Kişisine Bağlanılıyor"
+msgstr "{0} kişiye bağlanılıyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:74
 #, java-format
 msgid "{0} of {1} ({2})"
-msgstr "{1} ({2}) kişiden {0} kişi"
+msgstr "{0} / {1} ({2})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:79
 #, java-format
@@ -1688,12 +1695,12 @@ msgstr "{3} den {1} taneden {0} tanesi ({2})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:89
 msgid "Error downloading torrent"
-msgstr "İndirilmekte olan torentte hata var"
+msgstr "Torrent indirmede hata"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:91
 #, java-format
 msgid "Stalled - {0} of {1}"
-msgstr "Yarım Kaldı - {0} / {1}"
+msgstr "Yarım Kalan - {0} / {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:96
 msgid "Unable to download: "
@@ -1703,22 +1710,22 @@ msgstr "İndirilemiyor: "
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:99
 #, java-format
 msgid "Paused - {0} of {1}"
-msgstr "Duraklatıldı - {0} / {1}"
+msgstr "Duraklatılan - {0} / {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:107
 #, java-format
 msgid "Waiting - Next in line"
 msgid_plural "Waiting - {0} in line"
-msgstr[0] "Bekliyor - {0} Sonraki"
+msgstr[0] "Bekliyor - Sırada {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:118
 msgid "Looking for file..."
-msgstr "Şu dosyaya bakılıyor :"
+msgstr "Dosya aranıyor..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:120
 #, java-format
 msgid "Looking for file ({0} left)"
-msgstr "Bakılması gereken ({0} dosya kaldı)"
+msgstr "Dosya aranıyor (kalan {0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:126
 msgid "Store"
@@ -1726,7 +1733,7 @@ msgstr "Sakla"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:142
 msgid "1 P2P User"
-msgstr "1 bilgisayardan bilgisayara paylaşım kullanıcısı"
+msgstr "1 P2P Kullanıcısı"
 
 #. just friends
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRenderer.java:169
@@ -1762,7 +1769,7 @@ msgstr "daha fazla süzgeç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/AdvancedFilterPanel.java:455
 msgid "fewer filters"
-msgstr "daha az süzgeçler"
+msgstr "daha az süzgeç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/CategoryFilter.java:66
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/CategoryFilter.java:96
@@ -1793,7 +1800,7 @@ msgstr "Boyut"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/FilterPopupPanel.java:60
 #, java-format
 msgid "All {0}"
-msgstr "Tümü ({0})"
+msgstr "Tüm {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/PropertyFilter.java:266
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:42
@@ -1820,7 +1827,7 @@ msgstr "Türler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceFilter.java:352
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceFilter.java:446
 msgid "more"
-msgstr "diğer"
+msgstr "daha fazla"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/QualityFilterFormat.java:24
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:351
@@ -1828,7 +1835,7 @@ msgstr "diğer"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:46
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:35
 msgid "Quality"
-msgstr "Nitelik"
+msgstr "Kalite"
 
 #. {0}: lower bound of open-ended numeric range
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/RangeFilter.java:171
@@ -1857,7 +1864,7 @@ msgstr "tümü"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:41
 msgid "From"
-msgstr "Buradan"
+msgstr "Gönderen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceFilter.java:154
 msgid "Sources"
@@ -1899,11 +1906,11 @@ msgstr "Kabul edilsin mi?"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:105
 #, java-format
 msgid "{0} wants to be your friend."
-msgstr "{0} kişi arkadaşınız olmak istiyor."
+msgstr "{0}, arkadaşınız olmak istiyor."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/actions/AddFriendAction.java:31
 msgid "Add Friend..."
-msgstr "Yeni arkadaş ekle"
+msgstr "Arkadaş Ekle..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/actions/BrowseFriendsAction.java:14
 msgid "Browse Friends' Files"
@@ -1919,7 +1926,7 @@ msgstr "Çıkış yap"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/actions/StatusActions.java:56
 msgid "&Available"
-msgstr "Uygun"
+msgstr "&Uygun"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/actions/StatusActions.java:80
 msgid "&Do Not Disturb"
@@ -1928,7 +1935,7 @@ msgstr "&Rahatsız Etmeyin"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatDocumentBuilder.java:102
 #, java-format
 msgid "{0} has signed off"
-msgstr "{0} oturumu kapadı"
+msgstr "{0} oturumu kapattı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatDocumentBuilder.java:104
 #, java-format
@@ -1951,21 +1958,21 @@ msgstr "Durum: "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:121
 msgid "Unable to access remote file"
-msgstr "Uzaktaki dosyaya erişim yapılamıyor"
+msgstr "Uzak dosyaya erişilemiyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:122
 msgid "Hyperlink"
-msgstr "Web Bağı"
+msgstr "Köprü"
 
 #. todo: each message type should know how to display itself as a notification
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:277
 msgid "Message from the chat server"
-msgstr "Söyleşi sunucusundan ileti"
+msgstr "Sohbet sunucusundan ileti"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:277
 #, java-format
 msgid "Chat from {0}"
-msgstr "{0} tarafından söyleşi"
+msgstr "{0} tarafından sohbet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:278
 msgid "Reply"
@@ -1974,7 +1981,7 @@ msgstr "Yanıtla"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:292
 #, java-format
 msgid "Chat ({0})"
-msgstr "Söyleşi ({0})"
+msgstr "Sohbet ({0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatPopupMenu.java:97
 msgid "Open Conversation"
@@ -1995,19 +2002,19 @@ msgstr "Listeyi Paylaş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:9
 msgid "Facebook chat is not supported in this version of LimeWire."
-msgstr "Facebook çizelgesi LimeWire'ın bu sürümünde desteklenmiyor."
+msgstr "Facebook sohbeti LimeWire'ın bu sürümünde desteklenmiyor."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:10
 msgid ""
 "We at Lime Wire are actively looking into remedies.  In the meantime, you "
 "will still be able to browse friends."
 msgstr ""
-"Biz şu anda, Lime Wire'da çözümleri araştırıyoruz. Bu zaman zarfında, siz "
-"hala arkadaşlara gözatabileceksiniz."
+"Şu anda Lime Wire'da çözüm yollarına bakıyoruz. Bu arada siz arkadaşlarınıza "
+"gözatmaya devam edebileceksiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:11
 msgid "Thank you for your patience."
-msgstr "Dayandığınız için teşekkürler."
+msgstr "Sabrınız için teşekkürler."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:280
 msgid "On the Record"
@@ -2035,7 +2042,7 @@ msgstr "Şimdi indirin ya da {0}sonra{1} alın."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:60
 #, java-format
 msgid "Sharing file with {0}"
-msgstr "Dosyayı {0} ile paylaş"
+msgstr "{0} ile dosya paylaşımı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:80
 #, java-format
@@ -2050,15 +2057,15 @@ msgstr "{0} indir"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:98
 #, java-format
 msgid "Downloading {0}"
-msgstr "{0} İndiriliyor"
+msgstr "{0} indiriliyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:104
 msgid "Download cancelled.  Click button to retry"
-msgstr "İndirme iptal edildi. Yeniden denemek için butona tıklayın"
+msgstr "İndirme iptal edildi. Yeniden denemek için düğmeye tıklayın"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:110
 msgid "Error downloading file.  Click button to retry"
-msgstr "İndirme sırasında hata oluştu. Yeniden denemek için butona tıklayın"
+msgstr "Dosya indirmede hata oluştu. Yeniden denemek için düğmeye tıklayın"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:114
 #, java-format
@@ -2067,15 +2074,15 @@ msgstr "{0}İndirildi{1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageWriterImpl.java:40
 msgid "Message not sent because friend signed off."
-msgstr "Arkadaşınız çıkış yaptığı için mesajınız gönderilemedi."
+msgstr "Arkadaşınız çıkış yaptığı için ileti gönderilemedi."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/NoSaveStatusMessage.java:32
 msgid "Chat is now off the record"
-msgstr "Söyleşi şu anda kayıt dışı"
+msgstr "Sohbet şu anda kayıt dışı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/NoSaveStatusMessage.java:33
 msgid "Chat is now on the record"
-msgstr "Sohbet şu anda kaydedilmiyor"
+msgstr "Sohbet şu anda kaydediliyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/FacebookLoginAction.java:132
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:264
@@ -2115,11 +2122,11 @@ msgstr "Ağ hatası."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:131
 #, java-format
 msgid "Sign in with {0}"
-msgstr "{0} ile Bağlan"
+msgstr "{0} ile oturum aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:189
 msgid "Domain"
-msgstr "Alan"
+msgstr "Alan Adı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:192
 msgid "Email"
@@ -2148,7 +2155,7 @@ msgstr "Dosya ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AddFileAction.java:47
 msgid "All Files and Folders"
-msgstr "Bütün dosya ve klasörler"
+msgstr "Bütün Dosya ve Klasörler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:85
 msgid "All"
@@ -2171,7 +2178,7 @@ msgstr "{1} dosyadan {0} tanesi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/PublicSharedFeedbackPanel.java:49
 msgid "Files in this list are shared anonymously with the world."
-msgstr "Bu listedeki dosyalar bütün herkesle paylaşılıyor.."
+msgstr "Bu listedeki dosyalar herkesle isimsiz olarak paylaşılıyor."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:28
 msgid "Clear Files"
@@ -2182,21 +2189,22 @@ msgstr "Dosyaları Temizle"
 msgid ""
 "Remove all files from {0}?  This will stop sharing all of these files."
 msgstr ""
-"{0} 'daki tüm dosyaları sil ? Bu tüm bu dosyaların paylaşımını durduracak ."
+"{0}'daki tüm dosyalar kaldırılsın mı? Bu, tüm dosyaların paylaşımını "
+"durduracak."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:49
 #, java-format
 msgid "Remove all files from {0}?"
-msgstr "{0} 'daki tüm dosyaları kaldır ?"
+msgstr "{0}'daki tüm dosyalar kaldırılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:44
 msgid ""
 "Remove all files from your library?  This will remove all files you've "
 "downloaded and stop sharing every file you are sharing."
 msgstr ""
-"Kitaplığınızdaki tüm dosyalar kaldırılsın mı? Bu indirimiş olduğunuz tüm "
-"dosyaları  ve paylaşımı duraklatılan tüm dosya paylaşımını kaldıracak."
+"Kitaplığınızdaki tüm dosyalar kaldırılsın mı? Bu, indirdiğiniz tüm dosyaları "
+"kaldıracak ve mevcut tüm dosya paylaşımını durduracaktır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:47
 #, java-format
@@ -2204,8 +2212,8 @@ msgid ""
 "Remove all files from {0}?  This will stop sharing all of these files with "
 "the world."
 msgstr ""
-"{0} 'daki tüm dosyaları kaldır ? Bu dünya ile paylaşılan tüm dosyaları "
-"durduracak ."
+"{0}'daki tüm dosyalar kaldırılsın mı? Bu, herkesle paylaşılan bu dosyaların "
+"paylaşımını durduracak."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:33
 msgid "Delete List"
@@ -2217,14 +2225,14 @@ msgid ""
 "Delete list {0}?  This will stop sharing all of these files, but won't "
 "delete them from disk."
 msgstr ""
-"{0} listesini silmek istiyor musunuz? Bunu yaparsanız bütün bu dosyaların "
-"paylaşımı duracak, ama diskinizden silinmeyecek."
+"{0} listesi silinsin mi? Tüm dosyaların paylaşımı durdurulacak ama diskten "
+"silinmeyecek."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:51
 #, java-format
 msgid "Delete list {0}?"
-msgstr "{0} listesini sil ?"
+msgstr "{0} listesi silinsin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:49
 #, java-format
@@ -2232,12 +2240,12 @@ msgid ""
 "Delete list {0}?  This will stop sharing all of these files with the world, "
 "but won't delete them from disk."
 msgstr ""
-"{0} listesini sil ? Bu dünya ile paylaşılan tüm dosyaları silecek fakat "
-"onları diskinizden silmeyecektir."
+"{0} listesi silinsin mi? Herkesle tüm dosyaların paylaşımı durdurulacak ama "
+"diskten silinmeyecektir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ExportListAction.java:26
 msgid "Export List..."
-msgstr "Dışa Aktarım Listesi"
+msgstr "Listeyi Dışa Aktar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ExportListAction.java:36
 msgid "Export M3U List"
@@ -2246,11 +2254,11 @@ msgstr "M3U Listesini Dışa Aktar"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ExportListAction.java:72
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ImportListAction.java:60
 msgid "Playlist Files (*.m3u)"
-msgstr "Çalmalistesi Dosyaları (*.m3u)"
+msgstr "Çalma Listesi Dosyaları (*.m3u)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ImportListAction.java:25
 msgid "Import List..."
-msgstr "İçe Aktarım Listesi"
+msgstr "Listeyi İçe Aktar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ImportListAction.java:35
 msgid "Import M3U List"
@@ -2279,22 +2287,22 @@ msgstr "Dosyaları Ekle..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavigatorPanel.java:120
 msgid "Private Shared"
-msgstr "Özel Paylaşılmış"
+msgstr "Özel Paylaşılan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavigatorPanel.java:128
 msgid "Create List"
-msgstr "Liste Yarat"
+msgstr "Liste Oluştur"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/RenameAction.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RenameFileAction.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:268
 msgid "Rename"
-msgstr "Ad değiştir"
+msgstr "Yeniden Adlandır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditablePanel.java:88
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingFriendListPanel.java:142
 msgid "Sharing list with..."
-msgstr "Listeyi şununla paylaşıyor..."
+msgstr "Liste şununla paylaşılıyor..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditablePanel.java:93
 msgid "Filter..."
@@ -2310,7 +2318,7 @@ msgstr "Seç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditablePanel.java:109
 msgid "none"
-msgstr "hiç biri"
+msgstr "hiçbiri"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditableRendererEditor.java:105
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditableRendererEditor.java:113
@@ -2331,11 +2339,11 @@ msgstr "Paylaşılmadı"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:83
 #, java-format
 msgid "<a href={0}>Sign in</a> to share this list."
-msgstr "Bu listeyi paylaşmak için <a href={0}>Giriş yap</a>"
+msgstr "Bu listeyi paylaşmak için <a href={0}>giriş yapın</a>."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:79
 msgid "Logging in..."
-msgstr "Giriş yapılıyor..."
+msgstr "Oturum açılıyor..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:81
 #, java-format
@@ -2343,8 +2351,8 @@ msgid ""
 "<a href={0}>Sign in</a> to share this list or edit sharing, or <a "
 "href={1}>stop sharing</a> it now."
 msgstr ""
-"Bu listeyi paylaşmak ya da paylaşımı düzenlemek için <a href={0}>Giriş "
-"yap</a> ya da şimdi <a href={1}>paylaşımı durdur</a>."
+"Bu listeyi paylaşmak ya da paylaşımı düzenlemek için <a href={0}>giriş "
+"yapın</a> ya da şimdi <a href={1}>paylaşımı durdurun</a>."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AddToListMenu.java:46
 msgid "Add to List"
@@ -2377,7 +2385,7 @@ msgstr "Yüklemeler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:53
 msgid "Upload attempts"
-msgstr "Çalışmaları kaydet"
+msgstr "Yükleme denemeleri"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllTableFormat.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:63
@@ -2423,37 +2431,37 @@ msgstr[0] ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:55
 msgid "Move this file to the Recycle Bin?"
 msgid_plural "Move this file to the Recycle Bin?"
-msgstr[0] "Dosya(ları) çöp kutusuna taşımak istediğinizden emin misiniz?"
+msgstr[0] "Dosya, Geri Dönüşüm Kutusu'na taşınsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:57
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:50
 msgid "Move to Recycle Bin"
-msgstr "Çöp Kutusuna Taşı"
+msgstr "Geri Dönüşüm Kutusu'na taşı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:60
 msgid "Move File to the Trash"
 msgid_plural "Move Files to the Trash"
-msgstr[0] "Dosya(ları) çöpe taşı"
+msgstr[0] "Dosyayı/Dosyaları Çöp Kutusu'na taşı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:61
 msgid "Move this file to the Trash?"
 msgid_plural "Move this file to the Trash?"
-msgstr[0] "Dosya(ları) çöpe taşımak istediğinizden emin misiniz?"
+msgstr[0] "Dosya, Çöp Kutusu'na taşınsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:63
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:57
 msgid "Move to Trash"
-msgstr "Çöpe Taşı"
+msgstr "Çöp Kutusu'na taşı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:66
 msgid "Delete File"
 msgid_plural "Delete Files"
-msgstr[0] "Dosyayı Sil"
+msgstr[0] "Dosya Sil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:67
 msgid "Delete this file from disk?"
 msgid_plural "Delete these files from disk?"
-msgstr[0] "Dosya(lar) diskten silinsin mi?"
+msgstr[0] "Dosya/Dosyalar diskten silinsin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:35
@@ -2463,7 +2471,8 @@ msgstr "Kitaplıktan kaldır"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:46
 msgid "Move File to the Recycle Bin or Remove from Library"
 msgid_plural "Move Files to the Recycle Bin or Remove from Library"
-msgstr[0] "Dosyayı Geri Dönüşüm Kutusuna Taşı ya da Kitaplıktan Kaldır"
+msgstr[0] ""
+"Dosyayı/Dosyaları Geri Dönüşüm Kutusu'na Taşı ya da Kitaplıktan Kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:48
 msgid ""
@@ -2473,15 +2482,13 @@ msgid_plural ""
 "Do you want to move this file to the Recycle Bin or just remove it from the "
 "Library?"
 msgstr[0] ""
-"Bu dosyayı çöp kutusuna taşımak ya da kütüphaneden silmek istediğinize emin "
-"misiniz?"
+"Bu dosyayı Geri Dönüşüm Kutusu'na taşımak mı yoksa yalnızca Kitaplıktan "
+"kaldırmak mı istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:53
 msgid "Move File to the Trash or Remove from Library"
 msgid_plural "Move Files to the Trash or Remove from Library"
-msgstr[0] ""
-"Dosyayı Çöp'e Taşıyın veya Kütüphane'den Silin\r\n"
-"Dosyaları Çöp'e Taşıyın veya Kütüphane'den Silin"
+msgstr[0] "Dosyayı/Dosyaları Çöp Kutusu'na Taşı ya da Kitaplıktan Kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:55
 msgid ""
@@ -2491,13 +2498,13 @@ msgid_plural ""
 "Do you want to move this file to the Trash or just remove it from the "
 "Library?"
 msgstr[0] ""
-"Bu dosyayı Çöplüğe taşımayıya da yalnızca Kitaplığınızdan kaldırmayı ister "
-"misiniz?"
+"Bu dosyayı Çöp Kutusu'na taşımak mı yoksa yalnızca Kitaplıktan kaldırmak mı "
+"istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:60
 msgid "Delete File or Remove from Library"
 msgid_plural "Delete Files or Remove from Library"
-msgstr[0] "Dosya(ları) kütüphaneden sil"
+msgstr[0] "Dosyayı/Dosyaları Sil ya da Kitaplıktan Kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:62
 msgid ""
@@ -2505,8 +2512,8 @@ msgid ""
 msgid_plural ""
 "Do you want to delete this file from disk or just remove it from the Library?"
 msgstr[0] ""
-"Bu dosyayı diskinizden silmeyi ya da yalnızca Kitaplığınızdan kaldırmayı "
-"ister misiniz?"
+"Bu dosyayı diskten silmek mi yoksa yalnızca Kitaplıktan kaldırmak mı "
+"istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LaunchFileAction.java:35
 msgid "Play/Open"
@@ -2537,24 +2544,24 @@ msgstr "Şirket"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveButton.java:22
 msgid "Remove this file from this list"
-msgstr "Bu dosyayı listeden sil"
+msgstr "Bu dosyayı listeden kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:28
 msgid "Remove from All Lists"
-msgstr "Tüm listelerden sil"
+msgstr "Tüm Listelerden kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:38
 msgid "Remove from Lists"
-msgstr "Listelerden sil"
+msgstr "Listelerden kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:55
 msgid "Remove this file from All Lists?"
-msgstr "Bu dosya bütün listelerden silinsin mi?"
+msgstr "Bu dosya Tüm Listelerden kaldırılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:57
 #, java-format
 msgid "Remove {0} files from All Lists?"
-msgstr "{0} dosya tüm listelerden silinsin mi?"
+msgstr "{0} dosya Tüm Listelerden kaldırılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:158
@@ -2567,26 +2574,26 @@ msgstr[0] "Dosyaları kaldır"
 msgid ""
 "Remove \"{0}\" from Library? This will unshare this file with everyone."
 msgstr ""
-"\"{0}\" dosyası kütüphaneden silinsin mi? Bunu yapmak dosyayı herkesle "
+"\"{0}\" dosyası Kitaplıktan kaldırılsın mı? Bunu yapmak, dosyayı herkesle "
 "paylaşıma kapatır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:65
 #, java-format
 msgid "Remove \"{0}\" from Library?"
-msgstr "\"{0}\", Kitaplığınızdan kaldırılsın mı?"
+msgstr "\"{0}\" dosyası Kitaplıktan kaldırılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:68
 #, java-format
 msgid ""
 "Remove {0} files from Library? This will unshare these files with everyone."
 msgstr ""
-"{0} dosya kütüphaneden silinsin mi? Bunu yapmak dosyaları herkesle paylaşıma "
-"kapatır."
+"{0} dosya Kitaplıktan kaldırılsın mı? Bunu yapmak, dosyaları herkesle "
+"paylaşıma kapatır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:70
 #, java-format
 msgid "Remove {0} files from Library?"
-msgstr "Kitaplıktan {0} dosya kaldırılsın mı?"
+msgstr "{0} dosya Kitaplıktan kaldırılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromListAction.java:31
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:70
@@ -2595,7 +2602,7 @@ msgstr "Listeden Kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShowInListMenu.java:48
 msgid "Show in List"
-msgstr "Listede göster"
+msgstr "Listede Göster"
 
 #. place holder to get the -> on the parent menu
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShowInListMenu.java:88
@@ -2650,11 +2657,11 @@ msgid ""
 "also, of course, the result of the countless hours of work by LimeWire's "
 "developers:"
 msgstr ""
-"Esin kaynağı LimeWire'nin sahibi Mark Gorton olan LimeWire projesi, tüm "
-"dünyadan gelen programcıların ve araştırmacıların katıldığı, ortaklaşa bir "
-"<a href=\"http://www.limewire.org/\">açık kaynak çalışmasıdır</a>. Elbette "
-"ki LimeWire, aynı zamanda LimeWire geliştiricilerinin saatlerce "
-"çalışmalarının ürünüdür:"
+"Esin kaynağı LimeWire'ın sahibi Mark Gorton olan LimeWire projesi, dünyanın "
+"her yerindeki programcıların ve araştırmacıların katıldığı, ortaklaşa bir <a "
+"href=\"http://www.limewire.org/\">açık kaynak çalışmasıdır</a>. Elbette ki "
+"LimeWire, aynı zamanda LimeWire geliştiricilerinin saatlerce çalışmalarının "
+"ürünüdür:"
 
 #. behind the scenes technical
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:152
@@ -2737,27 +2744,28 @@ msgid ""
 "and/or LiveJournal service or technology"
 msgstr ""
 "Bittorrent, Bittorent Logosu ve Torrent; Bittorrent Inc.'in tescilli "
-"markası; Gmail, Google Inc.'in tescilli markası; Facebook, Facebook Inc.'in "
-"tescilli markası; Jabber ve LiveJournal markalarının herbiri XMPP Standards "
-"Foundation ve LiveJournal Inc. d/b/a LiveJournal.com 'un kayıtlı tescilli "
-"markalarıdır. Ne Google Inc.;Facebook Inc; XMPP Standards Foundation ne de "
-"Livejournal.com; Lime Wire LLC 'nin sponsoru veya ortağı değildir ve de Lime "
-"Wire LLC veya LimeWire yazılımı için destekleri bulunmamaktadır. Bu tescilli "
-"markaları kullanmak sadece ilgili sahipliğin teknoloji veya hizmetine "
-"gönderme yapar ve Gmail, Facebook, Jabber tescilli markalarının ve/veya "
-"LiveJournal hizmet veya teknolojisi Lime Wire LLC 'yi bağlamaz."
+"markası; Gmail, Google&nbsp;Inc.'in tescilli markası; Facebook, Facebook "
+"Inc.'in tescilli markası; Jabber ve LiveJournal markaları XMPP Standards "
+"Foundation ve LiveJournal Inc. d/b/a LiveJournal.com'un kayıtlı tescilli "
+"markalarıdır. Google&nbsp;Inc., Facebook&nbsp;Inc, XMPP Standards Foundation "
+"ya da Livejournal.com, Lime&nbsp;Wire&nbsp;LLC'nin sponsoru veya ortağı "
+"değildir ve de Lime&nbsp;Wire&nbsp;LLC veya LimeWire yazılımı için "
+"destekleri bulunmamaktadır. Bu tescilli markaları kullanmak sadece ilgili "
+"sahipliğin teknoloji veya hizmetine gönderme yapar ve Gmail, Facebook, "
+"Jabber tescilli markalarının ve/veya LiveJournal hizmet veya teknolojisi "
+"Lime&nbsp;Wire LLC'yi bağlamaz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:240
 msgid "New Version Available!"
-msgstr "Yeni Sürüm Kullanılabilir Durumda!"
+msgstr "Yeni Sürüm Mevcut!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/OptionsAction.java:16
 msgid "&Options..."
-msgstr "Seçenekler..."
+msgstr "&Seçenekler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:407
 msgid "Share with friends using your Private Shared list"
-msgstr "Özel Paylaşım listesini kullanarak arkadaşlarınla paylaş"
+msgstr "Özel Paylaşım listenizi kullanarak arkadaşlarınızla paylaşın"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:458
 msgid "Share this list with friends"
@@ -2769,7 +2777,7 @@ msgstr "Ona dosya ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:101
 msgid "Repeat Search"
-msgstr "Aramayı Yenile"
+msgstr "Aramayı Yinele"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:102
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:193
@@ -2790,7 +2798,7 @@ msgstr "LimeWire Mağazası"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:181
 msgid "Close All Searches"
-msgstr "Bütün Aramaları Kapat"
+msgstr "Tüm Aramaları Kapat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:182
 msgid "Close Search"
@@ -2816,12 +2824,12 @@ msgstr "Aramayı Durdur"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:29
 msgid "&Add to Library..."
-msgstr "Kitaplığa ekle..."
+msgstr "&Kitaplığa Ekle..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:37
 msgid "Add to Library"
-msgstr "Kitaplığa ekle"
+msgstr "Kitaplığa Ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:48
 msgid "Valid Files"
@@ -2829,11 +2837,11 @@ msgstr "Geçerli Dosyalar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ExitAction.java:21
 msgid "E&xit"
-msgstr "&Çıkış"
+msgstr "Çı&kış"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ExitAfterTransferAction.java:20
 msgid "Exit After &Transfers"
-msgstr "&Transfer Tamamlanınca Çık"
+msgstr "&Transferler Tamamlanınca Çık"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FileMenu.java:33
 msgid "&File"
@@ -2841,11 +2849,11 @@ msgstr "&Dosya"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FixStalledDownloadsAction.java:25
 msgid "Fix Stalled Downloads"
-msgstr "Kaybedilen indirmeleri düzelt"
+msgstr "Yarım Kalan İndirmeleri Düzelt"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendsMenu.java:47
 msgid "&Friends"
-msgstr "Arkadaşlar"
+msgstr "&Arkadaşlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:38
 msgid "&Help"
@@ -2853,19 +2861,19 @@ msgstr "&Yardım"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:50
 msgid "&Home Screen"
-msgstr "&Home ekranı"
+msgstr "&Ana Ekran"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:58
 msgid "&Using LimeWire"
-msgstr "&LimeWire'ı Kullanmak"
+msgstr "&LimeWire Kullanımı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:60
 msgid "&FAQ"
-msgstr "&S.S.S"
+msgstr "&SSS"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:64
 msgid "Get Personalized &Tech Support"
-msgstr "Kişiselleştir veya Teknik Destek AL"
+msgstr "Kişiselleştirilmiş &Teknik Destek Al"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:40
 msgid "Invalid Link"
@@ -2882,11 +2890,11 @@ msgstr "Aşağıya bir magnet veya torrent bağlantısı girin:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:37
 msgid "&Open Torrent..."
-msgstr "T&orrenti Aç..."
+msgstr "T&orrent Aç..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:45
 msgid "Open Torrent"
-msgstr "Torrenti Aç"
+msgstr "Torrent Aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:130
@@ -2898,7 +2906,7 @@ msgstr "\".torrent\" dosyaları"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:85
 #, java-format
 msgid "The file {0} does not exist."
-msgstr "{0} dosyası bulanamıyor."
+msgstr "{0} dosyası yok."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:85
 msgid "Unable to open torrent"
@@ -2916,7 +2924,7 @@ msgstr "Bağlantıyı Aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:67
 msgid "Magnet link is empty."
-msgstr "Magnet linki boş."
+msgstr "Magnet bağlantısı boş."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/RecentDownloadsMenu.java:30
 msgid "(empty)"
@@ -2932,7 +2940,7 @@ msgstr "Listeyi Temizle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ShareListMenu.java:33
 msgid "&Share List"
-msgstr "&Share Listesi"
+msgstr "&Listeyi Paylaş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ShowHideDownloadTrayAction.java:18
 msgid "Show Download Tray"
@@ -2948,11 +2956,11 @@ msgstr "&Araçlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:76
 msgid "&Uploads"
-msgstr "Yüklemeler"
+msgstr "&Yüklemeler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:90
 msgid "Advanced &Search"
-msgstr "Gelişmiş &Arama"
+msgstr "&Gelişmiş Arama"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:101
 msgid "&Advanced Tools..."
@@ -2960,15 +2968,15 @@ msgstr "Gelişmiş &Araçlar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:133
 msgid "&What's New Search"
-msgstr "Neler Yeni Araması"
+msgstr "&Yenilikleri Arama"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:23
 msgid "Hide &Chat Window"
-msgstr "Söyleşi Pen&ceresini Gizle"
+msgstr "Sohbet Pen&ceresini Gizle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:24
 msgid "Show &Chat Window"
-msgstr "Şöyleşi Pen&ceresini Göster"
+msgstr "Sohbet Pen&ceresini Göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:40
 msgid "&View"
@@ -2982,7 +2990,7 @@ msgstr "Dosyalar"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:40
 msgid "Transfers"
-msgstr "Aktarımlar"
+msgstr "Transferler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:41
 msgid "System"
@@ -2999,23 +3007,23 @@ msgstr "Sınırsız"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:79
 msgid "Upload torrents forever"
-msgstr "Torentleri sonsuz upload et"
+msgstr "Torrentleri her zaman yükle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
 msgid "Limit torrent upload "
-msgstr "Torrent yüklemesini Sınırlayın "
+msgstr "Torrent yüklemesini sınırla "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:128
 msgid "Seed a maximum of {c} torrents"
-msgstr ""
+msgstr "En fazla {c} torrenti besle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:131
 msgid "Seed until ratio of {c} OR after {c} days uploading"
-msgstr ""
+msgstr "{c} oranına kadar VEYA {c} gün yüklemeden sonra besle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:137
 msgid "Use ports {c} to {c}"
-msgstr "Portları {c}'den {c}'ye kullanın"
+msgstr "{c} ile {c} bağlantı noktaları arasını kullan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:140
 msgid "Show torrent file dialog when starting new torrents"
@@ -3064,7 +3072,7 @@ msgstr "Yükleme bant genişliğinizi sınırlandırın"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:225
 msgid "Clear uploads from list when finished"
-msgstr "Tamamlandığında, listeden yapılan yüklemeleri sil"
+msgstr "Tamamlandığında, yüklemeleri listeden sil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:234
 msgid "uploads at once"
@@ -3080,7 +3088,7 @@ msgstr "Dosyalar Kaydediliyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:121
 msgid "Save all downloads to one folder:"
-msgstr "Bütün dosyaları bu klasöre kaydet:"
+msgstr "Tüm dosyaları bu klasöre kaydet:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:122
 msgid "Save different categories to different folders"
@@ -3114,7 +3122,7 @@ msgstr "İndirme dizini kaydedilemedi, eski dizine geçildi"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:80
 msgid "Save Folder Error"
-msgstr "Klasör Kaydetme Hatası"
+msgstr "Kayıt Klasörü Hatası"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:86
 msgid "Add New Extension"
@@ -3126,7 +3134,7 @@ msgstr "Dosya Uzantısı:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:306
 msgid "The extension name was not valid, could not add."
-msgstr "Uzatma ismi geçerli değil ekleyemedi"
+msgstr "Uzatma adı geçerli değil, eklenemedi."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:94
 msgid "File Extensions"
@@ -3154,16 +3162,17 @@ msgstr "Dosya Depolama Organizasyonu"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:150
 msgid "Configure File Organization..."
-msgstr "Dosya Organizasyonu Yapılandırma..."
+msgstr "Dosya Organizasyonunu Yapılandır..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:150
 msgid "Configure how files downloaded from the LimeWire Store are organized"
 msgstr ""
-"Organize edilmiş LimeWire Deposundan nasıl dosya indirileceğini yapılandır"
+"LimeWire Mağazası'ndan indirilen dosyaların nasıl organize edileceğini "
+"yapılandır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:152
 msgid "Save Store downloads to:"
-msgstr "Depo İndirmeleri Buraya Kaydet:"
+msgstr "Mağaza indirmelerini kaydetme yeri:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:173
 msgid "Could not save Store download directory, reverted to old directory"
@@ -3178,7 +3187,8 @@ msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
 msgstr ""
-"LimeWire arama sonuçlarınızdaki uzantıları içeren dosyaları görüntüleyemiyor"
+"LimeWire, aşağıdaki uzantılara sahip dosyaları arama sonuçlarınızda "
+"göstermeyecek"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:262
@@ -3187,7 +3197,7 @@ msgstr "Varsayılanı Kullan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:99
 msgid "Revert to default settings"
-msgstr "Ön tanımlı ayarlara döndür"
+msgstr "Varsayılan ayarlara dön"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:39
 msgid "Add Keyword"
@@ -3202,8 +3212,8 @@ msgid ""
 "LimeWire will not show files with the following keywords in your search "
 "results"
 msgstr ""
-"LimeWire arama sonuçlarınızda aşağıdaki anahtar sözcükleri içeren sonuçları "
-"görüntülemeyecek"
+"LimeWire, aşağıdaki anahtar sözcükleri içeren dosyaları arama sonuçlarınızda "
+"göstermeyecek"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:100
 msgid "Use LimeWire's blacklist to protect you from harmful people"
@@ -3242,8 +3252,8 @@ msgid ""
 msgstr ""
 "Gelen bağlantıları dinleyen yerel ağ bağlantı noktasını belirleyebilirsiniz. "
 "Başka bir programla çakışma olduğunda veya güvenlik duvarınız doğrudan gelen "
-"bağlantılar için belirli sayıda bağlantı noktası gerektirdiğinde bu bağlantı "
-"noktası değiştirilebilir."
+"bağlantılar için belirli bir bağlantı noktası numarası gerektirdiğinde bu "
+"bağlantı noktası değiştirilebilir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:83
 msgid "Listening Port"
@@ -3251,12 +3261,12 @@ msgstr "Bağlantı Noktası Dinleniyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:89
 msgid "Listen on port:"
-msgstr "Şu bağlantı noktasında dinleme:"
+msgstr "Dinlenecek bağlantı noktası:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:104
 #, java-format
 msgid "The port chosen {0}, is already in use."
-msgstr "Seçilen {0} port zaten kullanımda."
+msgstr "Seçilen {0} bağlantı noktası zaten kullanımda."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:105
 msgid "Network Port Error"
@@ -3272,8 +3282,8 @@ msgstr ""
 "LimeWire, Evrensel Tak ve Kullan özelliğini kullanarak yönlendiricinizi veya "
 "güvenlik duvarınızı optimum performans elde etmek üzere otomatik biçimde "
 "yapılandırabilir. Yönlendiriciniz Evrensel Tak ve Çalıştır işlevini "
-"desteklemiyorsa, LimeWire harici bir bağlantı noktasını manuel olarak "
-"yayınlayacak şekilde ayarlanabilir."
+"desteklemiyorsa, LimeWire harici bir bağlantı noktasını yayınlayacak şekilde "
+"manüel ayarlanabilir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:139
 msgid "Router Configuration"
@@ -3285,7 +3295,7 @@ msgstr "Evrensel Tak ve Çalıştır Özelliğini Kullan (Önerilen)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:142
 msgid "Manual Port Forward:"
-msgstr "Manuel Bağlantı Noktası İletme:"
+msgstr "Manüel Bağlantı Noktası Yönlendirme:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:143
 msgid "Do Nothing"
@@ -3297,15 +3307,15 @@ msgstr "* Yönlendiricinizi de yapılandırmalısınız"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:37
 msgid "Add audio files I downloaded from LimeWire to iTunes"
-msgstr "LimeWire'den indirdiğim ses dosyalarını iTunes'e ekle"
+msgstr "LimeWire'dan indirdiğim ses dosyalarını iTunes'a ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:84
 msgid ""
 "Share audio and video files in Public Shared list on my local network with "
 "iTunes"
 msgstr ""
-"Genel paylaşım listemdeki ses ve görüntü dosyalarını yerel ağımda iTunes ile "
-"paylaştır"
+"Yerel ağımdaki Genel Paylaşılan listemde bulunan ses ve video dosyalarını "
+"iTunes'la paylaş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:92
 msgid "Require password"
@@ -3359,29 +3369,27 @@ msgstr "Bu tür dosyaları her zaman ekle:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:143
 msgid "Warn me when I add a folder to a list that is shared."
-msgstr "Paylaşılmış bir listeye bir klasör eklediğimde beni uyar"
+msgstr "Paylaşılan bir listeye klasör eklediğimde beni uyar."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:147
 msgid "When I add a folder to the Library or to a List:"
-msgstr "Bir kütüphaneye veya listeye klasör eklediğimde:"
+msgstr "Kitaplığa ya da bir Listeye klasör eklediğimde:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:197
 msgid "iTunes Configuration"
-msgstr "iTunes Ayarları"
+msgstr "iTunes Yapılandırması"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:198
 msgid "Configure iTunes"
-msgstr "iTunes'u Düzenle"
+msgstr "iTunes'u Yapılandır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:200
 msgid "Configure how files in your LimeWire interact with iTunes"
-msgstr ""
-"Limewiredeki dosyalarınızın iTunes ile nasıl etkileşim içinde olacağını "
-"ayarlayın"
+msgstr "LimeWire'daki dosyaların iTunes'la nasıl etkileşeceğini yapılandırın"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:232
 msgid "Use the LimeWire player when I play Audio files"
-msgstr "Ses dosyalarını çaldığımda LimeWire Player kullan"
+msgstr "Ses dosyalarını çaldığımda LimeWire oynatıcıyı kullan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:270
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:39
@@ -3391,7 +3399,7 @@ msgstr "Paylaşılıyor"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:274
 msgid "Add files I download from P2P Users to my Public Shared List"
 msgstr ""
-"P2P kullanıcılarından indirdiğim dosyaları Genel Paylaşım listeme ekle"
+"P2P kullanıcılarından indirdiğim dosyaları Genel Paylaşım Listeme ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:278
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:221
@@ -3415,15 +3423,15 @@ msgstr "Güvenli olmayan bazı paylaşım ayarlarını etkin hale getirdiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:337
 msgid "LimeWire is preventing you from unsafe searching and sharing."
-msgstr "LimeWire sizi güvensiz aramalardan ve paylaşmalardan engeller."
+msgstr "LimeWire sizi güvenli olmayan aramalar ve paylaşımlardan korur."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:60
 msgid "Select which file extensions belong in each category"
-msgstr "Her kategoriye hangi dosya uzantılarının ait olduğunu belirleyin"
+msgstr "Her kategoriye hangi dosya uzantılarının ait olduğunu seçin"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:110
 msgid "Choose where specific file types get saved"
-msgstr "Belirli dosya türlerinin nereye kaydedileceğini seç"
+msgstr "Belirli dosya türlerinin nereye kaydedileceğini seçin"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:263
 msgid "Revert directories to the default"
@@ -3435,7 +3443,7 @@ msgstr "Dil:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:76
 msgid "Help translate LimeWire!"
-msgstr "Limewire çevirisine yardım et!"
+msgstr "LimeWire çevirisine yardım et!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:85
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:75
@@ -3458,11 +3466,11 @@ msgstr "Sıfırla"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:167
 msgid "Reset warning messages"
-msgstr "Uyarı mesajlarını sıfırla"
+msgstr "Uyarı iletilerini sıfırla"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:198
 msgid "Friends and Chat"
-msgstr "Arkadaşlar ve Söyleşi"
+msgstr "Arkadaşlar ve Sohbet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:202
 msgid "Sign into Friends when LimeWire starts"
@@ -3474,7 +3482,7 @@ msgstr "Jabber Sunucusu:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:234
 msgid "Using:"
-msgstr "Kullanılıyor:"
+msgstr "Kullanılan:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:243
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:95
@@ -3483,7 +3491,7 @@ msgstr "Parola:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:71
 msgid "Let LimeWire choose my network interface (Recommended)"
-msgstr "LimeWire'nin ağ arabirimini seçmesine izin ver (Önerilen)"
+msgstr "LimeWire'ın ağ arabirimimi seçmesine izin ver (Önerilen)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:72
 msgid "Let me choose a specific network interface"
@@ -3512,8 +3520,8 @@ msgstr "Gelişmiş"
 msgid ""
 "One or more options will take effect the next time LimeWire is restarted."
 msgstr ""
-"LimeWire bir sonraki yeniden başlatıldığında bir ya da daha fazla seçenek "
-"etkili olacak."
+"Bir ya da daha fazla seçenek LimeWire'ın bir sonraki başlatılmasında "
+"etkinleşecek."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:26
 msgid ""
@@ -3521,24 +3529,24 @@ msgid ""
 "\"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you "
 "notice performance issues."
 msgstr ""
-"Bilgisayarınızın hızlı bir internet bağlantısı varsa, LimeWire \"Ultraeş\" "
-"olarak işlev görerek Mojito DHT'ye bağlanabilir. Performans sorunları "
-"yaşarsanız bunları devre dışı bırakabilirsiniz."
+"Bilgisayarınız hızlı Internet bağlantısına sahipse, LimeWire, \"Ultraeş\" "
+"olarak işlev görebilir ya da Mojito DHT'ye bağlanabilir. Performans "
+"sorunları yaşarsanız bunları devre dışı bırakabilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:27
 msgid ""
 "LimeWire uses a secure communications mode called TLS, which may use more "
 "CPU resources."
 msgstr ""
-"LimeWire, CPU kaynaklarını daha yoğun kullanabilen TLS adı verilen güvenli "
-"bir iletişim modu kullanır."
+"LimeWire, daha fazla CPU kaynağı kullanabilen, TLS adlı güvenli bir iletişim "
+"modu kullanır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:28
 msgid ""
 "Out-of-band Searching helps deliver faster search results to you, but some "
 "internet connections may not work well with this feature."
 msgstr ""
-"Bant dışı Arama daha hızlı arama sonuçları sağlayabilir; ancak bazı internet "
+"Bant Dışı Arama daha hızlı arama sonuçları sağlayabilir ancak bazı Internet "
 "bağlantıları bu özellikle iyi çalışmayabilir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:52
@@ -3547,7 +3555,7 @@ msgstr "Ultraeş özelliklerini devre dışı bırak"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:53
 msgid "Disable connecting to the Mojito DHT"
-msgstr "Mojito DHT bağlantısını devre dışı bırak"
+msgstr "Mojito DHT'ye bağlanmayı devre dışı bırak"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:54
 msgid "Disable TLS capabilities"
@@ -3646,7 +3654,7 @@ msgstr "Şimdi Temizle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:218
 msgid "Search Filtering"
-msgstr "Arama Süzmesi"
+msgstr "Arama Süzme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:230
 msgid ""
@@ -3685,20 +3693,24 @@ msgstr "Dosya Uzantılarını Süz..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:244
 msgid ""
 "Restrict files with certain extensions from being displayed in search results"
-msgstr "Arama sonuçlarında görüntülenen dosya uzantılarını daralt"
+msgstr ""
+"Arama sonuçlarında belirli uzantıları içeren dosyaların görüntülenmesini "
+"engelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:299
 msgid ""
 "You enabled showing Programs in search results. This can lead to viruses."
-msgstr "Aramalarda program paylaşımını açtınız. Bu virüslere yol açabilir."
+msgstr ""
+"Arama sonuçlarında Programların gösterilmesini etkinleştirdiniz. Bu virüs "
+"bulaşmasına yol açabilir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:302
 msgid ""
 "LimeWire is helping to prevent viruses by not showing Programs in search "
 "results."
 msgstr ""
-"LimeWire arama sonuçlarında program dosyalarını göstermeyerek virüsleri "
-"engellemeye yardımcı oluyor."
+"LimeWire, arama sonuçlarında Programları göstermeyerek virüsleri engellemeye "
+"yardımcı olur."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SpamOptionPanel.java:27
 msgid "Reset the Spam filter by clearing all files marked as spam"
@@ -3707,11 +3719,11 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SpamOptionPanel.java:45
 msgid "Clear Filter"
-msgstr "Temiz Süzgeç"
+msgstr "Süzgeci Kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:48
 msgid "Tell me about Beta updates"
-msgstr "Beta yükseltmeleri hakkında bilgi ver"
+msgstr "Beta güncellemeleri hakkında bilgi ver"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:118
 msgid "File Associations"
@@ -3732,7 +3744,7 @@ msgstr "Başlatma ve Kapatma"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:239
 msgid "Run LimeWire on System Startup"
-msgstr "LimeWire programını Sistem Başlatılırken çalıştır"
+msgstr "LimeWire'ı, Başlangıç'ta çalıştır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:241
 msgid "Minimize to system tray"
@@ -3756,11 +3768,11 @@ msgstr "Gönderilmeden önce hatalar hakkında bilgilenmeme izin ver"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 msgid "Always send bugs to Lime Wire"
-msgstr "Lime Wire 'a hataları her zaman gönder"
+msgstr "Lime Wire'a hataları her zaman gönder"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
 msgid "Never send bugs to Lime Wire"
-msgstr "Lime Wire 'a hataları hiçbir zaman gönderme"
+msgstr "Lime Wire'a hataları hiçbir zaman gönderme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:51
 msgid "Allow me to search for and share Programs with anyone"
@@ -3771,16 +3783,16 @@ msgid ""
 "Allow me to add Documents to my Public Shared list and share them with the "
 "world"
 msgstr ""
-"Genel Paylaşım kalsörüme dosya eklemeye ve tüm dünyayla paylaşmaya izin ver."
+"Genel Paylaşım listeme Belgeler eklememe ve herkesle paylaşmama izin ver"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:61
 msgid ""
 "Enabling these settings makes you more prone to viruses and accidently "
 "sharing private documents. We strongly recommend you don't enable them."
 msgstr ""
-"Bu ayarları aktif hale getirmek sizi virüslere daha yatkın kılar ve özel "
-"dosyalarınızı yanlışlıkla paylaşabilirsiniz. Bu ayarları kesinlikle "
-"etkinleştirmemeyi öneririz."
+"Bu ayarları etkinleştirmek, virüs bulaşmasına ve özel dosyalarınızı "
+"yanlışlıkla paylaşmaya daha açık hale getirir. Bu ayarları kesinlikle "
+"etkinleştirmemenizi öneririz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:26
 #, java-format
@@ -3823,19 +3835,19 @@ msgstr "Yapılan değişiklikleri koru"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/MiniPlayerPanel.java:89
 msgid "Nothing selected"
-msgstr "Seçilen yok"
+msgstr "Hiçbir şey seçilmedi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerPanel.java:132
 msgid "Skip Back"
-msgstr "Önceki Sayfa"
+msgstr "Geri Git"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerPanel.java:138
 msgid "Play"
-msgstr "Yürüt"
+msgstr "Oynat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerPanel.java:153
 msgid "Skip Forward"
-msgstr "Sonraki Sayfa"
+msgstr "İleri Git"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerPanel.java:159
 msgid "Volume"
@@ -3851,19 +3863,19 @@ msgstr "LimeWire PRO'ya yükseltilsin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:101
 msgid "Upgrade to PRO today!"
-msgstr ""
+msgstr "Şimdi PRO sürümüne yükselt!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:102
 msgid "Turbo-charged downloads"
-msgstr ""
+msgstr "Turbo-güçlendirilmiş indirmeler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:103
 msgid "More search results"
-msgstr ""
+msgstr "Daha fazla arama sonucu"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:104
 msgid "Free tech support and upgrades"
-msgstr ""
+msgstr "Ücretsiz teknik destek ve yükseltmeler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/OldStyleProNag.java:151
 msgid "Get LimeWire PRO Now"
@@ -3943,7 +3955,7 @@ msgstr "Uzunluk"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:178
 msgid "Bitrate:"
-msgstr "Bitrate"
+msgstr "Bit oranı:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:190
 msgid "Dimensions:"
@@ -3952,7 +3964,7 @@ msgstr "Boyutlar:"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:197
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:206
 msgid "Date Created:"
-msgstr "Tarih Oluşturuldu"
+msgstr "Oluşturulma Tarihi:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:202
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:213
@@ -3961,11 +3973,11 @@ msgstr "Tür"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:217
 msgid "Hash:"
-msgstr "Hash"
+msgstr "Hash:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:89
 msgid "Sharing from these lists"
-msgstr "Bu listelerden paylaş"
+msgstr "Bu listelerden paylaşım"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:102
 #, java-format
@@ -3979,7 +3991,7 @@ msgstr "Bu dosya paylaşılmıyor"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:159
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:190
 msgid "Don't ask me again"
-msgstr "Tekrar sorma"
+msgstr "Bir daha sorma"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:38
 msgid "General"
@@ -3987,12 +3999,12 @@ msgstr "Genel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:79
 msgid "Downloading from"
-msgstr "kaynağından indiriliyor."
+msgstr "İndirme yeri"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:137
 #, java-format
 msgid "{0}% complete"
-msgstr "{0}% tamamlandı"
+msgstr "%{0} tamamlandı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentDownloadSelector.java:17
 msgid "Torrent Download"
@@ -4000,7 +4012,7 @@ msgstr "Torrent İndirme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:48
 msgid "Select files to download"
-msgstr "İndirmek için dosyaları seçin"
+msgstr "İndirilecek dosyaları seçin"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:72
 msgid "Always ask before starting torrent"
@@ -4020,13 +4032,13 @@ msgstr "{0} adlı P2P kullanıcısı engellensin mi?"
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:137
 msgid "Block P2P uUers?"
-msgstr "P2P Kullanıcılarını engelle?"
+msgstr "P2P Kullanıcıları engellensin mi?"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:173
 #, java-format
 msgid "Block {0} P2P Users?"
-msgstr "{0} adlı P2P kullanıcıları engellensin mi?"
+msgstr "P2P Kullanıcıları {0} engellensin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:132
 msgid "Retry"
@@ -4035,32 +4047,32 @@ msgstr "Yeniden Dene"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:148
 msgid "When you sign on to LimeWire, your friends' files will appear here."
 msgstr ""
-"LimeWire de giriş yaptığınız zaman, arkadaşlarınızın dosyaları burada "
-"görünür."
+"LimeWire'a giriş yaptığınızda arkadaşlarınızın dosyaları burada görünür."
 
 #. BrowseState.OFFLINE
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:150
 msgid "When you sign on to LimeWire, your friend's files will appear here."
 msgstr ""
-"LimeWire de giriş yaptığınız zaman, arkadaşınızın dosyaları burada görünür."
+"LimeWire'a giriş yaptığınızda arkadaşınızın dosyaları burada görünür."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:153
 msgid ""
 "When they sign on to LimeWire and share with you, their files will appear "
 "here."
 msgstr ""
-"Onlar LimeWire de giriş yaptığı zaman, paylaştığı dosyalar burada görünür."
+"LimeWire'a giriş yaptıklarında ve sizinle paylaştıklarında dosyaları burada "
+"görünür."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:172
 msgid "<HTML><A href=\"\">Chat</A> and tell them to share.</HTML>"
 msgstr ""
-"<HTML><A href=\"\">Sohbet edin</A> ve onlara paylaşmalarını söyleyin.</HTML>"
+"<HTML><A href=\"\">Sohbet edin</A> ve onlardan paylaşmalarını isteyin.</HTML>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:174
 msgid "<HTML><A href=\"\">Chat</A> and tell them to sign on.</HTML>"
 msgstr ""
-"<HTML><A href=\"\">Sohbet edin</A> ve onlara giriş yapmalarını "
-"söyleyin.</HTML>"
+"<HTML><A href=\"\">Sohbet edin</A> ve onlardan giriş yapmalarını "
+"isteyin.</HTML>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:205
 msgid "No friends are sharing with you"
@@ -4073,11 +4085,11 @@ msgstr "Hiçbir arkadaş LimeWire'da değil"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:212
 #, java-format
 msgid "{0} is not signed on to LimeWire."
-msgstr "{0} LimeWire de henüz giriş yapmadı."
+msgstr "{0} LimeWire'a giriş yapmamış."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:214
 msgid "These people are not signed on to LimeWire."
-msgstr "Bu kişiler LimeWire de henüz giriş yapmadı."
+msgstr "Bu kişiler LimeWire'a giriş yapmamış."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:219
 #, java-format
@@ -4098,7 +4110,7 @@ msgstr "Güncellemeler var!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:163
 msgid "Unable to Browse"
-msgstr "Gözden geçirilemiyor."
+msgstr "Göz atılamıyor."
 
 #. text is lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:48
@@ -4107,7 +4119,7 @@ msgstr "kapat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:58
 msgid "Like the way search results used to look?"
-msgstr "Arama sonuçlarının görüldüğü gibi olmasını beğendiniz mi?"
+msgstr "Arama sonuçlarının görüntülenme şeklini beğendiniz mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:63
 msgid "Switch to Classic View"
@@ -4159,8 +4171,8 @@ msgid ""
 "enable downloading programs via Preferences > Search > Search Filtering."
 msgstr ""
 "LimeWire kullanarak program dosyalarını indirmemenizi öneriyoruz. Buna "
-"rağmen, program indirmeyi Seçenekler > Arama > Arama Filtreleme yolundan "
-"aktif ededebilirsiniz."
+"rağmen, program indirmeyi Tercihler > Arama > Arama Süzme menüsünden "
+"etkinleştirebilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
 msgid ""
@@ -4168,8 +4180,8 @@ msgid ""
 "enable downloading programs via Tools > Options > Search > Search Filtering."
 msgstr ""
 "LimeWire kullanarak program dosyalarını indirmemenizi öneriyoruz. Buna "
-"rağmen, program indirmeyi Araçlar > Ayarlar > Arama > Arama Filtreleme "
-"yolundan aktif ededebilirsiniz."
+"rağmen, program indirmeyi Araçlar > Seçenekler > Arama Süzme menüsünden "
+"etkinleştirebilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:117
 msgid "Search..."
@@ -4224,35 +4236,35 @@ msgstr "Tüm dosyalar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:60
 msgid "Only audio"
-msgstr "Yalnız ses"
+msgstr "Yalnızca ses"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:61
 msgid "Only documents"
-msgstr "Yalnız belgeler"
+msgstr "Yalnızca belgeler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:62
 msgid "Only images"
-msgstr "Yalnız görüntüler"
+msgstr "Yalnızca resimler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:63
 msgid "Only programs"
-msgstr "Yalnız programlar"
+msgstr "Yalnızca programlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:64
 msgid "Only videos"
-msgstr "Yalnız videolar"
+msgstr "Yalnızca videolar"
 
 #. {0}: browse title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:308
 #, java-format
 msgid "Browse {0} ({1})"
-msgstr "{0} başlığında gezin ({1})"
+msgstr "{0} başlığına gözat ({1})"
 
 #. {0}: browse title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:310
 #, java-format
 msgid "Browse {0} - Showing {1} of {2}"
-msgstr "{0} başlığında gezin - {2} sonucun {1} tanesi görüntüleniyor"
+msgstr "{0} başlığına gözat - {2} sonuçtan {1} tanesi görüntüleniyor"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:327
@@ -4264,26 +4276,26 @@ msgstr "{0} için tüm sonuçlar ({1})"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:329
 #, java-format
 msgid "All results for {0} - Showing {1} of {2}"
-msgstr "{0} için tüm sonuçlar - {2} sonucun {1} tanesi görüntüleniyor"
+msgstr "{0} için tüm sonuçlar - {2} sonuçtan {1} tanesi görüntüleniyor"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:334
 #, java-format
 msgid "Audio results for {0} ({1})"
-msgstr "{0} için ses dosyası sonuçları({1})"
+msgstr "{0} için ses dosyası sonuçları ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:336
 #, java-format
 msgid "Audio results for {0} - Showing {1} of {2}"
 msgstr ""
-"{0} için ses dosyası sonuçları - {2} sonucun {1} tanesi görüntüleniyor"
+"{0} için ses dosyası sonuçları - {2} sonuçtan {1} tanesi görüntüleniyor"
 
 #. {0}: search title, {1}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:341
 #, java-format
 msgid "Video results for {0} ({1})"
-msgstr "{0} için video sonuçları({1})"
+msgstr "{0} için video sonuçları ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:343
@@ -4295,7 +4307,7 @@ msgstr "{0} için video sonuçları - {2} sonuçtan {1} tanesi görüntüleniyor
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:348
 #, java-format
 msgid "Image results for {0} ({1})"
-msgstr "{0} için resim sonuçları({1})"
+msgstr "{0} için resim sonuçları ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:350
@@ -4331,7 +4343,7 @@ msgstr "{0} için program sonuçları - {2} sonuçtan {1} tanesi görüntüleniy
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:369
 #, java-format
 msgid "Other results for {0} ({1})"
-msgstr "{0} için diğer sonuçlar({1})"
+msgstr "{0} için diğer sonuçlar ({1})"
 
 #. {0}: search title, {1}: actual count, {2}: total count
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:371
@@ -4341,13 +4353,11 @@ msgstr "{0} için diğer sonuçlar - {2} sonuçtan {1} tanesi görüntüleniyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:581
 msgid "LimeWire will start your search right after it finishes loading."
-msgstr "LimeWire yüklemeyi bitirdikten sonra aramalarınızı başlatıcak."
+msgstr "LimeWire yüklemeyi bitirdikten sonra aramalarınızı başlatacak."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:585
 msgid "You might not receive many results until LimeWire finishes loading..."
-msgstr ""
-"LimeWire yüklemeyi bitirmeden birçok nedenden dolayı yanıt "
-"alamayabilirsiniz..."
+msgstr "LimeWire yüklemeyi bitirene kadar çoğu sonucu alamayabilirsiniz..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:69
 msgid "Sort by:"
@@ -4394,16 +4404,20 @@ msgid ""
 "\n"
 "LimeWire cannot monitor or control the content of the P2P Network, so please "
 "respect your local copyright laws."
-msgstr "LimeWire bu dosya için bir lisans bulamadı. Yine de indirilsin mi?"
+msgstr ""
+"LimeWire bu dosya için bir lisans bulamadı. Yine de indirilsin mi?\n"
+"\n"
+"LimeWire, P2P Ağı'nın içeriğini izleyemediği ya da kontrol edemediği için, "
+"yerel telif hakkı yasalarına saygı gösteriniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:45
 msgid "Do not warn me again"
-msgstr "Beni yeniden uyarma"
+msgstr "Beni tekrar uyarma"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchHeadingDocumentBuilderImpl.java:13
 #, java-format
 msgid "{0} is marked as spam."
-msgstr "{0} spam olarak kaydedildi."
+msgstr "{0}, spam olarak işaretlendi."
 
 #. Add Download menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:74
@@ -4413,7 +4427,7 @@ msgstr "İndir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:86
 msgid "Download As..."
-msgstr "Öyle indir"
+msgstr "Farklı İndir..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:99
 msgid "Download As"
@@ -4453,53 +4467,51 @@ msgstr "Uzantı"
 #, java-format
 msgid "Not showing {0} results.  Narrow results to see more."
 msgstr ""
-"{0} sonucun tümü gösterilmiyor. Daha çok görmek için aramayı daraltın."
+"{0} sonuç gösterilmiyor. Daha fazlasını görmek için aramayı daraltın."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Turbo Hızlı aramalar için LimeWire PRO programını alın"
+msgstr "Turbo Hızlı aramalar için LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
-"LimeWire programının eşler arası gelişimini destekleyin. PRO sürümünü alın."
+msgstr "LimeWire'ın eşler arası geliştirmesini destekleyin. PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:61
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
 msgid "Purchase LimeWire PRO to help us make downloads faster."
 msgstr ""
-"İndirmeleri daha hızlı gerçekleştirmek için LimeWire PRO sürümünü satın alın."
+"İndirmeleri daha hızlı kılmamıza yardım etmek için LimeWire PRO'yu satın "
+"alın."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Turbo Hızlı indirmeler için LimeWire PRO sürümünü alın."
+msgstr "Turbo Hızlı indirmeler için LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
 msgid "Support open networks. Get LimeWire PRO."
-msgstr "Açık ağları destekleyin. LimeWire PRO programını alın."
+msgstr "Açık ağları destekleyin. LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:71
 msgid "Support open source and open protocols. Get LimeWire PRO."
 msgstr ""
-"Açık kaynak ve açık protokolleri destekleyin. LimeWire PRO programını alın."
+"Açık kaynak ve açık protokolleri destekleyin. LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Turbo Hızlı performans için LimeWire PRO programını alın."
+msgstr "Turbo Hızlı performans için LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:77
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Internet'i açık tutun. LimeWire PRO programını alın."
+msgstr "Internet'i açık tutun. LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:80
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr ""
-"LimeWire programının geliştirilmesi gerçek paraya mal oluyor. PRO sürümünü "
-"alın."
+msgstr "LimeWire'ı geliştirmenin gerçek bir maliyeti var. PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"
@@ -4507,36 +4519,35 @@ msgstr "\"magnet:\" bağlantıları"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
 msgid "Warn me when other programs take LimeWire associations"
-msgstr "Başka programlar LimeWire bağlantıları almadığında beni uyar"
+msgstr "Başka programlar LimeWire ilişkilendirmelerini aldığında uyar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
 msgid ""
 "Torrent files and magnet links are no longer associated with LimeWire. Would "
 "you like LimeWire to re-associate them?"
 msgstr ""
-"Torrent dosyaları ve magnet bağlantıları artık LimeWire ile ile ilişkili "
-"değil. LimeWire uygulamasının bunları yeniden ilişkilendirmesini ister "
-"misiniz?"
+"Torrent dosyaları ve magnet bağlantıları artık LimeWire'la ilişkili değil. "
+"LimeWire'ın bunları yeniden ilişkilendirmesini ister misiniz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:80
 msgid ""
 "Torrent files are no longer associated with LimeWire. Would you like "
 "LimeWire to re-associate them?"
 msgstr ""
-"Torrent dosyaları artık LimeWire ile ilişkili değil. LimeWire uygulamasının "
-"bunları yeniden ilişkilendirmesini ister misiniz?"
+"Torrent dosyaları artık LimeWire'la ilişkili değil. LimeWire'ın bunları "
+"yeniden ilişkilendirmesini ister misiniz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:84
 msgid ""
 "Magnet links are no longer associated with LimeWire. Would you like LimeWire "
 "to re-associate them?"
 msgstr ""
-"Magnet bağlantıları artık LimeWire ile ilişkili değil. LimeWire "
-"uygulamasının bunları yeniden ilişkilendirmesini ister misiniz?"
+"Magnet bağlantıları artık LimeWire'la ilişkili değil. LimeWire'ın bunları "
+"yeniden ilişkilendirmesini ister misiniz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:106
 msgid "No internet connection"
-msgstr "İnternet bağlantısı yok"
+msgstr "Internet bağlantısı yok"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:107
 msgid "You have no internet connection"
@@ -4544,11 +4555,11 @@ msgstr "Internet bağlantınız yok"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:111
 msgid "Couldn't connect"
-msgstr "Bağlanamıyor"
+msgstr "Bağlanamadı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 msgid "You couldn't connect to LimeWire"
-msgstr "LimeWire 'a bağlanılamıyor"
+msgstr "LimeWire'a bağlanamadınız"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:123
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:128
@@ -4563,12 +4574,12 @@ msgstr "Bağlantınız zayıf"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:138
 msgid "Medium connection"
-msgstr "Orta düzeyde bağlantı"
+msgstr "Orta düzey bağlantı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:139
 msgid "You have a medium connection"
-msgstr "Orta derece bir bağlantıya sahipsiniz"
+msgstr "Orta düzey bağlantınız var"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 msgid "Full connection"
@@ -4580,20 +4591,20 @@ msgstr "Tamamen bağlısınız"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 msgid "Turbo-charged connection"
-msgstr "Yüksek bağlantı"
+msgstr "Turbo hızlı bağlantı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:151
 msgid "You have a turbo-charged connection"
-msgstr "Yüksek hızlı bağlantıya sahipsiniz."
+msgstr "Turbo hızlı bağlantınız var"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPanel.java:118
 #, java-format
 msgid "Adding {0} of {1}"
-msgstr "{1} taneden {0} tanesi ekleniyor"
+msgstr "{0} / {1} ekleniyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPopupContentPanel.java:52
 msgid "Adding Files"
-msgstr "Dosyaları Ekle"
+msgstr "Dosyalar Ekleniyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPopupContentPanel.java:62
 msgid "Scanning..."
@@ -4609,19 +4620,19 @@ msgstr "Hepsi Tamamlandı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:37
 msgid "Want faster downloads?  Get LimeWire PRO."
-msgstr "Daha hızlı mı indirmek istiyorsun ? LimeWire PRO satın al."
+msgstr "Daha hızlı indirmek mi istiyorsunuz? LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:49
 msgid "For the best BitTorrent downloads, get LimeWire PRO."
-msgstr "En iyi BitTorrent indirmeleri için LimeWire PRO satın al."
+msgstr "En iyi BitTorrent indirmeleri için LimeWire PRO'yu edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:53
 msgid "LimeWire PRO comes with FREE tech support. "
-msgstr "LimeWire PRO BEDAVA teknik yardımla birlikte geliyor. "
+msgstr "LimeWire PRO, ÜCRETSİZ teknik destekle gelir. "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:65
 msgid "FREE updates and support - LimeWire PRO."
-msgstr "BEDAVA güncellemeler ve destek - LimeWire PRO."
+msgstr "ÜCRETSİZ güncellemeler ve destek - LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:32
 #, java-format
@@ -4655,12 +4666,12 @@ msgstr "LimeWire 5"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/Notification.java:57
 msgctxt "Launch Action Text (Notification)"
 msgid "Launch"
-msgstr "Başlat"
+msgstr "Çalıştır"
 
 #. restore
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:102
 msgid "Show LimeWire"
-msgstr "LimeWire programını göster"
+msgstr "LimeWire'ı göster"
 
 #. exit after transfers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:115
@@ -4675,12 +4686,12 @@ msgstr "Çıkış"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:159
 msgid "Update Now"
-msgstr "Şimdi Güncelleştir"
+msgstr "Şimdi Güncelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:162
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:199
 msgid "Visit http://www.limewire.com to update!"
-msgstr "Güncelleştirmek için http://www.limewire.com adresini ziyaret edin!"
+msgstr "Güncellemek için http://www.limewire.com adresini ziyaret edin!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:173
 msgid ""
@@ -4688,17 +4699,17 @@ msgid ""
 "update now, LimeWire will update automatically when you close. Would you "
 "like to update now?"
 msgstr ""
-"Güncelleştirmeyi yüklemek için LimeWire programının yeniden başlatılması "
-"gerekli. Şimdi güncelleştirmeyi seçmezseniz, programı kapadığınızda LimeWire "
-"otomatik olarak güncelleştirilecek. Şimdi güncelleştirmek istiyor musunuz?"
+"Güncellemenin kurulması için LimeWire'ın yeniden başlatılması gerekli. Şimdi "
+"güncellemeyi seçmezseniz, LimeWire kapatıldığında otomatik olarak "
+"güncellenecek. Şimdi güncellemek istiyor musunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:174
 msgid "Update Ready"
-msgstr "Güncelleştirme Hazır"
+msgstr "Güncelleme Hazır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:196
 msgid "Update Later"
-msgstr "Daha Sonra Güncelleştir"
+msgstr "Sonra Güncelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:66
 msgid "Play File"
@@ -4715,17 +4726,17 @@ msgstr "Yükleme tamamlandı"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:259
 #, java-format
 msgid "Connected to {0} P2P user, uploading at {1} - Ratio {2}"
-msgstr "{0} P2P kullanıcısına bağlanıldı, {1} gönderiliyor: {2}"
+msgstr "{0} P2P kullanıcısına bağlanıldı, {1} hızında yükleniyor - Oran {2}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:261
 #, java-format
 msgid "Connected to {0} P2P users, uploading at {1} - Ratio {2}"
-msgstr "{0} P2P kullanıcısına bağlanıldı, {1} gönderiliyor: {2}"
+msgstr "{0} P2P kullanıcısına bağlanıldı, {1} hızında yükleniyor - Oran {2}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:264
 #, java-format
 msgid "Uploading - {0} of {1}({2})"
-msgstr "Gönderiliyor - {0} / {1}({2})"
+msgstr "Yükleniyor - {0} / {1}({2})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:280
 msgid "Unable to upload: file error"
@@ -4733,7 +4744,7 @@ msgstr "Yükleme yapılamıyor: dosya hatası"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:282
 msgid "Unable to upload: transfer interrupted"
-msgstr "Yükleme yapılamıyor: aktarım kesildi"
+msgstr "Yükleme yapılamıyor: transfer kesildi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:284
 msgid "Unable to upload: upload limit reached"
@@ -4745,36 +4756,35 @@ msgstr "Dosyayı Farklı Kaydet..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:144
 msgid "Sorry, this file is already being downloaded."
-msgstr "Üzgünüz, bu dosya şu anda zaten yükleniyor."
+msgstr "Üzgünüz, bu dosya zaten indiriliyor."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:150
 msgid "Sorry, you can't download files to this location."
-msgstr "Üzgünüz, dosyaları buraya indiremezsiniz."
+msgstr "Üzgünüz, dosyaları bu konuma indiremezsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:155
 msgid ""
 "Sorry, there is a problem with torrents.\n"
 "Please try reinstalling LimeWire to solve this problem."
 msgstr ""
-"Üzgünüz, torrentlerle ilgili bir problem var.\n"
-"\n"
-"Bu problemi çözmek için lütfen LimeWire'ı yeniden yüklemeyi deneyin."
+"Üzgünüz, torrentlerle ilgili bir sorun var.\n"
+"Bu sorunu çözmek için lütfen LimeWire'ı yeniden yüklemeyi deneyin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:158
 msgid "You can also ask for help on the forums."
-msgstr "Ayrıca forumlarda yardım isteyebilirsiniz."
+msgstr "Forumlarda da yardım isteyebilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:170
 msgid ""
 "Sorry, we are still loading your old downloads.\n"
 "Please wait to add a new download until we are done."
 msgstr ""
-"Üzgünüz, hala eski indirme işlemlerinizi yüklüyoruz.\n"
-"Lütfen yeni indirme işlemini yükleme işlemi bittikten sonra ekleyin."
+"Üzgünüz, eski indirme işlemlerinizi yüklemeye devam ediyoruz.\n"
+"Yeni indirme eklemek için lütfen işimizi tamamlayana kadar bekleyin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:173
 msgid "Sorry, there was a problem downloading your file."
-msgstr "Üzgünüm, dosyanız indirilirken bir sorun oluştu."
+msgstr "Üzgünüz, dosyanız indirilirken bir sorun oluştu."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:227
 msgid "File already exists. What do you want to do?"
@@ -4782,7 +4792,7 @@ msgstr "Dosya zaten var. Ne yapmak istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:234
 msgid "Overwrite"
-msgstr "Üzerine Yaz"
+msgstr "Üstüne Yaz"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:251
 msgid "Choose a new folder to save download."
@@ -4800,7 +4810,7 @@ msgstr "Tüm Klasörler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:508
 msgid "File already exists.  Do you want to replace it?"
-msgstr "Dosya zaten var. Onu yerine koymak ister misiniz?"
+msgstr "Dosya zaten var. Değiştirmek ister misiniz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:28
 msgid "Date"
@@ -4847,7 +4857,7 @@ msgstr "Mükemmel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:441
 msgid "Poor Quality"
-msgstr "Düşük Kalite"
+msgstr "Zayıf Kalite"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:443
 msgid "Good Quality"
@@ -4863,11 +4873,11 @@ msgstr "Geçersiz magnet seçeneği."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:109
 msgid "Unable to open URL"
-msgstr "Adres açılamadı"
+msgstr "URL açılamadı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:109
 msgid "Open URL"
-msgstr "Adres Aç"
+msgstr "URL Aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:200
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:203
@@ -4887,13 +4897,13 @@ msgstr "Dosya Aç"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:287
 #, java-format
 msgid "Unable to locate file: {0}"
-msgstr "Dosya konumlandıralamıyor: {0}"
+msgstr "Dosya bulunamadı: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:280
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:284
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:288
 msgid "Locate File"
-msgstr "Dosyayı Konumlandır"
+msgstr "Dosyayı Bul"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:49
 msgid ""
@@ -4918,10 +4928,10 @@ msgid ""
 "{1}.\n"
 "Would you like to choose another location?"
 msgstr ""
-"İndirilenleri {0} a kaydetmek doğru bir seçim olmayabilir.\n"
-"İndirilenleri kaydettiğinizden emin olmalısınızki, gerektiği gibi {1} in bir "
+"İndirilenleri {0} klasörüne kaydetmek doğru çalışmayabilir.\n"
+"İndirilenlerin doğru kaydedildiğinden emin olmak için, {1} klasörünün bir "
 "alt klasörüne kaydetmelisiniz.\n"
-"Başka bir yer seçmek ister misiniz?"
+"Başka bir konum seçmek ister misiniz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:168
 msgid "Folder Warning"
@@ -4934,12 +4944,12 @@ msgid ""
 "Documents may contain personal information. <a href=\"{0}\">learn "
 "more</a></body></html>"
 msgstr ""
-"<html><body>Uyarı: Tüm dünyayla dosya paylaşıyorsunz. Bu dosyalar kişisel "
+"<html><body>Uyarı: Belgeleri herkesle paylaşıyorsunuz. Bu Belgeler kişisel "
 "bilgi içeriyor olabilir. <a href=\"{0}\">daha fazla bilgi</a></body></html>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/DocumentWarningPanel.java:72
 msgid "Do you want to keep sharing Documents with the world?"
-msgstr "Belgeleri dünya ile paylaşmayı sürdürmeyi ister misiniz?"
+msgstr "Belgeleri herkesle paylaşmaya devam etmek istiyor musunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/DocumentWarningPanel.java:78
 msgid "Continue Sharing"
@@ -4983,22 +4993,21 @@ msgid ""
 "Always choose these kind of files when I add a folder to the Library or a "
 "List"
 msgstr ""
-"Kitaplığa ya da bir Listeye bir klasör eklediğim zaman hep bu tür dosyaları "
-"seç"
+"Kitaplığa ya da bir Listeye klasör eklediğimde her zaman bu tür dosyaları seç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:169
 #, java-format
 msgid ""
 "What kind of files do you want to add from \"{0}\" and its subfolders?"
 msgstr ""
-"\"{0}\" ve altklasörlerinden hangi tür dosyaları eklemek istiyorsunuz?"
+"\"{0}\" ve alt klasörlerinden hangi tür dosyaları eklemek istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:173
 msgid ""
 "What kind of files do you want to add from these folders and their "
 "subfolders?"
 msgstr ""
-"Bu dosyalar ve alt klasörlerinden hangi tür dosyaları eklemek istiyorsunuz?"
+"Bu klasörler ve alt klasörlerinden hangi tür dosyaları eklemek istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:179
 #, java-format
@@ -5006,16 +5015,16 @@ msgid ""
 "What kind of files do you want to <b>share with the world</b> from \"{0}\" "
 "and its subfolders?"
 msgstr ""
-"\"{0}\" ve alt klasörlerinden hangi tür dosyaları <b> tüm dünyayla paylaşmak "
-"</b> istiyorsunuz?"
+"\"{0}\" ve alt klasörlerinden hangi tür dosyaları <b>herkesle paylaşmak</b> "
+"istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:183
 msgid ""
 "What kind of files do you want to <b>share with the world</b> from these "
 "folders and their subfolders?"
 msgstr ""
-"Bu dosyalardan ve alt klasörlerinden hangi tür dosyaları <b> tüm dünyayla "
-"paylaşmak </b> istiyorsunuz?"
+"Bu klasörler ve alt klasörlerinden hangi tür dosyaları <b>herkesle "
+"paylaşmak</b> istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:189
 #, java-format
@@ -5023,16 +5032,16 @@ msgid ""
 "What kind of files do you want to share with selected friends from \"{0}\" "
 "and its subfolders?"
 msgstr ""
-"\"{0}\" dosyasından ve alt klasörlerinden hangi tür dosyaları "
-"arkadaşlarınızla paylaşmak istiyorsunuz?"
+"\"{0}\" ve alt klasörlerinden hangi tür dosyaları seçili arkadaşlarınızla "
+"paylaşmak istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:193
 msgid ""
 "What kind of files do you want to share with selected friends from these "
 "folders and their subfolders?"
 msgstr ""
-"Bu dosyalardan ve alt klasörlerinden hangi tür dosyaları arkadaşlarınızla "
-"paylaşmak istiyorsunuz?"
+"Bu klasörler ve alt klasörlerinden hangi tür dosyaları seçili "
+"arkadaşlarınızla paylaşmak istiyorsunuz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:63
 msgid "Share files?"
@@ -5040,39 +5049,37 @@ msgstr "Dosyalar paylaşılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:95
 msgid "Warn me before adding folders to any shared list"
-msgstr "Paylaşılmış bir listeye klasör eklemeden önce beni uyar"
+msgstr "Paylaşılan bir listeye klasör eklemeden önce uyar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:121
 #, java-format
 msgid "Share files in \"{0}\" and its subfolders <b>with the world</b>?"
 msgstr ""
-"\"{0}\" içindeki ve alt klasörlerdeki dosyalar <b> tüm dünya ile </b> "
-"paylaşılsın mı?"
+"\"{0}\" ve alt klasörlerindeki dosyalar <b>herkesle</b> paylaşılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:124
 msgid ""
 "Share files in these folders and their subfolders <b>with the world</b>?"
 msgstr ""
-"Bu klasörler ve alt klasörlerindeki dosyalar <b> tüm dünya ile </b> "
-"paylaşılsın mı?"
+"Bu klasörler ve alt klasörlerindeki dosyalar <b>herkesle</b> paylaşılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:128
 #, java-format
 msgid "Share files in \"{0}\" and its subfolders with selected friends? "
 msgstr ""
-"\"{0}\" klasörü ve alt klasörlerindeki dosyalar seçili arkadaşlar ile "
-"paylaşılsın mı? "
+"\"{0}\" ve alt klasörlerindeki dosyalar seçili arkadaşlarınızla paylaşılsın "
+"mı? "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/SharingWarningDialog.java:132
 msgid ""
 "Share files in these folders and their subfolders with selected friends?"
 msgstr ""
-"Bu klasörler ve alt klasörlerindeki dosyalar seçili arkadaşlar ile "
+"Bu klasörler ve alt klasörlerindeki dosyalar seçili arkadaşlarınızla "
 "paylaşılsın mı?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:264
 msgid "Some Legal Stuff"
-msgstr "Bazı Yasal Şeyler"
+msgstr "Bazı Yasal Konular"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:266
 #, java-format
@@ -5082,10 +5089,11 @@ msgid ""
 "distributing certain copyrighted content. Learn more information about <a "
 "href=\"{0}\">Copyright</a></body></html>."
 msgstr ""
-"<html><body>LimeWire Basic ve LimeWire PRO, sadece izinli dosyaları paylaşma "
-"amaçlı karşılıklı eşe eş programlardır. Telif Hakları belirli içeriklerin "
-"elde edilmesini veya dağıtılmasını yasaklayabilir. Bunun hakkında daha fazla "
-"bilgi edinin.<a href=\"{0}\">Copyright</a></body></html>."
+"<html><body>LimeWire Basic ve LimeWire PRO, yalnızca izinli dosyaların "
+"paylaşımına yönelik eşler arası programlardır. Telif Hakları yasaları, bazı "
+"telif haklı içeriklerin elde edilmesini veya dağıtılmasını yasaklayabilir. "
+"<a href=\"{0}\">Telif Hakkı</a> konusunda daha fazla bilgi "
+"edinin.</body></html>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:267
 msgid "Copyright Infringement"
@@ -5093,7 +5101,7 @@ msgstr "Telif Hakkı İhlali"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:268
 msgid "Privacy Policy"
-msgstr "Gizlilik İlkesi"
+msgstr "Gizlilik Politikası"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:270
 msgid ""
@@ -5101,10 +5109,10 @@ msgid ""
 "to the terms of the License Agreement and Privacy Policy. You also agree "
 "that you will not use LimeWire for copyright infringement."
 msgstr ""
-"Kabul Ediyorum düğmesine basarak, Gizlilik Politikasını ve Lisans "
+"\"Kabul Ediyorum\" düğmesine basarak, Gizlilik Politikasını ve Lisans "
 "Anlaşmasını okuduğunuzu, anladığınızı ve kabul ettiğinizi onaylamış "
-"olursunuz. Ayrıca LimeWire'yi telif hakları ihlali için kullanmayacağınızı "
-"da kabul etmiş olursunuz."
+"olursunuz. Ayrıca LimeWire'ı telif hakları ihlali için kullanmayacağınızı da "
+"kabul edersiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:271
 msgid "Choose your language"
@@ -5143,43 +5151,45 @@ msgid ""
 "Don't let me download or upload files copyright owners request not be shared"
 msgstr ""
 "Telif hakkı sahiplerinin paylaşılmasını istemedikleri dosyaları indirmeme "
-"veya göndermeme izin verme"
+"veya yüklememe izin verme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:98
 msgid "Please take a minute to configure these options before moving on."
 msgstr ""
-"Lütfen devam etmeden önce aşağıdaki seçenekleri ayarlamak için birkaç "
-"dakikanızı ayırın."
+"Devam etmeden önce bu seçenekleri yapılandırmak için lütfen bir dakikanızı "
+"ayırın."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:108
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:120
 msgid "All settings can be changed later from LimeWire > Preferences"
-msgstr "Tüm ayarlar daha sonra LimeWire > Tercihler'den değiştirilebilir"
+msgstr ""
+"Tüm ayarlar, LimeWire > Tercihler menüsünden daha sonra değiştirilebilir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:109
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:121
 msgid "All settings can be changed later in Tools > Options"
-msgstr "Tüm ayarlar daha sonra Araçlar > Seçenekler'de değiştirilebilir"
+msgstr ""
+"Tüm ayarlar, Araçlar > Seçenekler menüsünden daha sonra değiştirilebilir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:126
 msgid "Learn about sharing."
-msgstr "Paylaşma hakkındakileri öğren."
+msgstr "Paylaşım hakkında bilgi alın."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:141
 msgid "Files in your Public Shared list are shared with the world."
-msgstr "Genel Paylaşım listesindeki dosyalarınız dünya ile paylaşılır."
+msgstr "Genel Paylaşım listenizdeki dosyalar herkesle paylaşılır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:147
 msgid "Add files I download from P2P Users to my Public Shared list."
 msgstr ""
-"P2P kullanıcılarından indirdiğim dosyaları Genel Paylaşım listeme ekle."
+"P2P Kullanıcılarından indirdiğim dosyaları Genel Paylaşım listeme ekle."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:157
 msgid ""
 "LimeWire will add files you download from P2P Users into your Public Shared "
 "list."
 msgstr ""
-"LimeWire P2P Kullanıcılarından indirdiğiniz dosyaları Genel Paylaşım "
+"LimeWire, P2P Kullanıcılarından indirdiğiniz dosyaları Genel Paylaşım "
 "listenize ekleyecek."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:179
@@ -5200,11 +5210,11 @@ msgstr ""
 msgid ""
 "Shared files from your old version will be in your Public Shared list."
 msgstr ""
-"Eski sürümünüzdeki paylaştığınız dosyalar Genel Paylaşım listenizde olacak."
+"Eski sürümünüzde paylaşılan dosyalar Genel Paylaşım listenizde olacak."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:207
 msgid "Shared files from your Public Shared list will continue to be shared."
-msgstr "Genel Paylaşım listenizdeki dosyalar, paylaşılmaya devam edecek."
+msgstr "Genel Paylaşım listenizdeki dosyalar paylaşılmaya devam edecek."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 msgid "Continue"
@@ -5221,7 +5231,7 @@ msgstr "Son"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:205
 #, java-format
 msgid "Setup - step {0} of {1}"
-msgstr "Kur - {1} adımdan {0}"
+msgstr "Kur - adım {0} / {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:207
 msgid "Setup"
