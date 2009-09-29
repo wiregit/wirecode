@@ -58,6 +58,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
     private FileServer fileServer = null;
 
+    private  Injector injector = null;
+    
     public BTDownloaderImplTest(String name) {
         super(name);
     }
@@ -65,7 +67,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public static Test suite() {
         return buildTestSuite(BTDownloaderImplTest.class);
     }
-
+    
     @Override
     protected void setUp() throws Exception {
         torrentDir = TestUtils
@@ -82,6 +84,11 @@ public class BTDownloaderImplTest extends LimeTestCase {
         fileServer = new FileServer(TEST_PORT, fileDir);
         fileServer.start();
         super.setUp();
+        
+        injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
+                ActivityCallbackAdapter.class));
+        GuiceUtils.loadEagerSingletons(injector);
+    
     }
 
     @Override
@@ -95,16 +102,14 @@ public class BTDownloaderImplTest extends LimeTestCase {
         FileUtils.deleteRecursive(torrentDir);
         FileUtils.deleteRecursive(fileDir);
         super.tearDown();
+        injector.getInstance(TorrentManager.class).stop();
     }
     
     public void testInspections() throws Exception {
         File torrentFile = createFile("test-peer-dl-single-file.torrent");
 
-        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
-                ActivityCallbackAdapter.class));
-        GuiceUtils.loadEagerSingletons(injector);
         injector.getInstance(TorrentManager.class).isValid();
-        BTDownloaderImpl downloader = createBTDownloader(torrentFile, injector);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         try {
             // TODO more InspectionTool code into common so it can generate the mapping
             assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
@@ -259,13 +264,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
     }
     
     private BTDownloaderImpl createBTDownloader(File torrentFile) throws IOException {
-        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
-                ActivityCallbackAdapter.class));
-        GuiceUtils.loadEagerSingletons(injector);
-        return createBTDownloader(torrentFile, injector);
-    }
-
-    private BTDownloaderImpl createBTDownloader(File torrentFile, Injector injector) throws IOException {
         AssertComparisons.assertTrue(torrentFile.exists());        
 
         CoreDownloaderFactory coreDownloaderFactory = injector
