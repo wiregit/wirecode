@@ -449,7 +449,7 @@ public class TorrentManagerImpl implements TorrentManager {
             if (sha1 != null) {
                 updatedTorrents.add(sha1);
                 
-                if (alert.getCategory() == LibTorrentAlert.status_notification) {
+                if (alert.getCategory() == LibTorrentAlert.storage_notification) {
                     Torrent torrent = torrents.get(sha1);
                     if (torrent != null) {
                         torrent.handleFastResumeAlert(alert);
