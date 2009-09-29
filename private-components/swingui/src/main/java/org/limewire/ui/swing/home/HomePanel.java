@@ -20,6 +20,7 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.BrowserUtils;
 import org.limewire.ui.swing.browser.UriAction;
@@ -87,9 +88,14 @@ public class HomePanel extends JXPanel {
             
             browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT) {
                 @Override
-                public void pageLoadStopped(boolean failed) {
+                public void pageLoadStopped(final boolean failed) {
                     super.pageLoadStopped(failed);
-                    pageLoadFinished(!failed);
+                    SwingUtils.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            pageLoadFinished(!failed);
+                        }
+                    });
                 }
             };
             fallbackBrowser = null;
@@ -200,6 +206,7 @@ public class HomePanel extends JXPanel {
             String offlinePage = "<html><head><style type=\"text/css\">* {margin: 0;  padding: 0;} body {background: #EAEAEA url(\""+ bgImage.toExternalForm() + "\") repeat-x left top; font-family: Arial, sans-serif;}table#layout tr td#header {  background: url(\"" + topImage.toExternalForm() + "\") no-repeat center top;}table#layout tr td h2 {  font-size: 16px;  margin: 0 0 8px 0;  color: #807E7E;}table#layout tr td p {  font-size: 11px;  color: #931F22;}</style></head><body><center>  <table id=\"layout\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"400\" style=\"margin: 46px 0 0 0\">    <tr valign=\"top\">      <td id=\"header\" height=\"127\" align=\"center\"></td>    </tr>    <tr valign=\"top\">      <td align=\"center\">        <h2>You are offline</h2>        <p>Please check your internet connection.</p>      </td>    </tr>  </table></center></body></html>";
             
             fallbackBrowser.setPageAsynchronous(url, offlinePage).addFutureListener(new EventListener<FutureEvent<Boolean>>() {
+                @SwingEDTEvent
                 public void handleEvent(FutureEvent<Boolean> event) {
                     // == TRUE to allow false || null to be false.
                     pageLoadFinished(event.getResult() == Boolean.TRUE);
