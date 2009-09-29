@@ -82,7 +82,8 @@ class URNFilterImpl implements URNFilter {
     /**
      * Returns false if the message is a query reply with a URN that matches
      * the blacklist; matching query replies are passed to the spam filter.
-     * Returns true for all other messages.
+     * Browse host replies are always allowed. Returns true for all other
+     * messages.
      */
     @Override
     public boolean allow(Message m) {
@@ -90,10 +91,27 @@ class URNFilterImpl implements URNFilter {
             return true;
         if(m instanceof QueryReply) {
             QueryReply q = (QueryReply)m;
+            if(q.isBrowseHostReply())
+                return true; // We'll filter individual responses later
             if(isBlacklisted(q)) {
                 if(FilterSettings.FILTERED_URNS_ARE_SPAM.getValue())
                     spamManager.handleSpamQueryReply(q);
                 return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns false if the query reply is a browse host reply and the response
+     * contains a URN that matches the blacklist; otherwise returns true.
+     */
+    @Override
+    public boolean allow(QueryReply q, Response r) {
+        if(q.isBrowseHostReply()) {
+            for(URN u : r.getUrns()) {
+                if(isBlacklisted(u))
+                    return false;
             }
         }
         return true;
@@ -126,7 +144,7 @@ class URNFilterImpl implements URNFilter {
      */
     @Override
     public boolean isBlacklisted(URN urn) {
-        if(blacklist == null)
+        if(blacklist == null || urn == null)
             return false;
         if(blacklist.contains(urn.getNamespaceSpecificString())) {
             if(LOG.isDebugEnabled())

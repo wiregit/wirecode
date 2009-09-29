@@ -101,12 +101,16 @@ public class URNFilterTest extends LimeTestCase {
         final QueryReply queryReply = context.mock(QueryReply.class);
         context.checking(new Expectations() {{
             // The first reply should be rejected and passed to the spam manager
+            one(queryReply).isBrowseHostReply();
+            will(returnValue(false));
             one(queryReply).getResultsArray();
             will(returnValue(new Response[] {response}));
             one(response).getUrns();
             will(returnValue(badURNs));
             one(spamManager).handleSpamQueryReply(queryReply);
             // The second reply should be accepted
+            one(queryReply).isBrowseHostReply();
+            will(returnValue(false));
             one(queryReply).getResultsArray();
             will(returnValue(new Response[] {response}));
             one(response).getUrns();
