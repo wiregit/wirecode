@@ -22,7 +22,8 @@ public enum LicenseType {
     ARTISTIC ("http://www.opensource.org/licenses/artistic-license.php"), 
     PUBLIC_DOMAIN ("http://www.public-domain.org"), 
     SHAREWARE ("http://en.wikipedia.org/wiki/Shareware"),
-    LIMEWIRE_STORE_PURCHASE("LIMEWIRE_STORE_PURCHASE");
+    LIMEWIRE_STORE_PURCHASE("LIMEWIRE_STORE_PURCHASE"),
+    LIMEWIRE_STORE_RESHAREABLE("LIMEWIRE_STORE_RESHAREABLE");
     
     private final String keyword;
     private final List<String> indivList;
@@ -35,7 +36,8 @@ public enum LicenseType {
     }
     
     public boolean isDRMLicense() {
-        return this == WEED_LICENSE || this == DRM_LICENSE || this == LIMEWIRE_STORE_PURCHASE;
+        return this == WEED_LICENSE || this == DRM_LICENSE || this == LIMEWIRE_STORE_PURCHASE 
+                    || this == LIMEWIRE_STORE_RESHAREABLE;
     }
     
     public List<String> getIndivisibleKeywords() {
@@ -54,6 +56,8 @@ public enum LicenseType {
             return DRM_LICENSE;
         if (hasLWSLicense(type))
             return LIMEWIRE_STORE_PURCHASE;
+        if (hasLWSRedistributionLicense(type))
+            return LIMEWIRE_STORE_RESHAREABLE;
         
         // the other licenses do not have any special requirements 
         // for the license or type field (yet)
@@ -89,5 +93,10 @@ public enum LicenseType {
     private static boolean hasLWSLicense(String type) {
         return type != null &&
                type.startsWith(AudioDataReader.MAGIC_KEY);
+    }
+    
+    private static boolean hasLWSRedistributionLicense(String type) {
+        return type != null &&
+                type.startsWith(AudioDataReader.SHAREABLE);
     }
 }

@@ -25,6 +25,7 @@ public class AudioDataReader implements MetaReader {
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
     public static final String MAGIC_KEY = "NOT CLEARED";
+    public static final String SHAREABLE = "SHAREABLE";
    
     /**
      * Reads header information about the file. All audio formats contain

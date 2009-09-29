@@ -10,6 +10,7 @@ import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestStoreFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestStoreFileV2;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.getUrn;
 
 import java.io.File;
@@ -26,6 +27,7 @@ import org.limewire.core.settings.ContentSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -281,48 +283,62 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
         
         assertFalse(managedList.contains(f1));
         assertAdds(fileList, f1);
-        assertTrue(managedList.contains(f1));
-        assertFalse(fileView.contains(f1));
-        
-        f2 = createNewTestStoreFile(_scratchDir);
-        assertFalse(managedList.contains(f2));
-        assertAdds(fileList, f2);
-        assertTrue(managedList.contains(f2));
-        assertFalse(fileView.contains(f2));
+        assertOldStoreFile(f1);
     } 
     
-    // TODO: Test change from store -> non-store (become shared?)
-    // TODO: Test change non-store -> store (become unshared?)
+    public void testStoreFileV2DoesAddToView() throws Exception {
+        f1 = createNewTestStoreFileV2(_storeDir);
+        
+        assertFalse(managedList.contains(f1));
+        assertAdds(fileList, f1);
+        assertNewStoreFile(f1);
+    }
     
-//    public void testAddFolder() throws Exception {
-//        f1 = createNewExtensionTestFile(1,  "tmp", _scratchDir);
-//        f2 = createNewExtensionTestFile(3,  "tmp", _scratchDir);
-//        f3 = createNewExtensionTestFile(11, "tmp2", _scratchDir);
-//        
-//        File dir1 = new File(_scratchDir, "sub1");        
-//        File dir2 = new File(_scratchDir, "sub2");
-//        dir1.mkdirs();
-//        dir2.mkdirs();
-//        
-//        f4 = createNewExtensionTestFile(15, "tmp", dir1);
-//        f5 = createNewExtensionTestFile(15, "tmp2", dir2);
-//
-//        managedList.setManagedExtensions(Collections.singletonList("tmp"));
-//        
-//        List<FileDesc> fdList;
-//        
-//        fdList = assertAddsFolder(fileList, _scratchDir);
-//        assertContainsFiles(fdList, f1, f2);
-//        assertContainsFiles(fileList, f1, f2);
-//        // TODO: The below check has a race-condition 
-//        //       ...The subdir might not be managed yet.
-//        assertContainsFiles(managedList, f1, f2, f4); // subdir managed, not shared!
-//        
-//        assertLoads(managedList);
-//        assertContainsFiles(fileList, f1, f2);
-//        assertContainsFiles(managedList, f1, f2, f4);
-//        
-//        assertFalse(fileList.contains(f5));
-//        assertFalse(managedList.contains(f5));
-//    }
+    public void testStoreFileRename() throws Exception {
+        f1 = createNewTestStoreFile(_storeDir);
+        
+        assertFalse(managedList.contains(f1));
+        assertAdds(fileList, f1);
+        assertOldStoreFile(f1);
+        
+        File newFile = new File(f1.getParentFile(), "oldStoreTest.mp3");
+        FileUtils.forceRename(f1, newFile);
+        assertFileRenames(managedList, f1, newFile);
+        
+        assertOldStoreFile(newFile);
+    }
+    
+    public void testStoreFileV2Rename() throws Exception {
+        f1 = createNewTestStoreFileV2(_storeDir);
+        
+        assertFalse(managedList.contains(f1));
+        assertAdds(fileList, f1);
+        assertNewStoreFile(f1);
+        
+        File newFile = new File(f1.getParentFile(), "newStoreTest.mp3");
+        FileUtils.forceRename(f1, newFile);
+        assertFileRenames(managedList, f1, newFile);
+        
+        assertNewStoreFile(newFile);
+    }
+    
+    private void assertOldStoreFile(File file) {
+        assertTrue(managedList.contains(file));
+        assertFalse(fileView.contains(file));
+           
+        FileDesc fd = managedList.getFileDesc(file);
+        assertNotNull(fd.getXMLDocument());
+        assertTrue(fd.isStoreFile());
+        assertFalse(fd.isShareable());
+    }
+    
+    private void assertNewStoreFile(File file) {
+        assertTrue(managedList.contains(file));
+        assertTrue(fileView.contains(file));
+           
+        FileDesc fd = managedList.getFileDesc(file);
+        assertNotNull(fd.getXMLDocument());
+        assertTrue(fd.isStoreFile());
+        assertTrue(fd.isShareable());
+    }
 }

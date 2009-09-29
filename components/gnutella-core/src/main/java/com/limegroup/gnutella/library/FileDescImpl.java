@@ -80,8 +80,11 @@ class FileDescImpl implements FileDesc {
 	 */
 	private int _completedUploads;
 	
-	   /** True if this is a store file. */
+	/** True if this is a store file. */
     private volatile boolean storeFile;
+    
+    /** True if this can be shared. */
+    private volatile boolean isShareable = true;
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
     private final RareFileStrategy rareFileStrategy;
@@ -264,7 +267,13 @@ class FileDescImpl implements FileDesc {
         }
         
         storeFile = doc.getLicenseString() != null &&
-                    doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
+                    (doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name()) ||
+                     doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_RESHAREABLE.name()));
+        
+        if(doc.getLicenseString() != null &&
+                    doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name())) {
+            isShareable = false;
+        }
     }
     
     /* (non-Javadoc)
@@ -439,6 +448,10 @@ class FileDescImpl implements FileDesc {
      */
     public boolean isStoreFile() {
         return storeFile;
+    }
+    
+    public boolean isShareable() {
+        return isShareable;
     }
     
     @Override

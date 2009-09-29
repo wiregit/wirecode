@@ -162,6 +162,8 @@ class LimeXMLDocumentFactoryImpl implements LimeXMLDocumentFactory {
             inputMap.put(prefix + GenericXmlDocument.XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
         } else if (docInfo.licenseType == LicenseType.LIMEWIRE_STORE_PURCHASE) {
             inputMap.put(prefix + GenericXmlDocument.XML_LICENSE_TYPE_ATTRIBUTE, LicenseType.LIMEWIRE_STORE_PURCHASE.toString());
+        } else if (docInfo.licenseType == LicenseType.LIMEWIRE_STORE_RESHAREABLE) {
+            inputMap.put(prefix + GenericXmlDocument.XML_LICENSE_TYPE_ATTRIBUTE, LicenseType.LIMEWIRE_STORE_RESHAREABLE.toString());
         }
         
         // Grab the version, if it exists.

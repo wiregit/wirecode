@@ -220,6 +220,11 @@ public class FileDescStub implements FileDesc {
         // TODO Auto-generated method stub
         return false;
     }
+    
+    @Override
+    public  boolean isShareable() {
+        return true;
+    }
 
     @Override
     public long lastModified() {

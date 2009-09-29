@@ -709,10 +709,10 @@ class FileViewManagerImpl implements FileViewManager {
 
     /**
      * Determines if the FileDesc can be added to a view. FileDescs without URNs
-     * or that are store files cannot be added to a view.
+     * and files that are shareable.
      */
     private boolean isFileAddable(FileDesc fd) {
-        return fd.getSHA1Urn() != null && !fd.isStoreFile();
+        return fd.getSHA1Urn() != null && fd.isShareable();
     }
 
     /**

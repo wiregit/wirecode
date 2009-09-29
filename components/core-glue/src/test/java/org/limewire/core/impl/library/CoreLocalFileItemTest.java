@@ -236,7 +236,7 @@ public class CoreLocalFileItemTest extends TestCase {
     public void testIsShareable() throws Exception {
         final URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         context.checking(new Expectations() {{
-            one(fileDesc).isStoreFile();
+            one(fileDesc).isShareable();
             will(returnValue(true));
             one(fileDesc).getSHA1Urn();
             will(returnValue(urn));
@@ -245,7 +245,7 @@ public class CoreLocalFileItemTest extends TestCase {
         context.assertIsSatisfied();
 
         context.checking(new Expectations() {{
-            one(fileDesc).isStoreFile();
+            one(fileDesc).isShareable();
             will(returnValue(false));
             one(fileDesc).getSHA1Urn();
             will(returnValue(urn));
@@ -265,7 +265,7 @@ public class CoreLocalFileItemTest extends TestCase {
         context.assertIsSatisfied();
         
         context.checking(new Expectations() {{
-            one(incompleteFileDesc).isStoreFile();
+            one(incompleteFileDesc).isShareable();
             will(returnValue(false));
             one(incompleteFileDesc).getSHA1Urn();
             will(returnValue(urn));

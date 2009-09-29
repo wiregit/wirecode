@@ -65,7 +65,7 @@ public class FileManagerTestUtils {
 
     public static void assertAdds(FileCollection fileList, File... files) throws Exception {
         for (File file : files) {
-            assertNotNull(fileList.add(file).get(1, TimeUnit.SECONDS));
+            assertNotNull(fileList.add(file).get(2, TimeUnit.SECONDS));
         }
     }
     
@@ -248,10 +248,10 @@ public class FileManagerTestUtils {
         return FileUtils.getCanonicalFile(file);
     }
 
-    public static File createNewNameStoreTestFile2(String name, File directory) throws Exception {
+    public static File createNewNameStoreTestFileV2(String name, File directory) throws Exception {
         String dir = "com/limegroup/gnutella/";
 
-        File f = TestUtils.getResourceFile(dir + "StoreTestFile2.mp3");
+        File f = TestUtils.getResourceFile(dir + "StoreTestFileV2.mp3");
         assertTrue(f.exists());
         File file = File.createTempFile(name, ".mp3", directory);
 
@@ -268,8 +268,8 @@ public class FileManagerTestUtils {
         return createNewNameStoreTestFile("FileManager_unit_store_test", dir);
     }
 
-    public static File createNewTestStoreFile2(File dir) throws Exception {
-        return createNewNameStoreTestFile2("FileManager_unit_store_test", dir);
+    public static File createNewTestStoreFileV2(File dir) throws Exception {
+        return createNewNameStoreTestFileV2("FileManager_unit_store_test", dir);
     }    
 
     /**

@@ -173,7 +173,15 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
      */
     public int getCompletedUploads();
 
+    /**
+     * @return true if this file came from the LWS, false otherwise.
+     */
     public boolean isStoreFile();
+    
+    /**
+     * @return true if this file can be shared, false otherwise.
+     */
+    public boolean isShareable();
     
     /** Sets a new property for this FileDesc. */
     public void putClientProperty(String property, Object value);
