@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.KeywordFilter;
+import com.limegroup.gnutella.filters.URNFilter;
 
 @Singleton
 class ResponseFilterFactoryImpl implements ResponseFilterFactory {
@@ -23,6 +24,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     private final Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter;
     private final Provider<MutableGUIDFilter> mutableGUIDFilter;
     private final Provider<KeywordFilter> keywordFilter;
+    private final Provider<URNFilter> urnFilter;
     
     @Inject
     public ResponseFilterFactoryImpl(Provider<XMLDocFilter> xmlDocFilter,
@@ -33,7 +35,8 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
             Provider<ResponseTypeFilter> typeFilter,
             Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter,
             Provider<MutableGUIDFilter> mutableGUIDFilter,
-            Provider<KeywordFilter> keywordFilter) {
+            Provider<KeywordFilter> keywordFilter,
+            Provider<URNFilter> urnFilter) {
         this.xmlDocFilter = xmlDocFilter;
         this.wormFilter = wormFilter;
         this.queryFilter = queryFilter;
@@ -43,12 +46,14 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         this.whiteListUpdateUrnFilter = whiteListUpdateUrnFilter;
         this.mutableGUIDFilter = mutableGUIDFilter;
         this.keywordFilter = keywordFilter;
+        this.urnFilter = urnFilter;
     }
     
     @Override
     public ResponseFilter createResponseFilter() {
         List<ResponseFilter> filters = new ArrayList<ResponseFilter>();
         
+        filters.add(urnFilter.get());
         filters.add(keywordFilter.get());
         if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
             filters.add(mutableGUIDFilter.get());
