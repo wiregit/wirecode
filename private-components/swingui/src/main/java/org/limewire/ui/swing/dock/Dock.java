@@ -30,7 +30,7 @@ public class Dock {
                     System.loadLibrary("Dock");
                     hasDock = true;
                 } catch (UnsatisfiedLinkError err) {
-                    ErrorService.error(err);
+                    ErrorService.error(err, "java.library.path=" + System.getProperty("java.library.path"));
                 }
             }
         }
