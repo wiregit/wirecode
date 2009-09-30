@@ -67,6 +67,11 @@ public class MockStoreConnection implements StoreConnection {
         insertValue(buf, getNameValuePair("background"));
         insertValue(buf, getNameValuePair("buyAlbumIcon"));
         insertValue(buf, getNameValuePair("buyTrackIcon"));
+        insertValue(buf, getNameValuePair("classicBuyIcon"));
+        insertValue(buf, getNameValuePair("classicPauseIcon"));
+        insertValue(buf, getNameValuePair("classicPlayIcon"));
+        insertValue(buf, getNameValuePair("classicPriceFont"));
+        insertValue(buf, getNameValuePair("classicPriceForeground"));
         insertValue(buf, getNameValuePair("downloadAlbumIcon"));
         insertValue(buf, getNameValuePair("downloadTrackIcon"));
         insertValue(buf, getNameValuePair("headingFont"));

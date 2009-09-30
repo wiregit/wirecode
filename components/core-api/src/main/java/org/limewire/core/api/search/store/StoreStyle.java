@@ -19,6 +19,16 @@ public interface StoreStyle {
     
     Icon getBuyTrackIcon();
     
+    Icon getClassicBuyIcon();
+    
+    Icon getClassicPauseIcon();
+    
+    Icon getClassicPlayIcon();
+    
+    Font getClassicPriceFont();
+    
+    Color getClassicPriceForeground();
+    
     Icon getDownloadAlbumIcon();
     
     Icon getDownloadTrackIcon();

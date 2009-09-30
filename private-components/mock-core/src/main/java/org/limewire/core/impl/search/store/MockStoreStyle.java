@@ -20,6 +20,11 @@ public class MockStoreStyle implements StoreStyle {
     private final Color background;
     private final Icon buyAlbumIcon;
     private final Icon buyTrackIcon;
+    private final Icon classicBuyIcon;
+    private final Icon classicPauseIcon;
+    private final Icon classicPlayIcon;
+    private final Font classicPriceFont;
+    private final Color classicPriceForeground;
     private final Icon downloadAlbumIcon;
     private final Icon downloadTrackIcon;
     private final Font headingFont;
@@ -56,6 +61,11 @@ public class MockStoreStyle implements StoreStyle {
         background = getColor(jsonObj, "background");
         buyAlbumIcon = getIcon(jsonObj, "buyAlbumIcon");
         buyTrackIcon = getIcon(jsonObj, "buyTrackIcon");
+        classicBuyIcon = getIcon(jsonObj, "classicBuyIcon");
+        classicPauseIcon = getIcon(jsonObj, "classicPauseIcon");
+        classicPlayIcon = getIcon(jsonObj, "classicPlayIcon");
+        classicPriceFont = getFont(jsonObj, "classicPriceFont");
+        classicPriceForeground = getColor(jsonObj, "classicPriceForeground");
         downloadAlbumIcon = getIcon(jsonObj, "downloadAlbumIcon");
         downloadTrackIcon = getIcon(jsonObj, "downloadTrackIcon");
         headingFont = getFont(jsonObj, "headingFont");
@@ -97,6 +107,31 @@ public class MockStoreStyle implements StoreStyle {
     @Override
     public Icon getBuyTrackIcon() {
         return buyTrackIcon;
+    }
+
+    @Override
+    public Icon getClassicBuyIcon() {
+        return classicBuyIcon;
+    }
+
+    @Override
+    public Icon getClassicPauseIcon() {
+        return classicPauseIcon;
+    }
+
+    @Override
+    public Icon getClassicPlayIcon() {
+        return classicPlayIcon;
+    }
+
+    @Override
+    public Font getClassicPriceFont() {
+        return classicPriceFont;
+    }
+
+    @Override
+    public Color getClassicPriceForeground() {
+        return classicPriceForeground;
     }
 
     @Override
@@ -232,29 +267,32 @@ public class MockStoreStyle implements StoreStyle {
     /**
      * Returns the boolean value for the specified property key.
      */
-    private boolean getBoolean(JSONObject jsonObj, String propertyKey) throws JSONException {
-        return jsonObj.getBoolean(propertyKey);
+    private boolean getBoolean(JSONObject jsonObj, String propertyKey) {
+        return jsonObj.optBoolean(propertyKey);
     }
     
     /**
      * Returns the color for the specified property key.
      */
-    private Color getColor(JSONObject jsonObj, String propertyKey) throws JSONException {
-        return Color.decode(jsonObj.getString(propertyKey));
+    private Color getColor(JSONObject jsonObj, String propertyKey) {
+        String value = jsonObj.optString(propertyKey);
+        return (value != null) ? Color.decode(value) : null;
     }
     
     /**
      * Returns the font for the specified property key.
      */
-    private Font getFont(JSONObject jsonObj, String propertyKey) throws JSONException {
-        return Font.decode(jsonObj.getString(propertyKey));
+    private Font getFont(JSONObject jsonObj, String propertyKey) {
+        String value = jsonObj.optString(propertyKey);
+        return (value != null) ? Font.decode(value) : null;
     }
     
     /**
      * Retrieves the icon for the specified property key.
      */
-    private Icon getIcon(JSONObject jsonObj, String propertyKey) throws JSONException {
-        return new ImageIcon(getClass().getResource(jsonObj.getString(propertyKey)));
+    private Icon getIcon(JSONObject jsonObj, String propertyKey) {
+        String value = jsonObj.optString(propertyKey);
+        return (value != null) ? new ImageIcon(getClass().getResource(value)) : null;
     }
     
     /**
