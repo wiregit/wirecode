@@ -73,6 +73,7 @@ import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingHacks;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -173,6 +174,8 @@ public class LibraryPanel extends JPanel {
         tableListPanel = new JPanel(tableListLayout);
         
         libraryTable.setTransferHandler(transferHandler);
+        SwingHacks.fixDnDforKDE(libraryTable);
+        
         libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
         configureEnclosingScrollPane(libraryScrollPane);

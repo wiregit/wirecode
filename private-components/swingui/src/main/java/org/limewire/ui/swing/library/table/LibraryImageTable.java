@@ -39,6 +39,7 @@ import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingHacks;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -117,6 +118,7 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     @Override
     public void setTransferHandler(TransferHandler newHandler) {
         imageList.setTransferHandler(newHandler);
+        SwingHacks.fixDnDforKDE(imageList);
     }
     
     public ImageList getImageList() {

@@ -33,6 +33,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.ui.swing.util.SwingHacks;
 import org.limewire.util.Objects;
 
 /** A combobox rendered in the LimeWire 5.0 style. */
@@ -490,7 +491,7 @@ public class LimeComboBox extends JXButton {
     }
 
     private void createPopupMenu() {
-        menu = new JPopupMenu();        
+        menu = new JPopupMenu();
         initMenu(true);
     }
        
@@ -563,6 +564,8 @@ public class LimeComboBox extends JXButton {
             decorateMenuComponent(menu);
             menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
         }
+        
+        SwingHacks.fixPopupMenuForWindows(menu);
         
         menu.addPopupMenuListener(new PopupMenuListener() {
             @Override

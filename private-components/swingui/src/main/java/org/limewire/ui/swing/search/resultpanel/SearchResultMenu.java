@@ -22,6 +22,7 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingHacks;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -51,6 +52,8 @@ public class SearchResultMenu extends JPopupMenu {
         BlockUserMenuFactory blockUserMenuFactory, final LibraryMediator libraryMediator,
         @Assisted ViewType viewType) {
 
+        SwingHacks.fixPopupMenuForWindows(this);
+        
         final VisualSearchResult firstItem = selectedItems.get(0);
         
         // Determine if download is enabled.

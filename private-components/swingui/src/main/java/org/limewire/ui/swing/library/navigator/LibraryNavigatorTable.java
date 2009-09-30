@@ -27,6 +27,7 @@ import org.limewire.ui.swing.table.GlazedJXTable;
 import org.limewire.ui.swing.table.SingleColumnTableFormat;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingHacks;
 
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
@@ -88,6 +89,7 @@ public class LibraryNavigatorTable extends GlazedJXTable {
         setModel(new DefaultEventTableModel<LibraryNavItem>(stpl, new SingleColumnTableFormat<LibraryNavItem>("")));
         setDropMode(DropMode.ON);
         setTransferHandler(libraryNavTransferHandler);
+        SwingHacks.fixDnDforKDE(this);
         setEditable(false);
     }
     

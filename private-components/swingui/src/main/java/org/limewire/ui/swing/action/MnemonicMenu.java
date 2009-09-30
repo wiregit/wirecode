@@ -7,6 +7,7 @@ import javax.swing.JMenuItem;
 import org.limewire.ui.swing.components.PlainCheckBoxMenuItemUI;
 import org.limewire.ui.swing.components.PlainMenuItemUI;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingHacks;
 
 /**
  * Allows the text of the menu to have an ampersand to 
@@ -16,6 +17,8 @@ public abstract class MnemonicMenu extends javax.swing.JMenu {
     
     public MnemonicMenu(String text) {
         super(text);
+        
+        SwingHacks.fixPopupMenuForWindows(getPopupMenu());
     }
     
     @Override
