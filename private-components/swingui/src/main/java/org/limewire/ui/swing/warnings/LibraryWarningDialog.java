@@ -28,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -215,6 +217,23 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         decorateComponent(advancedLabel);
         advancedLabel.setVisible(false);
         extensionTextField = new JTextField();
+        extensionTextField.getDocument().addDocumentListener(new DocumentListener(){
+            @Override
+            public void changedUpdate(DocumentEvent e) {}
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                if(extensionTextField.getText().trim().length() > 0)
+                    advancedToggleButton.setEnabled(false);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                if(extensionTextField.getText().trim().length() == 0)
+                    advancedToggleButton.setEnabled(true);
+            }
+        });
+
         decorateComponent(extensionTextField);
         extensionTextField.setVisible(false);
         
