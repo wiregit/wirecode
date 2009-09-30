@@ -134,6 +134,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private Scrollable visibleComponent;
     
     private NameRendererDelegate nameRendererDelegate;
+    private NameRendererDelegate nameEditorDelegate;
     
     private StyleListener styleListener;
     private StoreListener storeListener;
@@ -200,6 +201,9 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                         resultsList.setStoreStyle(storeStyle);
                         if (nameRendererDelegate != null) {
                             nameRendererDelegate.setStoreStyle(storeStyle);
+                        }
+                        if (nameEditorDelegate != null) {
+                            nameEditorDelegate.setStoreStyle(storeStyle);
                         }
                     }
                 });
@@ -449,6 +453,10 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         TableCellRenderer iconRenderer = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
         nameRendererDelegate = nameRendererDelegateFactory.get().create(iconRenderer, (selectedCategory == SearchCategory.ALL));
         
+        // Create Name column editor.
+        TableCellRenderer iconEditor = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
+        nameEditorDelegate = nameRendererDelegateFactory.get().create(iconEditor, (selectedCategory == SearchCategory.ALL));
+        
         int columnCount = tableFormat.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
             Class clazz = tableFormat.getColumnClass(i);
@@ -462,7 +470,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 setCellEditor(i, null);
             } else if (i == tableFormat.getNameColumn()) {
                 setCellRenderer(i, nameRendererDelegate);
-                setCellEditor(i, null);
+                setCellEditor(i, nameEditorDelegate);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
                 setCellRenderer(i, new FromTableCellRenderer(fromWidgetfactory.create(RemoteWidgetType.TABLE)));
                 setCellEditor(i, new FromTableCellRenderer(fromWidgetfactory.create(RemoteWidgetType.TABLE)));
