@@ -47,10 +47,10 @@ public interface LocalFileList extends FileList<LocalFileItem> {
      */
     LocalFileItem getFileItem(File file);
     
-    /** Returns true if the file is addable to the list. */
+    /** Returns true if the file is addable to the list.  Always false for a directory. */
     boolean isFileAllowed(File file);
     
-    /** Returns true if this directory is allowed to be added to the list. */
+    /** Returns true if this directory is allowed to be added to the list. Always false for a non-directory. */
     boolean isDirectoryAllowed(File folder);
     
     /** Removes all files from the list that match the specified filter. */
