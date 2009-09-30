@@ -419,7 +419,6 @@ public class TorrentManagerImpl implements TorrentManager {
 
         @Override
         public void callback(LibTorrentAlert alert) {
-            //System.out.println(alert.toString());
             if (LOG.isDebugEnabled()) {
                 LOG.debug(alert.toString());
             }
