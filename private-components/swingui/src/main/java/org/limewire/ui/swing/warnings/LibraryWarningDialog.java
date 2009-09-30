@@ -10,10 +10,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.Action;
@@ -35,8 +32,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.LibraryData;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.settings.LibrarySettings;
@@ -48,11 +44,13 @@ import org.limewire.ui.swing.components.OverlayPopupPanel;
 import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.friends.FriendRequestPanel;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
 import org.limewire.util.NotImplementedException;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 
 class LibraryWarningDialog extends OverlayPopupPanel {
@@ -60,9 +58,8 @@ class LibraryWarningDialog extends OverlayPopupPanel {
     private static int HEIGHT_COLLAPSED = 185;
     private static int HEIGHT_OPEN = 240;
     
-    private final LibraryManager libraryManager;
+    private final CategoryManager categoryManager;
     private final LibraryFileAdder libraryFileAdder;
-    private final LibraryData libraryData;
 
     @Resource private Color border;
     @Resource private Font normalFont;
@@ -87,13 +84,13 @@ class LibraryWarningDialog extends OverlayPopupPanel {
     public LibraryWarningDialog(
             @GlobalLayeredPane JLayeredPane layeredPane,
             FriendRequestPanel friendRequestPanel,
-            LibraryManager libraryManager, LibraryFileAdder libraryFileAdder) {
+            LibraryFileAdder libraryFileAdder,
+            CategoryManager categoryManager) {
         
         super(layeredPane);
         
-        this.libraryManager = libraryManager;
         this.libraryFileAdder = libraryFileAdder;
-        this.libraryData = libraryManager.getLibraryData();
+        this.categoryManager = categoryManager;
         
         GuiUtils.assignResources(this);
         
@@ -147,7 +144,7 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         ButtonGroup radioButtonGroup = new ButtonGroup();
         radioButtonGroup.add(recursiveButton);
         radioButtonGroup.add(nonRecursiveButton);
-        recursiveButton.setSelected(LibrarySettings.RECURSIVELY_ADD_FOLDERS.getValue());
+        recursiveButton.setSelected(LibrarySettings.DEFAULT_RECURSIVELY_ADD_FOLDERS_OPTION.getValue());
         
         JLabel fromLabel = new JLabel(I18n.tr("From:"));
         decorateComponent(fromLabel);
@@ -170,11 +167,10 @@ class LibraryWarningDialog extends OverlayPopupPanel {
     private HorizonalCheckBoxListPanel<Category> createCheckBoxes() {
         List<Category> categoryList = Arrays.asList(Category.AUDIO, Category.VIDEO, Category.IMAGE, Category.DOCUMENT, Category.PROGRAM);
         HorizonalCheckBoxListPanel<Category> categoriesPanel = new HorizonalCheckBoxListPanel<Category>(categoryList);
-        categoriesPanel.setSelected(libraryManager.getLibraryData().getManagedCategories());
+        categoriesPanel.setSelected(SwingUiSettings.getDefaultSelectedCategories());
         categoriesPanel.setForeground(fontColor);
         categoriesPanel.setFont(normalFont);
         
-        //TODO: these shouldn't be needed but not properlly working in options
         //disable program check box is programs is disabled in settings
         if(!LibrarySettings.ALLOW_PROGRAMS.get()) {
             categoriesPanel.getCheckBox(Category.PROGRAM).setEnabled(false);
@@ -369,7 +365,7 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             List<String> includedExtensions = getAdvancedExtensions();
-            libraryFileAdder.addFilesInner(localFileList, files, new ManageableFileFilter(categories.getSelected(), includedExtensions, recursiveButton.isSelected()));
+            libraryFileAdder.addFilesInner(localFileList, files, new Filter(categories.getSelected(), includedExtensions, recursiveButton.isSelected()));
             LibraryWarningDialog.this.dispose();
         }
     }
@@ -392,20 +388,23 @@ class LibraryWarningDialog extends OverlayPopupPanel {
      * Filter which accepts a file if its a folder or the extension matches one of the
      * selected categories or is added to the advanced textfield.
      */
-    private class ManageableFileFilter implements FileFilter {
-        private final Set<String> extensions;
+    private class Filter implements FileFilter {
+        private final Set<String> extensionSet;
         private final boolean isRecursive;
   
         /** Constructs the filter with the given set of allowed extensions. */
-        public ManageableFileFilter(Collection<Category> categories, List<String> advancedExtensions, boolean isRecursive) {
+        public Filter(Collection<Category> categories, List<String> advancedExtensions, boolean isRecursive) {
             this.isRecursive = isRecursive;
             
-            Map<Category, Collection<String>> map = libraryData.getExtensionsPerCategory();
-            extensions = new HashSet<String>();
-            extensions.addAll(advancedExtensions);
+            ImmutableSortedSet.Builder<String> builder =
+                ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER);
+            
+            builder.addAll(advancedExtensions);
             for(Category category : categories) {
-                extensions.addAll(map.get(category));
+                builder.addAll(categoryManager.getExtensionsForCategory(category));
             }
+            
+            extensionSet = builder.build();
         }
   
         /**
@@ -414,10 +413,11 @@ class LibraryWarningDialog extends OverlayPopupPanel {
          */
         @Override
         public boolean accept(File file) {
-            if(file.isDirectory())
+            if(file.isDirectory()) {
                 return isRecursive;
-            else 
-                return extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US));
+            } else { 
+                return extensionSet.contains(FileUtils.getFileExtension(file));
+            }
         }
     }
 }

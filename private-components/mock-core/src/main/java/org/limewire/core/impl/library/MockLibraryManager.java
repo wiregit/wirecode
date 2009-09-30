@@ -2,9 +2,6 @@ package org.limewire.core.impl.library;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -167,32 +164,8 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         }
 
         @Override
-        public Collection<Category> getManagedCategories() {
-            return EnumSet.allOf(Category.class);
-        }
-
-        @Override
         public boolean isDirectoryAllowed(File folder) {
             return folder.isDirectory();
-        }
-
-        @Override
-        public Collection<String> getDefaultExtensions() {
-            return new ArrayList<String>();
-        }
-
-        @Override
-        public Map<Category, Collection<String>> getExtensionsPerCategory() {
-            return new HashMap<Category, Collection<String>>();
-        }
-
-        @Override
-        public void setManagedExtensions(Collection<String> extensions) {
-        }
-
-        @Override
-        public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
-            
         }
     }
 

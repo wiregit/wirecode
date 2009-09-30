@@ -54,7 +54,7 @@ class IncompleteFileCollectionImpl extends AbstractFileCollection implements Inc
     }
     
     @Override
-    protected boolean isFileAddable(FileDesc fileDesc) {
+    protected boolean isFileDescAllowed(FileDesc fileDesc) {
         return fileDesc instanceof IncompleteFileDesc;
     }
 
@@ -69,8 +69,13 @@ class IncompleteFileCollectionImpl extends AbstractFileCollection implements Inc
     }
 
     @Override
-    public boolean isFileAddable(File file) {
+    public boolean isFileAllowed(File file) {
         return true;
+    }
+    
+    @Override
+    public boolean isDirectoryAllowed(File folder) {
+        return false;
     }
     
     

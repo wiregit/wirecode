@@ -72,8 +72,13 @@ public interface FileCollection extends FileView {
     void clear();
 
     /**
-     * Returns true if the file is addable to the collection. 
+     * Returns true if the file is allowed to be added to the collection. 
      */
-    boolean isFileAddable(File file);
+    boolean isFileAllowed(File file);
+    
+    /**
+     * Returns true if files in this directory are allowed to be added to the collection.
+     */
+    boolean isDirectoryAllowed(File folder);
 
 }

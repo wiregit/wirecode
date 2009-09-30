@@ -184,6 +184,11 @@ public abstract class AbstractFileCollectionStub implements FileCollection {
     @Override
     public int size() {
         return fileDescList.size();
-    }    
+    }
+    
+    @Override
+    public boolean isDirectoryAllowed(File folder) {
+        return true;
+    }
 
 }

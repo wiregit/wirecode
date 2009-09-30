@@ -116,7 +116,12 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
 
     @Override
-    public boolean isFileAddable(File file) {
+    public boolean isFileAllowed(File file) {
+        return true;
+    }
+    
+    @Override
+    public boolean isDirectoryAllowed(File folder) {
         return true;
     }
 

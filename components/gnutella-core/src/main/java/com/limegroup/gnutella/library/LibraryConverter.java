@@ -67,7 +67,7 @@ class LibraryConverter {
         extensions.addAll(Arrays.asList(OldLibrarySettings.getDefaultExtensions()));
         extensions.removeAll(Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.get())));
         extensions.addAll(Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.get())));        
-        newData.setManagedExtensions(extensions);
+//        newData.setManagedExtensions(extensions);
         
         Set<File> convertedDirectories = new HashSet<File>();
         // Here's the bulk of the conversion -- loop through, recursively, previously 

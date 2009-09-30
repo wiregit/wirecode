@@ -7,12 +7,10 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -32,10 +30,8 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureTask;
 import org.limewire.concurrent.SimpleFuture;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.FileProcessingEvent;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -49,6 +45,7 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
+import org.limewire.util.Objects;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
@@ -451,21 +448,6 @@ class LibraryImpl implements Library, FileCollection {
         } finally {
             rwLock.readLock().unlock();
         }
-    }
-    
-    @Override
-    public Collection<String> getDefaultManagedExtensions() {
-        return getLibraryData().getDefaultManagedExtensions();
-    }
-    
-    @Override
-    public Map<Category, Collection<String>> getExtensionsPerCategory() {
-        return getLibraryData().getExtensionsPerCategory();
-    }
-    
-    @Override
-    public Collection<Category> getManagedCategories() {
-        return getLibraryData().getManagedCategories();
     }
     
     @Override
@@ -1111,11 +1093,6 @@ class LibraryImpl implements Library, FileCollection {
             throw new UnsupportedOperationException();
         }
     }
-        
-    /** Returns a filter used to get manageable files. */
-    FileFilter newManageableFilter() {
-        return new ManageableFileFilter(true);
-    }
     
     @Override
     public boolean isDirectoryAllowed(File folder) {
@@ -1138,24 +1115,6 @@ class LibraryImpl implements Library, FileCollection {
     @Override
     public boolean isProgramManagingAllowed() {
         return getLibraryData().isProgramManagingAllowed();
-    }
-    
-    /** A filter used to see if a file is manageable. */
-    private class ManageableFileFilter implements FileFilter {
-        private final Set<String> extensions;
-        private final boolean includeContainedFiles;
-        
-        /** Constructs the filter with the given set of allowed extensions. */
-        public ManageableFileFilter(boolean includeContainedFiles) {
-            this.extensions = getLibraryData().getExtensionsInManagedCategories();
-            this.includeContainedFiles = includeContainedFiles;
-        }
-        
-        @Override
-        public boolean accept(File file) {
-            return file.isDirectory() || (includeContainedFiles || !contains(file))
-                   && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US));
-        }
     }
 
     /** A simple empty callable for use in PendingFuture. */
@@ -1188,16 +1147,6 @@ class LibraryImpl implements Library, FileCollection {
         }
     }
 
-    @Override
-    public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
-        getLibraryData().setManagedCategories(managedCategories);
-    }
-
-    @Override
-    public void setManagedExtensions(Collection<String> extensions) {
-        getLibraryData().setManagedExtensions(extensions);
-    }
-
     /** Removes all items from an IntSet that do not pass the filter. */
     void filterIndexes(IntSet indexes, Predicate<FileDesc> filter) {
         List<Integer> removeList = null;
@@ -1225,15 +1174,18 @@ class LibraryImpl implements Library, FileCollection {
         }
     }
     
-    ListeningFuture<List<ListeningFuture<FileDesc>>> scanFolderAndAddToCollection(final File folder, final FileFilter fileFilter, final FileCollection collection) {
+    ListeningFuture<List<ListeningFuture<FileDesc>>> scanFolderAndAddToCollection(
+            final File folder, final FileFilter fileFilter, final FileCollection collection) {
+        Objects.nonNull(folder, "folder");
+        Objects.nonNull(fileFilter, "fileFilter");
+        Objects.nonNull(collection, "collection");
         return folderLoader.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             private final List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-            private final FileFilter filter = fileFilter == null ? newManageableFilter() : fileFilter;
             
             @Override
             public List<ListeningFuture<FileDesc>> call() throws Exception {
-                if(folder != null && folder.isDirectory() && isDirectoryAllowed(folder)) {
-                    File[] files = folder.listFiles(filter);
+                if(isDirectoryAllowed(folder)) {
+                    File[] files = folder.listFiles(fileFilter);
                     addFiles(new ArrayList<File>(Arrays.asList(files)));
                 }
                 return futures;
@@ -1242,8 +1194,8 @@ class LibraryImpl implements Library, FileCollection {
             private void addFiles(List<File> accumulator) {
                 while(accumulator.size() > 0) {
                     File folderOrFile = accumulator.remove(0);
-                    if(folderOrFile.isDirectory() && isDirectoryAllowed(folderOrFile)) {
-                        File[] files = folderOrFile.listFiles(filter);
+                    if(isDirectoryAllowed(folderOrFile)) {
+                        File[] files = folderOrFile.listFiles(fileFilter);
                         accumulator.addAll(Arrays.asList(files));
                     } else {
                         futures.add(collection.add(folderOrFile));
@@ -1259,20 +1211,8 @@ class LibraryImpl implements Library, FileCollection {
     }
 
     @Override
-    public boolean isFileAddable(File file) {
-        if(file == null) {
-            return false;
-        }
-        
-        if(file.isDirectory()) {
-            return isDirectoryAllowed(file);
-        }
-        
-        Category category = categoryManager.getCategoryForFile(file);
-        if(category == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
-            return false;
-        }
-        return true;
+    public boolean isFileAllowed(File file) {
+        return LibraryUtils.isFileManagable(file, categoryManager);
     }
 
     @Override

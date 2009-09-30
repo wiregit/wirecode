@@ -2,14 +2,9 @@ package com.limegroup.gnutella.library;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.listener.EventListener;
 
@@ -18,11 +13,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
 public class LibraryStub extends AbstractFileCollectionStub implements Library {
-    
-    @Override
-    public Collection<Category> getManagedCategories() {
-        return EnumSet.allOf(Category.class);
-    }
     
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -51,27 +41,12 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
 
     @Override
-    public Collection<String> getDefaultManagedExtensions() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Map<Category, Collection<String>> getExtensionsPerCategory() {
-        return Collections.emptyMap();
-    }
-
-    @Override
     public boolean isLoadFinished() {
         return true;
     }
 
     @Override
     public void removeManagedListStatusListener(EventListener<LibraryStatusEvent> listener) {
-    }
-
-    @Override
-    public void setManagedExtensions(Collection<String> extensions) {
-        throw new UnsupportedOperationException();
     }
     
     @Override
@@ -85,12 +60,7 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
     
     @Override
-    public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isFileAddable(File file) {
+    public boolean isFileAllowed(File file) {
         return true;
     }
 

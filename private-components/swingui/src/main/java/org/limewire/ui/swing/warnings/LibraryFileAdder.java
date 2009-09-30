@@ -32,11 +32,12 @@ class LibraryFileAdder {
         this.libraryMediator = libraryMediator;
         this.libraryNavigatorTable = libraryNavigatorTable;
     }
-
-    void addFilesInner(LocalFileList fileList, List<File> files) {
-        addFilesInner(fileList, files, null);
-    }
     
+    /**
+     * Adds all files to the given list. If a file in files is a directory, then
+     * the FileFilter is applied to any files within that directory to see if
+     * they should be added also.
+     */
     void addFilesInner(final LocalFileList fileList, final List<File> files, final FileFilter fileFilter) {
         
         //only clear the filters if the library has been initialized
@@ -50,13 +51,14 @@ class LibraryFileAdder {
         
         List<File> rejectedFiles = new ArrayList<File>();
         for(File file : files) {
-            if(fileList.isFileAddable(file)) {
-                if(file.isDirectory()) {
-                    fileList.addFolder(file, fileFilter);
-                } else {
-                    fileList.addFile(file);
-                }
+            if(fileList.isDirectoryAllowed(file)) {
+                // add as directory if it's a directory
+                fileList.addFolder(file, fileFilter);
+            } else if(fileList.isFileAllowed(file)) {
+                // add as file if it's a file.
+                fileList.addFile(file);
             } else {
+                // otherwise it was rejected!
             	rejectedFiles.add(file);
             }
         }

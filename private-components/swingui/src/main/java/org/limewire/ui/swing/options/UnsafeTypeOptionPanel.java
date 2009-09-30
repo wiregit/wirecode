@@ -2,7 +2,6 @@ package org.limewire.ui.swing.options;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,9 +88,6 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         manager.saveSettings();
 
         if(!programCheckBox.isSelected()) {
-        	Collection<Category> managedCategories = libraryManager.getLibraryData().getManagedCategories();
-        	managedCategories.remove(Category.PROGRAM);
-        	libraryManager.getLibraryData().setCategoriesToIncludeWhenAddingFolders(managedCategories);
             libraryManager.getLibraryManagedList().removeFiles(new Predicate<LocalFileItem>() {
                @Override
                 public boolean apply(LocalFileItem localFileItem) {

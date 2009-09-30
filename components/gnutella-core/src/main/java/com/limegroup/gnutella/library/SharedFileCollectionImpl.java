@@ -166,15 +166,14 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     }
     
     /**
-     * Returns false if it's an {@link IncompleteFileDesc} or it's a store
-     * file.
+     * Returns false if it's an {@link IncompleteFileDesc}.
      */
     @Override
-    protected boolean isFileAddable(FileDesc fileDesc) {
+    protected boolean isFileDescAllowed(FileDesc fileDesc) {
         if (fileDesc instanceof IncompleteFileDesc) {
             return false;
         } else {
-	        return isFileAddable(fileDesc.getFile());
+	        return isFileAllowed(fileDesc.getFile());
 	    }
     }
     
@@ -216,8 +215,8 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     }
 
     @Override
-    public boolean isFileAddable(File file) {
-        if(!library.isFileAddable(file)) {
+    public boolean isFileAllowed(File file) {
+        if(!library.isFileAllowed(file)) {
             return false;
         }
         
@@ -229,6 +228,11 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         }
         
         return true;
+    }
+    
+    @Override
+    public boolean isDirectoryAllowed(File folder) {
+        return library.isDirectoryAllowed(folder);
     }
 
     @Override

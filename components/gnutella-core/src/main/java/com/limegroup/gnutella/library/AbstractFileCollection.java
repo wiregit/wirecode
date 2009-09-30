@@ -59,7 +59,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     
     @Override
     public ListeningFuture<FileDesc> add(File file) {
-        if(!isFileAddable(file)) {
+        if(!isFileAllowed(file)) {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(
                     file, FileViewChangeEvent.Type.FILE_ADD_FAILED, 
                     FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
@@ -79,7 +79,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     @Override
     public ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
 
-        if(!isFileAddable(file)) {
+        if(!isFileAllowed(file)) {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(
                     file, FileViewChangeEvent.Type.FILE_ADD_FAILED, 
                     FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
@@ -98,7 +98,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     
     @Override
     public boolean add(FileDesc fileDesc) {
-        if(!isFileAddable(fileDesc)) {
+        if(!isFileDescAllowed(fileDesc)) {
             return false;
         }
         
@@ -124,7 +124,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         Objects.nonNull(fileDesc, "fileDesc");        
         rwLock.writeLock().lock();
         try {
-            if(isFileAddable(fileDesc) && getInternalIndexes().add(fileDesc.getIndex())) {
+            if(isFileDescAllowed(fileDesc) && getInternalIndexes().add(fileDesc.getIndex())) {
                 totalFileSize += fileDesc.getFileSize();
                 return true;
             } else {
@@ -321,7 +321,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     /** Updates the list with new metadata about the file, possibly removing if it cannot be contained anymore. */
     private void fileMetaChanged(FileDesc fd) {
         if(contains(fd)) {
-            if(isFileAddable(fd)) {
+            if(isFileDescAllowed(fd)) {
                 fireMetaChangeEvent(fd);
             } else {
                 remove(fd);
@@ -333,7 +333,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
      * Returns true if this list is allowed to add this FileDesc
      * @param fileDesc - FileDesc to be added
      */
-    protected abstract boolean isFileAddable(FileDesc fileDesc);
+    protected abstract boolean isFileDescAllowed(FileDesc fileDesc);
 
     void dispose() {
         clear();

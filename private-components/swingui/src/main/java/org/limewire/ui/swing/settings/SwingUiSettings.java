@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.settings;
 
 import java.io.File;
+import java.util.Collection;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.Inspectable;
@@ -17,6 +19,8 @@ import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -278,5 +282,46 @@ public final class SwingUiSettings extends LimeProps {
         }
         return defaultDirectory;
     }
+    
+    /** True if AUDIO files are added by default when adding a folder. */
+    public static final BooleanSetting CATEGORY_AUDIO_DEFAULT =
+        FACTORY.createBooleanSetting("MANAGE_AUDIO_FILES", true);
+    
+    /** True if VIDEO files are added by default when adding a folder. */
+    public static final BooleanSetting CATEGORY_VIDEO_DEFAULT =
+        FACTORY.createBooleanSetting("MANAGE_VIDEO_FILES", true);
+    
+    /** True if IMAGES files are added by default when adding a folder. */
+    public static final BooleanSetting CATEGORY_IMAGES_DEFAULT =
+        FACTORY.createBooleanSetting("MANAGE_IMAGES_FILES", true);
+    
+    /** True if DOCUMENTS files are added by default when adding a folder. */
+    public static final BooleanSetting CATEGORY_DOCUMENTS_DEFAULT =
+        FACTORY.createBooleanSetting("MANAGE_DOCUMENTS_FILES", false);
+    
+    /** True if PROGRAMS files are added by default when adding a folder. */
+    public static final BooleanSetting CATEGORY_PROGRAMS_DEFAULT =
+        FACTORY.createBooleanSetting("MANAGE_PROGRAMS_FILES", false);
+    
+    /** Returns all categories that should be selected by default when adding a folder. */
+    public static Collection<Category> getDefaultSelectedCategories() {
+        ImmutableList.Builder<Category> builder = ImmutableList.builder();
+        if(CATEGORY_AUDIO_DEFAULT.get()) {
+            builder.add(Category.AUDIO);
+        }
+        if(CATEGORY_DOCUMENTS_DEFAULT.get()) {
+            builder.add(Category.DOCUMENT);
+        }
+        if(CATEGORY_IMAGES_DEFAULT.get()) {
+            builder.add(Category.IMAGE);
+        }
+        if(CATEGORY_PROGRAMS_DEFAULT.get()) {
+            builder.add(Category.PROGRAM);
+        }
+        if(CATEGORY_VIDEO_DEFAULT.get()) {
+            builder.add(Category.VIDEO);
+        }
+        return builder.build();
+    }    
 
 }

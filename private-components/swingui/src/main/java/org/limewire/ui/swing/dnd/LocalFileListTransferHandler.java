@@ -121,7 +121,7 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
         LocalFileList localFileList = getLocalFileList();
 
         for (File file : files) {
-            if (localFileList.isFileAddable(file)) {
+            if (localFileList.isFileAllowed(file) || localFileList.isDirectoryAllowed(file)) {
                 return true;
             }
         }

@@ -15,7 +15,7 @@ public class IncompleteFileCollectionStub extends AbstractFileCollectionStub imp
     }
 
     @Override
-    public boolean isFileAddable(File file) {
+    public boolean isFileAllowed(File file) {
         return true;
     }
 

@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,32 +28,19 @@ import com.google.inject.Provider;
  */
 public class FilesOptionPanel extends OptionPanel {
     
-    private final ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel;
     private final Provider<IconManager> iconManager;
     
-    private ManageExtensionsPanel manageExtensionsPanel;
     private LimeWireStorePanel limeWireStorePanel;
     
     @Inject
-    FilesOptionPanel(ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel,
-            Provider<IconManager> iconManager) { 
-        
-        this.manageFileExtensionsOptionPanel = manageFileExtensionsOptionPanel;
+    FilesOptionPanel(Provider<IconManager> iconManager) {         
         this.iconManager = iconManager;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
         setOpaque(false);
         
-        add(getManageExtensionsPanel(), "pushx, growx");
         add(getLimeWireStorePanel(), "pushx, growx");
-    }
-    
-    private OptionPanel getManageExtensionsPanel() {
-        if(manageExtensionsPanel == null) {
-            manageExtensionsPanel = new ManageExtensionsPanel();
-        }
-        return manageExtensionsPanel;
     }
     
     private OptionPanel getLimeWireStorePanel() {
@@ -66,63 +52,20 @@ public class FilesOptionPanel extends OptionPanel {
     
     @Override
     boolean applyOptions() {
-        boolean restart = getManageExtensionsPanel().applyOptions();
-        restart |= getLimeWireStorePanel().applyOptions();
+        boolean restart = getLimeWireStorePanel().applyOptions();
 
         return restart;
     }
 
     @Override
     boolean hasChanged() {
-        return getManageExtensionsPanel().hasChanged() || 
-                getLimeWireStorePanel().hasChanged();
+        return getLimeWireStorePanel().hasChanged();
 
     }
 
     @Override
     public void initOptions() {
-        getManageExtensionsPanel().initOptions();
         getLimeWireStorePanel().initOptions();
-    }
-    
-    private class ManageExtensionsPanel extends OptionPanel {
-
-        private ManageFileExtensionsOptionPanel extensionsPanel;
-        private JButton manageButton;
-        
-        public ManageExtensionsPanel() {
-            super(I18n.tr("File Extensions"));
-            
-            extensionsPanel = manageFileExtensionsOptionPanel;
-            
-            manageButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
-                    extensionsPanel, I18n.tr("Manage File Extensions"),
-                    I18n.tr("Manage..."),I18n.tr("Manage file extensions to load")) { 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    extensionsPanel.initOptions();
-                    super.actionPerformed(e);
-                }
-            });
-            
-            add(new JLabel(I18n.tr("Choose the file extensions that belong in each category")), "push");
-            add(manageButton);
-        }
-        
-        @Override
-        boolean applyOptions() {
-            return extensionsPanel.applyOptions();
-        }
-
-        @Override
-        boolean hasChanged() {
-            return extensionsPanel.hasChanged();
-        }
-
-        @Override
-        public void initOptions() {
-            extensionsPanel.reset();
-        }
     }
     
     private class LimeWireStorePanel extends OptionPanel {

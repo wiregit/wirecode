@@ -6,15 +6,11 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -22,8 +18,6 @@ import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.limewire.collection.CollectionUtils;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
@@ -43,20 +37,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final CategoryManager categoryManager;
     
-    /** Default file extensions. */
-    private final String DEFAULT_MANAGED_EXTENSIONS_STRING =
-        "xml;txt;ps;rtf;tex;mp3;mp4;wav;wax;au;aif;aiff;"+
-        "ra;ram;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;flac;fla;flv;"+
-        "mpg;mpeg;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;bmp;"+
-        "zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-        "bin;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4a;bz2;sea;pf;arc;arj;"+
-        "bz;tbz;mime;taz;ua;toast;lit;rpm;deb;pkg;sxw;l6t;srt;sub;idx;mkv;"+
-        "ogm;shn;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
-        "pyo;pyz;latex";
-    
-    private final Collection<String> DEFAULT_MANAGED_EXTENSIONS =
-        Collections.unmodifiableList(Arrays.asList(DEFAULT_MANAGED_EXTENSIONS_STRING.split(";")));
-    
     private static enum Version {
         // for prior versions [before 5.0], see OldLibraryData & LibraryConverter
         ONE, // the first ever version [active 5.0 -> 5.1]
@@ -65,8 +45,8 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
     
     private static final String CURRENT_VERSION_KEY = "CURRENT_VERSION";
-    private static final String USER_EXTENSIONS_KEY = "USER_EXTENSIONS";
-    private static final String USER_REMOVED_KEY = "USER_REMOVED";
+//    private static final String USER_EXTENSIONS_KEY = "USER_EXTENSIONS";
+//    private static final String USER_REMOVED_KEY = "USER_REMOVED";
 //    private static final String MANAGED_DIRECTORIES_KEY = "MANAGED_DIRECTORIES";
 //    private static final String DO_NOT_MANAGE_KEY = "DO_NOT_MANAGE";
 //    private static final String EXCLUDE_FILES_KEY = "EXCLUDE_FILES";
@@ -82,8 +62,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     
     private final Version CURRENT_VERSION = Version.THREE;
     
-    private final Set<String> userExtensions = new HashSet<String>();
-    private final Set<String> userRemoved = new HashSet<String>();
     private final Map<String, List<Integer>> fileData = new HashMap<String, List<Integer>>();
     private final SortedMap<Integer, String> collectionNames = new TreeMap<Integer, String>();
     private final Map<Integer, List<String>> collectionShareData = new HashMap<Integer, List<String>>();
@@ -93,15 +71,11 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final File saveFile = new File(CommonUtils.getUserSettingsDir(), "library5.dat"); 
     private final File backupFile = new File(CommonUtils.getUserSettingsDir(), "library5.bak");
     
-    private volatile boolean loaded = false;
-
-    private volatile Set<String> managedExtensions = Collections.unmodifiableSet(new HashSet<String>());
-    private volatile Set<String> extensionsInManagedCategories = Collections.unmodifiableSet(new HashSet<String>());    
+    private volatile boolean loaded = false;   
 
     LibraryFileData(CategoryManager categoryManager) {
         this.categoryManager = categoryManager;
         SettingsGroupManager.instance().addSettingsGroup(this);
-        updateManagedExtensions();
     }
     
     public boolean isLoaded() {
@@ -123,10 +97,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.writeLock().lock();
         try {
             dirty = true;
-            userExtensions.clear();
-            userRemoved.clear();
             fileData.clear();
-            updateManagedExtensions();
         } finally {
             lock.writeLock().unlock();
         }
@@ -141,8 +112,6 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.readLock().lock();
         try {
             save.put(CURRENT_VERSION_KEY, CURRENT_VERSION);
-            save.put(USER_EXTENSIONS_KEY, userExtensions);
-            save.put(USER_REMOVED_KEY, userRemoved);
             save.put(FILE_DATA_KEY, fileData);
             save.put(COLLECTION_NAME_KEY, collectionNames);
             save.put(COLLECTION_SHARE_DATA_KEY, collectionShareData);
@@ -197,8 +166,6 @@ class LibraryFileData extends AbstractSettingsGroup {
      * Initializes the read map assuming it's a particular version.
      */
     private void initializeFromVersion(Version version, Map<String, Object> readMap) {
-        Set<String> userExtensions;
-        Set<String> userRemoved;
         Map<String, List<Integer>> fileData;
         Map<Integer, String> collectionNames;
         Map<Integer, List<String>> collectionShareData;
@@ -206,8 +173,6 @@ class LibraryFileData extends AbstractSettingsGroup {
         
         switch(version) {
         case ONE:
-            userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
-            userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
             Map<File, FileProperties> oldShareData = GenericsUtils.scanForMap(readMap.get(SHARE_DATA_KEY), File.class, FileProperties.class, ScanMode.REMOVE);
             fileData = new HashMap<String, List<Integer>>();
             collectionNames = new HashMap<Integer, String>();
@@ -237,8 +202,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             Map<File, List<Integer>> oldFileData = GenericsUtils.scanForMapOfList(readMap.get(FILE_DATA_KEY), File.class, List.class, Integer.class, ScanMode.REMOVE);
             convertShareData(oldFileData, fileData);
             
-            userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
-            userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
             collectionNames = GenericsUtils.scanForMap(readMap.get(COLLECTION_NAME_KEY), Integer.class, String.class, ScanMode.REMOVE);
             collectionShareData = GenericsUtils.scanForMapOfList(readMap.get(COLLECTION_SHARE_DATA_KEY), Integer.class, List.class, String.class, ScanMode.REMOVE);
             safeUrns = GenericsUtils.scanForSet(readMap.get(SAFE_URNS), String.class, ScanMode.REMOVE);
@@ -246,8 +209,6 @@ class LibraryFileData extends AbstractSettingsGroup {
         case THREE:
             fileData = GenericsUtils.scanForMapOfList(readMap.get(FILE_DATA_KEY), String.class, List.class, Integer.class, ScanMode.REMOVE);
             
-            userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
-            userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
             collectionNames = GenericsUtils.scanForMap(readMap.get(COLLECTION_NAME_KEY), Integer.class, String.class, ScanMode.REMOVE);
             collectionShareData = GenericsUtils.scanForMapOfList(readMap.get(COLLECTION_SHARE_DATA_KEY), Integer.class, List.class, String.class, ScanMode.REMOVE);
             safeUrns = GenericsUtils.scanForSet(readMap.get(SAFE_URNS), String.class, ScanMode.REMOVE);
@@ -267,13 +228,10 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.writeLock().lock();
         try {
             clear();
-            this.userExtensions.addAll(lowercase(userExtensions));
-            this.userRemoved.addAll(userRemoved);
             this.fileData.putAll(fileData);
             this.collectionNames.putAll(collectionNames);
             this.collectionShareData.putAll(collectionShareData);
             this.safeUrns.addAll(safeUrns);
-            updateManagedExtensions();
         } finally {
             lock.writeLock().unlock();
         }
@@ -420,32 +378,27 @@ class LibraryFileData extends AbstractSettingsGroup {
      * Adds a managed file.
      */
     void addOrRenameManagedFile(File file, File originalFile) {
-        
         if (originalFile == null) {
             addManagedFile(file);
-        }
-        
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            
-            String key = createKey(file);
-            if(!fileData.containsKey(key)) {
-                
-                String originalKey = createKey(originalFile);
-                if (fileData.containsKey(originalKey)) {
-                    fileData.put(key, fileData.get(originalKey));
-                    fileData.remove(originalKey);
-                } 
-                else {                
-                    fileData.put(key, Collections.<Integer>emptyList());
+        } else {
+            lock.writeLock().lock();
+            try {
+                boolean changed = false;
+                String key = createKey(file);
+                if(!fileData.containsKey(key)) {
+                    String originalKey = createKey(originalFile);
+                    if (fileData.containsKey(originalKey)) {
+                        fileData.put(key, fileData.get(originalKey));
+                        fileData.remove(originalKey);
+                    } else {
+                        fileData.put(key, Collections.<Integer>emptyList());
+                    }
+                    changed = true;
                 }
-                
-                changed = true;
-            } 
-            dirty |= changed;            
-        } finally {
-            lock.writeLock().unlock();
+                dirty |= changed;
+            } finally {
+                lock.writeLock().unlock();
+            }
         }
     }
     
@@ -479,139 +432,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     /** Retuns true if the given folder is the incomplete folder. */
     boolean isIncompleteDirectory(File folder) {
         return FileUtils.canonicalize(SharingSettings.INCOMPLETE_DIRECTORY.get()).equals(folder);
-    }    
-    
-    /** Returns all categories that should be managed. */
-    public Collection<Category> getManagedCategories() {
-        Set<Category> categories = EnumSet.noneOf(Category.class);
-        if(LibrarySettings.MANAGE_AUDIO.getValue()) {
-            categories.add(Category.AUDIO);
-        }
-        if(LibrarySettings.MANAGE_DOCUMENTS.getValue()) {
-            categories.add(Category.DOCUMENT);
-        }
-        if(LibrarySettings.MANAGE_IMAGES.getValue()) {
-            categories.add(Category.IMAGE);
-        }
-        if(LibrarySettings.MANAGE_OTHER.getValue()) {
-            categories.add(Category.OTHER);
-        }
-        if(LibrarySettings.MANAGE_PROGRAMS.getValue() && LibrarySettings.ALLOW_PROGRAMS.getValue()) {
-            categories.add(Category.PROGRAM);
-        }
-        if(LibrarySettings.MANAGE_VIDEO.getValue()) {
-            categories.add(Category.VIDEO);
-        }
-        return categories;
-    }
-
-    /** Sets the new group of categories to manage. */
-    public void setManagedCategories(Collection<Category> categoriesToManage) {
-    	lock.writeLock().lock();
-	    try {
-        	LibrarySettings.MANAGE_AUDIO.setValue(categoriesToManage.contains(Category.AUDIO));
-	        LibrarySettings.MANAGE_VIDEO.setValue(categoriesToManage.contains(Category.VIDEO));
-	        LibrarySettings.MANAGE_DOCUMENTS.setValue(categoriesToManage.contains(Category.DOCUMENT));
-    	    LibrarySettings.MANAGE_IMAGES.setValue(categoriesToManage.contains(Category.IMAGE));
-        	LibrarySettings.MANAGE_PROGRAMS.setValue(categoriesToManage.contains(Category.PROGRAM));
-	        LibrarySettings.MANAGE_OTHER.setValue(categoriesToManage.contains(Category.OTHER));
-            updateManagedExtensions();
-        } finally {
-        	lock.writeLock().unlock();
-        }
-    }
-
-    /** Returns all extensions that are managed within the managed categories. The returned set cannot be mpodified.*/
-    public Set<String> getExtensionsInManagedCategories() {
-        return extensionsInManagedCategories;
-    }
-    
-    /**
-     * Returns a Map of Category->Collection<String> that defines
-     * what extensions are in what category.
-     */
-    Map<Category, Collection<String>> getExtensionsPerCategory() {
-        Set<String> extensions = getManagedExtensions();
-        
-        Map<Category, Collection<String>> extByCategory = new EnumMap<Category, Collection<String>>(Category.class);
-        for(Category category : Category.values()) {
-            extByCategory.put(category, new ArrayList<String>());
-        }
-        
-        for(String ext : extensions) {
-            extByCategory.get(categoryManager.getCategoryForExtension(ext)).add(ext);
-        }
-        
-        return extByCategory;
-    }
-
-
-    /**
-     * Should be called whenever a method is updating the extensions or the categories that the Library manages.
-     * It rebuilds the managedExtentiosn and extensions in Managed categories set. So that they are always up to 
-     * date and can be returned immediately.
-     */
-    private void updateManagedExtensions() {
-        Set<String> managedExtensions = new HashSet<String>();        
-        try {
-            lock.writeLock().lock();
-            managedExtensions.addAll(DEFAULT_MANAGED_EXTENSIONS);
-            managedExtensions.addAll(userExtensions);
-            managedExtensions.removeAll(userRemoved);
-            this.managedExtensions  = Collections.unmodifiableSet(managedExtensions);
-            
-            Map<Category, Collection<String>> map = getExtensionsPerCategory();
-            map.keySet().retainAll(getManagedCategories());
-            extensionsInManagedCategories = Collections.unmodifiableSet(new HashSet<String>(CollectionUtils.flatten(map.values()))); 
-            
-        } finally {
-            lock.writeLock().unlock();
-        }
-        
-    }
-    
-    /**
-     * Returns a new Set with all the currently managed extensions contained within. The returned set cannot be modified.
-     */
-    Set<String> getManagedExtensions() {
-        return managedExtensions;
-    }
-
-    /** Sets all extensions that should be managed. */
-    void setManagedExtensions(Collection<String> newExtensions) {
-        lock.writeLock().lock();
-        try {
-            newExtensions = lowercase(newExtensions);
-            
-            boolean changed = false;
-            Set<String> removed = new HashSet<String>();
-            removed.addAll(DEFAULT_MANAGED_EXTENSIONS);
-            removed.removeAll(newExtensions);
-            if(!userRemoved.equals(removed)) {
-                changed = true;
-                userRemoved.clear();
-                userRemoved.addAll(removed);
-            }
-            
-            Set<String> added = new HashSet<String>();
-            added.addAll(newExtensions);
-            added.removeAll(DEFAULT_MANAGED_EXTENSIONS);
-            if(!userExtensions.equals(added)) {
-                changed = true;
-                userExtensions.clear();
-                userExtensions.addAll(added);
-            }
-            if(changed) {
-                updateManagedExtensions();
-            }
-            dirty |= changed;
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    
-    public Collection<String> getDefaultManagedExtensions() {
-        return DEFAULT_MANAGED_EXTENSIONS;
     }
     
     /** Returns the IDs of all collections. */
@@ -845,14 +665,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     
     boolean isGnutellaDocumentSharingAllowed() {
         return LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
-    }
-    
-    private Collection<String> lowercase(Collection<String> extensions) {
-        Set<String> exts = new HashSet<String>(extensions.size());
-        for(String string : extensions) {
-            exts.add(string.toLowerCase(Locale.US));
-        }
-        return exts;
     }
     
     private static class FileProperties implements Serializable {

@@ -246,8 +246,13 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     @Override
-    public boolean isFileAddable(File file) {
-       return getCoreCollection().isFileAddable(file);
+    public boolean isFileAllowed(File file) {
+       return getCoreCollection().isFileAllowed(file);
+    }
+    
+    @Override
+    public boolean isDirectoryAllowed(File folder) {
+        return getCoreCollection().isDirectoryAllowed(folder);
     }
     
     @Override

@@ -71,7 +71,7 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
     }
 
     @Override
-    public boolean isFileAddable(File file) {
+    public boolean isFileAllowed(File file) {
         return true;
     }
 
