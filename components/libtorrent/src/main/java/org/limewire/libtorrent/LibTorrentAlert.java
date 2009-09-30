@@ -3,6 +3,7 @@ package org.limewire.libtorrent;
 
 import org.limewire.bittorrent.TorrentAlert;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 /**
@@ -25,7 +26,17 @@ public class LibTorrentAlert extends Structure implements TorrentAlert {
      * Message associated with this alert.
      */
     public String message;
-
+    
+    /**
+     * Boolean whether or not the resume data exists.
+     */
+    public int has_data;
+    
+    /**
+     * Pointer to the resume data in memory.
+     */
+    public Pointer resume_data;
+    
     @Override
     public int getCategory() {
         return category;

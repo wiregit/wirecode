@@ -352,4 +352,15 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.free_torrent_info(info.getPointer()));
         LOG.debugf("after free_torrent_info: {0}", info);
     }
+    
+    /**
+     * Saves the fast resume data for the given alert.
+     */
+    public void save_fast_resume_data(LibTorrentAlert alert, String filePath) {
+        LOG.debugf("before save_fast_resume_data: {0} - {1}", alert, filePath);
+        catchWrapperException(libTorrent.save_fast_resume_data(alert, new WString(filePath)));
+        LOG.debugf("after save_fast_resume_data: {0} - {1}", alert, filePath);
+    }
+    
+    
 }

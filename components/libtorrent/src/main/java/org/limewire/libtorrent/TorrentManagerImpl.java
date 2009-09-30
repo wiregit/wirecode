@@ -419,6 +419,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
         @Override
         public void callback(LibTorrentAlert alert) {
+            //System.out.println(alert.toString());
             if (LOG.isDebugEnabled()) {
                 LOG.debug(alert.toString());
             }
@@ -428,6 +429,9 @@ public class TorrentManagerImpl implements TorrentManager {
                 Torrent torrent = torrents.get(sha1);
                 if (torrent != null) {
                     torrent.alert(alert);
+                    if(alert.getCategory() == LibTorrentAlert.SAVE_RESUME_DATA_ALERT) {
+                        libTorrent.save_fast_resume_data(alert, torrent.getFastResumeFile().getAbsolutePath());
+                    }
                 }
             }
         }
