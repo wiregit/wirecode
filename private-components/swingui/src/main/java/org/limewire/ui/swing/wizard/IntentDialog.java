@@ -21,6 +21,9 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -28,6 +31,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
+import org.limewire.ui.swing.action.UrlAction.LaunchType;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -67,9 +71,9 @@ public class IntentDialog extends LimeJDialog {
     private final JLabel copyrightLabel;
     private final JLabel policiesLabel;
     
-    private final String copyrightURL = "http://www.limewire.com/client_redirect/?page=copyright";
-    private final String licenseURL = "http://www.limewire.com/client_redirect/?page=agreement";
-    private final String privacyURL = "http://www.limewire.com/client_redirect/?page=privacy";
+    private final String copyrightURL = "http://client-data.limewire.com/client_startup/docs/?page=copyright?is_client=true";
+    private final String licenseURL = "http://client-data.limewire.com/client_startup/docs/?page=agreement?is_client=true";
+    private final String privacyURL = "http://client-data.limewire.com/client_startup/docs/?page=privacy?is_client=true";
     
     private boolean agreed = false;
     
@@ -94,19 +98,19 @@ public class IntentDialog extends LimeJDialog {
         
         copyrightLabel = new JLabel();
         copyrightLabel.setFont(headingFont);
-        
+                
         policiesLabel = new JLabel();
         policiesLabel.setFont(headingFont);
         
         agreeLabel = new MultiLineLabel("", 500);
         agreeLabel.setFont(smallFont);
         //FontUtils.bold(agreeLabel);
-        licenseButton = new HyperlinkButton(new UrlAction(licenseURL));
+        licenseButton = new HyperlinkButton(new UrlAction(licenseURL, LaunchType.POPUP));
         licenseButton.setFocusPainted(false);
         licenseButton.setFont(smallFont);
         FontUtils.underline(licenseButton);
         licenseButton.setForeground(new Color(0x2152a6));
-        privacyButton = new HyperlinkButton(new UrlAction(privacyURL));
+        privacyButton = new HyperlinkButton(new UrlAction(privacyURL, LaunchType.POPUP));
         privacyButton.setFocusPainted(false);
         privacyButton.setFont(smallFont);
         FontUtils.underline(privacyButton);
@@ -116,6 +120,16 @@ public class IntentDialog extends LimeJDialog {
         bodyLabel.setHtmlLinkForeground(new Color(0x2152a6));
         bodyLabel.setEditable(false);
         bodyLabel.setOpaque(false);
+        bodyLabel.addHyperlinkListener(new HyperlinkListener() {
+            private final Action urlAction = new UrlAction(copyrightURL, LaunchType.POPUP);
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == EventType.ACTIVATED) {
+                    urlAction.actionPerformed(null);
+                }
+            }
+            
+        });
         
         languageLabel = new JLabel();
         languageLabel.setFont(smallFont);
@@ -264,7 +278,7 @@ public class IntentDialog extends LimeJDialog {
     private void setTextContents() {
         String heading  = I18n.tr("Some Legal Stuff");
         String bodyText1
-        = I18n.tr("<html><body>LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only. Copyright laws may forbid obtaining or distributing certain copyrighted content. Learn more information about <a href=\"{0}\">Copyright</a></body></html>.", copyrightURL);
+        = I18n.tr("<html><body>LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only. Copyright laws may forbid obtaining or distributing certain copyrighted content. Learn more information about <a href=\"{0}\">Copyright</a></body></html>.", 0);
         String copyInfringementText = I18n.tr("Copyright Infringement");
         String privacyText = I18n.tr("Privacy Policy");
         String licenseText = I18n.tr("License");
