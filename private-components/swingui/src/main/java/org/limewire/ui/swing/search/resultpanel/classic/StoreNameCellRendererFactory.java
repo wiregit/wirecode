@@ -37,14 +37,12 @@ class StoreNameCellRendererFactory {
         // Create renderer based on style type.
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
-            return new StoreNameCellRendererAB(storeStyle, showAudioArtist, 
-                    categoryIconManager, storeControllerFactory.create());
-            
         case STYLE_C: case STYLE_D:
-            return new StoreNameCellRendererCD(storeStyle, showAudioArtist, 
+            return new StoreNameCellRendererImpl(storeStyle, showAudioArtist, 
                     categoryIconManager, storeControllerFactory.create());
             
         default:
+            // Return null if type is not recognized.
             return null;
         }
     }
