@@ -185,6 +185,18 @@ public abstract class AbstractTabList extends JXPanel {
         }
         props.setHighlightPainter(highlightPainter);
     }
+
+    /**
+     * Sets the painter to be used when the tab is in the normal state.
+     */
+    public void setNormalPainter(Painter<?> normalPainter) {
+        for (FancyTab tab : tabs) {
+            if (!tab.isHighlighted() && !tab.isSelected()) {
+                tab.setBackgroundPainter(normalPainter);
+            }
+        }
+        props.setNormalPainter(normalPainter);
+    }
     
     /**
      * Sets the painter to be used when the tab is selected. 

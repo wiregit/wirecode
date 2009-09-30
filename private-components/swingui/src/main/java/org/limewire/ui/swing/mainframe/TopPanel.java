@@ -189,6 +189,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setRemovable(true);
         searchList.setSelectionPainter(tabPainterFactory.createSelectionPainter());
         searchList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
+        searchList.setNormalPainter(tabPainterFactory.createNormalPainter());
         searchList.setTabInsets(new Insets(0,10,2,10));
         
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
