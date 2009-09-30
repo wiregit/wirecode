@@ -2205,22 +2205,27 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     /**
      * Sets the maximum number of connections we'll maintain.
     */
-    private void setPreferredConnections() {
+    protected void setPreferredConnections() {
         // if we're disconnected, do nothing.
         if(!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
            _disconnectTime != 0)
             return;
 
-        int oldPreferred = _preferredConnections;
-
         if(isSupernode())
-            _preferredConnections = ConnectionSettings.NUM_CONNECTIONS.getValue();
+            setPreferredConnections(ConnectionSettings.NUM_CONNECTIONS.getValue());
         else if(isIdle())
-            _preferredConnections = ConnectionSettings.IDLE_CONNECTIONS.getValue();
+            setPreferredConnections(ConnectionSettings.IDLE_CONNECTIONS.getValue());
         else
-            _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
-
-        if(oldPreferred != _preferredConnections)
+            setPreferredConnections(PREFERRED_CONNECTIONS_FOR_LEAF);
+    }
+    
+    /**
+     * Sets the maximum number of connections we'll maintain.
+     */
+    protected void setPreferredConnections(int connections) {
+        int oldPreferred = _preferredConnections;
+        _preferredConnections = connections;
+        if(oldPreferred != connections)
             stabilizeConnections();
     }
 
