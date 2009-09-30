@@ -76,19 +76,19 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
         }
         
         // Layout components in renderer.
-        setLayout(new MigLayout("insets 1 2 0 6, gap 0! 0!, novisualpadding"));
+        renderer.setLayout(new MigLayout("insets 1 2 0 6, gap 0! 0!, novisualpadding"));
         if (storeStyle.getType() == Type.STYLE_D) {
-            add(tracksButton, "aligny 50%, gap 3 3");
+            renderer.add(tracksButton, "aligny 50%, gap 3 3");
         }
-        add(iconLabel, "aligny 50%");
+        renderer.add(iconLabel, "aligny 50%");
         if (storeStyle.getType() != Type.STYLE_B) {
-            add(streamButton, "aligny 50%, gapleft 6");
+            renderer.add(streamButton, "aligny 50%, gapleft 6");
         }
-        add(namePanel, "aligny 50%, pushx 200");
+        renderer.add(namePanel, "aligny 50%, pushx 200");
         if (storeStyle.getType() == Type.STYLE_B) {
-            add(streamButton, "aligny 50%, gapleft 6");
+            renderer.add(streamButton, "aligny 50%, gapleft 6");
         }
-        add(priceButton, "alignx right, aligny 50%, gapleft 6");
+        renderer.add(priceButton, "alignx right, aligny 50%, gapleft 6");
     }
     
     @Override

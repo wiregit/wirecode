@@ -2,7 +2,9 @@ package org.limewire.ui.swing.search.resultpanel.classic;
 
 import java.awt.Component;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.limewire.core.api.search.store.StoreStyle;
@@ -12,10 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 /**
- * A table cell renderer that delegates to the appropriate component to display
- * the Name column in the Classic view table for search results.
+ * A table cell editor/renderer used to display the Name column in the Classic
+ * view table for search results.  NameRendererDelegate delegates rendering to
+ * the appropriate component based on the value type.
  */
-public class NameRendererDelegate implements TableCellRenderer {
+public class NameRendererDelegate extends AbstractCellEditor 
+    implements TableCellRenderer, TableCellEditor {
 
     private final TableCellRenderer defaultRenderer;
     private final boolean showAudioArtist;
@@ -48,6 +52,17 @@ public class NameRendererDelegate implements TableCellRenderer {
             return defaultRenderer.getTableCellRendererComponent(table, value, 
                     isSelected, hasFocus, row, column);
         }
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value, 
+            boolean isSelected, int row, int column) {
+        return getTableCellRendererComponent(table, value, isSelected, true, row, column);
+    }
+
+    @Override
+    public Object getCellEditorValue() {
+        return null;
     }
     
     /**

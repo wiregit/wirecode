@@ -22,6 +22,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -32,7 +33,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  * A table cell renderer for displaying Lime Store results in the Name column
  * of the Classic view table.
  */
-abstract class StoreNameCellRenderer extends JXPanel implements TableCellRenderer {
+abstract class StoreNameCellRenderer implements TableCellRenderer {
 
     protected final StoreStyle storeStyle;
     protected final boolean showAudioArtist;
@@ -44,13 +45,15 @@ abstract class StoreNameCellRenderer extends JXPanel implements TableCellRendere
     protected final Action streamAction;
     protected final Action showTracksAction;
     
-    protected JLabel iconLabel;
-    protected JLabel nameLabel;
+    protected final JXPanel renderer;
+    protected final JLabel iconLabel;
+    protected final JLabel nameLabel;
     
     protected VisualStoreResult vsr;
     
     /**
-     * Constructs a StoreNameCellRenderer using the specified services and options.
+     * Constructs a StoreNameCellRenderer using the specified services and 
+     * options.
      */
     public StoreNameCellRenderer(
             StoreStyle storeStyle,
@@ -62,11 +65,12 @@ abstract class StoreNameCellRenderer extends JXPanel implements TableCellRendere
         this.categoryIconManager = categoryIconManager;
         this.storeController = storeController;
         
-        this.resources = new RendererResources();
-        this.downloadAction = new DownloadAction();
-        this.streamAction = new StreamAction();
-        this.showTracksAction = new ShowTracksAction();
+        resources = new RendererResources();
+        downloadAction = new DownloadAction();
+        streamAction = new StreamAction();
+        showTracksAction = new ShowTracksAction();
         
+        renderer = new JXPanel();
         iconLabel = new JLabel();
         nameLabel = new JLabel();
         nameLabel.setFont(resources.getFont());
@@ -119,18 +123,20 @@ abstract class StoreNameCellRenderer extends JXPanel implements TableCellRendere
         }
         
         // Apply attributes to renderer.
-        setBackground(background);
-        setForeground(foreground);
+        renderer.setBackground(background);
+        renderer.setForeground(foreground);
         iconLabel.setIcon(icon);
         nameLabel.setText(text);
+        nameLabel.setToolTipText(text);
         
-        // Set small minimum width to allow label to shrink when column is made smaller.
+        // Set small minimum width to allow label to shrink in MigLayout when
+        // column is made smaller.
         nameLabel.setMinimumSize(new Dimension(15, nameLabel.getMinimumSize().height));
         
-        return this;
+        return renderer;
     }
     
-    @Override
+    // TODO review for removal
     public String getToolTipText(){
         return nameLabel.getText();
     }
@@ -218,7 +224,7 @@ abstract class StoreNameCellRenderer extends JXPanel implements TableCellRendere
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO implement
+            // TODO implement; toggle state and button icon/text
             System.out.println("showTracks");
         }
     }
@@ -231,6 +237,7 @@ abstract class StoreNameCellRenderer extends JXPanel implements TableCellRendere
         
         private final Icon bgIcon;
         private BufferedImage bgImage;
+        private RolloverCursorListener rolloverListener;
         
         public PriceButton(Icon bgIcon) {
             super();
@@ -242,6 +249,20 @@ abstract class StoreNameCellRenderer extends JXPanel implements TableCellRendere
             setFocusPainted(false);
             setFont(storeStyle.getClassicPriceFont());
             setForeground(storeStyle.getClassicPriceForeground());
+        }
+        
+        @Override
+        public void setAction(Action action) {
+            super.setAction(action);
+            
+            // Display hand cursor only if action is defined.
+            if ((action != null) && (rolloverListener == null)) {
+                rolloverListener = new RolloverCursorListener();
+                rolloverListener.install(this);
+            } else if ((action == null) && (rolloverListener != null)) {
+                rolloverListener.uninstall(this);
+                rolloverListener = null;
+            }
         }
         
         @Override
