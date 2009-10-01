@@ -9,6 +9,7 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.lifecycle.MockLifeCycleModule;
 import org.limewire.core.api.magnet.MockMagnetModule;
 import org.limewire.core.impl.bittorrent.MockBittorrentModule;
@@ -17,6 +18,7 @@ import org.limewire.core.impl.callback.MockGuiCallbackService;
 import org.limewire.core.impl.connection.MockConnectionModule;
 import org.limewire.core.impl.daap.MockDaapModule;
 import org.limewire.core.impl.download.MockDownloadModule;
+import org.limewire.core.impl.file.MockCategoryManager;
 import org.limewire.core.impl.friend.MockFriendModule;
 import org.limewire.core.impl.library.MockLibraryModule;
 import org.limewire.core.impl.mojito.MockMojitoModule;
@@ -59,6 +61,7 @@ public class MockModule extends AbstractModule {
         bind(Application.class).to(MockApplication.class);
         bind(GuiCallbackService.class).to(MockGuiCallbackService.class);
         bind(ServiceRegistry.class).to(MockServiceRegistry.class);
+        bind(CategoryManager.class).to(MockCategoryManager.class);
 
         install(new MockLifeCycleModule());
         install(new MockConnectionModule());
