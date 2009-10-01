@@ -109,6 +109,8 @@ public class MockModule extends AbstractModule {
         bind(Executor.class).annotatedWith(execAnn).to(mainKey);
         bind(ExecutorService.class).annotatedWith(execAnn).to(mainKey);
         
+        bind(CategoryManager.class).to(MockCategoryManager.class);
+        
     }
 
     @Singleton
