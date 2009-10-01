@@ -1,25 +1,32 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.SortedSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.FileUtils;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.inject.Inject;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 class CategoryManagerImpl implements CategoryManager {
 
-    private final SortedSet<String> docExt = ImmutableSortedSet.orderedBy(
+    private final Collection<String> documentExtBuiltIn = ImmutableSortedSet.orderedBy(
             String.CASE_INSENSITIVE_ORDER).add("123", "abw", "accdb", "accde", "accdr", "accdt",
             "ans", "asc", "asp", "bdr", "chm", "css", "csv", "dat", "db", "dif", "diz", "doc",
             "docm", "docx", "dotm", "dotx", "dvi", "eml", "eps", "epsf", "fm", "grv", "gsa", "gts",
             "hlp", "htm", "html", "idb", "idx", "iif", "info", "js", "jsp", "kfl", "kwd", "latex",
-            "lif", "lit", "log", "man", "mcw", "mdb", "mht", "mhtml", "mny", "msg", "obi", "odp",
+            "lif", "lit", "log", "man", "mcw", "mht", "mhtml", "mny", "msg", "obi", "odp",
             "ods", "odt", "ofx", "one", "onepkg", "ost", "pages", "pdf", "php", "pot", "potm",
             "potx", "pps", "ppsm", "ppsx", "ppt", "pptm", "pptx", "ps", "pub", "qba", "qbb", "qdb",
             "qbi", "qbm", "qbw", "qbx", "qdf", "qel", "qfp", "qpd", "qph", "qmd", "qsd", "rtf",
@@ -34,57 +41,49 @@ class CategoryManagerImpl implements CategoryManager {
             "mbs", "mbx", "mht", "msb", "msf", "msg", "nws", "pmi", "pmm", "pmx", "tbb", "toc",
             "vfb", "zmc", "stw", "odm", "ott", "wpt").build();
 
-    private final SortedSet<String> audioExt = ImmutableSortedSet.orderedBy(
+    private final Collection<String> audioExtBuiltIn = ImmutableSortedSet.orderedBy(
             String.CASE_INSENSITIVE_ORDER).add("mp3", "mpa", "mp1", "mpga", "mp2", "ra", "rm",
-            "ram", "rmj", "wma", "wav", "m4a", "m4p", "mp4", "lqt", "ogg", "med", "aif", "aiff",
+            "ram", "rmj", "wma", "wav", "m4a", "m4p", "lqt", "ogg", "med", "aif", "aiff",
             "aifc", "au", "snd", "s3m", "aud", "mid", "midi", "rmi", "mod", "kar", "ac3", "shn",
             "fla", "flac", "cda", "mka").build();
 
-    private final SortedSet<String> videoExt = ImmutableSortedSet.orderedBy(
+    private final Collection<String> videoExtBuiltIn = ImmutableSortedSet.orderedBy(
             String.CASE_INSENSITIVE_ORDER).add("mpg", "mpeg", "mpe", "mng", "mpv", "m1v", "vob",
-            "mp2", "mpv2", "mp2v", "m2p", "m2v", "mpgv", "vcd", "mp4", "dv", "dvd", "div", "divx",
-            "dvx", "smi", "smil", "rm", "ram", "rv", "rmm", "rmvb", "avi", "asf", "asx", "wmv",
+            "mpv2", "mp2v", "m2p", "m2v", "mpgv", "vcd", "mp4", "dv", "dvd", "div", "divx",
+            "dvx", "smi", "smil", "rv", "rmm", "rmvb", "avi", "asf", "asx", "wmv",
             "qt", "mov", "fli", "flc", "flx", "flv", "wml", "vrml", "swf", "dcr", "jve", "nsv",
             "mkv", "ogm", "cdg", "srt", "sub", "flv").build();
 
-    private final SortedSet<String> imageExt = ImmutableSortedSet.orderedBy(
+    private final Collection<String> imageExtBuiltIn = ImmutableSortedSet.orderedBy(
             String.CASE_INSENSITIVE_ORDER).add("gif", "png", "bmp", "jpg", "jpeg", "jpe", "jif",
-            "jiff", "jfif", "tif", "tiff", "iff", "lbm", "ilbm", "eps", "mac", "drw", "pct", "img",
+            "jiff", "jfif", "tif", "tiff", "iff", "lbm", "ilbm", "mac", "drw", "pct", "img",
             "bmp", "dib", "rle", "ico", "ani", "icl", "cur", "emf", "wmf", "pcx", "pcd", "tga",
             "pic", "fig", "psd", "wpg", "dcx", "cpt", "mic", "pbm", "pnm", "ppm", "xbm", "xpm",
             "xwd", "sgi", "fax", "rgb", "ras").build();
 
-    private final SortedSet<String> programOsxLinuxExt = ImmutableSortedSet.orderedBy(
+    private final Collection<String> programOsxLinuxExtBuiltIn = ImmutableSortedSet.orderedBy(
             String.CASE_INSENSITIVE_ORDER).add("app", "bin", "mdb", "sh", "csh", "awk", "pl",
             "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz", "taz", "shar", "hqx",
             "sit", "dmg", "7z", "jar", "zip", "nrg", "cue", "iso", "jnlp", "rar", "sh").build();
 
-    private final SortedSet<String> programWindowsExt = ImmutableSortedSet.orderedBy(
-            String.CASE_INSENSITIVE_ORDER).add("exe", "zip", "jar", "cab", "msi", "msp", "arj",
+    private final Collection<String> programWindowsExtBuiltIn = ImmutableSortedSet.orderedBy(
+            String.CASE_INSENSITIVE_ORDER).add("mdb", "exe", "zip", "jar", "cab", "msi", "msp", "arj",
             "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", "iso", "jnlp", "bat", "lnk", "vbs")
             .build();
-
-    private final SortedSet<String> programExt = ImmutableSortedSet.orderedBy(
-            String.CASE_INSENSITIVE_ORDER).addAll(programOsxLinuxExt).addAll(programWindowsExt).build();
     
-    private final class SetPredicate implements Predicate<String> {
-        private final SortedSet<String> set;
-        
-        public SetPredicate(SortedSet<String> set) {
-            this.set = set;
-        }
-        
-        @Override
-        public boolean apply(String input) {
-            return set.contains(input);
-        }
-    }
+    private final AtomicReference<Collection<String>> audioExts = new AtomicReference<Collection<String>>();
+    private final AtomicReference<Collection<String>> videoExts = new AtomicReference<Collection<String>>();
+    private final AtomicReference<Collection<String>> imageExts = new AtomicReference<Collection<String>>();
+    private final AtomicReference<Collection<String>> documentExts = new AtomicReference<Collection<String>>();
+    private final AtomicReference<Collection<String>> programOsxLinuxExts = new AtomicReference<Collection<String>>();
+    private final AtomicReference<Collection<String>> programWindowsExts = new AtomicReference<Collection<String>>();
+    private final AtomicReference<Collection<String>> programExts = new AtomicReference<Collection<String>>();
     
-    private final Predicate<String> audioPred = new SetPredicate(audioExt);
-    private final Predicate<String> videoPred = new SetPredicate(videoExt);
-    private final Predicate<String> programPred = new SetPredicate(programExt);
-    private final Predicate<String> imagePred = new SetPredicate(imageExt);
-    private final Predicate<String> docPred = new SetPredicate(docExt);
+    private final Predicate<String> audioPred = new CollectionPredicate(audioExts);
+    private final Predicate<String> videoPred = new CollectionPredicate(videoExts);
+    private final Predicate<String> programPred = new CollectionPredicate(programExts);
+    private final Predicate<String> imagePred = new CollectionPredicate(imageExts);
+    private final Predicate<String> docPred = new CollectionPredicate(documentExts);
     private final Predicate<String> otherPred = new Predicate<String>() {
         public boolean apply(String input) {
             // This would be a terrible implementation for other categories,
@@ -92,24 +91,120 @@ class CategoryManagerImpl implements CategoryManager {
             // "do i belong in another category?... if not -> other"
             return getCategoryForExtension(input) == Category.OTHER;
         };
-    };
+    };    
+    private final Predicate<String> programOsLinuxPred = new CollectionPredicate(programOsxLinuxExts);
+    private final Predicate<String> programWindowsPred = new CollectionPredicate(programWindowsExts);
     
-    private final Predicate<String> programOsLinuxPred = new SetPredicate(programOsxLinuxExt);
-    private final Predicate<String> programWindowsPred = new SetPredicate(programWindowsExt);
+    CategoryManagerImpl() {
+        rebuildExtensions();
+    }
+    
+    @Inject void register(SimppManager simppManager) {
+        // listen on all of simpp, not the specific settings,
+        // so that we can rebuild in a batch & look at all new settings
+        // at once.
+        simppManager.addListener(new SimppListener() {
+            @Override
+            public void simppUpdated(int newVersion) {
+                rebuildExtensions();
+            }
+        });
+    }
+    
+    /** Rebuilds all extensions so that they contain both built-in & simpp extensions. */
+    private void rebuildExtensions() {
+        audioExts.set(combineAndCleanup(Category.AUDIO, audioExtBuiltIn, LibrarySettings.ADDITIONAL_AUDIO_EXTS.get()));
+        imageExts.set(combineAndCleanup(Category.IMAGE, imageExtBuiltIn, LibrarySettings.ADDITIONAL_IMAGE_EXTS.get()));
+        videoExts.set(combineAndCleanup(Category.VIDEO, videoExtBuiltIn, LibrarySettings.ADDITIONAL_VIDEO_EXTS.get()));
+        documentExts.set(combineAndCleanup(Category.DOCUMENT, documentExtBuiltIn, LibrarySettings.ADDITIONAL_DOCUMENT_EXTS.get()));
+        programOsxLinuxExts.set(combineAndCleanup(Category.PROGRAM, programOsxLinuxExtBuiltIn,
+                LibrarySettings.ADDITIONAL_PROGRAM_OSX_LINUX_EXTS.get()));
+        programWindowsExts.set(combineAndCleanup(Category.PROGRAM, programWindowsExtBuiltIn,
+                LibrarySettings.ADDITIONAL_PROGRAM_WINDOWS_EXTS.get()));
+        
+        programExts.set(ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER).addAll(
+                programOsxLinuxExts.get()).addAll(programWindowsExts.get()).build());
+    }
+    
+    private Collection<String> combineAndCleanup(Category category, Collection<String> builtIn, String[] remote) {
+        Set<String> remoteSet = new TreeSet<String>(Arrays.asList(remote));
+        // remove everything that's built-in
+        remoteSet.removeAll(audioExtBuiltIn);
+        remoteSet.removeAll(videoExtBuiltIn);
+        remoteSet.removeAll(imageExtBuiltIn);
+        remoteSet.removeAll(documentExtBuiltIn);
+        remoteSet.removeAll(programOsxLinuxExtBuiltIn);
+        remoteSet.removeAll(programWindowsExtBuiltIn);
+        
+        Collection<String> rAudio = Arrays.asList(LibrarySettings.ADDITIONAL_AUDIO_EXTS.get());
+        Collection<String> rDoc = Arrays.asList(LibrarySettings.ADDITIONAL_DOCUMENT_EXTS.get());
+        Collection<String> rImage = Arrays.asList(LibrarySettings.ADDITIONAL_IMAGE_EXTS.get());
+        Collection<String> rProgramOsxLinux = Arrays.asList(LibrarySettings.ADDITIONAL_PROGRAM_OSX_LINUX_EXTS.get());
+        Collection<String> rProgramWindows = Arrays.asList(LibrarySettings.ADDITIONAL_PROGRAM_WINDOWS_EXTS.get());
+        Collection<String> rVideo = Arrays.asList(LibrarySettings.ADDITIONAL_VIDEO_EXTS.get());
+        
+        // Remove the stuff from the other remote extensions,
+        // otherwise we can end up with two different categories having
+        // the same extension
+        switch(category) {
+        case AUDIO:
+            remoteSet.removeAll(rDoc);
+            remoteSet.removeAll(rImage);
+            remoteSet.removeAll(rProgramOsxLinux);
+            remoteSet.removeAll(rProgramWindows);
+            remoteSet.removeAll(rVideo);
+            break;
+        case DOCUMENT:
+            remoteSet.removeAll(rAudio);
+            remoteSet.removeAll(rImage);
+            remoteSet.removeAll(rProgramOsxLinux);
+            remoteSet.removeAll(rProgramWindows);
+            remoteSet.removeAll(rVideo);
+            break;
+        case IMAGE:
+            remoteSet.removeAll(rAudio);
+            remoteSet.removeAll(rDoc);
+            remoteSet.removeAll(rProgramOsxLinux);
+            remoteSet.removeAll(rProgramWindows);
+            remoteSet.removeAll(rVideo);
+            break;
+        case PROGRAM:
+            // Programs is a little special, because it's OK to share extensions btw
+            // osx/linux & Windows program things. So we don't remove either OS specific
+            // program from the other.
+            remoteSet.removeAll(rAudio);
+            remoteSet.removeAll(rDoc);
+            remoteSet.removeAll(rImage);
+            remoteSet.removeAll(rVideo);
+            break;
+        case VIDEO:
+            remoteSet.removeAll(rAudio);
+            remoteSet.removeAll(rImage);
+            remoteSet.removeAll(rDoc);
+            remoteSet.removeAll(rProgramOsxLinux);
+            remoteSet.removeAll(rProgramWindows);
+            break;
+        default:    
+            throw new IllegalStateException(category.toString());
+        }
+
+        return ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER).
+            addAll(builtIn).addAll(remoteSet).build();
+    }
 
     @Override
     public Category getCategoryForExtension(String extension) {
         // note: the extension sets are all case insensitive,
         // so... no lowercasing required.
-        if(audioExt.contains(extension)) {
+        if(audioExts.get().contains(extension)) {
             return Category.AUDIO;
-        } else if(videoExt.contains(extension)) {
+        } else if(videoExts.get().contains(extension)) {
             return Category.VIDEO;
-        } else if(programExt.contains(extension)) {
+        } else if(programExts.get().contains(extension)) {
             return Category.PROGRAM;
-        } else if(imageExt.contains(extension)) {
+        } else if(imageExts.get().contains(extension)) {
             return Category.IMAGE;
-        } else if(docExt.contains(extension)) {
+        } else if(documentExts.get().contains(extension)) {
             return Category.DOCUMENT;
         } else {
             return Category.OTHER;
@@ -134,15 +229,15 @@ class CategoryManagerImpl implements CategoryManager {
     public Collection<String> getExtensionsForCategory(Category category) {
         switch(category) {
         case AUDIO:
-            return audioExt;
+            return audioExts.get();
         case DOCUMENT:
-            return docExt;
+            return documentExts.get();
         case IMAGE:
-            return imageExt;
+            return imageExts.get();
         case PROGRAM:
-            return programExt;
+            return programExts.get();
         case VIDEO:
-            return videoExt;
+            return videoExts.get();
         case OTHER:
             return Collections.emptySet();
         }
@@ -179,5 +274,17 @@ class CategoryManagerImpl implements CategoryManager {
     public Predicate<String> getWindowsProgramsFilter() {
         return programWindowsPred;
     }
-
+    
+    private static final class CollectionPredicate implements Predicate<String> {
+        private final AtomicReference<Collection<String>> delegate;
+        
+        public CollectionPredicate(AtomicReference<Collection<String>> set) {
+            this.delegate = set;
+        }
+        
+        @Override
+        public boolean apply(String input) {
+            return delegate.get().contains(input);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package org.limewire.core.settings;
 
 import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
 public class LibrarySettings extends LimeProps {
@@ -28,5 +29,29 @@ public class LibrarySettings extends LimeProps {
     public static enum LibraryVersion {
         FOUR_X, FIVE_0_0;
     }
+    
+    /** More extensions that belong in the audio category. */
+    public static final StringArraySetting ADDITIONAL_AUDIO_EXTS =
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_AUDIO_EXTS", new String[0], "Library.moreAudioExts");
+    
+    /** More extensions that belong in the video category. */
+    public static final StringArraySetting ADDITIONAL_VIDEO_EXTS =
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_VIDEO_EXTS", new String[0], "Library.moreVideoExts");
+    
+    /** More extensions that belong in the image category. */
+    public static final StringArraySetting ADDITIONAL_IMAGE_EXTS =
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_IMAGE_EXTS", new String[0], "Library.moreImageExts");
+    
+    /** More extensions that belong in the document category. */
+    public static final StringArraySetting ADDITIONAL_DOCUMENT_EXTS =
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_DOCUMENT_EXTS", new String[0], "Library.moreDocumentExts");
+    
+    /** More extensions that belong in the program category on Windows. */
+    public static final StringArraySetting ADDITIONAL_PROGRAM_WINDOWS_EXTS =
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_PROGRAM_WINDOWS_EXTS", new String[0], "Library.moreProgramWindowsExts");
+    
+    /** More extensions that belong in the program category on OSX & Linux. */
+    public static final StringArraySetting ADDITIONAL_PROGRAM_OSX_LINUX_EXTS =
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_PROGRAM_OSX_LINUX_EXTS", new String[0], "Library.moreProgramOsxLinuxExts");
     
 }
