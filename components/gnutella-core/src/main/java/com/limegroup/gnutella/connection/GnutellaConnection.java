@@ -20,9 +20,9 @@ import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.SocketsManager;
@@ -56,8 +56,8 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
@@ -72,8 +72,6 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.Message.MessageCounter;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -81,6 +79,8 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.MessageCounter;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
@@ -1183,18 +1183,22 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             // we need to see if there is a new simpp version out there.
             CapabilitiesVM capVM = (CapabilitiesVM) vm;
             int smpV = capVM.supportsSIMPP();
-            if (smpV != -1 && (!receivedCapVM || smpV > simppManager.get().getVersion())) {
-                // request the simpp message
-                networkUpdateSanityChecker.handleNewRequest(this, RequestType.SIMPP);
-                send(new SimppRequestVM());
+            if (smpV != -1) {
+                if (smpV > simppManager.get().getVersion() || (!receivedCapVM && MessageSettings.REREQUEST_SIGNED_MESSAGE.evaluateBoolean())) {
+                    // request the simpp message
+                    networkUpdateSanityChecker.handleNewRequest(this, RequestType.SIMPP);
+                    send(new SimppRequestVM());
+                }
             }
 
             // see if there's a new update message.
             int latestId = updateHandler.get().getLatestId();
             int currentId = capVM.supportsUpdate();
-            if (currentId != -1 && (!receivedCapVM || currentId > latestId)) {
-                networkUpdateSanityChecker.handleNewRequest(this, RequestType.VERSION);
-                send(new UpdateRequest());
+            if (currentId != -1) {
+                if (currentId > latestId || (!receivedCapVM && MessageSettings.REREQUEST_SIGNED_MESSAGE.evaluateBoolean())) {
+                    networkUpdateSanityChecker.handleNewRequest(this, RequestType.VERSION);
+                    send(new UpdateRequest());
+                }
             } else if (currentId == latestId) {
                 updateHandler.get().handleUpdateAvailable(this, currentId);
             }

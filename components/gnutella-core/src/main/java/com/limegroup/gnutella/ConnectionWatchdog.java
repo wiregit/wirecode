@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
@@ -42,6 +43,8 @@ public final class ConnectionWatchdog implements Service {
     private final ConnectionServices connectionServices;
 
     private final PingRequestFactory pingRequestFactory;
+    @InspectablePrimitive("old kill count")
+    private volatile int oldKillCount;
     
     @Inject
     public ConnectionWatchdog(
@@ -80,16 +83,20 @@ public final class ConnectionWatchdog implements Service {
     }
 
     /** A snapshot of a connection. */
-    private static class ConnectionState {
+    private class ConnectionState {
         final long sentDropped;
         final long sent;
         final long received;
+        private long bytesReceived;
+        private long bytesSent;
 
         /** Takes a snapshot of the given connection. */
         ConnectionState(RoutedConnection c) {
             this.sentDropped=c.getConnectionMessageStatistics().getNumSentMessagesDropped();
             this.sent=c.getConnectionMessageStatistics().getNumMessagesSent();
-            this.received=c.getConnectionMessageStatistics().getNumMessagesReceived();            
+            this.received=c.getConnectionMessageStatistics().getNumMessagesReceived();
+            this.bytesReceived = c.getConnectionBandwidthStatistics().getBytesReceived();
+            this.bytesSent = c.getConnectionBandwidthStatistics().getBytesSent();
         }
 
         /**
@@ -102,11 +109,29 @@ public final class ConnectionWatchdog implements Service {
             long numSent=this.sent-old.sent;
             long numSentDropped=this.sentDropped-old.sentDropped;
             long numReceived=this.received-old.received;
-
+            long numBytesReceived = this.bytesReceived - old.bytesReceived;
+            long numBytesSent = this.bytesSent - old.bytesSent;
+            
             if ((numSent==numSentDropped) && numSent!=0) {
-                return true;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(numBytesSent + " all sent messages dropped");
+                }
+                if (numBytesSent < ConnectionSettings.MIN_BYTES_SENT.getValue()) {
+                    return true;
+                } else {
+                    ++oldKillCount;
+                    return false;
+                }
             } else if (numReceived==0) {
-                return true;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(numBytesReceived + " no messages received");
+                }
+                if (numBytesReceived < ConnectionSettings.MIN_BYTES_RECEIVED.getValue()) { 
+                    return true;
+                } else {
+                    ++oldKillCount;
+                    return false;
+                }
             } else
                 return false;
         }
