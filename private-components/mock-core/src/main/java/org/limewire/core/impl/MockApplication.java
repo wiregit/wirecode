@@ -2,11 +2,18 @@ package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
 
-
+/**
+ * Implementation of Application for the mock core.
+ */
 public class MockApplication implements Application {
     
     @Override
     public String addClientInfoToUrl(String baseUrl) {
+        if (baseUrl.indexOf('?') == -1)
+            baseUrl += "?";
+        else
+            baseUrl += "&";
+        baseUrl += "lang=en";
         return baseUrl;
     }
     
