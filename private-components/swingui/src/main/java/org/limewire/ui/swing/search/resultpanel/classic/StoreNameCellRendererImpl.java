@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.resultpanel.classic;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -16,6 +17,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.I18n;
 
 /**
  * Implementation of StoreNameCellRenderer for all styles.
@@ -40,16 +42,13 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
 
     @Override
     protected void initComponents() {
-        tracksButton = new IconButton();
-        tracksButton.setAction(showTracksAction);
-        if (storeStyle.getType() != Type.STYLE_D) {
-            tracksButton.setFont(resources.getFont());
-        } else {
-            tracksButton.setIcon(resources.getAlbumCollapsedIcon());
-        }
+        tracksButton = new IconButton(showTracksAction);
+        tracksButton.setFont(resources.getFont());
+        tracksButton.setMinimumSize(new Dimension(
+                resources.getAlbumExpandedIcon().getIconWidth(),
+                resources.getAlbumExpandedIcon().getIconHeight()));
         
-        streamButton = new IconButton();
-        streamButton.setAction(streamAction);
+        streamButton = new IconButton(streamAction);
         streamButton.setIcon(getPlayIcon());
         
         switch (storeStyle.getType()) {
@@ -104,12 +103,22 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
             
             if (vsr.getStoreResult().isAlbum()) {
                 if (storeStyle.getType() != Type.STYLE_D) {
+                    // Update tracks button text.
                     int trackCount = vsr.getStoreResult().getAlbumResults().size();
-                    String trackText = "<html>(<a href=''>show " + trackCount + " tracks</a>)</html>";
-                    tracksButton.setText(trackText);
+                    String trackText = vsr.isShowTracks() ?
+                            I18n.trn("hide {0} track", "hide {0} tracks", trackCount, trackCount) :
+                            I18n.trn("show {0} track", "show {0} tracks", trackCount, trackCount);
+                    String trackHtml = "<html> (<a href=''>" + trackText + "</a>)</html>";
+                    tracksButton.setText(trackHtml);
+                    tracksButton.setIcon(null);
+                    
                 } else {
+                    // Update tracks button icon.
+                    tracksButton.setIcon(vsr.isShowTracks() ? 
+                            resources.getAlbumExpandedIcon() : resources.getAlbumCollapsedIcon());
                     tracksButton.setText(null);
                 }
+                
                 tracksButton.setVisible(true);
                 
             } else {
@@ -118,5 +127,5 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
         }
         
         return renderer;
-    }    
+    }
 }

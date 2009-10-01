@@ -15,6 +15,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
@@ -43,12 +44,15 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
     protected final RendererResources resources;
     protected final Action downloadAction;
     protected final Action streamAction;
-    protected final Action showTracksAction;
+    protected final ShowTracksAction showTracksAction;
     
     protected final JXPanel renderer;
     protected final JLabel iconLabel;
     protected final JLabel nameLabel;
     
+    private JTable table;
+    private int row;
+    private int col;
     protected VisualStoreResult vsr;
     
     /**
@@ -86,6 +90,10 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, 
             boolean isSelected, boolean hasFocus, int row, int column) {
+        this.table = table;
+        this.row = row;
+        this.col = column;
+        
         Color background;
         Color foreground;
         Icon icon;
@@ -134,11 +142,6 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
         nameLabel.setMinimumSize(new Dimension(15, nameLabel.getMinimumSize().height));
         
         return renderer;
-    }
-    
-    // TODO review for removal
-    public String getToolTipText(){
-        return nameLabel.getText();
     }
     
     /**
@@ -220,12 +223,26 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
     /**
      * Action to show or hide album tracks.
      */
-    private class ShowTracksAction extends AbstractAction {
+    public class ShowTracksAction extends AbstractAction {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO implement; toggle state and button icon/text
-            System.out.println("showTracks");
+            if (vsr != null) {
+                // Toggle indicator.
+                vsr.setShowTracks(!vsr.isShowTracks());
+                
+                // Post event to update cell editor.
+                if (table != null) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (row >= 0) {
+                                table.editCellAt(row, col);
+                            }
+                        }
+                    });
+                }
+            }
         }
     }
     
