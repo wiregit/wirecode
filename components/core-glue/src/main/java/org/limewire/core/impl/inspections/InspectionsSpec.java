@@ -196,11 +196,7 @@ public class InspectionsSpec {
             // inspect and add all finished inspections to queue
             InspectionDataContainer inspResults = inspect(inspector,
                 ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.get());
-            try {
-                processor.inspectionsPerformed(inspResults);
-            } catch (InspectionProcessingException e) {
-                ensureCancelled();
-            }
+            processor.inspectionsPerformed(InspectionsSpec.this, inspResults);
         }
     }
 }

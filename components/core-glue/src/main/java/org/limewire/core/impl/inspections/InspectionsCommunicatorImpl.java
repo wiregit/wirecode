@@ -6,6 +6,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.http.HttpEntity;
@@ -33,6 +38,7 @@ import org.limewire.lifecycle.Asynchronous;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.StringSetting;
+import org.limewire.concurrent.ExecutorsHelper;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -206,10 +212,13 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
 
     @Override
     public void stop() {
-        // todo: send any unsent (such as previously failed, or not yet sent) inspections results
-        if (started.get()) {
+        if (started.compareAndSet(true, false)) {
             // cancel any pending inspections scheduled
             cancelInspections(inspectionsSpecs);
+            if (processor != null) {
+                processor.stopped();
+                processor = null;
+            }
         }
     }
 
@@ -221,20 +230,60 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
         return SERVICE_NAME;
     }
 
-    // default implementation currently just logs and sends inspection results to server
-    //
-    // todo: another, better implementation can add to a queue, and a separate thread is responsible for all sending
+    /**
+     * Default impl has a dedicated sending thread that takes from a queue and sends to the server.
+     * {@link #inspectionsPerformed} adds inspection results to this queue.
+     */
     private class DefaultInspectionsProcessor implements InspectionsResultProcessor {
+        
+        private final static int QUEUE_SIZE = 10;
+        
+        private ExecutorService queueExec = new ThreadPoolExecutor(1, 1, 0L, 
+                TimeUnit.MILLISECONDS, 
+                new LinkedBlockingQueue<Runnable>(QUEUE_SIZE), 
+                ExecutorsHelper.daemonThreadFactory("InspectionsSender"),
+                new InspectionSendingErrorHandler());
 
         @Override
-        public void inspectionsPerformed(InspectionDataContainer insps) throws InspectionProcessingException {
+        public void inspectionsPerformed(final InspectionsSpec spec, final InspectionDataContainer insps) {
+            queueExec.submit(new SendToServer(spec, insps));
+        }
+
+        @Override
+        public synchronized void stopped() {
+            queueExec.shutdown();
+        }
+    }
+    
+    private class InspectionSendingErrorHandler implements RejectedExecutionHandler {
+        @Override
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+            ((SendToServer)r).processError();
+        }
+    }
+
+    private class SendToServer implements Runnable {
+        
+        SendToServer(InspectionsSpec spec, InspectionDataContainer insps) {
+            this.spec = spec;
+            this.insps = insps;
+        }
+        
+        private final InspectionsSpec spec;
+        private final InspectionDataContainer insps;
+
+        @Override
+        public void run() {
             try {
                 byte[] bytesToSend = parser.inspectionResultToByteArray(insps);
                 sendInspectionsResultsToServer(bytesToSend);
             } catch (IOException e) {
-                LOG.debug("Error sending inspections results to server", e);
-                throw new InspectionProcessingException(e);
+                processError();
             }
+        }
+
+        private void processError() {
+            spec.ensureCancelled();
         }
     }
 }

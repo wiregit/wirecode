@@ -217,9 +217,11 @@ public class InspectionsSchedulingTest extends LimeTestCase {
         }
 
         @Override
-        public void inspectionsPerformed(InspectionDataContainer insps) throws InspectionProcessingException {
+        public void inspectionsPerformed(InspectionsSpec spec, InspectionDataContainer insps){
             inspectionResults.add(insps);
         }
+
+        @Override public void stopped() {}
     }
 
     /**

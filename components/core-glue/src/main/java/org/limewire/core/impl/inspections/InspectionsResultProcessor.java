@@ -9,9 +9,12 @@ public interface InspectionsResultProcessor {
      * Process inspection results
      * 
      * @param insps inspection results
-     * @throws InspectionProcessingException upon error
      */
-    public void inspectionsPerformed(InspectionDataContainer insps) throws InspectionProcessingException;
+    public void inspectionsPerformed(InspectionsSpec spec, InspectionDataContainer insps);
     
-    // todo: maybe put in a "stopped()" method to process inspections when inspections communicator shuts down
+
+    /**
+     * Called when {@link InspectionsCommunicator} service has been stopped
+     */
+    public void stopped();
 }

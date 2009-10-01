@@ -264,6 +264,43 @@ public class InspectionsIntegrationTest extends LimeTestCase {
         // expecting no inspections results
         assertEquals(0, listInspDataEncoded.size());
     }
+
+    /**
+     * Tests default inspections result processor, which maintains a queue of
+     * inspections results and a dedicated sending thread.
+     * 
+     * This test attempts to insert more inspections results into the queue
+     * than the queue capacity
+     * 
+     * @throws Exception on error
+     */
+    public void testUnsuccessfulSendOverflow() throws Exception {
+        int SEND_QUEUE_SIZE = 10;
+        List<String> inspections = 
+            Collections.singletonList("org.limewire.core.impl.inspections.InspectionsIntegrationTest:INSPECTION_ONE");
+        List<InspectionsSpec> specs = new ArrayList<InspectionsSpec>();
+        
+        // try to put (SEND_QUEUE_SIZE+5) inspections results simultaneously.  
+        // The server delay in responding will make sure excess inspections results
+        // are attempted
+        for (int i=0; i< SEND_QUEUE_SIZE + 5; i++) {
+            specs.add(new InspectionsSpec(inspections, 1, 9000));    
+        }
+        
+        // start web server and lw services
+        ServerController serverController = startServerWithInspectionSpecs(specs);
+        serverController.setSubmissionDelayBeforeResponse(1000);
+        startInspectionsCommunicator();       
+        Thread.sleep(16000);
+        
+        List<byte[]> listInspDataEncoded = serverController.getReceivedInspectionData();
+        
+        // expecting only as many results as the size of the queue + 1
+        // 1 is attempted to be sent, SEND_QUEUE_SIZE are queued up and sent sequentially, 
+        // Remaining excess inspection results
+        // are not sent, and their inspection specs cancelled
+        assertEquals(SEND_QUEUE_SIZE+1, listInspDataEncoded.size());
+    }
     
     public void testServerNotUp() throws Exception {
         InspectionsCommunicatorImpl ic = 
@@ -500,6 +537,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
     private class ServerController extends ResourceHandler {
         
         private List<byte[]> inspectionDataEncoded = new ArrayList<byte[]>();
+        private int delay = 0;           // delay in seconds prior to response
 
         @SuppressWarnings("unchecked")
         @Override
@@ -520,11 +558,25 @@ public class InspectionsIntegrationTest extends LimeTestCase {
                 byte[] b = new byte[lengthOfData];
                 assertEquals(lengthOfData, httpRequest.getInputStream().read(b));
                 inspectionDataEncoded.add(b);
+                delayResponseIfNecessary();
             } else {
                 fail("Invalid request: " + path);
             }
             httpResponse.commit();
             httpRequest.setHandled(true);
+        }
+        
+        void setSubmissionDelayBeforeResponse(int delay) {
+            this.delay = delay;    
+        }
+        
+        private void delayResponseIfNecessary() {
+            if (delay > 0) {
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                }
+            }
         }
 
         protected void sendInspectionSpecs(org.mortbay.http.HttpRequest httpRequest,
