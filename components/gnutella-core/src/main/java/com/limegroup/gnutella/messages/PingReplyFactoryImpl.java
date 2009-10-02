@@ -28,7 +28,6 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Statistics;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -38,7 +37,6 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
     private final NetworkManager networkManager;
     private final Provider<Statistics> statistics;
-    private final Provider<UDPService> udpService;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<HostCatcher> hostCatcher;
     private final Provider<DHTManager> dhtManager;
@@ -49,7 +47,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     // TODO: All these objects should be folded into LocalPongInfo
     @Inject
     public PingReplyFactoryImpl(NetworkManager networkManager,
-            Provider<Statistics> statistics, Provider<UDPService> udpService,
+            Provider<Statistics> statistics,
             Provider<ConnectionManager> connectionManager,
             Provider<HostCatcher> hostCatcher,
             Provider<DHTManager> dhtManager,
@@ -58,8 +56,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.statistics = statistics;
-        this.udpService = udpService;
-        this.connectionManager = connectionManager;
+            this.connectionManager = connectionManager;
         this.hostCatcher = hostCatcher;
         this.dhtManager = dhtManager;
         this.localPongInfo = localPongInfo;
@@ -79,7 +76,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                 localPongInfo.getSharedFileSize() / 1024,
                 localPongInfo.isSupernode(),
                 statistics.get().calculateDailyUptime(),
-                udpService.get().isGUESSCapable(),
+                networkManager.isGUESSCapable(),
                 ApplicationSettings.LANGUAGE.get().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                         .get()
                         : ApplicationSettings.LANGUAGE.get(),
@@ -113,8 +110,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             Collection<? extends IpPort> gnutHosts,
             Collection<? extends IpPort> dhtHosts) {
         GGEP ggep = newGGEP(statistics.get().calculateDailyUptime(),
-                localPongInfo.isSupernode(), udpService
-                        .get().isGUESSCapable());
+                localPongInfo.isSupernode(), networkManager.isGUESSCapable());
 
         String locale = ApplicationSettings.LANGUAGE.get().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                 .get()

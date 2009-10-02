@@ -450,10 +450,37 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         // Grab a handle to the stream, to ensure it can't become null.
         NIOOutputStream output = nioOutputStream;
         
-        if(output != null)
+        if(output != null) {
             return output.getOutputStream();
-        else
-            throw new IllegalStateException("blocking I/O not in use!");
+        } else {
+            Callable<OutputStream> callable = new Callable<OutputStream>() {
+                @Override
+                public OutputStream call() throws Exception {
+                    InterestWritableByteChannel source = getBaseWriteChannel();
+                    InterestWritableByteChannel bottom = getBottomFromChain(source);
+                    if (bottom.hasBufferedOutput()) {
+                        throw new IllegalStateException("still buffered output");
+                    } else {
+                        synchronized (LOCK) {
+                            if (shutdown) {
+                                throw new IOException("shut down");
+                            }
+                            nioOutputStream = new NIOOutputStream(AbstractNBSocket.this, source);
+                            writer = getBottomFromChain(source);
+                            return nioOutputStream.getOutputStream();
+                        }
+                    }
+                }
+            };
+            Future<OutputStream> future = NIODispatcher.instance().getScheduledExecutorService().submit(callable);
+            try {
+                return future.get();
+            } catch(ExecutionException ee) {
+                throw new IOException(ee.getCause());
+            } catch (InterruptedException ie) {
+                throw new IOException(ie.getCause());
+            }
+        }
     }
     
     /** Gets the read timeout for this socket. */

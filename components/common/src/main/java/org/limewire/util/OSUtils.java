@@ -405,10 +405,6 @@ public class OSUtils {
         }
     }
     
-    public static boolean supportsTLS() {
-        return true;
-    }
-    
     private static class OSInspecter implements Inspectable {
         @Override
         public Object inspect() {

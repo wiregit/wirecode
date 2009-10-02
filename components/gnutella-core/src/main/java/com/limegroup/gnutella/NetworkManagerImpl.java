@@ -31,6 +31,8 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ProxySettings;
+import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.nio.ByteBufferCache;
@@ -39,7 +41,6 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.BooleanSetting;
-import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -88,6 +89,8 @@ public class NetworkManagerImpl implements NetworkManager {
      */
     private volatile Set<Connectable> cachedProxies;
 
+    private final ProxySettings proxySettings;
+
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
             Provider<Acceptor> acceptor,
@@ -97,7 +100,8 @@ public class NetworkManagerImpl implements NetworkManager {
             NetworkInstanceUtils networkInstanceUtils,
             Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
             Provider<ByteBufferCache> bbCache,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices,
+            ProxySettings proxySettings) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
@@ -107,6 +111,7 @@ public class NetworkManagerImpl implements NetworkManager {
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.bbCache = bbCache;
         this.applicationServices = applicationServices;
+        this.proxySettings = proxySettings;
     }
     
     @Inject
@@ -198,7 +203,7 @@ public class NetworkManagerImpl implements NetworkManager {
      * @see com.limegroup.gnutella.NetworkManager#isGUESSCapable()
      */
     public boolean isGUESSCapable() {
-    	return udpService.get().isGUESSCapable();
+    	return udpService.get().isGUESSCapable() && !isProxyEnabled();
     }
 
     /* (non-Javadoc)
@@ -409,21 +414,25 @@ public class NetworkManagerImpl implements NetworkManager {
      * @see com.limegroup.gnutella.NetworkManager#canReceiveUnsolicited()
      */
     public boolean canReceiveUnsolicited() {
-    	return udpService.get().canReceiveUnsolicited();
+    	return udpService.get().canReceiveUnsolicited() && !isProxyEnabled();
+    }
+    
+    private boolean isProxyEnabled() {
+        return proxySettings.getCurrentProxyType() != ProxyType.NONE;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.NetworkManager#canReceiveSolicited()
      */
     public boolean canReceiveSolicited() {
-    	return udpService.get().canReceiveSolicited();
+    	return udpService.get().canReceiveSolicited() && !isProxyEnabled();
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.NetworkManager#canDoFWT()
      */
     public boolean canDoFWT() {
-        return udpService.get().canDoFWT();
+        return udpService.get().canDoFWT() && !isProxyEnabled();
     }
     
     public int getStableUDPPort() {
@@ -435,7 +444,7 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     public int supportsFWTVersion() {
-        return udpService.get().canDoFWT() ? RUDPUtils.VERSION : 0;
+        return canDoFWT() ? RUDPUtils.VERSION : 0;
     }
     
     public boolean isPrivateAddress(byte[] addr) {
@@ -458,12 +467,12 @@ public class NetworkManagerImpl implements NetworkManager {
     
     /** Returns true if TLS is disabled for this session. */
     public boolean isTLSSupported() {
-        return tlsSupported;
+        return tlsSupported && !isProxyEnabled();
     }
     
     /** Whether or not incoming TLS is allowed. */
     public boolean isIncomingTLSEnabled() {
-        return tlsSupported && SSLSettings.TLS_INCOMING.getValue() && OSUtils.supportsTLS();
+        return isTLSSupported() && SSLSettings.TLS_INCOMING.getValue();
     }
 
     public void setIncomingTLSEnabled(boolean enabled) {
@@ -472,7 +481,7 @@ public class NetworkManagerImpl implements NetworkManager {
 
     /** Whether or not outgoing TLS is allowed. */
     public boolean isOutgoingTLSEnabled() {
-        return tlsSupported && SSLSettings.TLS_OUTGOING.getValue() && OSUtils.supportsTLS();
+        return isTLSSupported() && SSLSettings.TLS_OUTGOING.getValue();
     }
 
     public void setOutgoingTLSEnabled(boolean enabled) {

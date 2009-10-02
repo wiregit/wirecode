@@ -13,6 +13,7 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UploadServices;
@@ -51,6 +52,7 @@ class LimeSessionInfo implements SessionInfo {
     private final ConnectionServices connectionServices;
     private final LifecycleManager lifecycleManager;
     private final RemoteLibraryManager remoteLibraryManager;
+    private final NetworkManager networkManager;
 
     @Inject
     public LimeSessionInfo(NIODispatcher dispatcher, DownloadManager downloadManager,
@@ -63,7 +65,8 @@ class LimeSessionInfo implements SessionInfo {
                            Library library, SimppManager simppManager,
                            UploadSlotManager uploadSlotManager, ConnectionServices connectionServices,
                            LifecycleManager lifecycleManager, RemoteLibraryManager remoteLibraryManager,
-                           @GnutellaFiles FileView gnutellaFileView) {
+                           @GnutellaFiles FileView gnutellaFileView,
+                           NetworkManager networkManager) {
         this.dispatcher = dispatcher;
         this.downloadManager = downloadManager;
         this.statistics = statistics;
@@ -86,6 +89,7 @@ class LimeSessionInfo implements SessionInfo {
         this.lifecycleManager = lifecycleManager;
         this.remoteLibraryManager = remoteLibraryManager;
         this.gnutellaFileView = gnutellaFileView;
+        this.networkManager = networkManager;
     }
 
     
@@ -196,11 +200,11 @@ class LimeSessionInfo implements SessionInfo {
     }
 
     public boolean isGUESSCapable() {
-        return udpService.isGUESSCapable();
+        return networkManager.isGUESSCapable();
     }
 
     public boolean canReceiveSolicited() {
-        return udpService.canReceiveSolicited();
+        return networkManager.canReceiveSolicited();
     }
 
     public boolean acceptedIncomingConnection() {
@@ -213,7 +217,7 @@ class LimeSessionInfo implements SessionInfo {
 
     @Override
     public boolean canDoFWT() {
-        return udpService.canDoFWT();
+        return networkManager.canDoFWT();
     }
 
     @Override

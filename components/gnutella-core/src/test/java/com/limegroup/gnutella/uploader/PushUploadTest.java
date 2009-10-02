@@ -39,6 +39,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.ProxySettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIOTestUtils;
@@ -551,9 +552,11 @@ public class PushUploadTest extends LimeTestCase {
                 Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
                 Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
                 NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
-                Provider<ByteBufferCache> bbCache, ApplicationServices applicationServices) {
+                Provider<ByteBufferCache> bbCache, ApplicationServices applicationServices,
+                ProxySettings proxySettings) {
             super(udpService, acceptor, dhtManager, connectionManager,
-                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory, bbCache, applicationServices);
+                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory, bbCache, applicationServices,
+                    proxySettings);
         }
 
         @Override
