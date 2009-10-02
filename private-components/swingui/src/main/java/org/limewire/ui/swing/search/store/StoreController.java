@@ -40,14 +40,20 @@ public class StoreController {
      * Returns a handler for downloading search results.
      */
     public DownloadHandler getDownloadHandler() {
-        // TODO implement by using factory to create concrete handler
+        // TODO review - maybe use factory to create concrete handler
         return new DownloadHandler() {
             @Override
             public void download(VisualSearchResult vsr) {
+                if (vsr instanceof VisualStoreResult) {
+                    StoreController.this.download((VisualStoreResult) vsr);
+                }
             }
             
             @Override
             public void download(VisualSearchResult vsr, File saveFile) {
+                if (vsr instanceof VisualStoreResult) {
+                    StoreController.this.download((VisualStoreResult) vsr);
+                }
             }
         };
     }
