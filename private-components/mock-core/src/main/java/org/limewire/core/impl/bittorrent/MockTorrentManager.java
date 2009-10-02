@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentManagerSettings;
@@ -136,5 +137,20 @@ public class MockTorrentManager implements TorrentManager {
     @Override
     public List<Torrent> getTorrents() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isValid(Torrent torrent) {
+        return false;
+    }
+
+    @Override
+    public boolean hasMetaData(Torrent torrent) {
+        return false;
+    }
+
+    @Override
+    public TorrentInfo getTorrentInfo(Torrent torrent) {
+        return null;
     }
 }

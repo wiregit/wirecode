@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.TorrentException;
+import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.libtorrent.callback.AlertCallback;
@@ -40,7 +42,8 @@ class LibTorrentWrapper {
             NativeLibrary lib = NativeLibrary.getInstance("torrent-wrapper");
             validate(lib);
             init(torrentSettings);
-            //TODO add get_version method to the wrapper that can be checked here as well.
+            // TODO add get_version method to the wrapper that can be checked
+            // here as well.
             loaded.set(true);
         } catch (Throwable e) {
             LOG.error("Failure loading the libtorrent libraries.", e);
@@ -88,9 +91,9 @@ class LibTorrentWrapper {
         LOG.debug("after get_alerts");
     }
 
-    public void get_alerts(AlertCallback alertCallback, int mask) {
+    public void get_alerts(AlertCallback alertCallback) {
         LOG.debug("before get_alerts");
-        catchWrapperException(libTorrent.get_alerts(alertCallback, mask));
+        catchWrapperException(libTorrent.get_alerts(alertCallback));
         LOG.debug("after get_alerts");
     }
 
@@ -326,9 +329,36 @@ class LibTorrentWrapper {
         return has_metadata.getValue() != 0;
     }
     
-    public void set_alert_mask(int mask) {
-        LOG.debugf("before set_alert_mask: {0}", mask);
-        catchWrapperException(libTorrent.set_alert_mask(mask));
-        LOG.debugf("after set_alert_mask: {0}", mask);
+    public boolean is_valid(String id) {
+        LOG.debugf("before is_valid: {0}", id);
+        IntByReference is_valid = new IntByReference(0);
+        catchWrapperException(libTorrent.is_valid(id, is_valid));
+        LOG.debugf("after is_valid: {0}", id);
+        return is_valid.getValue() != 0;
+    }
+
+    public TorrentInfo get_torrent_info(String id) {
+        LOG.debugf("before get_torrent_info: {0}", id);
+        LibTorrentInfo info = new LibTorrentInfo();
+        catchWrapperException(libTorrent.get_torrent_info(id, info));
+        free_torrent_info(info);
+        TorrentFileEntry[] files = get_files(id);
+        LOG.debugf("after get_torrent_info: {0}", id);
+        return new TorrentInfoImpl(info, files);
+    }
+
+    public void free_torrent_info(LibTorrentInfo info) {
+        LOG.debugf("before free_torrent_info: {0}", info);
+        catchWrapperException(libTorrent.free_torrent_info(info.getPointer()));
+        LOG.debugf("after free_torrent_info: {0}", info);
+    }
+    
+    /**
+     * Saves the fast resume data for the given alert.
+     */
+    public void save_fast_resume_data(LibTorrentAlert alert, String filePath) {
+        LOG.debugf("before save_fast_resume_data: {0} - {1}", alert, filePath);
+        catchWrapperException(libTorrent.save_fast_resume_data(alert, new WString(filePath)));
+        LOG.debugf("after save_fast_resume_data: {0} - {1}", alert, filePath);
     }
 }

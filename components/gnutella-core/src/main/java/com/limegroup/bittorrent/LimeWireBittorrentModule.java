@@ -12,6 +12,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.libtorrent.LazyTorrentManager;
+import org.limewire.libtorrent.LibTorrentAlert;
 import org.limewire.libtorrent.TorrentImpl;
 
 import com.google.inject.AbstractModule;
@@ -80,11 +81,6 @@ public class LimeWireBittorrentModule extends AbstractModule {
                             }
 
                             @Override
-                            public File getTorrentUploadsFolder() {
-                                return BittorrentSettings.LIBTORRENT_UPLOADS_FOLDER.get();
-                            }
-
-                            @Override
                             public float getSeedRatioLimit() {
 
                                 if (BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue()) {
@@ -128,6 +124,18 @@ public class LimeWireBittorrentModule extends AbstractModule {
                             @Override
                             public int getMaxSeedingLimit() {
                                 return BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue();
+                            }
+
+                            @Override
+                            public int getAlertMask() {
+                                return LibTorrentAlert.storage_notification 
+                                | LibTorrentAlert.progress_notification
+                                | LibTorrentAlert.status_notification;
+                            }
+
+                            @Override
+                            public File getTorrentUploadsFolder() {
+                                return BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
                             }
                         };
                     }

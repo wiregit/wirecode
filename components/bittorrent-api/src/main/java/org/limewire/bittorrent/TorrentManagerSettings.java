@@ -83,4 +83,9 @@ public interface TorrentManagerSettings {
      * Returns the maximum number of seeding torrents allowed. 
      */
     public int getMaxSeedingLimit();
+
+    /**
+     * Returns the alert mask for the torrent session. 
+     */
+    public int getAlertMask();
 }

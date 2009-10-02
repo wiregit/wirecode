@@ -122,8 +122,15 @@ public interface TorrentStatus {
     public long getTotalWantedDone();
 
     /**
-     * Returns the internal error message for the torrent. If the torrent is in an Error state. 
+     * Returns the internal error message for the torrent. If the torrent is in
+     * an Error state.
      */
     public String getError();
+
+    /**
+     * Returns the current tracker for this torrent, null if no
+     * tracker was ever contacted.
+     */
+    public String getCurrentTracker();
 
 }

@@ -208,18 +208,28 @@ public interface Torrent {
     public File getTorrentDataFile(TorrentFileEntry torrentFileEntry);
 
     /**
-     * Sets the snapshot TorrentInfo for this torrent.
-     */
-    public void setTorrentInfo(TorrentInfo torrentInfo);
-
-    /**
      * Returns true if this torrent has metadata yet or not.
      */
     public boolean hasMetaData();
 
     /**
-     * Returns the TorrentInfo object for this torrent, can be null 
-     * when the torrent does no yet have its metadata loaded. 
+     * Returns the TorrentInfo object for this torrent, can be null when the
+     * torrent does no yet have its metadata loaded.
      */
     public TorrentInfo getTorrentInfo();
+
+    /**
+     * Sets a property on the torrent to the given value.
+     */
+    public void setProperty(String key, Object value);
+
+    /**
+     * Gets the value for the given property for this torrent. Null if not set.
+     */
+    public Object getProperty(String key);
+    
+    /**
+     * Returns true of this torrent is still considered valid.
+     */
+    public boolean isValid();
 }

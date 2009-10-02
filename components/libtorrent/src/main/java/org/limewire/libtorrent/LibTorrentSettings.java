@@ -4,7 +4,6 @@ package org.limewire.libtorrent;
 import org.limewire.bittorrent.TorrentManagerSettings;
 
 import com.sun.jna.Structure;
-import com.sun.jna.WString;
 
 public class LibTorrentSettings extends Structure {
 
@@ -24,8 +23,6 @@ public class LibTorrentSettings extends Structure {
     
     public int listen_end_port = 6889;
 
-    public WString uploads_directory;
-    
     public float seed_ratio_limit;
     
     public float seed_time_ratio_limit;
@@ -35,18 +32,20 @@ public class LibTorrentSettings extends Structure {
     public int active_downloads_limit;
     public int active_seeds_limit;
     public int active_limit;
+    public int alert_mask;
+    
     
     public LibTorrentSettings(TorrentManagerSettings torrentSettings) {
         this.max_upload_bandwidth = torrentSettings.getMaxUploadBandwidth();
         this.max_download_bandwidth = torrentSettings.getMaxDownloadBandwidth();
         this.listen_start_port = torrentSettings.getListenStartPort();
         this.listen_end_port = torrentSettings.getListenEndPort();
-        this.uploads_directory = new WString(torrentSettings.getTorrentUploadsFolder().getAbsolutePath());
         this.seed_ratio_limit = torrentSettings.getSeedRatioLimit();
         this.seed_time_ratio_limit = torrentSettings.getSeedTimeRatioLimit();
         this.seed_time_limit = torrentSettings.getSeedTimeLimit();
         this.active_downloads_limit = torrentSettings.getActiveDownloadsLimit();
         this.active_seeds_limit = torrentSettings.getActiveSeedsLimit();
         this.active_limit = torrentSettings.getActiveLimit();
+        this.alert_mask = torrentSettings.getAlertMask();
     }
 }

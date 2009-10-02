@@ -49,7 +49,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
      * starting off the uploads.
      */
     public void loadSavedUploads() {
-        File uploadsDirectory = BittorrentSettings.LIBTORRENT_UPLOADS_FOLDER.get();
+        File uploadsDirectory = BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
         if (uploadsDirectory.exists()) {
             File[] uploadMementos = uploadsDirectory.listFiles(new FileFilter() {
                 @Override

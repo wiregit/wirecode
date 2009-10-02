@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentPeer;
@@ -249,5 +250,31 @@ public class LazyTorrentManager implements TorrentManager, Service {
 
         setupTorrentManager();
         return torrentManager.get().getTorrents();
+    }
+
+    @Override
+    public boolean isValid(Torrent torrent) {
+        if (!initialized) {
+            return false;
+        }
+
+        setupTorrentManager();
+        return torrentManager.get().isValid(torrent);
+    }
+
+    @Override
+    public boolean hasMetaData(Torrent torrent) {
+        if (!initialized) {
+            return false;
+        }
+        setupTorrentManager();
+        return torrentManager.get().hasMetaData(torrent);
+
+    }
+
+    @Override
+    public TorrentInfo getTorrentInfo(Torrent torrent) {
+        setupTorrentManager();
+        return torrentManager.get().getTorrentInfo(torrent);
     }
 }

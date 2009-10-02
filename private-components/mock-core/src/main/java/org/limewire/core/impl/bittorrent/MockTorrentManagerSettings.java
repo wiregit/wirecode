@@ -44,11 +44,6 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     }
 
     @Override
-    public File getTorrentUploadsFolder() {
-        return null;
-    }
-
-    @Override
     public float getSeedRatioLimit() {
         return 0;
     }
@@ -81,5 +76,15 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     @Override
     public int getMaxSeedingLimit() {
         return 0;
+    }
+
+    @Override
+    public int getAlertMask() {
+        return 0;
+    }
+
+    @Override
+    public File getTorrentUploadsFolder() {
+        return null;
     }
 }

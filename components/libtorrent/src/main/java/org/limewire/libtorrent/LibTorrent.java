@@ -45,10 +45,9 @@ interface LibTorrent extends Library {
 
     /**
      * Reads any stored alerts in the session, having there data coming in
-     * through the callback.  Use the mask to filter and discard alerts
-     * that do not match.
+     * through the callback.
      */
-    public WrapperStatus get_alerts(AlertCallback alertCallback, int mask);
+    public WrapperStatus get_alerts(AlertCallback alertCallback);
 
     /**
      * Fills in the Libtorrent status struct for the torrent with the given sha1
@@ -184,16 +183,30 @@ interface LibTorrent extends Library {
      * the given priority.
      */
     public WrapperStatus set_file_priority(String sha1, int index, int priority);
-    
+
     /**
      * Checks if the given torrent has metadata yet. 
      */
     public WrapperStatus has_metadata(String sha1, IntByReference has_metadata);
 
     /**
-     * Sets the global alert mask and enables creation of the various events
-     *  that match with the mask.  
+     * Checks if the given torrent is Valid.
      */
-    public WrapperStatus set_alert_mask(int mask);
-    
+    public WrapperStatus is_valid(String sha1, IntByReference is_valid);
+
+    /**
+     * Returns the TorrentInfo for the given torrent.
+     */
+    public WrapperStatus get_torrent_info(String sha1, LibTorrentInfo torrentInfo);
+
+    /**
+     * Frees memory for the torrent info.
+     */
+    public WrapperStatus free_torrent_info(Pointer pointer);
+
+    /**
+     * Saves the fast resume data for the given alert.
+     */
+    public WrapperStatus save_fast_resume_data(LibTorrentAlert alert, WString filePath);
+
 }

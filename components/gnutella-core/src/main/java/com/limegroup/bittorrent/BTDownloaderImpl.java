@@ -164,8 +164,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // nothing to do now.
         } else if(TorrentEvent.STARTED == event) {
             torrentsStarted.incrementAndGet();    
-        } else if (TorrentEvent.META_DATA_UPDATED == event) {
-            // nothing to do now.
         } else {
             DownloadState currentState = getState();
             if (lastState.getAndSet(currentState) != currentState) {
@@ -221,13 +219,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             }
         }
 
-        // TODO should maybe not use the same TorrentFileEntry for items in
-        // the TorrentInfo object, right now making a copy of the last known
-        // contents, to display the correct value in the ui, in general
-        // these fields are not kept up to date however.
-        TorrentInfo torrentInfo = new TorrentInfo(fileEntries);
-        torrent.setTorrentInfo(torrentInfo);
-        
         if (hasAnyPriorityZero) {
             for (TorrentFileEntry fileEntry : fileEntries) {
                 if (fileEntry.getPriority() == 0) {

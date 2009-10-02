@@ -58,8 +58,8 @@ public class BittorrentSettings extends LimeProps {
     /**
      * The folder where all the upload mementos are saved for torrents.
      */
-    public static FileSetting LIBTORRENT_UPLOADS_FOLDER = FACTORY
-            .createFileSetting("LIBTORRENT_UPLOADS_FOLDER", new File(CommonUtils
+    public static FileSetting TORRENT_UPLOADS_FOLDER = FACTORY
+            .createFileSetting("TORRENT_UPLOADS_FOLDER", new File(CommonUtils
                     .getUserSettingsDir(), "uploads.dat/"));
 
     /**

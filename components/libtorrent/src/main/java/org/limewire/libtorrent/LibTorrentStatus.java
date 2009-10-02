@@ -13,25 +13,23 @@ import com.sun.jna.Structure;
 public class LibTorrentStatus extends Structure implements TorrentStatus {
 
     /**
-     * long containing the total amount of the torrent downloaded and
-     * verified.
+     * long containing the total amount of the torrent downloaded and verified.
      */
     public long total_done;
-    
+
     /**
-     * String containing the total amount of wanted bytes of the torrent downloaded and
-     * verified.
+     * String containing the total amount of wanted bytes of the torrent
+     * downloaded and verified.
      */
     public long total_wanted_done;
-    
+
     /**
      * long containing the total amount of wanted bytes of the torrent.
      */
     public long total_wanted;
 
     /**
-     * long containing the total amount of the torrent downloaded, this
-     * session.
+     * long containing the total amount of the torrent downloaded, this session.
      */
     public long total_download;
 
@@ -41,8 +39,8 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     public long total_upload;
 
     /**
-     * long containing the total amount of the torrent payload downloaded,
-     * this session.
+     * long containing the total amount of the torrent payload downloaded, this
+     * session.
      */
     public long total_payload_download;
 
@@ -59,8 +57,8 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     public long all_time_payload_download;
 
     /**
-     * long containing the total amount of the torrent payload uploaded over
-     * all time.
+     * long containing the total amount of the torrent payload uploaded over all
+     * time.
      */
     public long all_time_payload_upload;
 
@@ -73,7 +71,7 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
      * The current rate of the torrent upload in bytes/second
      */
     public float upload_rate;
-    
+
     /**
      * The current rate of the torrent payload download in bytes/second
      */
@@ -128,7 +126,7 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
      * boolean of whether this torrent is valid.
      */
     public int valid;
-    
+
     /**
      * boolean of whether this torrent is auto managed.
      */
@@ -149,6 +147,12 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
      * is no error.
      */
     public String error;
+
+    /**
+     * Represents the current tracker for this torrent. Null/empty if there was
+     * never a successful tracker connect.
+     */
+    public String current_tracker;
 
     @Override
     public float getDownloadPayloadRate() {
@@ -187,7 +191,7 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
 
     @Override
     public long getTotalDone() {
-       return total_done;
+        return total_done;
     }
 
     @Override
@@ -214,7 +218,7 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     public boolean isError() {
         return !StringUtils.isEmpty(error);
     }
-    
+
     @Override
     public String getError() {
         return error;
@@ -246,10 +250,10 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
 
     @Override
     public float getSeedRatio() {
-        if(getAllTimePayloadDownload() <= 0 || getAllTimePayloadUpload() <= 0) {
+        if (getAllTimePayloadDownload() <= 0 || getAllTimePayloadUpload() <= 0) {
             return 0;
         }
-        float seedRatio = getAllTimePayloadUpload() / (float)getAllTimePayloadDownload(); 
+        float seedRatio = getAllTimePayloadUpload() / (float) getAllTimePayloadDownload();
         return seedRatio;
     }
 
@@ -270,16 +274,18 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
 
     @Override
     public int getSeedingTime() {
-        // Partial downloads have no notion of seeding time since they never fully
-        //  enter the seeding state.  Instead use the active time in this case for
-        //  comparison.
-        // TODO: Update when something better becomes available.  This will cause 
-        //        partial torrent download seeds to become stale comparatively sooner
-        //        than their normal peers.
-        if (seeding_time==0 && LibTorrentState.forId(state) == LibTorrentState.FINISHED) {
+        // Partial downloads have no notion of seeding time since they never
+        // fully
+        // enter the seeding state. Instead use the active time in this case for
+        // comparison.
+        // TODO: Update when something better becomes available. This will cause
+        // partial torrent download seeds to become stale comparatively sooner
+        // than their normal peers.
+        //TODO after talking with arvid, he will add a finished_time variable for this extraneous case.
+        //it will be a part of 0.15.0 when it is released.
+        if (seeding_time == 0 && LibTorrentState.forId(state) == LibTorrentState.FINISHED) {
             return active_time;
-        } 
-        else {
+        } else {
             return seeding_time;
         }
     }
@@ -297,5 +303,10 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     @Override
     public long getTotalWantedDone() {
         return total_wanted_done;
+    }
+
+    @Override
+    public String getCurrentTracker() {
+        return current_tracker != null && current_tracker.isEmpty() ? null : current_tracker;
     }
 }

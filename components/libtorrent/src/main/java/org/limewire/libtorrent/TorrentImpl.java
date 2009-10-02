@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,6 +43,8 @@ import com.google.inject.name.Named;
  * back to the TorrentManager.
  */
 public class TorrentImpl implements Torrent {
+    private final Map<String, Object> properties = Collections.synchronizedMap(new HashMap<String, Object>(2));
+
     private final AsynchronousEventMulticaster<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;
@@ -272,6 +275,12 @@ public class TorrentImpl implements Torrent {
         lock.writeLock().lock();
         try {
             if (started.get() && !cancelled.getAndSet(true)) {
+                // updating the torrent info object 1 last time.
+                if (isValid() && hasMetaData()) {
+                    TorrentInfo ti = torrentManager.getTorrentInfo(this);
+                    torrentInfo.set(ti);
+                }
+                // removing the torrent handle from libtorrent.
                 torrentManager.removeTorrent(this);
             }
             listeners.broadcast(TorrentEvent.STOPPED);
@@ -328,9 +337,9 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public void updateStatus(TorrentStatus torrentStatus) {
-        if (!cancelled.get()) {
-            lock.writeLock().lock();
-            try {
+        lock.writeLock().lock();
+        try {
+            if (!cancelled.get()) {
                 TorrentImpl.this.status.set(torrentStatus);
                 boolean newlyfinished = !complete.get() && torrentStatus.isFinished();
                 complete.set(torrentStatus.isFinished());
@@ -340,9 +349,9 @@ public class TorrentImpl implements Torrent {
                 } else {
                     listeners.broadcast(TorrentEvent.STATUS_CHANGED);
                 }
-            } finally {
-                lock.writeLock().unlock();
             }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
@@ -350,9 +359,7 @@ public class TorrentImpl implements Torrent {
     public void handleFastResumeAlert(TorrentAlert alert) {
         lock.writeLock().lock();
         try {
-            
             listeners.broadcast(TorrentEvent.FAST_RESUME_FILE_SAVED);
-
         } finally {
             lock.writeLock().unlock();
         }
@@ -360,11 +367,11 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public boolean registerWithTorrentManager() {
+        lock.writeLock().lock();
         if (!torrentManager.isValid()) {
             return false;
         }
 
-        lock.writeLock().lock();
         try {
             File torrent = torrentFile.get();
             File torrentParent = torrent.getParentFile();
@@ -411,14 +418,14 @@ public class TorrentImpl implements Torrent {
     public List<TorrentFileEntry> getTorrentFileEntries() {
         lock.readLock().lock();
         try {
-            if (cancelled.get()) {
-                //TODO change to isValid check.
+            if (!isValid()) {
                 TorrentInfo torrentInfo = this.torrentInfo.get();
                 if (torrentInfo == null) {
                     return Collections.emptyList();
                 }
                 return torrentInfo.getTorrentFileEntries();
             }
+
             return torrentManager.getTorrentFileEntries(this);
         } finally {
             lock.readLock().unlock();
@@ -427,7 +434,12 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public List<TorrentPeer> getTorrentPeers() {
-        return torrentManager.getTorrentPeers(this);
+        lock.readLock().lock();
+        try {
+            return torrentManager.getTorrentPeers(this);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
@@ -438,7 +450,12 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public void setAutoManaged(boolean autoManaged) {
-        torrentManager.setAutoManaged(this, autoManaged);
+        lock.writeLock().lock();
+        try {
+            torrentManager.setAutoManaged(this, autoManaged);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     @Override
@@ -457,18 +474,46 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public void setTorrentInfo(TorrentInfo torrentInfo) {
-        this.torrentInfo.set(torrentInfo);
-        listeners.broadcast(TorrentEvent.META_DATA_UPDATED);
-    }
-
-    @Override
     public boolean hasMetaData() {
-        return torrentInfo.get() != null;
+        lock.readLock().lock();
+        try {
+            return torrentInfo.get() != null || torrentManager.hasMetaData(this);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public TorrentInfo getTorrentInfo() {
-        return torrentInfo.get();
+        lock.readLock().lock();
+        try {
+            if (isValid() && hasMetaData() && torrentInfo.get() == null) {
+                TorrentInfo ti = torrentManager.getTorrentInfo(this);
+                torrentInfo.set(ti);
+            }
+            return torrentInfo.get();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public Object getProperty(String key) {
+        return properties.get(key);
+    }
+
+    @Override
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    @Override
+    public boolean isValid() {
+        lock.readLock().lock();
+        try {
+            return torrentManager.isValid(this);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 }
