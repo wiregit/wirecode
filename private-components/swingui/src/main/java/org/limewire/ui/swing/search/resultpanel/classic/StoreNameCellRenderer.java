@@ -7,7 +7,11 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -24,11 +28,19 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.components.RolloverCursorListener;
+import org.limewire.ui.swing.listener.MousePopupListener;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
+import org.limewire.ui.swing.search.resultpanel.ResultsTable;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenu.ViewType;
 import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GraphicsUtilities;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 /**
  * A table cell renderer for displaying Lime Store results in the Name column
@@ -39,6 +51,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
     protected final StoreStyle storeStyle;
     protected final boolean showAudioArtist;
     protected final CategoryIconManager categoryIconManager;
+    protected final SearchResultMenuFactory popupMenuFactory;
     protected final StoreController storeController;
     
     protected final RendererResources resources;
@@ -50,10 +63,12 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
     protected final JLabel iconLabel;
     protected final JLabel nameLabel;
     
+    protected VisualStoreResult vsr;
+    
+    private MouseListener popupListener;
     private JTable table;
     private int row;
     private int col;
-    protected VisualStoreResult vsr;
     
     /**
      * Constructs a StoreNameCellRenderer using the specified services and 
@@ -63,10 +78,12 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
             StoreStyle storeStyle,
             boolean showAudioArtist,
             CategoryIconManager categoryIconManager,
+            SearchResultMenuFactory popupMenuFactory,
             StoreController storeController) {
         this.storeStyle = storeStyle;
         this.showAudioArtist = showAudioArtist;
         this.categoryIconManager = categoryIconManager;
+        this.popupMenuFactory = popupMenuFactory;
         this.storeController = storeController;
         
         resources = new RendererResources();
@@ -79,6 +96,10 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
         nameLabel = new JLabel();
         nameLabel.setFont(resources.getFont());
         
+        installPopupListener(renderer);
+        installPopupListener(iconLabel);
+        installPopupListener(nameLabel);
+        
         initComponents();
     }
     
@@ -86,6 +107,17 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
      * Initializes the components in the renderer.
      */
     protected abstract void initComponents();
+    
+    /**
+     * Installs the popup and selection listener on the specified component.
+     */
+    protected void installPopupListener(Component component) {
+        if (popupListener == null) {
+            popupListener = new SelectionPopupListener();
+        }
+        
+        component.addMouseListener(popupListener);
+    }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -192,6 +224,27 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
             }
             return categoryIconManager.getIcon(vsr);
         }
+    }
+    
+    /**
+     * Updates the table row selection based on the specified mouse event.
+     */
+    private void updateSelection(MouseEvent e) {
+        if (table.isEditing()) {
+            // Get cell being edited by this editor.
+            int editRow = table.getEditingRow();
+            int editCol = table.getEditingColumn();
+            
+            // Update the selection.  We also prepare the editor to apply
+            // the selection colors to the current editor component.
+            if ((editRow > -1) && (editRow < table.getRowCount())) {
+                table.changeSelection(editRow, editCol, e.isControlDown(), e.isShiftDown());
+                table.prepareEditor(table.getCellEditor(), editRow, editCol);
+            }
+        }
+        
+        // Request focus so Enter key can be handled.
+        e.getComponent().requestFocusInWindow();
     }
     
     /**
@@ -302,7 +355,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
             super.paintComponent(g);
         }
     }
-
+    
     /**
      * Resource container for store renderer.
      */
@@ -386,6 +439,61 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
         
         public Icon getSpamIcon() {
             return spamIcon;
+        }
+    }
+    
+    /**
+     * Mouse listener to update selection and display popup menu.
+     */
+    private class SelectionPopupListener extends MousePopupListener {
+        
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                updateSelection(e);
+            }
+            super.mousePressed(e);
+        }
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if ((vsr != null) && (e.getClickCount() == 2) && SwingUtilities.isLeftMouseButton(e)) {  
+                storeController.download(vsr);
+            } else {
+                super.mouseClicked(e);
+            }
+        }
+
+        @Override
+        public void handlePopupMouseEvent(MouseEvent e) {
+            // Update selection if mouse is not in selected row.
+            if (table.isEditing()) {
+                int editRow = table.getEditingRow();
+                if (!table.isRowSelected(editRow)) {
+                    updateSelection(e);
+                }
+            }
+            
+            // Create list of selected results.
+            List<VisualSearchResult> selectedResults = new ArrayList<VisualSearchResult>();
+            DefaultEventTableModel model = ((ResultsTable) table).getEventTableModel();
+            int[] selectedRows = table.getSelectedRows();
+            for (int row : selectedRows) {
+                Object element = model.getElementAt(row);
+                if (element instanceof VisualSearchResult) {
+                    selectedResults.add((VisualSearchResult) element);
+                }
+            }
+            
+            // If nothing selected, use current result.
+            if (selectedResults.size() == 0) {
+                selectedResults.add(vsr);
+            }
+            
+            // Display context menu.
+            SearchResultMenu searchResultMenu = popupMenuFactory.create(
+                    storeController.getDownloadHandler(), selectedResults, ViewType.Table);
+            searchResultMenu.show(e.getComponent(), e.getX()+3, e.getY()+3);
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel.classic;
 
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.store.StoreControllerFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
@@ -12,6 +13,7 @@ import com.google.inject.Inject;
 class StoreNameCellRendererFactory {
 
     private final CategoryIconManager categoryIconManager;
+    private final SearchResultMenuFactory popupMenuFactory;
     private final StoreControllerFactory storeControllerFactory;
     
     /**
@@ -19,8 +21,10 @@ class StoreNameCellRendererFactory {
      */
     @Inject
     public StoreNameCellRendererFactory(CategoryIconManager categoryIconManager,
+            SearchResultMenuFactory popupMenuFactory,
             StoreControllerFactory storeControllerFactory) {
         this.categoryIconManager = categoryIconManager;
+        this.popupMenuFactory = popupMenuFactory;
         this.storeControllerFactory = storeControllerFactory;
     }
     
@@ -39,7 +43,8 @@ class StoreNameCellRendererFactory {
         case STYLE_A: case STYLE_B:
         case STYLE_C: case STYLE_D:
             return new StoreNameCellRendererImpl(storeStyle, showAudioArtist, 
-                    categoryIconManager, storeControllerFactory.create());
+                    categoryIconManager, popupMenuFactory, 
+                    storeControllerFactory.create());
             
         default:
             // Return null if type is not recognized.
