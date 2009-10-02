@@ -7,13 +7,16 @@ import java.util.List;
 
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
+import org.limewire.core.api.search.store.StoreResult.SortPriority;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.table.QualityComparator;
 import org.limewire.ui.swing.util.EventListTableSortFormat;
+import org.limewire.util.Objects;
 
 /**
  * This class is the base class for each of the TableFormat classes
@@ -155,19 +158,20 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
                 // Special case: if each search result comes from one source,
                 // use alphabetical order to break the tie.
                 if(size1 == 1) {
+                    // Get friend names if available.
                     Collection<Friend> friends1 = o1.getFriends();
                     String name1 = null;
                     if(friends1.size() == 1)
                         name1 = friends1.iterator().next().getRenderName();
-                    else
-                        return 1; // Keep P2P results together 
+                    
                     Collection<Friend> friends2 = o2.getFriends();
                     String name2 = null;
                     if(friends2.size() == 1)
                         name2 = friends2.iterator().next().getRenderName();
-                    else
-                        return -1; // Keep P2P results together
-                    return name1.compareToIgnoreCase(name2);
+                    
+                    // Compare friend names.  Handle null values to keep P2P
+                    // results together. 
+                    return Objects.compareToNullIgnoreCase(name1, name2, false);
                 }
                 return 0;
             } else if(size1 > size2) {
@@ -204,22 +208,36 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     }
     
     /**
-     * Compares the Spam Column. This column is never displayed to the user. Its used
-     * to sort classic search results based on files marked as spam and files not 
-     * marked as spam. 
+     * Compares values in the Spam column.  This column is never displayed to
+     * the user.  It is used to pre-sort classic search results based on files 
+     * marked as spam, and files marked as store results. 
      */
     public static class IsSpamComparator implements Comparator<VisualSearchResult> {
         @Override
         public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+            // Sort spam results to the bottom.
             boolean spam1 = o1.isSpam();
             boolean spam2 = o2.isSpam();
             
-            if(!spam1 && spam2)
+            if (!spam1 && spam2) {
                 return -1;
-            else if(spam1 && !spam2)
+            } else if (spam1 && !spam2) {
                 return 1;
-            else 
+            }
+            
+            // Sort store results according to their sort priority.
+            SortPriority prio1 = (o1 instanceof VisualStoreResult) ?
+                    ((VisualStoreResult) o1).getSortPriority() : SortPriority.MIXED;
+            SortPriority prio2 = (o2 instanceof VisualStoreResult) ?
+                    ((VisualStoreResult) o2).getSortPriority() : SortPriority.MIXED;
+                    
+            if (prio1 == prio2) {
                 return 0;
+            } else if ((prio1 == SortPriority.TOP) || (prio2 == SortPriority.BOTTOM)) {
+                return -1;
+            } else {
+                return 1;
+            }
         }
     }
 }
