@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.store.StoreConnection;
 import org.limewire.core.api.search.store.StoreConnectionFactory;
+import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
@@ -59,12 +60,6 @@ public class CoreStoreManager implements StoreManager {
     public void removeStoreListener(StoreListener listener) {
         listenerList.remove(listener);
     }
-    
-    @Override
-    public String getConfirmURI() {
-        // TODO implement
-        return null;
-    }
 
     @Override
     public String getLoginURI() {
@@ -73,15 +68,15 @@ public class CoreStoreManager implements StoreManager {
     }
 
     @Override
-    public boolean isDownloadApproved(StoreResult storeResult) {
+    public StoreDownloadToken validateDownload(StoreResult storeResult) {
         // TODO implement
-        return false;
+        return null;
     }
 
     @Override
-    public boolean isDownloadApproved(TrackResult trackResult) {
+    public StoreDownloadToken validateDownload(TrackResult trackResult) {
         // TODO implement
-        return false;
+        return null;
     }
     
     @Override

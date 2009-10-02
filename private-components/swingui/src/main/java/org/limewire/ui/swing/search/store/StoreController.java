@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.http.cookie.Cookie;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreManager.AttributeKey;
@@ -49,13 +50,6 @@ public class StoreController {
             public void download(VisualSearchResult vsr, File saveFile) {
             }
         };
-    }
-    
-    /**
-     * Returns the URI text for the confirm download page.
-     */
-    public String getConfirmURI() {
-        return storeManager.getConfirmURI();
     }
     
     /**
@@ -111,17 +105,21 @@ public class StoreController {
      * Initiates downloading of the specified visual store result.
      */
     public void download(VisualStoreResult vsr) {
-        if (!storeManager.isLoggedIn()) {
-            startLogin();
-            if (storeManager.isLoggedIn()) {
-                startApproval(vsr);
-            }
+        // Validate download.  Display browser dialog if required, or perform
+        // download if approved.
+        StoreDownloadToken downloadToken = storeManager.validateDownload(vsr.getStoreResult());
+        switch (downloadToken.getStatus()) {
+        case LOGIN_REQ:
+        case CONFIRM_REQ:
+            new StoreBrowserPanel(this).showDownload(downloadToken, vsr);
+            break;
             
-        } else if (!storeManager.isDownloadApproved(vsr.getStoreResult())) {
-            startApproval(vsr);
-                
-        } else {
+        case APPROVED:
             doDownload(vsr);
+            break;
+            
+        default:
+            throw new IllegalStateException("Unknown download status " + downloadToken.getStatus());
         }
     }
 
@@ -129,18 +127,21 @@ public class StoreController {
      * Initiates downloading of the specified store track result.
      */
     public void downloadTrack(TrackResult str) {
-        if (!storeManager.isLoggedIn()) {
-            startLogin();
-            // TODO review this - maybe login success starts download approval automatically
-            if (storeManager.isLoggedIn()) {
-                startApproval(str);
-            }
+        // Validate download.  Display browser dialog if required, or perform
+        // download if approved.
+        StoreDownloadToken downloadToken = storeManager.validateDownload(str);
+        switch (downloadToken.getStatus()) {
+        case LOGIN_REQ:
+        case CONFIRM_REQ:
+            new StoreBrowserPanel(this).showDownload(downloadToken, str);
+            break;
             
-        } else if (!storeManager.isDownloadApproved(str)) {
-            startApproval(str);
-            
-        } else {
+        case APPROVED:
             doDownloadTrack(str);
+            break;
+            
+        default:
+            throw new IllegalStateException("Unknown download status " + downloadToken.getStatus());
         }
     }
     
@@ -174,29 +175,5 @@ public class StoreController {
     public void streamTrack(TrackResult str) {
         // TODO implement
         System.out.println("StoreController.streamTrack: " + str.getProperty(FilePropertyKey.TITLE));
-    }
-
-    /**
-     * Initiates the download approval process for the specified store result.
-     */
-    private void startApproval(VisualStoreResult vsr) {
-        StoreBrowserPanel browserPanel = new StoreBrowserPanel(this);
-        browserPanel.showConfirm(vsr);
-    }
-
-    /**
-     * Initiates the download approval process for the specified track result.
-     */
-    private void startApproval(TrackResult trackResult) {
-        StoreBrowserPanel browserPanel = new StoreBrowserPanel(this);
-        browserPanel.showConfirm(trackResult);
-    }
-
-    /**
-     * Initiates the login process for the store.
-     */
-    private void startLogin() {
-        StoreBrowserPanel browserPanel = new StoreBrowserPanel(this);
-        browserPanel.showLogin();
     }
 }

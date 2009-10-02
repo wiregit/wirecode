@@ -24,26 +24,21 @@ public interface StoreManager {
     void removeStoreListener(StoreListener listener);
     
     /**
-     * Returns the URI text for the confirm download page.
-     */
-    String getConfirmURI();
-    
-    /**
      * Returns the URI text for the login page.
      */
     String getLoginURI();
     
     /**
-     * Returns true if the specified store result can be downloaded without
-     * further user prompts.
+     * Validates the specified store result for download, and returns a token
+     * indicating the approval status. 
      */
-    boolean isDownloadApproved(StoreResult storeResult);
+    StoreDownloadToken validateDownload(StoreResult storeResult);
     
     /**
-     * Returns true if the specified track result can be downloaded without
-     * further user prompts.
+     * Validates the specified track result for download, and returns a token
+     * indicating the approval status. 
      */
-    boolean isDownloadApproved(TrackResult trackResult);
+    StoreDownloadToken validateDownload(TrackResult trackResult);
     
     /**
      * Returns true if the user is logged in to the store.

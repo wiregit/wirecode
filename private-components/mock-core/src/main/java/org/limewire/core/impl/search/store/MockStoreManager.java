@@ -11,12 +11,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.store.StoreConnectionFactory;
+import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.TrackResult;
+import org.limewire.core.api.search.store.StoreDownloadToken.Status;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 
 import com.google.inject.Inject;
@@ -50,11 +52,6 @@ public class MockStoreManager implements StoreManager {
     public void removeStoreListener(StoreListener listener) {
         listenerList.remove(listener);
     }
-    
-    @Override
-    public String getConfirmURI() {
-        return getClass().getResource("confirm.html").toString();
-    }
 
     @Override
     public String getLoginURI() {
@@ -62,13 +59,21 @@ public class MockStoreManager implements StoreManager {
     }
 
     @Override
-    public boolean isDownloadApproved(StoreResult storeResult) {
-        return false;
+    public StoreDownloadToken validateDownload(StoreResult storeResult) {
+        if (isLoggedIn()) {
+            return new MockStoreDownloadToken(Status.CONFIRM_REQ, getConfirmURI());
+        } else {
+            return new MockStoreDownloadToken(Status.LOGIN_REQ, getLoginURI());
+        }
     }
 
     @Override
-    public boolean isDownloadApproved(TrackResult trackResult) {
-        return false;
+    public StoreDownloadToken validateDownload(TrackResult trackResult) {
+        if (isLoggedIn()) {
+            return new MockStoreDownloadToken(Status.CONFIRM_REQ, getConfirmURI());
+        } else {
+            return new MockStoreDownloadToken(Status.LOGIN_REQ, getLoginURI());
+        }
     }
 
     @Override
@@ -153,6 +158,13 @@ public class MockStoreManager implements StoreManager {
                 }
             }
         }).start();
+    }
+    
+    /**
+     * Returns the URI text for the confirm page.
+     */
+    private String getConfirmURI() {
+        return getClass().getResource("confirm.html").toString();
     }
     
     /**

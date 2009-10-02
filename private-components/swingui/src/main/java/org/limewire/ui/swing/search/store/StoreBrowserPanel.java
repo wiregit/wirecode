@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import org.apache.http.cookie.Cookie;
+import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.UriAction;
@@ -143,35 +144,50 @@ public class StoreBrowserPanel extends Browser {
     }
     
     /**
-     * Displays the confirm download dialog for the specified result.
+     * Displays the download approval dialog for the specified store result.
      */
-    public void showConfirm(VisualStoreResult vsr) {
+    public void showDownload(StoreDownloadToken downloadToken, VisualStoreResult vsr) {
         // Save result.
         visualStoreResult = vsr;
         trackResult = null;
         
-        // Load login page into browser.
-        setPreferredSize(new Dimension(510, 192));
-        load(storeController.getConfirmURI());
-        
-        // Display dialog.
-        showDialog(I18n.tr("Confirm"));
+        showDownload(downloadToken);
     }
     
     /**
-     * Displays the confirm download dialog for the specified result.
+     * Displays the download approval dialog for the specified track result.
      */
-    public void showConfirm(TrackResult trackResult) {
+    public void showDownload(StoreDownloadToken downloadToken, TrackResult trackResult) {
         // Save result.
         this.trackResult = trackResult;
         visualStoreResult = null;
         
-        // Load login page into browser.
-        setPreferredSize(new Dimension(510, 192));
-        load(storeController.getConfirmURI());
+        showDownload(downloadToken);
+    }
+    
+    /**
+     * Displays the download approval dialog using the specified download 
+     * token.
+     */
+    private void showDownload(StoreDownloadToken downloadToken) {
+        // Determine size and title.
+        String title;
+        switch (downloadToken.getStatus()) {
+        case LOGIN_REQ:
+            setPreferredSize(new Dimension(480, 480));
+            title = I18n.tr("Log In");
+            break;
+        case CONFIRM_REQ:
+            setPreferredSize(new Dimension(510, 192));
+            title = I18n.tr("Confirm");
+            break;
+        default:
+            throw new IllegalStateException("Unknown download status " + downloadToken.getStatus());
+        }
         
-        // Display dialog.
-        showDialog(I18n.tr("Confirm"));
+        // Load URL into browser and display.
+        load(downloadToken.getUrl());
+        showDialog(title);
     }
     
     /**
