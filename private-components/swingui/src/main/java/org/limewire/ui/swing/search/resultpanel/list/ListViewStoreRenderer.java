@@ -3,9 +3,7 @@ package org.limewire.ui.swing.search.resultpanel.list;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -21,24 +19,17 @@ import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.ui.swing.components.CustomLineBorder;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewTable;
-import org.limewire.ui.swing.search.resultpanel.ResultsTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
-import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
-import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
-import org.limewire.ui.swing.search.resultpanel.SearchResultMenu.ViewType;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.store.StoreBrowserPanel;
 import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Provider;
 
@@ -56,7 +47,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final CategoryIconManager categoryIconManager;
     protected final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     protected final Provider<SearchResultTruncator> headingTruncator;
-    protected final SearchResultMenuFactory popupMenuFactory;
+    protected final MouseListener popupListener;
     protected final StoreController storeController;
 
     protected final JXPanel albumPanel;
@@ -68,7 +59,6 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final Action showInfoAction;
     protected final Action showTracksAction;
     
-    private MouseListener popupListener;
     private JTable table;
     private VisualStoreResult vsr;
     private int row;
@@ -82,14 +72,14 @@ abstract class ListViewStoreRenderer extends JXPanel {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
-            SearchResultMenuFactory popupMenuFactory,
+            MousePopupListener popupListener,
             StoreController storeController) {
         
         this.storeStyle = storeStyle;
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
-        this.popupMenuFactory = popupMenuFactory;
+        this.popupListener = popupListener;
         this.storeController = storeController;
         
         this.albumPanel = new JXPanel();
@@ -150,10 +140,6 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * Installs the popup and selection listener on the specified component.
      */
     protected void installPopupListener(Component component) {
-        if (popupListener == null) {
-            popupListener = new SelectionPopupListener();
-        }
-        
         component.addMouseListener(popupListener);
     }
     
@@ -271,27 +257,6 @@ abstract class ListViewStoreRenderer extends JXPanel {
     }
     
     /**
-     * Updates the table row selection based on the specified mouse event.
-     */
-    private void updateSelection(MouseEvent e) {
-        if (table.isEditing()) {
-            // Get cell being edited by this editor.
-            int editRow = table.getEditingRow();
-            int editCol = table.getEditingColumn();
-            
-            // Update the selection.  We also prepare the editor to apply
-            // the selection colors to the current editor component.
-            if ((editRow > -1) && (editRow < table.getRowCount())) {
-                table.changeSelection(editRow, editCol, e.isControlDown(), e.isShiftDown());
-                table.prepareEditor(table.getCellEditor(), editRow, editCol);
-            }
-        }
-        
-        // Request focus so Enter key can be handled.
-        e.getComponent().requestFocusInWindow();
-    }
-    
-    /**
      * Action to download store result.
      */
     private class DownloadAction extends AbstractAction {
@@ -394,61 +359,6 @@ abstract class ListViewStoreRenderer extends JXPanel {
                     });
                 }
             }
-        }
-    }
-    
-    /**
-     * Mouse listener to update selection and display popup menu.
-     */
-    private class SelectionPopupListener extends MousePopupListener {
-        
-        @Override
-        public void mousePressed(MouseEvent e) {
-            if (SwingUtilities.isLeftMouseButton(e)) {
-                updateSelection(e);
-            }
-            super.mousePressed(e);
-        }
-        
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            if ((vsr != null) && (e.getClickCount() == 2) && SwingUtilities.isLeftMouseButton(e)) {  
-                storeController.download(vsr);
-            } else {
-                super.mouseClicked(e);
-            }
-        }
-        
-        @Override
-        public void handlePopupMouseEvent(MouseEvent e) {
-            // Update selection if mouse is not in selected row.
-            if (table.isEditing()) {
-                int editRow = table.getEditingRow();
-                if (!table.isRowSelected(editRow)) {
-                    updateSelection(e);
-                }
-            }
-            
-            // Create list of selected results.
-            List<VisualSearchResult> selectedResults = new ArrayList<VisualSearchResult>();
-            DefaultEventTableModel model = ((ResultsTable) table).getEventTableModel();
-            int[] selectedRows = table.getSelectedRows();
-            for (int row : selectedRows) {
-                Object element = model.getElementAt(row);
-                if (element instanceof VisualSearchResult) {
-                    selectedResults.add((VisualSearchResult) element);
-                }
-            }
-            
-            // If nothing selected, use current result.
-            if (selectedResults.size() == 0) {
-                selectedResults.add(vsr);
-            }
-            
-            // Display context menu.
-            SearchResultMenu searchResultMenu = popupMenuFactory.create(
-                    storeController.getDownloadHandler(), selectedResults, ViewType.List);
-            searchResultMenu.show(e.getComponent(), e.getX()+3, e.getY()+3);
         }
     }
 }

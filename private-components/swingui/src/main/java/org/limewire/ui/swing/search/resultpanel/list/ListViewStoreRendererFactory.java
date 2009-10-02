@@ -1,12 +1,13 @@
 package org.limewire.ui.swing.search.resultpanel.list;
 
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
-import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
-import org.limewire.ui.swing.search.store.StoreControllerFactory;
+import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
@@ -17,29 +18,25 @@ class ListViewStoreRendererFactory {
     private final CategoryIconManager categoryIconManager;
     private final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     private final Provider<SearchResultTruncator> headingTruncator;
-    private final SearchResultMenuFactory popupMenuFactory;
-    private final StoreControllerFactory storeControllerFactory;
     
     /**
      * Constructs a ListViewStoreRendererFactory using the specified services.
      */
+    @Inject
     public ListViewStoreRendererFactory(
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
-            Provider<SearchResultTruncator> headingTruncator,
-            SearchResultMenuFactory popupMenuFactory,
-            StoreControllerFactory storeControllerFactory) {
+            Provider<SearchResultTruncator> headingTruncator) {
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
-        this.popupMenuFactory = popupMenuFactory;
-        this.storeControllerFactory = storeControllerFactory;
     }
     
     /**
      * Creates a List view renderer for the specified store style.
      */
-    public ListViewStoreRenderer create(StoreStyle storeStyle) {
+    public ListViewStoreRenderer create(StoreStyle storeStyle, 
+            MousePopupListener popupListener, StoreController storeController) {
         // Return null if style is null or unknown.
         if (storeStyle == null) {
             return null;
@@ -49,13 +46,13 @@ class ListViewStoreRendererFactory {
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
             return new ListViewStoreRendererAB(storeStyle, categoryIconManager,
-                    headingBuilder, headingTruncator, popupMenuFactory, 
-                    storeControllerFactory.create());
+                    headingBuilder, headingTruncator, popupListener, 
+                    storeController);
             
         case STYLE_C: case STYLE_D:
             return new ListViewStoreRendererCD(storeStyle, categoryIconManager, 
-                    headingBuilder, headingTruncator, popupMenuFactory, 
-                    storeControllerFactory.create());
+                    headingBuilder, headingTruncator, popupListener, 
+                    storeController);
             
         default:
             return null;

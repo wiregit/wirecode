@@ -8,7 +8,9 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
+import org.limewire.ui.swing.search.store.StoreController;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -22,6 +24,8 @@ public class NameRendererDelegate extends AbstractCellEditor
     implements TableCellRenderer, TableCellEditor {
 
     private final TableCellRenderer defaultRenderer;
+    private final MousePopupListener storePopupListener;
+    private final StoreController storeController;
     private final boolean showAudioArtist;
     private final StoreNameCellRendererFactory storeNameRendererFactory;
     
@@ -33,10 +37,14 @@ public class NameRendererDelegate extends AbstractCellEditor
      */
     @Inject
     public NameRendererDelegate(
-            @Assisted TableCellRenderer defaultRenderer, 
+            @Assisted TableCellRenderer defaultRenderer,
+            @Assisted MousePopupListener storePopupListener,
+            @Assisted StoreController storeController,
             @Assisted boolean showAudioArtist,
             StoreNameCellRendererFactory storeNameRendererFactory) {
         this.defaultRenderer = defaultRenderer;
+        this.storePopupListener = storePopupListener;
+        this.storeController = storeController;
         this.showAudioArtist = showAudioArtist;
         this.storeNameRendererFactory = storeNameRendererFactory;
     }
@@ -69,6 +77,7 @@ public class NameRendererDelegate extends AbstractCellEditor
      * Applies the specified store style to the delegate.
      */
     public void setStoreStyle(StoreStyle storeStyle) {
-        storeRenderer = storeNameRendererFactory.create(storeStyle, showAudioArtist);
+        storeRenderer = storeNameRendererFactory.create(storeStyle, 
+                storePopupListener, storeController, showAudioArtist);
     }
 }

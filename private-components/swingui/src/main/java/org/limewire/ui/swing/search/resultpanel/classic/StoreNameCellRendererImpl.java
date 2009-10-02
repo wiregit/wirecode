@@ -14,8 +14,8 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
-import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
@@ -37,9 +37,9 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
             StoreStyle storeStyle,
             boolean showAudioArtist,
             CategoryIconManager categoryIconManager,
-            SearchResultMenuFactory popupMenuFactory,
+            MousePopupListener popupListener,
             StoreController storeController) {
-        super(storeStyle, showAudioArtist, categoryIconManager, popupMenuFactory, storeController);
+        super(storeStyle, showAudioArtist, categoryIconManager, popupListener, storeController);
     }
 
     @Override

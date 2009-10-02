@@ -29,10 +29,12 @@ import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.library.LibraryMediator;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.SearchResultsModel.StyleListener;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenu.ViewType;
 import org.limewire.ui.swing.search.resultpanel.classic.AllTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.AudioTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ClassicDoubleClickHandler;
@@ -50,6 +52,8 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
+import org.limewire.ui.swing.search.store.StoreController;
+import org.limewire.ui.swing.search.store.StoreControllerFactory;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
@@ -121,6 +125,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
     private final DefaultTableCellRenderer defaultTableCellRenderer;
+    private final Provider<StoreControllerFactory> storeControllerFactory;
     private final StoreManager storeManager;
     
     private RangeList<VisualSearchResult> maxSizedList;
@@ -158,6 +163,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             LibraryMediator libraryMediator,
             Provider<QualityRenderer> qualityRenderer, 
             DefaultTableCellRenderer defaultTableCellRenderer,
+            Provider<StoreControllerFactory> storeControllerFactory,
             StoreManager storeManager) {
         
         this.searchResultsModel = searchResultsModel;
@@ -174,6 +180,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         this.qualityRenderer = qualityRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
+        this.storeControllerFactory = storeControllerFactory;
         this.storeManager = storeManager;
         
         rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery());
@@ -306,6 +313,11 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             }
         };
 
+        // Create store controller and listener.
+        StoreController storeController = storeControllerFactory.get().create();
+        MousePopupListener storePopupListener = new ResultsTableEditorListener(
+                resultsList, ViewType.List, menuFactory, storeController.getDownloadHandler());
+        
         // Note that the same ListViewTableCellEditor instance
         // cannot be used for both the editor and the renderer
         // because the renderer receives paint requests for some cells
@@ -314,10 +326,12 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
-                downloadHandler, rowHeightRule, displayLimit, searchResultsModel);
+                downloadHandler, rowHeightRule, displayLimit, searchResultsModel, 
+                storePopupListener, storeController);
         
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
-                downloadHandler, rowHeightRule, displayLimit, searchResultsModel);
+                downloadHandler, rowHeightRule, displayLimit, searchResultsModel, 
+                storePopupListener, storeController);
         
 //        // TODO REMOVE DEAD CODE
 //        TableColumnModel tcm = resultsList.getColumnModel();
@@ -450,14 +464,23 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         SearchCategory selectedCategory = searchResultsModel.getSelectedCategory();
         StoreStyle storeStyle = searchResultsModel.getStoreStyle();
         
+        // Create store controller and listener.
+        StoreController storeController = storeControllerFactory.get().create();
+        MousePopupListener storePopupListener = new ResultsTableEditorListener(
+                resultsTable, ViewType.Table, menuFactory, storeController.getDownloadHandler());
+
         // Create Name column renderer.
         TableCellRenderer iconRenderer = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
-        nameRendererDelegate = nameRendererDelegateFactory.get().create(iconRenderer, (selectedCategory == SearchCategory.ALL));
+        nameRendererDelegate = nameRendererDelegateFactory.get().create(
+                iconRenderer, storePopupListener, storeController,
+                (selectedCategory == SearchCategory.ALL));
         if (storeStyle != null) nameRendererDelegate.setStoreStyle(storeStyle);
         
         // Create Name column editor.
         TableCellRenderer iconEditor = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
-        nameEditorDelegate = nameRendererDelegateFactory.get().create(iconEditor, (selectedCategory == SearchCategory.ALL));
+        nameEditorDelegate = nameRendererDelegateFactory.get().create(
+                iconEditor, storePopupListener, storeController,
+                (selectedCategory == SearchCategory.ALL));
         if (storeStyle != null) nameEditorDelegate.setStoreStyle(storeStyle);
         
         int columnCount = tableFormat.getColumnCount();

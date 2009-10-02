@@ -25,10 +25,10 @@ import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
-import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
@@ -72,10 +72,10 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
-            SearchResultMenuFactory popupMenuFactory,
+            MousePopupListener popupListener,
             StoreController storeController) {
         super(storeStyle, categoryIconManager, headingBuilder, headingTruncator, 
-                popupMenuFactory, storeController);
+                popupListener, storeController);
     }
 
     @Override

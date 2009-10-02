@@ -71,7 +71,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
-import org.limewire.ui.swing.search.store.StoreControllerFactory;
+import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.table.TransparentCellTableRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -167,6 +167,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private int textPanelWidth;
 
     private final SearchResultMenuFactory searchResultMenuFactory;
+    private final MousePopupListener storePopupListener;
+    private final StoreController storeController;
     private final ListViewStoreRendererFactory storeRendererFactory;
     
     @Inject
@@ -182,7 +184,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
         SearchResultMenuFactory searchResultMenuFactory,
-        StoreControllerFactory storeControllerFactory) {
+        @Assisted MousePopupListener storePopupListener,
+        @Assisted StoreController storeController,
+        ListViewStoreRendererFactory storeRendererFactory) {
 
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
@@ -192,9 +196,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
-        this.storeRendererFactory = new ListViewStoreRendererFactory(
-                categoryIconManager, headingBuilder, truncator, 
-                searchResultMenuFactory, storeControllerFactory);
+        this.storePopupListener = storePopupListener;
+        this.storeController = storeController;
+        this.storeRendererFactory = storeRendererFactory;
         
         GuiUtils.assignResources(this);
 
@@ -648,7 +652,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      */
     public void setStoreStyle(StoreStyle storeStyle) {
         // Update store renderer using new style.
-        storeRenderer = storeRendererFactory.create(storeStyle);
+        storeRenderer = storeRendererFactory.create(storeStyle, storePopupListener, storeController);
     }
     
 //    private class HeadingFontWidthResolver implements FontWidthResolver {
