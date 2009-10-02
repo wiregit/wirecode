@@ -448,14 +448,17 @@ public class BaseResultPanel extends JXPanel implements Disposable {
      */
     protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
         SearchCategory selectedCategory = searchResultsModel.getSelectedCategory();
+        StoreStyle storeStyle = searchResultsModel.getStoreStyle();
         
         // Create Name column renderer.
         TableCellRenderer iconRenderer = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
         nameRendererDelegate = nameRendererDelegateFactory.get().create(iconRenderer, (selectedCategory == SearchCategory.ALL));
+        if (storeStyle != null) nameRendererDelegate.setStoreStyle(storeStyle);
         
         // Create Name column editor.
         TableCellRenderer iconEditor = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
         nameEditorDelegate = nameRendererDelegateFactory.get().create(iconEditor, (selectedCategory == SearchCategory.ALL));
+        if (storeStyle != null) nameEditorDelegate.setStoreStyle(storeStyle);
         
         int columnCount = tableFormat.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
