@@ -32,26 +32,26 @@ public class LibrarySettings extends LimeProps {
     
     /** More extensions that belong in the audio category. */
     public static final StringArraySetting ADDITIONAL_AUDIO_EXTS =
-        FACTORY.createRemoteStringArraySetting("ADDITIONAL_AUDIO_EXTS", new String[0], "Library.moreAudioExts");
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_AUDIO_EXTS", new String[0], "LibrarySetting.additionalAudioExts");
     
     /** More extensions that belong in the video category. */
     public static final StringArraySetting ADDITIONAL_VIDEO_EXTS =
-        FACTORY.createRemoteStringArraySetting("ADDITIONAL_VIDEO_EXTS", new String[0], "Library.moreVideoExts");
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_VIDEO_EXTS", new String[0], "LibrarySetting.additionalVideoExts");
     
     /** More extensions that belong in the image category. */
     public static final StringArraySetting ADDITIONAL_IMAGE_EXTS =
-        FACTORY.createRemoteStringArraySetting("ADDITIONAL_IMAGE_EXTS", new String[0], "Library.moreImageExts");
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_IMAGE_EXTS", new String[0], "LibrarySetting.additionalImageExts");
     
     /** More extensions that belong in the document category. */
     public static final StringArraySetting ADDITIONAL_DOCUMENT_EXTS =
-        FACTORY.createRemoteStringArraySetting("ADDITIONAL_DOCUMENT_EXTS", new String[0], "Library.moreDocumentExts");
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_DOCUMENT_EXTS", new String[0], "LibrarySetting.additionalDocumentExts");
     
     /** More extensions that belong in the program category on Windows. */
     public static final StringArraySetting ADDITIONAL_PROGRAM_WINDOWS_EXTS =
-        FACTORY.createRemoteStringArraySetting("ADDITIONAL_PROGRAM_WINDOWS_EXTS", new String[0], "Library.moreProgramWindowsExts");
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_PROGRAM_WINDOWS_EXTS", new String[0], "LibrarySetting.additionalProgramWindowsExts");
     
     /** More extensions that belong in the program category on OSX & Linux. */
     public static final StringArraySetting ADDITIONAL_PROGRAM_OSX_LINUX_EXTS =
-        FACTORY.createRemoteStringArraySetting("ADDITIONAL_PROGRAM_OSX_LINUX_EXTS", new String[0], "Library.moreProgramOsxLinuxExts");
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_PROGRAM_OSX_LINUX_EXTS", new String[0], "LibrarySetting.additionalProgramOsxLinuxExts");
     
 }
