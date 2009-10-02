@@ -1,15 +1,17 @@
 package org.limewire.core.impl;
 
 import java.lang.annotation.Annotation;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.concurrent.AbstractLazySingletonProvider;
+import org.limewire.concurrent.ScheduledListeningExecutorService;
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
-import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.lifecycle.MockLifeCycleModule;
 import org.limewire.core.api.magnet.MockMagnetModule;
 import org.limewire.core.impl.bittorrent.MockBittorrentModule;
@@ -18,7 +20,7 @@ import org.limewire.core.impl.callback.MockGuiCallbackService;
 import org.limewire.core.impl.connection.MockConnectionModule;
 import org.limewire.core.impl.daap.MockDaapModule;
 import org.limewire.core.impl.download.MockDownloadModule;
-import org.limewire.core.impl.file.MockCategoryManager;
+import org.limewire.core.impl.file.MockFileModule;
 import org.limewire.core.impl.friend.MockFriendModule;
 import org.limewire.core.impl.library.MockLibraryModule;
 import org.limewire.core.impl.mojito.MockMojitoModule;
@@ -44,14 +46,11 @@ import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.MockNetModule;
 import org.limewire.xmpp.activity.XmppActivityEvent;
-import org.limewire.concurrent.ScheduledListeningExecutorService;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
-import org.limewire.concurrent.SimpleTimer;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 public class MockModule extends AbstractModule {
@@ -61,7 +60,6 @@ public class MockModule extends AbstractModule {
         bind(Application.class).to(MockApplication.class);
         bind(GuiCallbackService.class).to(MockGuiCallbackService.class);
         bind(ServiceRegistry.class).to(MockServiceRegistry.class);
-        bind(CategoryManager.class).to(MockCategoryManager.class);
 
         install(new MockLifeCycleModule());
         install(new MockConnectionModule());
@@ -86,6 +84,7 @@ public class MockModule extends AbstractModule {
         install(new MockUploadModule());
         install(new MockUpdatesModule());
         install(new MockBittorrentModule());
+        install(new MockFileModule());
                        
         EventMulticaster<XmppActivityEvent> activityMulticaster = new EventMulticasterImpl<XmppActivityEvent>(); 
         bind(new TypeLiteral<EventBroadcaster<XmppActivityEvent>>(){}).toInstance(activityMulticaster);
@@ -108,8 +107,6 @@ public class MockModule extends AbstractModule {
         bind(ScheduledExecutorService.class).annotatedWith(execAnn).to(mainKey);
         bind(Executor.class).annotatedWith(execAnn).to(mainKey);
         bind(ExecutorService.class).annotatedWith(execAnn).to(mainKey);
-        
-        bind(CategoryManager.class).to(MockCategoryManager.class);
         
     }
 
