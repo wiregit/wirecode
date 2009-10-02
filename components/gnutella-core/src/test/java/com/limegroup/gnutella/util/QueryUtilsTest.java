@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,15 +15,20 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.NameValue;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 @SuppressWarnings("unchecked")
 public class QueryUtilsTest extends BaseTestCase {
     
     private QueryRequestFactory queryRequestFactory;
+    private LimeXMLDocumentFactory xmlFactory;
 
     public QueryUtilsTest(String name) {
         super(name);
@@ -36,6 +42,7 @@ public class QueryUtilsTest extends BaseTestCase {
     protected void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjectorNonEagerly();
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        xmlFactory = injector.getInstance(LimeXMLDocumentFactory.class);
     }
     
     public void testCreateQueryString() {
@@ -160,12 +167,52 @@ public class QueryUtilsTest extends BaseTestCase {
             assertFalse("considered a delimiter: " + c, QueryUtils.isDelimiter(c));
         }
     }
-    
+
     public void testMutateQuery() {
         String query = "abc 123 \u6771\u4eac"; // abc 123 tokyo
         query = QueryUtils.mutateQuery(query);
         assertTrue(query.contains("abc"));
         assertTrue(query.contains("123"));
         assertTrue(query.contains("\u6771\u4eac"));
+    }
+
+    public void testCalculateRelevance() {
+        LimeXMLDocument doc = null;
+        // Relevance should be 1 if the query is empty
+        assertEquals(1f, QueryUtils.calculateRelevance("foo bar", null, ""));
+        // Relevance should be 1 if the filename exactly matches the query
+        assertEquals(1f, QueryUtils.calculateRelevance("foo bar", null, "foo bar"));
+        // Relevance should still be 1 if the keywords are in a different order
+        assertEquals(1f, QueryUtils.calculateRelevance("bar foo", null, "foo bar"));
+        // Irrelevant words in the filename should decrease the relevance
+        float shorter = QueryUtils.calculateRelevance("foo bar", null, "foo");
+        float longer = QueryUtils.calculateRelevance("foo bar baz bam", null, "foo");
+        assertLessThan(shorter, longer);
+        // Relevant words in the XML should increase the relevance
+        doc = createDocument("baz");
+        float nameOnly = QueryUtils.calculateRelevance("foo", doc, "foo bar");
+        doc = createDocument("bar");
+        float nameAndXML = QueryUtils.calculateRelevance("foo", doc, "foo bar");
+        assertGreaterThan(nameOnly, nameAndXML);
+        // Irrelevant words in the XML should decrease the relevance
+        doc = createDocument("bar");
+        shorter = QueryUtils.calculateRelevance("foo", doc, "foo bar");
+        doc = createDocument("bar baz bam qux");
+        longer = QueryUtils.calculateRelevance("foo", doc, "foo bar");
+        assertLessThan(shorter, longer);
+        // Words that appear more than once should only be counted once
+        nameOnly = QueryUtils.calculateRelevance("foo bar", null, "foo bar baz");
+        doc = createDocument("foo bar");
+        nameAndXML = QueryUtils.calculateRelevance("foo bar", doc, "foo bar baz");
+        assertEquals(nameOnly, nameAndXML);
+    }
+
+    private LimeXMLDocument createDocument(String title) {
+        List<NameValue<String>> values = new ArrayList<NameValue<String>>(3);
+        values.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, title));
+        values.add(new NameValue<String>(LimeXMLNames.AUDIO_BITRATE, "123"));
+        values.add(new NameValue<String>(LimeXMLNames.AUDIO_SECONDS, "456"));
+        return xmlFactory.createLimeXMLDocument(values,
+                LimeXMLNames.AUDIO_SCHEMA);
     }
 }

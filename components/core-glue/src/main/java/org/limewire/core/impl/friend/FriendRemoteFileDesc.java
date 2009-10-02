@@ -25,6 +25,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class FriendRemoteFileDesc implements RemoteFileDesc {
@@ -275,5 +276,14 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
     @Override
     public String toString() {
         return StringUtils.toString(this, filename, address);
+    }
+
+    /**
+     * Returns a score between 0 and 1 indicating how well the keywords in this
+     * RemoteFileDesc's filename and XML metadata match the specified query. 
+     */
+    @Override
+    public float getRelevance(String query) {
+        return QueryUtils.calculateRelevance(filename, xmlDoc, query);
     }
 }

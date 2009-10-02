@@ -182,10 +182,12 @@ public class MockSearchResult implements Cloneable, SearchResult {
         return magnetURL;
     }
 
-    public int getRelevance() {
-        return 0;
+    @Override
+    public float getRelevance(String query) {
+        return 1;
     }
-
+    
+    @Override
     public boolean isLicensed() {
         return false;
     }

@@ -70,6 +70,12 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     public Address getAddress();
 
     /**
+     * Returns a score between 0 and 1 indicating how well the keywords in this
+     * RemoteFileDesc's filename and XML metadata match the specified query. 
+     */
+    public float getRelevance(String query);
+
+    /**
      * Returns the query GUID if this RemoteFileDesc was constructed from a
      * query reply, otherwise null.
      */

@@ -127,10 +127,10 @@ public class TestSearchResult implements SearchResult {
     }
 
     @Override
-    public int getRelevance() {
-        return 0;
+    public float getRelevance(String query) {
+        return 1;
     }
-
+    
     @Override
     public boolean isLicensed() {
         return false;

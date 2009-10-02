@@ -561,14 +561,17 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
                     int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
                     if(idx >= 0) {
                         SearchResultAdapter vsr = (SearchResultAdapter)groupedUrnResults.get(idx);
-                        vsr.addNewSource(result);
+                        vsr.addNewSource(result, searchInfo.getSearchQuery());
                         groupedUrnResults.set(idx, vsr);
                         for(VisualSearchResultStatusListener listener : changeListeners) {
                             listener.resultChanged(vsr, "new-sources", null, null);
                         }
                     } else {
                         idx = -(idx + 1);
-                        SearchResultAdapter vsr = new SearchResultAdapter(result, propertiableHeadings, this);
+                        SearchResultAdapter vsr =
+                            new SearchResultAdapter(result,
+                                    propertiableHeadings, this,
+                                    searchInfo.getSearchQuery());
                         groupedUrnResults.add(idx, vsr);
                         for(VisualSearchResultStatusListener listener : changeListeners) {
                             listener.resultCreated(vsr);

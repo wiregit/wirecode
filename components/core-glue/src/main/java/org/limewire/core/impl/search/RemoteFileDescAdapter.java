@@ -71,7 +71,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final int quality;
     
     /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
-    private int relevance = -1;
+    private float relevance = -1;
 
     /**
      * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella presence based on the rfd's
@@ -117,29 +117,30 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
 
     /**
-     * Calculates a rough "relevance", which is a measure of the quality of the sources.  
-     *  Non anonymous sources with active capabilities (ie. browseable) are given greatest weight.
+     * Returns a score that indicates the quality of the sources and the degree
+     * to which the result matches the query. Non-anonymous sources with active
+     * capabilities (ie. browseable) are given greatest weight.
      */
     @Override
-    public int getRelevance() {
-        // If the value has already been calculated take that one, since it can not change
-        //  during the lifecycle of this object
-        if (relevance != -1) {
+    public float getRelevance(String query) {
+        // If the value has already been calculated take that one, since it
+        // cannot change during the lifecycle of this object
+        if(relevance != -1) {
             return relevance;
         }
-        
         relevance = 0;
-
         // Calculate the relevance based on the (truncated) sources list
         for(RemoteHost remoteHost : getSources()) {
 	        if (remoteHost instanceof RelevantRemoteHost) {
                 relevance += ((RelevantRemoteHost) remoteHost).getRelevance();
             }
         }
-       
+        // Consider how well the result matches the query
+        if(!query.isEmpty())
+            relevance *= rfd.getRelevance(query);
         return relevance;
     }
-
+    
     /**
      * @returns the complete list of AltLocs.
      */

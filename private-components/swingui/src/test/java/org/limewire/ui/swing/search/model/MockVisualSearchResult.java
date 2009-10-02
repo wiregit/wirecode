@@ -22,7 +22,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
     private VisualSearchResult similarityParent;
     private boolean spam;
     private HashMap<FilePropertyKey, Object> properties = new HashMap<FilePropertyKey, Object>();
-    private int relevance = 0;
+    private float relevance = 0;
     
     public MockVisualSearchResult(String name) {
         this.name = name;
@@ -203,11 +203,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public int getRelevance() {
+    public float getRelevance() {
         return relevance;
     }
     
-    public void setRelevance(int relevance) {
+    public void setRelevance(float relevance) {
         this.relevance = relevance;
     }
 

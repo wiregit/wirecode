@@ -7,10 +7,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class QueryUtils {
     
@@ -44,32 +47,42 @@ public class QueryUtils {
     
 
     /**
-     * Gets the keywords in this filename, seperated by delimiters & illegal
-     * characters.
+     * Extracts keywords from the given string, separated by delimiters and
+     * illegal characters, and returns them in a new set.
      *
-     * @param str String to extract keywords from
-     * @param allowNumbers whether number keywords are retained and returned
-     * in the result set
-     * @return
+     * @param str the string to extract keywords from
+     * @param allowNumbers whether numbers are treated as keywords
+     * @return a new set containing the keywords
      */
-    public static final Set<String> extractKeywords(String str, boolean allowNumbers) {
+    public static final Set<String> extractKeywords(String str,
+            boolean allowNumbers) {
+        Set<String> set = new LinkedHashSet<String>();
+        extractKeywords(str, allowNumbers, set);
+        return set;
+    }
 
-        //Separate by whitespace and _, etc.
-        Set<String> ret=new LinkedHashSet<String>();
-    
+    /**
+     * Extracts keywords from the given string, separated by delimiters and
+     * illegal characters, and adds them to the supplied set.
+     *
+     * @param str the string to extract keywords from
+     * @param allowNumbers whether numbers are treated as keywords
+     * @param set the set to which the keywords should be added
+     */
+    public static final void extractKeywords(String str, boolean allowNumbers,
+            Set<String> set) {        
         StringTokenizer st = new StringTokenizer(str, DELIMITERS_AND_ILLEGAL);
         while(st.hasMoreTokens()) {
             String currToken = st.nextToken().toLowerCase();
             if(!allowNumbers) {
                 try {                
-                    Double.parseDouble(currToken); //NFE if number
+                    Double.parseDouble(currToken); // NFE if not a number
                     continue;
                 } catch(NumberFormatException normalWord) {}
             }
             if(!TRIVIAL_WORDS.contains(currToken))
-                ret.add(currToken);
+                set.add(currToken);
         }
-        return ret;
     }
 
     /**
@@ -83,20 +96,19 @@ public class QueryUtils {
     }
     
     /**
-     * Removes illegal characters from the name, inserting spaces instead.
+     * Removes illegal characters and delimiters from a string, inserting
+     * spaces instead.
      */
-    public static final String removeIllegalChars(String name) {
-        String ret = "";
-        
-        String delim = QueryUtils.DELIMITERS;
-        char[] illegal = SearchSettings.ILLEGAL_CHARS.get();
-        StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
-        sb.append(illegal).append(delim);
-        StringTokenizer st = new StringTokenizer(name, sb.toString());        
-        while(st.hasMoreTokens())
-            ret += st.nextToken().trim() + " ";
-        return ret.trim();
+    public static final String removeIllegalChars(String str) {
+        StringBuilder sb = new StringBuilder(str.length());
+        StringTokenizer st = new StringTokenizer(str, DELIMITERS_AND_ILLEGAL);        
+        while(st.hasMoreTokens()) {
+            if(sb.length() > 0)
+                sb.append(' ');
+            sb.append(st.nextToken());
         }
+        return sb.toString();
+    }
     
     /**
      * Strips an extension off of a file's filename.
@@ -187,6 +199,31 @@ public class QueryUtils {
 
     public static final boolean isDelimiter(char c) {
         return Arrays.binarySearch(DELIMITERS_CHARACTERS, c) >= 0;
+    }
+    
+    /**
+     * Returns a score between 0 and 1 indicating how well the filename and XML
+     * document match the query. The XML document may be null.
+     */
+    public static float calculateRelevance(String filename, LimeXMLDocument doc,
+            String query) {
+        if(query.isEmpty())
+            return 1;
+        // Score between 0 and 1 for the fraction of relevant keywords. Note
+        // that this matches whole words, not prefixes.
+        Set<String> resultWords = extractKeywords(filename, false);
+        if(doc != null) {
+            for(Entry<String, String> entry : doc.getNameValueSet()) {
+                extractKeywords(entry.getValue(), false, resultWords);
+            }
+        }
+        Set<String> queryWords = QueryUtils.extractKeywords(query, false);
+        float matches = 0;
+        for(String queryWord : queryWords) {
+            if(resultWords.contains(queryWord))
+                matches++;
+        }
+        return matches / resultWords.size();
     }
     
     /**

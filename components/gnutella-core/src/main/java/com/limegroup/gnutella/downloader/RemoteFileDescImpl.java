@@ -21,6 +21,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -48,7 +49,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
     private final LimeXMLDocument _xmlDoc;
 
     private final Set<URN> _urns;
-
+    
     /**
      * Boolean indicating whether or not the remote host has browse host
      * enabled.
@@ -464,4 +465,12 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
         return null;
     }
 
+    /**
+     * Returns a score between 0 and 1 indicating how well the keywords in this
+     * RemoteFileDesc's filename and XML metadata match the specified query. 
+     */
+    @Override
+    public float getRelevance(String query) {
+        return QueryUtils.calculateRelevance(_filename, _xmlDoc, query);
+    }
 }

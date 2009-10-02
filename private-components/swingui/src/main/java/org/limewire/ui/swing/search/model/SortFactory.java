@@ -192,8 +192,8 @@ public class SortFactory {
         return new Comparator<VisualSearchResult>() {
             @Override
             public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                int r1 = vsr1.getRelevance();
-                int r2 = vsr2.getRelevance();
+                float r1 = vsr1.getRelevance();
+                float r2 = vsr2.getRelevance();
                 return ascending ? compareToNull(r1, r2, false) 
                         : compareToNull(r2, r1, false);
             }

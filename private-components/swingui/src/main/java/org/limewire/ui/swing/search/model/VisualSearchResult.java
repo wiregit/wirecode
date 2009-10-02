@@ -140,7 +140,7 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
     /**
      * Returns the relevance value of the search result.  
      */
-    int getRelevance();
+    float getRelevance();
     
     /**
      * Returns an indicator that determines if the result is an existing 

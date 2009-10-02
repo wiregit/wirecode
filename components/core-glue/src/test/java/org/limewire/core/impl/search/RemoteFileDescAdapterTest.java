@@ -50,34 +50,32 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final long fileSize = 1234L;
         final URN urn1 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
 
-        context.checking(new Expectations() {
-            {
-                allowing(remoteFileDesc1).getAddress();
-                will(returnValue(address1));
-                allowing(remoteFileDesc1).getClientGUID();
-                will(returnValue(guid1));
-                allowing(address1).getAddressDescription();
-                will(returnValue("address 1 description"));
-                allowing(remoteFileDesc1).getFileName();
+        context.checking(new Expectations() {{
+            allowing(remoteFileDesc1).getAddress();
+            will(returnValue(address1));
+            allowing(remoteFileDesc1).getClientGUID();
+            will(returnValue(guid1));
+            allowing(address1).getAddressDescription();
+            will(returnValue("address 1 description"));
+            allowing(remoteFileDesc1).getFileName();
                 will(returnValue(fileName1));
                 allowing(categoryManager).getCategoryForExtension("txt");
                 will(returnValue(Category.DOCUMENT));
 
-                allowing(remoteFileDesc1).getSize();
-                will(returnValue(fileSize));
-                allowing(remoteFileDesc1).getXMLDocument();
-                will(returnValue(null));
-                allowing(remoteFileDesc1).getCreationTime();
-                will(returnValue(5678L));
-                allowing(remoteFileDesc1).getSHA1Urn();
-                will(returnValue(urn1));
-                allowing(remoteFileDesc1).isSpam();
-                will(returnValue(false));
-            }
-        });
+            allowing(remoteFileDesc1).getSize();
+            will(returnValue(fileSize));
+            allowing(remoteFileDesc1).getXMLDocument();
+            will(returnValue(null));
+            allowing(remoteFileDesc1).getCreationTime();
+            will(returnValue(5678L));
+            allowing(remoteFileDesc1).getSHA1Urn();
+            will(returnValue(urn1));
+            allowing(remoteFileDesc1).isSpam();
+            will(returnValue(false));
+        }});
 
-        RemoteFileDescAdapter remoteFileDescAdapter1 = new RemoteFileDescAdapter(remoteFileDesc1,
-                ipPorts, categoryManager);
+        RemoteFileDescAdapter remoteFileDescAdapter1 =
+            new RemoteFileDescAdapter(remoteFileDesc1, ipPorts, categoryManager);
 
         assertEquals(Category.DOCUMENT, remoteFileDescAdapter1.getCategory());
         assertEquals("txt", remoteFileDescAdapter1.getFileExtension());
@@ -98,116 +96,120 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
-        
+
+        String query = "foo bar";
+        RemoteFileDescAdapter a, b;
+
         // Consistency across executions
-        assertEquals(createRFDAdapter(context, true, true, 10, true).getRelevance(), 
-                createRFDAdapter(context, true, true, 10, true).getRelevance());
-        
+        a = createRFDAdapter(context, query, true, true, 10, true);
+        b = createRFDAdapter(context, query, true, true, 10, true);
+        assertEquals(a.getRelevance(query), b.getRelevance(query));
+
         // Consistency across same execution
-        RemoteFileDescAdapter rfdAdapter = createRFDAdapter(context, true, true, 10, true);
-        assertEquals(rfdAdapter.getRelevance(), rfdAdapter.getRelevance());
-        
+        a = createRFDAdapter(context, query, true, true, 10, true);
+        assertEquals(a.getRelevance(query), a.getRelevance(query));
+
         // An XMPP friend result should have greater relevance than a Gnutella one
-        assertGreaterThan(createRFDAdapter(context, true, true, 0, true).getRelevance(), 
-                createRFDAdapter(context, false, true, 0, false).getRelevance());
-        assertGreaterThan(createRFDAdapter(context, true, true, 0, false).getRelevance(), 
-                createRFDAdapter(context, false, false, 0, false).getRelevance());
-        assertGreaterThan(createRFDAdapter(context, true, true, 1, true).getRelevance(), 
-                createRFDAdapter(context, false, false, 0, false).getRelevance());
-        
+        a = createRFDAdapter(context, query, true, true, 0, true);
+        b = createRFDAdapter(context, query, false, true, 0, false);
+        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+        a = createRFDAdapter(context, query, true, true, 0, false);
+        b = createRFDAdapter(context, query, false, false, 0, false);
+        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+        a = createRFDAdapter(context, query, true, true, 1, true);
+        b = createRFDAdapter(context, query, false, false, 0, false);
+        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+
         // Altlocs increase relevance, (currently only one factored in though)
-        assertGreaterThan(createRFDAdapter(context, false, false, 0, true).getRelevance(), 
-                createRFDAdapter(context, false, false, 1, false).getRelevance());
-        assertGreaterThan(createRFDAdapter(context, true, true, 0, true).getRelevance(), 
-                createRFDAdapter(context, true, true, 1, true).getRelevance());
-        
+        a = createRFDAdapter(context, query, false, false, 0, true);
+        b = createRFDAdapter(context, query, false, false, 1, false);
+        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+        a = createRFDAdapter(context, query, true, true, 0, true);
+        b = createRFDAdapter(context, query, true, true, 1, true);
+        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+
         // Browseable is better than non browsable
-        assertGreaterThan(createRFDAdapter(context, true, false, 1, true).getRelevance(), 
-                createRFDAdapter(context, true, true, 0, true).getRelevance());
-        
+        a = createRFDAdapter(context, query, true, false, 1, true);
+        b = createRFDAdapter(context, query, true, true, 0, true);
+        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+
         // Try with lots of altlocs, return is irrelevant.
-        createRFDAdapter(context, true, true, 30, false).getRelevance();
+        createRFDAdapter(context, query, true, true, 30, false).getRelevance(query);
 
         // Test altlocs are not factored into calculation after some point
-        assertEquals(createRFDAdapter(context, true, true, 100, true).getRelevance(), 
-                createRFDAdapter(context, true, true, 99, true).getRelevance());        
-        
+        a = createRFDAdapter(context, query, true, true, 100, true);
+        b = createRFDAdapter(context, query, true, true, 99, true);
+        assertEquals(a.getRelevance(query), b.getRelevance(query));
+
         context.assertIsSatisfied();
     }
     
-    private RemoteFileDescAdapter createRFDAdapter(final Mockery context, final boolean anonymous, 
-            final boolean canBrowseHost, final int altlocs, final boolean firstAltLocConnectable) {
-        
+    private RemoteFileDescAdapter createRFDAdapter(final Mockery context,
+            final String filename, final boolean anonymous,
+            final boolean canBrowseHost, final int altlocs,
+            final boolean firstAltLocConnectable) {
+
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         final FriendPresence friendPresence;
-        if (anonymous) {
+        if(anonymous) {
             friendPresence = null;
         } else {
             friendPresence = context.mock(FriendPresence.class);
         }
 
-        context.checking(new Expectations() {
-            {
-
-                // Fill the locs list with alternating IpPort and Connectable instances 
-                for ( int i=0 ; i<altlocs ; i++ ) {
-                    IpPort loc;
-                    if ((i%1 == 0) == firstAltLocConnectable) {
-                        loc = context.mock(Connectable.class);
-                    } 
-                    else {
-                        loc = context.mock(IpPort.class);
-                    }
-                    InetAddress addr = context.mock(InetAddress.class);
-                    allowing(loc).getInetAddress();
-                    will(returnValue(addr));
-                    allowing(addr).getAddress();
-                    will(returnValue(new byte[]{24,101,1,(byte) (i % 255)}));
-                    allowing(addr).getHostAddress();
-                    will(returnValue("24.101.1." + (i % 255)));
-                    allowing(loc);
-                    locs.add(loc);
-                    allowing(addr);
+        context.checking(new Expectations() {{
+            // Fill the locs list with alternating IpPort and Connectable instances 
+            for(int i = 0; i < altlocs; i++) {
+                IpPort loc;
+                if((i % 1 == 0) == firstAltLocConnectable) {
+                    loc = context.mock(Connectable.class);
+                } else {
+                    loc = context.mock(IpPort.class);
                 }
-
-                
-                allowing(rfd).getClientGUID();
-                will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
-
-                if (!anonymous) {
-                    Friend friend = context.mock(Friend.class);
-                    allowing(friendPresence).getFriend();
-                    will(returnValue(friend));                 
-                    allowing(friend).isAnonymous();
-                    will(returnValue(false));
-                    allowing(friend);
-                }
-                
-                allowing(rfd).isBrowseHostEnabled();
-                will(returnValue(canBrowseHost));
-                
-                allowing(rfd);
-                
-                allowing(categoryManager).getCategoryForExtension("");
-                will(returnValue(Category.OTHER));
+                InetAddress addr = context.mock(InetAddress.class);
+                allowing(loc).getInetAddress();
+                will(returnValue(addr));
+                allowing(addr).getAddress();
+                will(returnValue(new byte[]{24,101,1,(byte) (i % 255)}));
+                allowing(addr).getHostAddress();
+                will(returnValue("24.101.1." + (i % 255)));
+                allowing(loc);
+                locs.add(loc);
+                allowing(addr);
             }
-        });
-    
-        RemoteFileDescAdapter rfdAdapter;
-        
-        if (!anonymous) {
-            rfdAdapter = new RemoteFileDescAdapter(rfd,
-                locs, friendPresence, categoryManager);
-        } 
-        else {
-            rfdAdapter = new RemoteFileDescAdapter(rfd,
-                    locs, categoryManager);
+
+            allowing(rfd).getClientGUID();
+            will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
+
+            if(!anonymous) {
+                Friend friend = context.mock(Friend.class);
+                allowing(friendPresence).getFriend();
+                will(returnValue(friend));                 
+                allowing(friend).isAnonymous();
+                will(returnValue(false));
+                allowing(friend);
+            }
+
+            allowing(rfd).isBrowseHostEnabled();
+            will(returnValue(canBrowseHost));
+
+            allowing(rfd).getRelevance(with(equal(filename)));
+            will(returnValue(1f));
+
+            allowing(rfd);
+            
+            allowing(categoryManager).getCategoryForExtension("");
+            will(returnValue(Category.OTHER));
+        }});
+
+        if(anonymous) {
+            return new RemoteFileDescAdapter(rfd, locs, categoryManager);
+        } else {
+            return new RemoteFileDescAdapter(rfd, locs, friendPresence, categoryManager);
         }
-        
-        return rfdAdapter;
     }
    
     /**
@@ -218,43 +220,48 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
-    
+
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
+        final String filename = "foo bar";
 
         context.checking(new Expectations() {{
             allowing(rfd).getClientGUID();
             will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
+
+            allowing(rfd).getRelevance(with(equal(filename)));
+            will(returnValue(1f));
+
             allowing(rfd);
             allowing(categoryManager).getCategoryForExtension("");
             will(returnValue(Category.OTHER));
         }});
-        
+
         RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager) {
             @Override
             public List<RemoteHost> getSources() {
                 List<RemoteHost> list = new LinkedList<RemoteHost>();
-                
+
                 // Host without relevance
                 list.add(context.mock(RemoteHost.class));
-                
+
                 final RelevantRemoteHost host = context.mock(RelevantRemoteHost.class);
-                
+
                 context.checking(new Expectations() {{
                     allowing(host).getRelevance();
                     will(returnValue(99));
                 }});
-                
+
                 // New host type with other relevance
                 list.add(host);
-                
+
                 return list;
             }
         };
-        
-        assertEquals(99, rfdAdapter.getRelevance());
-        
+
+        assertEquals(99f, rfdAdapter.getRelevance(filename));
+
         context.assertIsSatisfied();
     }
     
@@ -370,7 +377,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
      
-        RemoteFileDescAdapter rfdAdapter = createRFDAdapter(context, true, true, 16, true);
+        RemoteFileDescAdapter rfdAdapter = createRFDAdapter(context, "", true, true, 16, true);
         
         List<IpPort> alts = rfdAdapter.getAlts();
         

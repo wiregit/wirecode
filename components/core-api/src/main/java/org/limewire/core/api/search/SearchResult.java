@@ -37,8 +37,13 @@ public interface SearchResult {
     
     String getMagnetURL();
 
-    public int getRelevance();
-
+    /**
+     * Returns a score that indicates the quality of the sources and the degree
+     * to which the result matches the query. Non-anonymous sources with active
+     * capabilities (ie. browseable) are given greatest weight.
+     */
+    public float getRelevance(String query);
+    
     /**
      * @return true if the underlying associated file contains a license
      */

@@ -54,7 +54,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     private boolean childrenVisible;    
     private Boolean spamCache;    
     private boolean preExistingDownload = false;    
-    private int relevance = 0;    
+    private float relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
     
@@ -64,15 +64,16 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
      * Constructs a SearchResultAdapter with the specified List of core results
      * and property values.
      */
-    public SearchResultAdapter(SearchResult source, Provider<PropertiableHeadings> propertiableHeadings,
-                               VisualSearchResultStatusListener changeListener) {
+    public SearchResultAdapter(SearchResult source,
+            Provider<PropertiableHeadings> propertiableHeadings,
+            VisualSearchResultStatusListener changeListener, String query) {
         this.propertiableHeadings = propertiableHeadings;
         this.remoteHosts = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
         this.visible = true;
         this.childrenVisible = false;
         this.changeListener = changeListener;
         
-        addNewSource(source);
+        addNewSource(source, query);
     }
 
     @Override
@@ -203,7 +204,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
      * Reloads the sources from the core search results. The number of alt-locs
      * is limited to avoid giving high relevance to spam results.
      */
-    void addNewSource(SearchResult result) {
+    void addNewSource(SearchResult result, String query) {
         // optimize for only having a single result
         if(coreResults == null) {
             coreResults = Collections.singletonList(result);
@@ -214,7 +215,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
             coreResults.add(result);
         }
         
-        relevance += result.getRelevance();
+        relevance += result.getRelevance(query);
         
         // Build collection of non-anonymous friends for filtering.
         for (RemoteHost host : result.getSources()) {
@@ -352,10 +353,9 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     }
 
     @Override
-    public int getRelevance() {
+    public float getRelevance() {
         return relevance;
     }
-
 
     /**
      * If any of the search results' lime xml docs contains a license string
