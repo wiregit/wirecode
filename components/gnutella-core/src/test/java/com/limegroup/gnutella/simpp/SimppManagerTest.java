@@ -7,6 +7,7 @@ import junit.framework.Test;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
@@ -174,6 +175,7 @@ public class SimppManagerTest extends LimeTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         
         ApplicationSettings.INITIALIZE_SIMPP.setValue(true);
+        MessageSettings.REREQUEST_SIGNED_MESSAGE.set(0.0f);
     }
     
     ////////////////////////////////tests/////////////////////////////////////
@@ -237,18 +239,21 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the TestConnection to have the old version, and expect to
         //not receive a simpprequest
         TestConnection conn = new TestConnection(OLD, false, false, messageFactory);//!expect, !respond
-        conn.start();
+        try {
+            conn.start();
         
-        //6s = 2s * 3 (timeout in TestConnection == 2s)
-        Thread.sleep(6000);//let messages be exchanged, 
-        
-        //3. let the test run and make sure state is OK, for this test this part
-        //is just a formality, the real testing is on the TestConnection in step
-        //2 above.
-        SimppManager man = simppManager;
-        assertEquals("SimppManager should not have updated", MIDDLE, 
-                                                              man.getVersion());
-        conn.killConnection();
+            //6s = 2s * 3 (timeout in TestConnection == 2s)
+            Thread.sleep(6000);//let messages be exchanged, 
+            
+            //3. let the test run and make sure state is OK, for this test this part
+            //is just a formality, the real testing is on the TestConnection in step
+            //2 above.
+            SimppManager man = simppManager;
+            assertEquals("SimppManager should not have updated", MIDDLE, 
+                    man.getVersion());
+        } finally {
+            conn.killConnection();
+        }
     }
     
     public void testOlderSimppNotRequestedUnsolicitedAccepted() throws Exception {
@@ -278,15 +283,18 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited same SimppResponse
         TestConnection conn = new TestConnection(MIDDLE,false, true, messageFactory);
-        conn.start();
-        //6s = 2s * 3 (timeout in TestConnection == 2s)
-        Thread.sleep(6000);//let messages be exchanged, 
-
-        //3. let the test run and make sure state is OK, 
-        SimppManager man = simppManager;
-        assertEquals("SimppManager should not have updated", MIDDLE, 
-                                                              man.getVersion());
-        conn.killConnection();
+        try {
+            conn.start();
+            //6s = 2s * 3 (timeout in TestConnection == 2s)
+            Thread.sleep(6000);//let messages be exchanged, 
+            
+            //3. let the test run and make sure state is OK, 
+            SimppManager man = simppManager;
+            assertEquals("SimppManager should not have updated", MIDDLE, 
+                    man.getVersion());
+        } finally {
+            conn.killConnection();
+        }
     }
     
     public void testNewSimppAdvOldActualRejected() throws Exception {
@@ -297,16 +305,19 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited older SimppResponse
         TestConnection conn = new TestConnection(MIDDLE,false, true, OLD, messageFactory);
-        conn.start();
-        
-        //6s = 2s * 3 (timeout in TestConnection == 2s)
-        Thread.sleep(6000);//let messages be exchanged, 
-
-        //3. let the test run and make sure state is OK, 
-        SimppManager man = simppManager;
-        assertEquals("SimppManager should not have updated", MIDDLE, 
-                                                              man.getVersion());
-        conn.killConnection();
+        try {
+            conn.start();
+            
+            //6s = 2s * 3 (timeout in TestConnection == 2s)
+            Thread.sleep(6000);//let messages be exchanged, 
+            
+            //3. let the test run and make sure state is OK, 
+            SimppManager man = simppManager;
+            assertEquals("SimppManager should not have updated", MIDDLE, 
+                    man.getVersion());
+        } finally {
+            conn.killConnection();
+        }
     }
 
 
@@ -318,15 +329,18 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire
         TestConnection conn = new TestConnection(NEW, true, true, messageFactory);//expect, respond
-        conn.start();
-        
-        Thread.sleep(6000);//let the message exchange take place
-
-        //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = simppManager;
-        assertEquals("Simpp manager did not update simpp version", 
-                                                         NEW, man.getVersion());
-        conn.killConnection();
+        try {
+            conn.start();
+            
+            Thread.sleep(6000);//let the message exchange take place
+            
+            //3. OK. LimeWire should have upgraded now. 
+            SimppManager man = simppManager;
+            assertEquals("Simpp manager did not update simpp version", 
+                    NEW, man.getVersion());
+        } finally {
+            conn.killConnection();
+        }
     }
 
     public void testTamperedSimppSigRejected() throws Exception {

@@ -143,7 +143,11 @@ public class TestConnection extends AssertComparisons {
         } catch (BadPacketException bpx) {
             fail("limewire sent message with BPX");
         }
-        assertNotNull("should have gotten simpp message", message);
+        if (_expectSimppRequest) {
+            assertNotNull(message);
+        } else {
+            assertNull(message);
+        }
     }
     
     private void checkSimppBehaviour(InputStream is, OutputStream os) 
