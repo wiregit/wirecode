@@ -94,7 +94,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
             Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel,
             BarPainterFactory barPainterFactory, UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager,
             Application application) {
-        super(GuiUtils.getMainFrame(), I18n.tr("Options"), true);
+        super(GuiUtils.getMainFrame(), (OSUtils.isMacOSX()) ? I18n.tr("Preferences") : I18n.tr("Options"), true);
 
         GuiUtils.assignResources(this); 
         
