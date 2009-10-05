@@ -77,17 +77,17 @@ public class AbstractModuleTest extends BaseTestCase {
     @Singleton
     private static class S1I implements S1 {
         private static boolean created = false;
-        S1I () { created = true; }
+        @SuppressWarnings("unused") S1I () { created = true; }
     }
     private static interface S2 {}
     @Singleton
     private static class S2I implements S2 {
         private static boolean created = false;
-        S2I () { created = true; }
+        @SuppressWarnings("unused") S2I () { created = true; }
     }
     @Singleton
     private static class S3I {
         private static boolean created = false;
-        S3I () { created = true; }
+        @SuppressWarnings("unused") S3I () { created = true; }
     }
 }

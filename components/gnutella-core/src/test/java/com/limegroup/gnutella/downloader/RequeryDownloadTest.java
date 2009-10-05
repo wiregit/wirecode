@@ -397,9 +397,9 @@ public class RequeryDownloadTest extends LimeTestCase {
             super.sendDynamicQuery(query); //add GUID to route table
         }
         
-        public void clearBroadcasts() { 
-            broadcasts.clear();
-        }
+//        public void clearBroadcasts() { 
+//            broadcasts.clear();
+//        }
     }
 
     

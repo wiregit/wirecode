@@ -871,7 +871,7 @@ public class Console extends JPanel {
         }
         
         public void add(Logger logger) {
-            classNodes.add(new ClassNode(this, logger));
+            classNodes.add(new ClassNode(logger));
         }
         
         public Level getLevel() {
@@ -930,21 +930,10 @@ public class Console extends JPanel {
     }
     
     private static class ClassNode implements LoggerNode {
-        
-        private PackageNode parent;
         private Logger logger;
         
-        private ClassNode(PackageNode parent, Logger logger) {
-            this.parent = parent;
+        private ClassNode(Logger logger) {
             this.logger = logger;
-        }
-        
-        public PackageNode getParent() {
-            return parent;
-        }
-        
-        public Logger getLogger() {
-            return logger;
         }
         
         public Level getLevel() {

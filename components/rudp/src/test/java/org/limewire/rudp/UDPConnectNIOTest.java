@@ -266,7 +266,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
         // Shutdownable methods.
         public void shutdown() {}
         
-        public ByteBuffer getRead() { return (ByteBuffer)readData.flip(); }
+//        public ByteBuffer getRead() { return (ByteBuffer)readData.flip(); }
     }
     
     private static class ICROAdapter implements ChannelReadObserver, InterestReadableByteChannel {

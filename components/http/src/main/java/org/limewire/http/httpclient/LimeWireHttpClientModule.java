@@ -84,11 +84,6 @@ public class LimeWireHttpClientModule extends AbstractModule {
     
     @Singleton
     private static class SSLSchemeRegistryProvider extends AbstractLazySingletonProvider<SchemeRegistry> {
-        
-        @Inject
-        public SSLSchemeRegistryProvider() {
-        }
-
         @Override
         protected SchemeRegistry createObject() {             
             try {
@@ -109,7 +104,7 @@ public class LimeWireHttpClientModule extends AbstractModule {
         private final Provider<SocketsManager> socketsManager;
         
         @Inject
-        public LimeSchemeRegistryProvider(Provider<SocketsManager> socketsManager) {
+        @SuppressWarnings("unused") public LimeSchemeRegistryProvider(Provider<SocketsManager> socketsManager) {
             this.socketsManager = socketsManager;
         }
 

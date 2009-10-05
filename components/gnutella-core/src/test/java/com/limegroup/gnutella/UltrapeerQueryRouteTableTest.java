@@ -17,7 +17,6 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**
@@ -184,9 +183,9 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
         public void record(QueryRequest qr) {
         }
 
-        public int score(String query, LimeXMLDocument richQuery, RemoteFileDesc response) {
-            return FilterSettings.MIN_MATCHING_WORDS.getValue() + 10 ;
-        }
+//        public int score(String query, LimeXMLDocument richQuery, RemoteFileDesc response) {
+//            return FilterSettings.MIN_MATCHING_WORDS.getValue() + 10 ;
+//        }
         
         public String getQueryString(byte[] guid) {
             return null;

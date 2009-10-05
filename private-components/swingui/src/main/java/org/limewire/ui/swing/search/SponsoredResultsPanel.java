@@ -70,14 +70,10 @@ public class SponsoredResultsPanel extends JXPanel {
     }
         
     private class SponsoredResultView extends JPanel {
-        
-        private SponsoredResult result;
 
-        public SponsoredResultView(SponsoredResult result){
-         super(new VerticalLayout());
-            this.result = result;
-            
-            MultiLineLabel link = new MultiLineLabel("<html><u>"+result.getTitle()+"</u><html>", textWidth);
+        public SponsoredResultView(SponsoredResult result) {
+            super(new VerticalLayout());
+            MultiLineLabel link = new MultiLineLabel("<html><u>" + result.getTitle() + "</u><html>", textWidth);
             link.setForeground(headingColor);
             link.setFont(headingFont);
             link.addMouseListener(new ActionHandListener(new SponsoredResultListener(result)));
@@ -97,11 +93,6 @@ public class SponsoredResultsPanel extends JXPanel {
             add(textArea);
             add(urlLabel);
         }
-
-        
-        public SponsoredResult getSponsoredResult() {
-            return result;
-        } 
         
     }
     

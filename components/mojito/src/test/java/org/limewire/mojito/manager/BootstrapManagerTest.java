@@ -254,7 +254,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
         List<Tag> sent = new ArrayList<Tag>();
         List<Tag> notSent = new ArrayList<Tag>();
         List<DHTMessage> received = new ArrayList<DHTMessage>();
-        List<DHTMessage> notReceived = new ArrayList<DHTMessage>();
+//        List<DHTMessage> notReceived = new ArrayList<DHTMessage>();
         volatile TestFilter filter;
         
         public TestMessageDispatcher(Context context) {

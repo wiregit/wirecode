@@ -262,9 +262,9 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         public void bootstrap() {
         }
 
-        public boolean isBootstrappingFromRT() {
-            return false;
-        }
+//        public boolean isBootstrappingFromRT() {
+//            return false;
+//        }
 
         public boolean isWaitingForNodes() {
             return isWaitingForNodes;

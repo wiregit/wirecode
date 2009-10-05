@@ -24,8 +24,9 @@ class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
     private final ScheduledFuture connectionCloserTask;
     private final IdleConnectionCloser connectionCloser;
 
-    public ReapingClientConnectionManager(Provider<SchemeRegistry> schemeRegistry, Provider<ScheduledExecutorService> scheduler, Provider<HttpParams> defaultParams) {
-        super(defaultParams.get(), schemeRegistry.get());
+    public ReapingClientConnectionManager(Provider<SchemeRegistry> schemeRegistry,
+            Provider<ScheduledExecutorService> scheduler, Provider<HttpParams> defaultParams) {
+        super(schemeRegistry.get());
         connectionCloser = new IdleConnectionCloser();
         // TODO revist - move this until later (eg., getConnection())
         connectionCloserTask = scheduler.get().scheduleWithFixedDelay(connectionCloser, 0L, 10L, TimeUnit.SECONDS);

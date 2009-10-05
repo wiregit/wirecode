@@ -118,13 +118,12 @@ public class SettingsGroupListenerTest extends BaseTestCase {
         
         private static final TestSettings INSTANCE = new TestSettings();
         
-        public static final SettingsFactory FACTORY = INSTANCE.getFactory();
+//        public static final SettingsFactory FACTORY = INSTANCE.getFactory();
         
         public TestSettings() {
             super(new File("test.props"), "Test Settings");
         }
         
-        public static final IntSetting TEST
-            = FACTORY.createIntSetting("TEST", 0);
+//        public static final IntSetting TEST = FACTORY.createIntSetting("TEST", 0);
     }
 }

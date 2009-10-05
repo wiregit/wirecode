@@ -137,22 +137,13 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
      */
     private static class ConnectionEventListener implements HttpAcceptorListener {
 
-        public void connectionOpen(NHttpConnection conn) {
+        @Override public void connectionOpen(NHttpConnection conn) {
         }
 
-        public void connectionClosed(NHttpConnection conn) {
+        @Override public void connectionClosed(NHttpConnection conn) {
         }
 
-        public void connectionTimeout(NHttpConnection conn) {
-        }
-
-        public void fatalIOException(IOException e, NHttpConnection conn) {
-        }
-
-        public void fatalProtocolException(HttpException e, NHttpConnection conn) {
-        }
-
-        public void responseSent(NHttpConnection conn, HttpResponse response) {
+        @Override public void responseSent(NHttpConnection conn, HttpResponse response) {
             HttpIOSession session = HttpContextParams.getIOSession(conn.getContext());
             session.setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
             session.setThrottle(null);
@@ -177,7 +168,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
          * DefaultNHttpServerConnection.submitResponse() but can't be easily
          * made accessible
          */
-        public void process(HttpResponse response, HttpContext context) throws HttpException,
+        @Override public void process(HttpResponse response, HttpContext context) throws HttpException,
                 IOException {
             for (Iterator it = response.headerIterator(); it.hasNext();) {
                 Header header = (Header) it.next();

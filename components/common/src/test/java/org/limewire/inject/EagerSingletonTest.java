@@ -114,13 +114,13 @@ public class EagerSingletonTest extends BaseTestCase {
     
     @EagerSingleton
     private static class EagerAnnotated {
-        public EagerAnnotated() {
+        @SuppressWarnings("unused") public EagerAnnotated() {
             EAGER_ANNOTATED_CONSTRUCTED = true;
         }
     }
     
     private static class Foo {
-        public Foo() {
+        @SuppressWarnings("unused") public Foo() {
             FOO_CONSTRUCTED = true;
         }
     }

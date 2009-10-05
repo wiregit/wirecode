@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent.metadata;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,10 +109,6 @@ public class TorrentMetaData implements MetaData {
 
         public void add(String name, String value) {
             values.add(new NameValue<String>(name, value));
-        }
-
-        public void add(String name, URI uri) {
-            values.add(new NameValue<String>(name, uri.toASCIIString()));
         }
 
         public void add(String name, long value) {

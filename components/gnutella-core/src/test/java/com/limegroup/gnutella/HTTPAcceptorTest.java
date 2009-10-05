@@ -170,22 +170,22 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
         boolean opened;
 
-        NHttpConnection conn;
+//        NHttpConnection conn;
 
         HttpResponse response;
 
         public void connectionClosed(NHttpConnection conn) {
-            this.conn = conn;
+//            this.conn = conn;
             this.closed = true;
         }
 
         public void connectionOpen(NHttpConnection conn) {
-            this.conn = conn;
+//            this.conn = conn;
             this.opened = true;
         }
 
         public void responseSent(NHttpConnection conn, HttpResponse response) {
-            this.conn = conn;
+//            this.conn = conn;
             this.response = response;
         }
 

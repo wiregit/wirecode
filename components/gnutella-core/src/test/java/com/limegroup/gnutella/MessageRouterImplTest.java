@@ -1208,7 +1208,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         
         private final NetworkInstanceUtils networkInstanceUtils;
 
-        @Inject
+        @Inject @SuppressWarnings("unused") 
         public ManagedConnectionStubFactory(Provider<ConnectionManager> connectionManager,
                 NetworkManager networkManager, QueryRequestFactory queryRequestFactory,
                 HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,

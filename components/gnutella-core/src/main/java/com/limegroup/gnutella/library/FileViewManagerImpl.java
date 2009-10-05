@@ -1001,13 +1001,13 @@ class FileViewManagerImpl implements FileViewManager {
 
         /** An inspectable that returns stats about hits, uploads & alts */
         @InspectionPoint(value = "FileManager h/u/a stats", category = DataCategory.USAGE)
-        public final Inspectable FDS = new FDInspectable(false);
+        @SuppressWarnings("unused") public final Inspectable FDS = new FDInspectable(false);
         /** An inspectable that returns stats about hits, uploads & alts > 0 */
         @InspectionPoint(value = "FileManager h/u/a stats > 0", category = DataCategory.USAGE)
-        public final Inspectable FDSNZ = new FDInspectable(true);
+        @SuppressWarnings("unused") public final Inspectable FDSNZ = new FDInspectable(true);
         
         @InspectionPoint(value = "friend file views", category = DataCategory.USAGE)
-        public final Inspectable FRIEND = new Inspectable() {
+        @SuppressWarnings("unused") public final Inspectable FRIEND = new Inspectable() {
             @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();

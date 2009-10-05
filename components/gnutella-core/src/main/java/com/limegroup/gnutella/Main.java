@@ -21,11 +21,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -162,35 +159,6 @@ public class Main {
 
         /////////////////////////// ActivityCallback methods //////////////////////
     
-        public void connectionInitializing(RoutedConnection c) {
-        }
-    
-        public void connectionInitialized(RoutedConnection c) {
-    //      String host = c.getOrigHost();
-    //      int    port = c.getOrigPort();
-            ;//System.out.println("Connected to "+host+":"+port+".");
-        }
-    
-        public void connectionClosed(RoutedConnection c) {
-    //      String host = c.getOrigHost();
-    //      int    port = c.getOrigPort();
-            //System.out.println("Connection to "+host+":"+port+" closed.");
-        }
-    
-        public void knownHost(Endpoint e) {
-            //Do nothing.
-        }
-    
-    //     public void handleQueryReply( QueryReply qr ) {
-    //      synchronized(System.out) {
-    //          System.out.println("Query reply from "+qr.getIP()+":"+qr.getPort()+":");
-    //          try {
-    //              for (Iterator iter=qr.getResults(); iter.hasNext(); )
-    //                  System.out.println("   "+((Response)iter.next()).getName());
-    //          } catch (BadPacketException e) { }
-    //      }
-    //     }
-    
         /**
          *  Add a query string to the monitor screen
          */
@@ -198,94 +166,51 @@ public class Main {
         public void handleQuery(QueryRequest query, String address, int port) {
         }
     
-    
-        public void error(int errorCode) {
-            error(errorCode, null);
-        }
-        
-        public void error(Throwable problem, String msg) {
-            problem.printStackTrace();
-            System.out.println(msg);
-        }
-    
-        /**
-         * Implements ActivityCallback.
-         */
-        public void error(Throwable problem) {
-            problem.printStackTrace();
-        }
-    
-        public void error(int message, Throwable t) {
-            System.out.println("Error: "+message);
-            t.printStackTrace();
-        }
-    
         ///////////////////////////////////////////////////////////////////////////
 
-    
+        @Override
         public void addDownload(Downloader mgr) {}
     
+        @Override
         public void removeDownload(Downloader mgr) {}
     
+        @Override
         public void addUpload(Uploader mgr) {}
     
+        @Override
         public void removeUpload(Uploader mgr) {}
-    
-        public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
         
+        @Override
         public void handleSharedFileUpdate(File file) {}
     
+        @Override
         public void downloadsComplete() {}    
         
+        @Override
         public void uploadsComplete() {}
     
+        @Override 
         public void promptAboutCorruptDownload(Downloader dloader) {
             dloader.discardCorruptDownload(false);
         }
         
-        public void warnUser(String filename, String message) {}
+        @Override public void warnUser(String filename, String message) {}
     
-        public void restoreApplication() {}
+        @Override public void restoreApplication() {}
     
-        public void showDownloads() {}
-    
-        public String getHostValue(String key){
-            return null;
-        }
-        public void browseHostFailed(GUID guid) {}
-        
-        public void updateAvailable(UpdateInformation update) {
-            if (update.getUpdateCommand() != null)
-                System.out.println("there's a new version out "+update.getUpdateVersion()+
-                        ", to get it shutdown limewire and run "+update.getUpdateCommand());
-            else
-                System.out.println("You're running an older version.  Get " +
-                             update.getUpdateVersion() + ", from " + update.getUpdateURL());
-        }  
-    
-        public boolean isQueryAlive(GUID guid) {
+        @Override public boolean isQueryAlive(GUID guid) {
             return false;
         }
         
-        public void componentLoading(String state, String component) {
-            System.out.println("Loading component: " + component);
-        }
-        
-        public void handleMagnets(final MagnetOptions[] magnets) {
+        @Override public void handleMagnets(final MagnetOptions[] magnets) {
         }
     
-    	public void handleTorrent(File torrentFile){}
-
-        public void handleAddressStateChanged() {
-        }
-        
-        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        }
-        public void installationCorrupted() {
+        @Override public void handleTorrent(File torrentFile){}
+    	
+        @Override public void installationCorrupted() {
             
         }
-        public void handleDAAPConnectionError(Throwable t) {  }
-        public String translate(String s) { return s;}
+        @Override public String translate(String s) { return s;}
 
         @Override
         public void handleDownloadException(DownloadAction downLoadAction,

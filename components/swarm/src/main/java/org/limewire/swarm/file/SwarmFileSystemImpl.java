@@ -168,12 +168,12 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             }
         }
 
-        public void flush() throws IOException {
-            synchronized (LOCK) {
-                initialize();
-                fileChannel.force(true);
-            }
-        }
+//        public void flush() throws IOException {
+//            synchronized (LOCK) {
+//                initialize();
+//                fileChannel.force(true);
+//            }
+//        }
 
         public long read(ByteBuffer byteBuffer, long position) throws IOException {
             synchronized (LOCK) {

@@ -2,7 +2,6 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -26,7 +25,6 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
@@ -110,253 +108,221 @@ public class HttpPushRequestHandlerTest extends BaseTestCase {
     private class StubMessageRouter implements MessageRouter {
         private PushRequest push;
 
-        protected List<QueryReply> createQueryReply(byte[] guid, byte ttl,
-                long speed, Response[] res, byte[] clientGUID, boolean busy,
-                boolean uploaded, boolean measuredSpeed, boolean isFromMcast,
-                boolean shouldMarkForFWTransfer, SecurityToken securityToken) {
-            return null;
-        }
-
-        protected void respondToPingRequest(PingRequest request,
-                ReplyHandler handler) {
-        }
-
-        protected boolean respondToQueryRequest(QueryRequest queryRequest,
-                byte[] clientGUID, ReplyHandler handler) {
-            return false;
-        }
-
-        protected void respondToUDPPingRequest(PingRequest request,
-                InetSocketAddress addr, ReplyHandler handler) {
-        }
-
-        public void sendPushRequest(PushRequest push) throws IOException {
+        @Override public void sendPushRequest(PushRequest push) throws IOException {
             this.push = push;
         }
 
-        public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
+        @Override public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
             // TODO Auto-generated method stub
             return false;
         }
 
-        public boolean addBypassedSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+        @Override public boolean addBypassedSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
             // TODO Auto-generated method stub
             return false;
         }
 
-        public void addMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+        @Override public void addMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public void addMulticastMessageHandler(Class<? extends Message> clazz,
+        @Override public void addMulticastMessageHandler(Class<? extends Message> clazz,
                 MessageHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public void addUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+        @Override public void addUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public void broadcastPingRequest(PingRequest ping) {
+        @Override public void broadcastPingRequest(PingRequest ping) {
             // TODO Auto-generated method stub
             
         }
 
-        public void downloadFinished(GUID guid) throws IllegalArgumentException {
+        @Override public void downloadFinished(GUID guid) throws IllegalArgumentException {
             // TODO Auto-generated method stub
             
         }
 
-        public void forwardInspectionRequestToLeaves(InspectionRequest ir) {
+        @Override public void forwardInspectionRequestToLeaves(InspectionRequest ir) {
             // TODO Auto-generated method stub
             
         }
 
-        public void forwardQueryRequestToLeaves(QueryRequest query, ReplyHandler handler) {
+        @Override public void forwardQueryRequestToLeaves(QueryRequest query, ReplyHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public MessageHandler getMessageHandler(Class<? extends Message> clazz) {
+        @Override public MessageHandler getMessageHandler(Class<? extends Message> clazz) {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public MessageHandler getMulticastMessageHandler(Class<? extends Message> clazz) {
+        @Override public MessageHandler getMulticastMessageHandler(Class<? extends Message> clazz) {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
+        @Override public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
             // TODO Auto-generated method stub
             return 0;
         }
 
-        public long getOOBExpireTime() {
+        @Override public long getOOBExpireTime() {
             // TODO Auto-generated method stub
             return 0;
         }
 
-        public String getPingRouteTableDump() {
+        @Override public String getPingRouteTableDump() {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public String getPushRouteTableDump() {
+        @Override public String getPushRouteTableDump() {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public Set<GUESSEndpoint> getQueryLocs(GUID guid) {
+        @Override public Set<GUESSEndpoint> getQueryLocs(GUID guid) {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public QueryRouteTable getQueryRouteTable() {
+        @Override public QueryRouteTable getQueryRouteTable() {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public String getQueryRouteTableDump() {
+        @Override public String getQueryRouteTableDump() {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public MessageHandler getUDPMessageHandler(Class<? extends Message> clazz) {
+        @Override public MessageHandler getUDPMessageHandler(Class<? extends Message> clazz) {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public void handleMessage(Message msg, ReplyHandler receivingConnection) {
+        @Override public void handleMessage(Message msg, ReplyHandler receivingConnection) {
             // TODO Auto-generated method stub
             
         }
 
-        public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
+        @Override public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
             // TODO Auto-generated method stub
             
         }
 
-        public void handleQueryReply(QueryReply queryReply, ReplyHandler handler) {
+        @Override public void handleQueryReply(QueryReply queryReply, ReplyHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public void handleUDPMessage(Message msg, InetSocketAddress addr) {
+        @Override public void handleUDPMessage(Message msg, InetSocketAddress addr) {
             // TODO Auto-generated method stub
             
         }
 
-        public void start() {
+        @Override public void start() {
             // TODO Auto-generated method stub
             
         }
 
-        public boolean isHostUnicastQueried(GUID guid, IpPort host) {
+        @Override public boolean isHostUnicastQueried(GUID guid, IpPort host) {
             // TODO Auto-generated method stub
             return false;
         }
 
-        public boolean isQueryAlive(GUID guid) {
+        @Override public boolean isQueryAlive(GUID guid) {
             // TODO Auto-generated method stub
             return false;
         }
 
-        public boolean sendInitialQuery(QueryRequest query, RoutedConnection mc) {
+        @Override public boolean sendInitialQuery(QueryRequest query, RoutedConnection mc) {
             // TODO Auto-generated method stub
             return false;
         }
 
-        public void originateQueryGUID(byte[] guid) {
+        @Override public void originateQueryGUID(byte[] guid) {
             // TODO Auto-generated method stub
             
         }
 
-        public void queryKilled(GUID guid) throws IllegalArgumentException {
+        @Override public void queryKilled(GUID guid) throws IllegalArgumentException {
             // TODO Auto-generated method stub
             
         }
 
-        public void registerMessageListener(byte[] guid, MessageListener ml) {
+        @Override public void registerMessageListener(byte[] guid, MessageListener ml) {
             // TODO Auto-generated method stub
             
         }
 
-        public void removeConnection(ReplyHandler rh) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+        @Override public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                 QueryRequest queryRequest) {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public void sendDynamicQuery(QueryRequest query) {
+        @Override public void sendDynamicQuery(QueryRequest query) {
             // TODO Auto-generated method stub
             
         }
 
-        public void sendMulticastPushRequest(PushRequest push) {
+        @Override public void sendMulticastPushRequest(PushRequest push) {
             // TODO Auto-generated method stub
             
         }
 
-        public void sendPingRequest(PingRequest request, RoutedConnection connection) {
+        @Override public void sendPingRequest(PingRequest request, RoutedConnection connection) {
             // TODO Auto-generated method stub
             
         }
 
-        public void setMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+        @Override public void setMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public void setMulticastMessageHandler(Class<? extends Message> clazz,
+        @Override public void setMulticastMessageHandler(Class<? extends Message> clazz,
                 MessageHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public void setUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+        @Override public void setUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
             // TODO Auto-generated method stub
             
         }
 
-        public void unregisterMessageListener(byte[] guid, MessageListener ml) {
+        @Override public void unregisterMessageListener(byte[] guid, MessageListener ml) {
             // TODO Auto-generated method stub
             
         }
 
-        public ReplyHandler getPushHandler(byte[] guid) {
+        @Override public ReplyHandler getPushHandler(byte[] guid) {
             return null;
         }
-        
-        public void setPersonalFilter(SpamFilter personalFilter) {
-        }
-        
-        public boolean isPersonalSpam(Message m) {
-            return false;
+
+        @Override public void stop() {
         }
 
-        public void stop() {
-        }
-
-        public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+        @Override public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                 QueryRequest queryRequest, int replyLimit, SecurityToken token) {
             return null;
         }
         
-        public void initialize() {
+        @Override public void initialize() {
             // TODO Auto-generated method stub
             
         }
         
-        public String getServiceName() {
+        @Override public String getServiceName() {
             // TODO Auto-generated method stub
             return null;
         }

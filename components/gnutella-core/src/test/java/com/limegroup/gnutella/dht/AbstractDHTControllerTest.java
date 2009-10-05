@@ -8,7 +8,6 @@ import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.Test;
 
@@ -20,9 +19,7 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueFactoryManager;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.EvictorManager;
 import org.limewire.mojito.db.StorableModelManager;
@@ -120,115 +117,111 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return true;
         }
 
-        public void bind(InetAddress addr, int port) throws IOException {}
+        @Override public void bind(InetAddress addr, int port) throws IOException {}
 
-        public void bind(int port) throws IOException {}
+        @Override public void bind(int port) throws IOException {}
 
-        public void bind(SocketAddress address) throws IOException {}
+        @Override public void bind(SocketAddress address) throws IOException {}
 
-        public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType) {
+//        public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType) {
+//            return null;
+//        }
+
+        @Override public SocketAddress getContactAddress() {
             return null;
         }
 
-        public SocketAddress getContactAddress() {
+        @Override public DHTStats getDHTStats() {
             return null;
         }
 
-        public DHTStats getDHTStats() {
-            return null;
-        }
-
-        public int getExternalPort() {
+        @Override public int getExternalPort() {
             return 0;
         }
 
-        public SocketAddress getLocalAddress() {
+        @Override public SocketAddress getLocalAddress() {
             return null;
         }
 
-        public Contact getLocalNode() {
+        @Override public Contact getLocalNode() {
             return null;
         }
 
-        public KUID getLocalNodeID() {
+        @Override public KUID getLocalNodeID() {
             return null;
         }
 
-        public String getName() {
+        @Override public String getName() {
             return null;
         }
 
-        public Vendor getVendor() {
+        @Override public Vendor getVendor() {
             return Vendor.UNKNOWN;
         }
 
-        public Version getVersion() {
+        @Override public Version getVersion() {
             return Version.ZERO;
         }
 
-        public boolean isBootstrapping() {
+        @Override public boolean isBootstrapping() {
             return false;
         }
 
-        public boolean isBootstrapped() {
+        @Override public boolean isBootstrapped() {
             return true;
         }
 
-        public boolean isFirewalled() {
+        @Override public boolean isFirewalled() {
             return false;
         }
 
-        public boolean isRunning() {
+        @Override public boolean isRunning() {
             return true;
         }
 
-        public Set<KUID> keySet() {
-            return null;
-        }
-
-        public DHTFuture<PingResult> ping(SocketAddress dst) {
+        @Override public DHTFuture<PingResult> ping(SocketAddress dst) {
             pingedList.add(dst);
             return null;
         }
 
-        public DHTFuture<StoreResult> remove(KUID key) {
+        @Override public DHTFuture<StoreResult> remove(KUID key) {
             return null;
         }
 
-        public void setDatabase(Database database) {}
+        @Override public void setDatabase(Database database) {}
 
-        public Database getDatabase() {
+        @Override public Database getDatabase() {
             return null;
         }
         
-        public void setExternalPort(int port) {}
+        @Override public void setExternalPort(int port) {}
 
-        public MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory) {
+        @Override public MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory) {
             return null;
         }
 
-        public void setMessageFactory(MessageFactory messageFactory) {}
+        @Override public void setMessageFactory(MessageFactory messageFactory) {}
 
-        public void setRouteTable(RouteTable routeTable) {}
+        @Override public void setRouteTable(RouteTable routeTable) {}
         
-        public RouteTable getRouteTable() {
+        @Override public RouteTable getRouteTable() {
             return null;
         }
         
-        public BigInteger size() {
+        @Override public BigInteger size() {
             return null;
         }
 
-        public void start() {}
+        @Override public void start() {}
 
-        public void stop() {}
+        @Override public void stop() {}
         
-        public void close() {}
+        @Override public void close() {}
         
-        public void setHostFilter(HostFilter hostFilter) {
+        @Override public void setHostFilter(HostFilter hostFilter) {
         }
 
-        public HostFilter getHostFilter() {
+        @Override public HostFilter getHostFilter() {
             return null;
         }
         
@@ -236,64 +229,57 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return pingedList;
         }
 
-        public DHTExecutorService getDHTExecutorService() {
+        @Override public DHTExecutorService getDHTExecutorService() {
             return null;
         }
 
-        public void setDHTExecutorService(DHTExecutorService executors) {
+        @Override public void setDHTExecutorService(DHTExecutorService executors) {
         }
 
-        public DHTFuture<BootstrapResult> bootstrap(Contact node) {
+        @Override public DHTFuture<BootstrapResult> bootstrap(Contact node) {
             return null;
         }
 
-        public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst) {
+        @Override public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst) {
             return null;
         }
         
-        public DHTFuture<PingResult> findActiveContact() {
+        @Override public DHTFuture<PingResult> findActiveContact() {
             return null;
         }
 
-        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+        @Override public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
             return null;
         }
 
-        public DHTValueFactory getDHTValueFactory() {
+        @Override public KeyPair getKeyPair() {
             return null;
         }
 
-        public KeyPair getKeyPair() {
+        @Override public void setKeyPair(KeyPair keyPair) {
+        }
+
+        @Override public DHTFuture<FindValueResult> get(EntityKey entityKey) {
             return null;
         }
 
-        public void setDHTValueFactory(DHTValueFactory valueFactory) {
-        }
-
-        public void setKeyPair(KeyPair keyPair) {
-        }
-
-        public DHTFuture<FindValueResult> get(EntityKey entityKey) {
+        @Override public DHTValueFactoryManager getDHTValueFactoryManager() {
             return null;
         }
 
-        public DHTValueFactoryManager getDHTValueFactoryManager() {
+        @Override public StorableModelManager getStorableModelManager() {
             return null;
         }
 
-        public StorableModelManager getStorableModelManager() {
+        @Override public EvictorManager getEvictorManager() {
             return null;
         }
 
-        public EvictorManager getEvictorManager() {
-            return null;
-        }
-
-        public void setMACCalculatorRepositoryManager(MACCalculatorRepositoryManager manager) {
+        @Override public void setMACCalculatorRepositoryManager(MACCalculatorRepositoryManager manager) {
             
         }
 
-        public void setSecurityTokenProvider(TokenProvider tokenProvider) {
+        @Override public void setSecurityTokenProvider(TokenProvider tokenProvider) {
             
         }
     }

@@ -454,9 +454,9 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
         public MockableTranslator(Translator baseTranslator) {
             this.baseTranslator = baseTranslator;
         }
-        public void setCaseLocale(Locale locale) {
-            caseLocale = locale;
-        }
+//        public void setCaseLocale(Locale locale) {
+//            caseLocale = locale;
+//        }
         
         @Override
         public String translate(String text) {

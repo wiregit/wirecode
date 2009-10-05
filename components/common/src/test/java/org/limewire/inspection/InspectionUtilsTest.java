@@ -246,17 +246,17 @@ public class InspectionUtilsTest extends BaseTestCase {
     @Singleton
     private static class Requirements {
         static boolean created = false;
-        public Requirements() {
+        @SuppressWarnings("unused") public Requirements() {
             created = true;
         }
         @InspectablePrimitive(value="win", requires = InspectionRequirement.OS_WINDOWS)
-        int x = 5;
+        @SuppressWarnings("unused") int x = 5;
         
         @InspectablePrimitive(value="mac", requires = InspectionRequirement.OS_OSX)
-        int y = 5;
+        @SuppressWarnings("unused") int y = 5;
         
         @InspectablePrimitive(value="lin", requires = InspectionRequirement.OS_LINUX)
-        int z = 5;
+        @SuppressWarnings("unused") int z = 5;
     }
 
     private static interface TestInterface {
@@ -404,16 +404,16 @@ public class InspectionUtilsTest extends BaseTestCase {
 
     private static class NotGuiced {
         @InspectablePrimitive("")
-        static int inspectableInt;
+        @SuppressWarnings("unused") static int inspectableInt;
 
         @InspectionPoint("insp")
-        static Inspectable inspectable;
+        @SuppressWarnings("unused") static Inspectable inspectable;
     }
     
     private static interface IConcrete {}
     
     private static abstract class Abstract implements IConcrete {
-        @InspectablePrimitive("point") String inspectableA = "qqqq";
+        @SuppressWarnings("unused") @InspectablePrimitive("point") String inspectableA = "qqqq";
     }
     
     @Singleton private static class Concrete extends Abstract {}

@@ -67,9 +67,6 @@ public class UDPSelectorProvider extends SelectorProvider {
 
     @Override
     public ServerSocketChannel openServerSocketChannel() throws IOException {
-        if (true) {
-            throw new UnsupportedOperationException("not implemented");
-        }
-        return null;
+        throw new UnsupportedOperationException("not implemented");
     }
 }

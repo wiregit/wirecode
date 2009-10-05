@@ -890,19 +890,6 @@ public class DaapManager {
      */
     private final static class LimeAuthenticator implements DaapAuthenticator {
         
-        /**
-         * Returns true if username and password are correct.<p>
-         * Note: iTunes does not support usernames (i.e. it's
-         * don't care)!
-         */
-        public byte[] getPassword(String username, Object scheme) {
-            String password = DaapSettings.DAAP_PASSWORD.get();
-            if (password.startsWith("MD5/")) {
-                password = password.substring(4);
-            }
-            return DaapUtil.parseHexString(password);
-        }
-        
         public boolean authenticate(String username, String password, String uri, String nonce) {
             
             if (uri == null && nonce == null) {

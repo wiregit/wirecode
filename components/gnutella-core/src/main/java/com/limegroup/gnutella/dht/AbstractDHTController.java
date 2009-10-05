@@ -390,23 +390,19 @@ public abstract class AbstractDHTController implements DHTController {
             addr = (InetSocketAddress) node.getContactAddress();
         }
         
-        public String getAddress() {
+        @Override public String getAddress() {
             return getInetAddress().getHostAddress();
         }
 
-        public InetAddress getInetAddress() {
+        @Override public InetAddress getInetAddress() {
             return addr.getAddress();
         }
 
-        public int getPort() {
+        @Override public int getPort() {
             return addr.getPort();
         }
-        
-        public SocketAddress getSocketAddress() {
-            return addr;
-        }
 
-        public InetSocketAddress getInetSocketAddress() {
+        @Override public InetSocketAddress getInetSocketAddress() {
             return addr;
         }
     }

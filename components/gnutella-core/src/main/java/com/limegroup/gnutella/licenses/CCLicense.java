@@ -260,7 +260,7 @@ class CCLicense extends AbstractLicense {
         List<String> prohibited;
         
         // for de-serializing.
-        Details() { }
+        @SuppressWarnings("unused") Details() { }
         
         Details(URL url) {
             licenseURL = url;

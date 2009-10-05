@@ -521,13 +521,6 @@ public class ConnectionTable extends MouseableTable {
         }
         
         /**
-         * Returns the array of text lines in the tooltip.
-         */
-        public String[] getToolTipArray(){
-            return tipArray;
-        }
-        
-        /**
          * Sets the array of text lines in the tooltips.
          */
         public void setToolTipArray(String[] tipArray){

@@ -1025,9 +1025,9 @@ public class CheckBoxList<E> extends BoxPanel {
             commentlabel.setFont(this.originalFont);
         }
         
-        public E getData() {
-            return obj;
-        }
+//        public E getData() {
+//            return obj;
+//        }
         
         public void setRemovable(boolean state) {
             this.button.setVisible(state);
@@ -1076,9 +1076,9 @@ public class CheckBoxList<E> extends BoxPanel {
         /**
          * Returns whether or not the check box is checked or not.
          */
-        public boolean isSelected() {
-            return checkBox.isSelected();
-        }
+//        public boolean isSelected() {
+//            return checkBox.isSelected();
+//        }
         
         public void setSelected(boolean selected) {
             checkBox.setSelected(selected);

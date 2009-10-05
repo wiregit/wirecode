@@ -41,7 +41,7 @@ import com.google.inject.spi.UntargettedBinding;
 public class InspectionUtils {
     
     private static class InspectionData {
-        String encodedField;
+//        String encodedField;
         boolean isStatic;
         Field field;
         List<Annotation> annotations;
@@ -113,7 +113,7 @@ public class InspectionUtils {
         field.setAccessible(true);
         
         InspectionData data = new InspectionData();
-        data.encodedField = encodedField;
+//        data.encodedField = encodedField;
         data.isStatic = true;
         data.fieldValue = clazz;
         data.field = field;
@@ -141,7 +141,7 @@ public class InspectionUtils {
         Field field = clazz.getDeclaredField(t.nextToken());
         field.setAccessible(true);       
         
-        data.encodedField = encodedField;
+//        data.encodedField = encodedField;
         data.lookupClass = lookupClass;
         data.actualClass = clazz;
         data.field = field;

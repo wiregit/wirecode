@@ -8,7 +8,6 @@ import org.jmock.Sequence;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.GUID;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
@@ -527,13 +526,13 @@ public class RequeryManagerTest extends LimeTestCase {
             };
         }
 
-        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
-            return false;
-        }
-
-        public AlternateLocation getAlternateLocation(GUID guid, URN urn) {
-            return null;
-        }
+//        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
+//            return false;
+//        }
+//
+//        public AlternateLocation getAlternateLocation(GUID guid, URN urn) {
+//            return null;
+//        }
  
     }
 }

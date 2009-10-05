@@ -320,20 +320,20 @@ public class RequeryBehaviorTest extends LimeTestCase {
     private static class MyAltLocFinder implements AltLocFinder {
         private volatile SearchListener<AlternateLocation> listener;
         
-        volatile boolean cancelled;
+//        volatile boolean cancelled;
         
         public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
             this.listener = listener;
             return new Shutdownable() {
                 public void shutdown() {
-                    cancelled = true;
+//                    cancelled = true;
                 }
             };
         }
 
-        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
-            return true;
-        }
+//        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
+//            return true;
+//        }
     }
     
     @Singleton

@@ -2,16 +2,15 @@ package com.limegroup.gnutella;
 
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
-
-import junit.framework.Test;
 
 
 public class ConnectionDispatcherTest extends LimeTestCase {
@@ -68,38 +67,38 @@ public class ConnectionDispatcherTest extends LimeTestCase {
     private static class StubAcceptor implements ConnectionAcceptor {
         private AtomicInteger accepted = new AtomicInteger();
         private CountDownLatch acceptLatch = new CountDownLatch(1);
-        private volatile Thread acceptedThread;
-        private volatile String acceptedWord;
-        private volatile Socket acceptedSocket;
+//        private volatile Thread acceptedThread;
+//        private volatile String acceptedWord;
+//        private volatile Socket acceptedSocket;
         private boolean blocking;
 
         public void acceptConnection(String word, Socket s) {
-            acceptedThread = Thread.currentThread();
-            acceptedWord = word;
-            acceptedSocket = s;
+//            acceptedThread = Thread.currentThread();
+//            acceptedWord = word;
+//            acceptedSocket = s;
             accepted.getAndIncrement();
             acceptLatch.countDown();
         }
         
-        public int getAcceptedCount() {
-            return accepted.get();
-        }
-        
-        public boolean waitForAccept() throws Exception {
-            return acceptLatch.await(5, TimeUnit.SECONDS);
-        }
-        
-        public Thread getAcceptThread() {
-            return acceptedThread;
-        }
-        
-        public String getAcceptedWord() {
-            return acceptedWord;
-        }
-        
-        public Socket getAcceptedSocket() {
-            return acceptedSocket;
-        }
+//        public int getAcceptedCount() {
+//            return accepted.get();
+//        }
+//        
+//        public boolean waitForAccept() throws Exception {
+//            return acceptLatch.await(5, TimeUnit.SECONDS);
+//        }
+//        
+//        public Thread getAcceptThread() {
+//            return acceptedThread;
+//        }
+//        
+//        public String getAcceptedWord() {
+//            return acceptedWord;
+//        }
+//        
+//        public Socket getAcceptedSocket() {
+//            return acceptedSocket;
+//        }
 
         public boolean isBlocking() {
              return blocking;

@@ -1,14 +1,10 @@
 package org.limewire.lws.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.LWSServerUtil;
-import org.limewire.lws.server.StringCallback;
 import org.limewire.net.SocketsManager;
 
 /**
@@ -19,12 +15,12 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
     /** The port on which we'll connect this server. */
     public final static int PORT = 8080;
     
-    private final LocalServerDelegate del;
+//    private final LocalServerDelegate del;
 
     public RemoteServerImpl(SocketsManager socketsManager, int otherPort) {
         super(PORT, "Remote Server");
         setDispatcher(new DispatcherImpl());
-        this.del = new LocalServerDelegate(socketsManager, "localhost", otherPort);
+//        this.del = new LocalServerDelegate(socketsManager, "localhost", otherPort);
     }
     
     /**
@@ -182,9 +178,9 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
             }
         }
 
-        public void sendMessageToServer(String msg, Map<String,String> args, StringCallback cb) throws IOException {
-            del.sendMessageToServer(msg, args, cb, LocalServerDelegate.NormalStyleURLConstructor.INSTANCE);
-        }
+//        public void sendMessageToServer(String msg, Map<String,String> args, StringCallback cb) throws IOException {
+//            del.sendMessageToServer(msg, args, cb, LocalServerDelegate.NormalStyleURLConstructor.INSTANCE);
+//        }
 
         @Override
         protected Map<String, String> getArgs(String request) {

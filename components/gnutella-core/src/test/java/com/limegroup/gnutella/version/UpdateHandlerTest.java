@@ -995,7 +995,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         private volatile Runnable scheduled;
         private volatile long initialDelay = -1;
         private volatile long period = -1;
-        private volatile TimeUnit timeUnit;
+//        private volatile TimeUnit timeUnit;
         
         Runnable getRunnable() {
             return scheduled;
@@ -1009,15 +1009,15 @@ public class UpdateHandlerTest extends LimeTestCase {
             return period;
         }
         
-        TimeUnit getTimeUnit() {
-            return timeUnit;
-        }
+//        TimeUnit getTimeUnit() {
+//            return timeUnit;
+//        }
         
         void clear() {
             scheduled = null;
             initialDelay = -1;
             period = -1;
-            timeUnit = null;
+//            timeUnit = null;
         }
 
         @Override
@@ -1038,7 +1038,7 @@ public class UpdateHandlerTest extends LimeTestCase {
             scheduled = command;
             this.initialDelay = -1;
             this.period = period;
-            this.timeUnit = unit;
+//            this.timeUnit = unit;
             return null;
         }
 
@@ -1048,7 +1048,7 @@ public class UpdateHandlerTest extends LimeTestCase {
             scheduled = command;
             this.initialDelay = -1;
             this.period = delay;
-            this.timeUnit = unit;
+//            this.timeUnit = unit;
             return null;
         }
 

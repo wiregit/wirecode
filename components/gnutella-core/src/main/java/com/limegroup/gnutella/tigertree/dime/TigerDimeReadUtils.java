@@ -45,7 +45,7 @@ public class TigerDimeReadUtils {
         private String _algorithm = null;
         private int _hashSize = 0;
         private String _serializationType = null;
-        private String _uri;
+//        private String _uri;
         private String data;        
     
         protected XMLTreeDescription(String xml) {
@@ -57,13 +57,6 @@ public class TigerDimeReadUtils {
          */
         long getFileSize() {
             return _fileSize;
-        }
-        
-        /**
-         * Accessor for the _uri;
-         */
-        String getURI() {
-            return _uri;
         }
     
         /**
@@ -177,7 +170,7 @@ public class TigerDimeReadUtils {
     
         private void parseSerializedtreeElement(Element e) {
             _serializationType = e.getAttribute("type");
-            _uri = e.getAttribute("uri");
+//            _uri = e.getAttribute("uri");
             try {
                 // value is ignored, but if it can't be parsed we should add
                 // a notice to the Log

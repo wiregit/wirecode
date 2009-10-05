@@ -154,9 +154,9 @@ public class ExecutorsHelperTest extends BaseTestCase {
             this(runLatch, false);
         }
         
-        public Runner(boolean throwException) {
-            this(null, throwException);
-        }
+//        public Runner(boolean throwException) {
+//            this(null, throwException);
+//        }
         
         public Runner(CountDownLatch runLatch, boolean throwException) {
             this.throwException = throwException;

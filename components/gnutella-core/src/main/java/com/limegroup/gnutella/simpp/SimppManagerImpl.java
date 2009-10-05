@@ -265,7 +265,7 @@ public class SimppManagerImpl implements SimppManager {
     
     private void doHttpMaxFailover() {
         long maxTimeAgo = clock.now() - silentPeriodForMaxHttpRequest; 
-        if(!httpRequestControl.requestQueued(HttpRequestControl.RequestReason.MAX) &&
+        if(!httpRequestControl.requestQueued() &&
                 UpdateSettings.LAST_SIMPP_FAILOVER.getValue() < maxTimeAgo) {
             int rndDelay = RANDOM.nextInt(maxMaxHttpRequestDelay) + minMaxHttpRequestDelay;
             final String rndUri = maxedUpdateList.get(RANDOM.nextInt(maxedUpdateList.size()));
@@ -374,11 +374,10 @@ public class SimppManagerImpl implements SimppManager {
      * depending on why it was requested.
      */
     private static class HttpRequestControl {
-        private static enum RequestReason { MAX };
         
         private final AtomicBoolean requestQueued = new AtomicBoolean(false);
         private final AtomicBoolean requestActive = new AtomicBoolean(false);
-        private volatile RequestReason requestReason;
+//        private volatile RequestReason requestReason;
         
         /** Returns true if a request is queued or active. */
         boolean isRequestPending() {
@@ -386,10 +385,8 @@ public class SimppManagerImpl implements SimppManager {
         }
         
         /** Sets a queued request and returns true if a request is pending or active. */
-        boolean requestQueued(RequestReason reason) {
+        boolean requestQueued() {
             boolean prior = requestQueued.getAndSet(true);
-            if(!prior || reason == RequestReason.MAX) // upgrade reason
-                requestReason = reason;
             return prior || requestActive.get();
         }
         
@@ -397,11 +394,6 @@ public class SimppManagerImpl implements SimppManager {
         void requestActive() {
             requestActive.set(true);
             requestQueued.set(false);
-        }
-        
-        /** Returns the reason the last request was queueud. */
-        RequestReason getRequestReason() {
-            return requestReason;
         }
         
         void cancelRequest() {

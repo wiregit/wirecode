@@ -1419,10 +1419,10 @@ public class AltLocUploadTest extends LimeTestCase {
             super.addAcceptedUploader(uploader, context);
         }
 
-        public void clearUploads() {
-            cleanup();
-
-            activeUploads.clear();
-        }
+//        public void clearUploads() {
+//            cleanup();
+//
+//            activeUploads.clear();
+//        }
     }
 }

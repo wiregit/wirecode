@@ -150,10 +150,6 @@ class FileInfoTabPanel {
             this.tab = tab;
         }
         
-        Tabs getTab() {
-            return tab;
-        }
-        
         @Override
         public void actionPerformed(ActionEvent e) {
             for(FileInfoTabListener listener : listeners) {

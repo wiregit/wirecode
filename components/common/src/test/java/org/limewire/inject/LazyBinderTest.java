@@ -143,7 +143,7 @@ public class LazyBinderTest extends BaseTestCase {
     
     @LazySingleton
     private static class AnnotatedFoo implements Foo {
-        public AnnotatedFoo() {
+        @SuppressWarnings("unused") public AnnotatedFoo() {
             ANNOTATED_CONSTRUCTED++;
         }
         
@@ -152,7 +152,7 @@ public class LazyBinderTest extends BaseTestCase {
     }
     
     private static class PlainFoo implements Foo {
-        public PlainFoo() {
+        @SuppressWarnings("unused") public PlainFoo() {
             PLAIN_CONSTRUCTED++;
         }
         

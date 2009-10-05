@@ -697,7 +697,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final TcpBandwidthStatistics tcpBandwidthStatistics;
         private final NetworkInstanceUtils networkInstanceUtils;
 
-        @Inject
+        @Inject @SuppressWarnings("unused") 
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
                 AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
                 Provider<CreationTimeCache> creationTimeCache, BandwidthManager bandwidthManager,
@@ -779,7 +779,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final SocketsManager socketsManager;
         private final NetworkManager networkManager;
         
-        @Inject
+        @Inject @SuppressWarnings("unused") 
         public AltLocWorkerStubFactory(
                 HTTPDownloaderFactory httpDownloaderFactory,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,

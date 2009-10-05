@@ -475,13 +475,6 @@ public final class FileChooser {
     private static class LimeFileChooser extends JFileChooser {
         
         private boolean promptToOverwrite = false;
-
-        /**
-         * Constructs a LimeFileChooser using the user's default directory.
-         */
-        public LimeFileChooser() {
-            super();
-        }
         
         /**
          * Constructs a LimeFileChooser using the specified current directory.
@@ -522,14 +515,6 @@ public final class FileChooser {
             
             // Call superclass method to close dialog and return value.
             super.approveSelection();
-        }
-
-        /**
-         * Returns an indicator that determines whether the Save dialog prompts
-         * the user to overwrite an existing file.
-         */
-        public boolean isPromptToOverwrite() {
-            return promptToOverwrite;
         }
         
         /**

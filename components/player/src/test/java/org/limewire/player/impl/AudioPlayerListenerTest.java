@@ -13,8 +13,8 @@ import org.limewire.util.BaseTestCase;
 
 public class AudioPlayerListenerTest extends BaseTestCase {
 
-    static LimeWirePlayer player;
-    static testAudioPlayerListener listener;
+    private LimeWirePlayer player;
+    private testAudioPlayerListener listener;
     
     public AudioPlayerListenerTest(String name) {
         super(name);
@@ -85,19 +85,19 @@ public class AudioPlayerListenerTest extends BaseTestCase {
     }
     
     private class progress{
-        int b;
-        Map<String,Object>m;
+//        int b;
+//        Map<String,Object>m;
         
         public progress(int bytes){
-            b = bytes;
+//            b = bytes;
         }
     }
     
     private class opened{
-        Map<String,Object> m;
+//        Map<String,Object> m;
         
         public opened(Map<String,Object> props){
-            m = props;
+//            m = props;
         }
     }
 }

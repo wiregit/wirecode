@@ -1025,7 +1025,7 @@ public class NIODispatcher implements Runnable {
     }
     
     private static class ProcessingException extends Exception {
-        public ProcessingException() { super(); }
+//        public ProcessingException() { super(); }
         public ProcessingException(Throwable t) { super(t); }
     }
     

@@ -347,12 +347,12 @@ public class DelayedBufferWriterTest extends BaseTestCase {
     }
     
     private class StubFuture implements ScheduledFuture {
-    	final long delay;
-    	final Runnable r;
+//    	final long delay;
+//    	final Runnable r;
     	boolean cancelled;
     	StubFuture(long delay, Runnable r) {
-    		this.delay = delay;
-    		this.r = r;
+//    		this.delay = delay;
+//    		this.r = r;
     	}
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			cancelled = true;

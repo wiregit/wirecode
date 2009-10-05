@@ -87,13 +87,13 @@ public class LazySingletonTest extends BaseTestCase {
     
     @LazySingleton
     private static class LazyAnnotated {
-        public LazyAnnotated() {
+        @SuppressWarnings("unused") public LazyAnnotated() {
             LAZY_ANNOTATED_CONSTRUCTED = true;
         }
     }
     
     private static class Foo {
-        public Foo() {
+        @SuppressWarnings("unused") public Foo() {
             FOO_CONSTRUCTED = true;
         }
     }

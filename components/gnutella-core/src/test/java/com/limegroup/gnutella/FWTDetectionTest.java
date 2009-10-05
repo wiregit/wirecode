@@ -510,8 +510,8 @@ public class FWTDetectionTest extends LimeTestCase {
         private final DatagramSocket _sock;
         private SocketAddress _lastAddress;
         
-        public PingReply reply;
-        public boolean shouldAsk;
+//        public PingReply reply;
+//        public boolean shouldAsk;
         
         private byte [] lastReceived;
         private byte [] respondersIP;

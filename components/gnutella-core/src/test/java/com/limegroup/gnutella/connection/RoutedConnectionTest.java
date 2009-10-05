@@ -608,10 +608,10 @@ public class RoutedConnectionTest extends ServerSideTestCase {
             this.timeout = timeout;
         }
         
-        public void clear() {
-            this.badHandshake = false;
-            this.noGOK = false;
-            this.timeout = false;
-        }
+//        public void clear() {
+//            this.badHandshake = false;
+//            this.noGOK = false;
+//            this.timeout = false;
+//        }
     }
 }

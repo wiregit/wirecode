@@ -85,10 +85,10 @@ final class CommandSender {
                 s.getInputStream(); 
                 s.getOutputStream();
                 s.close();
+                break;
             } catch (IOException e) {
                 // ignore
             }
-            break;
 
         }
         port = tmpPort;

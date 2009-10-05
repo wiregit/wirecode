@@ -1033,9 +1033,9 @@ public class PatriciaTrieTest extends BaseTestCase {
             }
         }
         
-        void selectFor(Object object) {
-            selectFor = object;
-        }
+//        void selectFor(Object object) {
+//            selectFor = object;
+//        }
         
         void addToRemove(Object... objects) {
             toRemove = new ArrayList<Object>(Arrays.asList(objects));

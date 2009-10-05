@@ -444,7 +444,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         private boolean connected;
         private InetSocketAddress addr;
         private DataWindow readWindow;
-        private boolean preparedOpenConnection;
+//        private boolean preparedOpenConnection;
         private boolean prepareOpenConnectionRetValue;
         private boolean sentKeepAlive;
         private boolean wokeupWriteEvent;
@@ -457,7 +457,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
             connected = false;
             addr = null;
             readWindow = null;
-            preparedOpenConnection = false;
+//            preparedOpenConnection = false;
             prepareOpenConnectionRetValue = false;
             sentKeepAlive = false;
             wokeupWriteEvent = false;
@@ -508,7 +508,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
 
         @Override
         protected boolean prepareOpenConnection() throws IOException {
-            preparedOpenConnection = true;
+//            preparedOpenConnection = true;
             return prepareOpenConnectionRetValue;
         }
 
@@ -528,9 +528,9 @@ public class UDPSocketChannelTest extends BaseTestCase {
             return chunkLimit;
         }
 
-        public boolean isPreparedOpenConnection() {
-            return preparedOpenConnection;
-        }
+//        public boolean isPreparedOpenConnection() {
+//            return preparedOpenConnection;
+//        }
 
         public boolean isSentKeepAlive() {
             return sentKeepAlive;
@@ -544,9 +544,9 @@ public class UDPSocketChannelTest extends BaseTestCase {
             return wokeupWriteEventWasForced;
         }
 
-        public void setAddr(InetSocketAddress addr) {
-            this.addr = addr;
-        }
+//        public void setAddr(InetSocketAddress addr) {
+//            this.addr = addr;
+//        }
 
         public void setChunkLimit(int chunkLimit) {
             this.chunkLimit = chunkLimit;
@@ -556,21 +556,21 @@ public class UDPSocketChannelTest extends BaseTestCase {
             this.closed = closed;
         }
 
-        public void setConnected(boolean connected) {
-            this.connected = connected;
-        }
-
-        public void setPrepareOpenConnectionRetValue(boolean prepareOpenConnectionRetValue) {
-            this.prepareOpenConnectionRetValue = prepareOpenConnectionRetValue;
-        }
+//        public void setConnected(boolean connected) {
+//            this.connected = connected;
+//        }
+//
+//        public void setPrepareOpenConnectionRetValue(boolean prepareOpenConnectionRetValue) {
+//            this.prepareOpenConnectionRetValue = prepareOpenConnectionRetValue;
+//        }
 
         public void setReadWindow(DataWindow readWindow) {
             this.readWindow = readWindow;
         }
         
-        public void setConnecting(boolean connecting) {
-            this.connecting = connecting;
-        }
+//        public void setConnecting(boolean connecting) {
+//            this.connecting = connecting;
+//        }
     
     }
     

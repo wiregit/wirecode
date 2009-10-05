@@ -351,7 +351,7 @@ public class BrowseHostHandler {
         private Credentials credentials;
         
         SocketWrappingHttpClient(Socket socket) {
-            super(new SingleClientConnManager(httpParams.get(), getSchemeRegistry(socket)), httpParams.get());    
+            super(new SingleClientConnManager(getSchemeRegistry(socket)), httpParams.get());    
         }
 
         void setCredentials(Credentials credentials) {

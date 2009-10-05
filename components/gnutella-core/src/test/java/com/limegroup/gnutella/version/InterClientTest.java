@@ -439,7 +439,7 @@ public class InterClientTest extends PeerTestCase {
 
     /* Required for PeerTestCase. */
     private static class MyActivityCallback extends ActivityCallbackStub {
-        UpdateInformation lastUpdate;
+        @SuppressWarnings("unused") UpdateInformation lastUpdate;
         
         @Override
         public void updateAvailable(UpdateInformation info) {
@@ -465,14 +465,14 @@ public class InterClientTest extends PeerTestCase {
     private static class UpdateRequestStub extends AbstractVendorMessage {
 
         public int version;
-        public boolean hasGGEP,requestsCompressed;
+//        public boolean hasGGEP,requestsCompressed;
         
         public UpdateRequestStub(int version, boolean hasGGEP, boolean requestsCompressed) 
         throws Exception {
             super(F_LIME_VENDOR_ID, F_UPDATE_REQ, version, derivePayload(hasGGEP, requestsCompressed));
             this.version = version;
-            this.hasGGEP = hasGGEP;
-            this.requestsCompressed = requestsCompressed;
+//            this.hasGGEP = hasGGEP;
+//            this.requestsCompressed = requestsCompressed;
         }
         
         @Override
@@ -480,13 +480,13 @@ public class InterClientTest extends PeerTestCase {
             return version;
         }
 
-        public boolean hasGGEP() {
-            return hasGGEP;
-        }
-
-        public boolean requestsCompressed() {
-            return requestsCompressed;
-        }
+//        public boolean hasGGEP() {
+//            return hasGGEP;
+//        }
+//
+//        public boolean requestsCompressed() {
+//            return requestsCompressed;
+//        }
         
     }
 }

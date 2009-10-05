@@ -50,7 +50,7 @@ public class LimeWireGnutellaRudpModule extends AbstractModule {
         private final NIODispatcher nioDispatcher;
         
         @Inject
-        public UDPMultiplexorProvider(UDPSelectorProvider provider,
+        @SuppressWarnings("unused") public UDPMultiplexorProvider(UDPSelectorProvider provider,
                 NIODispatcher nioDispatcher) {
             this.provider = provider;
             this.nioDispatcher = nioDispatcher;

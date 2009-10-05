@@ -581,7 +581,8 @@ public class LibraryPanel extends JPanel {
         }
         
         @SuppressWarnings("unchecked")
-        public void uninstall(JComponent c) {
+        @Override
+        public void uninstallUI(JComponent c) {
             super.uninstallUI(c);
             JXLayer<JComponent> l = (JXLayer<JComponent>) c;
             l.getGlassPane().setLayout(new FlowLayout());

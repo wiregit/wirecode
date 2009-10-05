@@ -366,10 +366,10 @@ public class StringUtilsTest extends BaseTestCase {
     }
     
     private static class AllFields {
-        String a = "a";
-        int i = Integer.MAX_VALUE;
-        Object n = null;
-        AllFields thiz = this;
+        @SuppressWarnings("unused") String a = "a";
+        @SuppressWarnings("unused") int i = Integer.MAX_VALUE;
+        @SuppressWarnings("unused") Object n = null;
+        @SuppressWarnings("unused") AllFields thiz = this;
         
         @Override
         public String toString() {
@@ -379,9 +379,9 @@ public class StringUtilsTest extends BaseTestCase {
     
     private static class SomeFields {
         String a = "a";
-        int i = Integer.MAX_VALUE;
+        @SuppressWarnings("unused") int i = Integer.MAX_VALUE;
         Object n = null;
-        SomeFields thiz = this;
+        @SuppressWarnings("unused") SomeFields thiz = this;
         
         @Override
         public String toString() {
@@ -390,8 +390,8 @@ public class StringUtilsTest extends BaseTestCase {
     }
     
     private static class ArrayFields {
-        Object[] objs = new Object[] { null, "hello" };
-        int[] ints = new int[] { 4 , 4 };
+        @SuppressWarnings("unused") Object[] objs = new Object[] { null, "hello" };
+        @SuppressWarnings("unused") int[] ints = new int[] { 4 , 4 };
         
         @Override
         public String toString() {
@@ -401,9 +401,9 @@ public class StringUtilsTest extends BaseTestCase {
     
     private static class BlacklistFields {
         String a = "a";
-        int i = Integer.MAX_VALUE;
+        @SuppressWarnings("unused") int i = Integer.MAX_VALUE;
         Object n = null;
-        BlacklistFields thiz = this;
+        @SuppressWarnings("unused") BlacklistFields thiz = this;
         
         @Override
         public String toString() {

@@ -19,7 +19,6 @@ import org.limewire.inject.AbstractModule;
 import org.limewire.inject.MutableProvider;
 import org.limewire.setting.StringSetting;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -41,11 +40,6 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
 
     @Singleton
     private static class FacebookURLsMapProvider extends AbstractLazySingletonProvider<Map<String, Provider<String>>> {
-        
-        @Inject
-        public FacebookURLsMapProvider() {
-        }
-
         @Override
         protected Map<String, Provider<String>> createObject() {
             Map<String, Provider<String>> map = new HashMap<String, Provider<String>>();
@@ -64,8 +58,6 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
     
     @Singleton
     private static class InspectionsURLsMapProvider extends AbstractLazySingletonProvider<Map<String, StringSetting>> {
-        @Inject public InspectionsURLsMapProvider() {}
-
         @Override
         protected Map<String, StringSetting> createObject() {
             return ImmutableMap.of(

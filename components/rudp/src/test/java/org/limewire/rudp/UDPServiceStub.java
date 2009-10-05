@@ -32,7 +32,7 @@ import org.limewire.service.ErrorService;
  * controlled delay times and loss rates for testing UDP communication.
  * It routes outgoing messages to itself after the delay time.
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "unchecked" } )
 public class UDPServiceStub implements UDPService {
 
 	/** The queue that processes packets to send. */
@@ -108,9 +108,9 @@ public class UDPServiceStub implements UDPService {
             }
         	
             if (_delay > 0) {
-                _timer.schedule(new MessageWrapper(dp, _delay, this),_delay);
+                _timer.schedule(new MessageWrapper(dp, this),_delay);
             } else {
-                receive(new MessageWrapper(dp, _delay, this));   
+                receive(new MessageWrapper(dp, this));   
             }
 		}
         
@@ -141,25 +141,12 @@ public class UDPServiceStub implements UDPService {
 
     private static class MessageWrapper extends TimerTask {
         public final DatagramPacket _dp;
-        public final long           _scheduledTime;
-        public final int            _delay;
         private final Receiver 		_receiver;
         
-        MessageWrapper(DatagramPacket dp, int delay, Receiver receiver) {
+        MessageWrapper(DatagramPacket dp, Receiver receiver) {
             _dp            = dp;
-            _scheduledTime = System.currentTimeMillis() + (long) delay;
-            _delay         = delay;
             _receiver      = receiver;
         }
-
-		public int compareTo(Object o) {
-			MessageWrapper other = (MessageWrapper) o;
-			if (_scheduledTime < other._scheduledTime) 
-				return -1;
-			else if (_scheduledTime > other._scheduledTime) 
-				return 1;
-			return 0;
-		}
 
         @Override
         public String toString() {

@@ -95,7 +95,7 @@ public class HyperlinkCellEditorRendererTest extends TestCase {
      */
     private static class TestEditorListener implements CellEditorListener {
         private boolean cancelled = false;
-        private boolean stopped = false;
+//        private boolean stopped = false;
 
         @Override
         public void editingCanceled(ChangeEvent e) {
@@ -104,15 +104,15 @@ public class HyperlinkCellEditorRendererTest extends TestCase {
 
         @Override
         public void editingStopped(ChangeEvent e) {
-            stopped = true;
+//            stopped = true;
         }
         
         public boolean isCancelled() {
             return cancelled;
         }
         
-        public boolean isStopped() {
-            return stopped;
-        }
+//        public boolean isStopped() {
+//            return stopped;
+//        }
     }
 }

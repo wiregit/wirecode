@@ -39,11 +39,13 @@ final class GuiLoader {
             //sanityCheck();
             Initializer initializer = new Initializer();
             initializer.initialize(args, splashFrame, splashImage);
-        } catch(StartupFailedException sfe) {
-            GuiUtils.hideAndDisposeAllWindows();
-            showCorruptionError(sfe);
-            System.exit(1);
-        } catch(Throwable err) {
+        } 
+//        catch(StartupFailedException sfe) {
+//            GuiUtils.hideAndDisposeAllWindows();
+//            showCorruptionError(sfe);
+//            System.exit(1);
+//        }
+        catch(Throwable err) {
             GuiUtils.hideAndDisposeAllWindows();
             try {
                 FatalBugManager.handleFatalBug(err);
@@ -311,14 +313,14 @@ final class GuiLoader {
 //        return os.contains("windows");
 //    }
 
-    private static class StartupFailedException extends Exception {
-        StartupFailedException(String msg) {
-            super(msg);
-        } 
-        
-        StartupFailedException() {
-            super();
-        }
-    }
+//    private static class StartupFailedException extends Exception {
+//        StartupFailedException(String msg) {
+//            super(msg);
+//        } 
+//        
+//        StartupFailedException() {
+//            super();
+//        }
+//    }
     
 }

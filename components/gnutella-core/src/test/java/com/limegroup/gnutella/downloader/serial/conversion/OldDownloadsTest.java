@@ -109,8 +109,8 @@ public class OldDownloadsTest extends org.limewire.gnutella.tests.LimeTestCase {
             downloaders.remove(d);
         }
         
-        public void clearDownloaders() {
-            downloaders.clear();
-        }
+//        public void clearDownloaders() {
+//            downloaders.clear();
+//        }
     }
 }
