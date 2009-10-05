@@ -68,6 +68,11 @@ public class MockFilterableItem implements FilterableItem {
     }
 
     @Override
+    public boolean isStore() {
+        return false;
+    }
+
+    @Override
     public Category getCategory() {
         return category;
     }

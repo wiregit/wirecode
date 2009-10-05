@@ -9,8 +9,8 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -19,8 +19,6 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -39,13 +37,13 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.HTMLLabel;
@@ -60,18 +58,21 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
+import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
+import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.ResultsTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenuFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
-import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.table.TransparentCellTableRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -136,7 +137,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private final ListViewRowHeightRule rowHeightRule;
     private final ListViewDisplayedRowsLimit displayLimit;
     private final Provider<SearchResultTruncator> truncator;
-    private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
+    private final HeadingFontWidthResolver headingFontWidthResolver;
     private final FileInfoDialogFactory fileInfoFactory;
     private RemoteHostWidget fromWidget;
     private JButton itemIconButton;
@@ -156,6 +157,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private JXPanel searchResultTextPanel;
 
     private JLabel lastRowMessage;
+    
+    private ListViewStoreRenderer storeRenderer;
 
     private DownloadHandler downloadHandler;
     
@@ -165,6 +168,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private int textPanelWidth;
 
     private final SearchResultMenuFactory searchResultMenuFactory;
+    private final MousePopupListener storePopupListener;
+    private final StoreController storeController;
+    private final ListViewStoreRendererFactory storeRendererFactory;
     private final MainDownloadPanel mainDownloadPanel;
     
     @Inject
@@ -172,13 +178,17 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetFactory,
         Navigator navigator, 
-        final @Assisted DownloadHandler downloadHandler,
+        @Assisted DownloadHandler downloadHandler,
         Provider<SearchHeadingDocumentBuilder> headingBuilder,
         @Assisted ListViewRowHeightRule rowHeightRule,
-        final @Assisted ListViewDisplayedRowsLimit displayLimit,
+        @Assisted ListViewDisplayedRowsLimit displayLimit,
+        @Assisted SearchResultsModel searchResultsModel,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
         SearchResultMenuFactory searchResultMenuFactory,
+        @Assisted MousePopupListener storePopupListener,
+        @Assisted StoreController storeController,
+        ListViewStoreRendererFactory storeRendererFactory,
         MainDownloadPanel mainDownloadPanel) {
 
         this.categoryIconManager = categoryIconManager;
@@ -189,13 +199,19 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
+        this.storePopupListener = storePopupListener;
+        this.storeController = storeController;
+        this.storeRendererFactory = storeRendererFactory;
         this.mainDownloadPanel = mainDownloadPanel;
         
         GuiUtils.assignResources(this);
 
+        headingFontWidthResolver = new HeadingFontWidthResolver(heading, headingFont);
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
-       
+        
+        setStoreStyle(searchResultsModel.getStoreStyle());
+        
         makePanel(navigator, libraryMediator);       
 
         setupButtons();
@@ -286,7 +302,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         editorComponent.setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         editorComponent.add(similarResultIndentation, "growy, hidemode 3, shrinkprio 0");
         editorComponent.add(itemIconButton, "left, aligny 50%, gapleft 4, shrinkprio 0");
-        editorComponent.add(searchResultTextPanel, "left, , aligny 50%, gapleft 4, growx, shrinkprio 200, growprio 200, push");
+        editorComponent.add(searchResultTextPanel, "left, , aligny 50%, gapleft 6, growx, shrinkprio 200, growprio 200, push");
         editorComponent.add(downloadSourceCount, "gapbottom 3, gapright 2, shrinkprio 0");
         editorComponent.add(new JLabel(dividerIcon), "shrinkprio 0");
         //TODO: better number for wmin
@@ -297,25 +313,44 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
 
     @Override
-    public Component getTableCellRendererComponent(
-        JTable table, Object value,
-        boolean isSelected, boolean hasFocus,
-        int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value,
+        boolean isSelected, boolean hasFocus, int row, int column) {
 
-        return getTableCellEditorComponent(
-            table, value, isSelected, row, column);
+        return getEditorRenderer(table, value, false, row, column);
     }
 
     @Override
-    public Component getTableCellEditorComponent(
-        final JTable table, Object value, boolean isSelected, int row, final int col) {
-        vsr = (VisualSearchResult) value;
+    public Component getTableCellEditorComponent(JTable table, Object value,
+            boolean isSelected, int row, int column) {
+        
+        return getEditorRenderer(table, value, true, row, column);
+    }  
+
+    /**
+     * Returns the component used to edit and render the specified table cell 
+     * value.
+     */
+    private Component getEditorRenderer(JTable table, Object value,
+            boolean editing, int row, int col) {
+        
+        this.vsr = (VisualSearchResult) value;
         this.table = table;        
-        editorComponent.setBackground(table.getBackground());
         
         if (value == null) {
             return emptyPanel;
         }
+        
+        // Use component for store result if available.  If the RowDisplayResult
+        // is not yet available, create a temporary one for rendering.
+        if ((vsr instanceof VisualStoreResult) && (storeRenderer != null)) {
+            RowDisplayResult result = vsr.getRowDisplayResult();
+            if (result == null) result = rowHeightRule.createDisplayResult(vsr);
+            storeRenderer.update(table, (VisualStoreResult) vsr, result, editing, row, col);
+            return storeRenderer;
+        }
+        
+        // Use component for search result.
+        editorComponent.setBackground(table.getBackground());
                 
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
@@ -324,12 +359,10 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                     (displayLimit.getTotalResultsReturned() - displayLimit.getLastDisplayedRow())));
           return lastRowPanel;
         } 
-
+        
         update(vsr);
         return editorComponent;
-    }  
-
-
+    }
 
     private void update(VisualSearchResult vsr) {
         fromWidget.setPeople(vsr.getSources());
@@ -344,7 +377,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconButton.setIcon(getIcon(vsr));
         itemIconButton.setCursor(getIconCursor(vsr));
 
-        RowDisplayResult result = rowHeightRule.getDisplayResult(vsr);
+        RowDisplayResult result = vsr.getRowDisplayResult();
+        if (result == null) result = rowHeightRule.createDisplayResult(vsr);
 
         setLabelVisibility(result.getConfig());
 
@@ -480,6 +514,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         heading.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
         heading.setOpaque(false);
         heading.setFocusable(false);
+        heading.setMargin(new Insets(3, 0, 3, 3));
         StyleSheet mainStyle = ((HTMLDocument)heading.getDocument()).getStyleSheet();
         String rules = "body { font-family: " + headingFont.getFamily() + "; }" +
                 ".title { color: " + headingColor + "; font-size: " + headingFont.getSize() + "; }" +
@@ -618,24 +653,32 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         e.getComponent().requestFocusInWindow();
     }
     
-    private class HeadingFontWidthResolver implements FontWidthResolver {
-        private static final String EMPTY_STRING = "";
-        //finds <b>foo</b> or <a href="#foo"> or {1} patterns
-        //**NOTE** This does not account for all HTML sanitizing, just for HTML
-        //**NOTE** that would have been added by search result display code
-        private final Pattern findHTMLTagsOrReplacementTokens = Pattern.compile("([<][/]?[\\w =\"#]*[>])|([{][\\d]*[}])");
-        private final Matcher matcher = findHTMLTagsOrReplacementTokens.matcher("");
-        
-        @Override
-        public int getPixelWidth(String text) {
-            HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
-            StyleSheet css = editorKit.getStyleSheet();
-            FontMetrics fontMetrics = css.getFontMetrics(headingFont);
-            matcher.reset(text);
-            text = matcher.replaceAll(EMPTY_STRING);
-            return fontMetrics.stringWidth(text);
-        }
+    /**
+     * Applies the specified store style to the store renderer.
+     */
+    public void setStoreStyle(StoreStyle storeStyle) {
+        // Update store renderer using new style.
+        storeRenderer = storeRendererFactory.create(storeStyle, storePopupListener, storeController);
     }
+    
+//    private class HeadingFontWidthResolver implements FontWidthResolver {
+//        private static final String EMPTY_STRING = "";
+//        //finds <b>foo</b> or <a href="#foo"> or {1} patterns
+//        //**NOTE** This does not account for all HTML sanitizing, just for HTML
+//        //**NOTE** that would have been added by search result display code
+//        private final Pattern findHTMLTagsOrReplacementTokens = Pattern.compile("([<][/]?[\\w =\"#]*[>])|([{][\\d]*[}])");
+//        private final Matcher matcher = findHTMLTagsOrReplacementTokens.matcher("");
+//        
+//        @Override
+//        public int getPixelWidth(String text) {
+//            HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
+//            StyleSheet css = editorKit.getStyleSheet();
+//            FontMetrics fontMetrics = css.getFontMetrics(headingFont);
+//            matcher.reset(text);
+//            text = matcher.replaceAll(EMPTY_STRING);
+//            return fontMetrics.stringWidth(text);
+//        }
+//    }
     
     /**
      * A label that does not appear to dance up and down when displaying HTML in a table.
@@ -644,7 +687,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      * when the label is used in a table renderer or editor, it has weird mouse over behavior where the lines dance up and down.  
      * NoDancingHtmlLabel prevents this behavior.
      */
-    private static class NoDancingHtmlLabel extends TransparentCellTableRenderer {
+    public static class NoDancingHtmlLabel extends TransparentCellTableRenderer {
         public NoDancingHtmlLabel(){
             //prevents strange movement on mouseover
             setVerticalAlignment(JLabel.TOP);

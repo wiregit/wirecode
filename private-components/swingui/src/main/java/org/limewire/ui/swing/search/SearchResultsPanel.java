@@ -42,7 +42,7 @@ import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
+import org.limewire.ui.swing.search.resultpanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -241,6 +241,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         sortAndFilterPanel.dispose();
         filterPanel.dispose();
         classicSearchReminderPanel.dispose();
+        resultsContainer.dispose();
         browseFailedPanel.dispose();
         searchResultsModel.dispose();
         browseStatusPanel.dispose();
