@@ -14,6 +14,7 @@ import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.table.QualityComparator;
 import org.limewire.ui.swing.util.EventListTableSortFormat;
+import org.limewire.util.Objects;
 
 /**
  * This class is the base class for each of the TableFormat classes
@@ -155,19 +156,20 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
                 // Special case: if each search result comes from one source,
                 // use alphabetical order to break the tie.
                 if(size1 == 1) {
+                    // Get friend names if available.
                     Collection<Friend> friends1 = o1.getFriends();
                     String name1 = null;
                     if(friends1.size() == 1)
                         name1 = friends1.iterator().next().getRenderName();
-                    else
-                        return 1; // Keep P2P results together 
+                    
                     Collection<Friend> friends2 = o2.getFriends();
                     String name2 = null;
                     if(friends2.size() == 1)
                         name2 = friends2.iterator().next().getRenderName();
-                    else
-                        return -1; // Keep P2P results together
-                    return name1.compareToIgnoreCase(name2);
+                    
+                    // Compare friend names.  Handle null values to keep P2P
+                    // results together. 
+                    return Objects.compareToNullIgnoreCase(name1, name2, false);
                 }
                 return 0;
             } else if(size1 > size2) {
