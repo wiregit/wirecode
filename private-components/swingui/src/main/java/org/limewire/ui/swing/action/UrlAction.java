@@ -6,6 +6,10 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 import javax.swing.JDialog;
+import javax.swing.JScrollPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
@@ -95,7 +99,20 @@ public class UrlAction extends AbstractAction {
             {   getContentPane().setLayout(new BorderLayout());
                 HTMLPane browser = new HTMLPane();
                 
-                getContentPane().add(browser);
+                browser.addHyperlinkListener(new HyperlinkListener() {
+                    @Override
+                    public void hyperlinkUpdate(HyperlinkEvent e) {
+                        if (e.getEventType() == EventType.ACTIVATED) {
+                            NativeLaunchUtils.openURL(e.getURL().toString());
+                        }
+                    }
+                });
+                
+                JScrollPane scrollPane = new JScrollPane(browser, 
+                        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                
+                getContentPane().add(scrollPane);
                 
                 ResizeUtils.forceSize(this, new Dimension(600,400));
                 setModal(true);
