@@ -89,7 +89,7 @@ public class InterClientTest extends PeerTestCase {
     public void testRequestIsSent() throws Exception {
         assertEquals(0, getUpdateHandler().getLatestId());
         
-        PEER.send(getCVM(1));
+        PEER.send(getCVM(2));
         PEER.flush();
         
         // We should get an UpdateRequest.
@@ -426,7 +426,7 @@ public class InterClientTest extends PeerTestCase {
     }
     
     private void doInitialExchange() throws Exception {
-        PEER.send(getCVM(0));
+        PEER.send(getCVM(1));
         PEER.flush();
         assertNotNull(BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class));
     }
