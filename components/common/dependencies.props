@@ -21,9 +21,9 @@ guice-assistedinject.version=snapshot20090814
 hamcrest-core.version
 hamcrest-library.version=
 hsqldb.version=1.8.0.10
-httpclient.version=4.0-beta2
-httpcore.version=4.0
-httpcore-nio.version=4.0
+httpclient.version=4.1-alpha1-r821939
+httpcore.version=4.1-alpha2-r821939
+httpcore-nio.version=4.1-alpha2-r821939
 icu4j.version=
 inspTool.version=0.4
 iTunes.version=0.0.1
