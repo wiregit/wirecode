@@ -136,7 +136,7 @@ public class RemoteFileDescAdapter implements SearchResult {
             }
         }
         // Consider how well the result matches the query
-        if(!query.isEmpty())
+        if(query != null && !query.isEmpty())
             relevance *= rfd.getRelevance(query);
         return relevance;
     }
