@@ -28,6 +28,7 @@ import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
 import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -159,12 +160,21 @@ public class MainDownloadPanel extends JPanel {
                         ActionMap map = Application.getInstance().getContext().getActionManager()
                                 .getActionMap();
                         map.get("restoreView").actionPerformed(e);
-
+                        
                         if (downloadItem.isLaunchable()) {
                             DownloadItemUtils.launch(downloadItem, categoryManager);
                         }
                     }
                 }));
+                
+                // the user might be editing one of the cell's while the download completes,
+                // i.e. the user might have the mouse hovering over the pause button. (Bug LWC-4317)
+                // Let's manually cancel cell editing here after the download completes
+                TableRendererEditor editor = (TableRendererEditor) table.getCellEditor();
+                if ( editor != null )
+                {
+                    editor.cancelCellEditing();
+                }
             }
         }
     }
