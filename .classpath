@@ -61,6 +61,7 @@
 	<classpathentry kind="src" output="components/setting/build/classes" path="components/setting/src/main/java"/>
 	<classpathentry kind="src" output="components/setting/build/tests" path="components/setting/src/test/java"/>
 	<classpathentry kind="src" output="components/statistic/build/classes" path="components/statistic/src/main/java"/>
+	<classpathentry kind="src" output="components/store/build/classes" path="components/store/src/main/java"/>
 	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
 	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
 	<classpathentry kind="src" output="components/swarm/src/test-common/resources" path="components/swarm/src/test-common/resources"/>

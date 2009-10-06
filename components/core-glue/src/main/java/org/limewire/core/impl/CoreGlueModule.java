@@ -36,6 +36,7 @@ import org.limewire.core.impl.inspections.InspectionsCommunicator;
 import org.limewire.core.impl.inspections.InspectionsCommunicatorImpl;
 import org.limewire.facebook.service.LimeWireFacebookModule;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
+import org.limewire.store.LimeWireStoreModule;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.ActivityCallback;
@@ -78,6 +79,7 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueSupportModule());
         install(new CoreGlueUploadModule());
         install(new CoreGlueUpdatesModule());
+        install(new LimeWireStoreModule());
     }
 
 }

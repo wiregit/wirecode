@@ -1,4 +1,4 @@
-package org.limewire.core.impl.search.store;
+package org.limewire.store;
 
 import org.apache.commons.lang.StringUtils;
 import org.limewire.core.api.search.store.StoreConnection;

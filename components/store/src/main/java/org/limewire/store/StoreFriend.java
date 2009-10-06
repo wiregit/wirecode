@@ -1,4 +1,4 @@
-package org.limewire.core.impl.search.store;
+package org.limewire.store;
 
 import java.util.Collections;
 import java.util.Map;
