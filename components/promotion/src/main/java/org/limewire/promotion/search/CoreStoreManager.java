@@ -1,4 +1,4 @@
-package org.limewire.store;
+package org.limewire.promotion.search;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -10,9 +10,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.store.StoreConnection;
-import org.limewire.core.api.search.store.StoreConnectionFactory;
 import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
@@ -26,6 +26,7 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * Implementation of StoreManager for the live core.
@@ -40,15 +41,18 @@ public class CoreStoreManager implements StoreManager {
     private final Map<AttributeKey, Object> userAttributes = 
         Collections.synchronizedMap(new EnumMap<AttributeKey, Object>(AttributeKey.class));
     
-    private final StoreConnectionFactory storeConnectionFactory;
+    private final StoreConnection storeConnection;
+    private final ScheduledListeningExecutorService executorService;
 
     /**
      * Constructs a CoreStoreManager with the specified store connection 
      * factory.
      */
     @Inject
-    public CoreStoreManager(StoreConnectionFactory storeConnectionFactory) {
-        this.storeConnectionFactory = storeConnectionFactory;
+    public CoreStoreManager(StoreConnection storeConnection,
+                            @Named("backgroundExecutor") ScheduledListeningExecutorService executorService) {
+        this.storeConnection = storeConnection;
+        this.executorService = executorService;
     }
     
     @Override
@@ -119,10 +123,8 @@ public class CoreStoreManager implements StoreManager {
     public void startSearch(final SearchDetails searchDetails, 
             final StoreSearchListener storeSearchListener) {
         // Start background process to retrieve store results.
-        new Thread(new Runnable() {
+        executorService.submit(new Runnable() {
             public void run() {
-                // Create store connection.
-                StoreConnection storeConnection = storeConnectionFactory.create();
                 
                 // Execute query.
                 String query = searchDetails.getSearchQuery();
@@ -146,7 +148,7 @@ public class CoreStoreManager implements StoreManager {
                     }
                 }
             }
-        }).start();
+        });
     }
     
     /**

@@ -1,4 +1,4 @@
-package org.limewire.store;
+package org.limewire.promotion.search;
 
 import java.awt.Color;
 import java.awt.Font;

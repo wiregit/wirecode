@@ -1,5 +1,8 @@
 package org.limewire.promotion;
 
+import org.limewire.core.api.search.SearchDetails;
+import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 
@@ -23,7 +26,7 @@ public interface PromotionSearcher {
      *        latitude/longitude, no radius restrictions will be applied. If
      *        missing territory, no territory restrictions will be applied.
      */
-    void search(String query, PromotionSearchResultsCallback callback,
+    void search(SearchDetails query, PromotionSearchResultsCallback callback,
             GeocodeInformation userLocation);
 
     /**
@@ -48,6 +51,10 @@ public interface PromotionSearcher {
          * displayed.
          */
         void process(PromotionMessageContainer result);
+        
+        void process(StoreResult storeResult);
+        
+        void process(StoreStyle styleResult);
     }
     
     /**

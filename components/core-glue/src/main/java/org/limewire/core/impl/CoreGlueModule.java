@@ -10,6 +10,8 @@ import org.limewire.core.impl.daap.CoreGlueDaapModule;
 import org.limewire.core.impl.download.CoreGlueDownloadModule;
 import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.friend.CoreGlueFriendModule;
+import org.limewire.core.impl.inspections.InspectionsCommunicator;
+import org.limewire.core.impl.inspections.InspectionsCommunicatorImpl;
 import org.limewire.core.impl.itunes.ItunesMediator;
 import org.limewire.core.impl.itunes.ItunesMediatorImpl;
 import org.limewire.core.impl.library.CoreGlueLibraryModule;
@@ -32,11 +34,8 @@ import org.limewire.core.impl.updates.CoreGlueUpdatesModule;
 import org.limewire.core.impl.upload.CoreGlueUploadModule;
 import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.core.impl.xmpp.CoreGlueXMPPModule;
-import org.limewire.core.impl.inspections.InspectionsCommunicator;
-import org.limewire.core.impl.inspections.InspectionsCommunicatorImpl;
 import org.limewire.facebook.service.LimeWireFacebookModule;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
-import org.limewire.store.LimeWireStoreModule;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.ActivityCallback;
@@ -79,7 +78,6 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueSupportModule());
         install(new CoreGlueUploadModule());
         install(new CoreGlueUpdatesModule());
-        install(new LimeWireStoreModule());
     }
 
 }

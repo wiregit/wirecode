@@ -412,4 +412,11 @@ public final class SearchSettings extends LimeProps {
     public static final BooleanSetting INCLUDE_METADATA_IN_PLAINTEXT_SEARCH = FACTORY
             .createRemoteBooleanSetting("INCLUDE_METADATA_IN_PLAINTEXT_SEARCH", true,
                     "SearchSettings.includeMetadataInPlaintextSearch");
+    
+    /**
+     * The store search URL
+     */
+    public static final StringSetting SEARCH_STORE_URL = 
+            FACTORY.createRemoteStringSetting("SEARCH_STORE_URL",
+                    "http://store.limewire.com/search", "SearchSettings.SearchStoreURL");
 }

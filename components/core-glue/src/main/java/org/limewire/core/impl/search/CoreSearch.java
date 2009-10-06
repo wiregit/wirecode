@@ -18,9 +18,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
-import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
-import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
@@ -50,7 +48,6 @@ public class CoreSearch implements Search {
     private final QueryReplyListenerList listenerList;
     private final PromotionSearcher promotionSearcher;
     private final FriendSearcher friendSearcher;
-    private final StoreManager storeManager;
     private final Provider<GeocodeInformation> geoLocation;
     private final RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory;
 
@@ -79,24 +76,22 @@ public class CoreSearch implements Search {
 
     @Inject
     public CoreSearch(@Assisted SearchDetails searchDetails,
-            SearchServices searchServices,
-            QueryReplyListenerList listenerList,
-            PromotionSearcher promotionSearcher,
-            FriendSearcher friendSearcher,
-            StoreManager storeManager,
-            Provider<GeocodeInformation> geoLocation,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            EventBroadcaster<SearchEvent> searchEventBroadcaster,
-            LimeXMLDocumentFactory xmlDocumentFactory,
-            Clock clock,
-            AdvancedQueryStringBuilder compositeQueryBuilder,
-            RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
+                      SearchServices searchServices,
+                      QueryReplyListenerList listenerList,
+                      PromotionSearcher promotionSearcher,
+                      FriendSearcher friendSearcher,
+                      Provider<GeocodeInformation> geoLocation,
+                      @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                      EventBroadcaster<SearchEvent> searchEventBroadcaster,
+                      LimeXMLDocumentFactory xmlDocumentFactory,
+                      Clock clock,
+                      AdvancedQueryStringBuilder compositeQueryBuilder,
+                      RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
         this.promotionSearcher = promotionSearcher;
         this.friendSearcher = friendSearcher;
-        this.storeManager = storeManager;
         this.geoLocation = geoLocation;
         this.backgroundExecutor = backgroundExecutor;
         this.searchEventBroadcaster = searchEventBroadcaster;
@@ -144,42 +139,25 @@ public class CoreSearch implements Search {
             doKeywordSearch(initial);
             break;
         case WHATS_NEW:
-            doWhatsNewSearch(initial);
+            doWhatsNewSearch();
             break;
         }
-        
-        doStoreSearch(initial);
     }
     
-    private void doWhatsNewSearch(boolean initial) {
+    private void doWhatsNewSearch() {
         searchServices.queryWhatIsNew(searchGuid,
                 searchDetails.getSearchCategory());
         
         // TODO: Search friends too.
+        // TODO: Search store too.
     }
     
     private void doKeywordSearch(boolean initial) {
-        String query = searchDetails.getSearchQuery();
-        String advancedQuery = "";
-        Map<FilePropertyKey, String> advancedSearch = searchDetails.getAdvancedDetails();
-        if(advancedSearch != null && advancedSearch.size() > 0) {
-            if(query == null || query.equals("")) {
-                query = compositeQueryBuilder.createSimpleCompositeQuery(advancedSearch);
-            }
-            advancedQuery = compositeQueryBuilder.createXMLQueryString(advancedSearch, searchDetails.getSearchCategory().getCategory());
-        }
-        
-        String mutated = searchServices.mutateQuery(query);
-        searchServices.query(searchGuid, mutated, advancedQuery,
-                searchDetails.getSearchCategory());
-        
-        backgroundExecutor.execute(new Runnable() {
-            @Override
-            public void run() { 
-                friendSearcher.doSearch(searchDetails, friendSearchListener);
-            }
-        });        
-        
+        doGnutellaSearch();
+        doPromotionSearch(initial);
+    }
+
+    private void doPromotionSearch(boolean initial) {
         if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
@@ -206,43 +184,51 @@ public class CoreSearch implements Search {
                             target);
                     handleSponsoredResults(coreSponsoredResult);
                 }
+
+                @Override
+                public void process(StoreResult storeResult) {
+                    handleStoreResult(storeResult);
+                }
+
+                @Override
+                public void process(StoreStyle styleResult) {
+                    handleStoreStyle(styleResult);
+                }
             };
             
-            final String finalQuery = query;
             backgroundExecutor.execute(new Runnable() {
                 @Override
                 public void run() { 
-                    promotionSearcher.search(finalQuery, callback, geoLocation.get());
+                    promotionSearcher.search(searchDetails, callback, geoLocation.get());
                 }
             });            
         }
     }
-    
-    /**
-     * Performs store search based on initial indicator.
-     */
-    private void doStoreSearch(boolean initial) {
-        // For now, we only perform store search on initial search.
-        if (initial) {
-            // Create listener for store results.
-            StoreSearchListener storeSearchListener = new StoreSearchListener() {
-                @Override
-                public void resultsFound(StoreResult[] storeResults) {
-                    for (StoreResult storeResult : storeResults) {
-                        handleStoreResult(storeResult);
-                    }
-                }
-                
-                @Override
-                public void styleUpdated(StoreStyle storeStyle) {
-                    handleStoreStyle(storeStyle);
-                }
-            };
-            
-            // Start store search.
-            storeManager.startSearch(searchDetails, storeSearchListener);
+
+    private void doGnutellaSearch() {
+        String query = searchDetails.getSearchQuery();
+        String advancedQuery = "";
+        Map<FilePropertyKey, String> advancedSearch = searchDetails.getAdvancedDetails();
+        if(advancedSearch != null && advancedSearch.size() > 0) {
+            if(query == null || query.equals("")) {
+                query = compositeQueryBuilder.createSimpleCompositeQuery(advancedSearch);
+            }
+            advancedQuery = compositeQueryBuilder.createXMLQueryString(advancedSearch, searchDetails.getSearchCategory().getCategory());
         }
+
+        String mutated = searchServices.mutateQuery(query);
+        searchServices.query(searchGuid, mutated, advancedQuery,
+                searchDetails.getSearchCategory());
+
+        backgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() { 
+                friendSearcher.doSearch(searchDetails, friendSearchListener);
+            }
+        });
     }
+
+    
     
     /**
      * Stops current search and repeats search.

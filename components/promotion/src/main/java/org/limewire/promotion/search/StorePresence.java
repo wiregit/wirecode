@@ -1,4 +1,4 @@
-package org.limewire.store;
+package org.limewire.promotion.search;
 
 import java.net.URI;
 import java.util.Collection;

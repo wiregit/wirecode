@@ -1,4 +1,4 @@
-package org.limewire.store;
+package org.limewire.promotion.search;
 
 import java.io.IOException;
 import java.util.EnumMap;

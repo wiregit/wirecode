@@ -18,6 +18,7 @@ import org.limewire.geocode.GeocodeUrl;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inject.MutableProvider;
 import org.limewire.setting.StringSetting;
+import org.limewire.promotion.search.StoreSearchURL;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -37,6 +38,7 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<Boolean>(){}).annotatedWith(FacebookReportBugs.class).toProvider(FacebookSettings.REPORT_BUGS);
         bind(new TypeLiteral<Map<String, Provider<String>>>(){}).annotatedWith(FacebookURLs.class).toProvider(FacebookURLsMapProvider.class);
         bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);
+        bind(new TypeLiteral<String>(){}).annotatedWith(StoreSearchURL.class).toProvider(SearchSettings.SEARCH_STORE_URL);
     }
 
     @Singleton
