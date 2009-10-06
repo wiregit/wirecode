@@ -126,7 +126,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
     private final DefaultLimeTableCellRenderer defaultTableCellRenderer;
-    private final Provider<StoreControllerFactory> storeControllerFactory;
+    private final StoreController storeController;
     private final StoreManager storeManager;
     
     private RangeList<VisualSearchResult> maxSizedList;
@@ -175,15 +175,16 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         this.fromWidgetfactory = fromWidgetFactory;
         this.iconLabelRendererFactory = iconLabelRendererFactory;
         this.nameRendererDelegateFactory = nameRendererDelegateFactory;
-        this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryMediator, mainDownloadPanel);
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
         this.calendarRenderer = calendarRenderer;
         this.qualityRenderer = qualityRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
-        this.storeControllerFactory = storeControllerFactory;
+        this.storeController = storeControllerFactory.get().create();
         this.storeManager = storeManager;
+        
+        this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, storeController, libraryMediator, mainDownloadPanel);
         
         rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery());
 
@@ -315,10 +316,9 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             }
         };
 
-        // Create store controller and listener.
-        StoreController storeController = storeControllerFactory.get().create();
+        // Create store popup listener.
         MousePopupListener storePopupListener = new ResultsTableEditorListener(
-                resultsList, ViewType.List, menuFactory, storeController.getDownloadHandler());
+                resultsList, ViewType.List, menuFactory, downloadHandler);
         
         // Note that the same ListViewTableCellEditor instance
         // cannot be used for both the editor and the renderer
@@ -466,10 +466,9 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         SearchCategory selectedCategory = searchResultsModel.getSelectedCategory();
         StoreStyle storeStyle = searchResultsModel.getStoreStyle();
         
-        // Create store controller and listener.
-        StoreController storeController = storeControllerFactory.get().create();
+        // Create store popup listener.
         MousePopupListener storePopupListener = new ResultsTableEditorListener(
-                resultsTable, ViewType.Table, menuFactory, storeController.getDownloadHandler());
+                resultsTable, ViewType.Table, menuFactory, downloadHandler);
 
         // Create Name column renderer.
         TableCellRenderer iconRenderer = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
