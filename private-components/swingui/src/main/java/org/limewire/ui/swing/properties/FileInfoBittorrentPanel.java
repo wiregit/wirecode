@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -49,6 +51,8 @@ import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<TorrentEvent> {
 
+    public static final String TORRENT_FILE_ENTRY_SELECTED = "torrentFileEntrySelected";
+    
     private static final int DONT_DOWNLOAD = 0;
 
     private static final int LOWEST_PRIORITY = 1;
@@ -70,6 +74,8 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
      */
     private EventList<TorrentFileEntryWrapper> eventList;
 
+    private PropertyChangeSupport support = new PropertyChangeSupport(this);
+    
     public FileInfoBittorrentPanel(Torrent torrent) {
         this.torrent = torrent;
 
@@ -100,7 +106,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         for (TorrentFileEntry entry : fileEntries) {
             eventList.add(new TorrentFileEntryWrapper(entry));
         }
-
+        
         table = new BitTorrentTable(new DefaultEventTableModel<TorrentFileEntryWrapper>(eventList,
                 new BitTorrentTableFormat()));
 
@@ -137,13 +143,15 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     }
 
     private class BitTorrentTable extends MouseableTable {
-        public BitTorrentTable(DefaultEventTableModel<TorrentFileEntryWrapper> model) {
+        public BitTorrentTable(final DefaultEventTableModel<TorrentFileEntryWrapper> model) {
             super(model);
             setShowHorizontalLines(false);
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             setColumnSelectionAllowed(false);
             final CheckBoxRendererEditor checkBoxEditor = new CheckBoxRendererEditor();
             checkBoxEditor.addActionListener(new ActionListener() {
+                boolean torrentPartSelected = true;
+                
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (checkBoxEditor.getCellEditorValue() != null) {
@@ -151,7 +159,26 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
                                 checkBoxEditor.isSelected() ? 1 : 0);
                         checkBoxEditor.cancelCellEditing();
                     }
+                    
+                    if ( isAnyTorrentPartSelected() != torrentPartSelected )
+                    {
+                        torrentPartSelected = !torrentPartSelected;
+                        support.firePropertyChange(TORRENT_FILE_ENTRY_SELECTED, !torrentPartSelected, torrentPartSelected);
+                    }
+                    
                     BitTorrentTable.this.repaint();
+                }
+                
+                private boolean isAnyTorrentPartSelected()
+                {
+                    for (int counter = 0; counter < model.getRowCount(); counter++)
+                    {
+                        TorrentFileEntryWrapper torrentFile = model.getElementAt(counter);
+                        if (torrentFile.getPriority() != 0)
+                            return true;
+                    }
+                    
+                    return false;
                 }
             });
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellRenderer(
@@ -476,6 +503,16 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         }
     }
 
+    public void addPropertyChangeListener( PropertyChangeListener listener )
+    {
+        support.addPropertyChangeListener(listener);
+    }
+    
+    public void removePropertyChangeListener( PropertyChangeListener listener )
+    {
+        support.removePropertyChangeListener(listener);
+    }
+    
     @Override
     public void handleEvent(TorrentEvent event) {
         if (event == TorrentEvent.STATUS_CHANGED || event == TorrentEvent.COMPLETED) {

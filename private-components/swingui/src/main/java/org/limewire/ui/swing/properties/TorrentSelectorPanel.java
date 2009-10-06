@@ -7,7 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -25,24 +26,26 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-public class TorrentSelectorPanel {
+public class TorrentSelectorPanel implements PropertyChangeListener {
     @Resource private Color backgroundColor;
     @Resource private Font headerFont;
     
     private final JPanel component;
    
-    private FileInfoPanel bittorrentPanel;
+    private FileInfoBittorrentPanel bittorrentPanel;
     private JButton okButton;
     private JCheckBox checkBox;
     private int closeValue = JOptionPane.CANCEL_OPTION;
     
     public TorrentSelectorPanel(Torrent torrent, FileInfoPanelFactory factory) {        
         GuiUtils.assignResources(this);
+        
         component = new JPanel(new MigLayout("fill, gap 0, insets 0, "));
         component.setPreferredSize(new Dimension(440, 500));
-        component.setBackground(backgroundColor);
+        component.setBackground(backgroundColor);        
         
-        bittorrentPanel = factory.createBittorentPanel(torrent);
+        bittorrentPanel = (FileInfoBittorrentPanel) factory.createBittorentPanel(torrent);
+        bittorrentPanel.addPropertyChangeListener(this);
         
         component.add(factory.createOverviewPanel(torrent).getComponent(), "growx, wrap");
         component.add(createHeaderLabel(I18n.tr("Select files to download")), "gapleft 5, wrap");
@@ -91,10 +94,10 @@ public class TorrentSelectorPanel {
     /**
      * Closes the dialog and saves any data that may have changed.
      */
-    private class OKAction extends AbstractAction {
+    private class OKAction extends AbstractAction{
         public OKAction() {
             super(tr("OK"));
-        }
+         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -118,6 +121,14 @@ public class TorrentSelectorPanel {
         public void actionPerformed(ActionEvent e) {
             closeValue = JOptionPane.CANCEL_OPTION;
             close();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ( evt.getPropertyName().equals( FileInfoBittorrentPanel.TORRENT_FILE_ENTRY_SELECTED) )
+        {
+            okButton.setEnabled( ((Boolean) evt.getNewValue()).booleanValue() );
         }
     }
 }
