@@ -51,7 +51,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     }
     
     @Override
-    public FileInfoPanel createBittorentPanel(Torrent torrent) {
+    public FileInfoBittorrentPanel createBittorentPanel(Torrent torrent) {
         return new FileInfoBittorrentPanel(torrent);
     }
     

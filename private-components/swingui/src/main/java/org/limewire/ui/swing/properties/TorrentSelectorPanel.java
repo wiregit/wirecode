@@ -44,7 +44,7 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
         component.setPreferredSize(new Dimension(440, 500));
         component.setBackground(backgroundColor);        
         
-        bittorrentPanel = (FileInfoBittorrentPanel) factory.createBittorentPanel(torrent);
+        bittorrentPanel = factory.createBittorentPanel(torrent);
         bittorrentPanel.addPropertyChangeListener(this);
         
         component.add(factory.createOverviewPanel(torrent).getComponent(), "growx, wrap");

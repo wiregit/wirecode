@@ -19,5 +19,5 @@ public interface FileInfoPanelFactory {
     
     public FileInfoPanel createSharingPanel(FileInfoType type, PropertiableFile propertiableFile);
     
-    public FileInfoPanel createBittorentPanel(Torrent torrent);
+    public FileInfoBittorrentPanel createBittorentPanel(Torrent torrent);
 }
