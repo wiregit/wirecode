@@ -47,10 +47,6 @@ public class LibraryNavItem {
         }
     }
     
-    public boolean canRemove() {
-        return navType == NavType.LIST;
-    }
-    
     public NavType getType() {
         return navType;
     }

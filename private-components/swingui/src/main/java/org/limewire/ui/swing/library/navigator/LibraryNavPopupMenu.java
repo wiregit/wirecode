@@ -33,10 +33,11 @@ class LibraryNavPopupMenu extends JPopupMenu {
         
         this.addAction.putValue(Action.NAME, I18n.tr("Add Files..."));
 
-        init(navPanel.getSelectedNavItem());
+        init(navPanel);
     }
     
-    public void init(LibraryNavItem item) {
+    public void init(LibraryNavigatorPanel navPanel) {
+        LibraryNavItem item = navPanel.getSelectedNavItem();
         
         add(addAction);
         addSeparator();
@@ -49,7 +50,7 @@ class LibraryNavPopupMenu extends JPopupMenu {
             add(renameAction.get());
             addSeparator();
             add(clearAction).setEnabled(item.getLocalFileList().size() > 0);
-            add(deleteAction.get()).setEnabled(item.canRemove());
+            add(deleteAction.get()).setEnabled(item.getType() == NavType.LIST && navPanel.getSharedFileListManager().getNumberOfPrivateSharedLists() > 1);
         }
     }
 }

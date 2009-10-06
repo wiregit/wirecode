@@ -160,4 +160,10 @@ public class LibraryNavigatorPanel extends JXPanel {
             }
         });
     }
+    
+    public SharedFileListManager getSharedFileListManager() {
+        return sharedFileListManager;
+    }
 }
+
+

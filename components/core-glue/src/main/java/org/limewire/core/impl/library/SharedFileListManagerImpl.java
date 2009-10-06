@@ -353,4 +353,18 @@ class SharedFileListManagerImpl implements SharedFileListManager {
             shareLists.getReadWriteLock().readLock().unlock();
         }
     }
+    
+    public int getNumberOfPrivateSharedLists()
+    {
+        int numberOfPrivateSharedLists = 0;
+        for (SharedFileList aSharedFileList : sharedLists)
+        {
+            if ( !aSharedFileList.isPublic() )
+            {
+                numberOfPrivateSharedLists++;
+            }
+        }
+        
+        return numberOfPrivateSharedLists;
+    }
 }

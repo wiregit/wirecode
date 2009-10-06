@@ -49,4 +49,10 @@ public interface SharedFileListManager {
      * Removes all documents from all public share lists, and turns off sharing documents with gnutella. 
      */
     void removeDocumentsFromPublicLists();
+ 
+    /**
+     * Returns the number of private shared lists.
+     * 
+     */
+    int getNumberOfPrivateSharedLists();
 }
