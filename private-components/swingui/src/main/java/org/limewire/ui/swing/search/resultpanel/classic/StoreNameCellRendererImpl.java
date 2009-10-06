@@ -106,7 +106,7 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
             if (vsr.getStoreResult().isAlbum()) {
                 if (storeStyle.getType() != Type.STYLE_D) {
                     // Update tracks button text.
-                    int trackCount = vsr.getStoreResult().getAlbumResults().size();
+                    long trackCount = vsr.getStoreResult().getTrackCount();
                     String trackText = vsr.isShowTracks() ?
                             I18n.trn("hide {0} track", "hide {0} tracks", trackCount, trackCount) :
                             I18n.trn("show {0} track", "show {0} tracks", trackCount, trackCount);

@@ -242,7 +242,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         if (vsr.getStoreResult().isAlbum()) {
             if (vsr.isShowTracks()) {
                 albumTrackPanel.setVisible(true);
-                List<TrackResult> trackList = vsr.getStoreResult().getAlbumResults();
+                List<TrackResult> trackList = vsr.getStoreResult().getTracks();
                 for (TrackResult result : trackList) {
                     Component comp = createTrackComponent(result);
                     albumTrackPanel.add(comp, "align left, gapbottom 1, growx, wrap");

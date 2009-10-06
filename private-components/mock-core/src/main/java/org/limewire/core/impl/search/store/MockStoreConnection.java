@@ -115,6 +115,7 @@ public class MockStoreConnection implements StoreConnection {
         insertNameValue(album, "title", "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
         insertNameValue(album, "album", "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
         insertNameValue(album, "albumIcon", "albumCover.png");
+        insertNameValue(album, "albumId", "666");
         insertNameValue(album, "bitRate", String.valueOf(128));
         insertNameValue(album, "category", Category.AUDIO.toString());
         insertNameValue(album, "fileName", "Green Monkeys The Collection.mp3");
@@ -124,6 +125,7 @@ public class MockStoreConnection implements StoreConnection {
         insertNameValue(album, "length", String.valueOf(568));
         insertNameValue(album, "price", "4 Credits");
         insertNameValue(album, "quality", String.valueOf(3));
+        insertNameValue(album, "trackCount", "3");
         insertNameValue(album, "URN", "www.store.limewire.com" + i);
         
         // Create tracks.

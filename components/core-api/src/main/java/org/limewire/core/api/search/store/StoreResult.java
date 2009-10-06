@@ -29,9 +29,9 @@ public interface StoreResult {
     Icon getAlbumIcon();
     
     /**
-     * Returns a List of media files associated with the result.
+     * Returns the album identifier.
      */
-    List<TrackResult> getAlbumResults();
+    String getAlbumId();
     
     /**
      * Returns the category for the result.
@@ -77,6 +77,21 @@ public interface StoreResult {
      * Returns the source for the result as a RemoteHost object.
      */
     RemoteHost getSource();
+    
+    /**
+     * Returns the URI of the stream for the result.
+     */
+    String getStreamURI();
+    
+    /**
+     * Returns the number of tracks in an album.
+     */
+    long getTrackCount();
+    
+    /**
+     * Returns a List of media files associated with the result.
+     */
+    List<TrackResult> getTracks();
     
     /**
      * Returns the URN for the result.

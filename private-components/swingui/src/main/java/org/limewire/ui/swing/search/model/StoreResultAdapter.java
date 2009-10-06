@@ -47,7 +47,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
             Provider<PropertiableHeadings> propertiableHeadings) {
         this.storeResult = storeResult;
         this.propertiableHeadings = propertiableHeadings;
-        this.relevance = storeResult.getAlbumResults().size();
+        this.relevance = storeResult.getTrackCount();
         this.remoteHosts = new HashSet<RemoteHost>();
         this.friends = new HashSet<Friend>();
         

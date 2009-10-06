@@ -32,6 +32,7 @@ public class MockStoreResult implements StoreResult {
     private final List<TrackResult> trackList;
     
     private final Icon albumIcon;
+    private final String albumId;
     private final Category category;
     private final RemoteHost remoteHost;
     private final String fileExtension;
@@ -39,6 +40,8 @@ public class MockStoreResult implements StoreResult {
     private final String infoUri;
     private final String price;
     private final long size;
+    private final String streamUri;
+    private final long trackCount;
     private final URN urn;
     
     /**
@@ -49,6 +52,7 @@ public class MockStoreResult implements StoreResult {
         trackList = new ArrayList<TrackResult>();
         
         albumIcon = getAlbumIcon(jsonObj);
+        albumId = jsonObj.optString("albumId");
         category = getCategory(jsonObj);
         fileName = jsonObj.getString("fileName");
         fileExtension = FileUtils.getFileExtension(fileName);
@@ -56,6 +60,8 @@ public class MockStoreResult implements StoreResult {
         price = jsonObj.optString("price");
         remoteHost = new MockStoreHost();
         size = jsonObj.getLong("fileSize");
+        streamUri = jsonObj.optString("streamUrl");
+        trackCount = jsonObj.optLong("trackCount");
         urn = new MockURN(jsonObj.getString("URN"));
         
         initProperties(jsonObj);
@@ -98,7 +104,7 @@ public class MockStoreResult implements StoreResult {
     
     @Override
     public boolean isAlbum() {
-        return (trackList.size() > 0);
+        return (albumId != null) && (albumId.length() > 0) && (trackCount > 0);
     }
     
     @Override
@@ -107,8 +113,8 @@ public class MockStoreResult implements StoreResult {
     }
     
     @Override
-    public List<TrackResult> getAlbumResults() {
-        return trackList;
+    public String getAlbumId() {
+        return albumId;
     }
     
     @Override
@@ -154,6 +160,21 @@ public class MockStoreResult implements StoreResult {
     @Override
     public RemoteHost getSource() {
         return remoteHost;
+    }
+
+    @Override
+    public String getStreamURI() {
+        return streamUri;
+    }
+    
+    @Override
+    public long getTrackCount() {
+        return trackCount;
+    }
+    
+    @Override
+    public List<TrackResult> getTracks() {
+        return trackList;
     }
     
     @Override
