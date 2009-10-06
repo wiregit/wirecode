@@ -89,17 +89,17 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(1, similarResults0.size());
+        assertEquals(1, similarResults0.size()); // Parent with one child
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         assertEquals(3, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(0, similarResults1.size());
+        assertEquals(0, similarResults1.size()); // Child
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         assertEquals(1, coreResults1.size());
 
-        assertNull(group0.getSimilarityParent());
+        assertNull(group0.getSimilarityParent()); // Parent has no parent
         assertEquals(group0, group1.getSimilarityParent());
 
     }
@@ -122,19 +122,19 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(group0.toString(), 0, similarResults0.size());
-        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
-        assertEquals(3, coreResults0.size());
+        List<VisualSearchResult> similarResults1 = group0.getSimilarResults();
+        assertEquals(1, similarResults1.size()); // Parent with one child
+        List<SearchResult> coreResults1 = group0.getCoreSearchResults();
+        assertEquals(3, coreResults1.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(1, similarResults1.size());
-        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
-        assertEquals(1, coreResults1.size());
+        List<VisualSearchResult> similarResults0 = group1.getSimilarResults();
+        assertEquals(0, similarResults0.size()); // Child
+        List<SearchResult> coreResults0 = group1.getCoreSearchResults();
+        assertEquals(1, coreResults0.size());
 
-        assertNull(group1.getSimilarityParent());
-        assertEquals(group1, group0.getSimilarityParent());
+        assertNull(group0.getSimilarityParent()); // Parent has no parent
+        assertEquals(group0, group1.getSimilarityParent());
 
     }
 
@@ -163,19 +163,19 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(0, similarResults0.size());
-        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
-        assertEquals(9, coreResults0.size());
+        List<VisualSearchResult> similarResults1 = group0.getSimilarResults();
+        assertEquals(1, similarResults1.size()); // Parent with one child
+        List<SearchResult> coreResults1 = group0.getCoreSearchResults();
+        assertEquals(9, coreResults1.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(1, similarResults1.size());
-        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
-        assertEquals(3, coreResults1.size());
+        List<VisualSearchResult> similarResults0 = group1.getSimilarResults();
+        assertEquals(0, similarResults0.size()); // Child
+        List<SearchResult> coreResults0 = group1.getCoreSearchResults();
+        assertEquals(3, coreResults0.size());
 
-        assertNull(group1.getSimilarityParent());
-        assertEquals(group1, group0.getSimilarityParent());
+        assertNull(group0.getSimilarityParent()); // Parent has no parent
+        assertEquals(group0, group1.getSimilarityParent());
 
     }
 
@@ -197,30 +197,30 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertEquals(4, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(3, similarResults0.size());
+        assertEquals(3, similarResults0.size()); // Parent with three children
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         assertEquals(1, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(0, similarResults1.size());
+        assertEquals(0, similarResults1.size()); // Child
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         assertEquals(1, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
-        assertEquals(0, similarResults2.size());
+        assertEquals(0, similarResults2.size()); // Child
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         assertEquals(1, coreResults2.size());
 
         VisualSearchResult group3 = results.get(3);
         List<VisualSearchResult> similarResults3 = group3.getSimilarResults();
-        assertEquals(0, similarResults3.size());
+        assertEquals(0, similarResults3.size()); // Child
         List<SearchResult> coreResults3 = group1.getCoreSearchResults();
         assertEquals(1, coreResults3.size());
 
+        assertNull(group0.getSimilarityParent()); // Parent has no parent
         assertEquals(group0, group1.getSimilarityParent());
-        assertNull(group0.getSimilarityParent());
         assertEquals(group0, group2.getSimilarityParent());
         assertEquals(group0, group3.getSimilarityParent());
 
@@ -246,23 +246,23 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(2, similarResults0.size());
+        assertEquals(2, similarResults0.size()); // Parent with two children
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(0, similarResults1.size());
+        assertEquals(0, similarResults1.size()); // Child
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
-        assertEquals(0, similarResults2.size());
+        assertEquals(0, similarResults2.size()); // Child
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         assertEquals(1, coreResults2.size());
 
-        assertNull(group0.getSimilarityParent());
+        assertNull(group0.getSimilarityParent()); // Parent has no parent
         assertEquals(group0, group1.getSimilarityParent());
         assertEquals(group0, group2.getSimilarityParent());
 
@@ -290,25 +290,25 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(0, similarResults0.size());
+        assertEquals(2, similarResults0.size()); // Parent with two children
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(2, similarResults1.size());
+        assertEquals(0, similarResults1.size()); // Child
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
-        assertEquals(0, similarResults2.size());
+        assertEquals(0, similarResults2.size()); // Child
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         assertEquals(2, coreResults2.size());
 
-        assertNull(group1.getSimilarityParent());
-        assertEquals(group1, group0.getSimilarityParent());
-        assertEquals(group1, group2.getSimilarityParent());
+        assertNull(group0.getSimilarityParent()); // Parent has no parent
+        assertEquals(group0, group1.getSimilarityParent());
+        assertEquals(group0, group2.getSimilarityParent());
 
     }
 
@@ -336,25 +336,25 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(0, similarResults0.size());
+        assertEquals(0, similarResults0.size()); // Child
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(2, similarResults1.size());
+        assertEquals(0, similarResults1.size()); // Child
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
-        assertEquals(0, similarResults2.size());
+        assertEquals(2, similarResults2.size()); // Parent with two children
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         assertEquals(3, coreResults2.size());
 
-        assertNull(group1.getSimilarityParent());
-        assertEquals(group1, group2.getSimilarityParent());
-        assertEquals(group1, group0.getSimilarityParent());
+        assertNull(group2.getSimilarityParent()); // Parent has no parent
+        assertEquals(group2, group0.getSimilarityParent());
+        assertEquals(group2, group1.getSimilarityParent());
 
     }
 

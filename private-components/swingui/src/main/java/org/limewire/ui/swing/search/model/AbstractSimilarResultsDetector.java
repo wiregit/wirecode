@@ -77,47 +77,42 @@ public abstract class AbstractSimilarResultsDetector implements SimilarResultsDe
 
     /**
      * Returns which item should be the parent between the two similar search
-     * results. Currently the item with the most sources, is considered the
-     * parent.
+     * results. The item with the most sources should be the parent as it's
+     * likely to provide the fastest download.
      */
     private VisualSearchResult findParent(VisualSearchResult o1, VisualSearchResult o2) {
-        VisualSearchResult parent = null;
 
-        VisualSearchResult parent1 = o1;
-        VisualSearchResult parent2 = o2;
-        VisualSearchResult parent3 = o1.getSimilarityParent();
-        VisualSearchResult parent4 = o2.getSimilarityParent();
-        float parent1Count = parent1 == null ? 0 : parent1.getRelevance();
-        float parent2Count = parent2 == null ? 0 : parent2.getRelevance();
-        float parent3Count = parent3 == null ? 0 : parent3.getRelevance();
-        float parent4Count = parent4 == null ? 0 : parent4.getRelevance();
+        VisualSearchResult parent1 = o1.getSimilarityParent();
+        VisualSearchResult parent2 = o2.getSimilarityParent();
+        int o1Count = o1.getSources().size();
+        int o2Count = o2.getSources().size();
+        int parent1Count = parent1 == null ? 0 : parent1.getSources().size();
+        int parent2Count = parent2 == null ? 0 : parent2.getSources().size();
 
-        if (parent4Count > parent3Count && parent4Count > parent2Count
-                && parent4Count > parent1Count) {
-            parent = parent4;
-        } else if (parent3Count > parent2Count && parent3Count > parent1Count) {
-            parent = parent3;
-        } else if (parent2Count > parent1Count) {
-            parent = parent2;
-        } else if (parent1Count > parent2Count) {
-            parent = parent1;
+        // Parents should not have parents of their own 
+        assert(parent1 == null || parent1.getSimilarityParent() == null);
+        assert(parent2 == null || parent2.getSimilarityParent() == null);
+
+        // Find the result with the highest count - if we're in the process of
+        // regrouping results, a child may have a higher count than its parent
+        if(parent2Count > parent1Count && parent2Count > o2Count &&
+                parent2Count > o1Count) {
+            return parent2;
+        } else if(parent1Count > o2Count && parent1Count > o1Count) {
+            return parent1;
+        } else if(o2Count > o1Count) {
+            return o2;
+        } else if(o1Count > o2Count) {
+            return o1;
+        }        
+        // All the results have equal counts; keep the current parent (if any)
+        if(parent1 != null) {
+            return parent1;
+        } else if(parent2 != null) {
+            return parent2;
         } else {
-            // keep current parent the parent
-            // makes it easier to predict when testing
-            if (parent1 != null && parent1.getSimilarityParent() == null) {
-                parent = parent1;
-            } else if (parent2 != null && parent2.getSimilarityParent() == null) {
-                parent = parent2;
-            } else if (parent3 != null && parent3.getSimilarityParent() == null) {
-                parent = parent3;
-            } else if (parent4 != null && parent4.getSimilarityParent() == null) {
-                parent = parent4;
-            } else {
-                parent = parent1;
-            }
+            return o1; // Doesn't matter whether we return o1 or o2
         }
-
-        return parent;
     }
 
 }
