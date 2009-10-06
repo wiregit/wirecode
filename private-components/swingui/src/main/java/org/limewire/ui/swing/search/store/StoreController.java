@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.store;
 
-import java.io.File;
 import java.util.List;
 
 import org.apache.http.cookie.Cookie;
@@ -10,9 +9,7 @@ import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreManager.AttributeKey;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
-import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
 
 import com.google.inject.Inject;
 
@@ -34,28 +31,6 @@ public class StoreController {
             StoreManager storeManager) {
         this.application = application;
         this.storeManager = storeManager;
-    }
-    
-    /**
-     * Returns a handler for downloading search results.
-     */
-    public DownloadHandler getDownloadHandler() {
-        // TODO review - maybe use factory to create concrete handler
-        return new DownloadHandler() {
-            @Override
-            public void download(VisualSearchResult vsr) {
-                if (vsr instanceof VisualStoreResult) {
-                    StoreController.this.download((VisualStoreResult) vsr);
-                }
-            }
-            
-            @Override
-            public void download(VisualSearchResult vsr, File saveFile) {
-                if (vsr instanceof VisualStoreResult) {
-                    StoreController.this.download((VisualStoreResult) vsr);
-                }
-            }
-        };
     }
     
     /**
