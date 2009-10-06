@@ -1060,6 +1060,8 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
             will(returnValue(false));
             one(queryReply).getVendor();
             will(returnValue("vendor"));
+            one(queryReply).getGUID();
+            will(returnValue(GUID.makeGuid()));
         }});
         RemoteFileDesc rfd = response.toRemoteFileDesc(queryReply, address, remoteFileDescFactory, pushEndpointFactory);
         assertSame(address, rfd.getAddress());
