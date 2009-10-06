@@ -32,6 +32,7 @@ public class StoreResultAdapter implements StoreResult {
     private final List<TrackResult> trackList;
     
     private final Icon albumIcon;
+    private final String albumId;
     private final Category category;
     private final String fileExtension;
     private final String fileName;
@@ -40,6 +41,8 @@ public class StoreResultAdapter implements StoreResult {
     private final RemoteHost remoteHost;
     private final long size;
     private final SortPriority sortPriority;
+    private final String streamUri;
+    private final long trackCount;
     private final URN urn;
     
     /**
@@ -50,6 +53,7 @@ public class StoreResultAdapter implements StoreResult {
         trackList = new ArrayList<TrackResult>();
         
         albumIcon = getIcon(jsonObj, "albumIcon");
+        albumId = jsonObj.optString("albumId");
         category = getCategory(jsonObj);
         fileName = jsonObj.getString("fileName");
         fileExtension = FileUtils.getFileExtension(fileName);
@@ -58,6 +62,8 @@ public class StoreResultAdapter implements StoreResult {
         remoteHost = new RemostHostImpl(new StorePresence("Store"));
         size = jsonObj.getLong("fileSize");
         sortPriority = getSortPriority(jsonObj);
+        streamUri = jsonObj.optString("streamUrl");
+        trackCount = jsonObj.optLong("trackCount");
         urn = com.limegroup.gnutella.URN.createUrnFromString(jsonObj.getString("URN"));
         
         initProperties(jsonObj);
@@ -102,8 +108,8 @@ public class StoreResultAdapter implements StoreResult {
     }
 
     @Override
-    public List<TrackResult> getAlbumResults() {
-        return trackList;
+    public String getAlbumId() {
+        return albumId;
     }
 
     @Override
@@ -152,13 +158,28 @@ public class StoreResultAdapter implements StoreResult {
     }
 
     @Override
+    public String getStreamURI() {
+        return streamUri;
+    }
+
+    @Override
+    public long getTrackCount() {
+        return trackCount;
+    }
+
+    @Override
+    public List<TrackResult> getTracks() {
+        return trackList;
+    }
+
+    @Override
     public URN getUrn() {
         return urn;
     }
 
     @Override
     public boolean isAlbum() {
-        return (trackList.size() > 0);
+        return (albumId != null) && (albumId.length() > 0) && (trackCount > 0);
     }
     
     /**
