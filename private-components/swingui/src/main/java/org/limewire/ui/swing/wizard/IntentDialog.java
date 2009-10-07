@@ -45,8 +45,6 @@ import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.SystemUtils;
 
-import com.limegroup.gnutella.util.EncodingUtils;
-
 public class IntentDialog extends LimeJDialog {
 
     private final Color backgroundColor = Color.WHITE;
@@ -109,7 +107,8 @@ public class IntentDialog extends LimeJDialog {
         final UrlAction.GetParamAppender languageAppender = new UrlAction.GetParamAppender() {
             @Override
             public String appendParams(String original) {
-                return original + "&lang=" + EncodingUtils.encode(languageDropDown.getSelectedItem().toString());
+                // TODO: should language be encoded like LimeWireUtils.addLWInfoToUrl() ??
+                return original + "&lang=" + languageDropDown.getSelectedItem().toString();
             }
         };
         
