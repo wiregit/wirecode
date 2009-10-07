@@ -1,5 +1,6 @@
 package org.limewire.core.impl.search.store;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -35,12 +36,9 @@ public class MockStoreConnection implements StoreConnection {
         StringBuilder buf = new StringBuilder(JSON_OBJ);
         
         try {
-            // Load style properties.
-            URL url = MockStoreStyle.class.getResource("MockStoreStyle.properties");
-            properties.load(url.openStream());
-
-            // Insert store style and results.
-            insertValue(buf, quoted("storeStyle") + COLON + createStyleJSON());
+            // Insert style type and results.
+            insertNameValue(buf, "styleType", styleType.toString());
+            insertNameValue(buf, "styleTimestamp", "2009-10-07 12:00:00");
             insertValue(buf, quoted("storeResults") + COLON + createResultsJSON());
             
         } catch (Exception e) {
@@ -53,7 +51,18 @@ public class MockStoreConnection implements StoreConnection {
     @Override
     public String loadStyle(String styleId) {
         StringBuilder buf = new StringBuilder(JSON_OBJ);
-        insertValue(buf, quoted("storeStyle") + COLON + createStyleJSON());
+        
+        try {
+            // Load style properties.
+            URL url = MockStoreStyle.class.getResource("MockStoreStyle.properties");
+            properties.load(url.openStream());
+            
+            insertValue(buf, quoted("storeStyle") + COLON + createStyleJSON());
+            
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        
         return buf.toString();
     }
     
