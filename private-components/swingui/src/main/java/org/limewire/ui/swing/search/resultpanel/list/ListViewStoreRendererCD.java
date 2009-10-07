@@ -8,6 +8,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.event.HyperlinkEvent;
@@ -377,8 +378,9 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             
         } else {
             // Estimate heading width based on column width.
+            Icon coverIcon = albumCoverButton.getIcon();
             int columnWidth = getColumnWidth();
-            int coverWidth = albumCoverButton.getIcon().getIconWidth();
+            int coverWidth = (coverIcon != null) ? coverIcon.getIconWidth() : 0;
             if (albumDownloadButton.isVisible()) {
                 return columnWidth - 21 - coverWidth - albumDownloadButton.getSize().width;
             } else {
