@@ -37,6 +37,7 @@ public class MockStoreResult implements StoreResult {
     private final Map<FilePropertyKey, Object> propertyMap;
     private final List<TrackResult> trackList;
     
+    private final String albumIconUri;
     private final String albumId;
     private final Category category;
     private final RemoteHost remoteHost;
@@ -51,6 +52,9 @@ public class MockStoreResult implements StoreResult {
     
     private Icon albumIcon;
     
+    private boolean albumIconRequested;
+    private boolean tracksRequested;
+    
     /**
      * Constructs a MockStoreResult using the specified JSON object.
      */
@@ -60,7 +64,7 @@ public class MockStoreResult implements StoreResult {
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         trackList = new ArrayList<TrackResult>();
         
-        albumIcon = getAlbumIcon(jsonObj);
+        albumIconUri = jsonObj.optString("albumIcon");
         albumId = jsonObj.optString("albumId");
         category = getCategory(jsonObj);
         fileName = jsonObj.getString("fileName");
@@ -74,7 +78,6 @@ public class MockStoreResult implements StoreResult {
         urn = new MockURN(jsonObj.getString("URN"));
         
         initProperties(jsonObj);
-        initTracks(jsonObj);
     }
     
     /**
@@ -97,19 +100,6 @@ public class MockStoreResult implements StoreResult {
         long year = jsonObj.optLong("year");
         if (year > 0) propertyMap.put(FilePropertyKey.YEAR, year);
     }
-    
-    /**
-     * Sets album track values using the specified JSON object.
-     */
-    private void initTracks(JSONObject jsonObj) throws JSONException {
-        JSONArray trackArr = jsonObj.optJSONArray("tracks");
-        if ((trackArr != null) && (trackArr.length() > 0)) {
-            for (int i = 0, len = trackArr.length(); i < len; i++) {
-                JSONObject trackObj = trackArr.getJSONObject(i);
-                trackList.add(new MockTrackResult(trackObj));
-            }
-        }
-    }
 
     @Override
     public void addStoreResultListener(StoreResultListener listener) {
@@ -128,6 +118,24 @@ public class MockStoreResult implements StoreResult {
     
     @Override
     public Icon getAlbumIcon() {
+        if (isAlbum() && (albumIconUri.length() > 0) && !albumIconRequested) {
+            albumIconRequested = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {}
+
+                    // TODO use StoreConnection to load icon
+                    albumIcon = new ImageIcon(getClass().getResource(albumIconUri));
+
+                    // Fire event to update UI.
+                    fireAlbumIconUpdated();
+                }
+            }).start();
+        }
+        
         return albumIcon;
     }
     
@@ -193,11 +201,35 @@ public class MockStoreResult implements StoreResult {
     
     @Override
     public List<TrackResult> getTracks() {
-        if (isAlbum() && (trackList.size() == 0)) {
-            StoreConnection storeConnection = storeConnectionFactory.create();
-            String jsonStr = storeConnection.loadTracks(albumId);
-            // TODO convert jsonStr to track list
+        if (isAlbum() && (trackList.size() == 0) && !tracksRequested) {
+            tracksRequested = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {}
+                    
+                    // Create connection and load tracks.
+                    StoreConnection storeConnection = storeConnectionFactory.create();
+                    String jsonStr = storeConnection.loadTracks(albumId);
+                    
+                    try {
+                        // Parse JSON and add tracks.
+                        JSONObject jsonObj = new JSONObject(jsonStr);
+                        List<TrackResult> newTracks = parseTracks(jsonObj);
+                        trackList.addAll(newTracks);
+                        
+                        // Fire event to update UI.
+                        fireTracksUpdated();
+                        
+                    } catch (JSONException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }).start();
         }
+        
         return trackList;
     }
     
@@ -206,18 +238,11 @@ public class MockStoreResult implements StoreResult {
         return urn;
     }
     
-    public void addTracks(List<TrackResult> tracks) {
-        if (tracks.size() > 0) {
-            trackList.addAll(tracks);
-            fireTracksUpdated();
+    private void fireAlbumIconUpdated() {
+        for (StoreResultListener listener : listenerList) {
+            listener.albumIconUpdated(albumIcon);
         }
     }
-    
-//    private void fireAlbumIconUpdated() {
-//        for (StoreResultListener listener : listenerList) {
-//            listener.albumIconUpdated(albumIcon);
-//        }
-//    }
     
     private void fireTracksUpdated() {
         for (StoreResultListener listener : listenerList) {
@@ -225,14 +250,9 @@ public class MockStoreResult implements StoreResult {
         }
     }
     
-    private Icon getAlbumIcon(JSONObject jsonObj) {
-        String url = jsonObj.optString("albumIcon");
-        if (url.length() > 0) {
-            return new ImageIcon(getClass().getResource(url));
-        }
-        return null;
-    }
-    
+    /**
+     * Returns the Category from the specified JSON object.
+     */
     private Category getCategory(JSONObject jsonObj) throws JSONException {
         String value = jsonObj.getString("category");
         for (Category category : Category.values()) {
@@ -241,6 +261,23 @@ public class MockStoreResult implements StoreResult {
             }
         }
         throw new JSONException("Invalid result category");
+    }
+    
+    /**
+     * Returns a list of track results by parsing the specified JSON object.
+     */
+    private List<TrackResult> parseTracks(JSONObject jsonObj) throws JSONException {
+        List<TrackResult> trackList = new ArrayList<TrackResult>();
+        
+        JSONArray trackArr = jsonObj.optJSONArray("tracks");
+        if ((trackArr != null) && (trackArr.length() > 0)) {
+            for (int i = 0, len = trackArr.length(); i < len; i++) {
+                JSONObject trackObj = trackArr.getJSONObject(i);
+                trackList.add(new MockTrackResult(trackObj));
+            }
+        }
+        
+        return trackList;
     }
     
     /**
