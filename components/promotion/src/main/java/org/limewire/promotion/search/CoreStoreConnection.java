@@ -80,6 +80,12 @@ public class CoreStoreConnection implements StoreConnection {
     }
     
     @Override
+    public String loadStyle(String styleId) {
+        // TODO implement
+        return "";
+    }
+    
+    @Override
     public String loadTracks(String albumId) {
         // TODO implement
         return "";

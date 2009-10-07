@@ -51,8 +51,17 @@ public class MockStoreConnection implements StoreConnection {
     }
     
     @Override
+    public String loadStyle(String styleId) {
+        StringBuilder buf = new StringBuilder(JSON_OBJ);
+        insertValue(buf, quoted("storeStyle") + COLON + createStyleJSON());
+        return buf.toString();
+    }
+    
+    @Override
     public String loadTracks(String albumId) {
-        return createTracksJSON();
+        StringBuilder buf = new StringBuilder(JSON_OBJ);
+        insertValue(buf, quoted("tracks") + COLON + createTracksJSON(albumId));
+        return buf.toString();
     }
     
     /**
@@ -69,6 +78,7 @@ public class MockStoreConnection implements StoreConnection {
         StringBuilder buf = new StringBuilder(JSON_OBJ);
         
         insertNameValue(buf, "type", styleType.toString());
+        insertNameValue(buf, "timestamp", "2009-10-07 12:00:00");
         insertValue(buf, getNameValuePair("background"));
         insertValue(buf, getNameValuePair("buyAlbumIcon"));
         insertValue(buf, getNameValuePair("buyTrackIcon"));
@@ -133,52 +143,7 @@ public class MockStoreConnection implements StoreConnection {
         insertNameValue(album, "trackCount", "3");
         insertNameValue(album, "URN", "www.store.limewire.com" + i);
         
-        // Create tracks.
-        StringBuilder trackArr = new StringBuilder(JSON_ARR);
-        StringBuilder track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", "666");
-        insertNameValue(track, "artist", "Green Monkeys");
-        insertNameValue(track, "title", "Heh?");
-        insertNameValue(track, "bitRate", String.valueOf(128));
-        insertNameValue(track, "fileName", "Green Monkeys - Heh.mp3");        
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
-        insertNameValue(track, "length", String.valueOf(129));
-        insertNameValue(track, "price", "1 Credit");
-        insertNameValue(track, "quality", String.valueOf(3));
-        insertNameValue(track, "trackNumber", String.valueOf(1));
-        insertNameValue(track, "URN", "www.store.limewire.com" + (i + 1));
-        insertValue(trackArr, track.toString());
-
-        track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", "666");
-        insertNameValue(track, "artist", "Green Monkeys");
-        insertNameValue(track, "title", "Take Me To Space (Man)");
-        insertNameValue(track, "bitRate", String.valueOf(128));
-        insertNameValue(track, "fileName", "Green Monkeys - Take Me To Space (Man).mp3");        
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
-        insertNameValue(track, "length", String.valueOf(251));
-        insertNameValue(track, "price", "1 Credit");
-        insertNameValue(track, "quality", String.valueOf(3));
-        insertNameValue(track, "trackNumber", String.valueOf(2));
-        insertNameValue(track, "URN", "www.store.limewire.com" + (i + 2));
-        insertValue(trackArr, track.toString());
-
-        track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", "666");
-        insertNameValue(track, "artist", "Green Monkeys");
-        insertNameValue(track, "title", "Crush");
-        insertNameValue(track, "bitRate", String.valueOf(128));
-        insertNameValue(track, "fileName", "Green Monkeys - Crush.mp3");        
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
-        insertNameValue(track, "length", String.valueOf(188));
-        insertNameValue(track, "price", "1 Credit");
-        insertNameValue(track, "quality", String.valueOf(3));
-        insertNameValue(track, "trackNumber", String.valueOf(3));
-        insertNameValue(track, "URN", "www.store.limewire.com" + (i + 3));
-        insertValue(trackArr, track.toString());
-        
-        // Add tracks to album, and album to results.
-        insertValue(album, quoted("tracks") + COLON + trackArr.toString());
+        // Add album to results.
         insertValue(resultArr, album.toString());
         
         // Create single file result.
@@ -206,14 +171,13 @@ public class MockStoreConnection implements StoreConnection {
     /**
      * Returns an array of track results formatted as a JSON string.
      */
-    private String createTracksJSON() {
+    private String createTracksJSON(String albumId) {
         int i = 0;
-        StringBuilder buf = new StringBuilder(JSON_OBJ);
         
         // Create tracks.
         StringBuilder trackArr = new StringBuilder(JSON_ARR);
         StringBuilder track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", "666");
+        insertNameValue(track, "albumId", albumId);
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Heh?");
         insertNameValue(track, "bitRate", String.valueOf(128));
@@ -227,7 +191,7 @@ public class MockStoreConnection implements StoreConnection {
         insertValue(trackArr, track.toString());
 
         track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", "666");
+        insertNameValue(track, "albumId", albumId);
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Take Me To Space (Man)");
         insertNameValue(track, "bitRate", String.valueOf(128));
@@ -241,7 +205,7 @@ public class MockStoreConnection implements StoreConnection {
         insertValue(trackArr, track.toString());
 
         track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", "666");
+        insertNameValue(track, "albumId", albumId);
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Crush");
         insertNameValue(track, "bitRate", String.valueOf(128));
@@ -254,9 +218,7 @@ public class MockStoreConnection implements StoreConnection {
         insertNameValue(track, "URN", "www.store.limewire.com" + (i + 3));
         insertValue(trackArr, track.toString());
         
-        // Add tracks to buffer.
-        insertValue(buf, quoted("tracks") + COLON + trackArr.toString());
-        return buf.toString();
+        return trackArr.toString();
     }
     
     /**

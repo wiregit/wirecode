@@ -12,6 +12,12 @@ public interface StoreConnection {
     String doQuery(String query);
     
     /**
+     * Retrieves the style for the specified style id, and returns the 
+     * result as a JSON text string.
+     */
+    String loadStyle(String styleId);
+    
+    /**
      * Retrieves the tracks for the specified album id, and returns the 
      * result as a JSON text string.
      */
