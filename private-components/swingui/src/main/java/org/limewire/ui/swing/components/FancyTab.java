@@ -39,6 +39,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingHacks;
 
 /**
  * A fancy 'tab' for use in a {@link FancyTabList}.
@@ -386,6 +387,9 @@ public class FancyTab extends JXPanel {
     
     private void showPopup(MouseEvent e) {
         JPopupMenu menu = new JPopupMenu();
+        
+        SwingHacks.fixPopupMenuForWindows(menu);
+        
         for (Action action : getTabActionMap().getRightClickActions()) {
             if(action == TabActionMap.SEPARATOR){
                 menu.addSeparator();
