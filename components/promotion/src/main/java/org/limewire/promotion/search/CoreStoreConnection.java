@@ -78,6 +78,12 @@ public class CoreStoreConnection implements StoreConnection {
         }
         return "";
     }
+    
+    @Override
+    public String loadTracks(String albumId) {
+        // TODO implement
+        return "";
+    }
 
     private String buildURL(String query) {
         return storeSearchURL.get() + "?query=" + query + 

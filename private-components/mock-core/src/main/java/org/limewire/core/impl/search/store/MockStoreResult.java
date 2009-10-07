@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -15,7 +16,10 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.search.store.StoreConnection;
+import org.limewire.core.api.search.store.StoreConnectionFactory;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreResultListener;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.impl.MockURN;
 import org.limewire.core.impl.friend.MockFriend;
@@ -28,10 +32,11 @@ import org.limewire.util.FileUtils;
  */
 public class MockStoreResult implements StoreResult {
 
+    private final StoreConnectionFactory storeConnectionFactory;
+    private final List<StoreResultListener> listenerList;
     private final Map<FilePropertyKey, Object> propertyMap;
     private final List<TrackResult> trackList;
     
-    private final Icon albumIcon;
     private final String albumId;
     private final Category category;
     private final RemoteHost remoteHost;
@@ -44,10 +49,14 @@ public class MockStoreResult implements StoreResult {
     private final long trackCount;
     private final URN urn;
     
+    private Icon albumIcon;
+    
     /**
      * Constructs a MockStoreResult using the specified JSON object.
      */
-    public MockStoreResult(JSONObject jsonObj) throws JSONException {
+    public MockStoreResult(JSONObject jsonObj, StoreConnectionFactory storeConnectionFactory) throws JSONException {
+        this.storeConnectionFactory = storeConnectionFactory;
+        listenerList = new CopyOnWriteArrayList<StoreResultListener>();
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         trackList = new ArrayList<TrackResult>();
         
@@ -100,6 +109,16 @@ public class MockStoreResult implements StoreResult {
                 trackList.add(new MockTrackResult(trackObj));
             }
         }
+    }
+
+    @Override
+    public void addStoreResultListener(StoreResultListener listener) {
+        listenerList.add(listener);
+    }
+
+    @Override
+    public void removeStoreResultListener(StoreResultListener listener) {
+        listenerList.remove(listener);
     }
     
     @Override
@@ -174,12 +193,36 @@ public class MockStoreResult implements StoreResult {
     
     @Override
     public List<TrackResult> getTracks() {
+        if (isAlbum() && (trackList.size() == 0)) {
+            StoreConnection storeConnection = storeConnectionFactory.create();
+            String jsonStr = storeConnection.loadTracks(albumId);
+            // TODO convert jsonStr to track list
+        }
         return trackList;
     }
     
     @Override
     public URN getUrn() {
         return urn;
+    }
+    
+    public void addTracks(List<TrackResult> tracks) {
+        if (tracks.size() > 0) {
+            trackList.addAll(tracks);
+            fireTracksUpdated();
+        }
+    }
+    
+//    private void fireAlbumIconUpdated() {
+//        for (StoreResultListener listener : listenerList) {
+//            listener.albumIconUpdated(albumIcon);
+//        }
+//    }
+    
+    private void fireTracksUpdated() {
+        for (StoreResultListener listener : listenerList) {
+            listener.tracksUpdated(trackList);
+        }
     }
     
     private Icon getAlbumIcon(JSONObject jsonObj) {
@@ -200,6 +243,9 @@ public class MockStoreResult implements StoreResult {
         throw new JSONException("Invalid result category");
     }
     
+    /**
+     * Implementation of RemoteHost for mock store data.
+     */
     private class MockStoreHost implements RemoteHost {
         private final FriendPresence friendPresence;
 

@@ -19,6 +19,18 @@ public interface StoreResult {
     }
 
     /**
+     * Adds the specified listener to the list that is notified when the 
+     * store result is updated.
+     */
+    void addStoreResultListener(StoreResultListener listener);
+    
+    /**
+     * Removes the specified listener from the list that is notified when the
+     * store result is updated.
+     */
+    void removeStoreResultListener(StoreResultListener listener);
+    
+    /**
      * Returns true if the result represents a collection of media files.
      */
     boolean isAlbum();

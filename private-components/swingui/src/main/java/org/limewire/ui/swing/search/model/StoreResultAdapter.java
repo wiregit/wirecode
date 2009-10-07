@@ -6,17 +6,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.Icon;
+
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreResultListener;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreResult.SortPriority;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.util.Objects;
 
 import com.google.inject.Provider;
 
@@ -28,6 +33,7 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     private final StoreResult storeResult;
     private final Provider<PropertiableHeadings> propertiableHeadings;
+    private final VisualSearchResultStatusListener changeListener;
     private final Set<RemoteHost> remoteHosts;
     private final Set<Friend> friends;
     
@@ -44,9 +50,11 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
      * and heading service.
      */
     public StoreResultAdapter(StoreResult storeResult,
-            Provider<PropertiableHeadings> propertiableHeadings) {
+            Provider<PropertiableHeadings> propertiableHeadings,
+            VisualSearchResultStatusListener changeListener) {
         this.storeResult = storeResult;
         this.propertiableHeadings = propertiableHeadings;
+        this.changeListener = changeListener;
         this.relevance = storeResult.getTrackCount();
         this.remoteHosts = new HashSet<RemoteHost>();
         this.friends = new HashSet<Friend>();
@@ -55,6 +63,24 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
         // From widget.
         this.remoteHosts.add(storeResult.getSource());
         this.friends.add(storeResult.getSource().getFriendPresence().getFriend());
+    }
+    
+    /**
+     * Initializes the adapter by installing a listener for result updates.
+     */
+    public void initializeUpdates() {
+        // Add listener for store result updates.
+        storeResult.addStoreResultListener(new StoreResultListener() {
+            @Override
+            public void albumIconUpdated(Icon icon) {
+                firePropertyChange("albumIcon", null, icon);
+            }
+
+            @Override
+            public void tracksUpdated(List<TrackResult> tracks) {
+                firePropertyChange("tracks", Collections.emptyList(), tracks);
+            }
+        });
     }
     
     @Override
@@ -284,5 +310,16 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
         
         VisualSearchResult vsr = (VisualSearchResult) o;
         return getHeading().compareTo(vsr.getHeading());
+    }
+    
+    /**
+     * Notifies change listener that the specified property name has changed 
+     * values.
+     */
+    private void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+        if (!Objects.equalOrNull(oldValue, newValue)) {
+            System.out.println("store result change: " + propertyName);
+//            changeListener.resultChanged(this, propertyName, oldValue, newValue); TODO
+        }
     }
 }

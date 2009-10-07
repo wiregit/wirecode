@@ -186,7 +186,7 @@ public class MockStoreManager implements StoreManager {
         StoreResult[] storeResults = new StoreResult[resultsArr.length()];
         for (int i = 0, len = resultsArr.length(); i < len; i++) {
             JSONObject resultObj = resultsArr.getJSONObject(i);
-            storeResults[i] = new MockStoreResult(resultObj);
+            storeResults[i] = new MockStoreResult(resultObj, storeConnectionFactory);
         }
         
         return storeResults;

@@ -452,7 +452,9 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
                 // Add store result if not in list.
                 if (idx < 0) {
                     idx = -(idx + 1);
-                    VisualSearchResult vsr = new StoreResultAdapter(storeResult, propertiableHeadings);
+                    StoreResultAdapter vsr = new StoreResultAdapter(storeResult, 
+                            propertiableHeadings, BasicSearchResultsModel.this);
+                    vsr.initializeUpdates();
                     groupedUrnResults.add(idx, vsr);
                 }
                 

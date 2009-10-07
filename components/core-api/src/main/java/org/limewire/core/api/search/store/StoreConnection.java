@@ -10,4 +10,10 @@ public interface StoreConnection {
      * result as a JSON text string.
      */
     String doQuery(String query);
+    
+    /**
+     * Retrieves the tracks for the specified album id, and returns the 
+     * result as a JSON text string.
+     */
+    String loadTracks(String albumId);
 }

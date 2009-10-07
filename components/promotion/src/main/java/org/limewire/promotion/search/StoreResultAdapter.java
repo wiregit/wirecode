@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -19,6 +20,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreResultListener;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.util.FileUtils;
@@ -28,6 +30,7 @@ import org.limewire.util.FileUtils;
  */
 public class StoreResultAdapter implements StoreResult {
 
+    private final List<StoreResultListener> listenerList;
     private final Map<FilePropertyKey, Object> propertyMap;
     private final List<TrackResult> trackList;
     
@@ -49,6 +52,7 @@ public class StoreResultAdapter implements StoreResult {
      * Constructs a StoreResultAdapter using the specified JSON object.
      */
     public StoreResultAdapter(JSONObject jsonObj) throws IOException, JSONException {
+        listenerList = new CopyOnWriteArrayList<StoreResultListener>();
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         trackList = new ArrayList<TrackResult>();
         
@@ -100,6 +104,16 @@ public class StoreResultAdapter implements StoreResult {
                 trackList.add(new TrackResultAdapter(trackObj));
             }
         }
+    }
+    
+    @Override
+    public void addStoreResultListener(StoreResultListener listener) {
+        listenerList.add(listener);
+    }
+
+    @Override
+    public void removeStoreResultListener(StoreResultListener listener) {
+        listenerList.remove(listener);
     }
     
     @Override
