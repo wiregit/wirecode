@@ -131,6 +131,7 @@ public class MockStoreConnection implements StoreConnection {
         // Create tracks.
         StringBuilder trackArr = new StringBuilder(JSON_ARR);
         StringBuilder track = new StringBuilder(JSON_OBJ);
+        insertNameValue(track, "albumId", "666");
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Heh?");
         insertNameValue(track, "bitRate", String.valueOf(128));
@@ -144,6 +145,7 @@ public class MockStoreConnection implements StoreConnection {
         insertValue(trackArr, track.toString());
 
         track = new StringBuilder(JSON_OBJ);
+        insertNameValue(track, "albumId", "666");
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Take Me To Space (Man)");
         insertNameValue(track, "bitRate", String.valueOf(128));
@@ -157,6 +159,7 @@ public class MockStoreConnection implements StoreConnection {
         insertValue(trackArr, track.toString());
 
         track = new StringBuilder(JSON_OBJ);
+        insertNameValue(track, "albumId", "666");
         insertNameValue(track, "artist", "Green Monkeys");
         insertNameValue(track, "title", "Crush");
         insertNameValue(track, "bitRate", String.valueOf(128));

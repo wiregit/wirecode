@@ -9,6 +9,11 @@ import org.limewire.core.api.URN;
 public interface TrackResult {
 
     /**
+     * Returns the album identifier.
+     */
+    String getAlbumId();
+    
+    /**
      * Returns the file extension for the result.
      */
     String getFileExtension();
@@ -32,6 +37,11 @@ public interface TrackResult {
      * Returns the total file size in bytes.
      */
     long getSize();
+    
+    /**
+     * Returns the URI of the stream for the result.
+     */
+    String getStreamURI();
     
     /**
      * Returns the URN for the result.

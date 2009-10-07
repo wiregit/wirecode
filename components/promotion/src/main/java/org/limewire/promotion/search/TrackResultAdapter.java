@@ -18,10 +18,12 @@ public class TrackResultAdapter implements TrackResult {
 
     private final Map<FilePropertyKey, Object> propertyMap;
     
+    private final String albumId;
     private final String fileExtension;
     private final String fileName;
     private final String price;
     private final long size;
+    private final String streamUri;
     private final URN urn;
     
     /**
@@ -30,10 +32,12 @@ public class TrackResultAdapter implements TrackResult {
     public TrackResultAdapter(JSONObject jsonObj) throws IOException, JSONException {
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         
+        albumId = jsonObj.getString("albumId");
         fileName = jsonObj.getString("fileName");
         fileExtension = FileUtils.getFileExtension(fileName);
         price = jsonObj.optString("price");
         size = jsonObj.getLong("fileSize");
+        streamUri = jsonObj.optString("streamUrl");
         urn = com.limegroup.gnutella.URN.createUrnFromString(jsonObj.getString("URN"));
         
         initProperties(jsonObj);
@@ -60,6 +64,11 @@ public class TrackResultAdapter implements TrackResult {
     }
 
     @Override
+    public String getAlbumId() {
+        return albumId;
+    }
+    
+    @Override
     public String getFileExtension() {
         return fileExtension;
     }
@@ -82,6 +91,11 @@ public class TrackResultAdapter implements TrackResult {
     @Override
     public long getSize() {
         return size;
+    }
+
+    @Override
+    public String getStreamURI() {
+        return streamUri;
     }
 
     @Override
