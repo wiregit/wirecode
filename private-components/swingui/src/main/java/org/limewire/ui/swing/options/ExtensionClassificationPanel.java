@@ -95,11 +95,6 @@ public class ExtensionClassificationPanel extends OptionPanel {
         buttonPanel.add(new JButton(new OKDialogAction()), "tag ok");
         add(buttonPanel, BorderLayout.SOUTH);
     }
-    
-    @Inject
-    public void register() {
-        initOptions();
-    }
 
     /**
      * Builds a table model containing the extension association information for a given
