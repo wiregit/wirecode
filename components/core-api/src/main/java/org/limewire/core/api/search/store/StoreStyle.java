@@ -59,6 +59,8 @@ public interface StoreStyle {
   
     Color getSubHeadingForeground();
     
+    long getTimestamp();
+    
     Font getTrackFont();
     
     Color getTrackForeground();

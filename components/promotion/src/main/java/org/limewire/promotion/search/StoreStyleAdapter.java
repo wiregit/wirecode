@@ -5,6 +5,9 @@ import java.awt.Font;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -19,6 +22,7 @@ import org.limewire.core.api.search.store.StoreStyle;
 public class StoreStyleAdapter implements StoreStyle {
 
     private final Type type;
+    private final long timestamp;
     
     private final Color background;
     private final Icon buyAlbumIcon;
@@ -60,6 +64,7 @@ public class StoreStyleAdapter implements StoreStyle {
      */
     public StoreStyleAdapter(JSONObject jsonObj) throws IOException, JSONException {
         type = getType(jsonObj);
+        timestamp = getTimestamp(jsonObj);
         
         background = getColor(jsonObj, "background");
         buyAlbumIcon = getIcon(jsonObj, "buyAlbumIcon");
@@ -213,6 +218,11 @@ public class StoreStyleAdapter implements StoreStyle {
     }
 
     @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+    
+    @Override
     public Font getTrackFont() {
         return trackFont;
     }
@@ -296,6 +306,21 @@ public class StoreStyleAdapter implements StoreStyle {
     private Icon getIcon(JSONObject jsonObj, String propertyKey) throws MalformedURLException {
         String value = jsonObj.optString(propertyKey);
         return (value != null) ? new ImageIcon(new URL(value)) : null;
+    }
+    
+    /**
+     * Retrieves the timestamp from the specified JSON object.
+     */
+    private long getTimestamp(JSONObject jsonObj) throws JSONException {
+        String value = jsonObj.getString("timestamp");
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return dateFormat.parse(value).getTime();
+            
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            return 0;
+        }
     }
     
     /**
