@@ -42,16 +42,16 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.OverlayPopupPanel;
 import org.limewire.ui.swing.components.PopupHeaderBar;
-import org.limewire.ui.swing.friends.FriendRequestPanel;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
+import org.limewire.ui.swing.options.ExtensionClassificationPanel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
-import org.limewire.util.NotImplementedException;
 
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 class LibraryWarningDialog extends OverlayPopupPanel {
 
@@ -60,6 +60,7 @@ class LibraryWarningDialog extends OverlayPopupPanel {
     
     private final CategoryManager categoryManager;
     private final LibraryFileAdder libraryFileAdder;
+    private final Provider<ExtensionClassificationPanel> classificationPanelProvider;
 
     @Resource private Color border;
     @Resource private Font normalFont;
@@ -83,14 +84,15 @@ class LibraryWarningDialog extends OverlayPopupPanel {
     @Inject
     public LibraryWarningDialog(
             @GlobalLayeredPane JLayeredPane layeredPane,
-            FriendRequestPanel friendRequestPanel,
             LibraryFileAdder libraryFileAdder,
-            CategoryManager categoryManager) {
+            CategoryManager categoryManager,
+            Provider<ExtensionClassificationPanel> classificationPanelProvider) {
         
         super(layeredPane);
         
         this.libraryFileAdder = libraryFileAdder;
         this.categoryManager = categoryManager;
+        this.classificationPanelProvider = classificationPanelProvider;
         
         GuiUtils.assignResources(this);
         
@@ -122,8 +124,7 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         HyperlinkButton learnMoreLink = new HyperlinkButton(new AbstractAction("(" + I18n.tr("Learn More") + ")"){
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new NotImplementedException("No URL exists for this!");
-//                NativeLaunchUtils.openURL("");
+                classificationPanelProvider.get().showDialogue();
             }
         });
         

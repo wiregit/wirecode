@@ -2,6 +2,7 @@ package org.limewire.ui.swing.options;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,9 +30,11 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.OSUtils;
@@ -90,11 +94,7 @@ public class ExtensionClassificationPanel extends JPanel {
         
         centerPanel.add(scrollPane, BorderLayout.CENTER);
         add(centerPanel, BorderLayout.CENTER);
-        
-        JPanel buttonPanel = new JPanel(new MigLayout("insets 4 0 0 0, gap 4, fill"));
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(new JButton(new OKDialogAction()), "tag ok");
-        add(buttonPanel, BorderLayout.SOUTH);
+
     }
 
     /**
@@ -229,5 +229,27 @@ public class ExtensionClassificationPanel extends JPanel {
                 switchPanel.add(createSelectionButton(new CategorySwitchAction(category)));
             }
         }
+    }
+
+    public void showDialogue() {
+
+        LimeJDialog dialogue = new LimeJDialog(GuiUtils.getMainFrame(), 
+                I18n.tr("File extension Classification"),
+                ModalityType.APPLICATION_MODAL);
+        dialogue.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        dialogue.getContentPane().setLayout(new BorderLayout());
+        dialogue.getContentPane().add(this, BorderLayout.CENTER);
+        init();
+        
+        JPanel buttonPanel = new JPanel(new MigLayout("insets 4, gap 4, fill"));
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(new JButton(new OKDialogAction()), "tag ok");
+        dialogue.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+        
+        dialogue.pack();
+        dialogue.setLocationRelativeTo(GuiUtils.getMainFrame());
+        dialogue.setVisible(true);
+        
     }
 }
