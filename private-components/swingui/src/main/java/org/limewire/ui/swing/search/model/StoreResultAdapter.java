@@ -63,12 +63,14 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
         // From widget.
         this.remoteHosts.add(storeResult.getSource());
         this.friends.add(storeResult.getSource().getFriendPresence().getFriend());
+        
+        initResultListener();
     }
     
     /**
-     * Initializes the adapter by installing a listener for result updates.
+     * Installs a listener for store result updates.
      */
-    public void initializeUpdates() {
+    private void initResultListener() {
         // Add listener for store result updates.
         storeResult.addStoreResultListener(new StoreResultListener() {
             @Override
@@ -81,6 +83,16 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
                 firePropertyChange("tracks", Collections.emptyList(), tracks);
             }
         });
+    }
+    
+    /**
+     * Notifies change listener that the specified property name has changed 
+     * values.
+     */
+    private void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+        if (!Objects.equalOrNull(oldValue, newValue)) {
+            changeListener.resultChanged(this, propertyName, oldValue, newValue);
+        }
     }
     
     @Override
@@ -310,16 +322,5 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
         
         VisualSearchResult vsr = (VisualSearchResult) o;
         return getHeading().compareTo(vsr.getHeading());
-    }
-    
-    /**
-     * Notifies change listener that the specified property name has changed 
-     * values.
-     */
-    private void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-        if (!Objects.equalOrNull(oldValue, newValue)) {
-            System.out.println("store result change: " + propertyName);
-//            changeListener.resultChanged(this, propertyName, oldValue, newValue); TODO
-        }
     }
 }
