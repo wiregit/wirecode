@@ -166,8 +166,6 @@ final class Initializer {
         // and hide the splash screen & display the UI.
         loadUI();
         
-        enablePreferences();
-        
         SettingsWarningManager.checkTemporaryDirectoryUsage();
         SettingsWarningManager.checkSettingsLoadSaveFailure();        
         
@@ -598,12 +596,6 @@ final class Initializer {
                 connectionReporter.get().setLoadTime(System.currentTimeMillis() - Main.getStartTime());
             }
         });
-    }  
-    
-    private void enablePreferences() {        
-        if (OSUtils.isMacOSX()) {
-            MacEventHandler.instance().enablePreferences();
-        }
     }
     
     /** Runs any late UI tasks, such as initializing Icons, I18n support. */

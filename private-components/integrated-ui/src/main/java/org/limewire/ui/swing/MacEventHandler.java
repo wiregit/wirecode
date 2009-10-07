@@ -1,16 +1,10 @@
 package org.limewire.ui.swing;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
 
-import net.roydesign.event.ApplicationEvent;
-import net.roydesign.mac.MRJAdapter;
-
-import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.file.CategoryManager;
@@ -18,7 +12,9 @@ import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.ui.swing.mainframe.AboutAction;
 import org.limewire.ui.swing.mainframe.OptionsAction;
 import org.limewire.ui.swing.menu.ExitAction;
+import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.ActivityCallback;
@@ -58,13 +54,18 @@ public class MacEventHandler {
     /** Creates a new instance of MacEventHandler */
     @Inject
     public MacEventHandler() {
-
-        MRJAdapter.addOpenDocumentListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                File file = ((ApplicationEvent) evt).getFile();
-                handleOpenFile(file);
-            }
-        });
+        assert ( OSUtils.isMacOSX() ) : "MacEventHandler should only be used on Mac OS-X operating systems.";
+        
+        try {
+            OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[])null));
+            OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[])null));
+            OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("preferences", (Class[])null));
+            OSXAdapter.setFileHandler(this, getClass().getDeclaredMethod("openFile", new Class[] { String.class }));
+            OSXAdapter.setReOpenApplicationHandler(this, getClass().getDeclaredMethod("reOpenApplication", (Class[])null));
+            
+        } catch (SecurityException e) {
+        } catch (NoSuchMethodException e) {
+        }
     }
 
     @Inject
@@ -76,39 +77,35 @@ public class MacEventHandler {
         }
     }
 
-    /**
-     * Enable preferences.
-     */
-    public void enablePreferences() {
-        MRJAdapter.setPreferencesEnabled(true);
-
-        MRJAdapter.addPreferencesListener(optionsAction);
-        
-        MRJAdapter.addAboutListener(aboutAction);
-
-        MRJAdapter.addQuitApplicationListener(exitAction);
-
-        // Must be added after the UI is created, otherwise it'll create the application too soon!
-        MRJAdapter.addReopenApplicationListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
-                Action action = map.get("restoreView");
-                if (action != null) {
-                    action.actionPerformed(evt);
-                }
-            }
-        });
+    public void preferences() {
+        optionsAction.actionPerformed(null);
     }
-
-    /**
-     * This method handles a request to open the specified file.
-     */
-    private void handleOpenFile(File file) {
+    
+    public void about() {
+        aboutAction.actionPerformed(null);
+    }
+    
+    public boolean quit() {
+        exitAction.actionPerformed(null);
+        
+        return true;
+    }
+  
+    public void reOpenApplication() {
+        ActionMap map = org.jdesktop.application.Application.getInstance().getContext().getActionManager().getActionMap();
+        Action action = map.get("restoreView");
+        if (action != null) {
+            action.actionPerformed(null);
+        }
+    }
+    
+    public void openFile(String filename) {
+        File file = new File(filename);
         if (!enabled) {
             lastFileOpened = file;
         } else {
             runFileOpen(file);
-        }
+        }        
     }
 
     private void runFileOpen(final File file) {
