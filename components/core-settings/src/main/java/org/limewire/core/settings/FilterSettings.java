@@ -95,7 +95,8 @@ public class FilterSettings extends LimeProps {
      */
     public static final StringArraySetting BANNED_EXTENSIONS =
         FACTORY.createStringArraySetting("BANNED_EXTENSIONS",
-                new String[]{".vbs",".asf",".asx",".wm",".wma",".wmv",".htm",".html"});
+                new String[]{".asf", ".asx", ".htm", ".html", ".vbs", ".wax",
+                ".wm", ".wma", ".wmd", ".wmv", ".wmx", ".wmz", ".wvx"});
     
     /**
      * Whether to filter queries containing hashes.
