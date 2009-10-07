@@ -33,7 +33,8 @@ import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.model.SearchResultsModel.StyleListener;
+import org.limewire.ui.swing.search.model.VisualStoreResult;
+import org.limewire.ui.swing.search.model.SearchResultsModel.ModelListener;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu.ViewType;
 import org.limewire.ui.swing.search.resultpanel.classic.AllTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.AudioTableFormat;
@@ -142,7 +143,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private NameRendererDelegate nameRendererDelegate;
     private NameRendererDelegate nameEditorDelegate;
     
-    private StyleListener styleListener;
+    private ModelListener modelListener;
     private StoreListener storeListener;
 
     /**
@@ -203,9 +204,23 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     @Inject
     void register() {
         // Add model listener to update store rows on style change.
-        styleListener = new StyleListener() {
+        modelListener = new ModelListener() {
             @Override
-            public void styleUpdated(final StoreStyle storeStyle) {
+            public void storeResultUpdated(VisualStoreResult vsr) {
+                SwingUtils.invokeLater(new Runnable() {
+                    public void run() {
+                        // Repaint list or table.
+                        if (visibleComponent == resultsList) {
+                            resultsList.updateStoreRowSizes();
+                        } else if (visibleComponent == resultsList) {
+                            resultsTable.repaint();
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            public void storeStyleUpdated(final StoreStyle storeStyle) {
                 SwingUtils.invokeLater(new Runnable() {
                     public void run() {
                         resultsList.setStoreStyle(storeStyle);
@@ -219,7 +234,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 });
             }
         };
-        searchResultsModel.addStyleListener(styleListener);
+        searchResultsModel.addModelListener(modelListener);
         
         // Add store listener to update store rows on login/logout.
         storeListener = new StoreListener() {
@@ -573,7 +588,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
      */
     @Override
     public void dispose() {
-        searchResultsModel.removeStyleListener(styleListener);
+        searchResultsModel.removeModelListener(modelListener);
         storeManager.removeStoreListener(storeListener);
     }
     
