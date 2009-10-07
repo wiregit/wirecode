@@ -110,7 +110,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     private final List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
     
-    private final List<StyleListener> styleListeners = new ArrayList<StyleListener>();
+    private final List<ModelListener> modelListeners = new ArrayList<ModelListener>();
     
     /** Headings to create search results with. */
     private final Provider<PropertiableHeadings> propertiableHeadings;
@@ -267,7 +267,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     @Override
     public void setStoreStyle(StoreStyle storeStyle) {
         this.storeStyle = storeStyle;
-        notifyStyleListeners(storeStyle);
+        fireStoreStyleUpdated(storeStyle);
     }
 
     /**
@@ -376,6 +376,14 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {
+        // Process store result change and return; store results are not grouped.
+        if (vsr instanceof VisualStoreResult) {
+            if ("albumIcon".equals(propertyName) || "tracks".equals(propertyName)) {
+                fireStoreResultUpdated((VisualStoreResult) vsr);
+            }
+            return;
+        }
+        
         // Scan through the list & find the item.
         URN urn = vsr.getUrn();
         int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
@@ -454,7 +462,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
                     idx = -(idx + 1);
                     StoreResultAdapter vsr = new StoreResultAdapter(storeResult, 
                             propertiableHeadings, BasicSearchResultsModel.this);
-                    vsr.initializeUpdates();
                     groupedUrnResults.add(idx, vsr);
                 }
                 
@@ -638,13 +645,13 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     }
     
     @Override
-    public void addStyleListener(StyleListener listener) {
-        styleListeners.add(listener);
+    public void addModelListener(ModelListener listener) {
+        modelListeners.add(listener);
     }
     
     @Override
-    public void removeStyleListener(StyleListener listener) {
-        styleListeners.remove(listener);
+    public void removeModelListener(ModelListener listener) {
+        modelListeners.remove(listener);
     }
     
     private void notifyDisposalListeners(){
@@ -653,9 +660,15 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         }
     }
     
-    private void notifyStyleListeners(StoreStyle storeStyle) {
-        for (StyleListener listener : styleListeners) {
-            listener.styleUpdated(storeStyle);
+    private void fireStoreResultUpdated(VisualStoreResult vsr) {
+        for (ModelListener listener : modelListeners) {
+            listener.storeResultUpdated(vsr);
+        }
+    }
+    
+    private void fireStoreStyleUpdated(StoreStyle storeStyle) {
+        for (ModelListener listener : modelListeners) {
+            listener.storeStyleUpdated(storeStyle);
         }
     }
     

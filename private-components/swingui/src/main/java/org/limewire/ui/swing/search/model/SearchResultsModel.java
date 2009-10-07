@@ -117,22 +117,25 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
     
     /**
      * Adds the specified listener to the list that is notified when the 
-     * store style is updated.
+     * model data is updated.
      */
-    void addStyleListener(StyleListener listener);
+    void addModelListener(ModelListener listener);
     
     /**
      * Removes the specified listener from the list that is notified when the 
-     * store style is updated.
+     * model data is updated.
      */
-    void removeStyleListener(StyleListener listener);
+    void removeModelListener(ModelListener listener);
     
     /**
-     * Defines a listener that is notified when the store style is updated.
+     * Defines a listener that is notified when model data is updated.
      */
-    public interface StyleListener {
+    public interface ModelListener {
+        
+        /** Invoked when the specified store result is updated. */
+        void storeResultUpdated(VisualStoreResult vsr);
         
         /** Invoked when the style for store results is updated. */
-        void styleUpdated(StoreStyle storeStyle);
+        void storeStyleUpdated(StoreStyle storeStyle);
     }
 }
