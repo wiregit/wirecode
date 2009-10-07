@@ -349,7 +349,12 @@ public class LibraryTest extends LimeTestCase {
         f2 = createNewExtensionTestFile(3, "mov", _scratchDir);
         f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
         
-        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, null);
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, new FileFilter() {            
+            @Override
+            public boolean accept(File pathname) {
+                return true;
+            }
+        });
         assertEquals(3, list.size());
     }
     
@@ -380,7 +385,12 @@ public class LibraryTest extends LimeTestCase {
         f4 = createNewExtensionTestFile(14, "wav", subFolder);
         f5 = createNewExtensionTestFile(15, "png", subFolder);
         
-        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, null);
+        List<FileDesc> list = assertAddsFolder(fileList, _scratchDir, new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return true;
+            }
+        });
         assertEquals(5, list.size());
         
         assertTrue(fileList.contains(f4));
