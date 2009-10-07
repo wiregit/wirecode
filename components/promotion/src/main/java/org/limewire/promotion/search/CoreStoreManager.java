@@ -1,6 +1,9 @@
 package org.limewire.promotion.search;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -20,6 +23,7 @@ import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.TrackResult;
+import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
@@ -37,6 +41,9 @@ public class CoreStoreManager implements StoreManager {
     
     private final List<StoreListener> listenerList = 
         new CopyOnWriteArrayList<StoreListener>();
+    
+    private final Map<Type, StoreStyle> styleMap = 
+        Collections.synchronizedMap(new EnumMap<Type, StoreStyle>(Type.class));
     
     private final Map<AttributeKey, Object> userAttributes = 
         Collections.synchronizedMap(new EnumMap<AttributeKey, Object>(AttributeKey.class));
@@ -132,11 +139,31 @@ public class CoreStoreManager implements StoreManager {
                 
                 if (!StringUtils.isEmpty(jsonStr)) {
                     try {
-                        // Parse JSON to create store style and results collection.
+                        // Create JSON object from query result.
                         JSONObject jsonObj = new JSONObject(jsonStr);
-                        StoreStyle storeStyle = readStoreStyle(jsonObj);
+                        
+                        // Get style type and timestamp.
+                        Type type = valueToType(jsonObj.getString("styleType"));
+                        long time = valueToTimestamp(jsonObj.getString("styleTimestamp"));
+                        
+                        // Get store results array.
                         StoreResult[] storeResults = readStoreResults(jsonObj);
 
+                        // Get cached style and compare timestamp.
+                        StoreStyle storeStyle = styleMap.get(type);
+                        if (storeStyle != null) {
+                            if (storeStyle.getTimestamp() < time) {
+                                storeStyle = null;
+                            }
+                        }
+                        
+                        // Load new style if necessary.
+                        if (storeStyle == null) {
+                            JSONObject styleJson = new JSONObject(storeConnection.loadStyle(type.toString()));
+                            storeStyle = readStoreStyle(styleJson);
+                            styleMap.put(type, storeStyle);
+                        }
+                        
                         // Fire event to update style.
                         storeSearchListener.styleUpdated(storeStyle);
 
@@ -174,6 +201,32 @@ public class CoreStoreManager implements StoreManager {
         }
         
         return storeResults;
+    }
+    
+    /**
+     * Converts the specified input value to a timestamp.
+     */
+    private long valueToTimestamp(String value) {
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return dateFormat.parse(value).getTime();
+            
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            return 0;
+        }
+    }
+    
+    /**
+     * Returns the Type that matches the input value.
+     */
+    private Type valueToType(String value) {
+        for (Type type : Type.values()) {
+            if (type.toString().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        return null;
     }
     
     /**

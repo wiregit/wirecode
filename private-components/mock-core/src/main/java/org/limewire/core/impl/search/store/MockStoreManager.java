@@ -1,5 +1,8 @@
 package org.limewire.core.impl.search.store;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -32,6 +35,9 @@ public class MockStoreManager implements StoreManager {
 
     private final List<StoreListener> listenerList = 
         new CopyOnWriteArrayList<StoreListener>();
+    
+    private final Map<Type, StoreStyle> styleMap = 
+        Collections.synchronizedMap(new EnumMap<Type, StoreStyle>(Type.class));
     
     private final Map<AttributeKey, Object> userAttributes = 
         Collections.synchronizedMap(new EnumMap<AttributeKey, Object>(AttributeKey.class));
@@ -142,10 +148,30 @@ public class MockStoreManager implements StoreManager {
                 String jsonStr = storeConnection.doQuery(query);
                 
                 try {
-                    // Parse JSON to create store style and results collection.
+                    // Create JSON object from query result.
                     JSONObject jsonObj = new JSONObject(jsonStr);
-                    StoreStyle storeStyle = extractStoreStyle(jsonObj);
+                    
+                    // Get style type and timestamp.
+                    Type type = valueToType(jsonObj.getString("styleType"));
+                    long time = valueToTimestamp(jsonObj.getString("styleTimestamp"));
+                    
+                    // Get store results array.
                     StoreResult[] storeResults = extractStoreResults(jsonObj);
+                    
+                    // Get cached style and compare timestamp.
+                    StoreStyle storeStyle = styleMap.get(type);
+                    if (storeStyle != null) {
+                        if (storeStyle.getTimestamp() < time) {
+                            storeStyle = null;
+                        }
+                    }
+                    
+                    // Load new style if necessary.
+                    if (storeStyle == null) {
+                        JSONObject styleJson = new JSONObject(storeConnection.loadStyle(type.toString()));
+                        storeStyle = extractStoreStyle(styleJson);
+                        styleMap.put(type, storeStyle);
+                    }
 
                     // Fire event to update style.
                     storeSearchListener.styleUpdated(storeStyle);
@@ -190,6 +216,32 @@ public class MockStoreManager implements StoreManager {
         }
         
         return storeResults;
+    }
+    
+    /**
+     * Converts the specified input value to a timestamp.
+     */
+    private long valueToTimestamp(String value) {
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return dateFormat.parse(value).getTime();
+            
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            return 0;
+        }
+    }
+    
+    /**
+     * Converts the specified input value to a Type.
+     */
+    private Type valueToType(String value) {
+        for (Type type : Type.values()) {
+            if (type.toString().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        return null;
     }
     
     /**
