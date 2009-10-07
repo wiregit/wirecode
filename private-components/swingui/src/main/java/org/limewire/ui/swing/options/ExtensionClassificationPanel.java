@@ -3,10 +3,10 @@ package org.limewire.ui.swing.options;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -40,7 +40,7 @@ import com.google.inject.Inject;
 /**
  * A panel that simply displays the current file to category associations being used.
  */
-public class ExtensionClassificationPanel extends OptionPanel {
+public class ExtensionClassificationPanel extends JPanel {
 
     private final CategoryManager categoryManager;
     private final IconManager iconManager;
@@ -55,12 +55,13 @@ public class ExtensionClassificationPanel extends OptionPanel {
     @Inject
     public ExtensionClassificationPanel(CategoryManager categoryManager, IconManager iconManager,
             TableDecorator tableDecorator, ButtonDecorator buttonDecorator) {
+
+        super(new BorderLayout());
         
         this.categoryManager = categoryManager;
         this.iconManager = iconManager;
         this.buttonDecorator = buttonDecorator;
                 
-        setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
         setOpaque(false);
         
@@ -106,11 +107,11 @@ public class ExtensionClassificationPanel extends OptionPanel {
             extensions.addAll(categoryManager.getExtensionsForCategory(category));
         }
         
-        List<String> sortedList = new LinkedList<String>(extensions);
+        List<String> sortedList = new ArrayList<String>(extensions);
         Collections.sort(sortedList);
         extensions = sortedList;
         
-        List<String> headingList = new LinkedList<String>();
+        List<String> headingList = new ArrayList<String>();
         headingList.add(""); // Icon
         headingList.add(I18n.tr("Extension"));
         if (categories.length > 1) {
@@ -208,20 +209,10 @@ public class ExtensionClassificationPanel extends OptionPanel {
         return button;
     }
     
-    @Override
-    boolean applyOptions() {
-        // This dialogue is purely informational
-        return false;
-    }
-
-    @Override
-    boolean hasChanged() {
-        // This dialogue is purely informational
-        return false;
-    }
-    
-    @Override
-    public void initOptions() {
+    /**
+     * Loads the panel for use.  Builds the table and lays out the component.
+     */
+    public void init() {
         switchCategory(ALL_CATEGORIES);
         
         switchPanel.removeAll();
