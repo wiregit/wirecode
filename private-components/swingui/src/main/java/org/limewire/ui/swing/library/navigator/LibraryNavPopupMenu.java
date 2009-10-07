@@ -36,7 +36,7 @@ class LibraryNavPopupMenu extends JPopupMenu {
         init(navPanel);
     }
     
-    public void init(LibraryNavigatorPanel navPanel) {
+    private void init(LibraryNavigatorPanel navPanel) {
         LibraryNavItem item = navPanel.getSelectedNavItem();
         
         add(addAction);
@@ -50,7 +50,7 @@ class LibraryNavPopupMenu extends JPopupMenu {
             add(renameAction.get());
             addSeparator();
             add(clearAction).setEnabled(item.getLocalFileList().size() > 0);
-            add(deleteAction.get()).setEnabled(item.getType() == NavType.LIST && navPanel.getSharedFileListManager().getNumberOfPrivateSharedLists() > 1);
+            add(deleteAction.get()).setEnabled(item.getType() == NavType.LIST && navPanel.getPrivateListCount() > 1);
         }
     }
 }

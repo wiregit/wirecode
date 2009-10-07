@@ -203,9 +203,4 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     public void removeDocumentsFromPublicLists() {
         
     }
-
-    @Override
-    public int getNumberOfPrivateSharedLists() {
-        return 0;
-    }
 }

@@ -161,8 +161,15 @@ public class LibraryNavigatorPanel extends JXPanel {
         });
     }
     
-    public SharedFileListManager getSharedFileListManager() {
-        return sharedFileListManager;
+    public int getPrivateListCount() {
+        int numberOfPrivateSharedLists = 0;
+        for ( SharedFileList sharedFileList : sharedFileListManager.getModel() )
+        {
+            if (!sharedFileList.isPublic()) {
+                numberOfPrivateSharedLists++;
+            }
+        }
+        return numberOfPrivateSharedLists;
     }
 }
 

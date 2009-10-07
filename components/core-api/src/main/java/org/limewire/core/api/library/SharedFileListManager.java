@@ -50,9 +50,4 @@ public interface SharedFileListManager {
      */
     void removeDocumentsFromPublicLists();
  
-    /**
-     * Returns the number of private shared lists.
-     * 
-     */
-    int getNumberOfPrivateSharedLists();
 }
