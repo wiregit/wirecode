@@ -155,10 +155,20 @@ public class UrlAction extends AbstractAction {
         };
     }
 
+    /**
+     * The type of show action to be used.
+     */
     public enum LaunchType {
-        EXTERNAL_BROWSER, POPUP;
+        /** Launch the url in an external browser **/
+        EXTERNAL_BROWSER, 
+        
+        /** Spawn a temporary dialogue to show the url **/
+        POPUP;
     }
     
+    /**
+     * An interface used to append get params to the url before launching it.
+     */
     public static interface GetParamAppender {
         public String appendParams(String original);
     }

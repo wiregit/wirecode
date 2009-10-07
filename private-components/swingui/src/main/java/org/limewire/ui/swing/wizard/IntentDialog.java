@@ -106,7 +106,7 @@ public class IntentDialog extends LimeJDialog {
         
         final JComboBox languageDropDown = createLanguageDropDown(normalFont);
         
-        final UrlAction.GetParamAppender appender = new UrlAction.GetParamAppender() {
+        final UrlAction.GetParamAppender languageAppender = new UrlAction.GetParamAppender() {
             @Override
             public String appendParams(String original) {
                 return original + "&lang=" + EncodingUtils.encode(languageDropDown.getSelectedItem().toString());
@@ -116,12 +116,12 @@ public class IntentDialog extends LimeJDialog {
         agreeLabel = new MultiLineLabel("", 500);
         agreeLabel.setFont(smallFont);
         //FontUtils.bold(agreeLabel);
-        licenseButton = new HyperlinkButton(new UrlAction(licenseURL, LaunchType.POPUP, appender));
+        licenseButton = new HyperlinkButton(new UrlAction(licenseURL, LaunchType.POPUP, languageAppender));
         licenseButton.setFocusPainted(false);
         licenseButton.setFont(smallFont);
         FontUtils.underline(licenseButton);
         licenseButton.setForeground(new Color(0x2152a6));
-        privacyButton = new HyperlinkButton(new UrlAction(privacyURL, LaunchType.POPUP, appender));
+        privacyButton = new HyperlinkButton(new UrlAction(privacyURL, LaunchType.POPUP, languageAppender));
         privacyButton.setFocusPainted(false);
         privacyButton.setFont(smallFont);
         FontUtils.underline(privacyButton);
@@ -132,7 +132,7 @@ public class IntentDialog extends LimeJDialog {
         bodyLabel.setEditable(false);
         bodyLabel.setOpaque(false);
         bodyLabel.addHyperlinkListener(new HyperlinkListener() {
-            private final Action urlAction = new UrlAction(copyrightURL, LaunchType.POPUP, appender);
+            private final Action urlAction = new UrlAction(copyrightURL, LaunchType.POPUP, languageAppender);
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if (e.getEventType() == EventType.ACTIVATED) {
