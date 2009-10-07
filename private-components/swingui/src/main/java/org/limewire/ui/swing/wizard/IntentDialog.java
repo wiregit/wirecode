@@ -45,6 +45,8 @@ import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.SystemUtils;
 
+import com.limegroup.gnutella.util.EncodingUtils;
+
 public class IntentDialog extends LimeJDialog {
 
     private final Color backgroundColor = Color.WHITE;
@@ -102,15 +104,24 @@ public class IntentDialog extends LimeJDialog {
         policiesLabel = new JLabel();
         policiesLabel.setFont(headingFont);
         
+        final JComboBox languageDropDown = createLanguageDropDown(normalFont);
+        
+        final UrlAction.GetParamAppender appender = new UrlAction.GetParamAppender() {
+            @Override
+            public String appendParams(String original) {
+                return original + "&lang=" + EncodingUtils.encode(languageDropDown.getSelectedItem().toString());
+            }
+        };
+        
         agreeLabel = new MultiLineLabel("", 500);
         agreeLabel.setFont(smallFont);
         //FontUtils.bold(agreeLabel);
-        licenseButton = new HyperlinkButton(new UrlAction(licenseURL, LaunchType.POPUP));
+        licenseButton = new HyperlinkButton(new UrlAction(licenseURL, LaunchType.POPUP, appender));
         licenseButton.setFocusPainted(false);
         licenseButton.setFont(smallFont);
         FontUtils.underline(licenseButton);
         licenseButton.setForeground(new Color(0x2152a6));
-        privacyButton = new HyperlinkButton(new UrlAction(privacyURL, LaunchType.POPUP));
+        privacyButton = new HyperlinkButton(new UrlAction(privacyURL, LaunchType.POPUP, appender));
         privacyButton.setFocusPainted(false);
         privacyButton.setFont(smallFont);
         FontUtils.underline(privacyButton);
@@ -121,7 +132,7 @@ public class IntentDialog extends LimeJDialog {
         bodyLabel.setEditable(false);
         bodyLabel.setOpaque(false);
         bodyLabel.addHyperlinkListener(new HyperlinkListener() {
-            private final Action urlAction = new UrlAction(copyrightURL, LaunchType.POPUP);
+            private final Action urlAction = new UrlAction(copyrightURL, LaunchType.POPUP, appender);
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if (e.getEventType() == EventType.ACTIVATED) {
@@ -140,8 +151,6 @@ public class IntentDialog extends LimeJDialog {
         decorateButton(exitButton);
         exitButton.setBackgroundPainter(new IntentLightButtonBackgroundPainter());
 
-        JComboBox languageDropDown = createLanguageDropDown(normalFont);
-                
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel outerPanel = new JPanel(new BorderLayout());
         JPanel innerPanel = new JPanel(new MigLayout("gap 6, insets 0, fill"));

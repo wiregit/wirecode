@@ -21,49 +21,29 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 public class UrlAction extends AbstractAction {
-    private LaunchType type = LaunchType.EXTERNAL_BROWSER;
+    private final LaunchType type;
     private final String url;
+    private final GetParamAppender getParamAppender;
     
     /**
-     * Constructs a UrlAction whose name is its URL, without any identifying
-     * information added to the URL.
+     * Constructs an UrlAction whose name is its URL with a given launch type and the param
+     *  appender passed.
      */
-    public UrlAction(String url, LaunchType type) {
-        this(url, url);
-        this.type = type;
+    public UrlAction(String url, LaunchType type, GetParamAppender getParamAppender) {
+        this(url, url, type, getParamAppender);
     }
     
     /**
-     * Constructs a UrlAction whose name is its URL, without any identifying
-     * information added to the URL.
+     * Constructs an UrlAction whose name is its URL, without any identifying
+     * information added to the URL and the default {@link LaunchType}.
      */
     public UrlAction(String url) {
-        this(url, url);
+        this(url, url, LaunchType.EXTERNAL_BROWSER, null);
     }
     
-    /**
-     * Constructs a UrlAction with a specific name & url, without any identifying
-     * information added to the URL.
-     */
-    public UrlAction(String name, String url) {
-        super(name);
-        this.url = url;
-        putValue(Action.SHORT_DESCRIPTION, url);
-    }
     
     /**
-     * Constructs a UrlAction with a specific name & url, without any identifying
-     * information added to the URL.
-     */
-    public UrlAction(String name, String url, LaunchType type) {
-        super(name);
-        this.url = url;
-        this.type = type;
-        putValue(Action.SHORT_DESCRIPTION, url);
-    }
-    
-    /**
-     * Constructs a UrlAction whose name is its URL, with identifying
+     * Constructs an UrlAction whose name is its URL, with identifying
      * information added to the URL.
      */
     public UrlAction(String url, Application application) {
@@ -71,30 +51,62 @@ public class UrlAction extends AbstractAction {
     }
     
     /**
-     * Constructs a UrlAction with a specific name & URL, with identifying
+     * Constructs an UrlAction with a specific name & URL, with identifying
      * information added to the URL.
      */
-    public UrlAction(String name, String url, Application application) {
+    public UrlAction(String name, String url, final Application application) {
+        this(name, url, LaunchType.EXTERNAL_BROWSER, new GetParamAppender() {
+            @Override
+            public String appendParams(String original) {
+                return application.addClientInfoToUrl(original);
+            }
+        });
+    }
+
+    /**
+     * Constructs an UrlAction with a specific name & url, without any identifying
+     * information added to the URL.
+     */
+    public UrlAction(String name, String url) {
+        this(name, url, LaunchType.EXTERNAL_BROWSER, null);
+    }
+    
+    /**
+     * Constructs an UrlAction with a specific name & url, a specific launch type, and 
+     *  without any identifying information added to the URL.
+     */
+    public UrlAction(String name, String url, LaunchType type) {
+        this(name, url, type, null);
+    }
+    
+    /**
+     * Constructs an UrlAction with a specific name & url, with identifying
+     * information added to the URL, and a specific launch type.
+     */
+    public UrlAction(String name, String url, LaunchType type, GetParamAppender getParamAppender) {
         super(name);
-        this.url = application.addClientInfoToUrl(url);
+        this.url = url;
+        this.type = type;
+        this.getParamAppender = getParamAppender;
         putValue(Action.SHORT_DESCRIPTION, url);
     }
-    
+       
     @Override
     public void actionPerformed(ActionEvent e) {
+        String urlToShow = url;
+        if (getParamAppender != null) {
+            urlToShow = getParamAppender.appendParams(urlToShow);
+        }
+        
         if (type == LaunchType.EXTERNAL_BROWSER) {
-            NativeLaunchUtils.openURL(url);
+            NativeLaunchUtils.openURL(urlToShow);
         }
         else {
-            showPopup(url);
+            showPopup(urlToShow);
         }
     }
     
-    public enum LaunchType {
-        EXTERNAL_BROWSER, POPUP;
-    }
-    
-    private static void showPopup(final String url) {
+    private static void showPopup(final String urlToShow) {
         new LimeJDialog() {
             {   getContentPane().setLayout(new BorderLayout());
                 HTMLPane browser = new HTMLPane();
@@ -123,14 +135,14 @@ public class UrlAction extends AbstractAction {
                 setLocationRelativeTo(null);
                 
                 // If popout browser does not work use the system browser.
-                browser.setPageAsynchronous(url, null).addFutureListener(new EventListener<FutureEvent<Boolean>>() {
+                browser.setPageAsynchronous(urlToShow, null).addFutureListener(new EventListener<FutureEvent<Boolean>>() {
 
 					@SwingEDTEvent
                     @Override
                     public void handleEvent(FutureEvent<Boolean> event) {
                         if (!(event.getResult() == Boolean.TRUE)) {
                             dispose();
-                            NativeLaunchUtils.openURL(url);
+                            NativeLaunchUtils.openURL(urlToShow);
                         }
                     }
                     
@@ -141,5 +153,13 @@ public class UrlAction extends AbstractAction {
                 setVisible(true);
             }
         };
+    }
+
+    public enum LaunchType {
+        EXTERNAL_BROWSER, POPUP;
+    }
+    
+    public static interface GetParamAppender {
+        public String appendParams(String original);
     }
 }
