@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -15,11 +15,15 @@ import javax.swing.ImageIcon;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 /**
  * Implementation of StoreStyle for the live core.
  */
 public class StoreStyleAdapter implements StoreStyle {
+    
+    private static final Log LOG = LogFactory.getLog(StoreStyleAdapter.class);
 
     private final Type type;
     private final long timestamp;
@@ -100,6 +104,46 @@ public class StoreStyleAdapter implements StoreStyle {
         showInfoOnHover = getBoolean(jsonObj, "showInfoOnHover");
         showTracksOnHover = getBoolean(jsonObj, "showTracksOnHover");
         streamButtonVisible = getBoolean(jsonObj, "streamButtonVisible");
+    }
+    
+    public StoreStyleAdapter(StoreStyle.Type type, Map<String, String> data)  throws IOException {
+        this.type = type;
+        
+        timestamp = getTimestamp(data.get("timestamp"));
+        background = getColor(data.get("background"));
+        buyAlbumIcon = getIcon(data.get("buyAlbumIcon"));
+        buyTrackIcon = getIcon(data.get("buyTrackIcon"));
+        classicBuyIcon = getIcon(data.get("classicBuyIcon"));
+        classicPauseIcon = getIcon(data.get("classicPauseIcon"));
+        classicPlayIcon = getIcon(data.get("classicPlayIcon"));
+        classicPriceFont = getFont(data.get("classicPriceFont"));
+        classicPriceForeground = getColor(data.get("classicPriceForeground"));
+        downloadAlbumIcon = getIcon(data.get("downloadAlbumIcon"));
+        downloadTrackIcon = getIcon(data.get("downloadTrackIcon"));
+        headingFont = getFont(data.get("headingFont"));
+        headingForeground = getColor(data.get("headingForeground"));
+        infoFont = getFont(data.get("infoFont"));
+        infoForeground = getColor(data.get("infoForeground"));
+        priceBackground = getColor(data.get("priceBackground"));
+        priceBorderColor = getColor(data.get("priceBorderColor"));
+        priceFont = getFont(data.get("priceFont"));
+        priceForeground = getColor(data.get("priceForeground"));
+        showTracksFont = getFont(data.get("showTracksFont"));
+        showTracksForeground = getColor(data.get("showTracksForeground"));
+        streamIcon = getIcon(data.get("streamIcon"));
+        subHeadingFont = getFont(data.get("subHeadingFont"));
+        subHeadingForeground = getColor(data.get("subHeadingForeground"));
+        trackFont = getFont(data.get( "trackFont"));
+        trackForeground = getColor(data.get("trackForeground"));
+        trackLengthFont = getFont(data.get("trackLengthFont"));
+        trackLengthForeground = getColor(data.get("trackLengthForeground"));
+        
+        downloadButtonVisible = getBoolean(data.get("downloadButtonVisible"));
+        priceButtonVisible = getBoolean(data.get("priceButtonVisible"));
+        priceVisible = getBoolean(data.get("priceVisible"));
+        showInfoOnHover = getBoolean(data.get("showInfoOnHover"));
+        showTracksOnHover = getBoolean(data.get("showTracksOnHover"));
+        streamButtonVisible = getBoolean(data.get("streamButtonVisible"));    
     }
     
     @Override
@@ -276,12 +320,19 @@ public class StoreStyleAdapter implements StoreStyle {
     public boolean isStreamButtonVisible() {
         return streamButtonVisible;
     }
-
+    
     /**
      * Returns the boolean value for the specified property key.
      */
     private boolean getBoolean(JSONObject jsonObj, String propertyKey) {
         return jsonObj.optBoolean(propertyKey);
+    }
+
+    /**
+     * Returns the boolean value for the specified value.
+     */
+    private boolean getBoolean(String value) {
+        return Boolean.valueOf(value);
     }
     
     /**
@@ -289,7 +340,14 @@ public class StoreStyleAdapter implements StoreStyle {
      */
     private Color getColor(JSONObject jsonObj, String propertyKey) {
         String value = jsonObj.optString(propertyKey);
-        return (value != null) ? Color.decode(value) : null;
+        return getColor(value);
+    }
+    
+    /**
+     * Returns the color for the specified value.
+     */
+    private Color getColor(String color) {
+        return (color != null) ? Color.decode(color) : null;
     }
     
     /**
@@ -297,7 +355,14 @@ public class StoreStyleAdapter implements StoreStyle {
      */
     private Font getFont(JSONObject jsonObj, String propertyKey) {
         String value = jsonObj.optString(propertyKey);
-        return (value != null) ? Font.decode(value) : null;
+        return getFont(value);
+    }
+    
+    /**
+     * Returns the font for the specified value.
+     */
+    private Font getFont(String font) {
+        return (font != null) ? Font.decode(font) : null;
     }
     
     /**
@@ -305,20 +370,35 @@ public class StoreStyleAdapter implements StoreStyle {
      */
     private Icon getIcon(JSONObject jsonObj, String propertyKey) throws MalformedURLException {
         String value = jsonObj.optString(propertyKey);
-        return (value != null) ? new ImageIcon(new URL(value)) : null;
+        return getIcon(value);
+    }
+    
+    /**
+     * Retrieves the icon for the specified property key.
+     */
+    private Icon getIcon(String icon) throws MalformedURLException {
+        return (icon != null) ? new ImageIcon(getClass().getResource(icon)) : null;
     }
     
     /**
      * Retrieves the timestamp from the specified JSON object.
      */
     private long getTimestamp(JSONObject jsonObj) throws JSONException {
-        String value = jsonObj.getString("timestamp");
+        return getTimestamp(jsonObj.getString("timestamp"));
+    }
+    
+    /**
+     * Retrieves the timestamp from the specified timestamp.
+     */
+    private long getTimestamp(String timestamp) {
+        if(timestamp == null) {
+            return 0;
+        }
         try {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            return dateFormat.parse(value).getTime();
-            
+            return dateFormat.parse(timestamp).getTime();            
         } catch (ParseException ex) {
-            ex.printStackTrace();
+            LOG.debugf(ex, "couldn't parse timestamp {0}", timestamp);
             return 0;
         }
     }

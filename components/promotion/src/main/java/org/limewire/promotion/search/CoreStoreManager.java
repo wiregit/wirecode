@@ -42,13 +42,11 @@ public class CoreStoreManager implements StoreManager {
     private final List<StoreListener> listenerList = 
         new CopyOnWriteArrayList<StoreListener>();
     
-    private final Map<Type, StoreStyle> styleMap = 
-        Collections.synchronizedMap(new EnumMap<Type, StoreStyle>(Type.class));
-    
     private final Map<AttributeKey, Object> userAttributes = 
         Collections.synchronizedMap(new EnumMap<AttributeKey, Object>(AttributeKey.class));
     
     private final StoreConnection storeConnection;
+    private final StyleManager styleManager;
     private final ScheduledListeningExecutorService executorService;
 
     /**
@@ -57,8 +55,10 @@ public class CoreStoreManager implements StoreManager {
      */
     @Inject
     public CoreStoreManager(StoreConnection storeConnection,
+                            StyleManager styleManager,
                             @Named("backgroundExecutor") ScheduledListeningExecutorService executorService) {
         this.storeConnection = storeConnection;
+        this.styleManager = styleManager;
         this.executorService = executorService;
     }
     
@@ -144,28 +144,21 @@ public class CoreStoreManager implements StoreManager {
                         
                         // Get style type and timestamp.
                         Type type = valueToType(jsonObj.getString("styleType"));
-                        long time = valueToTimestamp(jsonObj.getString("styleTimestamp"));
+//                        long time = valueToTimestamp(jsonObj.getString("styleTimestamp"));
                         
                         // Get store results array.
                         StoreResult[] storeResults = readStoreResults(jsonObj);
-
-                        // Get cached style and compare timestamp.
-                        StoreStyle storeStyle = styleMap.get(type);
-                        if (storeStyle != null) {
-                            if (storeStyle.getTimestamp() < time) {
-                                storeStyle = null;
-                            }
-                        }
                         
+                        StoreStyle style = getStyle(type);
                         // Load new style if necessary.
-                        if (storeStyle == null) {
-                            JSONObject styleJson = new JSONObject(storeConnection.loadStyle(type.toString()));
-                            storeStyle = readStoreStyle(styleJson);
-                            styleMap.put(type, storeStyle);
-                        }
+                        //if (storeStyle == null) {
+                            //JSONObject styleJson = new JSONObject(storeConnection.loadStyle(type.toString()));
+                            //storeStyle = readStoreStyle(styleJson);
+                            //styleMap.put(type, storeStyle);
+                        //}
                         
                         // Fire event to update style.
-                        storeSearchListener.styleUpdated(storeStyle);
+                        storeSearchListener.styleUpdated(style);
 
                         // Fire event to handle results.
                         storeSearchListener.resultsFound(storeResults);
@@ -178,12 +171,26 @@ public class CoreStoreManager implements StoreManager {
         });
     }
     
+    private StoreStyle getStyle(Type type) {
+        StoreStyle style = styleManager.getStyle(type);
+        return style != null ? style : styleManager.getDefaultStyle();
+    }
+    
     /**
      * Returns the store style contained in the specified JSON object.
      */
     private StoreStyle readStoreStyle(JSONObject jsonObj) throws IOException, JSONException {
-        JSONObject styleObj = jsonObj.getJSONObject("storeStyle");
-        return new StoreStyleAdapter(styleObj);
+        if(jsonObj.has("storeStyle")) {
+            StoreStyle style = new StoreStyleAdapter(jsonObj.getJSONObject("storeStyle"));
+            if(style.getBackground() != null) {  
+                styleManager.updateStyle(style);
+                return style;
+            } else {           
+                return styleManager.getStyle(style.getType());
+            }
+        } else {
+            return styleManager.getDefaultStyle();
+        }
     }
     
     /**

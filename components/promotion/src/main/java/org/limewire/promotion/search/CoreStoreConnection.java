@@ -1,6 +1,8 @@
 package org.limewire.promotion.search;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
@@ -91,11 +93,11 @@ public class CoreStoreConnection implements StoreConnection {
         return "";
     }
 
-    private String buildURL(String query) {
-        return storeSearchURL.get() + "?query=" + query + 
+    private String buildURL(String query) throws UnsupportedEncodingException {
+        return storeSearchURL.get() + "?query=" + URLEncoder.encode(query, "UTF-8") + 
                 "&lv=" + application.getVersion() + 
                 "&guid=" + new GUID(applicationServices.getMyGUID()).toHexString() + 
-                "&start=0" + 
+                "&start=1" + 
                 "&count=" + COUNT;
     }
 
