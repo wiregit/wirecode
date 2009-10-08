@@ -3,9 +3,8 @@ package org.limewire.ui.swing.util;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Locale;
 
 import javax.swing.JOptionPane;
@@ -52,30 +51,6 @@ import org.limewire.util.SystemUtils;
  */
 public final class NativeLaunchUtils {
     private static final Log LOG = LogFactory.getLog(NativeLaunchUtils.class);
-            
-    /**
-     * <tt>boolean</tt> specifying whether or not the necessary Mac
-     * classes were loaded successfully.
-     */
-    private static boolean _macClassesLoadedSuccessfully = true;
-
-    /**
-     * The openURL method of com.apple.mrj.MRJFileUtils.
-     */
-    private static Method _openURL;
-
-    /** 
-     * Loads the necessary Mac classes if running on Mac.
-     */
-    static {
-        if(OSUtils.isMacOSX()) {
-            try {
-                loadMacClasses();		
-            } catch(IOException ioe) {
-                _macClassesLoadedSuccessfully = false;
-            }
-        }
-    }
 
     /** 
      * This class should be never be instantiated; this just ensures so. 
@@ -137,7 +112,9 @@ public final class NativeLaunchUtils {
 
     /**
      * Opens the specified url in the default browser on the Mac.
-     * This makes use of the dynamically-loaded MRJ classes.
+     * This previously made use of the dynamically-loaded MRJ classes.
+     * This library is no longer being used, however, and now, 
+     * it's using the JDK 6 method Desktop.browse(URI)
      *
      * @param url the url to load
      *
@@ -146,21 +123,9 @@ public final class NativeLaunchUtils {
      *         throws -- it wraps these exceptions in an <tt>IOException</tt>
      */
     private static void openURLMac(String url) throws IOException {
-        if(!_macClassesLoadedSuccessfully) throw new IOException();
         try {
-            Object[] params = new Object[] {url};
-            _openURL.invoke(null, params);
-        } 
-        catch (NoSuchMethodError err) {
-            throw new IOException();
-            // this can occur when earlier versions of MRJ are used which
-            // do not support the openURL method.
-        } catch (NoClassDefFoundError err) {
-            throw new IOException();
-            // this can occur under runtime environments other than MRJ.
-        } catch (IllegalAccessException iae) {
-            throw new IOException();
-        } catch (InvocationTargetException ite) {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (URISyntaxException e) {
             throw new IOException();
         }
     }
@@ -387,29 +352,6 @@ public final class NativeLaunchUtils {
         };
         
         return command;
-    }
-    
-    /** 
-     * Loads specialized classes for the Mac needed to launch files.
-     *
-     * @return <tt>true</tt>  if initialization succeeded,
-     *	   	   <tt>false</tt> if initialization failed
-     *
-     * @throws <tt>IOException</tt> if an exception occurs loading the
-     *         necessary classes
-     */
-    @SuppressWarnings("unchecked")
-    private static void loadMacClasses() throws IOException {
-        try {
-            Class mrjAdapter = Class.forName("net.roydesign.mac.MRJAdapter");
-            _openURL = mrjAdapter.getDeclaredMethod("openURL", new Class[]{String.class});
-        } catch (ClassNotFoundException cnfe) {
-            throw new IOException();
-        } catch (NoSuchMethodException nsme) {
-            throw new IOException();
-        } catch (SecurityException se) {
-            throw new IOException();
-        } 
     }
     
     private static Process exec(String... commands) throws LaunchException {
