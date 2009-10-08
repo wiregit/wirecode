@@ -169,7 +169,7 @@ public class MockStoreManager implements StoreManager {
                     // Load new style if necessary.
                     if (storeStyle == null) {
                         JSONObject styleJson = new JSONObject(storeConnection.loadStyle(type.toString()));
-                        storeStyle = extractStoreStyle(styleJson);
+                        storeStyle = extractStoreStyle(styleJson, storeSearchListener);
                         styleMap.put(type, storeStyle);
                     }
 
@@ -194,14 +194,6 @@ public class MockStoreManager implements StoreManager {
     }
     
     /**
-     * Returns the store style contained in the specified JSON object.
-     */
-    private StoreStyle extractStoreStyle(JSONObject jsonObj) throws JSONException {
-        JSONObject styleObj = jsonObj.getJSONObject("storeStyle");
-        return new MockStoreStyle(styleObj);
-    }
-    
-    /**
      * Returns an array of store results contained in the specified JSON object.
      */
     private StoreResult[] extractStoreResults(JSONObject jsonObj) throws JSONException {
@@ -216,6 +208,15 @@ public class MockStoreManager implements StoreManager {
         }
         
         return storeResults;
+    }
+    
+    /**
+     * Returns the store style contained in the specified JSON object.
+     */
+    private StoreStyle extractStoreStyle(JSONObject jsonObj, 
+            StoreSearchListener storeSearchListener) throws JSONException {
+        JSONObject styleObj = jsonObj.getJSONObject("storeStyle");
+        return new MockStoreStyle(styleObj, storeSearchListener, storeConnectionFactory);
     }
     
     /**

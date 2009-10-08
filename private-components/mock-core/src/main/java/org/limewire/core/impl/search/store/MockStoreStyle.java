@@ -7,30 +7,36 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.core.api.search.store.StoreConnection;
+import org.limewire.core.api.search.store.StoreConnectionFactory;
+import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.util.StringUtils;
 
 /**
  * Implementation of StoreStyle for the mock core.
  */
 public class MockStoreStyle implements StoreStyle {
 
+    private final StoreSearchListener storeSearchListener;
+    private final StoreConnectionFactory storeConnectionFactory;
+    
     private final Type type;
     private final long timestamp;
     
     private final Color background;
-    private final Icon buyAlbumIcon;
-    private final Icon buyTrackIcon;
-    private final Icon classicBuyIcon;
-    private final Icon classicPauseIcon;
-    private final Icon classicPlayIcon;
+    private final String buyAlbumIconUri;
+    private final String buyTrackIconUri;
+    private final String classicBuyIconUri;
+    private final String classicPauseIconUri;
+    private final String classicPlayIconUri;
     private final Font classicPriceFont;
     private final Color classicPriceForeground;
-    private final Icon downloadAlbumIcon;
-    private final Icon downloadTrackIcon;
+    private final String downloadAlbumIconUri;
+    private final String downloadTrackIconUri;
     private final Font headingFont;
     private final Color headingForeground;
     private final Font infoFont;
@@ -41,7 +47,7 @@ public class MockStoreStyle implements StoreStyle {
     private final Color priceForeground;
     private final Font showTracksFont;
     private final Color showTracksForeground;
-    private final Icon streamIcon;
+    private final String streamIconUri;
     private final Font subHeadingFont;
     private final Color subHeadingForeground;
     private final Font trackFont;
@@ -56,23 +62,39 @@ public class MockStoreStyle implements StoreStyle {
     private final boolean showTracksOnHover;
     private final boolean streamButtonVisible;
     
+    private Icon buyAlbumIcon;
+    private Icon buyTrackIcon;
+    private Icon classicBuyIcon;
+    private Icon classicPauseIcon;
+    private Icon classicPlayIcon;
+    private Icon downloadAlbumIcon;
+    private Icon downloadTrackIcon;
+    private Icon streamIcon;
+    
+    private boolean iconsRequested;
+    
     /**
      * Constructs a StoreStyle using the specified JSON object.
      */
-    public MockStoreStyle(JSONObject jsonObj) throws JSONException {
+    public MockStoreStyle(JSONObject jsonObj, 
+            StoreSearchListener storeSearchListener,
+            StoreConnectionFactory storeConnectionFactory) throws JSONException {
+        this.storeSearchListener = storeSearchListener;
+        this.storeConnectionFactory = storeConnectionFactory;
+        
         type = getType(jsonObj);
         timestamp = getTimestamp(jsonObj);
         
         background = getColor(jsonObj, "background");
-        buyAlbumIcon = getIcon(jsonObj, "buyAlbumIcon");
-        buyTrackIcon = getIcon(jsonObj, "buyTrackIcon");
-        classicBuyIcon = getIcon(jsonObj, "classicBuyIcon");
-        classicPauseIcon = getIcon(jsonObj, "classicPauseIcon");
-        classicPlayIcon = getIcon(jsonObj, "classicPlayIcon");
+        buyAlbumIconUri = jsonObj.optString("buyAlbumIcon");
+        buyTrackIconUri = jsonObj.optString("buyTrackIcon");
+        classicBuyIconUri = jsonObj.optString("classicBuyIcon");
+        classicPauseIconUri = jsonObj.optString("classicPauseIcon");
+        classicPlayIconUri = jsonObj.optString("classicPlayIcon");
         classicPriceFont = getFont(jsonObj, "classicPriceFont");
         classicPriceForeground = getColor(jsonObj, "classicPriceForeground");
-        downloadAlbumIcon = getIcon(jsonObj, "downloadAlbumIcon");
-        downloadTrackIcon = getIcon(jsonObj, "downloadTrackIcon");
+        downloadAlbumIconUri = jsonObj.optString("downloadAlbumIcon");
+        downloadTrackIconUri = jsonObj.optString("downloadTrackIcon");
         headingFont = getFont(jsonObj, "headingFont");
         headingForeground = getColor(jsonObj, "headingForeground");
         infoFont = getFont(jsonObj, "infoFont");
@@ -83,7 +105,7 @@ public class MockStoreStyle implements StoreStyle {
         priceForeground = getColor(jsonObj, "priceForeground");
         showTracksFont = getFont(jsonObj, "showTracksFont");
         showTracksForeground = getColor(jsonObj, "showTracksForeground");
-        streamIcon = getIcon(jsonObj, "streamIcon");
+        streamIconUri = jsonObj.optString("streamIcon");
         subHeadingFont = getFont(jsonObj, "subHeadingFont");
         subHeadingForeground = getColor(jsonObj, "subHeadingForeground");
         trackFont = getFont(jsonObj, "trackFont");
@@ -97,6 +119,57 @@ public class MockStoreStyle implements StoreStyle {
         showInfoOnHover = getBoolean(jsonObj, "showInfoOnHover");
         showTracksOnHover = getBoolean(jsonObj, "showTracksOnHover");
         streamButtonVisible = getBoolean(jsonObj, "streamButtonVisible");
+        
+        loadIcons();
+    }
+    
+    /**
+     * Loads style icons.  The store search listener is notified when icons 
+     * are available.
+     */
+    private void loadIcons() {
+        if (!iconsRequested) {
+            iconsRequested = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {}
+                    
+                    // Create store connection and load icons.
+                    StoreConnection storeConnection = storeConnectionFactory.create();
+                    
+                    if (!StringUtils.isEmpty(buyAlbumIconUri)) {
+                        buyAlbumIcon = storeConnection.loadIcon(buyAlbumIconUri);
+                    }
+                    if (!StringUtils.isEmpty(buyTrackIconUri)) {
+                        buyTrackIcon = storeConnection.loadIcon(buyTrackIconUri);
+                    }
+                    if (!StringUtils.isEmpty(classicBuyIconUri)) {
+                        classicBuyIcon = storeConnection.loadIcon(classicBuyIconUri);
+                    }
+                    if (!StringUtils.isEmpty(classicPauseIconUri)) {
+                        classicPauseIcon = storeConnection.loadIcon(classicPauseIconUri);
+                    }
+                    if (!StringUtils.isEmpty(classicPlayIconUri)) {
+                        classicPlayIcon = storeConnection.loadIcon(classicPlayIconUri);
+                    }
+                    if (!StringUtils.isEmpty(downloadAlbumIconUri)) {
+                        downloadAlbumIcon = storeConnection.loadIcon(downloadAlbumIconUri);
+                    }
+                    if (!StringUtils.isEmpty(downloadTrackIconUri)) {
+                        downloadTrackIcon = storeConnection.loadIcon(downloadTrackIconUri);
+                    }
+                    if (!StringUtils.isEmpty(streamIconUri)) {
+                        streamIcon = storeConnection.loadIcon(streamIconUri);
+                    }
+                    
+                    // Fire search event to update style.
+                    storeSearchListener.styleUpdated(MockStoreStyle.this);
+                }
+            }).start();
+        }
     }
     
     @Override
@@ -297,13 +370,13 @@ public class MockStoreStyle implements StoreStyle {
         return (value != null) ? Font.decode(value) : null;
     }
     
-    /**
-     * Retrieves the icon for the specified property key.
-     */
-    private Icon getIcon(JSONObject jsonObj, String propertyKey) {
-        String value = jsonObj.optString(propertyKey);
-        return (value != null) ? new ImageIcon(getClass().getResource(value)) : null;
-    }
+//    /**
+//     * Retrieves the icon for the specified property key.
+//     */
+//    private Icon getIcon(JSONObject jsonObj, String propertyKey) {
+//        String value = jsonObj.optString(propertyKey);
+//        return (value != null) ? new ImageIcon(getClass().getResource(value)) : null;
+//    }
     
     /**
      * Retrieves the timestamp from the specified JSON object.

@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.store.StoreConnection;
 import org.limewire.core.api.search.store.StoreStyle;
@@ -46,6 +49,11 @@ public class MockStoreConnection implements StoreConnection {
         }
         
         return buf.toString();
+    }
+    
+    @Override
+    public Icon loadIcon(String iconUri) {
+        return new ImageIcon(getClass().getResource(iconUri));
     }
     
     @Override

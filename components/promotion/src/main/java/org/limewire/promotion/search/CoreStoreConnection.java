@@ -5,6 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
 
+import javax.swing.Icon;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -79,6 +81,12 @@ public class CoreStoreConnection implements StoreConnection {
             LOG.debug(e.getMessage(), e);
         }
         return "";
+    }
+    
+    @Override
+    public Icon loadIcon(String iconUri) {
+        // TODO implement
+        return null;
     }
     
     @Override

@@ -1,5 +1,7 @@
 package org.limewire.core.api.search.store;
 
+import javax.swing.Icon;
+
 /**
  * Defines a connection to a service that interacts with the Lime Store.
  */
@@ -10,6 +12,11 @@ public interface StoreConnection {
      * result as a JSON text string.
      */
     String doQuery(String query);
+    
+    /**
+     * Retrieves an icon using the specified icon URI.
+     */
+    Icon loadIcon(String iconUri);
     
     /**
      * Retrieves the style for the specified style id, and returns the 
