@@ -134,7 +134,7 @@ public class MockStoreStyle implements StoreStyle {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(3000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {}
                     
                     // Create store connection and load icons.
