@@ -38,7 +38,6 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 abstract class StoreNameCellRenderer implements TableCellRenderer {
 
-    protected final StoreStyle storeStyle;
     protected final boolean showAudioArtist;
     private final CategoryIconManager categoryIconManager;
     private final MouseListener popupListener;
@@ -53,6 +52,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
     protected final JLabel iconLabel;
     protected final JLabel nameLabel;
     
+    protected StoreStyle storeStyle;
     protected VisualStoreResult vsr;
     
     private JTable table;
@@ -212,6 +212,30 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
     }
     
     /**
+     * Returns true if the current style matches the specified style.
+     */
+    public boolean isCurrentStyle(StoreStyle storeStyle) {
+        return (this.storeStyle.getType() == storeStyle.getType());
+    }
+    
+    /**
+     * Updates the renderer using the specified StoreStyle.  The type of the
+     * specified style should match the type of the current style.
+     */
+    public void updateStyle(StoreStyle storeStyle) {
+        if (isCurrentStyle(storeStyle)) {
+            this.storeStyle = storeStyle;
+            applyStyle();
+        }
+    }
+    
+    /**
+     * Applies the current style to the renderer.  This method is called when
+     * the style is updated with new icons while in use.
+     */
+    protected abstract void applyStyle();
+    
+    /**
      * Action to download store result.
      */
     private class DownloadAction extends AbstractAction {
@@ -269,20 +293,22 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
      */
     public class PriceButton extends JXButton {
         
-        private final Icon bgIcon;
+        private Icon bgIcon;
         private BufferedImage bgImage;
         private RolloverCursorListener rolloverListener;
         
-        public PriceButton(Icon bgIcon) {
+        public PriceButton() {
             super();
-            
-            this.bgIcon = bgIcon;
             
             setBorder(BorderFactory.createEmptyBorder(1, 8, 2, 8));
             setContentAreaFilled(false);
             setFocusPainted(false);
             setFont(storeStyle.getClassicPriceFont());
             setForeground(storeStyle.getClassicPriceForeground());
+        }
+        
+        public void setBackgroundIcon(Icon bgIcon) {
+            this.bgIcon = bgIcon;
         }
         
         @Override

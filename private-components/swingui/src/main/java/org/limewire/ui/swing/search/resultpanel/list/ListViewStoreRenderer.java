@@ -43,7 +43,6 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected static final String HTML_END = "</html>";
     private static final int LEFT_COLUMN_WIDTH = 450;
 
-    protected final StoreStyle storeStyle;
     protected final CategoryIconManager categoryIconManager;
     protected final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     protected final Provider<SearchResultTruncator> headingTruncator;
@@ -58,6 +57,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final Action streamAction;
     protected final Action showInfoAction;
     protected final Action showTracksAction;
+    
+    protected StoreStyle storeStyle;
     
     private JTable table;
     private VisualStoreResult vsr;
@@ -255,6 +256,30 @@ abstract class ListViewStoreRenderer extends JXPanel {
             albumTrackPanel.setVisible(false);
         }
     }
+    
+    /**
+     * Returns true if the current style matches the specified style.
+     */
+    public boolean isCurrentStyle(StoreStyle storeStyle) {
+        return (this.storeStyle.getType() == storeStyle.getType());
+    }
+    
+    /**
+     * Updates the renderer using the specified StoreStyle.  The type of the
+     * specified style should match the type of the current style.
+     */
+    public void updateStyle(StoreStyle storeStyle) {
+        if (isCurrentStyle(storeStyle)) {
+            this.storeStyle = storeStyle;
+            applyStyle();
+        }
+    }
+    
+    /**
+     * Applies the current style to the renderer.  This method is called when
+     * the style is updated with new icons while in use.
+     */
+    protected abstract void applyStyle();
     
     /**
      * Action to download store result.

@@ -27,7 +27,7 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
 
     private JButton tracksButton;
     private JButton streamButton;
-    private JButton priceButton;
+    private PriceButton priceButton;
     private JPanel namePanel;
     
     /**
@@ -51,18 +51,17 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
                 resources.getAlbumExpandedIcon().getIconHeight()));
         
         streamButton = new IconButton(streamAction);
-        streamButton.setIcon(getPlayIcon());
         
+        priceButton = new PriceButton();
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
-            priceButton = new PriceButton(getBuyIcon());
             priceButton.setAction(downloadAction);
             break;
-        case STYLE_C: case STYLE_D:
         default:
-            priceButton = new PriceButton(null);
             break;
         }
+        
+        applyStyle();
         
         // Create container for name and tracks labels.
         namePanel = new JPanel();
@@ -129,5 +128,18 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
         }
         
         return renderer;
+    }
+    
+    @Override
+    protected void applyStyle() {
+        streamButton.setIcon(getPlayIcon());
+        
+        switch (storeStyle.getType()) {
+        case STYLE_A: case STYLE_B:
+            priceButton.setBackgroundIcon(getBuyIcon());
+            break;
+        default:
+            break;
+        }
     }
 }

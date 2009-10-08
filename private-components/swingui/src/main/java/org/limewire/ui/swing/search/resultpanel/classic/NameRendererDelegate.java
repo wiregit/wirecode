@@ -29,7 +29,7 @@ public class NameRendererDelegate extends AbstractCellEditor
     private final boolean showAudioArtist;
     private final StoreNameCellRendererFactory storeNameRendererFactory;
     
-    private TableCellRenderer storeRenderer;
+    private StoreNameCellRenderer storeRenderer;
     
     /**
      * Constructs a NameRendererDelegate with the specified default renderer
@@ -77,7 +77,13 @@ public class NameRendererDelegate extends AbstractCellEditor
      * Applies the specified store style to the delegate.
      */
     public void setStoreStyle(StoreStyle storeStyle) {
-        storeRenderer = storeNameRendererFactory.create(storeStyle, 
-                storePopupListener, storeController, showAudioArtist);
+        // Update store renderer.  If style is current, then update renderer;
+        // otherwise, create new renderer for style.
+        if ((storeRenderer != null) && storeRenderer.isCurrentStyle(storeStyle)) {
+            storeRenderer.updateStyle(storeStyle);
+        } else {
+            storeRenderer = storeNameRendererFactory.create(storeStyle, 
+                    storePopupListener, storeController, showAudioArtist);
+        }
     }
 }

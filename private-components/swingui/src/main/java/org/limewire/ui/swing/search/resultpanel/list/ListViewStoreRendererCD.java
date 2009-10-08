@@ -105,9 +105,6 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumHeadingLabel.setOpenUrlsNatively(false);
         albumHeadingLabel.setOpaque(false);
         albumHeadingLabel.setFocusable(false);
-        albumHeadingLabel.setHtmlFont(storeStyle.getHeadingFont());
-        albumHeadingLabel.setHtmlForeground(storeStyle.getHeadingForeground());
-        albumHeadingLabel.setHtmlLinkForeground(storeStyle.getHeadingForeground());
         albumHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         albumHeadingLabel.setMinimumSize(new Dimension(0, 22));
         albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
@@ -124,18 +121,11 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         installPopupListener(albumHeadingLabel);
         
         albumSubHeadingLabel = new NoDancingHtmlLabel();
-        albumSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
-        albumSubHeadingLabel.setForeground(storeStyle.getSubHeadingForeground());
-        
-        albumWidthResolver = new HeadingFontWidthResolver(albumHeadingLabel, storeStyle.getHeadingFont());
         
         albumTracksButton = new IconButton(showTracksAction);
-        albumTracksButton.setFont(storeStyle.getShowTracksFont());
-        albumTracksButton.setForeground(storeStyle.getShowTracksForeground());
         albumTracksButton.setHideActionText(false);
         
         albumStreamButton = new IconButton(streamAction);
-        albumStreamButton.setIcon(storeStyle.getStreamIcon());
         
         albumDownloadButton = new IconButton();
         albumDownloadButton.removeActionHandListener();
@@ -143,6 +133,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         albumPriceButton = new PriceButton();
         installPopupListener(albumPriceButton);
+        
+        applyAlbumStyle();
         
         // Layout components in container.
         albumHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding, hidemode 3"));
@@ -188,9 +180,6 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaHeadingLabel.setOpenUrlsNatively(false);
         mediaHeadingLabel.setOpaque(false);
         mediaHeadingLabel.setFocusable(false);
-        mediaHeadingLabel.setHtmlFont(storeStyle.getHeadingFont());
-        mediaHeadingLabel.setHtmlForeground(storeStyle.getHeadingForeground());
-        mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getHeadingForeground());
         mediaHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         mediaHeadingLabel.setMinimumSize(new Dimension(0, 22));
         mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
@@ -207,13 +196,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         installPopupListener(mediaHeadingLabel);
         
         mediaSubHeadingLabel = new NoDancingHtmlLabel();
-        mediaSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
-        mediaSubHeadingLabel.setForeground(storeStyle.getSubHeadingForeground());
-        
-        mediaWidthResolver = new HeadingFontWidthResolver(mediaHeadingLabel, storeStyle.getHeadingFont());
         
         mediaStreamButton = new IconButton(streamAction);
-        mediaStreamButton.setIcon(storeStyle.getStreamIcon());
         
         mediaDownloadButton = new IconButton();
         mediaDownloadButton.removeActionHandListener();
@@ -221,6 +205,8 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         
         mediaPriceButton = new PriceButton();
         installPopupListener(mediaPriceButton);
+        
+        applyMediaStyle();
         
         // Layout components in container.
         mediaHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
@@ -367,6 +353,47 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         } else {
             mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         }
+    }
+    
+    @Override
+    protected void applyStyle() {
+        applyAlbumStyle();
+        applyMediaStyle();
+    }
+    
+    /**
+     * Applies the current style to the album components.
+     */
+    private void applyAlbumStyle() {
+        albumHeadingLabel.setHtmlFont(storeStyle.getHeadingFont());
+        albumHeadingLabel.setHtmlForeground(storeStyle.getHeadingForeground());
+        albumHeadingLabel.setHtmlLinkForeground(storeStyle.getHeadingForeground());
+        
+        albumSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
+        albumSubHeadingLabel.setForeground(storeStyle.getSubHeadingForeground());
+        
+        albumWidthResolver = new HeadingFontWidthResolver(albumHeadingLabel, storeStyle.getHeadingFont());
+        
+        albumTracksButton.setFont(storeStyle.getShowTracksFont());
+        albumTracksButton.setForeground(storeStyle.getShowTracksForeground());
+        
+        albumStreamButton.setIcon(storeStyle.getStreamIcon());
+    }
+    
+    /**
+     * Applies the current style to the media components.
+     */
+    private void applyMediaStyle() {
+        mediaHeadingLabel.setHtmlFont(storeStyle.getHeadingFont());
+        mediaHeadingLabel.setHtmlForeground(storeStyle.getHeadingForeground());
+        mediaHeadingLabel.setHtmlLinkForeground(storeStyle.getHeadingForeground());
+        
+        mediaSubHeadingLabel.setFont(storeStyle.getSubHeadingFont());
+        mediaSubHeadingLabel.setForeground(storeStyle.getSubHeadingForeground());
+        
+        mediaWidthResolver = new HeadingFontWidthResolver(mediaHeadingLabel, storeStyle.getHeadingFont());
+        
+        mediaStreamButton.setIcon(storeStyle.getStreamIcon());
     }
     
     /**

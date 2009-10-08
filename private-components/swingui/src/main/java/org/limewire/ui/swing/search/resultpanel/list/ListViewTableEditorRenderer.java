@@ -657,8 +657,13 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      * Applies the specified store style to the store renderer.
      */
     public void setStoreStyle(StoreStyle storeStyle) {
-        // Update store renderer using new style.
-        storeRenderer = storeRendererFactory.create(storeStyle, storePopupListener, storeController);
+        // Update store renderer.  If style is current, then update renderer;
+        // otherwise, create new renderer for style.
+        if ((storeRenderer != null) && storeRenderer.isCurrentStyle(storeStyle)) {
+            storeRenderer.updateStyle(storeStyle);
+        } else {
+            storeRenderer = storeRendererFactory.create(storeStyle, storePopupListener, storeController);
+        }
     }
     
 //    private class HeadingFontWidthResolver implements FontWidthResolver {
