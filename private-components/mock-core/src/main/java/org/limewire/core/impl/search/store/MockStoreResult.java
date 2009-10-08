@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -127,8 +126,9 @@ public class MockStoreResult implements StoreResult {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {}
 
-                    // TODO use StoreConnection to load icon
-                    albumIcon = new ImageIcon(getClass().getResource(albumIconUri));
+                    // Create connection and load album icon.
+                    StoreConnection storeConnection = storeConnectionFactory.create();
+                    albumIcon = storeConnection.loadIcon(albumIconUri);
 
                     // Fire event to update UI.
                     fireAlbumIconUpdated();
