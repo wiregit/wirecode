@@ -45,6 +45,7 @@ public class LibraryNavigatorTable extends GlazedJXTable {
     @Resource private Color backgroundColor;    
     private TablePopupHandler popupHandler;
     private final Provider<Navigator> navigatorProvider;
+    private SwingThreadProxyEventList<LibraryNavItem> stpl;
     
     @Inject
     public LibraryNavigatorTable(LibraryNavTransferHandler libraryNavTransferHandler,
@@ -85,7 +86,8 @@ public class LibraryNavigatorTable extends GlazedJXTable {
         }
         
         SortedList<LibraryNavItem> sortedList = GlazedListsFactory.sortedList(compositeList, new LibraryNavItemComparator());    
-        SwingThreadProxyEventList<LibraryNavItem> stpl = GlazedListsFactory.swingThreadProxyEventList(sortedList);
+        stpl = GlazedListsFactory.swingThreadProxyEventList(sortedList);
+        
         setModel(new DefaultEventTableModel<LibraryNavItem>(stpl, new SingleColumnTableFormat<LibraryNavItem>("")));
         setDropMode(DropMode.ON);
         setTransferHandler(libraryNavTransferHandler);
@@ -266,6 +268,16 @@ public class LibraryNavigatorTable extends GlazedJXTable {
         } else {
             return false;
         }
+    }
+    
+    public int getPrivateSharedLibraryCount() {
+        int numberOfPrivateSharedLibraries = 0;
+        for ( LibraryNavItem item  : stpl ) {
+            if ( item.getType() == LibraryNavItem.NavType.LIST ) {
+                numberOfPrivateSharedLibraries++;
+            }
+        }
+        return numberOfPrivateSharedLibraries;
     }
     
     /**
