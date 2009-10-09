@@ -204,7 +204,7 @@ public class CoreStoreManager implements StoreManager {
         StoreResult[] storeResults = new StoreResult[resultsArr.length()];
         for (int i = 0, len = resultsArr.length(); i < len; i++) {
             JSONObject resultObj = resultsArr.getJSONObject(i);
-            storeResults[i] = new StoreResultAdapter(resultObj);
+            storeResults[i] = new StoreResultAdapter(resultObj, storeConnection);
         }
         
         return storeResults;

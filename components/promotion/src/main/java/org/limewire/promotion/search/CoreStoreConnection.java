@@ -2,10 +2,13 @@ package org.limewire.promotion.search;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -85,8 +88,12 @@ public class CoreStoreConnection implements StoreConnection {
     
     @Override
     public Icon loadIcon(String iconUri) {
-        // TODO implement
-        return null;
+        // TODO review implementation
+        try {
+            return new ImageIcon(new URL(iconUri));
+        } catch (MalformedURLException ex) {
+            throw new IllegalArgumentException(ex);
+        }
     }
     
     @Override

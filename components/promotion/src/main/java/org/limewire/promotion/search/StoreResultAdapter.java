@@ -1,8 +1,6 @@
 package org.limewire.promotion.search;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -10,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,22 +16,27 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.search.store.StoreConnection;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreResultListener;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
 /**
  * Implementation of StoreResult for the live core.
  */
 public class StoreResultAdapter implements StoreResult {
-
+    private static final Log LOG = LogFactory.getLog(StoreResultAdapter.class);
+    
+    private final StoreConnection storeConnection;
     private final List<StoreResultListener> listenerList;
     private final Map<FilePropertyKey, Object> propertyMap;
     private final List<TrackResult> trackList;
     
-    private final Icon albumIcon;
+    private final String albumIconUri;
     private final String albumId;
     private final Category category;
     private final String fileExtension;
@@ -48,15 +50,24 @@ public class StoreResultAdapter implements StoreResult {
     private final long trackCount;
     private final URN urn;
     
+    private Icon albumIcon;
+    
+    private boolean albumIconRequested;
+    private boolean tracksRequested;
+    
     /**
-     * Constructs a StoreResultAdapter using the specified JSON object.
+     * Constructs a StoreResultAdapter using the specified JSON object and
+     * store connection.
      */
-    public StoreResultAdapter(JSONObject jsonObj) throws IOException, JSONException {
+    public StoreResultAdapter(JSONObject jsonObj, StoreConnection storeConnection) 
+        throws IOException, JSONException {
+        
+        this.storeConnection = storeConnection;
         listenerList = new CopyOnWriteArrayList<StoreResultListener>();
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         trackList = new ArrayList<TrackResult>();
         
-        albumIcon = getIcon(jsonObj, "albumIcon");
+        albumIconUri = jsonObj.optString("albumIcon");
         albumId = jsonObj.optString("albumId");
         category = getCategory(jsonObj);
         fileName = jsonObj.getString("fileName");
@@ -71,7 +82,6 @@ public class StoreResultAdapter implements StoreResult {
         urn = com.limegroup.gnutella.URN.createUrnFromString(jsonObj.getString("URN"));
         
         initProperties(jsonObj);
-        initTracks(jsonObj);
     }
     
     /**
@@ -93,19 +103,6 @@ public class StoreResultAdapter implements StoreResult {
         if (year > 0) propertyMap.put(FilePropertyKey.YEAR, year);
     }
     
-    /**
-     * Populates the tracks using the specified JSON object.
-     */
-    private void initTracks(JSONObject jsonObj) throws IOException, JSONException {
-        JSONArray trackArr = jsonObj.optJSONArray("tracks");
-        if ((trackArr != null) && (trackArr.length() > 0)) {
-            for (int i = 0, len = trackArr.length(); i < len; i++) {
-                JSONObject trackObj = trackArr.getJSONObject(i);
-                trackList.add(new TrackResultAdapter(trackObj));
-            }
-        }
-    }
-    
     @Override
     public void addStoreResultListener(StoreResultListener listener) {
         listenerList.add(listener);
@@ -118,6 +115,20 @@ public class StoreResultAdapter implements StoreResult {
     
     @Override
     public Icon getAlbumIcon() {
+        if (isAlbum() && (albumIconUri.length() > 0) && !albumIconRequested) {
+            albumIconRequested = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // Use store connection to load album icon.
+                    albumIcon = storeConnection.loadIcon(albumIconUri);
+
+                    // Fire event to update UI.
+                    fireAlbumIconUpdated();
+                }
+            }).start();
+        }
+        
         return albumIcon;
     }
 
@@ -183,6 +194,30 @@ public class StoreResultAdapter implements StoreResult {
 
     @Override
     public List<TrackResult> getTracks() {
+        if (isAlbum() && (trackList.size() == 0) && !tracksRequested) {
+            tracksRequested = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // Use store connection to load tracks.
+                    String jsonStr = storeConnection.loadTracks(albumId);
+                    
+                    try {
+                        // Parse JSON and add tracks.
+                        JSONObject jsonObj = new JSONObject(jsonStr);
+                        List<TrackResult> newTracks = parseTracks(jsonObj);
+                        trackList.addAll(newTracks);
+                        
+                        // Fire event to update UI.
+                        fireTracksUpdated();
+                        
+                    } catch (Exception ex) {
+                        LOG.warnf(ex, ex.getMessage());
+                    }
+                }
+            }).start();
+        }
+        
         return trackList;
     }
 
@@ -194,6 +229,24 @@ public class StoreResultAdapter implements StoreResult {
     @Override
     public boolean isAlbum() {
         return (albumId != null) && (albumId.length() > 0) && (trackCount > 0);
+    }
+    
+    /**
+     * Notifies listeners when the album icon is updated.
+     */
+    private void fireAlbumIconUpdated() {
+        for (StoreResultListener listener : listenerList) {
+            listener.albumIconUpdated(albumIcon);
+        }
+    }
+    
+    /**
+     * Notifies listeners when the album tracks are updated.
+     */
+    private void fireTracksUpdated() {
+        for (StoreResultListener listener : listenerList) {
+            listener.tracksUpdated(trackList);
+        }
     }
     
     /**
@@ -210,17 +263,6 @@ public class StoreResultAdapter implements StoreResult {
     }
     
     /**
-     * Returns the icon from the specified JSON object and name.
-     */
-    private Icon getIcon(JSONObject jsonObj, String name) throws MalformedURLException {
-        String value = jsonObj.optString(name);
-        if (value.length() > 0) {
-            return new ImageIcon(new URL(value));
-        }
-        return null;
-    }
-    
-    /**
      * Returns the SortPriority from the specified JSON object.
      */
     private SortPriority getSortPriority(JSONObject jsonObj) throws JSONException {
@@ -233,6 +275,23 @@ public class StoreResultAdapter implements StoreResult {
             }
         }
         return SortPriority.TOP;
+    }
+    
+    /**
+     * Returns a list of track results by parsing the specified JSON object.
+     */
+    private List<TrackResult> parseTracks(JSONObject jsonObj) throws IOException, JSONException {
+        List<TrackResult> trackList = new ArrayList<TrackResult>();
+        
+        JSONArray trackArr = jsonObj.optJSONArray("tracks");
+        if ((trackArr != null) && (trackArr.length() > 0)) {
+            for (int i = 0, len = trackArr.length(); i < len; i++) {
+                JSONObject trackObj = trackArr.getJSONObject(i);
+                trackList.add(new TrackResultAdapter(trackObj));
+            }
+        }
+        
+        return trackList;
     }
 
     /**
