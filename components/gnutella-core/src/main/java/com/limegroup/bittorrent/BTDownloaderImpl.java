@@ -188,23 +188,34 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     /**
-     * Returns true if there are any Dangerous Files in this torrent after
-     * warning the user about them.
+     * Returns true if there are any dangerous files in this torrent after
+     * warning the user about them. The download is stopped if any files are
+     * dangerous.
      */
     private boolean checkForDangerousFiles() {
         // If the torrent contains any dangerous files, delete everything
         // and inform the user that the download has been cancelled.
         for(File f : getIncompleteFiles()) {
-            if(dangerousFileChecker.get().isDangerous(f)) {
-                lastState.set(DownloadState.DANGEROUS);
-                listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
-                // This will cause TorrentEvent.STOPPED
-                torrent.stop();
-                downloadCallback.get().warnUser(getSaveFile().getName(),
-                        I18nMarker.marktr(DANGEROUS_TORRENT_WARNING),
-                        DANGEROUS_TORRENT_INFO_URL);
+            if(isDangerous(f))
                 return true;
-            }
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given file is dangerous, after warning the user
+     * about it. The download is stopped if a file is dangerous.
+     */
+    private boolean isDangerous(File file) {
+        if(dangerousFileChecker.get().isDangerous(file)) {
+            lastState.set(DownloadState.DANGEROUS);
+            listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
+            // This will cause TorrentEvent.STOPPED
+            torrent.stop();
+            downloadCallback.get().warnUser(getSaveFile().getName(),
+                    I18nMarker.marktr(DANGEROUS_TORRENT_WARNING),
+                    DANGEROUS_TORRENT_INFO_URL);
+            return true;
         }
         return false;
     }
@@ -317,7 +328,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isLaunchable() {
-        return getDownloadFragment() != null;
+        if (isCompleted())
+            return true;
+
+        TorrentInfo torrentInfo = torrent.getTorrentInfo();
+        if (torrentInfo == null || torrentInfo.getTorrentFileEntries().size() > 1)
+            return false;
+
+        return true;
     }
 
     @Override
@@ -365,6 +383,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // much.
         long size = Math.min(getIncompleteFile().length(), 2 * 1024 * 1024);
         if (FileUtils.copy(getIncompleteFile(), size, file) <= 0) {
+            return null;
+        }
+        if (isDangerous(file)) {
+            file.delete();
             return null;
         }
         return file;

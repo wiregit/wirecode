@@ -1570,8 +1570,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
 
     /**
-     * Stops this download if it is not already stopped.  If
-     * <code>deleteFile</code> is true, then the file is deleted.
+     * Stops this download if it is not already stopped.
      *
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#stop()
      */
@@ -1786,39 +1785,42 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getDownloadFragment()
     */
     public File getDownloadFragment() {
-        //We haven't started yet.
+        //W e haven't started yet.
         if (incompleteFile == null)
             return null;
 
-        //a) Special case for saved corrupt fragments.  We don't worry about
-        //removing holes.
-        if (state == DownloadState.CORRUPT_FILE)
-            return corruptFile; //may be null
-            //b) If the file is being downloaded, create *copy* of first
-            //block of incomplete file.  The copy is needed because some
-            //programs, notably Windows Media Player, attempt to grab
-            //exclusive file locks.  If the download hasn't started, the
-            //incomplete file may not even exist--not a problem.
-        else if (state != DownloadState.COMPLETE) {
+        if (state == DownloadState.CORRUPT_FILE) {
+            // If the corrupt file exists, return it unless it's dangerous.
+            final File corrupt = corruptFile;
+            if(corrupt == null || isDangerous(corrupt))
+                return null;
+            return corrupt;
+        } else if (state == DownloadState.COMPLETE) {
+            // If the download is complete, return the whole file.
+            return getSaveFile();
+        } else {
+            // Create a copy of the beginning of the incomplete file. The copy
+            // is needed because some programs, notably Windows Media Player,
+            // attempt to grab exclusive file locks.
             File file = new File(incompleteFile.getParent(),
                     IncompleteFileManager.PREVIEW_PREFIX
-                            + incompleteFile.getName());
-            //Get the size of the first block of the file.  (Remember
-            //that swarmed downloads don't always write in order.)
+                    + incompleteFile.getName());
+            // Get the size of the first block of the file. (Remember
+            // that swarmed downloads don't always write in order.)
             long size = amountForPreview();
             if (size <= 0)
                 return null;
-            //Copy first block, returning if nothing was copied.
+            // Copy the first block, returning null if nothing was copied.
             if (FileUtils.copy(incompleteFile, size, file) <= 0)
                 return null;
+            // Try to determine whether the copy is dangerous.
+            if (isDangerous(file)) {
+                incompleteFile.delete();
+                return null;
+            }
             return file;
         }
-        //c) Otherwise, choose completed file.
-        else {
-            return getSaveFile();
-        }
     }
-
 
     /**
      * Returns the amount of the file written on disk that can be safely
@@ -1958,16 +1960,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private DownloadState verifyAndSave() throws InterruptedException {
 
         // Check whether this is a dangerous file
-        if (dangerousFileChecker.isDangerous(incompleteFile)) {
-            // Mark the file as spam in future search results
-            RemoteFileDesc[] type = new RemoteFileDesc[0];
-            spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
-            // Delete the file
-            discardCorruptDownload(true);
-            // Inform the user that the file was deleted
-            downloadCallback.warnUser(getSaveFile().getName(),
-                    I18nMarker.marktr(DANGEROUS_FILE_WARNING),
-                    DANGEROUS_FILE_INFO_URL);
+        if(isDangerous(incompleteFile)) {
             // Remove the download from the UI
             return DownloadState.DANGEROUS;
         }
@@ -1983,6 +1976,27 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // Save the file to disk.
         return saveFile(fileHash);
+    }
+
+    /**
+     * Returns true if the given file is dangerous, after stopping the download,
+     * deleting the file and warning the user.
+     */
+    private boolean isDangerous(File file) {
+        if(dangerousFileChecker.isDangerous(file)) {
+            // Mark the file as spam in future search results
+            RemoteFileDesc[] type = new RemoteFileDesc[0];
+            spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
+            // Stop the download and delete the file
+            stop();
+            file.delete();
+            // Inform the user that the file was deleted
+            downloadCallback.warnUser(getSaveFile().getName(),
+                    I18nMarker.marktr(DANGEROUS_FILE_WARNING),
+                    DANGEROUS_FILE_INFO_URL);
+            return true;
+        }
+        return false;
     }
 
     /**
