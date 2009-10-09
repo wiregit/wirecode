@@ -2,6 +2,9 @@ package org.limewire.ui.swing.search.resultpanel.list;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
@@ -19,9 +23,12 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.ui.swing.components.CustomLineBorder;
+import org.limewire.ui.swing.components.HTMLLabel;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
+import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.ListViewTable;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
@@ -53,14 +60,21 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final MouseListener popupListener;
     protected final StoreController storeController;
     
-    protected final JXPanel albumPanel;
-    protected final JXPanel mediaPanel;
-    protected final JXPanel albumTrackPanel;
-    
     protected final Action downloadAction;
     protected final Action streamAction;
     protected final Action showInfoAction;
     protected final Action showTracksAction;
+    
+    protected final JXPanel albumPanel;
+    protected final JXPanel mediaPanel;
+    protected final JXPanel downloadPanel;
+    protected final JXPanel albumTrackPanel;
+    
+    private IconButton downloadIconButton;
+    private HTMLLabel downloadHeadingLabel;
+    private JButton downloadInfoButton;
+    private FontWidthResolver downloadWidthResolver;
+    private int downloadHeadingWidth;
     
     protected StoreStyle storeStyle;
     
@@ -89,14 +103,15 @@ abstract class ListViewStoreRenderer extends JXPanel {
         this.popupListener = popupListener;
         this.storeController = storeController;
         
-        this.albumPanel = new JXPanel();
-        this.mediaPanel = new JXPanel();
-        this.albumTrackPanel = new JXPanel();
-        
         this.downloadAction = new DownloadAction();
         this.streamAction = new StreamAction();
         this.showInfoAction = new ShowInfoAction();
         this.showTracksAction = new ShowTracksAction();
+        
+        this.albumPanel = new JXPanel();
+        this.mediaPanel = new JXPanel();
+        this.downloadPanel = new JXPanel();
+        this.albumTrackPanel = new JXPanel();
         
         initComponents();
     }
@@ -111,6 +126,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         // Initialize album/media panels.
         initAlbumComponent();
         initMediaComponent();
+        initDownloadComponent();
         
         // Initialize popup listener.
         installPopupListener(this);
@@ -125,7 +141,43 @@ abstract class ListViewStoreRenderer extends JXPanel {
         setLayout(new MigLayout("insets 6 0 0 0, gap 0! 0!, novisualpadding, hidemode 3"));
         add(albumPanel, "alignx left, aligny 50%, gap 6 6 0 6, growx, pushx 200, wrap");
         add(mediaPanel, "alignx left, aligny 50%, gap 6 6 0 6, growx, pushx 200, wrap");
+        add(downloadPanel, "alignx left, aligny 50%, gap 6 6 0 6, growx, pushx 200, wrap");
         add(albumTrackPanel, "span 3, left, aligny top, gap 36 36 0 6, grow, wrap");
+    }
+    
+    /**
+     * Initializes component to display a downloaded file.
+     */
+    private void initDownloadComponent() {
+        downloadPanel.setOpaque(false);
+        
+        downloadIconButton = new IconButton();
+        downloadIconButton.removeActionHandListener();
+        
+        // Create heading label.  We override paint to cache heading width.
+        downloadHeadingLabel = new HTMLLabel() {
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                downloadHeadingWidth = getSize().width;
+            }
+        };
+        downloadHeadingLabel.setOpenUrlsNatively(false);
+        downloadHeadingLabel.setOpaque(false);
+        downloadHeadingLabel.setFocusable(false);
+        downloadHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
+        downloadHeadingLabel.setMinimumSize(new Dimension(0, 22));
+        
+        downloadInfoButton = new IconButton(showInfoAction);
+        downloadInfoButton.setHideActionText(false);
+        
+        applyDownloadStyle();
+        
+        // Layout components in container.
+        downloadPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, novisualpadding"));
+        downloadPanel.add(downloadIconButton, "alignx left, aligny 50%, shrinkprio 0, growprio 0");
+        downloadPanel.add(downloadHeadingLabel, "alignx left, aligny 50%, gapleft 6, growx, shrinkprio 200, growprio 200, pushx 200");
+        downloadPanel.add(downloadInfoButton, "alignx right, aligny top, shrinkprio 0, growprio 0");
     }
     
     /**
@@ -240,9 +292,17 @@ abstract class ListViewStoreRenderer extends JXPanel {
         this.row = row;
         this.col = col;
         
-        if (vsr.getStoreResult().isAlbum() && (vsr.getDownloadState() == BasicDownloadState.NOT_STARTED)) {
+        if (vsr.getDownloadState() != BasicDownloadState.NOT_STARTED) {
+            albumPanel.setVisible(false);
+            mediaPanel.setVisible(false);
+            downloadPanel.setVisible(true);
+            albumTrackPanel.setVisible(false);
+            updateDownload(vsr, rowResult, editing);
+            
+        } else if (vsr.getStoreResult().isAlbum()) {
             albumPanel.setVisible(true);
             mediaPanel.setVisible(false);
+            downloadPanel.setVisible(false);
             showTracksAction.putValue(Action.NAME, vsr.isShowTracks() ? 
                     I18n.tr("Hide Tracks").toUpperCase() : I18n.tr("Show Tracks").toUpperCase());
             updateAlbum(vsr, rowResult, editing);
@@ -251,6 +311,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         } else {
             albumPanel.setVisible(false);
             mediaPanel.setVisible(true);
+            downloadPanel.setVisible(false);
             albumTrackPanel.setVisible(false);
             updateMedia(vsr, rowResult, editing);
         }
@@ -290,6 +351,21 @@ abstract class ListViewStoreRenderer extends JXPanel {
     }
     
     /**
+     * Updating download view for specified VisualStoreResult.
+     */
+    private void updateDownload(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing) {
+        // Set category icon.
+        downloadIconButton.setIcon(getIcon(vsr));
+        
+        // Set text field.
+        downloadHeadingLabel.setText(getHeadingHtml(rowResult, downloadWidthResolver, downloadHeadingWidth, editing));
+        downloadHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
+        
+        // Info button may be hidden when not editing.
+        downloadInfoButton.setVisible(!storeStyle.isShowInfoOnHover() || editing);
+    }
+    
+    /**
      * Returns true if the current style matches the specified style.
      */
     public boolean isCurrentStyle(StoreStyle storeStyle) {
@@ -303,6 +379,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
     public void updateStyle(StoreStyle storeStyle) {
         if (isCurrentStyle(storeStyle)) {
             this.storeStyle = storeStyle;
+            applyDownloadStyle();
             applyStyle();
         }
     }
@@ -312,6 +389,20 @@ abstract class ListViewStoreRenderer extends JXPanel {
      * the style is updated with new icons while in use.
      */
     protected abstract void applyStyle();
+    
+    /**
+     * Applies the current style to the download renderer.
+     */
+    private void applyDownloadStyle() {
+        downloadHeadingLabel.setHtmlFont(storeStyle.getHeadingFont());
+        downloadHeadingLabel.setHtmlForeground(storeStyle.getHeadingForeground());
+        downloadHeadingLabel.setHtmlLinkForeground(storeStyle.getHeadingForeground());
+        
+        downloadWidthResolver = new HeadingFontWidthResolver(downloadHeadingLabel, storeStyle.getHeadingFont());
+        
+        downloadInfoButton.setFont(storeStyle.getInfoFont());
+        downloadInfoButton.setForeground(storeStyle.getInfoForeground());
+    }
     
     /**
      * Action to download store result.
