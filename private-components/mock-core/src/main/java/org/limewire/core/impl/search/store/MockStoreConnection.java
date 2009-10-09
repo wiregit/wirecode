@@ -117,6 +117,7 @@ public class MockStoreConnection implements StoreConnection {
         insertValue(buf, getNameValuePair("showTracksFont"));
         insertValue(buf, getNameValuePair("showTracksForeground"));
         insertValue(buf, getNameValuePair("streamIcon"));
+        insertValue(buf, getNameValuePair("streamPauseIcon"));
         insertValue(buf, getNameValuePair("subHeadingFont"));
         insertValue(buf, getNameValuePair("subHeadingForeground"));
         insertValue(buf, getNameValuePair("trackFont"));
