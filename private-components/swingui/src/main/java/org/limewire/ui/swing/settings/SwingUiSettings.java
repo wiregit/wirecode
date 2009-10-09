@@ -248,7 +248,11 @@ public final class SwingUiSettings extends LimeProps {
     /** If the LimeWire video player is enabled. */
     @InspectablePrimitive(value = "video player enabled", category = DataCategory.USAGE)
     public static final BooleanSetting VIDEO_PLAYER_ENABLED =
-        FACTORY.createBooleanSetting("VIDEO_PLAYER_ENABLED", true);
+        FACTORY.createBooleanSetting("VIDEO_PLAYER_ENABLED", true);    
+
+    /** Setting for whether or not video should stretch to fill the screen. */
+    public static final BooleanSetting VIDEO_FIT_TO_SCREEN =
+        FACTORY.createBooleanSetting("VIDEO_FIT_TO_SCREEN", false);
     
     /** Shows a sign-on overlay message to highlight the Library/Private Shared feature. */
     public static final BooleanSetting SHOW_LIBRARY_OVERLAY_MESSAGE =

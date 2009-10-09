@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.player;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -10,7 +8,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javax.media.CannotRealizeException;
 import javax.media.Controller;
@@ -21,23 +18,16 @@ import javax.media.NoPlayerException;
 import javax.media.Player;
 import javax.media.StopEvent;
 import javax.media.Time;
-import javax.swing.JFrame;
-import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
-import org.limewire.ui.swing.components.LimeJFrame;
-import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
-import org.limewire.ui.swing.mainframe.MainPanel;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.util.SystemUtils;
 
 import ca.odell.glazedlists.EventList;
 
@@ -49,24 +39,17 @@ class VideoPlayerMediator implements PlayerMediator {
     
     private Player player;
     private File currentVideo;
-    private PlayerControlPanelFactory controlPanelFactory;
-    private final MainPanel mainPanel;
+    private final VideoDisplayDirector displayDirector;
     private final List<PlayerMediatorListener> listenerList;
     private volatile Timer updateTimer;
-    private final HeaderBarDecorator headerBarDecorator;
-    private final Navigator nav;
     private final CategoryManager categoryManager;
-    private VideoPanel videoPanel;
     
     @Inject
-    VideoPlayerMediator(PlayerControlPanelFactory controlPanelFactory, MainPanel mainPanel,
-            HeaderBarDecorator headerBarDecorator, Navigator nav, CategoryManager categoryManager){
-        this.controlPanelFactory = controlPanelFactory;
-        this.mainPanel = mainPanel;
-        this.headerBarDecorator = headerBarDecorator;
-        this.listenerList = new ArrayList<PlayerMediatorListener>();
-        this.nav = nav;
+    VideoPlayerMediator(VideoDisplayDirector displayDirector,
+            CategoryManager categoryManager){
+        this.displayDirector = displayDirector;
         this.categoryManager = categoryManager;
+        this.listenerList = new ArrayList<PlayerMediatorListener>();
     }
 
     @Override
@@ -113,15 +96,13 @@ class VideoPlayerMediator implements PlayerMediator {
     @Override
     public boolean isPaused(File file) {
         // TODO: this isn't 100% correct but it's close enough to start
-        return player != null && player.getState() != Controller.Started;
+        return file.equals(currentVideo) && player != null && player.getState() != Controller.Started;
     }
 
     @Override
     public boolean isPlaying(File file) {
-        if (file.equals(currentVideo) && player != null) {
-        return player.getState() == Controller.Started;
-        }
-        return false;
+        return player.getState() == Controller.Started && file.equals(currentVideo)
+                && player != null;
     }
 
     @Override
@@ -131,8 +112,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public boolean isSeekable() {
-        return player != null && player.getDuration() != Player.DURATION_UNBOUNDED
-                && player.getDuration() != Player.DURATION_UNKNOWN;
+        return isDurationMeasurable();
     }
 
     @Override
@@ -154,20 +134,66 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void play(File file) {
-        //TODO: full screen?
-        initializeVideoPanel();
-        mainPanel.showTemporaryPanel(videoPanel);
-        initializePlayer(file, null, true);
+        if(initializePlayerOrNativeLaunch(file, null, true)){
+            displayDirector.show(player.getVisualComponent(), false);
+        }
     }
     
-    private void initializePlayer(File file, Time time, boolean autoPlay){
-        new InitializationWorker(file, time, autoPlay).execute();
+  
+     /**
+     * Initializes an FMJ player for the video if possible, launches natively if
+     * not.
+     * 
+     * @param file the video file to be played
+     * @param time the starting time of the video. null to start at the
+     *        beginning.
+     * @param autoPlay whether or not to start playback
+     * @return true if the player is successfully initialized, false if it is
+     *         not initialized and the file is natively launched
+     */
+    private boolean initializePlayerOrNativeLaunch(File file, Time time, boolean autoPlay){
+        GuiUtils.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        currentVideo = file;
+
+        try {
+            player = Manager.createRealizedPlayer(file.toURI().toURL());
+        } catch (CannotRealizeException e) {
+            nativeLaunch(file);
+            return false;
+        } catch (NoPlayerException e) {
+           nativeLaunch(file);
+           return false;
+        } catch (MalformedURLException e) {
+           nativeLaunch(file);
+           return false;
+        } catch (IOException e) {
+            //TODO: how should this be handled?
+            nativeLaunch(file);
+            return false;
+        }
+        
+        
+        
+        if(time != null){
+            player.setMediaTime(time);
+        }
+        player.start();
+        
+        player.addControllerListener(new VideoControllerListener());        
+        updateTimer = new Timer(1000, new TimerAction());
+        updateTimer.start();
+        
+        fireSongChanged(file.getName());   
+
+        if (!autoPlay) {
+            //start and stop to get initial frame on screen
+            pause();
+        }
+        GuiUtils.getMainFrame().setCursor(Cursor.getDefaultCursor());
+        
+        return true;    
     }
-    
-    private void initializeVideoPanel(){
-        videoPanel = new VideoPanel(controlPanelFactory.createVideoControlPanel(), 
-                headerBarDecorator, this);
-    }
+ 
     
     private void nativeLaunch(File file){
         NativeLaunchUtils.safeLaunchFile(file, categoryManager);        
@@ -219,7 +245,10 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void skip(double percent) {
-        // TODO: duration can be UNBOUNDED or UNKNOWN
+        if(!isDurationMeasurable()){
+            throw new IllegalStateException("Can not skip when duration is unmeasurable");
+        }
+        
         player.setMediaTime(new Time(percent * player.getDuration().getSeconds()));
     }
 
@@ -254,18 +283,11 @@ class VideoPlayerMediator implements PlayerMediator {
 
     public void closeVideoPanel() {
         killTimer();
-        killPlayer();
+        killPlayer();        
 
         currentVideo = null;
-        videoPanel = null;
 
-        if (isFullScreen) {
-            isFullScreen = false;
-            fullScreenFrame.setVisible(false);
-            fullScreenFrame = null;
-            GuiUtils.getMainFrame().setVisible(true);
-        }
-        nav.goBack();
+        displayDirector.close();
     }
     
     private void killTimer(){
@@ -276,76 +298,57 @@ class VideoPlayerMediator implements PlayerMediator {
     }
     
     private void killPlayer() {
-        player.stop();
-        try {
-            player.deallocate();
-        } catch (Throwable e) {
-            // TODO
-            // will this actually stop the crash? doubtful.
-            e.printStackTrace();
-        }
+        player.close();
+        player.deallocate();
         player = null;
     }
 
-    private JFrame fullScreenFrame;
-    private boolean isFullScreen;
-    
-    public boolean isFullScreen(){
-        return isFullScreen;
-    }
     public void setFullScreen(boolean isFullScreen) {
-        if(player == null){
-            throw new IllegalStateException("Video player not initialized");
-        }
-        
-        if (this.isFullScreen == isFullScreen){
+
+        if (displayDirector.isFullScreen() == isFullScreen) {
             return;
         }
         
-        this.isFullScreen = isFullScreen;
+        reInitializePlayer();
+        
+        displayDirector.show(player.getVisualComponent(), isFullScreen);
+
+    }
+    
+    private void reInitializePlayer(){
+
+        if (player == null) {
+            throw new IllegalStateException("Video player not initialized");
+        }
+
         killTimer();
 
-        Time time = player.getMediaTime();
+        Time time = isDurationMeasurable() ? player.getMediaTime() : null;
 
         boolean isPlaying = player.getState() == Controller.Started;
-        if (isPlaying) {
-            player.stop();
-        }
-        try {
-            player.deallocate();
-        } catch (Throwable e) {
-            // TODO will this actually stop the crash? doubtful.
-            e.printStackTrace();
-        }
-        
-        initializeVideoPanel();
 
-        if (isFullScreen) {
-            GuiUtils.getMainFrame().setVisible(false);
-            fullScreenFrame = new LimeJFrame();
-            fullScreenFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            fullScreenFrame.setAlwaysOnTop(true);
-            SystemUtils.setWindowTopMost(fullScreenFrame);
-            fullScreenFrame.setUndecorated(true);
-            fullScreenFrame.add(videoPanel, BorderLayout.CENTER);            
+        killPlayer();
 
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            fullScreenFrame.setBounds(0,0,screenSize.width, screenSize.height);
+        boolean playerInitialized = initializePlayerOrNativeLaunch(currentVideo, time, isPlaying);
+
+        if (!playerInitialized) {
+            // TODO: how should we handle this?
+            throw new IllegalStateException("Video player initialization failed");
+        }         
             
-            GuiUtils.getMainFrame().setVisible(false);
-            fullScreenFrame.setVisible(true);
-            GuiUtils.getMainFrame().toFront();
-
-        } else {
-            fullScreenFrame.setVisible(false);
-            GuiUtils.getMainFrame().setVisible(true);
-            mainPanel.showTemporaryPanel(videoPanel);
-            //TODO: need to focus on the window
-            GuiUtils.getMainFrame().toFront();
-        }
-        
-        initializePlayer(currentVideo, time, isPlaying);
     }
+    
+    public boolean isFullScreen(){
+        return displayDirector.isFullScreen();
+    }
+
+    
+    private boolean isDurationMeasurable(){
+        return player != null && player.getDuration() != Player.DURATION_UNBOUNDED
+        && player.getDuration() != Player.DURATION_UNKNOWN;
+    }
+    
+
 
     private class VideoControllerListener implements ControllerListener {
 
@@ -380,91 +383,22 @@ class VideoPlayerMediator implements PlayerMediator {
     private class TimerAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            if(!isDurationMeasurable()){
+                return;
+            }
+            
             if (player.getMediaTime().getSeconds() >= player.getDuration().getSeconds()) {
+                //FMJ doesn't seem to fire EndOfMediaEvents so we need to do this manually
                 player.stop();
                 updateTimer.stop();
                 player.setMediaTime(new Time(0));
                 fireProgressUpdated(0);
                 firePlayerStateChanged(PlayerState.EOM);
-                System.out.println("EOM");
             } else {
-                // TODO: duration can be UNBOUNDED or
-                // UNKNOWN
-                fireProgressUpdated((float) (player.getMediaTime().getSeconds() / player
-                        .getDuration().getSeconds()));
+                fireProgressUpdated((float) (player.getMediaTime().getSeconds() / player.getDuration().getSeconds()));
             }
         }
 
     }
-
-    private class InitializationWorker extends SwingWorker<Player, Void> {
-        
-        private final File file;
-        private final Time time;
-        private final boolean autoPlay;
-
-        /**
-         * 
-         * @param file the video file to be played
-         * @param time the starting time of the video.  null to start at the beginning.
-         */
-        public InitializationWorker(File file, Time time, boolean autoPlay){
-            this.file = file;
-            this.time = time;
-            this.autoPlay = autoPlay;
-        }
-
-        @Override
-        protected Player doInBackground() throws Exception {
-            currentVideo = file;
-            try {
-                Player player = Manager.createRealizedPlayer(file.toURI().toURL());  
-                if(time!=null){
-                    player.setMediaTime(time);
-                }
-                return player;
-            } catch (NoPlayerException e) {
-               nativeLaunch(file);
-            } catch (CannotRealizeException e) {
-               nativeLaunch(file);
-            } catch (MalformedURLException e) {
-               nativeLaunch(file);
-            } catch (IOException e) {
-                //TODO: how should this be handled?
-                throw e;
-            }
-            return null;
-        }
-        
-        @Override
-        public void done(){
-            //TODO: handle exceptions & null player
-            try {
-                player = get();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            player.addControllerListener(new VideoControllerListener());
-            videoPanel.add(player.getVisualComponent());
-            videoPanel.revalidate();
-            player.start();
-            updateTimer = new Timer(1000, new TimerAction());
-            updateTimer.start();
-            
-            fireSongChanged(file.getName());   
-
-            if (!autoPlay) {
-                //start and stop to get initial frame on screen
-                pause();
-            }
-
-        }
-        
-    }
-    
+  
 }

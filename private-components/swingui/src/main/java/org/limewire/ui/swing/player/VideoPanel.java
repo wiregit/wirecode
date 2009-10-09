@@ -1,9 +1,13 @@
 package org.limewire.ui.swing.player;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -26,9 +30,10 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 
-public class VideoPanel extends JPanel {
+public class VideoPanel {
 
     private final HeaderBar headerBar = new HeaderBar();
 
@@ -37,38 +42,77 @@ public class VideoPanel extends JPanel {
     private JButton closeButton;
 
     private final VideoPlayerMediator videoMediator;
+    
+    private Component videoRenderer;
+    
+    /**
+     * the video panel containing video and controls.
+     */
+    private JPanel videoPanel = new JPanel(new BorderLayout());
+    
 
-    public VideoPanel(PlayerControlPanel controlPanel,
+    private final MigLayout fitToScreenLayout = new MigLayout("debug, novisualpadding, gap 0, ins 0");
+    
+    /**
+     * Panel that holds the video panel. This is necessary to control whether or
+     * not the video fits to screen.
+     */
+    private final JPanel fitToScreenContainer = new JPanel(fitToScreenLayout);
+    
+
+    public VideoPanel(PlayerControlPanel controlPanel, Component videoRenderer,
             HeaderBarDecorator headerBarDecorator, VideoPlayerMediator videoMediator) {
-        super(new BorderLayout());
 
-        setFocusable(true);
+        this.videoRenderer = new JButton("renderer");//videoRenderer;
+        
+        videoPanel.setBackground(Color.BLACK);
+        videoPanel.setFocusable(true);
         
         this.videoMediator = videoMediator;
 
         setUpHeaderBar(controlPanel, headerBarDecorator);
 
-        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), "fullScreen");
-        getActionMap().put("fullScreen", new ToggleFullScreen());
+        videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), "fullScreen");
+        videoPanel.getActionMap().put("fullScreen", new ToggleFullScreen());
         
-        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "esc");
-        getActionMap().put("esc", new EscAction());
+        videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "esc");
+        videoPanel.getActionMap().put("esc", new EscAction());
         
-        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "space");
-        getActionMap().put("space", new PlayOrPauseAction());
+        videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "space");
+        videoPanel.getActionMap().put("space", new PlayOrPauseAction());
+        
+        setUpMouseListener(videoPanel);
+        setUpMouseListener(fitToScreenContainer);
+        setUpMouseListener(this.videoRenderer);
 
-        add(headerBar, BorderLayout.NORTH);
+        fitToScreenContainer.setOpaque(false);
+        fitToScreenContainer.add(this.videoRenderer);
+        setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());        
+
+        videoPanel.add(headerBar, BorderLayout.NORTH);
+        videoPanel.add(fitToScreenContainer, BorderLayout.CENTER);
+
     }
     
-    public void addVideoComponent(Component videoComponent){
-        add(videoComponent);
-        setUpMouseListener(videoComponent);
+    public Component getComponent(){
+        return videoPanel;
     }
+ 
+
 
     private void setUpMouseListener(Component videoComponent) {
         videoComponent.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            private void maybeShowPopup(MouseEvent e) {
                 if (e.isPopupTrigger()) {
                     JPopupMenu menu = new JPopupMenu();
                     if (videoMediator.getStatus() == PlayerState.PLAYING) {
@@ -77,6 +121,7 @@ public class VideoPanel extends JPanel {
                         menu.add(createPlayMenuItem());
                     }
                     menu.addSeparator();
+                    menu.add(createFitToScreenMenuItem());
                     menu.add(createFullScreenMenuItem());
                     menu.addSeparator();
                     menu.add(createCloseItem());
@@ -89,9 +134,18 @@ public class VideoPanel extends JPanel {
     private void setUpHeaderBar(PlayerControlPanel controlPanel,
             HeaderBarDecorator headerBarDecorator) {
 
-        fullScreenButton = new JCheckBox("Full Screen");
+        fullScreenButton = new JCheckBox(I18n.tr("Full Screen"));
         fullScreenButton.addItemListener(new FullScreenListener());
-        fullScreenButton.setSelected(videoMediator.isFullScreen());
+        
+        videoPanel.addComponentListener(new ComponentAdapter(){
+            @Override
+            public void componentResized(ComponentEvent e) {
+                //This is less than ideal.  We really want this to happen when the VideoPanel is first shown but
+                //componentShown() only fires on setVisibility(true) so we are using
+                //componentResized() instead since it will resize when VideoPanel is added to its parent.
+                fullScreenButton.setSelected(VideoPanel.this.videoMediator.isFullScreen());
+            }            
+        });
         
         closeButton = new JButton("X");
         closeButton.addActionListener(new CloseAction());
@@ -123,6 +177,15 @@ public class VideoPanel extends JPanel {
         return item;
     }
     
+
+    private JMenuItem createFitToScreenMenuItem() {
+        JMenuItem item = new JCheckBoxMenuItem(I18n.tr("Fit to Screen"));
+        item.setSelected(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
+        item.addItemListener(new FitToScreenListener());
+        return item;
+    }
+    
+    
     private JMenuItem createPauseMenuItem(){
         JMenuItem item = new JMenuItem(I18n.tr("Pause"));
         item.addActionListener(new ActionListener() {
@@ -144,29 +207,52 @@ public class VideoPanel extends JPanel {
         });
         return item;
     }
+    
+    private void setFitToScreen(boolean isFitToScreen) {
+        SwingUiSettings.VIDEO_FIT_TO_SCREEN.setValue(isFitToScreen);
+        videoRenderer.setBackground(Color.BLUE);
+        
+        if(isFitToScreen){
+            fitToScreenLayout.setComponentConstraints(videoRenderer, "grow, gap 0, push");   
+            videoRenderer.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));   
+            videoRenderer.setMinimumSize(new Dimension(0, 0)); 
+        } else {
+            fitToScreenLayout.setComponentConstraints(videoRenderer, "pos 0.5al 0.5al");
+            videoRenderer.setMaximumSize(videoRenderer.getPreferredSize());   
+            videoRenderer.setMinimumSize(videoRenderer.getPreferredSize()); 
+        }
+        fitToScreenContainer.revalidate();
+        fitToScreenContainer.setSize(new Dimension(videoPanel.getSize().width, videoPanel.getSize().height - headerBar.getHeight()));
+        videoRenderer.setVisible(false);
+        videoRenderer.setVisible(true);
+    }
+    
 
     private class CloseAction extends AbstractAction {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             videoMediator.closeVideoPanel();
         }
-
     }
+    
     private class FullScreenListener implements ItemListener {
-
         @Override
         public void itemStateChanged(ItemEvent e) {
             videoMediator.setFullScreen(e.getStateChange() == ItemEvent.SELECTED);
         }
-
     }
     
     private class ToggleFullScreen extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("TOGGLE!");
             videoMediator.setFullScreen(!videoMediator.isFullScreen());
+        }
+    }
+    
+    private class FitToScreenListener implements ItemListener {
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            setFitToScreen(e.getStateChange() == ItemEvent.SELECTED);
         }
     }
     
