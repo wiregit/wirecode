@@ -21,6 +21,6 @@ public final class MacUtils {
         // This class takes advantage of a little know trick in 
         // Apple's VMs to show a real folder dialog, with a 
         // Choose button and all.
-        return new java.awt.FileDialog(frame, "");
+        return new OSXFolderDialog(frame, ""); 
     }
 }
