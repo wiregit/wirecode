@@ -241,7 +241,9 @@ public class StoreResultAdapter implements VisualStoreResult, Comparable {
 
     @Override
     public void setDownloadState(BasicDownloadState downloadState) {
+        BasicDownloadState oldDownloadState = this.downloadState;
         this.downloadState = downloadState;
+        firePropertyChange("downloadState", oldDownloadState, downloadState);
     }
 
     @Override
