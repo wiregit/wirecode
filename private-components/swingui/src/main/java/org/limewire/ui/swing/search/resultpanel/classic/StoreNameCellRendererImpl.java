@@ -37,18 +37,20 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
             StoreStyle storeStyle,
             boolean showAudioArtist,
             CategoryIconManager categoryIconManager,
+            StoreRendererResourceManager storeResourceManager,
             MousePopupListener popupListener,
             StoreController storeController) {
-        super(storeStyle, showAudioArtist, categoryIconManager, popupListener, storeController);
+        super(storeStyle, showAudioArtist, categoryIconManager, storeResourceManager,
+                popupListener, storeController);
     }
 
     @Override
     protected void initComponents() {
         tracksButton = new IconButton(showTracksAction);
-        tracksButton.setFont(resources.getFont());
+        tracksButton.setFont(storeResourceManager.getFont());
         tracksButton.setMinimumSize(new Dimension(
-                resources.getAlbumExpandedIcon().getIconWidth(),
-                resources.getAlbumExpandedIcon().getIconHeight()));
+                storeResourceManager.getAlbumExpandedIcon().getIconWidth(),
+                storeResourceManager.getAlbumExpandedIcon().getIconHeight()));
         
         streamButton = new IconButton(streamAction);
         
@@ -116,7 +118,8 @@ class StoreNameCellRendererImpl extends StoreNameCellRenderer {
                 } else {
                     // Update tracks button icon.
                     tracksButton.setIcon(vsr.isShowTracks() ? 
-                            resources.getAlbumExpandedIcon() : resources.getAlbumCollapsedIcon());
+                            storeResourceManager.getAlbumExpandedIcon() : 
+                            storeResourceManager.getAlbumCollapsedIcon());
                     tracksButton.setText(null);
                 }
                 

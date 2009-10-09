@@ -8,12 +8,14 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.ui.swing.components.CustomLineBorder;
@@ -25,6 +27,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
+import org.limewire.ui.swing.search.resultpanel.classic.StoreRendererResourceManager;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.store.StoreBrowserPanel;
 import org.limewire.ui.swing.search.store.StoreController;
@@ -46,9 +49,10 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected final CategoryIconManager categoryIconManager;
     protected final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     protected final Provider<SearchResultTruncator> headingTruncator;
+    protected final StoreRendererResourceManager storeResourceManager;
     protected final MouseListener popupListener;
     protected final StoreController storeController;
-
+    
     protected final JXPanel albumPanel;
     protected final JXPanel mediaPanel;
     protected final JXPanel albumTrackPanel;
@@ -73,6 +77,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            StoreRendererResourceManager storeResourceManager,
             MousePopupListener popupListener,
             StoreController storeController) {
         
@@ -80,6 +85,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
+        this.storeResourceManager = storeResourceManager;
         this.popupListener = popupListener;
         this.storeController = storeController;
         
@@ -194,6 +200,32 @@ abstract class ListViewStoreRenderer extends JXPanel {
             return headingBuilder.get().getHeadingDocument(searchHeading, vsr.getDownloadState(), rowResult.isSpam());
         } else {
             return headingBuilder.get().getHeadingDocument(searchHeading, vsr.getDownloadState(), rowResult.isSpam(), false);
+        }
+    }
+    
+    /**
+     * Returns the display icon for the specified store result.
+     */
+    protected Icon getIcon(VisualStoreResult vsr) {
+        if (vsr.isSpam()) {
+            return storeResourceManager.getSpamIcon();
+        }
+        
+        switch (vsr.getDownloadState()) {
+        case DOWNLOADING:
+            return storeResourceManager.getDownloadIcon();
+            
+        case DOWNLOADED:
+        case LIBRARY:
+            return storeResourceManager.getLibraryIcon();
+            
+        default:
+            if (vsr.getStoreResult().isAlbum()) {
+                return storeResourceManager.getAlbumIcon();
+            } else if (vsr.getCategory() == Category.AUDIO) {
+                return storeResourceManager.getAudioIcon();
+            }
+            return categoryIconManager.getIcon(vsr);
         }
     }
     

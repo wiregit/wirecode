@@ -32,6 +32,7 @@ import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
+import org.limewire.ui.swing.search.resultpanel.classic.StoreRendererResourceManager;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer.NoDancingHtmlLabel;
 import org.limewire.ui.swing.search.store.StoreController;
@@ -73,10 +74,11 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            StoreRendererResourceManager storeResourceManager,
             MousePopupListener popupListener,
             StoreController storeController) {
         super(storeStyle, categoryIconManager, headingBuilder, headingTruncator, 
-                popupListener, storeController);
+                storeResourceManager, popupListener, storeController);
     }
 
     @Override

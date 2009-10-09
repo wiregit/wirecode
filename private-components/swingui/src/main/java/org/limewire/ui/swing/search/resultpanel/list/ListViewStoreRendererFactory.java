@@ -4,6 +4,7 @@ import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
+import org.limewire.ui.swing.search.resultpanel.classic.StoreRendererResourceManager;
 import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
@@ -18,6 +19,7 @@ class ListViewStoreRendererFactory {
     private final CategoryIconManager categoryIconManager;
     private final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     private final Provider<SearchResultTruncator> headingTruncator;
+    private final StoreRendererResourceManager storeResourceManager;
     
     /**
      * Constructs a ListViewStoreRendererFactory using the specified services.
@@ -26,10 +28,12 @@ class ListViewStoreRendererFactory {
     public ListViewStoreRendererFactory(
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
-            Provider<SearchResultTruncator> headingTruncator) {
+            Provider<SearchResultTruncator> headingTruncator,
+            StoreRendererResourceManager storeResourceManager) {
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
+        this.storeResourceManager = storeResourceManager;
     }
     
     /**
@@ -46,13 +50,13 @@ class ListViewStoreRendererFactory {
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
             return new ListViewStoreRendererAB(storeStyle, categoryIconManager,
-                    headingBuilder, headingTruncator, popupListener, 
-                    storeController);
+                    headingBuilder, headingTruncator, storeResourceManager,
+                    popupListener, storeController);
             
         case STYLE_C: case STYLE_D:
             return new ListViewStoreRendererCD(storeStyle, categoryIconManager, 
-                    headingBuilder, headingTruncator, popupListener, 
-                    storeController);
+                    headingBuilder, headingTruncator, storeResourceManager,
+                    popupListener, storeController);
             
         default:
             return null;

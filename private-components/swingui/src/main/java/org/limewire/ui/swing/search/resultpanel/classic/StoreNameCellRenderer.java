@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search.resultpanel.classic;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -19,7 +18,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
@@ -30,7 +28,6 @@ import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.store.StoreController;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GraphicsUtilities;
-import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * A table cell renderer for displaying Lime Store results in the Name column
@@ -40,10 +37,10 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
 
     protected final boolean showAudioArtist;
     private final CategoryIconManager categoryIconManager;
+    protected final StoreRendererResourceManager storeResourceManager;
     private final MouseListener popupListener;
     private final StoreController storeController;
     
-    protected final RendererResources resources;
     protected final Action downloadAction;
     protected final Action streamAction;
     protected final ShowTracksAction showTracksAction;
@@ -67,15 +64,16 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
             StoreStyle storeStyle,
             boolean showAudioArtist,
             CategoryIconManager categoryIconManager,
+            StoreRendererResourceManager storeResourceManager,
             MousePopupListener popupListener,
             StoreController storeController) {
         this.storeStyle = storeStyle;
         this.showAudioArtist = showAudioArtist;
         this.categoryIconManager = categoryIconManager;
+        this.storeResourceManager = storeResourceManager;
         this.popupListener = popupListener;
         this.storeController = storeController;
         
-        resources = new RendererResources();
         downloadAction = new DownloadAction();
         streamAction = new StreamAction();
         showTracksAction = new ShowTracksAction();
@@ -83,7 +81,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
         renderer = new JXPanel();
         iconLabel = new JLabel();
         nameLabel = new JLabel();
-        nameLabel.setFont(resources.getFont());
+        nameLabel.setFont(storeResourceManager.getFont());
         
         installPopupListener(renderer);
         installPopupListener(iconLabel);
@@ -131,7 +129,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
             text = vsr.getNameProperty(showAudioArtist);
             icon = getIcon(vsr);
             if (vsr.isSpam()) {
-                foreground = resources.getDisabledForegroundColor();
+                foreground = storeResourceManager.getDisabledForegroundColor();
             } else {
                 foreground = table.getForeground();
             }
@@ -166,7 +164,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
      */
     protected Icon getBuyIcon() {
         Icon buyIcon = storeStyle.getClassicBuyIcon();
-        return (buyIcon != null) ? buyIcon : resources.getBuyIcon();
+        return (buyIcon != null) ? buyIcon : storeResourceManager.getBuyIcon();
     }
     
     /**
@@ -174,7 +172,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
      */
     protected Icon getPauseIcon() {
         Icon pauseIcon = storeStyle.getClassicPauseIcon();
-        return (pauseIcon != null) ? pauseIcon : resources.getPauseIcon();
+        return (pauseIcon != null) ? pauseIcon : storeResourceManager.getPauseIcon();
     }
     
     /**
@@ -182,7 +180,7 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
      */
     protected Icon getPlayIcon() {
         Icon playIcon = storeStyle.getClassicPlayIcon();
-        return (playIcon != null) ? playIcon : resources.getPlayIcon();
+        return (playIcon != null) ? playIcon : storeResourceManager.getPlayIcon();
     }
     
     /**
@@ -190,22 +188,22 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
      */
     private Icon getIcon(VisualStoreResult vsr) {
         if (vsr.isSpam()) {
-            return resources.getSpamIcon();
+            return storeResourceManager.getSpamIcon();
         }
         
         switch (vsr.getDownloadState()) {
         case DOWNLOADING:
-            return resources.getDownloadIcon();
+            return storeResourceManager.getDownloadIcon();
             
         case DOWNLOADED:
         case LIBRARY:
-            return resources.getLibraryIcon();
+            return storeResourceManager.getLibraryIcon();
             
         default:
             if (vsr.getStoreResult().isAlbum()) {
-                return resources.getAlbumIcon();
+                return storeResourceManager.getAlbumIcon();
             } else if (vsr.getCategory() == Category.AUDIO) {
-                return resources.getAudioIcon();
+                return storeResourceManager.getAudioIcon();
             }
             return categoryIconManager.getIcon(vsr);
         }
@@ -343,92 +341,6 @@ abstract class StoreNameCellRenderer implements TableCellRenderer {
             }
             
             super.paintComponent(g);
-        }
-    }
-    
-    /**
-     * Resource container for store renderer.
-     */
-    public static class RendererResources {
-        @Resource(key="StoreRenderer.albumIcon")
-        private Icon albumIcon;
-        @Resource(key="StoreRenderer.audioIcon")
-        private Icon audioIcon;
-        @Resource(key="StoreRenderer.albumCollapsedIcon")
-        private Icon albumCollapsedIcon;
-        @Resource(key="StoreRenderer.albumExpandedIcon")
-        private Icon albumExpandedIcon;
-        @Resource(key="StoreRenderer.classicBuyIcon")
-        private Icon buyIcon;
-        @Resource(key="StoreRenderer.classicPauseIcon")
-        private Icon pauseIcon;
-        @Resource(key="StoreRenderer.classicPlayIcon")
-        private Icon playIcon;
-        
-        @Resource(key="IconLabelRenderer.disabledForegroundColor")
-        private Color disabledForegroundColor;
-        @Resource(key="IconLabelRenderer.font")
-        private Font font;
-        @Resource(key="IconLabelRenderer.downloadingIcon")
-        private Icon downloadIcon;
-        @Resource(key="IconLabelRenderer.libraryIcon")
-        private Icon libraryIcon;
-        @Resource(key="IconLabelRenderer.spamIcon")
-        private Icon spamIcon;
-        
-        /**
-         * Constructs a RendererResources object. 
-         */
-        RendererResources() {
-            GuiUtils.assignResources(this);
-        }
-        
-        public Icon getAlbumIcon() {
-            return albumIcon;
-        }
-        
-        public Icon getAudioIcon() {
-            return audioIcon;
-        }
-        
-        public Icon getAlbumCollapsedIcon() {
-            return albumCollapsedIcon;
-        }
-        
-        public Icon getAlbumExpandedIcon() {
-            return albumExpandedIcon;
-        }
-        
-        public Icon getBuyIcon() {
-            return buyIcon;
-        }
-        
-        public Icon getPauseIcon() {
-            return pauseIcon;
-        }
-        
-        public Icon getPlayIcon() {
-            return playIcon;
-        }
-        
-        public Color getDisabledForegroundColor() {
-            return disabledForegroundColor;
-        }
-        
-        public Icon getDownloadIcon() {
-            return downloadIcon;
-        }
-        
-        public Font getFont() {
-            return font;
-        }
-        
-        public Icon getLibraryIcon() {
-            return libraryIcon;
-        }
-        
-        public Icon getSpamIcon() {
-            return spamIcon;
         }
     }
 }

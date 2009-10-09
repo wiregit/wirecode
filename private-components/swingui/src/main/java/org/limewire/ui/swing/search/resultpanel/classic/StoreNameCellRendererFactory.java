@@ -13,13 +13,16 @@ import com.google.inject.Inject;
 class StoreNameCellRendererFactory {
 
     private final CategoryIconManager categoryIconManager;
+    private final StoreRendererResourceManager storeResourceManager;
     
     /**
      * Constructs a StoreNameCellRendererFactory using the specified services.
      */
     @Inject
-    public StoreNameCellRendererFactory(CategoryIconManager categoryIconManager) {
+    public StoreNameCellRendererFactory(CategoryIconManager categoryIconManager,
+            StoreRendererResourceManager storeResourceManager) {
         this.categoryIconManager = categoryIconManager;
+        this.storeResourceManager = storeResourceManager;
     }
     
     /**
@@ -39,7 +42,8 @@ class StoreNameCellRendererFactory {
         case STYLE_A: case STYLE_B:
         case STYLE_C: case STYLE_D:
             return new StoreNameCellRendererImpl(storeStyle, showAudioArtist, 
-                    categoryIconManager, popupListener, storeController);
+                    categoryIconManager, storeResourceManager, popupListener,
+                    storeController);
             
         default:
             // Return null if type is not recognized.

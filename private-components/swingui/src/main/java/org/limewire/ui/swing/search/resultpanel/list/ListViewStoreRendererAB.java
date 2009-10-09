@@ -28,6 +28,7 @@ import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
+import org.limewire.ui.swing.search.resultpanel.classic.StoreRendererResourceManager;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer.NoDancingHtmlLabel;
 import org.limewire.ui.swing.search.store.StoreController;
@@ -75,10 +76,11 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            StoreRendererResourceManager storeResourceManager,
             MousePopupListener popupListener,
             StoreController storeController) {
         super(storeStyle, categoryIconManager, headingBuilder, headingTruncator,
-                popupListener, storeController);
+                storeResourceManager, popupListener, storeController);
     }
 
     @Override
@@ -333,7 +335,7 @@ class ListViewStoreRendererAB extends ListViewStoreRenderer {
     @Override
     protected void updateMedia(VisualStoreResult vsr, RowDisplayResult rowResult, boolean editing) {
         // Set category icon.
-        mediaIconButton.setIcon(categoryIconManager.getIcon(vsr));
+        mediaIconButton.setIcon(getIcon(vsr));
         
         // Update subheading visibility.
         switch (rowResult.getConfig()) {
