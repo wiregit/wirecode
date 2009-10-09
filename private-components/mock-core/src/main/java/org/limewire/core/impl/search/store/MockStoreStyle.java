@@ -48,6 +48,7 @@ public class MockStoreStyle implements StoreStyle {
     private final Font showTracksFont;
     private final Color showTracksForeground;
     private final String streamIconUri;
+    private final String streamPauseIconUri;
     private final Font subHeadingFont;
     private final Color subHeadingForeground;
     private final Font trackFont;
@@ -70,6 +71,7 @@ public class MockStoreStyle implements StoreStyle {
     private Icon downloadAlbumIcon;
     private Icon downloadTrackIcon;
     private Icon streamIcon;
+    private Icon streamPauseIcon;
     
     private boolean iconsRequested;
     
@@ -106,6 +108,7 @@ public class MockStoreStyle implements StoreStyle {
         showTracksFont = getFont(jsonObj, "showTracksFont");
         showTracksForeground = getColor(jsonObj, "showTracksForeground");
         streamIconUri = jsonObj.optString("streamIcon");
+        streamPauseIconUri = jsonObj.optString("streamIcon");
         subHeadingFont = getFont(jsonObj, "subHeadingFont");
         subHeadingForeground = getColor(jsonObj, "subHeadingForeground");
         trackFont = getFont(jsonObj, "trackFont");
@@ -163,6 +166,9 @@ public class MockStoreStyle implements StoreStyle {
                     }
                     if (!StringUtils.isEmpty(streamIconUri)) {
                         streamIcon = storeConnection.loadIcon(streamIconUri);
+                    }
+                    if (!StringUtils.isEmpty(streamPauseIconUri)) {
+                        streamPauseIcon = storeConnection.loadIcon(streamPauseIconUri);
                     }
                     
                     // Fire search event to update style.
@@ -278,6 +284,11 @@ public class MockStoreStyle implements StoreStyle {
     }
 
     @Override
+    public Icon getStreamPauseIcon() {
+        return streamPauseIcon;
+    }
+
+    @Override
     public Font getSubHeadingFont() {
         return subHeadingFont;
     }
@@ -369,14 +380,6 @@ public class MockStoreStyle implements StoreStyle {
         String value = jsonObj.optString(propertyKey);
         return (value != null) ? Font.decode(value) : null;
     }
-    
-//    /**
-//     * Retrieves the icon for the specified property key.
-//     */
-//    private Icon getIcon(JSONObject jsonObj, String propertyKey) {
-//        String value = jsonObj.optString(propertyKey);
-//        return (value != null) ? new ImageIcon(getClass().getResource(value)) : null;
-//    }
     
     /**
      * Retrieves the timestamp from the specified JSON object.

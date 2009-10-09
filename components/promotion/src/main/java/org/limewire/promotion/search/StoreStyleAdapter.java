@@ -49,6 +49,7 @@ public class StoreStyleAdapter implements StoreStyle {
     private final Font showTracksFont;
     private final Color showTracksForeground;
     private final Icon streamIcon;
+    private final Icon streamPauseIcon;
     private final Font subHeadingFont;
     private final Color subHeadingForeground;
     private final Font trackFont;
@@ -91,6 +92,7 @@ public class StoreStyleAdapter implements StoreStyle {
         showTracksFont = getFont(jsonObj, "showTracksFont");
         showTracksForeground = getColor(jsonObj, "showTracksForeground");
         streamIcon = getIcon(jsonObj, "streamIcon");
+        streamPauseIcon = getIcon(jsonObj, "streamPauseIcon");
         subHeadingFont = getFont(jsonObj, "subHeadingFont");
         subHeadingForeground = getColor(jsonObj, "subHeadingForeground");
         trackFont = getFont(jsonObj, "trackFont");
@@ -131,6 +133,7 @@ public class StoreStyleAdapter implements StoreStyle {
         showTracksFont = getFont(data.get("showTracksFont"));
         showTracksForeground = getColor(data.get("showTracksForeground"));
         streamIcon = getIcon(data.get("streamIcon"));
+        streamPauseIcon = getIcon(data.get("streamPauseIcon"));
         subHeadingFont = getFont(data.get("subHeadingFont"));
         subHeadingForeground = getColor(data.get("subHeadingForeground"));
         trackFont = getFont(data.get( "trackFont"));
@@ -249,6 +252,11 @@ public class StoreStyleAdapter implements StoreStyle {
     @Override
     public Icon getStreamIcon() {
         return streamIcon;
+    }
+
+    @Override
+    public Icon getStreamPauseIcon() {
+        return streamPauseIcon;
     }
 
     @Override

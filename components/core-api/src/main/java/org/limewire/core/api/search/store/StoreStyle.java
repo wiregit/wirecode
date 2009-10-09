@@ -55,6 +55,8 @@ public interface StoreStyle {
     
     Icon getStreamIcon();
     
+    Icon getStreamPauseIcon();
+    
     Font getSubHeadingFont();
   
     Color getSubHeadingForeground();
