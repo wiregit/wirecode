@@ -194,7 +194,7 @@ public class Main {
             dloader.discardCorruptDownload(false);
         }
         
-        @Override public void warnUser(String filename, String message) {}
+        @Override public void warnUser(String filename, String message, String moreInfoUrl) {}
     
         @Override public void restoreApplication() {}
     

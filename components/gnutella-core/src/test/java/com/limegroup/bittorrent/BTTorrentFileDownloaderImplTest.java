@@ -425,7 +425,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
             
             @Override
-            public void warnUser(String filename, String message) {
+            public void warnUser(String filename, String message, String moreInfoUrl) {
             }
 
             @Override

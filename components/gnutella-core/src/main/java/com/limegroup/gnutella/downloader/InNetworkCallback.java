@@ -43,7 +43,7 @@ public class InNetworkCallback implements DownloadCallback {
         dloader.discardCorruptDownload(true);
     }
     
-    public void warnUser(String filename, String message) {
+    public void warnUser(String filename, String message, String moreInfoUrl) {
     }
 
     public String getHostValue(String key) {

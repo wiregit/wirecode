@@ -60,7 +60,7 @@ public class ActivityCallbackStub implements ActivityCallback {
         corruptChecked = true;
         dloader.discardCorruptDownload(delCorrupt);
     }
-    public void warnUser(String filename, String message) { }
+    public void warnUser(String filename, String message, String moreInfoUrl) { }
     public void browseHostFailed(GUID guid) {}
 	public void restoreApplication() {}
 	public void showDownloads() {}

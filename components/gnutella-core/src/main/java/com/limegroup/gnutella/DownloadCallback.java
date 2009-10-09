@@ -31,7 +31,7 @@ public interface DownloadCallback {
     /**
      * Shows the user a warning about a file.
      */
-    public void warnUser(String filename, String message);
+    public void warnUser(String filename, String message, String moreInfoUrl);
 
     /**
      * Prompts the user about what priorities to assign the files in this

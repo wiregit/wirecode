@@ -42,7 +42,7 @@ public interface GuiCallback {
     /**
      * Shows the user a warning about a file.
      */
-    void warnUser(String filename, String message);
+    void warnUser(String filename, String message, String moreInfoUrl);
 
     /**
      * Prompts the user about what priorities to assign the files in this

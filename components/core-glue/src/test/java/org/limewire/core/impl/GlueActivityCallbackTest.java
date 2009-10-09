@@ -164,12 +164,12 @@ public class GlueActivityCallbackTest extends BaseTestCase {
         GlueActivityCallback activityCallback = new GlueActivityCallback(null);
         
         context.checking(new Expectations() {{
-            exactly(1).of(callback).warnUser("file", "oh noes");
+            exactly(1).of(callback).warnUser("file", "oh noes", null);
         }});
         
-        activityCallback.warnUser("file", "oh noes");
+        activityCallback.warnUser("file", "oh noes", null);
         activityCallback.setGuiCallback(callback);
-        activityCallback.warnUser("file", "oh noes");
+        activityCallback.warnUser("file", "oh noes", null);
         
         context.assertIsSatisfied();
     }

@@ -109,7 +109,7 @@ public class ActivityCallbackAdapter implements ActivityCallback {
        
     }
     
-    public void warnUser(String filename, String warning) {
+    public void warnUser(String filename, String warning, String moreInfoUrl) {
         
     }
 
