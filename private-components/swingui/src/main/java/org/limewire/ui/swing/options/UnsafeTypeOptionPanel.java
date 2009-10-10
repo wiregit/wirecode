@@ -26,10 +26,10 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.NotImplementedException;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
-import com.jacob.com.NotImplementedException;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
