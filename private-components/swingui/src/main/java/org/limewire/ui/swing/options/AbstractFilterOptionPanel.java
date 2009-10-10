@@ -16,6 +16,7 @@ import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXTable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -50,7 +51,8 @@ public abstract class AbstractFilterOptionPanel extends OptionPanel {
             getColumn(1).setCellEditor(new RemoveButtonRenderer(this));
         }
     }
-      protected static class FilterTableFormat extends AbstractTableFormat<String> {
+      
+    protected static class FilterTableFormat extends AbstractTableFormat<String> {
 
         private static final int NAME_INDEX = 0;
         private static final int BUTTON_INDEX = 1;
@@ -70,12 +72,12 @@ public abstract class AbstractFilterOptionPanel extends OptionPanel {
         }
     }
     
-    private class RemoveButtonRenderer extends JPanel implements TableCellRenderer, TableCellEditor {
+    protected class RemoveButtonRenderer extends JPanel implements TableCellRenderer, TableCellEditor {
         private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
         
         private final HyperlinkButton button;
         
-        public RemoveButtonRenderer(final FilterTable table) {
+        public RemoveButtonRenderer(final JXTable table) {
 
             // lower case since hyperlink
             button = new HyperlinkButton(I18n.tr("remove"));

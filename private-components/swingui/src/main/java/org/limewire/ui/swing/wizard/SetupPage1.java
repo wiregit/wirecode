@@ -29,7 +29,7 @@ public class SetupPage1 extends WizardPage {
         super(decorator, application);
         
         setOpaque(false);
-        setLayout(new MigLayout("insets 0 14 0 0, gap 0"));       
+        setLayout(new MigLayout("insets 0 14 0 0, gap 0, nogrid"));       
    
         associationFileTypeCheckBox = createAndDecorateCheckBox(true);
         launchAtStartupCheckBox = createAndDecorateCheckBox(true);
@@ -75,7 +75,7 @@ public class SetupPage1 extends WizardPage {
         add(createAndDecorateHeader(I18n.tr("Improve LimeWire")), "gaptop 20, span, wrap");
         add(shareUsageDataCheckBox, "gaptop 5, gapleft 26");
         add(createAndDecorateMultiLine(I18n.tr("Help improve LimeWire by sending us anonymous usage data"), shareUsageDataCheckBox), "gapleft 5, gaptop 5");
-        add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=anonymousDataCollection"), "gapleft 10, wrap");
+        add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=anonymousDataCollection"), "gapleft 10, gaptop 5, wrap");
     }
     
     /**
@@ -85,7 +85,7 @@ public class SetupPage1 extends WizardPage {
         add(createAndDecorateHeader(I18n.tr("Content Filters")), "gaptop 20, span, wrap");
         add(contentFilterCheckBox, "gaptop 5, gapleft 26");
         add(createAndDecorateMultiLine(I18n.tr("Don't let me download or upload files copyright owners request not be shared"), contentFilterCheckBox), "gapleft 5, gaptop 5");
-        add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=contentFiltering"), "gapleft 10, wrap");
+        add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=contentFiltering"), "gapleft 10, gaptop 5, wrap");
     }
     
     private void initSettings() {

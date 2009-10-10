@@ -667,6 +667,19 @@ class LibraryFileData extends AbstractSettingsGroup {
         return LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
     }
     
+    public int peekListCount(int listID) {
+        
+        int count = 0;
+        
+        for ( List<Integer> listForFile : fileData.values() ) {
+            if (listForFile.contains(listID)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+    
     private static class FileProperties implements Serializable {
         private static final long serialVersionUID = 767248414812908206L;
         private boolean gnutella;

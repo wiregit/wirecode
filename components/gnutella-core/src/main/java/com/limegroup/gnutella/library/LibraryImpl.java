@@ -1239,4 +1239,8 @@ class LibraryImpl implements Library, FileCollection {
             remove(file);
         }
     }
+    
+    public int peekListCount(int listID) {
+        return fileData.peekListCount(listID);
+    }
 }

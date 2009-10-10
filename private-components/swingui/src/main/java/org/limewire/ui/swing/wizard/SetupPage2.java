@@ -1,18 +1,24 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
+import org.limewire.core.api.library.LibraryData;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.ui.swing.components.SegmentLayout;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -22,57 +28,45 @@ import org.limewire.util.VersionFormatException;
 
 public class SetupPage2 extends WizardPage {
     private final JCheckBox shareDownloadedFilesCheckBox;
+    private final SharedFileListManager shareListManager;
+    private final LibraryData libraryData;
 
     @Resource private Icon p2pSharedListIcon;
     @Resource private Icon sharingMyFilesMacIcon;
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
 
-    public SetupPage2(SetupComponentDecorator decorator, Application application) {
+    public SetupPage2(SetupComponentDecorator decorator, Application application, 
+            SharedFileListManager shareListManager, LibraryData libraryData) {
+        
         super(decorator, application);
+        
+        this.shareListManager = shareListManager;
+        this.libraryData = libraryData;
 
         GuiUtils.assignResources(this);
 
         setOpaque(false);
-        setLayout(new MigLayout("insets 0, gap 0, fill, align center"));
+        setLayout(new SegmentLayout());
 
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
 
         boolean newInstall = InstallSettings.PREVIOUS_RAN_VERSIONS.get().size() == 0;
-        boolean five0Orfive1Upgrade = isFive0OrFive1Upgrade();
         boolean fourUpgrade = isFourUpgrade();
         
-        addAutoSharing(newInstall);
-        addSeperator();
-        addModifyInfo();
-        if (!newInstall) {
-            addSeperator();
-            addOldVersionInfo(five0Orfive1Upgrade, fourUpgrade);
-        }
+        JPanel autoSharingPanel = createAutoSharingPanel(newInstall);
+        autoSharingPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
+        add(autoSharingPanel);
+        
+        add(createModifyInfoPanel());
+       
+     //   if (!newInstall) {
+            JPanel oldVersionInfoPanel = createOldVersionInfoPanel(fourUpgrade);
+            oldVersionInfoPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK));
+            add(oldVersionInfoPanel);
+   //     }
 
         initSettings();
-    }
-
-    private boolean isFive0OrFive1Upgrade() {
-        boolean has50Or51 = false;
-        boolean hasGreater = false;
-        for (String previousVersion : InstallSettings.PREVIOUS_RAN_VERSIONS.get()) {
-            try {
-                Version version = new Version(previousVersion);
-                if (version.getMajor() == 5) {
-                    if(version.getMinor() == 0 || version.getMinor() == 1) {
-                        has50Or51 = true;
-                    } else {
-                        hasGreater = true;
-                    }
-                } else if(version.getMajor() > 5) {
-                    hasGreater = true;
-                }
-            } catch (VersionFormatException e) {
-                // do nothing
-            }
-        }
-        return has50Or51 && !hasGreater;
     }
     
     private boolean isFourUpgrade() {
@@ -91,13 +85,6 @@ public class SetupPage2 extends WizardPage {
             }
         }
         return has4 && !hasGreater;
-    }
-
-    private void addSeperator() {
-        JSeparator separator = new JSeparator();
-        separator.setForeground(Color.BLACK);
-        add(separator, "growx, span, wrap");
-
     }
 
     private void initSettings() {
@@ -135,15 +122,17 @@ public class SetupPage2 extends WizardPage {
     /**
      * Adds header for Auto-Sharing, checkbox and associated text.
      */
-    private void addAutoSharing(boolean newInstall) {
-        JPanel autoSharingPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
+    private JPanel createAutoSharingPanel(boolean newInstall) {
+        JPanel outerPanel = new JPanel(new GridBagLayout());
+        
+        JPanel autoSharingPanel = new JPanel(new MigLayout("insets 0, gap 0, nogrid"));
 
         autoSharingPanel.add(createAndDecorateHeader(I18n
                 .tr("Files in your Public Shared list are shared with the world.")),
                 "alignx center, wrap");
 
         if (newInstall) {
-            autoSharingPanel.add(shareDownloadedFilesCheckBox, "alignx center");
+            autoSharingPanel.add(shareDownloadedFilesCheckBox);
             autoSharingPanel.add(createAndDecorateMultiLine(I18n
                     .tr("Add files I download from P2P Users to my Public Shared list."),
                     shareDownloadedFilesCheckBox));
@@ -163,10 +152,13 @@ public class SetupPage2 extends WizardPage {
                     "wrap");
         }
 
-        add(autoSharingPanel, "growx, span, sg sameRowSize, wrap");
+        outerPanel.add(autoSharingPanel, new GridBagConstraints());
+        return outerPanel;
     }
 
-    private void addModifyInfo() {
+    private JPanel createModifyInfoPanel() {
+        JPanel outerPanel = new JPanel(new GridBagLayout());
+        
         Icon myFilesIcon = null;
         if (OSUtils.isMacOSX()) {
             myFilesIcon = sharingMyFilesMacIcon;
@@ -189,25 +181,40 @@ public class SetupPage2 extends WizardPage {
         modifyInfoPanel.add(new JLabel(I18n.tr("Public Shared"), p2pSharedListIcon,
                 JLabel.RIGHT), "aligny top, gaptop 15");
 
-        add(modifyInfoPanel, "growx, span, sg sameRowSize, wrap");
+        outerPanel.add(modifyInfoPanel, new GridBagConstraints());
+        
+        return outerPanel;
     }
 
-    private void addOldVersionInfo(boolean five0Orfive1Upgrade, boolean fourUpgrade) {
-        JPanel oldVersionInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0"));
-        if (five0Orfive1Upgrade) {
-            oldVersionInfoPanel.add(createAndDecorateHeader(I18n
-                    .tr("Files shared with the P2P Network in your old version will be in your Public Shared list.")),
-                    "alignx center, wrap");
-        } else if(fourUpgrade) {
-            oldVersionInfoPanel.add(createAndDecorateHeader(I18n
-                    .tr("Shared files from your old version will be in your Public Shared list.")),
-                    "alignx center, wrap");
-        } else {
-            //all other upgrades
-            oldVersionInfoPanel.add(createAndDecorateHeader(I18n
-                    .tr("Shared files from your Public Shared list will continue to be shared.")),
-                    "alignx center, wrap");
+    private int peekNumPublicSharedFiles() {
+        int numPublicFiles = 0;
+        for ( SharedFileList list : shareListManager.getModel() ) {
+            if (list.isPublic()) {
+                numPublicFiles += libraryData.peekListCount(list.getId());
+            }
         }
-        add(oldVersionInfoPanel, "growx, span, sg sameRowSize, wrap");
+        return numPublicFiles;
     }
+    
+    private JPanel createOldVersionInfoPanel(boolean fourUpgrade) {
+        
+        JPanel outerPanel = new JPanel(new GridBagLayout());
+        
+        JLabel label;
+        
+        if(fourUpgrade) {
+            label = createAndDecorateHeader(I18n
+                    .tr("Shared files from your old version will be in your Public Shared list."));
+        } else {
+            label = createAndDecorateHeader(I18n
+                    .tr("{0} shared files from your previous version will continue to be shared with the world.", 
+                            peekNumPublicSharedFiles()));
+        }
+        
+        outerPanel.add(label, new GridBagConstraints());
+
+        return outerPanel;
+    }
+    
+
 }

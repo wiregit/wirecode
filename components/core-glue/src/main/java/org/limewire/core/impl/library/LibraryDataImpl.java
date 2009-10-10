@@ -30,4 +30,9 @@ class LibraryDataImpl implements LibraryData {
     public boolean isDirectoryAllowed(File folder) {
         return library.isDirectoryAllowed(folder);
     }
+
+    @Override
+    public int peekListCount(int listID) {
+        return library.peekListCount(listID);
+    }
 }

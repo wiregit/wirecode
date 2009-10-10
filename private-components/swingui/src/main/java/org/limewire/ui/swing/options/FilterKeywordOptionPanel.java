@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -16,9 +15,12 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
+
+import com.google.inject.Inject;
 
 /**
  * Creates a table to manage which words will not show up in search results.
@@ -31,7 +33,8 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
     private FilterTable filterTable;
     private SpamManager spamManager;
     
-    public FilterKeywordOptionPanel(SpamManager spamManager, Action okAction) {
+    @Inject
+    public FilterKeywordOptionPanel(SpamManager spamManager) {
         this.spamManager = spamManager;
         setLayout(new MigLayout("gapy 10"));
         
@@ -39,7 +42,7 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
         addKeywordButton = new JButton(I18n.tr("Add Keyword"));
         
         filterTable = new FilterTable(new DefaultEventTableModel<String>(eventList, new FilterTableFormat(I18n.tr("Keyword"))));
-        okButton = new JButton(okAction);
+        okButton = new JButton(new OKDialogAction());
         addKeywordButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {

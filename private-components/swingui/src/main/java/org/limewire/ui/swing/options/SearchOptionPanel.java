@@ -16,16 +16,12 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.setting.Setting;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.NonNullJComboBox;
-import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
-import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
@@ -41,27 +37,30 @@ import com.google.inject.name.Named;
 public class SearchOptionPanel extends OptionPanel {
 
     private final AutoCompleteDictionary searchHistory;
-    private final SpamManager spamManager;
     private final Application application;
-    
     private final UnsafeTypeOptionPanel unsafeOptionPanel;
-    private final Provider<UnsafeTypeOptionPanelStateManager> unsafeTypeOptionPanelStateManagerProvider;
+    
+    private final Provider<FilterKeywordOptionPanel> filterKeywordOptionPanelProvider;
+    private final Provider<FilterFileExtensionsOptionPanel> filterFileExtensionsOptionPanelProvider;
+    
     
     private SearchBarPanel searchBarPanel;
     private FilteringPanel filteringPanel;
     private JCheckBox groupSimilarResults;
 
+    
     @Inject
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
-            SpamManager spamManager,
             UnsafeTypeOptionPanel unsafeOptionPanel,
-            Provider<UnsafeTypeOptionPanelStateManager> stateManager, 
-            Application application) {
+            Application application,
+            Provider<FilterKeywordOptionPanel> filterKeywordOptionPanelProvider,
+            Provider<FilterFileExtensionsOptionPanel> filterFileExtensionsOptionPanelProvider) {
+        
         this.application = application;
-        this.spamManager = spamManager;
         this.searchHistory = searchHistory;
         this.unsafeOptionPanel = unsafeOptionPanel;
-        this.unsafeTypeOptionPanelStateManagerProvider = stateManager;
+        this.filterKeywordOptionPanelProvider = filterKeywordOptionPanelProvider;
+        this.filterFileExtensionsOptionPanelProvider = filterFileExtensionsOptionPanelProvider;
         
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
@@ -225,10 +224,10 @@ public class SearchOptionPanel extends OptionPanel {
                     unsafeOptionPanel, I18n.tr("Unsafe File Sharing"),
                     I18n.tr("Configure..."), I18n.tr("Configure unsafe file sharing settings")));
             
-            filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
+            filterKeywordPanel = filterKeywordOptionPanelProvider.get();
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
             
-            filterFileExtensionPanel = new FilterFileExtensionsOptionPanel(spamManager, new OKDialogAction());
+            filterFileExtensionPanel = filterFileExtensionsOptionPanelProvider.get();
             filterFileExtensionPanel.setPreferredSize(new Dimension(300,400));
             
             copyrightContentCheckBox = new JCheckBox("<html>"+I18n.tr("Don't let me download or upload files copyright owners request not be shared.")+"</html>");
@@ -247,7 +246,7 @@ public class SearchOptionPanel extends OptionPanel {
                     I18n.tr("Filter File Extensions..."),
                     I18n.tr("Restrict files with certain extensions from being displayed in search results")));
            
-            programSharingLabel = new JLabel();
+            programSharingLabel = new JLabel(I18n.tr("Change the ability to search for Programs"));
             add(programSharingLabel);
             add(configureButton, "wrap");
             
@@ -284,28 +283,8 @@ public class SearchOptionPanel extends OptionPanel {
             filterKeywordPanel.initOptions();
             filterFileExtensionPanel.initOptions();
             unsafeOptionPanel.initOptions();
-            
-            updateProgramsMessage();
-            
-            unsafeTypeOptionPanelStateManagerProvider.get().addSettingChangedListener(new SettingChangedListener() {
-                @Override
-                public void settingChanged(Setting setting) {
-                    if (setting.equals(LibrarySettings.ALLOW_PROGRAMS)) {
-                        updateProgramsMessage();
-                    }
-                }
-            });
         }
-        
-        private void updateProgramsMessage() {
-            if (((Boolean)unsafeTypeOptionPanelStateManagerProvider.get()
-                    .getValue(LibrarySettings.ALLOW_PROGRAMS)).booleanValue()) {
-                programSharingLabel.setText("<html>"+I18n.tr("You enabled showing Programs in search results. This can lead to viruses.")+"</html>");
-            } 
-            else {
-                programSharingLabel.setText("<html>"+I18n.tr("LimeWire is helping to prevent viruses by not showing Programs in search results.")+"</html>");
-            }
-        }
+
     }
 
 }

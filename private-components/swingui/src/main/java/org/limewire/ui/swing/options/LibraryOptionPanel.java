@@ -11,11 +11,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.setting.Setting;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -41,18 +38,15 @@ public class LibraryOptionPanel extends OptionPanel {
     
     private final Provider<UnsafeTypeOptionPanel> unsafeOptionPanelProvider;
     private final Provider<ITunesOptionPanel> iTunesOptionPanelProvider;
-    private final Provider<UnsafeTypeOptionPanelStateManager> unsafeTypeOptionPanelStateManagerProvider;
     
     @Inject
     public LibraryOptionPanel(
             Provider<UnsafeTypeOptionPanel> unsafeTypeOptionPanelProvider,
             Provider<ITunesOptionPanel> iTunesOptionPanelProvider,
-            Provider<UnsafeTypeOptionPanelStateManager> stateManager,
             Application application) {
         this.application = application;
         this.unsafeOptionPanelProvider = unsafeTypeOptionPanelProvider;
         this.iTunesOptionPanelProvider = iTunesOptionPanelProvider;
-        this.unsafeTypeOptionPanelStateManagerProvider = stateManager;
         
         GuiUtils.assignResources(this);
         
@@ -223,17 +217,10 @@ public class LibraryOptionPanel extends OptionPanel {
             add(shareP2PdownloadedFilesCheckBox);
             add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo", application), "gapleft 15, wrap");
             
-            unsafeMessageLabel = new JLabel();
+            unsafeMessageLabel = new JLabel(I18n.tr("Configure unsafe sharing settings"));
             add(unsafeMessageLabel);
             add(learnMoreButton, "gapleft 15");
             add(configureButton, "gapleft 15");
-            
-            unsafeTypeOptionPanelStateManagerProvider.get().addSettingChangedListener(new SettingChangedListener() {
-                @Override
-                public void settingChanged(Setting setting) {
-                    updateUnsafeMessage();   
-                }
-            });
         }
         
         private void addModifyInfo() {
@@ -266,16 +253,6 @@ public class LibraryOptionPanel extends OptionPanel {
             add(modifyInfoPanel, "wrap");
         }
         
-        private void updateUnsafeMessage() {
-            if (((Boolean)unsafeTypeOptionPanelStateManagerProvider.get().getValue(LibrarySettings.ALLOW_PROGRAMS)).booleanValue()
-                    || ((Boolean)unsafeTypeOptionPanelStateManagerProvider.get().getValue(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING)).booleanValue()) {
-                unsafeMessageLabel.setText("<html>"+I18n.tr("You have enabled some unsafe file sharing options.")+"</html>");
-            }
-            else {
-                unsafeMessageLabel.setText("<html>"+I18n.tr("LimeWire is preventing you from unsafe searching and sharing.")+"</html>");
-            }
-        }
-        
         @Override
         boolean applyOptions() {
             SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES
@@ -297,7 +274,6 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             unsafeTypeOptionPanel.initOptions();
-            updateUnsafeMessage();
             
             shareP2PdownloadedFilesCheckBox.setSelected(
                     SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());

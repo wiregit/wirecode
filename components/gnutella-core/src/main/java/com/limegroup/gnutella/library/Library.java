@@ -42,4 +42,7 @@ public interface Library extends FileCollection {
     
     /** Cancels any pending file tasks. */
     void cancelPendingTasks();
+    
+    /** Returns the number of files in a given share list directly from the raw library db */
+    int peekListCount(int listID);
 }

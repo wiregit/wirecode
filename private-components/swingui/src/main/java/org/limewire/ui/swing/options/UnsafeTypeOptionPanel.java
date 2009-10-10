@@ -1,12 +1,18 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -16,13 +22,14 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.Setting;
-import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
+import com.jacob.com.NotImplementedException;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
@@ -45,11 +52,14 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         this.shareListManager = shareListManager;
         this.manager = manager;
 
-        setLayout(new MigLayout("gapy 10"));
-
+        setLayout(new BorderLayout());
+        
+        JPanel contentPanel = new JPanel(new MigLayout("nogrid"));
+        contentPanel.setOpaque(false);
+        
         programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share Programs with anyone"));
         programCheckBox.setContentAreaFilled(false);
-        documentCheckBox = new JCheckBox(I18n.tr("Allow me to add Documents to my Public Shared list and share them with the world"));
+        documentCheckBox = new JCheckBox(I18n.tr("Allow me to share Documents with the world"));
         documentCheckBox.setContentAreaFilled(false);
         okButton = new JButton(new OKDialogAction());
     
@@ -57,13 +67,45 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         settingMap.put(LibrarySettings.ALLOW_PROGRAMS, programCheckBox);
         settingMap.put(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, documentCheckBox);
         
-        add(new MultiLineLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents. We strongly recommend you don't enable them."), 600), "span 2, wrap");
+        contentPanel.add(new JLabel("<html>" + I18n.tr("Enabling this setting makes you more prone " +
+        		"to accidently sharing personal information")
+                + "</html>"), "wrap");
+        contentPanel.add(documentCheckBox, "gapleft 25");
+        contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are Documents?")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new NotImplementedException("Link not known?");
+            }
+        }), "wrap");
         
-        add(programCheckBox, "split, gapleft 25, wrap");
-        add(documentCheckBox, "split, gapbottom 15, gapleft 25, wrap");
+        JSeparator separator = new JSeparator();
+        separator.setForeground(Color.BLACK);
+        contentPanel.add(separator, "growx, wrap");
         
-        //add(new JLabel(I18n.tr("By default, LimeWire allows you to share documents with your friends")), "push");
-        add(okButton, "tag ok, gapbefore push");
+        contentPanel.add(new JLabel("<html>" + I18n.tr("Enabling this setting makes you more prone to viruses")
+        + "</html>"), "wrap");
+        contentPanel.add(programCheckBox, "gapleft 25");
+        contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are Programs?")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new NotImplementedException("Link not known?");
+            }
+        }), "wrap");
+        
+        add(contentPanel, BorderLayout.CENTER);
+        
+        JPanel buttonPanel = new JPanel(new MigLayout("fill"));
+        buttonPanel.setOpaque(false);
+        
+        buttonPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("Learn More")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new NotImplementedException("Link not known?");
+            }
+        }));
+        
+        buttonPanel.add(okButton, "tag ok");
+        add(buttonPanel, BorderLayout.SOUTH);
         
         okButton.addActionListener(new ActionListener() {
             @Override

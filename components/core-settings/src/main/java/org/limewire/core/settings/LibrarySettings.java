@@ -16,7 +16,7 @@ public class LibrarySettings extends LimeProps {
     
     /** The current version of the library. */
     public static final StringSetting VERSION =
-        FACTORY.createStringSetting("LIBRARY_VERSION", LibraryVersion.FOUR_X.name());
+        FACTORY.createStringSetting("LIBRARY_VERSION", LibraryVersion.FIVE_0_0.name());
     
     /** True if the user should be prompted about what categories to share during a folder drop. */
     public static final BooleanSetting ASK_ABOUT_FOLDER_DROP_CATEGORIES =

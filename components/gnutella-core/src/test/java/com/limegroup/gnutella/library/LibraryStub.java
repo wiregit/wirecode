@@ -78,4 +78,9 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     public void cancelPendingTasks() {
         
     }
+
+    @Override
+    public int peekListCount(int listID) {
+        return 0;
+    }
 }

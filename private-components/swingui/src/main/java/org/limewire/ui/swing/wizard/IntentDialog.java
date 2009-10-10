@@ -2,7 +2,6 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -15,11 +14,9 @@ import java.util.Locale;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -34,6 +31,7 @@ import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.action.UrlAction.LaunchType;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.LanguageComboBox;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NonNullJComboBox;
@@ -234,7 +232,7 @@ public class IntentDialog extends LimeJDialog {
     private JComboBox createLanguageDropDown(Font normalFont) {
         final JComboBox languageDropDown = new NonNullJComboBox();
         Locale[] locales = LanguageUtils.getLocales(normalFont);
-        languageDropDown.setRenderer(new LocaleRenderer());
+        languageDropDown.setRenderer(new LanguageComboBox.LocaleRenderer());
         languageDropDown.setFont(smallFont);
         languageDropDown.setModel(new DefaultComboBoxModel(locales));
         
@@ -262,22 +260,6 @@ public class IntentDialog extends LimeJDialog {
 
         return languageDropDown;
     }
-    
-    
-    private static class LocaleRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
-            
-            if (value instanceof Locale) {
-                Locale locale = (Locale) value;
-                setText(locale.getDisplayName(locale));
-            }
-            
-            return this;
-        }
-    }
-
     
     /**
      * Allows a soft localised refresh of the text within the panel based

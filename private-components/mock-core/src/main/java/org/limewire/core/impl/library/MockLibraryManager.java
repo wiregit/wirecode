@@ -167,6 +167,11 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         public boolean isDirectoryAllowed(File folder) {
             return folder.isDirectory();
         }
+
+        @Override
+        public int peekListCount(int listID) {
+            return 0;
+        }
     }
 
     @Override
