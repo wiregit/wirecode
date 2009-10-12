@@ -3233,7 +3233,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * @return the source ranker being used or null if none is set.
      */
-    protected SourceRanker getSourceRanker() {
+    protected synchronized SourceRanker getSourceRanker() {
         return ranker;
     }
 
@@ -3274,11 +3274,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
 
-    }
-
-    // for tests
-    protected SourceRanker getCurrentSourceRanker() {
-        return ranker;
     }
 
     @Override

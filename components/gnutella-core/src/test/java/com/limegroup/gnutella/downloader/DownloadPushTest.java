@@ -437,7 +437,7 @@ public class DownloadPushTest extends DownloadTestCase {
 
         ManagedDownloaderImpl download = (ManagedDownloaderImpl) downloadServices.download(
                 new RemoteFileDesc[] { rfd }, RemoteFileDesc.EMPTY_LIST, null, false);
-        SourceRanker ranker = download.getCurrentSourceRanker();
+        SourceRanker ranker = download.getSourceRanker();
         assertTrue(ranker instanceof FriendsFirstSourceRanker);
         LOG.debug("started download");
 
