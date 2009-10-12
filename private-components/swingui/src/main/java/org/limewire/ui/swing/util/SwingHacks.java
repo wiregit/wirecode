@@ -51,7 +51,7 @@ public class SwingHacks {
                 @Override
                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                     final JPopupMenu menu = (JPopupMenu)e.getSource();
-                    Timer flashTimer = new Timer(5, new ActionListener() {
+                    Timer flashTimer = new Timer(20, new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             if (!menu.isVisible()) {
