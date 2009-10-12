@@ -71,11 +71,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         EventListener<TorrentEvent> {
 
     private static final Log LOG = LogFactory.getLog(BTDownloaderImpl.class);
-    private static final String DANGEROUS_TORRENT_WARNING = 
-        "This file contains bad data and may have been designed to damage " +
-        "your computer. LimeWire has cancelled the download for your " +
-        "protection. Please wait for your search to complete before choosing " +
-        "a file to download.";
+    private static final String DANGEROUS_TORRENT_WARNING = I18nMarker.marktr(
+            "This file contains bad data and may have been designed to damage your computer. LimeWire has cancelled the download for your protection. Please wait for your search to complete before choosing a file to download.");
     private static final String DANGEROUS_TORRENT_INFO_URL =
         "http://www.limewire.com/client_redirect/?page=dangerousDownloads";
     
@@ -213,8 +210,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // This will cause TorrentEvent.STOPPED
             torrent.stop();
             downloadCallback.get().warnUser(getSaveFile().getName(),
-                    I18nMarker.marktr(DANGEROUS_TORRENT_WARNING),
-                    DANGEROUS_TORRENT_INFO_URL);
+                    DANGEROUS_TORRENT_WARNING, DANGEROUS_TORRENT_INFO_URL);
             return true;
         }
         return false;

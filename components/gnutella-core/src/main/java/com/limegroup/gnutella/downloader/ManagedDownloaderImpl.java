@@ -210,11 +210,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     */
 
     private static final Log LOG = LogFactory.getLog(ManagedDownloaderImpl.class);
-    private static final String DANGEROUS_FILE_WARNING =
-        "This file contains bad data and may have been designed to damage " +
-        "your computer. LimeWire has cancelled the download for your " +
-        "protection. Please wait for your search to complete before choosing " +
-        "a file to download.";
+    private static final String DANGEROUS_FILE_WARNING = I18nMarker.marktr(
+        "This file contains bad data and may have been designed to damage your computer. LimeWire has cancelled the download for your protection. Please wait for your search to complete before choosing a file to download.");
     private static final String DANGEROUS_FILE_INFO_URL =
         "http://www.limewire.com/client_redirect/?page=dangerousDownloads";
 
@@ -1992,8 +1989,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             file.delete();
             // Inform the user that the file was deleted
             downloadCallback.warnUser(getSaveFile().getName(),
-                    I18nMarker.marktr(DANGEROUS_FILE_WARNING),
-                    DANGEROUS_FILE_INFO_URL);
+                    DANGEROUS_FILE_WARNING, DANGEROUS_FILE_INFO_URL);
             return true;
         }
         return false;
