@@ -131,7 +131,8 @@ public class OSXFolderDialog extends FileDialog
 	 * you make it invisible yourself via <code>setVisible(false)</code>
 	 * or <code>dispose()</code>.
 	 */
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
     public void show()
 	{
 		// Set the system property required by Mac OS X
