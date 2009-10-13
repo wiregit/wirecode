@@ -55,6 +55,8 @@ public class MacEventHandler extends ApplicationAdapter {
     @Inject private volatile ExitAction exitAction = null;
     @Inject private volatile CategoryManager categoryManager = null;
 
+    private boolean allMenusAndActionsEnabled = false;
+    
     /** Creates a new instance of MacEventHandler */
     @Inject
     public MacEventHandler() {
@@ -62,8 +64,8 @@ public class MacEventHandler extends ApplicationAdapter {
         
         Application.getApplication().addApplicationListener(this);
         
-        Application.getApplication().setEnabledAboutMenu(true);
-        Application.getApplication().setEnabledPreferencesMenu(true);
+        Application.getApplication().setEnabledPreferencesMenu(false);
+        Application.getApplication().setEnabledAboutMenu(false);
     }
 
     @Inject
@@ -75,36 +77,60 @@ public class MacEventHandler extends ApplicationAdapter {
         }
     }
 
+    /**
+     * Enable preferences.
+     */
+    public void enableAllMacMenusAndEventHandlers() {
+        Application.getApplication().setEnabledAboutMenu(true);
+        Application.getApplication().setEnabledPreferencesMenu(true);
+        allMenusAndActionsEnabled = true;
+    }
+    
     @Override
     public void handlePreferences(ApplicationEvent event) {
-        optionsAction.actionPerformed(null);
-        event.setHandled(true);
+        if (allMenusAndActionsEnabled ) {
+            optionsAction.actionPerformed(null);
+            event.setHandled(true);
+        }
     }
     
     @Override
     public void handleAbout(ApplicationEvent event) {
-        aboutAction.actionPerformed(null);
-        event.setHandled(true);
+        if (allMenusAndActionsEnabled ) {        
+            aboutAction.actionPerformed(null);
+            event.setHandled(true);
+        }
     }
     
     @Override
     public void handleQuit(ApplicationEvent event) {
-        exitAction.actionPerformed(null);
-        event.setHandled(true);
+        if (allMenusAndActionsEnabled ) {
+            exitAction.actionPerformed(null);
+            event.setHandled(true);
+        }
     }
   
+    /**
+     * Must be added after the UI is created, otherwise it'll create the application too soon!
+     * Since the preferences are enabled after the UI is created, let's handle these events only
+     * after the preferences have been enabled.
+     */
     @Override
     public void handleReOpenApplication(ApplicationEvent event) {
-        ActionMap map = org.jdesktop.application.Application.getInstance().getContext().getActionManager().getActionMap();
-        Action action = map.get("restoreView");
-        if (action != null) {
-            action.actionPerformed(null);
+        if ( allMenusAndActionsEnabled ) {
+            ActionMap map = org.jdesktop.application.Application.getInstance().getContext().getActionManager().getActionMap();
+            Action action = map.get("restoreView");
+            if (action != null) {
+                action.actionPerformed(null);
+            }
+            event.setHandled(true);
         }
-        event.setHandled(true);
     }
     
     @Override
     public void handleOpenFile(ApplicationEvent event) {
+        // This handler unlike the others may receive OS events before the UI is created.
+        // So, don't check if allMenusAndActionsEnabled is true.
         File file = new File(event.getFilename());
         if (!enabled) {
             lastFileOpened = file;

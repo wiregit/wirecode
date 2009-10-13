@@ -166,6 +166,8 @@ final class Initializer {
         // and hide the splash screen & display the UI.
         loadUI();
         
+        enableNativeMenuItemsAndEventHandlers();
+        
         SettingsWarningManager.checkTemporaryDirectoryUsage();
         SettingsWarningManager.checkSettingsLoadSaveFailure();        
         
@@ -596,6 +598,16 @@ final class Initializer {
                 connectionReporter.get().setLoadTime(System.currentTimeMillis() - Main.getStartTime());
             }
         });
+    }
+    
+    /**
+     * Let's enable the preferences and about menus only after the
+     * UI has been created.
+     */
+    private void enableNativeMenuItemsAndEventHandlers() {        
+        if (OSUtils.isMacOSX()) {
+            MacEventHandler.instance().enableAllMacMenusAndEventHandlers();
+        }
     }
     
     /** Runs any late UI tasks, such as initializing Icons, I18n support. */
