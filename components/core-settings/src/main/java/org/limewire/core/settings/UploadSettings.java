@@ -118,4 +118,10 @@ public final class UploadSettings extends LimeProps {
     
     public static final BooleanSetting CHECK_DUPES =
         FACTORY.createBooleanSetting("CHECK_DUPE_UPLOADS", true);
+    
+    /**
+     * Indicator that determines whether the Uploads tray is displayed.
+     */
+    public static final BooleanSetting SHOW_UPLOADS_TRAY = 
+        FACTORY.createBooleanSetting("SHOW_UPLOADS_TRAY", false);
 }
