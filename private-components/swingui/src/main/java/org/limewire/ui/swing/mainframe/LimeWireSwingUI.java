@@ -20,10 +20,13 @@ import javax.swing.SwingUtilities;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
@@ -41,6 +44,7 @@ import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -114,6 +118,21 @@ public class LimeWireSwingUI extends JPanel {
 	@Inject
 	public void registerListener(){
 	    mainDownloadPanel.addDownloadVisibilityListener(new DownloadVisibilityHandler());
+	    
+	    // Add listener for Uploads setting.
+	    UploadSettings.SHOW_UPLOADS_TRAY.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean showDownloads = DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue();
+                        boolean showUploads = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
+                        handleDownloadVisibilityChange(showDownloads || showUploads);
+                    }
+                });
+            }
+	    });
 	}
 	
 	private boolean isFirstPainting = true;
@@ -122,7 +141,7 @@ public class LimeWireSwingUI extends JPanel {
 	    if(isFirstPainting && splitPane.getHeight() > 0){
 	        isFirstPainting = false;
 	        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
-	            handleDownloadVisibiltyChange(true);
+	            handleDownloadVisibilityChange(true);
 	        }
 	    }
 	    super.paint(g);
@@ -189,12 +208,13 @@ public class LimeWireSwingUI extends JPanel {
     private class DownloadVisibilityHandler implements DownloadVisibilityListener {
         @Override
         public void updateVisibility(DownloadVisibilityEvent event) {
-            handleDownloadVisibiltyChange(event.getVisibility());
+            boolean showUploads = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
+            handleDownloadVisibilityChange(event.getVisibility() || showUploads);
         }
     }
    
     
-   private void handleDownloadVisibiltyChange(boolean isVisible){
+   private void handleDownloadVisibilityChange(boolean isVisible){
        assert(SwingUtilities.isEventDispatchThread());
        splitPane.getBottomComponent().setVisible(isVisible);
        if (isVisible) {
