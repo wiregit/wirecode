@@ -88,4 +88,10 @@ public interface TorrentManagerSettings {
      * Returns the alert mask for the torrent session. 
      */
     public int getAlertMask();
+
+    /**
+     * Returns true if upnp should be used by the torrent manager for torrent
+     * connections.
+     */
+    public boolean isUPNPEnabled();
 }

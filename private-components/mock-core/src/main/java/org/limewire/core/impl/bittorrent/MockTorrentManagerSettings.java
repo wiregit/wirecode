@@ -87,4 +87,9 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     public File getTorrentUploadsFolder() {
         return null;
     }
+
+    @Override
+    public boolean isUPNPEnabled() {
+        return true;
+    }
 }

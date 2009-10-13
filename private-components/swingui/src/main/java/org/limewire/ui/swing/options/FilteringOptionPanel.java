@@ -116,7 +116,7 @@ public class FilteringOptionPanel extends OptionPanel {
             add(addButton, "wrap");
             add(new JScrollPane(filterTable), "growx, span 2, wrap");
             add(backListCheckBox, "span, split");
-            add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx");
+            add(new MultiLineLabel(description, AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx");
         }
         
         @Override
@@ -164,7 +164,7 @@ public class FilteringOptionPanel extends OptionPanel {
             filterTable = new FilteringTable();
             addButton.addActionListener(new AddAction(addressTextField, filterTable));
             
-            add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap");
+            add(new MultiLineLabel(description, AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap");
             add(addressTextField, "gapright 10");
             add(addButton, "wrap");
             add(new JScrollPane(filterTable), "growx, span 2");

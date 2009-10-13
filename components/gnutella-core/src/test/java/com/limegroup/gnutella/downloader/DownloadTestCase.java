@@ -155,7 +155,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
     protected void setUp() throws Exception {
         setDownloadWaitTime(DEFAULT_WAIT_TIME);
         // raise the download-bytes-per-sec so stealing is easier
-        DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
+        DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.setValue(10);
 
         activityCallback = new MyCallback();
         injector = LimeTestUtils.createInjector(new LimeWireIOTestModule(), NetworkManagerStub.MODULE, 

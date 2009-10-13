@@ -16,9 +16,18 @@ public class OKDialogAction extends AbstractAction {
     public static final String SHORT_DESCRIPTION = I18n.tr("Keep any changes made");
     
     public OKDialogAction() {
-        putValue(Action.NAME, NAME);
-        putValue(Action.SHORT_DESCRIPTION, SHORT_DESCRIPTION);
+        this(NAME, SHORT_DESCRIPTION);
     }
+    
+    public OKDialogAction(String name) {
+        this(name, null);
+    }
+    
+    public OKDialogAction(String name, String shortDescription) {
+        putValue(Action.NAME, name);
+        putValue(Action.SHORT_DESCRIPTION, shortDescription);
+    }
+    
     
     @Override
     public void actionPerformed(ActionEvent e) {

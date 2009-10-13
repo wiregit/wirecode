@@ -33,6 +33,12 @@ public class BittorrentSettings extends LimeProps {
                     "libtorrent.reportLibraryLoadFailure");
 
     /**
+     * Setting for whether or not torrents should use UPNP.
+     */
+    public static final BooleanSetting TORRENT_USE_UPNP = FACTORY.createBooleanSetting(
+            "TORRENT_USE_UPNP", true);
+
+    /**
      * Whether or not libtorrent is enabled and we should try loading the
      * libtorrent libraries.
      */
@@ -133,10 +139,8 @@ public class BittorrentSettings extends LimeProps {
      * The maximum number of torrents that can be seeded at once.  One the limit is reached
      *  seeding torrents will be stopped.
      */
-    // TODO: Reorganise this so it does not clash with LIBTORRENT_ACTIVE_SEEDS_LIMIT above
-    public static final IntSetting TORRENT_SEEDING_LIMIT = FACTORY.createIntSetting(
-            "LIBTORRENT_SEEDING_LIMIT", 20, 0, Integer.MAX_VALUE);
-    
+    public static final IntSetting TORRENT_SEEDING_LIMIT = FACTORY.createRemoteIntSetting(
+            "TORRENT_SEEDING_LIMIT", 40, "torrents.torrentSeedingLimit", 0, Integer.MAX_VALUE);
 
     /**
      * This setting will cause torrents to upload forever, and will not limit

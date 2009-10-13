@@ -345,8 +345,6 @@ public class TorrentManagerImpl implements TorrentManager {
                 libTorrent.initialize(torrentSettings.get());
                 if (libTorrent.isLoaded()) {
                     setTorrentManagerSettings(torrentSettings.get());
-                    libTorrent.start_upnp();
-                    libTorrent.start_natpmp();
                 }
             } finally {
                 lock.writeLock().unlock();
@@ -522,6 +520,16 @@ public class TorrentManagerImpl implements TorrentManager {
         torrentSettings.set(settings);
         libTorrent.update_settings(settings);
         limitSeedingTorrents();
+
+        // TODO externalize this logic from the setTorrentManagerSettings
+        // method.
+        if (settings.isUPNPEnabled()) {
+            libTorrent.start_upnp();
+            libTorrent.start_natpmp();
+        } else {
+            libTorrent.stop_upnp();
+            libTorrent.stop_natpmp();
+        }
     }
 
     @Override

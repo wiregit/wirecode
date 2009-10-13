@@ -23,6 +23,6 @@ class ShowDownloadOptionsAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
-        map.get("showOptionsDialog").actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, OptionsDialog.DOWNLOADS));
+        map.get("showOptionsDialog").actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, OptionsDialog.TRANSFERS));
     }
 }

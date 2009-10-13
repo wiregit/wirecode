@@ -3,6 +3,7 @@ package org.limewire.ui.swing.options;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -10,18 +11,23 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NonNullJComboBox;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
@@ -37,12 +43,13 @@ import com.google.inject.name.Named;
 public class SearchOptionPanel extends OptionPanel {
 
     private final AutoCompleteDictionary searchHistory;
+    private final SpamManager spamManager;
     private final Application application;
-    private final UnsafeTypeOptionPanel unsafeOptionPanel;
     
+    private final UnsafeTypeOptionPanel unsafeOptionPanel;    
     private final Provider<FilterKeywordOptionPanel> filterKeywordOptionPanelProvider;
     private final Provider<FilterFileExtensionsOptionPanel> filterFileExtensionsOptionPanelProvider;
-    
+  
     
     private SearchBarPanel searchBarPanel;
     private FilteringPanel filteringPanel;
@@ -51,15 +58,16 @@ public class SearchOptionPanel extends OptionPanel {
     
     @Inject
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
+            SpamManager spamManager,
             UnsafeTypeOptionPanel unsafeOptionPanel,
             Application application,
             Provider<FilterKeywordOptionPanel> filterKeywordOptionPanelProvider,
             Provider<FilterFileExtensionsOptionPanel> filterFileExtensionsOptionPanelProvider) {
-        
         this.application = application;
+        this.spamManager = spamManager;
         this.searchHistory = searchHistory;
         this.unsafeOptionPanel = unsafeOptionPanel;
-        this.filterKeywordOptionPanelProvider = filterKeywordOptionPanelProvider;
+ 		this.filterKeywordOptionPanelProvider = filterKeywordOptionPanelProvider;
         this.filterFileExtensionsOptionPanelProvider = filterFileExtensionsOptionPanelProvider;
         
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
@@ -206,6 +214,24 @@ public class SearchOptionPanel extends OptionPanel {
     
     private class FilteringPanel extends OptionPanel {
 
+        private final class SpamOptionPanel extends JPanel {
+            {
+                setLayout(new MigLayout("gapy 10, nogrid"));
+                add(new JLabel(I18n.tr("Do you want to reset the Spam Filter?")) , "wrap");
+                add(new MultiLineLabel(I18n.tr("This will clear all the files marked as spam. Doing this may result in more spam in search results."), 400) , "wrap");
+                JButton okButton = new JButton(new OKDialogAction(I18n.tr("Reset")));
+                okButton.addActionListener(new ActionListener() {
+                   @Override
+                    public void actionPerformed(ActionEvent e) {
+                       spamManager.clearFilterData();
+                    } 
+                });
+                
+                add(okButton, "tag ok, alignx right,");
+                add(new JButton(new CancelDialogAction()), "tag cancel");
+            }
+        }
+
         private FilterKeywordOptionPanel filterKeywordPanel;
         private FilterFileExtensionsOptionPanel filterFileExtensionPanel;
         
@@ -216,7 +242,8 @@ public class SearchOptionPanel extends OptionPanel {
         
         private final JButton configureButton;
         private JLabel programSharingLabel;
-        
+        private JButton clearSpamButton;
+
         public FilteringPanel() {
             super(I18n.tr("Search Filtering"));
            
@@ -246,6 +273,8 @@ public class SearchOptionPanel extends OptionPanel {
                     I18n.tr("Filter File Extensions..."),
                     I18n.tr("Restrict files with certain extensions from being displayed in search results")));
            
+            clearSpamButton = new JButton(new DialogDisplayAction(SearchOptionPanel.this, new SpamOptionPanel(), I18n.tr("Reset Spam Filter"), I18n.tr("Reset Spam Filter..."), I18n.tr("Reset the Spam filter by clearing all files marked as spam")));
+            
             programSharingLabel = new JLabel(I18n.tr("Change the ability to search for Programs"));
             add(programSharingLabel);
             add(configureButton, "wrap");
@@ -255,7 +284,8 @@ public class SearchOptionPanel extends OptionPanel {
             add(adultContentCheckBox, "wrap");
             
             add(filterKeywordsButton, "gapright 10, alignx left");
-            add(filterFileExtensionsButton, "alignx left, wrap");
+            add(filterFileExtensionsButton, "alignx left");
+            add(clearSpamButton, "alignx left, wrap");
         }
         
         @Override

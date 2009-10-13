@@ -209,7 +209,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
-        SharingSettings.setSaveLWSDirectory(_storeDir);
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
         DaapSettings.DAAP_ENABLED.setValue(false);

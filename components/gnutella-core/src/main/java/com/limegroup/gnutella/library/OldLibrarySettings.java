@@ -3,8 +3,10 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 
 import org.limewire.core.settings.LimeProps;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetSetting;
+import org.limewire.setting.FileSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
@@ -81,5 +83,10 @@ final class OldLibrarySettings extends LimeProps {
      */
     public static final StringSetting EXTENSIONS_LIST_UNSHARED =
          FACTORY.createStringSetting("EXTENSIONS_LIST_UNSHARED", "");
-
+    
+    /**
+     * Directory for saving songs purchased from LimeWire Store (LWS).
+     */
+    public static final FileSetting DIRECTORY_FOR_SAVING_LWS_FILES = FACTORY.createFileSetting(
+            "DIRETORY_FOR_SAVING_LWS_FILES", SharingSettings.DEFAULT_SAVE_LWS_DIR).setAlwaysSave(true);
 }

@@ -4,10 +4,10 @@ import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -19,9 +19,9 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
-import org.limewire.ui.swing.components.EmbeddedComponentLabel;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.components.NumericTextField;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -32,50 +32,25 @@ import com.google.inject.Provider;
  */
 public class BitTorrentOptionPanel extends OptionPanel {
 
-    private ButtonGroup buttonGroup;
-
-    private JRadioButton uploadForever;
-
-    private JRadioButton myControl;
-
-    private JComponent seedMaxController;
-    private JComponent seedController;
-    private JComponent portController;
-    
-    private SpinnerNumberModel seedMaxModel;
-    private JSpinner seedMax;
-    private SpinnerNumberModel seedRatioModel;
-    private JSpinner seedRatio;
-    private SpinnerNumberModel seedTimeModel;
-    private JSpinner seedTime;
-
-    private NumericTextField startPortField;
-    private NumericTextField endPortField;
-
+    private final ButtonGroup buttonGroup;
+    private final JRadioButton uploadForever;
+    private final JRadioButton myControl;
+    private final SpinnerNumberModel seedRatioModel;
+    private final JSpinner seedRatio;
+    private final SpinnerNumberModel seedTimeModel;
+    private final JSpinner seedTime;
     private final Provider<TorrentManager> torrentManager;
-
     private final TorrentManagerSettings torrentSettings;
-    
-    private JCheckBox prioritizeTorrentPopup;
+    private final JCheckBox prioritizeTorrentPopup;
+    private final JPanel seedController;
 
     @Inject
     public BitTorrentOptionPanel(Provider<TorrentManager> torrentManager,
             @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.torrentManager = torrentManager;
         this.torrentSettings = torrentSettings;
-
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("nogrid, fill"));
         setOpaque(false);
-
-        add(getBitTorrentPanel(), "pushx, growx");
-    }
-
-    private JPanel getBitTorrentPanel() {
-        JPanel p = new JPanel();
-        p.setBorder(BorderFactory.createTitledBorder(""));
-        p.setLayout(new MigLayout("gapy 10, fill, hidemode 3"));
-        p.setOpaque(false);
-
         uploadForever = new JRadioButton("<html>" + I18n.tr("Upload torrents forever") + "</html>");
         uploadForever.addItemListener(new ItemListener() {
             @Override
@@ -83,7 +58,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 updateState(uploadForever.isSelected());
             }
         });
-        myControl = new JRadioButton(I18n.tr("Limit torrent upload "));
+        myControl = new JRadioButton(I18n.tr("Upload torrents until either of the following:"));
         myControl.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -98,15 +73,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(uploadForever);
         buttonGroup.add(myControl);
 
-
-        seedMaxModel = new SpinnerNumberModel(
-                BittorrentSettings.TORRENT_SEEDING_LIMIT.get().intValue(),
-                BittorrentSettings.TORRENT_SEEDING_LIMIT.getMinValue().intValue(),
-                BittorrentSettings.TORRENT_SEEDING_LIMIT.getMaxValue().intValue(), 1);
-        seedMax = new JSpinner(seedMaxModel);
-        seedMax.setPreferredSize(new Dimension(50, 20));
-        seedMax.setMaximumSize(new Dimension(60, 20));
-        
         seedRatioModel = new SpinnerNumberModel(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                 .get().doubleValue(), BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getMinValue()
                 .doubleValue(), BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getMaxValue()
@@ -125,44 +91,35 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedTime.setPreferredSize(new Dimension(50, 20));
         seedTime.setMaximumSize(new Dimension(60, 20));
 
-        seedMaxController = new EmbeddedComponentLabel(I18n.tr("Seed a maximum of {c} torrents"), 
-                seedMax);
-        
-        seedController = new EmbeddedComponentLabel(I18n.tr("Seed until ratio of {c} OR after {c} days uploading"), 
-                seedRatio, seedTime); 
-        
-        startPortField = new NumericTextField(5, 1, 0xFFFF);
-        endPortField = new NumericTextField(5, 1, 0xFFFF);
-        
-        portController = new EmbeddedComponentLabel(I18n.tr("Use ports {c} to {c}"), 
-                startPortField, endPortField);
-        
-        prioritizeTorrentPopup = new JCheckBox(I18n.tr("Show torrent file dialog when starting new torrents"));
-        prioritizeTorrentPopup.setOpaque(false);
-        
-        
-        if (torrentManager.get().isValid()) {
-            p.add(seedMaxController, "wrap");
-            p.add(uploadForever, "wrap");
-            p.add(myControl, "wrap");
-            
-            p.add(seedController, "gapleft 10, wrap");
-            p.add(portController, "wrap");
-            
-            p.add(prioritizeTorrentPopup, "wrap");
+        seedController = new JPanel(new MigLayout("insets 0, gap 0, nogrid"));
+        seedController.setOpaque(false);
+        seedController.add(new JLabel(I18n.tr("Ratio:")));
+        seedController.add(seedRatio, "wrap");
+        seedController.add(new JLabel(I18n.tr("Maximum days:")));
+        seedController.add(seedTime, "wrap");
 
+        prioritizeTorrentPopup = new JCheckBox(I18n
+                .tr("Let me choose files to download when starting a torrent"));
+        prioritizeTorrentPopup.setOpaque(false);
+
+        if (torrentManager.get().isValid()) {
+            add(prioritizeTorrentPopup, "wrap");
+            add(uploadForever, "wrap, gaptop 20");
+            add(myControl, "wrap");
+            add(seedController, "gapleft 20, wrap");
         } else {
-            p.add(new MultiLineLabel(
-                  I18n.tr("There was an error loading bittorrent. You will not be able to use bittorrent capabilities until this is resolved."),
-                  500));
+            add(new MultiLineLabel(
+                    I18n
+                            .tr("There was an error loading bittorrent. You will not be able to use bittorrent capabilities until this is resolved."),
+                    500), "wrap");
         }
-        return p;
+
+        add(new JButton(new OKDialogAction()), "tag ok, alignx right, split 2");
+        add(new JButton(new CancelDialogAction()), "tag cancel");
     }
 
     @Override
     boolean applyOptions() {
-        BittorrentSettings.TORRENT_SEEDING_LIMIT.setValue(seedMaxModel.getNumber().intValue());
-        
         BittorrentSettings.UPLOAD_TORRENTS_FOREVER.setValue(uploadForever.isSelected());
         if (!uploadForever.isSelected()) {
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatioModel.getNumber()
@@ -171,22 +128,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
                     .ceil(((Double) seedTime.getValue()).doubleValue() * 60 * 60 * 24)).intValue());
         }
 
-        int startPort = startPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT
-                .getValue());
-
-        int endPort = endPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT
-                .getValue());
-
-        if (startPort > endPort) {
-            int temp = startPort;
-            startPort = endPort;
-            endPort = temp;
-        }
-
-        BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.setValue(startPort);
-        BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.setValue(endPort);
-        
-        BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(prioritizeTorrentPopup.isSelected());
+        BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(prioritizeTorrentPopup
+                .isSelected());
 
         if (torrentManager.get().isValid()) {
             torrentManager.get().setTorrentManagerSettings(torrentSettings);
@@ -196,17 +139,13 @@ public class BitTorrentOptionPanel extends OptionPanel {
 
     @Override
     boolean hasChanged() {
-        return ((Integer)seedMax.getValue()).intValue() != BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue()
-                || BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue() != uploadForever.isSelected()
+        return BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue() != uploadForever.isSelected()
                 || ((Float) seedRatio.getValue()).floatValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT
                         .getValue()
                 || ((Double) Math.ceil(((Double) seedTime.getValue()).doubleValue() * 60 * 60 * 24))
                         .intValue() != BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue()
-                || startPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT
-                        .getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue()
-                || endPortField.getValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue()) != BittorrentSettings.LIBTORRENT_LISTEN_END_PORT
-                        .getValue() 
-                || prioritizeTorrentPopup.isSelected() != BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue();
+                || prioritizeTorrentPopup.isSelected() != BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING
+                        .getValue();
     }
 
     @Override
@@ -218,12 +157,10 @@ public class BitTorrentOptionPanel extends OptionPanel {
             myControl.setSelected(true);
         }
 
-        seedMax.setValue(BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue());
         seedRatio.setValue(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.get().doubleValue());
         seedTime.setValue(getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()));
-        startPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
-        endPortField.setValue(BittorrentSettings.LIBTORRENT_LISTEN_END_PORT.getValue());
-        prioritizeTorrentPopup.setSelected(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
+        prioritizeTorrentPopup.setSelected(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING
+                .getValue());
 
         updateState(auto);
     }

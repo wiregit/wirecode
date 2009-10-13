@@ -18,16 +18,23 @@ public class DownloadSettings extends LimeProps {
     }
 
     /**
-     * Setting for the number of bytes/second to allow for all uploads.
+     * Boolean setting indicating whether the max download speed should be limited using the MAX_DOWNLOAD_SPEED setting.
      */
-    public static final IntSetting DOWNLOAD_SPEED = FACTORY.createIntSetting("DOWNLOAD_SPEED", 100);
+    public static final BooleanSetting LIMIT_MAX_DOWNLOAD_SPEED = FACTORY.createBooleanSetting("LIMIT_MAX_DOWNLOAD_SPEED", false);
+    
+    /**
+     * Setting for the number of bytes/second to allow for all downloads.
+     * 
+     * Minimum of 8 KB/sec
+     */
+    public static final IntSetting MAX_DOWNLOAD_SPEED = FACTORY.createIntSetting("MAX_DOWNLOAD_SPEED", SpeedConstants.CABLE_SPEED_INT/8 * 1024, 8 * 1024, Integer.MAX_VALUE);
 
     /**
-     * The maximum number of downstream bytes per second ever passed by this
+     * The maximum number of downstream kilobytes per second ever passed by this
      * node.
      */
     @InspectablePrimitive("downstream bandwidth max")
-    public static final IntSetting MAX_DOWNLOAD_BYTES_PER_SEC = FACTORY.createExpirableIntSetting(
+    public static final IntSetting MAX_MEASURED_DOWNLOAD_KBPS = FACTORY.createExpirableIntSetting(
             "MAX_DOWNLOAD_BYTES_PER_SEC", 0);
 
     /**

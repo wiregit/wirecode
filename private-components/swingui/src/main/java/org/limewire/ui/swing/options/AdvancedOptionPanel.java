@@ -1,12 +1,19 @@
 package org.limewire.ui.swing.options;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -19,47 +26,99 @@ import com.google.inject.Provider;
  * Advanced Option View.
  */
 public class AdvancedOptionPanel extends OptionPanel {
-    
-    private OptionPanel[] list = new OptionPanel[4];
-    private List<Provider<? extends OptionPanel>> providerList = new ArrayList<Provider<? extends OptionPanel>>(4);
-    private final JTabbedPane tabbedPane;
-    
+
+    public static final int MULTI_LINE_LABEL_WIDTH = 440;
+
+    private static final String SYSTEM = I18n.tr("System");
+    private static final String LISTENING_PORTS = I18n.tr("Listening Ports");
+    private static final String PROXY = I18n.tr("Proxy");
+    private static final String NETWORK_INTERFACE = I18n.tr("Network Interface");
+    private static final String PERFORMANCE = I18n.tr("Performance");
+    private static final String FILTERING = I18n.tr("Filtering");
+
+    private final CardLayout cardLayout;
+    private final JPanel cardPanel;
+    private final JList list;
+    private final Map<String, Provider<? extends OptionPanel>> providers = new HashMap<String, Provider<? extends OptionPanel>>();
+    private final Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
+
     @Inject
-    public AdvancedOptionPanel(Provider<FilesOptionPanel> filesOptionPanel, Provider<ConnectionsOptionPanel> connectionsOptionPanel,
-                    Provider<SystemOptionPanel> systemOptionPanel, Provider<ReallyAdvancedOptionPanel> reallyAdvancedOptionPanel) {
-        
-        providerList.add(filesOptionPanel);
-        providerList.add(connectionsOptionPanel);
-        providerList.add(systemOptionPanel);
-        providerList.add(reallyAdvancedOptionPanel);
-        
-        setLayout(new MigLayout("insets 12 12 8 12, fill"));
-        
-        tabbedPane = new JTabbedPane();
-        tabbedPane.addTab(I18n.tr("Files"), new JPanel());
-        tabbedPane.addTab(I18n.tr("Transfers"), new JPanel());
-        tabbedPane.addTab(I18n.tr("System"), new JPanel());
-        tabbedPane.addTab(I18n.tr("Super Really Advanced"), new JPanel());
-        
-        add(tabbedPane, "grow");
+    public AdvancedOptionPanel(Provider<ListeningPortsOptionPanel> firewallOptionPanel,
+            Provider<ProxyOptionPanel> proxyOptionPanel,
+            Provider<NetworkInterfaceOptionPanel> networkInterfaceOptionPanel,
+            Provider<PerformanceOptionPanel> performanceOptionPanel,
+            Provider<FilteringOptionPanel> filteringOptionPanel,
+            Provider<SystemOptionPanel> systemOptionPanel) {
+
+        providers.put(SYSTEM, systemOptionPanel);
+        providers.put(LISTENING_PORTS, firewallOptionPanel);
+        providers.put(PROXY, proxyOptionPanel);
+        providers.put(NETWORK_INTERFACE, networkInterfaceOptionPanel);
+        providers.put(PERFORMANCE, performanceOptionPanel);
+        providers.put(FILTERING, filteringOptionPanel);
+
+        setLayout(new MigLayout("insets 15, fill, gapy 10", "[][grow]", "[][]"));
+
+        list = new JList();
+        list.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setPreferredSize(new Dimension(150, 500));
+
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel();
+        cardPanel.setOpaque(false);
+
+        cardPanel.setLayout(cardLayout);
+        createPanel(SYSTEM);
+        createList();
+
+        add(
+                new JLabel(
+                        I18n
+                                .tr("We recommend you don't touch these unless you really know what you're doing.")),
+                "span 2, wrap");
+        add(list, "growy");
+        add(cardPanel, "grow");
+
+        list.setSelectedIndex(0);
     }
     
     @Inject
     void register() {
-        tabbedPane.addChangeListener(new ChangeListener(){
+        list.addListSelectionListener(new ListSelectionListener() {
             @Override
-            public void stateChanged(ChangeEvent e) {
-                createTab(tabbedPane.getSelectedIndex(), true);
+            public void valueChanged(ListSelectionEvent e) {
+                String name = (String) list.getModel().getElementAt(list.getSelectedIndex());
+                if (!panels.containsKey(name)) {
+                    createPanel(name);
+                }
+                cardLayout.show(cardPanel, name);
             }
         });
+    }
+
+    private void createPanel(String id) {
+        panels.put(id, providers.get(id).get());
+        cardPanel.add(panels.get(id), id);
+        panels.get(id).initOptions();
+    }
+
+    private void createList() {
+        DefaultListModel model = new DefaultListModel();
+        model.addElement(SYSTEM);
+        model.addElement(LISTENING_PORTS);
+        model.addElement(PROXY);
+        model.addElement(NETWORK_INTERFACE);
+        model.addElement(PERFORMANCE);
+        model.addElement(FILTERING);
+
+        list.setModel(model);
     }
 
     @Override
     boolean applyOptions() {
         boolean restartRequired = false;
-        for(OptionPanel panel : list) {
-            if(panel == null)
-                continue;
+        for (OptionPanel panel : panels.values()) {
             restartRequired |= panel.applyOptions();
         }
         return restartRequired;
@@ -67,10 +126,8 @@ public class AdvancedOptionPanel extends OptionPanel {
 
     @Override
     boolean hasChanged() {
-        for(OptionPanel panel : list) {
-            if(panel == null)
-                continue;
-            if(panel.hasChanged())
+        for (OptionPanel panel : panels.values()) {
+            if (panel.hasChanged())
                 return true;
         }
         return false;
@@ -78,24 +135,8 @@ public class AdvancedOptionPanel extends OptionPanel {
 
     @Override
     public void initOptions() {
-        
-        createTab(0, false);
-        
-        for(OptionPanel optionPanel : list) {
-            if(optionPanel != null) {
-                optionPanel.initOptions();
-            }
-        }
-    }
-    
-    private void createTab(int index, boolean init) {
-        if(list[index] == null) {
-            list[index] = providerList.get(index).get();
-            tabbedPane.setComponentAt(index, list[index]);
-            
-            if (init) {
-                list[index].initOptions();
-            }
+        for (OptionPanel panel : panels.values()) {
+            panel.initOptions();
         }
     }
 }

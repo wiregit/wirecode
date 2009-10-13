@@ -45,6 +45,7 @@ class LibraryConverterHelper {
      * @param convertedDirectories A list of already converted directories so we
      *        can stop converting the same directory twice.
      */
+    @SuppressWarnings("deprecation")
     void convertSaveDirectories(List<File> excludedFolders, List<File> excludedFiles,
             Set<File> convertedDirectories) {
         convertDirectory(SharingSettings.getSaveDirectory(), null, excludedFolders, excludedFiles,
@@ -61,7 +62,7 @@ class LibraryConverterHelper {
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
         convertDirectory(SharingSettings.getFileSettingForCategory(Category.DOCUMENT)
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
-        convertDirectory(SharingSettings.getSaveLWSDirectory(), Collections.singletonList("mp3"),
+        convertDirectory(OldLibrarySettings.DIRECTORY_FOR_SAVING_LWS_FILES.get(), Collections.singletonList("mp3"),
                 excludedFolders, excludedFiles, convertedDirectories, true);
     }
 
@@ -82,7 +83,7 @@ class LibraryConverterHelper {
 
         // If we already converted this directory, or it is suppsoed to be
         // excluded.
-        if (convertedDirectories.contains(directory) || excludedFolders.contains(directory)) {
+        if (!directory.exists() || convertedDirectories.contains(directory) || excludedFolders.contains(directory)) {
             return;
         }
 

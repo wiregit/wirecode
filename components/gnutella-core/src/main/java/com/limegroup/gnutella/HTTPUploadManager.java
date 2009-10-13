@@ -23,7 +23,6 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.auth.ServerAuthState;
@@ -583,41 +582,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     // //////////////// Bandwidth Allocation and Measurement///////////////
-
-    /**
-     * Calculates the appropriate burst size for the allocating bandwidth on the
-     * upload.
-     * 
-     * @return burstSize. if it is the special case, in which we want to upload
-     *         as quickly as possible.
-     */
-    public int calculateBandwidth() {
-        // public int calculateBurstSize() {
-        float totalBandwith = getTotalBandwith();
-        float burstSize = totalBandwith / uploadsInProgress();
-        return (int) burstSize;
-    }
-
-    /**
-     * @return the total bandwith available for uploads
-     */
-    private float getTotalBandwith() {
-
-        // To calculate the total bandwith available for
-        // uploads, there are two properties. The first
-        // is what the user *thinks* their connection
-        // speed is. Note, that they may have set this
-        // wrong, but we have no way to tell.
-        float connectionSpeed = ConnectionSettings.CONNECTION_SPEED.getValue() / 8.0f;
-        // the second number is the speed that they have
-        // allocated to uploads. This is really a percentage
-        // that the user is willing to allocate.
-        float speed = UploadSettings.UPLOAD_SPEED.getValue();
-        // the total bandwith available then, is the percentage
-        // allocated of the total bandwith.
-        float totalBandwith = connectionSpeed * speed / 100.0f;
-        return totalBandwith;
-    }
 
     public int measuredUploadSpeed() {
         // Note that no lock is needed.

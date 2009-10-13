@@ -72,26 +72,4 @@ public class SharingSettingsTest extends LimeTestCase {
 					SharingSettings.getFileSettingForCategory(types[i]).get());
 		}
 	}
-	
-    public void testSetStoreDirectory() throws Exception {
-        
-        File tmpFile = File.createTempFile("prefix", "postfix");
-        tmpFile.deleteOnExit();
-        File dir = new File(tmpFile.getParentFile(), "subdir");
-        dir.mkdir();
-        dir.deleteOnExit();
-                
-        // test the lws directory
-        SharingSettings.setSaveLWSDirectory(dir);
-        
-        assertEquals("Should be the set directory", 
-                dir.getCanonicalPath(),
-                SharingSettings.getSaveLWSDirectory().getCanonicalPath());
-        
-        SharingSettings.setSaveLWSDirectory(SharingSettings.DEFAULT_SAVE_LWS_DIR);
-        
-        assertEquals("Should be the save directory", 
-                SharingSettings.getSaveLWSDirectory(),
-                SharingSettings.DEFAULT_SAVE_LWS_DIR);
-    }
 }

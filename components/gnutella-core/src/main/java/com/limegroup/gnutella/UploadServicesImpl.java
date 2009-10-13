@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UploadSettings;
 
 import com.google.inject.Inject;
@@ -47,8 +46,7 @@ public class UploadServicesImpl implements UploadServices {
         // by setting the upload speed to unlimited
         // set the upload speed to 3.4E38 bytes per second.
         // This is de facto not limiting the uploads
-        int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
-        if (uSpeed == 100) {
+        if (!UploadSettings.LIMIT_MAX_UPLOAD_SPEED.getValue()) {
             return Float.MAX_VALUE; 
         } else {
             // if the uploads are limited, take messageUpstream
@@ -56,15 +54,13 @@ public class UploadServicesImpl implements UploadServices {
             // speeds than 1kb/s so uploads won't stall completely
             // if the user accidently sets his connection speed 
             // lower than his message upstream
-    
-            // connection speed is in kbits per second and upload speed is in percent
-            float speed = ConnectionSettings.CONNECTION_SPEED.getValue() / 8f * uSpeed / 100f;
-            
+
+            int uSpeed = UploadSettings.MAX_UPLOAD_SPEED.getValue();
             // reduced upload speed if we are an ultrapeer
-            speed -= connectionManager.get().getMeasuredUpstreamBandwidth();
+            uSpeed -= (connectionManager.get().getMeasuredUpstreamBandwidth() * 1024f);
             
             // we need bytes per second
-            return Math.max(speed, 1f) * 1024f;
+            return Math.max(uSpeed, 1024f);
         }
     }
 

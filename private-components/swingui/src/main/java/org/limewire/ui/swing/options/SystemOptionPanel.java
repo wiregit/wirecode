@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
@@ -13,6 +14,9 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.setting.BooleanSetting;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
+import org.limewire.ui.swing.options.actions.DialogDisplayAction;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.settings.BugSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -33,11 +37,9 @@ import com.google.inject.Inject;
 public class SystemOptionPanel extends OptionPanel {
 
     private final TrayNotifier trayNotifier;
-    private FileAssociationPanel fileAssociationPanel;
-    private StartupShutdownPanel startupShutdownPanel;
-    private BugsPanel bugsPanel;
-    
-    private JCheckBox betaCheckBox;
+    private final FileAssociationPanel fileAssociationPanel;
+    private final StartupShutdownPanel startupShutdownPanel;
+    private final BugsAndUpdatesPanel bugsAndUpdatesPanel;
 
     @Inject
     public SystemOptionPanel(TrayNotifier trayNotifier) {
@@ -46,78 +48,46 @@ public class SystemOptionPanel extends OptionPanel {
 
         setOpaque(false);
 
-        betaCheckBox = new JCheckBox(I18n.tr("Tell me about Beta updates"));
-        betaCheckBox.setContentAreaFilled(false);
-        
-        add(getFileAssociationPanel(), "pushx, growx");
-        add(getStartupShutdownPanel(), "pushx, growx");
-        add(getBugsPanel(), "pushx, growx");
-        add(betaCheckBox, "gapleft 15");
-    }
+        fileAssociationPanel = new FileAssociationPanel();
+        startupShutdownPanel = new StartupShutdownPanel();
+        bugsAndUpdatesPanel = new BugsAndUpdatesPanel();
 
-    private OptionPanel getFileAssociationPanel() {
-        if (fileAssociationPanel == null) {
-            fileAssociationPanel = new FileAssociationPanel();
-        }
-        return fileAssociationPanel;
+        add(fileAssociationPanel, "pushx, growx");
+        add(startupShutdownPanel, "pushx, growx");
+        add(bugsAndUpdatesPanel, "pushx, growx");
     }
-
-    private OptionPanel getStartupShutdownPanel() {
-        if (startupShutdownPanel == null) {
-            startupShutdownPanel = new StartupShutdownPanel();
-        }
-        return startupShutdownPanel;
-    }
-
-    private OptionPanel getBugsPanel() {
-        if (bugsPanel == null) {
-            bugsPanel = new BugsPanel();
-        }
-        return bugsPanel;
-    }
-
 
     @Override
     boolean applyOptions() {
-        boolean restart = getFileAssociationPanel().applyOptions();
-        restart |= getStartupShutdownPanel().applyOptions();
-        restart |= getBugsPanel().applyOptions();
-        if(betaCheckBox.isSelected()) {
-            UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_BETA);
-        } else {
-            UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_MINOR);
-        }
-
+        boolean restart = fileAssociationPanel.applyOptions();
+        restart |= startupShutdownPanel.applyOptions();
+        restart |= bugsAndUpdatesPanel.applyOptions();
         return restart;
     }
 
     @Override
     boolean hasChanged() {
-        int expectedUpdateStyle = betaCheckBox.isSelected() ? UpdateStyle.STYLE_BETA : UpdateStyle.STYLE_MINOR;
-        
-        return getFileAssociationPanel().hasChanged() || getStartupShutdownPanel().hasChanged()
-                || UpdateSettings.UPDATE_STYLE.getValue() == expectedUpdateStyle || getBugsPanel().hasChanged();                
+        return fileAssociationPanel.hasChanged() || startupShutdownPanel.hasChanged()
+                || bugsAndUpdatesPanel.hasChanged();
     }
 
     @Override
     public void initOptions() {
-        getFileAssociationPanel().initOptions();
-        getStartupShutdownPanel().initOptions();
-        getBugsPanel().initOptions();
-        betaCheckBox.setSelected(UpdateSettings.UPDATE_STYLE.getValue() == 0);
+        fileAssociationPanel.initOptions();
+        startupShutdownPanel.initOptions();
+        bugsAndUpdatesPanel.initOptions();
     }
 
-    private class FileAssociationPanel extends OptionPanel {
+    private static class FileAssociationPanel extends OptionPanel {
 
         private JCheckBox magnetCheckBox;
-
         private JCheckBox torrentCheckBox;
-
         private JCheckBox warnCheckBox;
 
         public FileAssociationPanel() {
             super(I18n.tr("File Associations"));
             setLayout(new MigLayout("insets 0, gap 0"));
+            setOpaque(false);
 
             magnetCheckBox = new JCheckBox(I18n.tr("\".magnet\" files"));
             magnetCheckBox.setContentAreaFilled(false);
@@ -136,7 +106,8 @@ public class SystemOptionPanel extends OptionPanel {
                     updateView();
                 }
             });
-            warnCheckBox = new JCheckBox(I18n.tr("Warn me when other programs want to automatically open these types"));
+            warnCheckBox = new JCheckBox(I18n
+                    .tr("Warn me when other programs want to automatically open these types"));
             warnCheckBox.setContentAreaFilled(false);
 
             add(magnetCheckBox, "gapleft 5, gapbottom 5, wrap");
@@ -188,9 +159,11 @@ public class SystemOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             initOption(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS.getValue()
-                    && LimeAssociations.isMagnetAssociationSupported() && LimeAssociations.getMagnetAssociation().isEnabled());
+                    && LimeAssociations.isMagnetAssociationSupported()
+                    && LimeAssociations.getMagnetAssociation().isEnabled());
             initOption(torrentCheckBox, SwingUiSettings.HANDLE_TORRENTS.getValue()
-                    && LimeAssociations.isTorrentAssociationSupported() && LimeAssociations.getTorrentAssociation().isEnabled());
+                    && LimeAssociations.isTorrentAssociationSupported()
+                    && LimeAssociations.getTorrentAssociation().isEnabled());
             initOption(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
             updateView();
         }
@@ -218,24 +191,18 @@ public class SystemOptionPanel extends OptionPanel {
      * When I press X is not shown for OSX, OSX automatically minimizes on an X
      * If Run at startup || minimize to try is selected, set System tray icon to
      * true
-     */ 
-     /* TODO: revisit this and check
      */
     private class StartupShutdownPanel extends OptionPanel {
 
         private JCheckBox runAtStartupCheckBox;
-
         private JRadioButton minimizeButton;
-
         private JRadioButton exitButton;
-
-        private ButtonGroup buttonGroup;
-
         private boolean displaySystemTrayIcon = false;
 
         public StartupShutdownPanel() {
             super(I18n.tr("Startup and Shutdown"));
             setLayout(new MigLayout("insets 0, gap 0"));
+            setOpaque(false);
 
             runAtStartupCheckBox = new JCheckBox(I18n.tr("Run LimeWire on System Startup"));
             runAtStartupCheckBox.setContentAreaFilled(false);
@@ -244,16 +211,16 @@ public class SystemOptionPanel extends OptionPanel {
             exitButton = new JRadioButton(I18n.tr("Exit program"));
             exitButton.setContentAreaFilled(false);
 
-            buttonGroup = new ButtonGroup();
+            ButtonGroup buttonGroup = new ButtonGroup();
             buttonGroup.add(minimizeButton);
             buttonGroup.add(exitButton);
 
-            if(OSUtils.isWindows() || OSUtils.isMacOSX())
+            if (OSUtils.isWindows() || OSUtils.isMacOSX()) {
                 add(runAtStartupCheckBox, "split, gapleft 5, wrap");
-
+            }
             if (trayNotifier.supportsSystemTray()) {
-                add(new JLabel(I18n.tr("When I press X:")), "wrap, gapleft 5, gaptop 6");
-                add(minimizeButton, "gapleft 25, split, gapafter 20");
+                add(new JLabel(I18n.tr("When I press X:")), "wrap");
+                add(minimizeButton, "split");
                 add(exitButton);
             }
         }
@@ -272,7 +239,7 @@ public class SystemOptionPanel extends OptionPanel {
             }
             StartupSettings.RUN_ON_STARTUP.setValue(runAtStartupCheckBox.isSelected());
             SwingUiSettings.MINIMIZE_TO_TRAY.setValue(minimizeButton.isSelected());
-            if(SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
+            if (SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
                 trayNotifier.showTrayIcon();
             } else {
                 trayNotifier.hideTrayIcon();
@@ -283,8 +250,8 @@ public class SystemOptionPanel extends OptionPanel {
         @Override
         boolean hasChanged() {
             return StartupSettings.RUN_ON_STARTUP.getValue() != runAtStartupCheckBox.isSelected()
-                    || SwingUiSettings.MINIMIZE_TO_TRAY.getValue() != minimizeButton
-                            .isSelected() || isIconDisplayed();
+                    || SwingUiSettings.MINIMIZE_TO_TRAY.getValue() != minimizeButton.isSelected()
+                    || isIconDisplayed();
         }
 
         private boolean isIconDisplayed() {
@@ -303,18 +270,59 @@ public class SystemOptionPanel extends OptionPanel {
         }
     }
 
+    private static class BugsAndUpdatesPanel extends OptionPanel {
+        private final BugsPanel bugsPanel;
+        private final JCheckBox betaCheckBox;
+
+        public BugsAndUpdatesPanel() {
+            super(I18n.tr("Bugs and Updates"));
+            betaCheckBox = new JCheckBox(I18n.tr("Tell me about Beta updates"));
+            betaCheckBox.setContentAreaFilled(false);
+            bugsPanel = new BugsPanel();
+
+            add(betaCheckBox, "wrap");
+            add(new JButton(new DialogDisplayAction(this, bugsPanel, I18n.tr("Bug Reports"), I18n
+                    .tr("Bug Reports..."), I18n.tr("Configure bug report settings."))), "wrap");
+        }
+
+        @Override
+        public boolean applyOptions() {
+            boolean restart = bugsPanel.applyOptions();
+            if (betaCheckBox.isSelected()) {
+                UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_BETA);
+            } else {
+                UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_MINOR);
+            }
+            return restart;
+        }
+
+        @Override
+        public boolean hasChanged() {
+            int expectedUpdateStyle = betaCheckBox.isSelected() ? UpdateStyle.STYLE_BETA
+                    : UpdateStyle.STYLE_MINOR;
+            return bugsPanel.hasChanged()
+                    || UpdateSettings.UPDATE_STYLE.getValue() != expectedUpdateStyle;
+        }
+
+        @Override
+        public void initOptions() {
+            bugsPanel.initOptions();
+            betaCheckBox.setSelected(UpdateSettings.UPDATE_STYLE.getValue() == 0);
+        }
+    }
+
     private static class BugsPanel extends OptionPanel {
 
         private JRadioButton showBugsBeforeSending;
         private JRadioButton alwaysSendBugs;
         private JRadioButton neverSendBugs;
 
-
         public BugsPanel() {
-            super(I18n.tr("Bugs"));
             setLayout(new MigLayout("gap 0, insets 0"));
-            
-            showBugsBeforeSending = new JRadioButton(I18n.tr("Let me know about bugs before sending them"));
+            setOpaque(false);
+
+            showBugsBeforeSending = new JRadioButton(I18n
+                    .tr("Let me know about bugs before sending them"));
             showBugsBeforeSending.setContentAreaFilled(false);
             alwaysSendBugs = new JRadioButton(I18n.tr("Always send bugs to Lime Wire"));
             alwaysSendBugs.setContentAreaFilled(false);
@@ -328,6 +336,8 @@ public class SystemOptionPanel extends OptionPanel {
             add(showBugsBeforeSending, "split, gapleft 5, wrap");
             add(alwaysSendBugs, "split, gapleft 5, wrap");
             add(neverSendBugs, "split, gapleft 5, wrap");
+            add(new JButton(new OKDialogAction()), "tag ok, alignx right, split 2");
+            add(new JButton(new CancelDialogAction()), "tag cancel");
         }
 
         @Override

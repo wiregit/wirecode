@@ -126,7 +126,7 @@ public class DownloadWorker {
      * The lowest (cumulative) bandwidth we will accept without stealing the
      * entire grey area from a downloader for a new one.
      */
-    private static final float MIN_ACCEPTABLE_SPEED = DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC
+    private static final float MIN_ACCEPTABLE_SPEED = DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS
             .getValue() < 8 ? 0.1f : 0.5f;
 
     /**

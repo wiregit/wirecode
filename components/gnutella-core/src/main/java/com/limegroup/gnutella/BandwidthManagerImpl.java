@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.net.Socket;
 
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.nio.NBThrottle;
 import org.limewire.nio.Throttle;
@@ -33,19 +32,18 @@ public class BandwidthManagerImpl implements BandwidthManager {
     }
     
     private void applyDownloadRate() {
-        float downloadRate = Float.MAX_VALUE;
-        int downloadThrottle = DownloadSettings.DOWNLOAD_SPEED.getValue();
-        
-        if ( downloadThrottle < 100 ) {
-            downloadRate = ((downloadThrottle/100.f)*
-                    (ConnectionSettings.CONNECTION_SPEED.getValue()/8.f))*1024.f;
+        float downloadRate = DownloadSettings.MAX_DOWNLOAD_SPEED.getValue();
+
+        if ( !DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.getValue() ) {
+            downloadRate = Float.MAX_VALUE;
         }
         DOWN_TCP.setRate(downloadRate);
     }
     
     public void applyUploadRate() {
-        UP_TCP.setRate(uploadServices.getRequestedUploadSpeed());
-        UP_UDP.setRate(uploadServices.getRequestedUploadSpeed());
+        float uploadRate = uploadServices.getRequestedUploadSpeed(); 
+        UP_TCP.setRate(uploadRate);
+        UP_UDP.setRate(uploadRate);
     }
     
     public Throttle getReadThrottle() {

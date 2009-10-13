@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -560,16 +561,18 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             new File( _savedDir, "metadata.mp3").exists());
         
         downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
-        UploadSettings.UPLOAD_SPEED.setValue(5);
 
+        //setting speed to 5% of cable modem speeds
+        UploadSettings.LIMIT_MAX_UPLOAD_SPEED.setValue(true);
+        UploadSettings.MAX_UPLOAD_SPEED.setValue((int)Math.ceil(SpeedConstants.CABLE_SPEED_INT * 1024 * .05 / 8));
+    
         searchServices.stopQuery(new GUID(guid));
         callback.clearGUID();
 
+        UploadSettings.LIMIT_MAX_UPLOAD_SPEED.setValue(false);
+    
         // download still in progress, don't purge
         assertByPassedResultsCacheHasSize(guid, 1);
-
-        UploadSettings.UPLOAD_SPEED.setValue(100);
-
         // sleep to make sure the download starts 
         Thread.sleep(20000);
         

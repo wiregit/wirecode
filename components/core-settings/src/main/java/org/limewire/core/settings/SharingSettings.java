@@ -69,12 +69,6 @@ public class SharingSettings extends LimeProps {
     }
 
     /**
-     * Directory for saving songs purchased from LimeWire Store (LWS).
-     */
-    public static final FileSetting DIRECTORY_FOR_SAVING_LWS_FILES = FACTORY.createFileSetting(
-            "DIRETORY_FOR_SAVING_LWS_FILES", DEFAULT_SAVE_LWS_DIR).setAlwaysSave(true);
-
-    /**
      * Template for substructure when saving songs purchased from LimeWire Store
      * (LWS). The template allows purchased songs to be saved in a unique
      * fashion, ie. LWS_dir/artist/album/songX.mp3.
@@ -231,52 +225,6 @@ public class SharingSettings extends LimeProps {
 
     public static final File getSaveDirectory() {
         return DIRECTORY_FOR_SAVING_FILES.get();
-    }
-
-    /**
-     * Sets the directory to save the purchased songs from the LWS.
-     * 
-     * @param storeDir a <tt>File</tt> instance denoting the abstract pathname
-     *        of the directory for store files.
-     * 
-     * @throws <tt>IOException</tt> If the directory denoted by the directory
-     *         pathname String parameter did not exist prior to this method call
-     *         and could not be created, or if the canonical path could not be
-     *         retrieved from the file system.
-     * 
-     * @throws <tt>NullPointerException</tt> If the "dir" parameter is null.
-     */
-    public static final void setSaveLWSDirectory(File storeDir) throws IOException {
-        if (storeDir == null)
-            throw new NullPointerException();
-        if (!storeDir.isDirectory()) {
-            if (!storeDir.mkdirs())
-                throw new IOException("could not create store save dir at: " + storeDir);
-        }
-
-        FileUtils.setWriteable(storeDir);
-
-        if (!storeDir.canRead() || !FileUtils.canWrite(storeDir)) {
-            throw new IOException("could not write to selected directory");
-        }
-
-        // Canonicalize the files ...
-        try {
-            storeDir = FileUtils.getCanonicalFile(storeDir);
-        } catch (IOException ignored) {
-        }
-
-        DIRECTORY_FOR_SAVING_LWS_FILES.set(storeDir);
-    }
-
-    /**
-     * @return directory of where to save songs purchased from LimeWire Store
-     */
-    public static final File getSaveLWSDirectory() {
-        final File f = DIRECTORY_FOR_SAVING_LWS_FILES.get();
-        if (!f.exists())
-            f.mkdirs();
-        return f;
     }
 
     /**

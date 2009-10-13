@@ -21,10 +21,17 @@ public final class UploadSettings extends LimeProps {
         FACTORY.createIntSetting("MAX_PUSHES_PER_HOST", 5);
 
     /**
-     * The maximum percentage of estimated upload bandwidth to use for uploads.
+     * Boolean setting indicating whether the max upload speed should be limited using the MAX_UPLOAD_SPEED setting.
      */
-    public static final IntSetting UPLOAD_SPEED =
-        FACTORY.createIntSetting("UPLOAD_SPEED", 100);
+    public static final BooleanSetting LIMIT_MAX_UPLOAD_SPEED = FACTORY.createBooleanSetting("LIMIT_MAX_UPLOAD_SPEED", false);
+    
+    /**
+     *  Setting for the number of bytes/second to allow for all uploads.
+     *  
+     *  Minimum of 8 KB/sec
+     */
+    public static final IntSetting MAX_UPLOAD_SPEED =
+        FACTORY.createIntSetting("MAX_UPLOAD_SPEED", SpeedConstants.CABLE_SPEED_INT/8 * 1024, 8 * 1024, Integer.MAX_VALUE);
 
     /**
      * Setting for the size of the upload queue.
@@ -39,11 +46,11 @@ public final class UploadSettings extends LimeProps {
         FACTORY.createIntSetting("UPLOADS_PER_PERSON_2", 3);
         
     /**
-     * The maximum number of upstream bytes per second ever passed by
+     * The maximum number of upstream kilobytes per second ever passed by
      * this node.
      */
     @InspectablePrimitive("upstream bandwidth max")
-    public static final IntSetting MAX_UPLOAD_BYTES_PER_SEC =
+    public static final IntSetting MAX_MEASURED_UPLOAD_KBPS =
         FACTORY.createExpirableIntSetting("MAX_UPLOAD_BYTES_PER_SEC", 0);
      
     /**

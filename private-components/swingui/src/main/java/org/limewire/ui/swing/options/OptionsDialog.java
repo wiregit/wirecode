@@ -49,7 +49,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     @Resource
     private Icon advancedIcon;
     @Resource
-    private Icon downloadsIcon;
+    private Icon transfersIcon;
     @Resource
     private Icon libraryIcon;
     @Resource
@@ -60,14 +60,14 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
     public static final String LIBRARY = I18n.tr("My Files");
     public static final String SEARCH = I18n.tr("Search");
-    public static final String DOWNLOADS = I18n.tr("Downloads");
+    public static final String TRANSFERS = I18n.tr("Transfers");
     public static final String SECURITY = I18n.tr("Security");
     public static final String MISC = I18n.tr("Misc");
     public static final String ADVANCED = I18n.tr("Advanced");
     
     private final Provider<LibraryOptionPanel> libraryOptionPanel;
     private final Provider<SearchOptionPanel> searchOptionPanel;
-    private final Provider<DownloadOptionPanel> downloadOptionPanel;
+    private final Provider<TransferOptionPanel> transferOptionPanel;
     private final Provider<MiscOptionPanel> miscOptionPanel;
     private final Provider<AdvancedOptionPanel> advancedOptionPanel;
     private final UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager;
@@ -90,7 +90,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
     @Inject
     public OptionsDialog(Provider<LibraryOptionPanel> libraryOptionPanel, Provider<SearchOptionPanel> searchOptionPanel,
-            Provider<DownloadOptionPanel> downloadOptionPanel,
+            Provider<TransferOptionPanel> transferOptionPanel,
             Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel,
             BarPainterFactory barPainterFactory, UnsafeTypeOptionPanelStateManager unsafeTypeOptionPanelStateManager,
             Application application) {
@@ -101,7 +101,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         this.application = application;
         this.libraryOptionPanel = libraryOptionPanel;
         this.searchOptionPanel = searchOptionPanel;
-        this.downloadOptionPanel = downloadOptionPanel;
+        this.transferOptionPanel = transferOptionPanel;
         this.miscOptionPanel = miscOptionPanel;
         this.advancedOptionPanel = advancedOptionPanel;
         this.unsafeTypeOptionPanelStateManager = unsafeTypeOptionPanelStateManager;
@@ -173,7 +173,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         
         createButton(LIBRARY, libraryIcon, libraryOptionPanel, down, up);
         createButton(SEARCH, searchIcon, searchOptionPanel, down, up);
-        createButton(DOWNLOADS, downloadsIcon, downloadOptionPanel, down, up);
+        createButton(TRANSFERS, transfersIcon, transferOptionPanel, down, up);
         createButton(MISC, miscIcon, miscOptionPanel, down, up);
         createButton(ADVANCED, advancedIcon, advancedOptionPanel, down, up);
     }

@@ -59,17 +59,17 @@ public class PerformanceOptionPanel extends OptionPanel {
         disableTLS.setOpaque(false);
         disableOutOfBandSearchCheckBox.setOpaque(false);
         
-        p.add(new MultiLineLabel(firstMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap");
+        p.add(new MultiLineLabel(firstMultiLineLabel, AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, wrap");
         
         p.add(disableUltraPeerCheckBox, "gapleft 25, split, wrap");
         
         p.add(disableMojitoCheckBox, "gapleft 25, split, wrap");
         
-        p.add(new MultiLineLabel(secondMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, gaptop 18, wrap");
+        p.add(new MultiLineLabel(secondMultiLineLabel, AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, gaptop 18, wrap");
         
         p.add(disableTLS, "gapleft 25, split, wrap");
         
-        p.add(new MultiLineLabel(thirdMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, gaptop 18, wrap");
+        p.add(new MultiLineLabel(thirdMultiLineLabel, AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "span, growx, gaptop 18, wrap");
         
         p.add(disableOutOfBandSearchCheckBox, "gapleft 25, split, wrap");
         

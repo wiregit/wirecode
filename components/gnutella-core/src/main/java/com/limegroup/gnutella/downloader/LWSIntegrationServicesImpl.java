@@ -19,7 +19,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LWSSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
@@ -59,6 +61,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
     private final LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final ScheduledExecutorService scheduler;
+    private final CategoryManager categoryManager;
     
     /**
      * Maintain a map from downloader IDs to progress bar IDs, because the client sometimes
@@ -151,8 +154,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             DownloadServices downloadServices,
             LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
             RemoteFileDescFactory remoteFileDescFactory,
-            @Named("backgroundExecutor") ScheduledExecutorService scheduler) {
-        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,scheduler,LWSSettings.LWS_DOWNLOAD_PREFIX.get());
+            @Named("backgroundExecutor") ScheduledExecutorService scheduler, CategoryManager categoryManager) {
+        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,scheduler,LWSSettings.LWS_DOWNLOAD_PREFIX.get(), categoryManager);
     }    
     
     /** For testing. */
@@ -161,13 +164,15 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                                LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
                                RemoteFileDescFactory remoteFileDescFactory,
                                ScheduledExecutorService scheduler,
-                               String downloadPrefix) {
+                               String downloadPrefix,
+                               CategoryManager categoryManager) {
         this.lwsManager = lwsManager;
         this.downloadServices = downloadServices;
         this.lwsIntegrationServicesDelegate = lwsIntegrationServicesDelegate;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.scheduler = scheduler;
         this.downloadPrefix = downloadPrefix;
+        this.categoryManager = categoryManager;
     }
     
     @Inject
@@ -354,7 +359,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                     } catch (NumberFormatException e) { /* ignore */ }
                 } 
                 try {
-                    File saveDir = SharingSettings.getSaveLWSDirectory();
+                    Category category = categoryManager.getCategoryForFilename(fileString.getValue());
+                    File saveDir = SharingSettings.getSaveDirectory(category);
                     RemoteFileDesc rfd = createRemoteFileDescriptor(fileString.getValue(), urlString.getValue(), length); 
                     Downloader theDownloader = createDownloader(rfd, saveDir);
                     long idOfTheDownloader = System.identityHashCode(theDownloader);

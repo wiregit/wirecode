@@ -72,18 +72,18 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private long _currentUptime = 0;
 
     /**
-     * Variable for the maximum number of bytes per second transferred 
-     * downstream over the history of the application.
-     */
-    private int _maxUpstreamBytesPerSec =
-        UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.getValue();
-
-    /**
-     * Variable for the maximum number of bytes per second transferred 
+     * Variable for the maximum number of kilobytes per second transferred 
      * upstream over the history of the application.
      */
-    private int _maxDownstreamBytesPerSec = 
-        DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue();
+    private int _maxUpstreamKiloBytesPerSec =
+        UploadSettings.MAX_MEASURED_UPLOAD_KBPS.getValue();
+
+    /**
+     * Variable for the maximum number of kilobytes per second transferred 
+     * downstream over the history of the application.
+     */
+    private int _maxDownstreamKiloBytesPerSec = 
+        DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.getValue();
     
     /**
      * Variable for whether or not this node has such good values that it is too
@@ -233,28 +233,28 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         }catch(InsufficientDataException ide) {
             bandwidth = 0;
         }
-        int newUpstreamBytesPerSec = 
+        int newUpstreamKiloBytesPerSec = 
             (int)bandwidth
            +(int)connectionManager.get().getMeasuredUpstreamBandwidth();
-        uploadStat.addData(newUpstreamBytesPerSec);
-        uploadHistogram.count(newUpstreamBytesPerSec);
+        uploadStat.addData(newUpstreamKiloBytesPerSec);
+        uploadHistogram.count(newUpstreamKiloBytesPerSec);
         try {
             bandwidth = downloadTracker.get().getMeasuredBandwidth();
         } catch (InsufficientDataException ide) {
             bandwidth = 0;
         }
-        int newDownstreamBytesPerSec = 
+        int newDownstreamKiloBytesPerSec = 
             (int)bandwidth
            +(int)connectionManager.get().getMeasuredDownstreamBandwidth();
-        downloadStat.addData(newDownstreamBytesPerSec);
-        downloadHistogram.count(newDownstreamBytesPerSec);
-        if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
-            _maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
-            UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
+        downloadStat.addData(newDownstreamKiloBytesPerSec);
+        downloadHistogram.count(newDownstreamKiloBytesPerSec);
+        if(newUpstreamKiloBytesPerSec > _maxUpstreamKiloBytesPerSec) {
+            _maxUpstreamKiloBytesPerSec = newUpstreamKiloBytesPerSec;
+            UploadSettings.MAX_MEASURED_UPLOAD_KBPS.setValue(_maxUpstreamKiloBytesPerSec);
         }
-        if(newDownstreamBytesPerSec > _maxDownstreamBytesPerSec) {
-            _maxDownstreamBytesPerSec = newDownstreamBytesPerSec;
-            DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(_maxDownstreamBytesPerSec);
+        if(newDownstreamKiloBytesPerSec > _maxDownstreamKiloBytesPerSec) {
+            _maxDownstreamKiloBytesPerSec = newDownstreamKiloBytesPerSec;
+            DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.setValue(_maxDownstreamKiloBytesPerSec);
         }
     }
     
@@ -265,9 +265,9 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private void setHardcoreCapable() {
         _isHardcoreCapable = 
         //Is upstream OR downstream high enough?
-        ((_maxUpstreamBytesPerSec >= 
+        ((_maxUpstreamKiloBytesPerSec >= 
                 UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() ||
-         _maxDownstreamBytesPerSec >= 
+         _maxDownstreamKiloBytesPerSec >= 
                 UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) &&
         //AND I'm not a modem (in case estimate wrong)
         (ConnectionSettings.CONNECTION_SPEED.getValue() > SpeedConstants.MODEM_SPEED_INT) &&
@@ -283,11 +283,11 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         }
         
         if (!_isHardcoreCapable && LOG.isTraceEnabled()) {
-            if (_maxUpstreamBytesPerSec < UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue()) {
-                LOG.trace("not enough upstream: " + _maxUpstreamBytesPerSec);
+            if (_maxUpstreamKiloBytesPerSec < UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue()) {
+                LOG.trace("not enough upstream: " + _maxUpstreamKiloBytesPerSec);
             }
-            if (_maxDownstreamBytesPerSec < UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) {
-                LOG.trace("not enough downstream: " + _maxDownstreamBytesPerSec);
+            if (_maxDownstreamKiloBytesPerSec < UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) {
+                LOG.trace("not enough downstream: " + _maxDownstreamKiloBytesPerSec);
             }
             if (ConnectionSettings.CONNECTION_SPEED.getValue() <= SpeedConstants.MODEM_SPEED_INT) {
                 LOG.trace("Not enoug speed: " + ConnectionSettings.CONNECTION_SPEED.getValue());

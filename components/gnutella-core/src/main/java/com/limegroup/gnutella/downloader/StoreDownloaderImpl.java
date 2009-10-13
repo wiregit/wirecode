@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
@@ -57,6 +58,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
      * must be parsed after downloading has been completed.
      */
     private final Provider<MetaDataFactory> metaDataFactory;
+    private final CategoryManager categoryManager;
 
     @Inject
     public StoreDownloaderImpl(SaveLocationManager saveLocationManager,
@@ -100,6 +102,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
                 socketsManager, downloadStateProcessingQueue,
                 dangerousFileChecker, spamManager, library, categoryManager);
         this.metaDataFactory = metaDataFactory;
+        this.categoryManager = categoryManager;
     }
 
     // //////////////////////////// Requery Logic ///////////////////////////
@@ -190,8 +193,9 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         if (!createSubstitutes(subs, metaData))
             return defaultSaveFile;
 
+        Category category = categoryManager.getCategoryForFile(defaultSaveFile);
         // First attempt to get new directory
-        final File realOutputDir = getLWSDirectory(SharingSettings.getSaveLWSDirectory(), subs);
+        final File realOutputDir = getLWSDirectory(SharingSettings.getSaveDirectory(category), subs);
 
         // make sure it is writable
         if (!FileUtils.setWriteable(realOutputDir)) {
