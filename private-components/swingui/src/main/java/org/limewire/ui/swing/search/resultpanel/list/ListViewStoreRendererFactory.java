@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.search.resultpanel.list;
 
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
@@ -19,6 +21,8 @@ class ListViewStoreRendererFactory {
     private final CategoryIconManager categoryIconManager;
     private final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     private final Provider<SearchResultTruncator> headingTruncator;
+    private final LibraryMediator libraryMediator;
+    private final MainDownloadPanel mainDownloadPanel;
     private final StoreRendererResourceManager storeResourceManager;
     
     /**
@@ -29,10 +33,14 @@ class ListViewStoreRendererFactory {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            LibraryMediator libraryMediator,
+            MainDownloadPanel mainDownloadPanel,
             StoreRendererResourceManager storeResourceManager) {
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
+        this.libraryMediator = libraryMediator;
+        this.mainDownloadPanel = mainDownloadPanel;
         this.storeResourceManager = storeResourceManager;
     }
     
@@ -50,13 +58,13 @@ class ListViewStoreRendererFactory {
         switch (storeStyle.getType()) {
         case STYLE_A: case STYLE_B:
             return new ListViewStoreRendererAB(storeStyle, categoryIconManager,
-                    headingBuilder, headingTruncator, storeResourceManager,
-                    popupListener, storeController);
+                    headingBuilder, headingTruncator, libraryMediator, mainDownloadPanel,
+                    storeResourceManager, popupListener, storeController);
             
         case STYLE_C: case STYLE_D:
             return new ListViewStoreRendererCD(storeStyle, categoryIconManager, 
-                    headingBuilder, headingTruncator, storeResourceManager,
-                    popupListener, storeController);
+                    headingBuilder, headingTruncator, libraryMediator, mainDownloadPanel,
+                    storeResourceManager, popupListener, storeController);
             
         default:
             return null;

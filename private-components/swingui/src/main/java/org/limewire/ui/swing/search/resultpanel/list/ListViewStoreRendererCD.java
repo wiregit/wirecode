@@ -5,15 +5,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
+import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.event.HyperlinkEvent.EventType;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -26,6 +22,8 @@ import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.search.resultpanel.HeadingFontWidthResolver;
@@ -74,11 +72,14 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            LibraryMediator libraryMediator,
+            MainDownloadPanel mainDownloadPanel,
             StoreRendererResourceManager storeResourceManager,
             MousePopupListener popupListener,
             StoreController storeController) {
         super(storeStyle, categoryIconManager, headingBuilder, headingTruncator, 
-                storeResourceManager, popupListener, storeController);
+                libraryMediator, mainDownloadPanel, storeResourceManager, 
+                popupListener, storeController);
     }
 
     @Override
@@ -109,17 +110,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         albumHeadingLabel.setFocusable(false);
         albumHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         albumHeadingLabel.setMinimumSize(new Dimension(0, 22));
-        albumHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == EventType.ACTIVATED) {
-                    if (e.getDescription().equals("#download")) {
-                        downloadAction.actionPerformed(new ActionEvent(
-                                mediaHeadingLabel, ActionEvent.ACTION_PERFORMED, e.getDescription()));
-                    }
-                }
-            }
-        });
+        albumHeadingLabel.addHyperlinkListener(new HeadingHyperlinkListener(albumHeadingLabel));
         installPopupListener(albumHeadingLabel);
         
         albumSubHeadingLabel = new NoDancingHtmlLabel();
@@ -166,7 +157,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
-                if (mediaDownloadButton.isVisible()) {
+                if (storeStyle.getType() == Type.STYLE_C) {
                     mediaHeadingWidth = getSize().width - mediaDownloadButton.getSize().width;
                 } else {
                     mediaHeadingWidth = getSize().width - mediaPriceButton.getSize().width;
@@ -184,17 +175,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         mediaHeadingLabel.setFocusable(false);
         mediaHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         mediaHeadingLabel.setMinimumSize(new Dimension(0, 22));
-        mediaHeadingLabel.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == EventType.ACTIVATED) {
-                    if (e.getDescription().equals("#download")) {
-                        downloadAction.actionPerformed(new ActionEvent(
-                                mediaHeadingLabel, ActionEvent.ACTION_PERFORMED, e.getDescription()));
-                    }
-                }
-            }
-        });
+        mediaHeadingLabel.addHyperlinkListener(new HeadingHyperlinkListener(mediaHeadingLabel));
         installPopupListener(mediaHeadingLabel);
         
         mediaSubHeadingLabel = new NoDancingHtmlLabel();
@@ -211,12 +192,12 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         applyMediaStyle();
         
         // Layout components in container.
-        mediaHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
-        mediaHeadingPanel.add(mediaHeadingLabel, "left, aligny 50%, growx, wmax pref, hidemode 3");
+        mediaHeadingPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding, hidemode 3"));
+        mediaHeadingPanel.add(mediaHeadingLabel, "left, aligny 50%, growx, wmax pref");
         if (storeStyle.getType() == Type.STYLE_C) {
-            mediaHeadingPanel.add(mediaDownloadButton, "left, aligny 50%, hidemode 3");
+            mediaHeadingPanel.add(mediaDownloadButton, "left, aligny 50%");
         } else {
-            mediaHeadingPanel.add(mediaPriceButton, "left, aligny 75%, hidemode 3");
+            mediaHeadingPanel.add(mediaPriceButton, "left, aligny 75%");
         }
         
         mediaTextPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, nogrid, novisualpadding"));
@@ -299,11 +280,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             break;
         }
         
-        // Set text and price fields.
-        albumHeadingLabel.setText(getHeadingHtml(rowResult, albumWidthResolver, getAlbumHeadingWidth(), editing));
-        albumHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
-        albumSubHeadingLabel.setText(rowResult.getSubheading());
-        
+        // Set price field.
         albumPriceButton.setText(vsr.getStoreResult().getPrice());
         
         // Apply style to show/hide components.
@@ -317,6 +294,14 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         } else {
             albumDownloadButton.setIcon(storeStyle.getDownloadAlbumIcon());
         }
+        
+        // Set text fields.
+        if (editing && (albumHeadingWidth == 0)) {
+            albumHeadingWidth = calcAlbumHeadingWidth();
+        }
+        albumHeadingLabel.setText(getHeadingHtml(rowResult, albumWidthResolver, albumHeadingWidth, editing));
+        albumHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
+        albumSubHeadingLabel.setText(rowResult.getSubheading());
     }
 
     @Override
@@ -338,11 +323,7 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
             break;
         }
         
-        // Set text and price fields.
-        mediaHeadingLabel.setText(getHeadingHtml(rowResult, mediaWidthResolver, getMediaHeadingWidth(), editing));
-        mediaHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
-        mediaSubHeadingLabel.setText(rowResult.getSubheading());
-        
+        // Set price field.
         mediaPriceButton.setText(vsr.getStoreResult().getPrice());
         
         // Apply style to show/hide components.
@@ -355,6 +336,14 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
         } else {
             mediaDownloadButton.setIcon(storeStyle.getDownloadTrackIcon());
         }
+        
+        // Set text fields.
+        if (editing && (mediaHeadingWidth == 0)) {
+            mediaHeadingWidth = calcMediaHeadingWidth();
+        }
+        mediaHeadingLabel.setText(getHeadingHtml(rowResult, mediaWidthResolver, mediaHeadingWidth, editing));
+        mediaHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
+        mediaSubHeadingLabel.setText(rowResult.getSubheading());
     }
     
     @Override
@@ -399,41 +388,38 @@ class ListViewStoreRendererCD extends ListViewStoreRenderer {
     }
     
     /**
-     * Returns the estimated album heading width.
+     * Returns the estimated album heading width.  The width depends on the 
+     * specific component layout for the renderer.
      */
-    private int getAlbumHeadingWidth() {
-        if (albumHeadingWidth > 0) {
-            return albumHeadingWidth;
-            
+    private int calcAlbumHeadingWidth() {
+        // Apply cell dimensions to component and perform layout.
+        Rectangle cellRect = getCellRect();
+        setSize(cellRect.width, cellRect.height);
+        doLayout();
+        
+        // Compute heading width by subtracting gap sizes and button widths.
+        if (storeStyle.getType() == Type.STYLE_C) {
+            return getWidth() - 21 - albumCoverButton.getWidth() - albumDownloadButton.getWidth();
         } else {
-            // Estimate heading width based on column width.
-            Icon coverIcon = albumCoverButton.getIcon();
-            int columnWidth = getColumnWidth();
-            int coverWidth = (coverIcon != null) ? coverIcon.getIconWidth() : 0;
-            if (albumDownloadButton.isVisible()) {
-                return columnWidth - 21 - coverWidth - albumDownloadButton.getSize().width;
-            } else {
-                return columnWidth - 21 - coverWidth - albumPriceButton.getSize().width;
-            }
+            return getWidth() - 21 - albumCoverButton.getWidth() - albumPriceButton.getWidth();
         }
     }
     
     /**
-     * Returns the estimated media heading width.
+     * Returns the estimated media heading width.  The width depends on the 
+     * specific component layout for the renderer.
      */
-    private int getMediaHeadingWidth() {
-        if (mediaHeadingWidth > 0) {
-            return mediaHeadingWidth;
-            
+    private int calcMediaHeadingWidth() {
+        // Apply cell dimensions to component and perform layout.
+        Rectangle cellRect = getCellRect();
+        setSize(cellRect.width, cellRect.height);
+        doLayout();
+        
+        // Compute heading width by subtracting gap sizes and button widths.
+        if (storeStyle.getType() == Type.STYLE_C) {
+            return getWidth() - 18 - mediaStreamButton.getWidth() - mediaDownloadButton.getWidth();
         } else {
-            // Estimate heading width based on column width.
-            int columnWidth = getColumnWidth();
-            int streamWidth = mediaStreamButton.getSize().width;
-            if (mediaDownloadButton.isVisible()) {
-                return columnWidth - 18 - streamWidth - mediaDownloadButton.getSize().width;
-            } else {
-                return columnWidth - 18 - streamWidth - mediaPriceButton.getSize().width;
-            }
+            return getWidth() - 18 - mediaStreamButton.getWidth() - mediaPriceButton.getWidth();
         }
     }
     

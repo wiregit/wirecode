@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
@@ -15,6 +16,9 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -25,6 +29,8 @@ import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.ui.swing.components.CustomLineBorder;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
@@ -53,11 +59,13 @@ abstract class ListViewStoreRenderer extends JXPanel {
     protected static final String HTML_END = "</html>";
     private static final int LEFT_COLUMN_WIDTH = 450;
 
-    protected final CategoryIconManager categoryIconManager;
-    protected final Provider<SearchHeadingDocumentBuilder> headingBuilder;
-    protected final Provider<SearchResultTruncator> headingTruncator;
-    protected final StoreRendererResourceManager storeResourceManager;
-    protected final MouseListener popupListener;
+    private final CategoryIconManager categoryIconManager;
+    private final Provider<SearchHeadingDocumentBuilder> headingBuilder;
+    private final Provider<SearchResultTruncator> headingTruncator;
+    private final LibraryMediator libraryMediator;
+    private final MainDownloadPanel mainDownloadPanel;
+    private final StoreRendererResourceManager storeResourceManager;
+    private final MouseListener popupListener;
     protected final StoreController storeController;
     
     protected final Action downloadAction;
@@ -91,6 +99,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
             CategoryIconManager categoryIconManager,
             Provider<SearchHeadingDocumentBuilder> headingBuilder,
             Provider<SearchResultTruncator> headingTruncator,
+            LibraryMediator libraryMediator,
+            MainDownloadPanel mainDownloadPanel,
             StoreRendererResourceManager storeResourceManager,
             MousePopupListener popupListener,
             StoreController storeController) {
@@ -99,6 +109,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
         this.headingTruncator = headingTruncator;
+        this.libraryMediator = libraryMediator;
+        this.mainDownloadPanel = mainDownloadPanel;
         this.storeResourceManager = storeResourceManager;
         this.popupListener = popupListener;
         this.storeController = storeController;
@@ -132,6 +144,7 @@ abstract class ListViewStoreRenderer extends JXPanel {
         installPopupListener(this);
         installPopupListener(albumPanel);
         installPopupListener(mediaPanel);
+        installPopupListener(downloadPanel);
         
         // Initialize album track container.
         albumTrackPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0! 0!, fill, novisualpadding"));
@@ -167,6 +180,8 @@ abstract class ListViewStoreRenderer extends JXPanel {
         downloadHeadingLabel.setFocusable(false);
         downloadHeadingLabel.setMargin(new Insets(2, 0, 2, 3));
         downloadHeadingLabel.setMinimumSize(new Dimension(0, 22));
+        downloadHeadingLabel.addHyperlinkListener(new HeadingHyperlinkListener(downloadHeadingLabel));
+        installPopupListener(downloadHeadingLabel);
         
         downloadInfoButton = new IconButton(showInfoAction);
         downloadInfoButton.setHideActionText(false);
@@ -200,6 +215,13 @@ abstract class ListViewStoreRenderer extends JXPanel {
      */
     protected void installPopupListener(Component component) {
         component.addMouseListener(popupListener);
+    }
+    
+    /**
+     * Returns the bounds of the current cell.
+     */
+    protected Rectangle getCellRect() {
+        return (table != null) ? table.getCellRect(row, col, false) : new Rectangle(0, 0);
     }
     
     /**
@@ -357,12 +379,22 @@ abstract class ListViewStoreRenderer extends JXPanel {
         // Set category icon.
         downloadIconButton.setIcon(getIcon(vsr));
         
+        // Info button may be hidden when not editing.
+        downloadInfoButton.setVisible(!storeStyle.isShowInfoOnHover() || editing);
+        
+        // Initialize heading width if necessary. 
+        if (editing && (downloadHeadingWidth == 0)) {
+            // Apply cell dimensions to component and perform layout.
+            Rectangle cellRect = getCellRect();
+            setSize(cellRect.width, cellRect.height);
+            doLayout();
+            // Compute heading width by subtracting gap sizes and button widths. 
+            downloadHeadingWidth = getWidth() - 18 - downloadIconButton.getWidth() - downloadInfoButton.getWidth();
+        }
+        
         // Set text field.
         downloadHeadingLabel.setText(getHeadingHtml(rowResult, downloadWidthResolver, downloadHeadingWidth, editing));
         downloadHeadingLabel.setToolTipText(HTML_BEGIN + rowResult.getHeading() + HTML_END);
-        
-        // Info button may be hidden when not editing.
-        downloadInfoButton.setVisible(!storeStyle.isShowInfoOnHover() || editing);
     }
     
     /**
@@ -505,6 +537,32 @@ abstract class ListViewStoreRenderer extends JXPanel {
                             }
                         }
                     });
+                }
+            }
+        }
+    }
+    
+    /**
+     * Hyperlink listener for heading labels.
+     */
+    public class HeadingHyperlinkListener implements HyperlinkListener {
+        private final Component source;
+
+        public HeadingHyperlinkListener(Component source) {
+            this.source = source;
+        }
+        
+        @Override
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+            if (e.getEventType() == EventType.ACTIVATED) {
+                String linkDescription = e.getDescription();
+                if ("#download".equals(linkDescription)) {
+                    downloadAction.actionPerformed(new ActionEvent(source,
+                            ActionEvent.ACTION_PERFORMED, e.getDescription()));
+                } else if ("#downloading".equals(linkDescription)) {
+                    mainDownloadPanel.selectAndScrollTo(vsr.getUrn());
+                } else if ("#library".equals(linkDescription)) {
+                    libraryMediator.selectInLibrary(vsr.getUrn());
                 }
             }
         }
