@@ -11,6 +11,9 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
+import org.limewire.core.impl.friend.MockFriend;
+import org.limewire.core.impl.friend.MockFriendPresence;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 public class MockUploadItem implements UploadItem {
@@ -21,6 +24,7 @@ public class MockUploadItem implements UploadItem {
     private long fileSize;
     private long amtUploaded;
     private Category category;
+    private RemoteHost uploadRemoteHost;
     
     public MockUploadItem(UploadState state, String fileName, long fileSize, long amtUploaded, Category category){
         this.state = state;
@@ -145,11 +149,37 @@ public class MockUploadItem implements UploadItem {
 
     @Override
     public RemoteHost getRemoteHost() {
-        return null;
+        if (uploadRemoteHost == null) {
+            uploadRemoteHost = new MockUploadRemoteHost();
+        }
+        return uploadRemoteHost;
     }
 
     @Override
     public float getSeedRatio() {
         return -1;
+    }
+    
+    private class MockUploadRemoteHost implements RemoteHost {
+
+        @Override
+        public FriendPresence getFriendPresence() {
+            return new MockFriendPresence(new MockFriend("uploader"));
+        }
+
+        @Override
+        public boolean isBrowseHostEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isChatEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isSharingEnabled() {
+            return false;
+        }
     }
 }
