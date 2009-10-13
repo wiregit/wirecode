@@ -1,16 +1,14 @@
 package org.limewire.ui.swing;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
 
-import net.roydesign.event.ApplicationEvent;
-import net.roydesign.mac.MRJAdapter;
+import com.apple.eawt.Application;
+import com.apple.eawt.ApplicationEvent;
+import com.apple.eawt.ApplicationAdapter;
 
-import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.file.CategoryManager;
@@ -19,6 +17,7 @@ import org.limewire.ui.swing.mainframe.AboutAction;
 import org.limewire.ui.swing.mainframe.OptionsAction;
 import org.limewire.ui.swing.menu.ExitAction;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.ActivityCallback;
@@ -32,7 +31,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * "Quit" option from the Mac file menu, and the dropping of a file on LimeWire
  * on the Mac, which LimeWire would be expected to handle in some way.
  */
-public class MacEventHandler {
+@SuppressWarnings("restriction")
+public class MacEventHandler extends ApplicationAdapter {
 
     private static MacEventHandler INSTANCE;
 
@@ -58,13 +58,12 @@ public class MacEventHandler {
     /** Creates a new instance of MacEventHandler */
     @Inject
     public MacEventHandler() {
-
-        MRJAdapter.addOpenDocumentListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                File file = ((ApplicationEvent) evt).getFile();
-                handleOpenFile(file);
-            }
-        });
+        assert ( OSUtils.isMacOSX() ) : "MacEventHandler should only be used on Mac OS-X operating systems.";
+        
+        Application.getApplication().addApplicationListener(this);
+        
+        Application.getApplication().setEnabledAboutMenu(true);
+        Application.getApplication().setEnabledPreferencesMenu(true);
     }
 
     @Inject
@@ -76,39 +75,43 @@ public class MacEventHandler {
         }
     }
 
-    /**
-     * Enable preferences.
-     */
-    public void enablePreferences() {
-        MRJAdapter.setPreferencesEnabled(true);
-
-        MRJAdapter.addPreferencesListener(optionsAction);
-        
-        MRJAdapter.addAboutListener(aboutAction);
-
-        MRJAdapter.addQuitApplicationListener(exitAction);
-
-        // Must be added after the UI is created, otherwise it'll create the application too soon!
-        MRJAdapter.addReopenApplicationListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
-                Action action = map.get("restoreView");
-                if (action != null) {
-                    action.actionPerformed(evt);
-                }
-            }
-        });
+    @Override
+    public void handlePreferences(ApplicationEvent event) {
+        optionsAction.actionPerformed(null);
+        event.setHandled(true);
     }
-
-    /**
-     * This method handles a request to open the specified file.
-     */
-    private void handleOpenFile(File file) {
+    
+    @Override
+    public void handleAbout(ApplicationEvent event) {
+        aboutAction.actionPerformed(null);
+        event.setHandled(true);
+    }
+    
+    @Override
+    public void handleQuit(ApplicationEvent event) {
+        exitAction.actionPerformed(null);
+        event.setHandled(true);
+    }
+  
+    @Override
+    public void handleReOpenApplication(ApplicationEvent event) {
+        ActionMap map = org.jdesktop.application.Application.getInstance().getContext().getActionManager().getActionMap();
+        Action action = map.get("restoreView");
+        if (action != null) {
+            action.actionPerformed(null);
+        }
+        event.setHandled(true);
+    }
+    
+    @Override
+    public void handleOpenFile(ApplicationEvent event) {
+        File file = new File(event.getFilename());
         if (!enabled) {
             lastFileOpened = file;
         } else {
             runFileOpen(file);
         }
+        event.setHandled(true);
     }
 
     private void runFileOpen(final File file) {

@@ -166,8 +166,6 @@ final class Initializer {
         // and hide the splash screen & display the UI.
         loadUI();
         
-        enablePreferences();
-        
         SettingsWarningManager.checkTemporaryDirectoryUsage();
         SettingsWarningManager.checkSettingsLoadSaveFailure();        
         
@@ -406,7 +404,7 @@ final class Initializer {
     private Injector createLimeWire() {
         stopwatch.reset();
         Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireModule(), new AbstractModule() {
-            @Override
+            @Override 
             protected void configure() {
                 requestStaticInjection(AppFrame.class);
                 requestInjection(Initializer.this);
@@ -598,12 +596,6 @@ final class Initializer {
                 connectionReporter.get().setLoadTime(System.currentTimeMillis() - Main.getStartTime());
             }
         });
-    }  
-    
-    private void enablePreferences() {        
-        if (OSUtils.isMacOSX()) {
-            MacEventHandler.instance().enablePreferences();
-        }
     }
     
     /** Runs any late UI tasks, such as initializing Icons, I18n support. */

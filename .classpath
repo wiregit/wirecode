@@ -76,13 +76,11 @@
 	<classpathentry kind="src" output="components/facebook/build/classes" path="components/facebook/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
-	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>
 	<classpathentry kind="lib" path="lib/jars/daap.jar"/>
 	<classpathentry kind="lib" path="lib/jars/icu4j.jar" sourcepath="lib/sources/icu4jsrc_2_6.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j.jar"/>
-	<classpathentry kind="lib" path="lib/jars/osx/MRJAdapter.jar"/>
 	<classpathentry kind="lib" path="lib/jars/gettext-commons.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
@@ -161,5 +159,6 @@
 	<classpathentry kind="lib" path="lib/jars/httpclient-4.1-alpha1-r821939.jar" sourcepath="lib/sources/httpclient-4.1-alpha1-r821939-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.1-alpha2-r821939.jar" sourcepath="lib/sources/httpcore-4.1-alpha2-r821939-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.1-alpha2-r821939.jar" sourcepath="lib/sources/httpcore-nio-4.1-alpha2-r821939-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jars/compile/AppleJavaExtensions.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

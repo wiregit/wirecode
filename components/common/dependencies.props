@@ -1,6 +1,7 @@
 activation.version=1.1
 aopalliance.version=
 AppFramework.version=
+AppleJavaExtensions.version=
 bcel.version=
 cglib-nodep.version=
 clink.version=
