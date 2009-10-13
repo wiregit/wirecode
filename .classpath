@@ -159,6 +159,10 @@
 	<classpathentry kind="lib" path="lib/jars/httpclient-4.1-alpha1-r821939.jar" sourcepath="lib/sources/httpclient-4.1-alpha1-r821939-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.1-alpha2-r821939.jar" sourcepath="lib/sources/httpcore-4.1-alpha2-r821939-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.1-alpha2-r821939.jar" sourcepath="lib/sources/httpcore-nio-4.1-alpha2-r821939-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jars/compile/AppleJavaExtensions.jar"/>
+	<classpathentry kind="lib" path="lib/jars/compile/AppleJavaExtensions.jar">
+		<accessrules>
+			<accessrule kind="nonaccessible" pattern="**"/>
+		</accessrules>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
