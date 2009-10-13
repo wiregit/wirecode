@@ -26,7 +26,6 @@ import org.limewire.util.URIUtils;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.EncodingUtils;
-import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Contains information fields extracted from a magnet link.
@@ -265,8 +264,8 @@ public class MagnetOptions implements Serializable {
             cmdstr = keystr.substring(start);
             keystr = keystr.substring(0, start - 1);
             try {
-                cmdstr = URLDecoder.decode(cmdstr);
-            } catch (IOException e1) {
+                cmdstr = URIUtils.decodeToUtf8(cmdstr);
+            } catch (URISyntaxException e1) {
                 continue;
             }
             // Process any numerical list of cmds
@@ -499,16 +498,18 @@ public class MagnetOptions implements Serializable {
     public String[] getDefaultURLs() {
         if (defaultURLs == null) {
             List<String> urls = getPotentialURLs();
+            List<String> results = new ArrayList<String>(urls.size());
             for (Iterator<String> it = urls.iterator(); it.hasNext();) {
                 try {
                     String nextURL = it.next();
-                    URIUtils.toURI(nextURL); // is it a valid URI?
+                    URI uri = URIUtils.toURI(nextURL); // is it a valid URI?
+                    results.add(uri.toASCIIString());
                 } catch (URISyntaxException e) {
                     it.remove(); // if not, remove it from the list.
                     localizedErrorMessage = e.getLocalizedMessage();
                 }
             }
-            defaultURLs = urls.toArray(new String[urls.size()]);
+            defaultURLs = results.toArray(new String[results.size()]);
         }
         return defaultURLs;
     }

@@ -269,6 +269,20 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertTrue(magnet.toExternalForm().contains(guidUrn.httpStringValue()));
     }
      
+    public void testMagnetUrlsAreEncoded() {
+        MagnetOptions[] magnets = MagnetOptions.parseMagnet("magnet:?xs=http://hello.world.com/path with spaces/?query=has space");
+        assertEquals(1, magnets.length);
+        assertEquals(1, magnets[0].getDefaultURLs().length);
+        assertEquals("http://hello.world.com/path%20with%20spaces/?query=has%20space", magnets[0].getDefaultURLs()[0]);
+    }
+    
+    public void testMagnetUrlsAreNotReencoded() {
+        MagnetOptions[] magnets = MagnetOptions.parseMagnet("magnet:?xs=http%3A%2F%2Ftest.com%2Fhello%2520you%26test%3Dtrue");
+        assertEquals(1, magnets.length);
+        assertEquals(1, magnets[0].getDefaultURLs().length);
+        assertEquals("http://test.com/hello%20you&test=true", magnets[0].getDefaultURLs()[0]);
+    }
+    
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < opts.length; i++) {

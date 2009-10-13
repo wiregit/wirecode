@@ -5,9 +5,6 @@ import java.net.URISyntaxException;
 
 import junit.framework.Test;
 
-import org.limewire.util.BaseTestCase;
-import org.limewire.util.URIUtils;
-
 public class URIUtilsTest extends BaseTestCase {
     public URIUtilsTest(String name) {
         super(name);
@@ -36,7 +33,21 @@ public class URIUtilsTest extends BaseTestCase {
     }
     
     public void testURINeedsEncoding() throws URISyntaxException {
-        assertEquals(new URI("http://www.foo.com/my+file"), URIUtils.toURI("http://www.foo.com/my file"));  
+        assertEquals(new URI("http://www.foo.com/my%20file"), URIUtils.toURI("http://www.foo.com/my file"));  
+    }
+    
+    public void testEncodeUriDoesNotEncodeSlashes() throws URISyntaxException {
+        assertTrue(URIUtils.encodeUri("http://hello.world.com/?fd dlkf").contains("/"));
+    }
+    
+    public void testEncodeUriComponentEncodesSlahes() throws Exception {
+        assertFalse(URIUtils.encodeUriComponent("http://hello.world.com/?fd dlkf").contains("/"));
+        assertTrue(URIUtils.encodeUriComponent("http://hello.world.com/?fd dlkf").contains("%2f"));
+    }
+    
+    public void testIdempotenceOfEncodeDecode() throws Exception {
+        assertEquals("http://hello.world.com/me and you/?q=test you", URIUtils.decodeToUtf8(URIUtils.encodeUri("http://hello.world.com/me and you/?q=test+you")));
+        assertEquals("http://hello.world.com/\u30d5\u30a1/?q=test you", URIUtils.decodeToUtf8(URIUtils.encodeUri("http://hello.world.com/\u30d5\u30a1/?q=test+you")));
     }
     
     public void testMalformedURI()  {

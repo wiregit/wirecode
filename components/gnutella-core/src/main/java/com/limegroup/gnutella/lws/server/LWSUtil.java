@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.lws.server;
 
-import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.limewire.lws.server.LWSDispatcherSupport;
+import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.util.Tagged;
-import com.limegroup.gnutella.util.URLDecoder;
 
 public final class LWSUtil {
     
@@ -27,8 +27,8 @@ public final class LWSUtil {
         }
         String result = res;
         try {
-            result = URLDecoder.decode(res);
-        } catch (IOException e) {
+            result = URIUtils.decodeToUtf8(res);
+        } catch (URISyntaxException e) {
             // no the end of the world
         }
         return new Tagged<String>(result, true);

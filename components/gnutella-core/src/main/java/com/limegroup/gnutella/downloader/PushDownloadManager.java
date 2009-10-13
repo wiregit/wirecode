@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +60,7 @@ import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.Base32;
 import org.limewire.util.BufferUtils;
 import org.limewire.util.StringUtils;
+import org.limewire.util.URIUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -79,7 +81,6 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.MultiShutdownable;
-import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Handles sending out pushes and awaiting incoming GIVs.
@@ -854,15 +855,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                 int j=command.indexOf("/", i);
                 byte[] guid=GUID.fromHexString(command.substring(i+1,j));
                 //c). Extract file name.
-                String filename=URLDecoder.decode(command.substring(j+1));
+                String filename= URIUtils.decodeToUtf8(command.substring(j+1));
     
                 return new GIVLine(filename, index, guid);
             } catch (IndexOutOfBoundsException e) {
-                throw new IOException();
+                throw new IOException(e);
             } catch (NumberFormatException e) {
-                throw new IOException();
+                throw new IOException(e);
             } catch (IllegalArgumentException e) {
-                throw new IOException();
+                throw new IOException(e);
+            } catch (URISyntaxException e) {
+                throw new IOException(e);
             }          
         }
     }

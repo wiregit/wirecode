@@ -1,12 +1,11 @@
 package org.limewire.ui.support;
 
-import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.limegroup.gnutella.util.URLDecoder;
+import org.limewire.util.URIUtils;
 
 /**
  * Handles the client-side representation of an 
@@ -69,8 +68,8 @@ public final class RemoteClientInfo extends RemoteAbstractInfo {
     private final void handleKeyValuePair(final String k, final String v) {
         String value = "";
         try {
-            value = URLDecoder.decode(v);
-        } catch (IOException e) {
+            value = URIUtils.decodeToUtf8(v);
+        } catch (URISyntaxException e) {
             return;
         }
         if(k.equalsIgnoreCase(NEXT_THIS_BUG_TIME))

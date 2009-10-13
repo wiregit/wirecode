@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.browser;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.URLDecoder;
+import org.limewire.util.URIUtils;
 
 /**
  * Allow various Magnet Related HTML page rendering.
@@ -32,7 +33,11 @@ public class MagnetHTML {
             }
             valstr = keystr.substring(start);
             keystr = keystr.substring(0,start-1);
-            valstr=URLDecoder.decode(valstr);   
+            try {
+                valstr= URIUtils.decodeToUtf8(valstr);
+            } catch (URISyntaxException e) {
+                throw new IOException(e);
+            }   
             if ( keystr.equals("addr") ) {
                 address = valstr;
             } else if ( keystr.startsWith("n") ) {
