@@ -136,10 +136,11 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         p.add(categories, "span, alignx center, gapbottom 5, wrap");
 
         File folder = getFolderBeingAdded(files);
-        recursiveButton = new JRadioButton(getRecursiveLabel(folder));
+        int folderCount = getFolderCount(files);
+        recursiveButton = new JRadioButton(getRecursiveLabel(folder, folderCount));
         recursiveButton.setBorder(BorderFactory.createEmptyBorder());
         decorateComponent(recursiveButton);
-        nonRecursiveButton = new JRadioButton(getNonRecursiveLabel(folder));
+        nonRecursiveButton = new JRadioButton(getNonRecursiveLabel(folder, folderCount));
         nonRecursiveButton.setBorder(BorderFactory.createEmptyBorder());
         decorateComponent(nonRecursiveButton);
         ButtonGroup radioButtonGroup = new ButtonGroup();
@@ -306,24 +307,33 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         return folder;
     }
     
+    private int getFolderCount(List<File> files) {
+        int folderCount = 0;
+        for(File file : files) {
+            if(file.isDirectory())
+                folderCount += 1;
+        }
+        return folderCount;
+    }
+    
     /**
      * Returns the text for the recursive radio button.
      */
-    private String getRecursiveLabel(File folder) {
+    private String getRecursiveLabel(File folder, int folderCount) {
         if(folder != null) 
             return I18n.tr("\"{0}\" and all its subfolders", folder.getName());
         else
-            return I18n.tr("These folders and all their subfolders");
+            return I18n.tr("{0} folders and all their subfolders", folderCount);
     }
     
     /**
      * Returns the text for the non-recursive radio button.
      */
-    private String getNonRecursiveLabel(File folder) {        
+    private String getNonRecursiveLabel(File folder, int folderCount) {        
         if(folder != null) 
             return I18n.tr("\"{0}\" only", folder.getName());
         else
-            return I18n.tr("These folders only");
+            return I18n.tr("{0} folders only", folderCount);
     }
 
     @Override
