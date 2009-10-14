@@ -965,100 +965,59 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     /**
      * This method calculates the quality of service for a given host. The
      * calculation is some function of whether or not the host is busy, whether
-     * or not the host has ever received an incoming connection, etc.
-     * <p>
-     * Moved this code from SearchView to here permanently, so we avoid
-     * duplication. It makes sense from a data point of view, but this method
-     * isn't really essential an essential method.
+     * or not the host has ever received an incoming connection, etc. Search
+     * results may be discarded if their quality is too low.
      * 
-     * @return a int from -1 to 3, with -1 for "never work" and 3 for "always
-     *         work". Typically a return value of N means N+1 stars will be
-     *         displayed in the GUI.
+     * @return a value from -1 to 4 indicating the predicted quality of the
+     * download connection, where -1 means there's no way to establish a
+     * connection.
      */
     public int calculateQualityOfService() {
+        if (Arrays.equals(_address, networkManager.getAddress()))
+            return 3; // same address -- display it
+        if (isReplyToMulticastQuery())
+            return 4; // multicast, maybe busy (but doesn't matter)
+
+        /* Is the local host firewalled? */
         boolean iFirewalled = !networkManager.acceptedIncomingConnection();
-        // TODO change to an enum
-        final int YES = 1;
-        final int MAYBE = 0;
-        final int NO = -1;
-
-        /* Is the remote host busy? */
-        int busy;
-        try {
-            busy = this.getIsBusy() ? YES : NO;
-        } catch (BadPacketException e) {
-            busy = MAYBE;
-        }
-
-        boolean isMCastReply = this.isReplyToMulticastQuery();
 
         /* Is the remote host firewalled? */
         int heFirewalled;
+        if (networkInstanceUtils.isPrivateAddress(_address))
+            heFirewalled = TRUE;
+        else
+            heFirewalled = _data.getPushFlag();
 
-        if (isMCastReply) {
-            iFirewalled = false;
-            heFirewalled = NO;
-        } else if (networkInstanceUtils.isPrivateAddress(this.getIPBytes())) {
-            heFirewalled = YES;
-        } else {
-            try {
-                heFirewalled = this.getNeedsPush() ? YES : NO;
-            } catch (BadPacketException e) {
-                heFirewalled = MAYBE;
-            }
-        }
-
-        /* Push Proxy availability? */
-        boolean hasPushProxies = false;
-        if ((this.getPushProxies() != null) && (this.getPushProxies().size() > 1))
-            hasPushProxies = true;
-
+        /* Can both hosts do firewall transfers? */
         if (getSupportsFWTransfer() && networkManager.canDoFWT()) {
             iFirewalled = false;
-            heFirewalled = NO;
+            heFirewalled = FALSE;
         }
 
-        /*
-         * In the old days, busy hosts were considered bad. Now they're OK (but
-         * not great) because of alternate locations. WARNING: before changing
-         * this method, take a look at isFirewalledQuality!
-         */
-        if (Arrays.equals(_address, networkManager.getAddress())) {
-            return 3; // same address -- display it
-        } else if (isMCastReply) {
-            return 4; // multicast, maybe busy (but doesn't matter)
-        } else if (iFirewalled && heFirewalled == YES) {
+        if (iFirewalled && heFirewalled == TRUE)
             return -1; // both firewalled; transfer impossible
-        } else if (busy == MAYBE || heFirewalled == MAYBE) {
+
+        /* Is the remote host busy? */
+        int busy = _data.getBusyFlag();
+
+        if (busy == UNDEFINED || heFirewalled == UNDEFINED) {
             return 0; // * older client; can't tell
-        } else if (busy == YES) {
-            assert heFirewalled == NO || !iFirewalled;
-            if (heFirewalled == YES)
+        } else if (busy == TRUE) {
+            assert heFirewalled == FALSE || !iFirewalled;
+            if (heFirewalled == TRUE)
                 return 0; // * busy, push
             else
                 return 1; // ** busy, direct connect
-        } else if (busy == NO) {
-            assert heFirewalled == NO || !iFirewalled;
-            if (heFirewalled == YES && !hasPushProxies)
+        } else {
+            assert busy == FALSE;
+            assert heFirewalled == FALSE || !iFirewalled;
+            boolean hasPushProxies = 
+                getPushProxies() != null && getPushProxies().size() > 1;
+            if (heFirewalled == TRUE && !hasPushProxies)
                 return 2; // *** not busy, no/not many proxies, old push
             else
                 return 3; // **** not busy, has proxies or direct connect
-        } else {
-            assert false : "Unexpected case!";
-            return -1;
         }
-    }
-
-    /**
-     * Utility method for determining whether or not the given "quality" score
-     * for a <tt>QueryReply</tt> denotes that the host is firewalled or not.
-     * 
-     * @param quality the quality, or score, in question
-     * @return <tt>true</tt> if the quality denotes that the host is firewalled,
-     *         otherwise <tt>false</tt>
-     */
-    public static boolean isFirewalledQuality(int quality) {
-        return quality == 0 || quality == 2;
     }
 
     public boolean isFirewalled() {

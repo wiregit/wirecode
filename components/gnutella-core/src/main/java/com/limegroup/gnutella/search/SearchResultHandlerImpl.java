@@ -232,9 +232,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
 
         // always handle reply to multicast queries.
         if(!qr.isReplyToMulticastQuery() && !qr.isBrowseHostReply()) {
-            // note that the minimum search quality will always be greater
-            // than -1, so -1 qualities (the impossible case) are never
-            // displayed
+            // Drop the reply if there's no way to connect to the responder.
             if(qr.calculateQualityOfService()
                     < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
                 LOG.debug("Ignoring reply with low quality");
@@ -245,10 +243,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
                 LOG.debug("Ignoring reply with low speed");
                 return;
             }
-            // if the other side is firewalled AND
-            // we're not on close IPs AND
-            // (we are firewalled OR we are a private IP) AND 
-            // no chance for FW transfer then drop the reply.
+            // TODO: the logic below belongs in qr.calculateQualityOfService()
             if(qr.isFirewalled()) {
                 LOG.debug("The responder is firewalled");
                 if(!networkInstanceUtils.isVeryCloseIP(qr.getIPBytes())) {
@@ -343,6 +338,9 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             // Send the result to the UI
             activityCallback.get().handleQueryResult(rfd, qr, alts);
         }
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug(numGoodSentToFrontEnd + " responses sent to the UI");
         
         accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd);
     }
