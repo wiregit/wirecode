@@ -16,11 +16,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class DefaultLimeTableCellRenderer extends DefaultTableCellRenderer {
 
-    private final Border border;
+    private static final Border border = BorderFactory.createEmptyBorder(0,5,0,5);
     
-    public DefaultLimeTableCellRenderer() {
-        border = BorderFactory.createEmptyBorder(0,5,0,5);
-    }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,

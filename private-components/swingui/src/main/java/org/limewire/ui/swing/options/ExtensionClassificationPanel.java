@@ -34,6 +34,7 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -46,6 +47,8 @@ import com.google.inject.Inject;
  */
 public class ExtensionClassificationPanel extends JPanel {
 
+    private static final Category[] ALL_CATEGORIES = Category.values();
+    
     private final CategoryManager categoryManager;
     private final IconManager iconManager;
     private final JXTable table;
@@ -53,7 +56,6 @@ public class ExtensionClassificationPanel extends JPanel {
     
     private Category[] currentCategories = null;
     
-    private static final Category[] ALL_CATEGORIES = Category.values();
     private final JPanel switchPanel;
     
     @Inject
@@ -86,6 +88,7 @@ public class ExtensionClassificationPanel extends JPanel {
         table.setShowGrid(false, false);
         table.setColumnSelectionAllowed(false);
         table.setSelectionMode(0);
+        table.setDefaultRenderer(Object.class, new DefaultLimeTableCellRenderer());
         
         JScrollPane scrollPane = new JScrollPane(table, 
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
@@ -102,6 +105,7 @@ public class ExtensionClassificationPanel extends JPanel {
      *  set of categories. 
      */
     private TableModel createTableModel(Category... categories) {
+        
         Collection<String> extensions = new HashSet<String>();
         for ( Category category : categories ) {
             extensions.addAll(categoryManager.getExtensionsForCategory(category));
@@ -174,6 +178,26 @@ public class ExtensionClassificationPanel extends JPanel {
             switchCategory(categoriesForSwitch);
             updateSelection((JButton)e.getSource());
         }
+        
+        public Category[] getCategoriesForSwitch() {
+            return categoriesForSwitch;
+        }
+    }
+    
+    /**
+     * Switch the visible tab to the one containing the category.
+     * 
+     * <p> Null category implies the all category as a shortcut if
+     *      ever needed
+     */
+    public void switchCategory(Category category) {
+        if (category == null) {
+            switchCategory(ALL_CATEGORIES);
+        } 
+        else {
+            switchCategory(new Category[] {category});
+        }
+        updateSelection(category);
     }
     
     private void switchCategory(Category... categories) {
@@ -202,6 +226,20 @@ public class ExtensionClassificationPanel extends JPanel {
         }
     }
     
+    private void updateSelection(Category category) {
+        for ( Component comp : switchPanel.getComponents() ) {
+            if (comp instanceof JButton) {
+                JButton button = ((JButton)comp);
+                Category[] categoriesForSwitch = ((CategorySwitchAction)button.getAction()).getCategoriesForSwitch();
+                if (category == null) {
+                    button.setSelected(categoriesForSwitch.length > 1);
+                } else {
+                    button.setSelected(categoriesForSwitch.length != 0 && categoriesForSwitch[0] == category);
+                }
+            }
+        }
+    }
+    
     private JButton createSelectionButton(Action action) {
         JXButton button = new JXButton(action);
         button.setModel(new JToggleButton.ToggleButtonModel());
@@ -213,7 +251,9 @@ public class ExtensionClassificationPanel extends JPanel {
      * Loads the panel for use.  Builds the table and lays out the component.
      */
     public void init() {
-        switchCategory(ALL_CATEGORIES);
+        if (currentCategories == null) { 
+            switchCategory(ALL_CATEGORIES);
+        }
         
         switchPanel.removeAll();
         switchPanel.invalidate();
@@ -221,12 +261,15 @@ public class ExtensionClassificationPanel extends JPanel {
         switchPanel.add(new JLabel(I18n.tr("Show:")));
         
         JButton allButton = createSelectionButton(new CategorySwitchAction(I18n.tr("All"), ALL_CATEGORIES));
-        allButton.setSelected(true);
+        allButton.setSelected(currentCategories == ALL_CATEGORIES);
+        
         switchPanel.add(allButton);
         
         for ( Category category : ALL_CATEGORIES ) {
             if (categoryManager.getExtensionsForCategory(category).size() > 0) {
-                switchPanel.add(createSelectionButton(new CategorySwitchAction(category)));
+                JButton categoryButton = createSelectionButton(new CategorySwitchAction(category));
+                categoryButton.setSelected(currentCategories.length == 1 && category == currentCategories[0]);
+                switchPanel.add(categoryButton);
             }
         }
     }
@@ -249,6 +292,8 @@ public class ExtensionClassificationPanel extends JPanel {
         
         dialogue.pack();
         dialogue.setLocationRelativeTo(GuiUtils.getMainFrame());
+        
+        table.requestFocusInWindow();
         dialogue.setVisible(true);
         
     }

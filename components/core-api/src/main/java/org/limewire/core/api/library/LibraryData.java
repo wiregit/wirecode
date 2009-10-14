@@ -16,7 +16,7 @@ public interface LibraryData {
     /** Returns true if this file is potentially manageable. */
     boolean isFileManageable(File f);
     
-    /** Returns the number of files in a given share list directly from the raw library db */
-    int peekListCount(int listID);
+    /** Returns the number of files in a the share list directly from the raw library db */
+    int peekPublicSharedListCount();
 
 }

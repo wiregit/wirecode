@@ -15,8 +15,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
-import org.limewire.core.api.library.SharedFileList;
-import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.SegmentLayout;
 import org.limewire.ui.swing.settings.InstallSettings;
@@ -28,7 +26,6 @@ import org.limewire.util.VersionFormatException;
 
 public class SetupPage2 extends WizardPage {
     private final JCheckBox shareDownloadedFilesCheckBox;
-    private final SharedFileListManager shareListManager;
     private final LibraryData libraryData;
 
     @Resource private Icon p2pSharedListIcon;
@@ -37,11 +34,10 @@ public class SetupPage2 extends WizardPage {
     @Resource private Icon sharingArrowIcon;
 
     public SetupPage2(SetupComponentDecorator decorator, Application application, 
-            SharedFileListManager shareListManager, LibraryData libraryData) {
+            LibraryData libraryData) {
         
         super(decorator, application);
         
-        this.shareListManager = shareListManager;
         this.libraryData = libraryData;
 
         GuiUtils.assignResources(this);
@@ -60,11 +56,11 @@ public class SetupPage2 extends WizardPage {
         
         add(createModifyInfoPanel());
        
-     //   if (!newInstall) {
+        if (!newInstall) {
             JPanel oldVersionInfoPanel = createOldVersionInfoPanel(fourUpgrade);
             oldVersionInfoPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK));
             add(oldVersionInfoPanel);
-   //     }
+        }
 
         initSettings();
     }
@@ -187,12 +183,8 @@ public class SetupPage2 extends WizardPage {
     }
 
     private int peekNumPublicSharedFiles() {
-        int numPublicFiles = 0;
-        for ( SharedFileList list : shareListManager.getModel() ) {
-            if (list.isPublic()) {
-                numPublicFiles += libraryData.peekListCount(list.getId());
-            }
-        }
+        int numPublicFiles = libraryData.peekPublicSharedListCount();
+        
         return numPublicFiles;
     }
     
@@ -204,7 +196,7 @@ public class SetupPage2 extends WizardPage {
         
         if(fourUpgrade) {
             label = createAndDecorateHeader(I18n
-                    .tr("Shared files from your old version will be in your Public Shared list."));
+                    .tr("Shared files from your old version will continue to be shared with the world."));
         } else {
             label = createAndDecorateHeader(I18n
                     .tr("{0} shared files from your previous version will continue to be shared with the world.", 

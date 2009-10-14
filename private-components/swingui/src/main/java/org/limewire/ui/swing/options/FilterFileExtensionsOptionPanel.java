@@ -20,16 +20,24 @@ import javax.swing.table.TableColumn;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXTable;
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.setting.Setting;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
-import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.util.OSUtils;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.CompositeList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
@@ -40,19 +48,25 @@ import com.google.inject.Inject;
 public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
     
     private final SpamManager spamManager;
-    private final IconManager iconManager;
+    private final CategoryManager categoryManager;
+    private final UnsafeTypeOptionPanelStateManager settingStateManager;
     
     private JButton defaultButton;
     private JButton okButton;
     private JTextField keywordTextField;
     private JButton addKeywordButton;
     private JXTable filterTable;
+
+    private final EventList<String> immutableProgramsList;
         
     @Inject
-    public FilterFileExtensionsOptionPanel(IconManager iconManager, SpamManager spamManager) {
+    public FilterFileExtensionsOptionPanel(IconManager iconManager, SpamManager spamManager,
+            CategoryManager categoryManager,
+            UnsafeTypeOptionPanelStateManager settingStateManager) {
         
-        this.iconManager = iconManager;
         this.spamManager = spamManager;
+        this.categoryManager = categoryManager;
+        this.settingStateManager = settingStateManager;
         
         setLayout(new MigLayout("gapy 10, nogrid"));
         
@@ -60,32 +74,51 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
         addKeywordButton = new JButton(I18n.tr("Add Extension"));
         
      
+        CompositeList<String> allExtensions = new CompositeList<String>(eventList.getPublisher(),
+                eventList.getReadWriteLock());
+        allExtensions.addMemberList(eventList);
+
+        immutableProgramsList = new BasicEventList<String>(eventList.getPublisher(),
+                eventList.getReadWriteLock());
+        allExtensions.addMemberList(immutableProgramsList);
+        
                 
-        filterTable = new MouseableTable(new DefaultEventTableModel<String>(eventList, new FileFilterTableFormat()));
+        filterTable = new MouseableTable(new DefaultEventTableModel<String>(
+                allExtensions, new FileFilterTableFormat(categoryManager, iconManager)));
         
         filterTable.setShowGrid(false, false);
         filterTable.setColumnSelectionAllowed(false);
         filterTable.setSelectionMode(0);
-        TableColumn column = filterTable.getColumn(0); 
-        column.setCellRenderer(new IconRenderer());
-        column.setWidth(16);
-        column.setMaxWidth(16);
-        column.setMinWidth(16);
-        filterTable.getColumn(2).setCellRenderer(new RemoveButtonRenderer(filterTable));
-        filterTable.getColumn(2).setCellEditor(new RemoveButtonRenderer(filterTable));
+        TableColumn iconColumn = filterTable.getColumn(0); 
+        iconColumn.setCellRenderer(new IconRenderer());
+        iconColumn.setWidth(16);
+        iconColumn.setMaxWidth(16);
+        iconColumn.setMinWidth(16);
+        
+        TableColumn removeColumn = filterTable.getColumn(FileFilterTableFormat.columnNames.length-1);
+        
+        removeColumn.setCellRenderer(new RemoveButtonRenderer(filterTable));
+        removeColumn.setCellEditor(new RemoveButtonRenderer(filterTable));
         
         okButton = new JButton(new OKDialogAction());
         addKeywordButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 String text = keywordTextField.getText();
-                if(text == null || text.trim().length() == 0)
+                
+                if(text == null || text.trim().length() == 0) {
                     return;
-                if(!eventList.contains(text)) {
-                    if(text.charAt(0) != '.')
-                        text = "." + text;
+                }
+                
+                text = text.trim();
+                if(text.charAt(0) != '.') {
+                    text = "." + text;
+                }
+                
+                if(!eventList.contains(text) && !immutableProgramsList.contains(text)) {
                     eventList.add(text);
                 }
+                
                 keywordTextField.setText("");
             }
         });
@@ -117,11 +150,40 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
         return model.equals(new ArrayList<String>(Arrays.asList(values)));
     }
 
+    private void updateItems() {
+        eventList.clear();
+        immutableProgramsList.clear();
+    
+        // Adds or removes the banned programs to list with non deletable elements to be appended at the end
+        //  based on the allow programs setting.
+        if (settingStateManager.getValue(LibrarySettings.ALLOW_PROGRAMS) == Boolean.FALSE) {
+            for ( String extension : categoryManager.getExtensionsForCategory(Category.PROGRAM) ) {
+                immutableProgramsList.add("." + extension);
+            }
+        }
+        
+        // Add all the banned extensions that are not already accounted for by 
+        //  banned programs
+        for ( String extension : FilterSettings.BANNED_EXTENSIONS.get() ) {
+            if (!immutableProgramsList.contains(extension)) {
+                eventList.add(extension);
+            }
+        }
+    }
+    
     @Override
     public void initOptions() {
-        eventList.clear();
-        String[] bannedWords = FilterSettings.BANNED_EXTENSIONS.get();
-        eventList.addAll(new ArrayList<String>(Arrays.asList(bannedWords)));
+        
+        
+        updateItems();
+        settingStateManager.addSettingChangedListener(new OptionPanelStateManager.SettingChangedListener() {
+            @Override
+            public void settingChanged(Setting setting) {
+                if (setting == LibrarySettings.ALLOW_PROGRAMS) {
+                    updateItems();
+                }
+            }
+        });
     }
     
     /**
@@ -142,26 +204,52 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
         }
     }
     
-    private class FileFilterTableFormat extends AbstractTableFormat<String> {
+    private static class FileFilterTableFormat implements TableFormat<String> {
 
-        private static final int ICON_INDEX = 0;
-        private static final int NAME_INDEX = 1;
-        private static final int BUTTON_INDEX = 2;
+        private final CategoryManager categoryManager;
+        private final IconManager iconManager;
         
-        public FileFilterTableFormat() {
-            super("", I18n.tr("Extensions"), "");
+        final int ICON_COLUMN = 0;
+        final int CATEGORY_COLUMN = 2;
+        final int TYPE_COLUMN = 3;
+        
+        static final String[] columnNames = OSUtils.isWindows() ?
+                new String[] {"", I18n.tr("Extension"), I18n.tr("Category"), I18n.tr("Type"), ""} 
+              : new String[] {"", I18n.tr("Extension"), I18n.tr("Category"), ""};
+        
+        public FileFilterTableFormat(CategoryManager cagetoryManager, IconManager iconManager) {
+            this.categoryManager = cagetoryManager;
+            this.iconManager = iconManager;
+        }
+                
+        @Override
+        public Object getColumnValue(String baseObject, int column) {
+            
+            switch (column) {
+                case ICON_COLUMN :
+                    return iconManager.getIconForExtension(baseObject.substring(1));
+            
+                case CATEGORY_COLUMN :
+                    return categoryManager.getCategoryForExtension(baseObject.substring(1));
+            
+                case TYPE_COLUMN :
+                    if (OSUtils.isWindows()) {
+                        return iconManager.getIconForExtension(baseObject.substring(1)).toString();
+                    } // ELSE PASS-THROUGH
+                    
+                default:
+                    return baseObject;
+            }
         }
 
         @Override
-        public Object getColumnValue(String baseObject, int column) {
-            switch(column) {
-                case ICON_INDEX: 
-                    return iconManager.getIconForExtension(baseObject.substring(1));
-                case NAME_INDEX: return baseObject;
-                case BUTTON_INDEX: return baseObject;
-            }
-                
-            throw new IllegalStateException("Unknown column:" + column);
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            return columnNames[column];
         }
     }
     
@@ -169,16 +257,14 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
 
         private final JLabel component = new JLabel(); 
         
-        public IconRenderer() {
-        }
-        
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
             if (value == null) {
                 return null;
             }
-            component.setIcon((Icon)value);
+            component.setIcon((Icon) value);
             
             return component;
         }

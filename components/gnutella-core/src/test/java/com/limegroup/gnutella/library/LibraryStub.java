@@ -80,7 +80,7 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
 
     @Override
-    public int peekListCount(int listID) {
+    public int peekPublicSharedListCount() {
         return 0;
     }
 }

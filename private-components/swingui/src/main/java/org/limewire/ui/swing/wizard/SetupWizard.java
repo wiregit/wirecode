@@ -5,7 +5,6 @@ import java.awt.Frame;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -16,16 +15,13 @@ public class SetupWizard {
 
     private Wizard wizard;
     private final Application application;
-    private final SharedFileListManager sharedFileListManager;
     private final LibraryData libraryData;
 
     @Inject
     public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory,
-            Provider<LibraryManager> libraryManagerProvider, Application application,
-            SharedFileListManager sharedFileListManager) {
+            Provider<LibraryManager> libraryManagerProvider, Application application) {
         
         this.application = application;
-        this.sharedFileListManager = sharedFileListManager;
         this.libraryData = libraryManagerProvider.get().getLibraryData();        
         
         createWizard(decoratorFactory.get(), libraryData);
@@ -65,7 +61,7 @@ public class SetupWizard {
             wizard.addPage(new SetupPage1(decorator, application));
         }
         
-        wizard.addPage(new SetupPage2(decorator, application, sharedFileListManager, libraryData));
+        wizard.addPage(new SetupPage2(decorator, application, libraryData));
     }
 
     private static boolean shouldShowPage1() {

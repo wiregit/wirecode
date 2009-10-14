@@ -97,6 +97,7 @@ public abstract class AbstractFilterOptionPanel extends OptionPanel {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+            button.setVisible(eventList.contains(value));
             if(isSelected) {
                 setBackground(table.getSelectionBackground());
             } else {
@@ -108,6 +109,7 @@ public abstract class AbstractFilterOptionPanel extends OptionPanel {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
+            button.setVisible(eventList.contains(value));
             setBackground(table.getSelectionBackground());
             return this;
         }

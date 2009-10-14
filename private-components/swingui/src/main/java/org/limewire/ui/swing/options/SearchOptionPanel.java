@@ -54,7 +54,6 @@ public class SearchOptionPanel extends OptionPanel {
     private SearchBarPanel searchBarPanel;
     private FilteringPanel filteringPanel;
     private JCheckBox groupSimilarResults;
-
     
     @Inject
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,

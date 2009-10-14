@@ -59,7 +59,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     static final Integer DEFAULT_SHARED_COLLECTION_ID = 0;
     private static final Integer MIN_COLLECTION_ID = 1;
     
-    
     private final Version CURRENT_VERSION = Version.THREE;
     
     private final Map<String, List<Integer>> fileData = new HashMap<String, List<Integer>>();
@@ -667,17 +666,20 @@ class LibraryFileData extends AbstractSettingsGroup {
         return LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
     }
     
-    public int peekListCount(int listID) {
-        
-        int count = 0;
-        
-        for ( List<Integer> listForFile : fileData.values() ) {
-            if (listForFile.contains(listID)) {
-                count++;
+    public int peekPublicSharedListCount() {
+        lock.readLock().lock();
+        try {
+            int count = 0;
+            for ( List<Integer> listForFile : fileData.values() ) {
+                if (listForFile.contains(DEFAULT_SHARED_COLLECTION_ID)) {
+                    count++;
+                }
             }
+            return count;
         }
-
-        return count;
+        finally {
+            lock.readLock().unlock();
+        }
     }
     
     private static class FileProperties implements Serializable {

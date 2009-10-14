@@ -32,8 +32,8 @@ public class LibraryOptionPanel extends OptionPanel {
     
     private final Application application;
     private final UsePlayerPanel playerPanel;
-    private final CategoriesPanel categoryPanel;
-    private final OptionPanel iTunesPanel;
+    
+    private OptionPanel iTunesPanel;
     private OptionPanel sharingPanel;
     
     private final Provider<UnsafeTypeOptionPanel> unsafeOptionPanelProvider;
@@ -51,17 +51,13 @@ public class LibraryOptionPanel extends OptionPanel {
         GuiUtils.assignResources(this);
         
         this.playerPanel = new UsePlayerPanel();
-        this.categoryPanel = new CategoriesPanel();
 
         setLayout(new MigLayout("insets 15, fillx, gap 4"));
 
-        // TODO: three different ways to add a panel!?
-        add(categoryPanel, "growx, wrap");
         add(getSharingPanel(), "growx, wrap");
 
         if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
-            iTunesPanel = new ITunesPanel();
-            add(iTunesPanel, "growx, wrap");
+            add(getITunesPanel(), "growx, wrap");
         }
         else {
             iTunesPanel = null;
@@ -72,48 +68,23 @@ public class LibraryOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return playerPanel.applyOptions() || categoryPanel.applyOptions() || getSharingPanel().applyOptions() 
+        return playerPanel.applyOptions() || getSharingPanel().applyOptions() 
             || iTunesPanel != null ? iTunesPanel.applyOptions() : false;
     }
 
     @Override
     boolean hasChanged() {
-        return playerPanel.hasChanged() || categoryPanel.hasChanged() || getSharingPanel().hasChanged()
+        return playerPanel.hasChanged() || getSharingPanel().hasChanged()
             || iTunesPanel != null ? iTunesPanel.hasChanged() : false;
     }
 
     @Override
     public void initOptions() {
         getSharingPanel().initOptions();
-        categoryPanel.initOptions();
         playerPanel.initOptions();
         if (iTunesPanel != null) {
             iTunesPanel.initOptions();
         }
-    }
-
-    private class CategoriesPanel extends OptionPanel {
-        
-        public CategoriesPanel() {
-            super(I18n.tr("Adding Folders"));
-            
-            add(new JLabel("TODO: Flesh out this option"));
-        }
-
-        @Override
-        boolean applyOptions() {
-            return false;
-        }
-
-        @Override
-        boolean hasChanged() {
-            return false;
-        }
-
-        @Override
-        public void initOptions() {
-        }
-
     }
 
     private class ITunesPanel extends OptionPanel {
@@ -189,6 +160,13 @@ public class LibraryOptionPanel extends OptionPanel {
             sharingPanel = new SharingPanel();
         }
         return sharingPanel;
+    }
+    
+    private OptionPanel getITunesPanel() {
+        if (iTunesPanel == null) {
+            iTunesPanel = new ITunesPanel();
+        }
+        return iTunesPanel;
     }
     
     private class SharingPanel extends OptionPanel {

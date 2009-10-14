@@ -1240,7 +1240,7 @@ class LibraryImpl implements Library, FileCollection {
         }
     }
     
-    public int peekListCount(int listID) {
-        return fileData.peekListCount(listID);
+    public int peekPublicSharedListCount() {
+        return fileData.peekPublicSharedListCount();
     }
 }

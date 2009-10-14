@@ -12,7 +12,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -23,6 +22,7 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.Setting;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
@@ -30,6 +30,7 @@ import org.limewire.util.NotImplementedException;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
@@ -46,7 +47,8 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     @Inject
     public UnsafeTypeOptionPanel(LibraryManager libraryManager,
             SharedFileListManager shareListManager,
-            UnsafeTypeOptionPanelStateManager manager) {
+            UnsafeTypeOptionPanelStateManager manager,
+            final Provider<ExtensionClassificationPanel> extensionClassificationPanelProvider) {
         
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -74,13 +76,13 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are Documents?")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new NotImplementedException("Link not known?");
+                ExtensionClassificationPanel panel = extensionClassificationPanelProvider.get();
+                panel.switchCategory(Category.DOCUMENT);
+                panel.showDialogue();
             }
         }), "wrap");
         
-        JSeparator separator = new JSeparator();
-        separator.setForeground(Color.BLACK);
-        contentPanel.add(separator, "growx, wrap");
+        contentPanel.add(Line.createHorizontalLine(Color.BLACK), "grow, wrap");
         
         contentPanel.add(new JLabel("<html>" + I18n.tr("Enabling this setting makes you more prone to viruses")
         + "</html>"), "wrap");
@@ -88,7 +90,9 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are Programs?")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new NotImplementedException("Link not known?");
+                ExtensionClassificationPanel panel = extensionClassificationPanelProvider.get();
+                panel.switchCategory(Category.PROGRAM);
+                panel.showDialogue();
             }
         }), "wrap");
         

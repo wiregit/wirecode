@@ -265,9 +265,9 @@ class LibraryWarningDialog extends OverlayPopupPanel {
      */
     private String getHeaderString() {
         if(isShared) 
-            return I18n.tr("Choose what to Share");
+            return I18n.tr("Choose What to Share");
         else
-            return I18n.tr("Choose what to Add");
+            return I18n.tr("Choose What to Add");
     }
     
     /**

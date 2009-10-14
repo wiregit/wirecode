@@ -32,7 +32,7 @@ class LibraryDataImpl implements LibraryData {
     }
 
     @Override
-    public int peekListCount(int listID) {
-        return library.peekListCount(listID);
+    public int peekPublicSharedListCount() {
+        return library.peekPublicSharedListCount();
     }
 }

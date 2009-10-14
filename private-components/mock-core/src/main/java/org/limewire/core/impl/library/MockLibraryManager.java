@@ -169,7 +169,7 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         }
 
         @Override
-        public int peekListCount(int listID) {
+        public int peekPublicSharedListCount() {
             return 0;
         }
     }
