@@ -199,11 +199,11 @@ public class MainDownloadPanel extends JPanel {
         
         int downloadCount = sourceList.size();
         
-        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue() && !isVisible()){
+        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) { // && !isVisible()){
             alertDownloadVisibilityListeners(true);
-        } else if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
-            //Do nothing - it is already set.
-            return;
+//        } else if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
+//            //Do nothing - it is already set.
+//            return;
         } else if (downloadCount == 0 && isVisible()) {
             alertDownloadVisibilityListeners(false);
         } else if (downloadCount > 0 && !isVisible()) {
