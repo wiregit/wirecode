@@ -284,8 +284,8 @@ public class SearchOptionPanel extends OptionPanel {
             add(adultContentCheckBox, "wrap");
             
             add(filterKeywordsButton, "gapright 10, alignx left");
-            add(filterFileExtensionsButton, "alignx left");
-            add(clearSpamButton, "alignx left, wrap");
+            add(filterFileExtensionsButton, "gapright 10, alignx left");
+            add(clearSpamButton, "gapright 10, alignx left, wrap");
         }
         
         @Override
