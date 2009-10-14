@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.io.IOException;
 
 import javax.swing.Icon;
 
@@ -212,9 +213,10 @@ public class MockStoreResult implements StoreResult {
                     
                     // Create connection and load tracks.
                     StoreConnection storeConnection = storeConnectionFactory.create();
-                    String jsonStr = storeConnection.loadTracks(albumId);
-                    
                     try {
+                        String jsonStr = storeConnection.loadTracks(albumId);
+                    
+                    
                         // Parse JSON and add tracks.
                         JSONObject jsonObj = new JSONObject(jsonStr);
                         List<TrackResult> newTracks = parseTracks(jsonObj);
@@ -225,6 +227,8 @@ public class MockStoreResult implements StoreResult {
                         
                     } catch (JSONException ex) {
                         ex.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }).start();

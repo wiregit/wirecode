@@ -39,18 +39,18 @@ public class CoreStoreConnection implements StoreConnection {
     
     private static final int COUNT = 5;
 
-    private final Provider<String> storeSearchURL;
+    private final Provider<String> storeAPIURL;
     private final ClientConnectionManager clientConnectionManager;
     private final ApplicationServices applicationServices;
     private final Application application;
     private final BasicCookieStore cookieStore;
 
     @Inject
-    public CoreStoreConnection(@StoreSearchURL Provider<String> storeSearchURL,
+    public CoreStoreConnection(@StoreAPIURL Provider<String> storeAPIURL,
                                @Named("sslConnectionManager") ClientConnectionManager connectionManager,
                                ApplicationServices applicationServices,
                                Application application) {
-        this.storeSearchURL = storeSearchURL;
+        this.storeAPIURL = storeAPIURL;
         this.clientConnectionManager = connectionManager;
         this.applicationServices = applicationServices;
         this.application = application;
@@ -62,33 +62,31 @@ public class CoreStoreConnection implements StoreConnection {
      * result as a JSON text string.
      */
     @Override
-    public String doQuery(String query) {
+    public String doQuery(String query) throws IOException {
         if (StringUtils.isEmpty(query)) {
             return "";
         }
-        
-        HttpClient client = createHttpClient();
-        try {
-            final String request = buildURL(query);
-            LOG.debugf("searching store: {0} ...", request);
-            HttpResponse response = client.execute(new HttpGet(request));
-            if (response.getEntity() != null) {
-                String responseStr = EntityUtils.toString(response.getEntity());
-                LOG.debugf(" ... response:\n{0}", responseStr);
-                HttpClientUtils.releaseConnection(response);
-                return responseStr;
-            } else {
-                return "";
-            }
-        } catch (IOException e) {
-            LOG.debug(e.getMessage(), e);
-        }
-        return "";
+        final String request = buildSearchRequestURL(query);
+        return makeHTTPRequest(request);
     }
-    
+
+    private String makeHTTPRequest(String request) throws IOException {
+        HttpClient client = createHttpClient();            
+        LOG.debugf("calling store api: {0} ...", request);
+        HttpResponse response = client.execute(new HttpGet(request));
+        if (response.getEntity() != null) {
+            String responseStr = EntityUtils.toString(response.getEntity());
+            LOG.debugf(" ... response:\n{0}", responseStr);
+            HttpClientUtils.releaseConnection(response);
+            return responseStr;
+        } else {
+            return "";
+        }
+    }
+
     @Override
     public Icon loadIcon(String iconUri) {
-        // TODO review implementation
+        // TODO caching?
         try {
             return new ImageIcon(new URL(iconUri));
         } catch (MalformedURLException ex) {
@@ -97,23 +95,41 @@ public class CoreStoreConnection implements StoreConnection {
     }
     
     @Override
-    public String loadStyle(String styleId) {
-        // TODO implement
-        return "";
+    public String loadStyle(String styleId) throws IOException {
+        if (StringUtils.isEmpty(styleId)) {
+            return "";
+        }
+        final String request = buildStyleRequestURL(styleId);
+        return makeHTTPRequest(request);
     }
     
     @Override
-    public String loadTracks(String albumId) {
-        // TODO implement
-        return "";
+    public String loadTracks(String albumId) throws IOException {
+        if (StringUtils.isEmpty(albumId)) {
+            return "";
+        }
+        final String request = buildTracksRequestURL(albumId);
+        return makeHTTPRequest(request);
     }
 
-    private String buildURL(String query) throws UnsupportedEncodingException {
-        return storeSearchURL.get() + "?query=" + URLEncoder.encode(query, "UTF-8") + 
+    private String buildSearchRequestURL(String query) throws UnsupportedEncodingException {
+        return storeAPIURL.get() + "/search?query=" + URLEncoder.encode(query, "UTF-8") + 
                 "&lv=" + application.getVersion() + 
                 "&guid=" + new GUID(applicationServices.getMyGUID()).toHexString() + 
                 "&start=1" + 
                 "&count=" + COUNT;
+    }
+    
+    private String buildTracksRequestURL(String albumId) throws UnsupportedEncodingException {
+        return storeAPIURL.get() + "/tracks?albumId=" + albumId + 
+                "&lv=" + application.getVersion() + 
+                "&guid=" + new GUID(applicationServices.getMyGUID()).toHexString();
+    }
+    
+    private String buildStyleRequestURL(String styleId) throws UnsupportedEncodingException {
+        return storeAPIURL.get() + "/style?styleId=" + styleId + 
+                "&lv=" + application.getVersion() + 
+                "&guid=" + new GUID(applicationServices.getMyGUID()).toHexString();
     }
 
     private HttpClient createHttpClient() {

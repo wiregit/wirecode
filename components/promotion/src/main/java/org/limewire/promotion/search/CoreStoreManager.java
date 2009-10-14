@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.json.JSONArray;
@@ -27,6 +28,8 @@ import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
+import org.limewire.geocode.GeoLocation;
+import org.limewire.inject.MutableProvider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -48,6 +51,7 @@ public class CoreStoreManager implements StoreManager {
     private final StoreConnection storeConnection;
     private final StyleManager styleManager;
     private final ScheduledListeningExecutorService executorService;
+    private final MutableProvider<Properties> geoLocation;
 
     /**
      * Constructs a CoreStoreManager with the specified store connection 
@@ -56,10 +60,12 @@ public class CoreStoreManager implements StoreManager {
     @Inject
     public CoreStoreManager(StoreConnection storeConnection,
                             StyleManager styleManager,
-                            @Named("backgroundExecutor") ScheduledListeningExecutorService executorService) {
+                            @Named("backgroundExecutor") ScheduledListeningExecutorService executorService,
+                            @GeoLocation MutableProvider<Properties> geoLocation) {
         this.storeConnection = storeConnection;
         this.styleManager = styleManager;
         this.executorService = executorService;
+        this.geoLocation = geoLocation;
     }
     
     @Override
@@ -132,13 +138,13 @@ public class CoreStoreManager implements StoreManager {
         // Start background process to retrieve store results.
         executorService.submit(new Runnable() {
             public void run() {
+                try {
+                    // Execute query.
+                    String query = searchDetails.getSearchQuery();
+                    String jsonStr = storeConnection.doQuery(query);
                 
-                // Execute query.
-                String query = searchDetails.getSearchQuery();
-                String jsonStr = storeConnection.doQuery(query);
-                
-                if (!StringUtils.isEmpty(jsonStr)) {
-                    try {
+                    if (!StringUtils.isEmpty(jsonStr)) {
+                    
                         // Create JSON object from query result.
                         JSONObject jsonObj = new JSONObject(jsonStr);
 //                        long time = valueToTimestamp(jsonObj.getString("styleTimestamp"));
@@ -159,12 +165,12 @@ public class CoreStoreManager implements StoreManager {
 
                         // Fire event to handle results.
                         storeSearchListener.resultsFound(storeResults);
-                        
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
                     }
+                        
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });

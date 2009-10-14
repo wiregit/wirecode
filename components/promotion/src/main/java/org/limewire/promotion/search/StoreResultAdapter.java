@@ -204,10 +204,10 @@ public class StoreResultAdapter implements StoreResult {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    // Use store connection to load tracks.
-                    String jsonStr = storeConnection.loadTracks(albumId);
-                    
                     try {
+                        // Use store connection to load tracks.
+                        String jsonStr = storeConnection.loadTracks(albumId);                    
+                    
                         // Parse JSON and add tracks.
                         JSONObject jsonObj = new JSONObject(jsonStr);
                         List<TrackResult> newTracks = parseTracks(jsonObj);

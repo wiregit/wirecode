@@ -416,7 +416,7 @@ public final class SearchSettings extends LimeProps {
     /**
      * The store search URL
      */
-    public static final StringSetting SEARCH_STORE_URL = 
-            FACTORY.createRemoteStringSetting("SEARCH_STORE_URL",
-                    "http://10.254.193.229:8080/links/search", "SearchSettings.SearchStoreURL");
+    public static final StringSetting STORE_API_URL = 
+            FACTORY.createRemoteStringSetting("STORE_API_URL",
+                    "http://localhost:8080/", "SearchSettings.StoreAPIURL");
 }

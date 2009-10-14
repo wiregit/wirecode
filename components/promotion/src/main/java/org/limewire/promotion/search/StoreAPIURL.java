@@ -11,5 +11,5 @@ import com.google.inject.BindingAnnotation;
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD}) 
 @Retention(RetentionPolicy.RUNTIME)
 
-public @interface StoreSearchURL {
+public @interface StoreAPIURL {
 }
