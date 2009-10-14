@@ -273,7 +273,7 @@ public class FancyTab extends JXPanel {
         removeButton.doClick(0);
     }
     
-    void select() {
+    public void select() {
         mainButton.doClick(0);
     }
     
