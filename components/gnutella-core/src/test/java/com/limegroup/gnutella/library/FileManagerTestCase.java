@@ -28,7 +28,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 /**
  * Tests for FileManager and handling of queries.
  */
-public class FileManagerTestCase extends LimeTestCase {
+public abstract class FileManagerTestCase extends LimeTestCase {
 
     public static final String SHARE_EXTENSION = "XYZ";
     public static final String EXTENSION = SHARE_EXTENSION + ";mp3";
@@ -39,10 +39,6 @@ public class FileManagerTestCase extends LimeTestCase {
     protected File f4 = null;
     protected File f5 = null;
     protected File f6 = null;
-
-    protected File store1 = null;
-    protected File store2 = null;
-    protected File store3 = null;
 
     // protected so that subclasses can
     // use these variables as well.
@@ -69,7 +65,6 @@ public class FileManagerTestCase extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 
         cleanFiles(_incompleteDir, false);
-        cleanFiles(_storeDir, false);
 
 
         injector = LimeTestUtils.createInjector(new AbstractModule() {
@@ -90,10 +85,6 @@ public class FileManagerTestCase extends LimeTestCase {
         if (f4!=null) f4.delete();
         if (f5!=null) f5.delete();
         if (f6!=null) f6.delete();
-
-        if(store1!=null) store1.delete();
-        if(store2!=null) store2.delete();
-        if(store3!=null) store3.delete();
     }
 
 

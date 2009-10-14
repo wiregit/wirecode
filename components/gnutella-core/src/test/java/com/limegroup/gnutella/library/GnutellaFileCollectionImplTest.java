@@ -279,7 +279,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
     }
     
     public void testStoreFileDoesntAddToView() throws Exception {
-        f1 = createNewTestStoreFile(_storeDir);
+        f1 = createNewTestStoreFile(_savedDir);
         
         assertFalse(managedList.contains(f1));
         assertAdds(fileList, f1);
@@ -287,7 +287,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
     } 
     
     public void testStoreFileV2DoesAddToView() throws Exception {
-        f1 = createNewTestStoreFileV2(_storeDir);
+        f1 = createNewTestStoreFileV2(_savedDir);
         
         assertFalse(managedList.contains(f1));
         assertAdds(fileList, f1);
@@ -295,7 +295,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
     }
     
     public void testStoreFileRename() throws Exception {
-        f1 = createNewTestStoreFile(_storeDir);
+        f1 = createNewTestStoreFile(_savedDir);
         
         assertFalse(managedList.contains(f1));
         assertAdds(fileList, f1);
@@ -309,7 +309,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
     }
     
     public void testStoreFileV2Rename() throws Exception {
-        f1 = createNewTestStoreFileV2(_storeDir);
+        f1 = createNewTestStoreFileV2(_savedDir);
         
         assertFalse(managedList.contains(f1));
         assertAdds(fileList, f1);

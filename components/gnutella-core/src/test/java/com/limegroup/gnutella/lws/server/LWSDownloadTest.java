@@ -347,7 +347,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
             inId.set(downloaderIDAndProgressBarID);
         }
 
-        File savedFile = new File(_storeDir, args.get("file"));
+        File savedFile = new File(_savedDir, args.get("file"));
         // Do a busy wait until we've run out of time or the file we wanted
         // was downloaded and is the size we wanted
         for (long toStop = System.currentTimeMillis() + constants.DOWNLOAD_WAIT_TIME; System.currentTimeMillis() < toStop;) {

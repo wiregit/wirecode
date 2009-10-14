@@ -90,7 +90,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         
         //create a valid download
-        StoreDownloaderImpl downloader = (StoreDownloaderImpl) downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
+        StoreDownloaderImpl downloader = (StoreDownloaderImpl) downloadManager.downloadFromStore(rfd, false, _savedDir, "test.txt" );
         
         assertNull(downloader.newRequery() );
         
@@ -145,11 +145,11 @@ public class StoreDownloaderTest extends LimeTestCase{
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
                 
         //create a valid download
-        downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
+        downloadManager.downloadFromStore(rfd, false, _savedDir, "test.txt" );
         
         //test redownloading same file
         try {
-            downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
+            downloadManager.downloadFromStore(rfd, false, _savedDir, "test.txt" );
             fail("File already downloading");
         }
         catch(DownloadException e) {
@@ -167,6 +167,6 @@ public class StoreDownloaderTest extends LimeTestCase{
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         
         
-        downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
+        downloadManager.downloadFromStore(rfd, false, _savedDir, "test.txt" );
     }
 }

@@ -32,7 +32,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     
     protected static File _baseDir;
     protected static File _savedDir;
-    protected static File _storeDir;
     protected static File _incompleteDir;
     protected static File _settingsDir;
     protected static File _scratchDir;
@@ -71,13 +70,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      */
     protected File getSaveDirectory() {
         return _savedDir;
-    }
-    
-    /**
-     * Get store directory
-     */
-    protected File getStoreDirectory() {
-        return _storeDir;
     }
     
     /**
@@ -242,12 +234,10 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         }
         _savedDir = new File(_baseDir, "saved");
         _settingsDir = new File(_baseDir, "settings");
-        _storeDir = new File(_baseDir, "store");
         _scratchDir = new File(_baseDir, "scratch");
 
         _baseDir.mkdirs();
         _savedDir.mkdirs();
-        _storeDir.mkdirs();
         _settingsDir.mkdirs();
         _scratchDir.mkdirs();
         

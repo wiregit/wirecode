@@ -72,13 +72,13 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
     private void runGenericLWSTest(RemoteFileDesc[] rfds) throws Exception {
 
         for (RemoteFileDesc rfd : rfds) {
-            services.createDownloader(rfd, _storeDir);
+            services.createDownloader(rfd, _savedDir);
         }
 
         waitForComplete();
         boolean isComplete = true;
         for (RemoteFileDesc rfd : rfds) {
-            File f = new File(_storeDir, rfd.getFileName());
+            File f = new File(_savedDir, rfd.getFileName());
             isComplete &= isComplete(f, rfd.getSize());
         }
         if (isComplete)
