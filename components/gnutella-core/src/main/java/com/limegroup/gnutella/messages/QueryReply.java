@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage;
@@ -220,4 +221,11 @@ public interface QueryReply extends Message, SecureMessage {
      * @throws BadPacketException
      */
     void validate() throws BadPacketException;
+    
+    /**
+     * Parses and returns the GGEP extension block attached to this QueryReply.
+     * Returns null if there is no GGEP extension block, or if the block exists
+     * but cannot be parsed. 
+     */
+    public GGEP getGGEP();
 }

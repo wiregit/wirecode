@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
@@ -1288,6 +1289,18 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     int getGGEPEnd() {
         parseResults();
         return _data.getGGEPEnd();
+    }
+    
+    @Override
+    public GGEP getGGEP() {
+        int start = getGGEPStart();
+        if(start == -1)
+            return null;
+        try {
+            return new GGEP(_payload, start, null);
+        } catch(BadGGEPBlockException e) {
+            return null;
+        }
     }
 
     int getQHDOffset() {
