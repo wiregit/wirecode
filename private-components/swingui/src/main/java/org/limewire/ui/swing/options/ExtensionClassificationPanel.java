@@ -68,7 +68,7 @@ public class ExtensionClassificationPanel extends JPanel {
         this.iconManager = iconManager;
         this.buttonDecorator = buttonDecorator;
                 
-        setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
+        setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         setOpaque(false);
         
         add(new JLabel("<html>"+I18n.tr("Below are the file extensions LimeWire knows about and how they are classified throughout the program")+"</html>"),
@@ -78,7 +78,7 @@ public class ExtensionClassificationPanel extends JPanel {
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setOpaque(false);
         
-        switchPanel = new JPanel(new MigLayout("insets 5, gap 5"));
+        switchPanel = new JPanel(new MigLayout("insets 10, gap 5"));
         
         centerPanel.add(switchPanel, BorderLayout.NORTH);
         
@@ -285,7 +285,7 @@ public class ExtensionClassificationPanel extends JPanel {
         dialogue.getContentPane().add(this, BorderLayout.CENTER);
         init();
         
-        JPanel buttonPanel = new JPanel(new MigLayout("insets 4, gap 4, fill"));
+        JPanel buttonPanel = new JPanel(new MigLayout("insets 0 0 10 10, gap 4, fill"));
         buttonPanel.setOpaque(false);
         buttonPanel.add(new JButton(new OKDialogAction()), "tag ok");
         dialogue.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
