@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -21,13 +23,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -140,7 +142,9 @@ public class ExtensionClassificationPanel extends JPanel {
                 data[y][x++] = I18n.tr(categoryManager.getCategoryForExtension(ext).getSingularName());
             }
             if (OSUtils.isWindows() && icon != null) {
-                data[y][x++] = icon.toString();
+                if (!icon.toString().startsWith("file:/")) {
+                    data[y][x++] = icon.toString();
+                }
             }
                
             y++;
@@ -210,11 +214,17 @@ public class ExtensionClassificationPanel extends JPanel {
         TableModel model = createTableModel(currentCategories);
 
         table.setModel(model);
-        TableColumn iconColumn = table.getColumn(model.getColumnName(0));
+        TableColumnExt iconColumn = table.getColumnExt(model.getColumnName(0));
         iconColumn.setResizable(false);
         iconColumn.setMinWidth(16);
         iconColumn.setMaxWidth(16);
         iconColumn.setWidth(16);
+        iconColumn.setComparator(new Comparator<ImageIcon>() {
+            @Override
+            public int compare(ImageIcon o1, ImageIcon o2) {
+                return o1.getImage().toString().compareTo(o2.getImage().toString());
+            }
+        });
     }
     
     private void updateSelection(JButton button) {
