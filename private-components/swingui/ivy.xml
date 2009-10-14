@@ -7,9 +7,6 @@
         <artifact name="swingui" conf="master"/>
     </publications>
     <dependencies>
-        <!-- osx specific dependency.  TODO: figure out how to make runtime OSX specific -->
-        <dependency org="none" name="osx/MRJAdapter" rev="${MRJAdapter.version}" conf="compile"/>
-
         <!-- compile & runtime dependencies. -->
         <dependency org="org.limewire" name="facebook" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="friend" rev="latest.integration" conf="compile,runtime"/>
