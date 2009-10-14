@@ -70,16 +70,21 @@ public class StoreResultAdapter implements StoreResult {
         albumIconUri = jsonObj.optString("albumIcon");
         albumId = jsonObj.optString("albumId");
         category = getCategory(jsonObj);
-        fileName = jsonObj.getString("fileName");
+        fileName = jsonObj.optString("fileName");
         fileExtension = FileUtils.getFileExtension(fileName);
-        infoUri = jsonObj.getString("infoPage");
+        infoUri = jsonObj.optString("infoPage");
         price = jsonObj.optString("price");
         remoteHost = new RemostHostImpl(new StorePresence("Store"));
-        size = jsonObj.getLong("fileSize");
+        size = jsonObj.optLong("fileSize");
         sortPriority = getSortPriority(jsonObj);
         streamUri = jsonObj.optString("streamUrl");
         trackCount = jsonObj.optLong("trackCount");
-        urn = com.limegroup.gnutella.URN.createUrnFromString(jsonObj.getString("URN"));
+        String urnString = jsonObj.optString("URN");
+        if(urnString != null && urnString.trim().length() > 0) {
+            urn = com.limegroup.gnutella.URN.createUrnFromString(urnString);
+        } else {
+            urn = null;
+        }
         
         initProperties(jsonObj);
     }
@@ -88,13 +93,13 @@ public class StoreResultAdapter implements StoreResult {
      * Populates the result properties using the specified JSON object.
      */
     private void initProperties(JSONObject jsonObj) throws JSONException {
-        propertyMap.put(FilePropertyKey.AUTHOR, jsonObj.getString("artist"));
-        propertyMap.put(FilePropertyKey.ALBUM, jsonObj.getString("album"));
-        propertyMap.put(FilePropertyKey.TITLE, jsonObj.getString("title"));
-        propertyMap.put(FilePropertyKey.BITRATE, jsonObj.getLong("bitRate"));
-        propertyMap.put(FilePropertyKey.GENRE, jsonObj.getString("genre"));
-        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.getLong("length"));
-        propertyMap.put(FilePropertyKey.QUALITY, jsonObj.getLong("quality"));
+        propertyMap.put(FilePropertyKey.AUTHOR, jsonObj.optString("artist"));
+        propertyMap.put(FilePropertyKey.ALBUM, jsonObj.optString("album"));
+        propertyMap.put(FilePropertyKey.TITLE, jsonObj.optString("title"));
+        propertyMap.put(FilePropertyKey.BITRATE, jsonObj.optLong("bitRate"));
+        propertyMap.put(FilePropertyKey.GENRE, jsonObj.optString("genre"));
+        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.optLong("length"));
+        propertyMap.put(FilePropertyKey.QUALITY, jsonObj.optLong("quality"));
         
         String trackNumber = jsonObj.optString("trackNumber");
         if (trackNumber.length() > 0) propertyMap.put(FilePropertyKey.TRACK_NUMBER, trackNumber);
@@ -253,13 +258,13 @@ public class StoreResultAdapter implements StoreResult {
      * Returns the Category from the specified JSON object.
      */
     private Category getCategory(JSONObject jsonObj) throws JSONException {
-        String value = jsonObj.getString("category");
+        String value = jsonObj.optString("category");
         for (Category category : Category.values()) {
             if (category.toString().equalsIgnoreCase(value)) {
                 return category;
             }
         }
-        throw new JSONException("Invalid result category");
+        return null;
     }
     
     /**
@@ -267,7 +272,7 @@ public class StoreResultAdapter implements StoreResult {
      */
     private SortPriority getSortPriority(JSONObject jsonObj) throws JSONException {
         String value = jsonObj.optString("sortPriority");
-        if (value.length() > 0) {
+        if (value != null && value.length() > 0) {
             for (SortPriority priority : SortPriority.values()) {
                 if (priority.toString().equalsIgnoreCase(value)) {
                     return priority;

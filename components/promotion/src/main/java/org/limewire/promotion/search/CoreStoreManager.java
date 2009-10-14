@@ -22,8 +22,8 @@ import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
-import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
@@ -141,15 +141,12 @@ public class CoreStoreManager implements StoreManager {
                     try {
                         // Create JSON object from query result.
                         JSONObject jsonObj = new JSONObject(jsonStr);
-                        
-                        // Get style type and timestamp.
-                        Type type = valueToType(jsonObj.getString("styleType"));
 //                        long time = valueToTimestamp(jsonObj.getString("styleTimestamp"));
                         
                         // Get store results array.
                         StoreResult[] storeResults = readStoreResults(jsonObj);
                         
-                        StoreStyle style = getStyle(type);
+                        StoreStyle style = getStyle(jsonObj);
                         // Load new style if necessary.
                         //if (storeStyle == null) {
                             //JSONObject styleJson = new JSONObject(storeConnection.loadStyle(type.toString()));
@@ -163,17 +160,28 @@ public class CoreStoreManager implements StoreManager {
                         // Fire event to handle results.
                         storeSearchListener.resultsFound(storeResults);
                         
-                    } catch (Exception ex) {
-                        LOG.warnf(ex, ex.getMessage());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
         });
     }
     
-    private StoreStyle getStyle(Type type) {
-        StoreStyle style = styleManager.getStyle(type);
-        return style != null ? style : styleManager.getDefaultStyle();
+    private StoreStyle getStyle(JSONObject jsonObject) {        
+        if(jsonObject.has("styleType")) {
+            try {
+                Type type = Type.valueOf(jsonObject.optString("styleType"));
+                StoreStyle style = styleManager.getStyle(type);
+                return style != null ? style : styleManager.getDefaultStyle();
+            } catch (IllegalArgumentException e) {
+                return styleManager.getDefaultStyle();
+            }
+        } else {
+            return styleManager.getDefaultStyle();    
+        }        
     }
     
     /**
@@ -222,18 +230,6 @@ public class CoreStoreManager implements StoreManager {
             ex.printStackTrace();
             return 0;
         }
-    }
-    
-    /**
-     * Returns the Type that matches the input value.
-     */
-    private Type valueToType(String value) {
-        for (Type type : Type.values()) {
-            if (type.toString().equalsIgnoreCase(value)) {
-                return type;
-            }
-        }
-        return null;
     }
     
     /**
