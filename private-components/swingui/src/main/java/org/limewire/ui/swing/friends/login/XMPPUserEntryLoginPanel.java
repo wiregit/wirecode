@@ -26,6 +26,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.settings.FriendSettings;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.listener.EventListener;
@@ -312,6 +313,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
     }
     
     private void login() {
+        FriendSettings.EVER_TRIED_TO_SIGN_IN.setValue(true);
         String user = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
         if(user.equals("") || password.equals("")) {
@@ -340,6 +342,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
     }
 
     void connected() {
+        FriendSettings.EVER_SIGNED_IN.setValue(true);
         parent.finished();
     }
 

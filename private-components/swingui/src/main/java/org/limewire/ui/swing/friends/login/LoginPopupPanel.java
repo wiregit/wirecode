@@ -17,6 +17,7 @@ import javax.swing.border.MatteBorder;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.settings.FriendSettings;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.components.Resizable;
@@ -92,6 +93,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
     @Override
     public void setVisible(boolean visible) {
         if (frame == null && visible) {
+            FriendSettings.EVER_OPENED_SIGN_IN_DIALOG.setValue(true);
             initContent();
             start();
             resize();
