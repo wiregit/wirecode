@@ -59,9 +59,9 @@ public class LimeWireFriendModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
         bind(new TypeLiteral<ListenerSupport<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
 
-        // bind egearly, so it registers itself with SocketsManager
+        // bind eagerly, so it registers itself with SocketsManager
         bind(FriendAddressResolver.class).asEagerSingleton();
-        // dito
+        // ditto
         bind(FriendAddressSerializer.class).asEagerSingleton();
 
         bind(FriendAddressRegistry.class);
