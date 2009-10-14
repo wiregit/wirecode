@@ -421,7 +421,7 @@ public class FancyTab extends JXPanel {
         public void mouseEntered(MouseEvent e) {
             updateButtons(true);
             if (!isSelected() && mainButton.isEnabled()) {
-                getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                e.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 changeState(TabState.ROLLOVER);
             }
         }
@@ -429,7 +429,7 @@ public class FancyTab extends JXPanel {
         @Override
         public void mouseExited(MouseEvent e) {
             updateButtons(false);
-            getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());            
+            e.getComponent().setCursor(Cursor.getDefaultCursor());
             if (!isSelected()) {
                 changeState(TabState.BACKGROUND);
             }
