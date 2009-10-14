@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class SegmentLayout implements LayoutManager2 {
     
-    List<Component> components = new LinkedList<Component>();
+    private final List<Component> components = new LinkedList<Component>();
     
     @Override
     public void addLayoutComponent(String name, Component comp) {
@@ -67,6 +67,6 @@ public class SegmentLayout implements LayoutManager2 {
     }
     @Override
     public Dimension maximumLayoutSize(Container target) {
-        return null;
+        return target.getMaximumSize();
     }
 }
