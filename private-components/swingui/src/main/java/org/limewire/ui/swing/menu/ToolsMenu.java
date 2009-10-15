@@ -10,6 +10,7 @@ import javax.swing.JMenu;
 import javax.swing.event.MenuListener;
 
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -45,6 +46,7 @@ class ToolsMenu extends MnemonicMenu {
     private final Provider<SearchNavigator> searchNavigatorProvider;
     private final Provider<OptionsAction> optionsAction;
     
+    // TODO move inspection to another place
     @InspectablePrimitive(value = "search view", category = DataCategory.USAGE)
     private static volatile int uploadsViewed = 0;
     
@@ -77,11 +79,12 @@ class ToolsMenu extends MnemonicMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 
-                NavItem navItem = navigatorProvider.get().getNavItem(NavCategory.UPLOAD, UploadMediator.NAME);
-                if (navItem == null) {
-                    navItem = navigatorProvider.get().createNavItem(NavCategory.UPLOAD, UploadMediator.NAME, uploadMediatorProvider.get());
-                }
-                navItem.select();
+//                NavItem navItem = navigatorProvider.get().getNavItem(NavCategory.UPLOAD, UploadMediator.NAME);
+//                if (navItem == null) {
+//                    navItem = navigatorProvider.get().createNavItem(NavCategory.UPLOAD, UploadMediator.NAME, uploadMediatorProvider.get());
+//                }
+//                navItem.select();
+                UploadSettings.SHOW_UPLOADS_TRAY.setValue(true);                
                 uploadsViewed++;
             }
         });
