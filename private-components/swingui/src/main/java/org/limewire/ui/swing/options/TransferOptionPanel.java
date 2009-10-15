@@ -41,10 +41,12 @@ public class TransferOptionPanel extends OptionPanel {
 
     private final Provider<IconManager> iconManager;
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
-    private DownloadsPanel downloadsPanel;
-    private TrayPanel trayPanel;
     private final TransferLimitsOptionPanel connectionsOptionPanel;
     private final BitTorrentOptionPanel bitTorrentOptionPanel;
+
+    private DownloadsPanel downloadsPanel;
+    private TrayPanel trayPanel;
+    private TransferPanel transferPanel;
     
     @Inject
     public TransferOptionPanel(Provider<IconManager> iconManager,
@@ -60,8 +62,7 @@ public class TransferOptionPanel extends OptionPanel {
 
         add(getDownloadsPanel(), "pushx, growx, wrap");
         add(getTrayPanel(), "pushx, growx, wrap");
-        add(new JLabel(I18n.tr("Set limits on downloads and uploads")), "split");
-        add(new JButton(new DialogDisplayAction(this, this.connectionsOptionPanel, I18n.tr("Transfer Limits"), I18n.tr("Settings..."), I18n.tr("Configure transfer limit settings."))), "wrap");
+        add(getTransfersPanel(), "pushx, growx, wrap");
         add(new JButton(new DialogDisplayAction(this, this.bitTorrentOptionPanel, I18n.tr("Configure Torrent Settings"), I18n.tr("Configure Torrent Settings..."), I18n.tr("Configure torrent settings."))), "wrap");
         
     }
@@ -79,22 +80,29 @@ public class TransferOptionPanel extends OptionPanel {
         }
         return trayPanel;
     }
+    
+    private OptionPanel getTransfersPanel() {
+        if (transferPanel == null) {
+            transferPanel = new TransferPanel();
+        }
+        return transferPanel;
+    }
 
     @Override
     boolean applyOptions() {
-        return getDownloadsPanel().applyOptions() || getTrayPanel().applyOptions() || connectionsOptionPanel.applyOptions() || bitTorrentOptionPanel.applyOptions();
+        return getDownloadsPanel().applyOptions() || getTrayPanel().applyOptions() || getTransfersPanel().applyOptions() || bitTorrentOptionPanel.applyOptions();
     }
 
     @Override
     boolean hasChanged() {
-        return getDownloadsPanel().hasChanged() || getTrayPanel().hasChanged() || connectionsOptionPanel.hasChanged() || bitTorrentOptionPanel.hasChanged();
+        return getDownloadsPanel().hasChanged() || getTrayPanel().hasChanged() || getTransfersPanel().hasChanged() || bitTorrentOptionPanel.hasChanged();
     }
 
     @Override
     public void initOptions() {
         getDownloadsPanel().initOptions();
         getTrayPanel().initOptions();
-        connectionsOptionPanel.initOptions();
+        getTransfersPanel().initOptions();
         bitTorrentOptionPanel.initOptions();
     }
 
@@ -335,6 +343,31 @@ public class TransferOptionPanel extends OptionPanel {
 
             // deleteFileOnCancelCheckBox.setSelected(DownloadSettings.
             // DELETE_CANCELED_DOWNLOADS.getValue());
+        }
+    }
+    
+    private class TransferPanel extends OptionPanel {
+
+        public TransferPanel() {
+            super(I18n.tr("Upload/Download Limits"));
+            
+            add(new JLabel(I18n.tr("Set limits on downloads and uploads")), "split");
+            add(new JButton(new DialogDisplayAction(this, connectionsOptionPanel, I18n.tr("Transfer Limits"), I18n.tr("Settings..."), I18n.tr("Configure transfer limit settings."))), "wrap");
+        }
+        
+        @Override
+        boolean applyOptions() {
+            return connectionsOptionPanel.applyOptions();
+        }
+
+        @Override
+        boolean hasChanged() {
+            return connectionsOptionPanel.hasChanged();
+        }
+
+        @Override
+        public void initOptions() {
+            connectionsOptionPanel.initOptions();            
         }
     }
 }

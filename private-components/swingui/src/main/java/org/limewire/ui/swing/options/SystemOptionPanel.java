@@ -201,8 +201,6 @@ public class SystemOptionPanel extends OptionPanel {
 
         public StartupShutdownPanel() {
             super(I18n.tr("Startup and Shutdown"));
-            setLayout(new MigLayout("insets 0, gap 0"));
-            setOpaque(false);
 
             runAtStartupCheckBox = new JCheckBox(I18n.tr("Run LimeWire on System Startup"));
             runAtStartupCheckBox.setContentAreaFilled(false);
@@ -216,11 +214,11 @@ public class SystemOptionPanel extends OptionPanel {
             buttonGroup.add(exitButton);
 
             if (OSUtils.isWindows() || OSUtils.isMacOSX()) {
-                add(runAtStartupCheckBox, "split, gapleft 5, wrap");
+                add(runAtStartupCheckBox, "wrap");
             }
             if (trayNotifier.supportsSystemTray()) {
                 add(new JLabel(I18n.tr("When I press X:")), "wrap");
-                add(minimizeButton, "split");
+                add(minimizeButton, "gapleft 10");
                 add(exitButton);
             }
         }
@@ -281,8 +279,8 @@ public class SystemOptionPanel extends OptionPanel {
             bugsPanel = new BugsPanel();
 
             add(betaCheckBox, "wrap");
-            add(new JButton(new DialogDisplayAction(this, bugsPanel, I18n.tr("Bug Reports"), I18n
-                    .tr("Bug Reports..."), I18n.tr("Configure bug report settings."))), "wrap");
+            add(new JButton(new DialogDisplayAction(this, bugsPanel, I18n.tr("Bug Reports"), 
+                    I18n.tr("Bug Reports..."), I18n.tr("Configure bug report settings."))), "wrap");
         }
 
         @Override
@@ -298,10 +296,8 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         public boolean hasChanged() {
-            int expectedUpdateStyle = betaCheckBox.isSelected() ? UpdateStyle.STYLE_BETA
-                    : UpdateStyle.STYLE_MINOR;
-            return bugsPanel.hasChanged()
-                    || UpdateSettings.UPDATE_STYLE.getValue() != expectedUpdateStyle;
+            int expectedUpdateStyle = betaCheckBox.isSelected() ? UpdateStyle.STYLE_BETA : UpdateStyle.STYLE_MINOR;
+            return bugsPanel.hasChanged() || UpdateSettings.UPDATE_STYLE.getValue() != expectedUpdateStyle;
         }
 
         @Override
@@ -313,39 +309,39 @@ public class SystemOptionPanel extends OptionPanel {
 
     private static class BugsPanel extends OptionPanel {
 
-        private JRadioButton showBugsBeforeSending;
-        private JRadioButton alwaysSendBugs;
-        private JRadioButton neverSendBugs;
+        private JRadioButton showBugsBeforeSendingButton;
+        private JRadioButton alwaysSendBugsButton;
+        private JRadioButton neverSendBugsButton;
 
         public BugsPanel() {
-            setLayout(new MigLayout("gap 0, insets 0"));
+            setLayout(new MigLayout("fill"));
             setOpaque(false);
 
-            showBugsBeforeSending = new JRadioButton(I18n
-                    .tr("Let me know about bugs before sending them"));
-            showBugsBeforeSending.setContentAreaFilled(false);
-            alwaysSendBugs = new JRadioButton(I18n.tr("Always send bugs to Lime Wire"));
-            alwaysSendBugs.setContentAreaFilled(false);
-            neverSendBugs = new JRadioButton(I18n.tr("Never send bugs to Lime Wire"));
-            neverSendBugs.setContentAreaFilled(false);
+            showBugsBeforeSendingButton = new JRadioButton(I18n.tr("Let me know about bugs before sending them"));
+            showBugsBeforeSendingButton.setContentAreaFilled(false);
+            alwaysSendBugsButton = new JRadioButton(I18n.tr("Always send bugs to Lime Wire"));
+            alwaysSendBugsButton.setContentAreaFilled(false);
+            neverSendBugsButton = new JRadioButton(I18n.tr("Never send bugs to Lime Wire"));
+            neverSendBugsButton.setContentAreaFilled(false);
 
             ButtonGroup bugsButtonGroup = new ButtonGroup();
-            bugsButtonGroup.add(showBugsBeforeSending);
-            bugsButtonGroup.add(alwaysSendBugs);
-            bugsButtonGroup.add(neverSendBugs);
-            add(showBugsBeforeSending, "split, gapleft 5, wrap");
-            add(alwaysSendBugs, "split, gapleft 5, wrap");
-            add(neverSendBugs, "split, gapleft 5, wrap");
+            bugsButtonGroup.add(showBugsBeforeSendingButton);
+            bugsButtonGroup.add(alwaysSendBugsButton);
+            bugsButtonGroup.add(neverSendBugsButton);
+            
+            add(showBugsBeforeSendingButton, "wrap");
+            add(alwaysSendBugsButton, "wrap");
+            add(neverSendBugsButton, "gapbottom 5, wrap");
             add(new JButton(new OKDialogAction()), "tag ok, alignx right, split 2");
             add(new JButton(new CancelDialogAction()), "tag cancel");
         }
 
         @Override
         boolean applyOptions() {
-            if (showBugsBeforeSending.isSelected()) {
+            if (showBugsBeforeSendingButton.isSelected()) {
                 BugSettings.SHOW_BUGS.setValue(true);
                 BugSettings.REPORT_BUGS.setValue(true);
-            } else if (alwaysSendBugs.isSelected()) {
+            } else if (alwaysSendBugsButton.isSelected()) {
                 BugSettings.SHOW_BUGS.setValue(false);
                 BugSettings.REPORT_BUGS.setValue(true);
             } else {
@@ -357,8 +353,8 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            return hasChanged(alwaysSendBugs, BugSettings.REPORT_BUGS)
-                    || hasChanged(showBugsBeforeSending, BugSettings.SHOW_BUGS);
+            return hasChanged(alwaysSendBugsButton, BugSettings.REPORT_BUGS)
+                    || hasChanged(showBugsBeforeSendingButton, BugSettings.SHOW_BUGS);
         }
 
         private boolean hasChanged(JRadioButton radioButton, BooleanSetting setting) {
@@ -368,11 +364,11 @@ public class SystemOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             if (BugSettings.SHOW_BUGS.getValue()) {
-                showBugsBeforeSending.setSelected(true);
+                showBugsBeforeSendingButton.setSelected(true);
             } else if (BugSettings.REPORT_BUGS.getValue()) {
-                alwaysSendBugs.setSelected(true);
+                alwaysSendBugsButton.setSelected(true);
             } else {
-                neverSendBugs.setSelected(true);
+                neverSendBugsButton.setSelected(true);
             }
         }
     }

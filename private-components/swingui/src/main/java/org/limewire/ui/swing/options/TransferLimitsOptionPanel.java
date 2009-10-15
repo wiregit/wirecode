@@ -44,12 +44,12 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         this.downloadsPanel = new DownloadsPanel();
         this.uploadPanel = new UploadsPanel();
 
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("fill"));
         setOpaque(false);
 
-        add(downloadsPanel, "pushx, growx");
-        add(new JSeparator(), "growx");
-        add(uploadPanel, "pushx, growx");
+        add(downloadsPanel, "pushx, growx, wrap");
+        add(new JSeparator(), "growx, wrap");
+        add(uploadPanel, "pushx, growx, wrap");
         add(new JButton(new OKDialogAction()), "tag ok, alignx right, split 2");
         add(new JButton(new CancelDialogAction()), "tag cancel");
     }

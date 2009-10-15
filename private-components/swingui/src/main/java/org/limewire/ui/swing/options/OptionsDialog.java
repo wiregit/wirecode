@@ -107,13 +107,13 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         this.unsafeTypeOptionPanelStateManager = unsafeTypeOptionPanelStateManager;
         
         if (!OSUtils.isMacOSX()) {
-            setSize(700, 656);
+            setSize(660, 556);
             setPreferredSize(getSize());
         } else {
-            setSize(743, 707);
+            setSize(703, 607);
             setPreferredSize(getSize());
         }
-        setResizable(true);
+        setResizable(false);
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         

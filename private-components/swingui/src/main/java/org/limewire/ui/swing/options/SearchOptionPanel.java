@@ -240,7 +240,6 @@ public class SearchOptionPanel extends OptionPanel {
         private JButton filterFileExtensionsButton;
         
         private final JButton configureButton;
-        private JLabel programSharingLabel;
         private JButton clearSpamButton;
 
         public FilteringPanel() {
@@ -274,13 +273,13 @@ public class SearchOptionPanel extends OptionPanel {
            
             clearSpamButton = new JButton(new DialogDisplayAction(SearchOptionPanel.this, new SpamOptionPanel(), I18n.tr("Reset Spam Filter"), I18n.tr("Reset Spam Filter..."), I18n.tr("Reset the Spam filter by clearing all files marked as spam")));
             
-            programSharingLabel = new JLabel(I18n.tr("Change the ability to search for Programs"));
-            add(programSharingLabel);
+            JLabel programSharingLabel = new JLabel(I18n.tr("Change the ability to search for Programs"));
+            add(programSharingLabel, "");
             add(configureButton, "wrap");
             
             add(copyrightContentCheckBox);
             add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=copyright", application), "wrap");
-            add(adultContentCheckBox, "wrap");
+            add(adultContentCheckBox, "gapbottom 10, wrap");
             
             add(filterKeywordsButton, "gapright 10, alignx left");
             add(filterFileExtensionsButton, "gapright 10, alignx left");
