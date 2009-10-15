@@ -57,7 +57,17 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
      */
     public File getFile();
 
+    /**
+     * @return the SHA1 for the file.
+     */
     public URN getSHA1Urn();
+    
+    /**
+     * @return the SHA1 not including metadata for an audio file. If the
+     * NonMetaData hash cannot be calculated or the file is not an audio
+     * file, returns null;
+     */
+    public URN getNMS1Urn();
 
     /**
      * Adds a new URN to this filedesc.

@@ -319,7 +319,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     }
     
     /** Updates the list with new metadata about the file, possibly removing if it cannot be contained anymore. */
-    private void fileMetaChanged(FileDesc fd) {
+    protected void fileMetaChanged(FileDesc fd) {
         if(contains(fd)) {
             if(isFileDescAllowed(fd)) {
                 fireMetaChangeEvent(fd);

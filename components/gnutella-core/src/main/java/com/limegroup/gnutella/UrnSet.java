@@ -24,7 +24,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     private static final long serialVersionUID = -1065284624401321676L;
 
     /** The sole URNs this knows about. */
-    private URN sha1, ttroot;
+    private URN sha1, ttroot, nms1;
     
     /** Returns a set of the UrnSet version of the set. */
     public static UrnSet resolve(Set<? extends URN> set) {
@@ -40,7 +40,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     public static UrnSet modifiableSet(Set<? extends URN> set) {
         if (set instanceof UnmodifiableUrnSet) {
             UrnSet urnSet = (UrnSet) set;
-            return new UrnSet(urnSet.getSHA1(), urnSet.getTTRoot());
+            return new UrnSet(urnSet.getSHA1(), urnSet.getTTRoot(), urnSet.getNMS1());
         }
         if(set instanceof UrnSet) {
             return (UrnSet)set;
@@ -71,9 +71,10 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         addAll(c);
     }
     
-    private UrnSet(URN sha1, URN ttroot) {
+    private UrnSet(URN sha1, URN ttroot, URN nms1) {
         this.sha1 = sha1;
         this.ttroot = ttroot;
+        this.nms1 = nms1;
     }
     
     @Override
@@ -84,7 +85,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     /** Clones this set. */
     @Override
     public UrnSet clone() {
-        return new UrnSet(sha1, ttroot);
+        return new UrnSet(sha1, ttroot, nms1);
     }
     
     /** Returns the hashcode for this UrnSet. */
@@ -99,6 +100,10 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     
     public URN getTTRoot() {
         return ttroot;
+    }
+    
+    public URN getNMS1() {
+        return nms1;
     }
     
     /**
@@ -148,6 +153,9 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         } else if (o.isTTRoot() && ttroot == null) {
             ttroot = o;
             return true;
+        } else if(o.isNMS1() && nms1 == null) {
+            nms1 = o;
+            return true;
         }
         return false;
     }
@@ -174,14 +182,15 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     public void clear() {
         sha1 = null;
         ttroot = null;
+        nms1 = null;
     }
 
     public boolean contains(Object o) {
-        return o.equals(sha1) || o.equals(ttroot);
+        return o.equals(sha1) || o.equals(ttroot) || o.equals(nms1); 
     }
 
     public boolean containsAll(Collection<?> c) {
-        if(c.size() > 2)
+        if(c.size() > 3)
             return false;
         if(c.isEmpty())
             return true;
@@ -195,7 +204,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     }
 
     public boolean isEmpty() {
-        return sha1 == null && ttroot == null;
+        return sha1 == null && ttroot == null && nms1 == null;
     }
 
     public Iterator<URN> iterator() {
@@ -213,11 +222,16 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
             return true;
         }
         
+        if(nms1 != null && o.equals(nms1)) {
+            nms1 = null;
+            return true;
+        }
+        
         return false;
     }
 
     public boolean removeAll(Collection<?> c) {
-        if(sha1 == null && ttroot == null || c.isEmpty())
+        if(sha1 == null && ttroot == null && nms1 == null || c.isEmpty())
             return false;
         
         boolean ret = false;
@@ -240,15 +254,21 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
             ttroot = null;
             ret = true;
         }
+        if(nms1 != null && !c.contains(nms1)) {
+            nms1 = null;
+            ret = true;
+        }
         
         return ret;
     }
 
     public int size() {
         int ret = 0;
-        if (sha1 != null)
+        if(sha1 != null)
             ret++;
-        if (ttroot != null)
+        if(ttroot != null)
+            ret++;
+        if(nms1 != null)
             ret++;
         return ret;
     }
@@ -256,9 +276,20 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     public Object[] toArray() {
         switch(size()) {
         case 0: return new Object[0];
-        case 1: Object o = sha1 != null ? sha1 : ttroot;
-            return new Object[]{o};
-        case 2: return new Object[]{sha1, ttroot};
+        case 1: if(sha1 != null)
+                    return new Object[]{sha1};
+                else if(ttroot != null)
+                    return new Object[]{ttroot};
+                else
+                    return new Object[]{nms1};
+        case 2: if(sha1 != null && ttroot != null) {
+                    return new Object[]{sha1, ttroot};
+                } else if(sha1 != null) {
+                    return new Object[]{sha1, nms1};
+                } else {
+                    return new Object[]{ttroot, nms1};
+                }
+        case 3: return new Object[]{sha1, ttroot, nms1};
         default:
             throw new IllegalStateException();
         }
@@ -271,13 +302,31 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
             a = (T[])Array.newInstance(a.getClass().getComponentType(), size);
         
         switch(size) {
-        case 1 :
-            URN present = sha1 != null ? sha1 : ttroot;
-                    a[0] = (T)present;
-                    break;
-        case 2 :
+        case 1:
+            if(sha1 != null)
+                a[0] = (T)sha1;
+            else if(ttroot != null)
+                a[0] = (T)ttroot;
+            else
+                a[0] = (T)nms1;
+            break;
+        case 2:
+            if(sha1 != null && ttroot != null) {
+                a[0] = (T)sha1;
+                a[1] = (T)ttroot;
+            } else if(sha1 != null) {
+                a[0] = (T)sha1;
+                a[1] = (T)nms1;
+            } else {
+                a[0] = (T)ttroot;
+                a[1] = (T)nms1;
+            }
+            break;        
+        case 3:
             a[0] = (T)sha1;
             a[1] = (T)ttroot;
+            a[2] = (T)nms1;
+            break;
         }
         
         if(a.length > size)
@@ -287,11 +336,12 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     
     /** Iterator that returns each of the Urn Types in turn. */
     private class UrnIterator implements Iterator<URN> {
-        private boolean givenSHA1,givenTTRoot;
+        private boolean givenSHA1, givenTTRoot, givenNMS1;
         
         public boolean hasNext() {
             return (!givenSHA1 && sha1 != null) ||
-               (!givenTTRoot && ttroot != null);
+               (!givenTTRoot && ttroot != null) ||
+               (!givenNMS1 && nms1 != null);
         }
 
         public URN next() {
@@ -306,17 +356,24 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
                 givenTTRoot = true;
                 return ttroot;
             }
+            if (!givenNMS1 && nms1 != null) {
+                givenNMS1 = true;
+                return nms1;
+            }
             throw new IllegalStateException();
         }
 
         public void remove() {
-            if (!(givenSHA1 || givenTTRoot))
+            if (!(givenSHA1 || givenTTRoot || givenNMS1))
                 throw new IllegalStateException();
             
-            if (givenTTRoot) 
+            if(givenNMS1) {
+            	nms1 = null;
+            } else if (givenTTRoot) {
                 ttroot = null;
-            else if (givenSHA1) 
+            } else if (givenSHA1) {
                 sha1 = null;
+            }
         }
 
     }
@@ -333,7 +390,19 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
             return null;
         }
     }
-
+    
+    public static URN getNMS1(Set<? extends URN> urns) {
+        if(urns instanceof UrnSet) {
+            return ((UrnSet)urns).nms1;
+        } else {
+            for(URN urn : urns) {
+                if(urn.isNMS1()) {
+                    return urn;
+                }
+            }
+            return null;
+        } 
+    }
     
     private static class UnmodifiableUrnSet extends UrnSet {
         
@@ -341,8 +410,8 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
             super.addAll(set);
         }
         
-        private UnmodifiableUrnSet(URN sha1, URN ttroot) {
-            super(sha1, ttroot);
+        private UnmodifiableUrnSet(URN sha1, URN ttroot, URN nms1) {
+            super(sha1, ttroot, nms1);
         }
         
         @Override
@@ -398,7 +467,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         
         @Override
         public UrnSet clone() {
-            return new UnmodifiableUrnSet(getSHA1(), getTTRoot());
+            return new UnmodifiableUrnSet(getSHA1(), getTTRoot(), getNMS1());
         }
     }
 }

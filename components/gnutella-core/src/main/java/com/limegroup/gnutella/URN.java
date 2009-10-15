@@ -56,6 +56,9 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
         /** UrnType for a Tiger Tree root URN */
         TTROOT("ttroot:",39),
         
+        /** UrnType for a SHA1 of an audio file not including metadata */
+        NMSA1("nms1:", 32),
+        
         /** UrnType for any kind of URN. */
         ANY_TYPE("",-1),
 
@@ -410,6 +413,17 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
         String hash = Base32.encode(bytes);
         return new URN(Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+hash, Type.TTROOT);
     }
+    
+    /**
+     * Creates a NMS1 from a byte[].
+     */
+    public static URN createNMS1FromBytes(byte[] bytes) throws Exception {
+        if(bytes == null || bytes.length != 20)
+            throw new IOException("invalid bytes!");
+        
+        String hash = Base32.encode(bytes);
+        return createUrnFromString("urn:nms1:" + hash);
+    }
 
 	/**
 	 * Convenience method that runs a standard validation check on the URN
@@ -549,6 +563,15 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
      */
     public boolean isTTRoot() {
         return _urnType == Type.TTROOT;
+    }
+    
+    /**
+     * Returns whether or not this URN is a NonMetaData SHA1 URN.
+     * 
+     * @return <tt>true</tt> if this is a NonMetaData SHA1 URN, <tt>false</tt> otherwise.
+     */
+    public boolean isNMS1() {
+        return _urnType == Type.NMSA1;
     }
     
     /**
@@ -784,31 +807,7 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
 	
 	public static URN createTTRootFile(File file) throws IOException, InterruptedException {
 	    MessageDigest tt = new MerkleTree(new Tiger());
-	    byte[] buffer = threadLocal.get();
-        int read;
-        InputStream fis = null;        
-        
-        try {
-            // this is purposely NOT a BufferedInputStream because we
-            // read it in the chunks that we want to.
-            fis = new FileInputStream(file);
-            while ((read=fis.read(buffer))!=-1) {
-                long start = System.nanoTime();
-                tt.update(buffer,0,read);
-                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
-                    long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-                    if (interval > 0) 
-                        Thread.sleep(interval * 3);
-                    else 
-                        Thread.yield();
-                }
-            }
-        } finally {
-            IOUtils.close(fis);
-        }
-
-        URN ttroot = new URN(Type.URN_NAMESPACE_ID + Type.TTROOT.getDescriptor() + Base32.encode(tt.digest()), Type.TTROOT);
-        return ttroot;
+	    return generateURN(file, 0, file.length(), Type.TTROOT, tt);
 	}
 
 	/**
@@ -825,42 +824,72 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
 	public static UrnSet generateUrnsFromFile(final File file) 
       throws IOException, InterruptedException {
 		MessageDigest md = new SHA1();
-        byte[] buffer = threadLocal.get();
-        int read;
-        AtomicInteger progress = new AtomicInteger(0);
-        progressMap.put( file, progress );
-        InputStream fis = null;        
-        
-        try {
-            // this is purposely NOT a BufferedInputStream because we
-            // read it in the chunks that we want to.
-		    fis = new FileInputStream(file);
-            while ((read=fis.read(buffer))!=-1) {
-                long start = System.nanoTime();
-                md.update(buffer,0,read);
-                progress.addAndGet( read );
-                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
-                    long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-                    if (interval > 0) 
-                        Thread.sleep(interval * 3);
-                    else 
-                        Thread.yield();
-                }
-            }
-        } finally {		
-            progressMap.remove(file);
-            IOUtils.close(fis);
-        }
 
+        URN sha1 = generateURN(file, 0, file.length(), Type.SHA1, md);
 
-		// preferred casing: lowercase "urn:sha1:", uppercase encoded value
-		// note that all URNs are case-insensitive for the "urn:<type>:" part,
-		// but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
-		// insensitive)
         UrnSet ret = new UrnSet();
-        URN sha1 = new URN(Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(md.digest()), Type.SHA1);
         ret.add(sha1);
         return ret;
+	}
+	
+	/**
+	 *  Create a new SHA1 hash string for the specified file on disk. This SHA1 
+	 *  tries to ignore any metadata attached to the file that can be detected, 
+	 *  producing a SHA1 that should never change over the lifetime of the file. 
+	 *  The offset is where the SHA1 hash should be started and length is the 
+	 *  number of bytes that should be read. 
+	 *  
+	 *  If no SHA1 could be created or an input value is invalid, null is returned.
+	 */
+	public static URN generateNMS1FromFile(final File file, long offset, long length) throws IOException, InterruptedException {
+	    MessageDigest md = new SHA1();
+	    
+	    return generateURN(file, offset, length, Type.NMSA1, md);
+	}
+	
+	private static URN generateURN(File file, long offset, long length, Type type, MessageDigest md) throws IOException, InterruptedException {
+	       if(offset < 0 || length <= 0 || offset > file.length() || offset + length > file.length())
+	            return null;
+
+	        byte[] buffer = threadLocal.get();
+	        int read = 0;
+	        AtomicInteger progress = new AtomicInteger(0);
+	        progressMap.put( file, progress );
+	        InputStream fis = null;   
+	        try {
+	            // this is purposely NOT a BufferedInputStream because we
+	            // read it in the chunks that we want to.
+	            fis = new FileInputStream(file);
+	            long skipped = fis.skip(offset);
+	            assert(skipped == offset);
+	            while(progress.get() < length) {
+	                if(length - progress.get() > buffer.length) {
+	                    read = fis.read(buffer);
+	                } else {
+	                    read = fis.read(buffer, 0, (int)(length - progress.get()));
+	                }
+
+	                long start = System.nanoTime();
+	                md.update(buffer,0,read);
+	                progress.addAndGet(read);
+	                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
+	                    long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+	                    if (interval > 0) 
+	                        Thread.sleep(interval * 3);
+	                    else 
+	                        Thread.yield();
+	                }
+	            }
+	        } finally {     
+	            progressMap.remove(file);
+	            IOUtils.close(fis);
+	        }
+	        
+	        // preferred casing: lowercase "urn:sha1:", uppercase encoded value
+	        // note that all URNs are case-insensitive for the "urn:<type>:" part,
+	        // but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
+	        // insensitive)
+	        return new URN(Type.URN_NAMESPACE_ID + type.getDescriptor() + Base32.encode(md.digest()), type);
 	}
 
 	/**
@@ -935,7 +964,7 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
             type = Type.createFromDescriptor(((UrnType)type).getType());        
         _urnType = (Type)type;
         
-        if(_urnType != URN.Type.SHA1 && _urnType != URN.Type.TTROOT)
+        if(_urnType != URN.Type.SHA1 && _urnType != URN.Type.TTROOT && _urnType != URN.Type.NMSA1)
             throw new InvalidObjectException("invalid urn type: " + type);
 
         if (!URN.isValidUrn(_urnString))

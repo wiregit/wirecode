@@ -37,6 +37,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.metadata.audio.MP3HashingUtils;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -116,23 +117,38 @@ public final class UrnCache {
      * notified immediately. Otherwise, it will be notified when hashing
      * completes, fails, or is interrupted.
      */
-    public ListeningFuture<Set<URN>> calculateAndCacheUrns(File file) {
+    public ListeningFuture<Set<URN>> calculateAndCacheSHA1(File file) {
         Set<URN> urns;
         synchronized (this) {
             urns = getUrns(file);
-            // TODO: If we ever create more URN types (other than SHA1)
-            // we cannot just check for size == 0, we must check for
-            // size == NUM_URNS_WE_WANT, and calculateUrns should only
-            // calculate the URN for the specific hash we still need.
-            if (urns.isEmpty()) {
+            // check that a SHA1 doesn't yet exist for this file.
+            if (UrnSet.getSha1(urns) == null) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("Adding: " + file + " to be hashed.");
-                return QUEUE.submit(new Processor(file));
+                return QUEUE.submit(new SHA1Processor(file));
             }
         }
 
         assert !urns.isEmpty();
         return new SimpleFuture<Set<URN>>(urns);
+    }
+    
+    /**
+     * Calculates the NonMetaData SHA1 for a File and caches it. The callback will be
+     * notified of the URN. If its already calculated, the callback will be
+     * notified immediately. Otherwise, it will be notified when hashing
+     * completes, fails, or is interrupted.
+     */
+    public ListeningFuture<URN> calculateAndCacheNMS1(File file) {
+        URN nms1 = null;
+        synchronized(this) {
+            nms1 = UrnSet.getNMS1(getUrns(file));
+            // calculate nms1 if it doesn't exist already
+            if(nms1 == null) {
+                return QUEUE.submit(new NMS1Processor(file));
+            }
+        }
+        return new SimpleFuture<URN>(nms1);
     }
 
     /**
@@ -305,10 +321,10 @@ public final class UrnCache {
         }
     }
 
-    private class Processor implements Callable<Set<URN>> {
+    private class SHA1Processor implements Callable<Set<URN>> {
         private final File file;
 
-        Processor(File f) {
+        SHA1Processor(File f) {
             file = f;
         }
 
@@ -323,20 +339,73 @@ public final class UrnCache {
             }
 
             // If not calculated, calculate OUTSIDE OF LOCK.
-            if (urns.isEmpty()) {
+            if(UrnSet.getSha1(urns) == null) {
                 if (LOG.isDebugEnabled())
-                    LOG.debug("Hashing file: " + file);
+                    LOG.debug("Hashing sha1 file: " + file);
                 try {
-                    urns = URN.generateUrnsFromFile(file);
-                    addUrns(file, urns);
+                    UrnSet calculatedUrns = URN.generateUrnsFromFile(file);
+                    UrnSet set = new UrnSet();
+                    synchronized (UrnCache.this) {
+                        set.addAll(getUrns(file));
+                        set.addAll(calculatedUrns);
+                        addUrns(file, set);
+                    }
+                    urns = set;
                 } catch (IOException ignored) {
-                    LOG.warn("Unable to calculate URNs", ignored);
+                    LOG.warn("Unable to calculate SHA1", ignored);
                 } catch (InterruptedException ignored) {
-                    LOG.warn("Unable to calculate URNs", ignored);
+                    LOG.warn("Unable to calculate SHA1", ignored);
                 }
             }
 
             return urns;
+        }
+    }
+    
+    /**
+     * Tries to calculate the Non-metadata sha1 of this file. If a 
+     * SHA1 is successfully created, the URNSet is updated and saved
+     * to disk.
+     */
+    private class NMS1Processor implements Callable<URN> {
+        private final File file;
+
+        NMS1Processor(File file) {
+            this.file = file;
+        }
+
+        public URN call() {
+            Set<URN> urns;
+            URN nms1 = null;
+
+            synchronized (UrnCache.this) {
+                urns = getUrns(file); // already calculated?
+            }
+
+            // if the sha1 has not been calculated yet, don't calculate the
+            // non-metadata hash.
+            if (UrnSet.getNMS1(urns) == null) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Hashing nmsa file: " + file);
+                if(MP3HashingUtils.canCreateNonMetaDataSHA1(file)) {
+                    try {
+                        nms1 = MP3HashingUtils.generateNonMetaDataSHA1FromFile(file);
+                        if(nms1 != null) {
+                            UrnSet set = new UrnSet();
+                            synchronized (UrnCache.this) {
+                                set.addAll(getUrns(file));
+                                set.add(nms1);
+                                addUrns(file, set);
+                            }
+                        }
+                    } catch (InterruptedException ignored) {
+                        LOG.warn("Unable to calculate NMS1", ignored);
+                    }
+                }
+            } else {
+            	nms1 = UrnSet.getNMS1(urns);
+            }
+            return nms1;
         }
     }
 

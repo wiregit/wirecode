@@ -185,6 +185,7 @@ class FileDescImpl implements FileDesc {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#getTTROOTUrn()
      */
+    @Override
 	public URN getTTROOTUrn() {
 	    return urns.getTTRoot();
 	}
@@ -192,8 +193,14 @@ class FileDescImpl implements FileDesc {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#getSHA1Urn()
      */
+	@Override
     public URN getSHA1Urn() {
         return urns.getSHA1();
+    }
+    
+    @Override
+    public URN getNMS1Urn() {
+        return urns.getNMS1();
     }
 
     /* (non-Javadoc)
@@ -207,6 +214,9 @@ class FileDescImpl implements FileDesc {
             urns = UrnSet.unmodifiableSet(newSet);
             if(multicaster != null && urn.isTTRoot()) {
                 multicaster.handleEvent(new FileDescChangeEvent(this, FileDescChangeEvent.Type.TT_ROOT_ADDED, urn));
+            }
+            if(multicaster != null && urn.isNMS1()) {
+                multicaster.handleEvent(new FileDescChangeEvent(this, FileDescChangeEvent.Type.NMS1_ADDED, urn));
             }
         }
     }

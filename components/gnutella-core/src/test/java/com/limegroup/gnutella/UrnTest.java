@@ -1,13 +1,22 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Locale;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
+import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
+
+import com.limegroup.gnutella.metadata.audio.MP3HashingUtils;
 
 
 /**
@@ -224,6 +233,130 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
             URN newURN = URN.createSHA1Urn(urn.toString());
             assertEquals("urns should be equal", urn, newURN);
 		}
+	}
+	
+	/**
+	 * Tests the same file with different combinations of tags.
+	 * All of the tags should be ignored and only the audio portion
+	 * of the file hashed.
+	 */
+	public void testUrnNonMetaDataHash() throws Exception {
+        File blankFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/BlankMP3.mp3");
+        Assert.assertTrue(blankFile.exists());
+        File id3V1File = TestUtils.getResourceFile("com/limegroup/gnutella/resources/ID3V1MP3.mp3");
+        Assert.assertTrue(id3V1File.exists());
+        File id3V2File = TestUtils.getResourceFile("com/limegroup/gnutella/resources/ID3V2MP3.mp3");
+        Assert.assertTrue(id3V2File.exists());
+        File id3V1_id3V2File = TestUtils.getResourceFile("com/limegroup/gnutella/resources/ID3V1_ID3V2MP3.mp3");
+        Assert.assertTrue(id3V1_id3V2File.exists());
+        File imageTag_id3V2File = TestUtils.getResourceFile("com/limegroup/gnutella/resources/ImageTag_ID3V2MP3.mp3");
+        Assert.assertTrue(imageTag_id3V2File.exists());
+        File lyricsV2TagFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/LyricsMP3.mp3");
+        Assert.assertTrue(lyricsV2TagFile.exists());
+        File lyricsV2Tag_id3V1File = TestUtils.getResourceFile("com/limegroup/gnutella/resources/Lyrics_ID3V1MP3.mp3");
+        Assert.assertTrue(lyricsV2Tag_id3V1File.exists());
+        File apeTagV2File = TestUtils.getResourceFile("com/limegroup/gnutella/resources/APEMP3.mp3");
+        Assert.assertTrue(apeTagV2File.exists());
+        File aDifferentFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
+        Assert.assertTrue(aDifferentFile.exists());
+        
+        URN blankSHA1 = URN.createSHA1Urn(blankFile);
+        URN blankURN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
+        URN id3V1URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(id3V1File);
+        URN id3V2SHA1 = URN.createSHA1Urn(id3V2File);
+        URN id3V2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(id3V2File);
+        URN id3V1_id3V2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(id3V1_id3V2File);
+        URN image_id3V2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(imageTag_id3V2File);
+        URN lyricsV2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2TagFile);
+        URN lyricsV2_id3V1URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2Tag_id3V1File);
+        URN apeV2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(apeTagV2File);
+        URN differentURN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(aDifferentFile);
+        
+        assertEquals(blankURN.getBytes(), blankSHA1.getBytes());
+        assertEquals(blankURN, id3V1URN);
+        assertEquals(blankURN, id3V2URN);
+        assertEquals(blankURN, id3V1_id3V2URN);
+        assertEquals(blankURN, image_id3V2URN);
+        assertEquals(blankURN, lyricsV2URN);
+        assertEquals(blankURN, lyricsV2_id3V1URN);
+        assertEquals(blankURN, apeV2URN);
+        assertNotEquals(blankURN, differentURN);
+        
+        // copies an id3v2 mp3 and modifies the metadata portion of the file in the copied file
+        // this tests that the nonMetaData SHA1 is not effected by the metadata.
+        File copyId3V2File = File.createTempFile("TestFile", ".mp3", id3V2File.getParentFile());
+        assertTrue(copyId3V2File.exists());
+        FileUtils.copy(id3V2File, copyId3V2File);
+        copyId3V2File.deleteOnExit();
+
+        URN modifiedSHA1 = URN.createSHA1Urn(copyId3V2File);
+        assertEquals(modifiedSHA1, id3V2SHA1);
+        URN modifiedId3V2URN = createURNModifiedMetaData(copyId3V2File);
+        assertEquals(modifiedId3V2URN, id3V2URN);
+        
+        // copies an id3v2 mp3 and modifies the audio portion of the file.
+        // this tests that the nonMetaData SHA1 is indeed effected by audio portion.
+        copyId3V2File = File.createTempFile("TestFile", ".mp3", id3V2File.getParentFile());
+        assertTrue(copyId3V2File.exists());
+        FileUtils.copy(id3V2File, copyId3V2File);
+        copyId3V2File.deleteOnExit();
+        
+        modifiedSHA1 = URN.createSHA1Urn(copyId3V2File);
+        assertEquals(modifiedSHA1, id3V2SHA1);
+        modifiedId3V2URN = createURNModifiedAudio(copyId3V2File);
+        assertNotEquals(modifiedId3V2URN, id3V2URN);
+	}
+	
+	/**
+	 * Modifies the metadata portion of the file prior to generating the 
+	 * Non-MetaDataSHA1. This is done after the locations are calculated
+	 * to ensure the proper audio/non-audio portion of the file is located.
+	 */
+	private URN createURNModifiedMetaData(File file) throws Exception {
+	    
+	    long startPosition = MP3HashingUtils.getAudioStartPosition(file);
+	    long endPosition = MP3HashingUtils.getAudioEndPosition(file);
+	    
+	    writeToFile(file, 100, 8);
+	    return URN.generateNMS1FromFile(file, startPosition, endPosition - startPosition);
+	}
+	
+	/**
+	 * Modifies the audio portion of the file prior to generating the 
+     * Non-MetaDataSHA1. This is done after the locations are calculated
+     * to ensure the proper audio/non-audio portion of the file is located.
+	 */
+	private URN createURNModifiedAudio(File file) throws Exception {
+        
+        long startPosition = MP3HashingUtils.getAudioStartPosition(file);
+        long endPosition = MP3HashingUtils.getAudioEndPosition(file);
+
+        writeToFile(file, (int)startPosition + 100, 8);
+
+        return URN.generateNMS1FromFile(file, startPosition, endPosition - startPosition);
+    }
+	
+    private boolean writeToFile(File file, int position, int length) {
+	    FileOutputStream stream = null;
+	    
+	    try {
+            stream = new FileOutputStream(file, true);
+            FileChannel channel = stream.getChannel();
+            channel.position(position);
+            ByteBuffer buffer = ByteBuffer.allocateDirect(length);
+            for(int i = 0; i < buffer.capacity(); i++)
+                buffer.put((byte)0);
+            buffer.rewind();
+            int written = channel.write(buffer, position);
+            channel.close();
+            
+            return written == length;
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        } finally {
+            FileUtils.close(stream);
+        }
+        return false;
 	}
 
 

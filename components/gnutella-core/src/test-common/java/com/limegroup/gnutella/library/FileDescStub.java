@@ -167,6 +167,11 @@ public class FileDescStub implements FileDesc {
         // TODO Auto-generated method stub
         return null;
     }
+    @Override
+    public URN getNMS1Urn() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public Set<URN> getUrns() {

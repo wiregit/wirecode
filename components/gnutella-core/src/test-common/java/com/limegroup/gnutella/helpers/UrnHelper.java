@@ -100,7 +100,7 @@ public class UrnHelper {
     }
 
     public static Set<URN> calculateAndCacheURN(File f, UrnCache urnCache) throws Exception {
-        return urnCache.calculateAndCacheUrns(f).get();
+        return urnCache.calculateAndCacheSHA1(f).get();
     }
 
 }

@@ -565,9 +565,9 @@ class LibraryImpl implements Library, FileCollection {
         final FileDesc fd = createAndAddFileDesc(file, metadata, urns, oldFileDesc, task);
         // We were able to succesfully create an FD -- now finish it off!
         if(fd != null) {
-            if(urns.isEmpty()) {
+            if(UrnSet.getSha1(urns) == null) {
                 // Create a FileDesc & add it before we have a set of URNs for it.
-                ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(file);
+                ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheSHA1(file);
                 setFutureForFile(file, urnFuture);  
                 LOG.debugf("Submitting URN future for {0}", file);
                 broadcastQueued(file);
@@ -990,7 +990,6 @@ class LibraryImpl implements Library, FileCollection {
                 }
             }
         };
-        
         int i = 0;
         for(File file : getLibraryData().getManagedFiles()) {
             // don't hog CPU...

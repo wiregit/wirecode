@@ -6,10 +6,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.core.settings.URNSettings;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.StringUtils;
 
@@ -18,6 +22,7 @@ import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent.Type;
+import com.limegroup.gnutella.metadata.audio.MP3HashingUtils;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 
@@ -33,12 +38,13 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     private final List<String> defaultFriendIds;
     private final boolean publicCollection;
     private final CategoryManager categoryManager;
+    private final UrnCache urnCache;
 
     @Inject
     public SharedFileCollectionImpl(Provider<LibraryFileData> data, LibraryImpl managedList, 
                                     SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster,
                                     EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
-                                    CategoryManager categoryManager,
+                                    CategoryManager categoryManager, UrnCache urnCache,
                                     @Assisted int id, HashTreeCache treeCache,
                                     @Assisted boolean publicCollection,
                                     @Assisted String... defaultFriendIds) {
@@ -49,6 +55,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         this.sharedBroadcaster = sharedCollectionBroadcaster;
         this.publicCollection = publicCollection;
         this.categoryManager = categoryManager;
+        this.urnCache = urnCache;
         if(defaultFriendIds.length == 0) {
             this.defaultFriendIds = Collections.emptyList();
         } else {
@@ -128,10 +135,56 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
                 	    fd.addUrn(root);
                 	}
                 }
+            } 
+            // if this file already has a SHA1, try creating the nms1.
+            // we want to ensure the SHA1 and FD are valid for this list
+            // so if they don't exist, we will wait till after the SHA1
+            // has been calculated. the nms1 and sha1 use the same thread
+            // and calculating the SHA1 is more important. 
+            // if no SHA1 exists yet, we're guarenteed to recieve
+            // a FILE_META_CHANGED event
+            if(fileDesc.getSHA1Urn() != null) {
+                calculateNonMetaDataHash(fileDesc);
             }
             return true;
         } else {
             return false;
+        }
+    }
+    
+    @Override
+    protected void fileMetaChanged(final FileDesc fileDesc) {
+        super.fileMetaChanged(fileDesc);
+        
+        // if this FileDesc still exists in this list, try creating NMS1.
+        // this will only be called on a new library load or if a file
+        // was added directly to the shared list. 
+        if(contains(fileDesc)) {
+            calculateNonMetaDataHash(fileDesc);
+        }
+    }
+    
+    /**
+     * Attempts to calculate the NMS1 for this FileDesc if we're
+     * allowing NMS1 and the FileDesc doesn't already contain it 
+     * and it can be created for this file type.
+     */
+    private void calculateNonMetaDataHash(final FileDesc fileDesc) {
+        if(URNSettings.USE_NON_METADATA_HASH.get() && 
+            fileDesc.getNMS1Urn() == null &&
+            MP3HashingUtils.canCreateNonMetaDataSHA1(fileDesc.getFile())) {
+                ListeningFuture<URN> urnFuture = urnCache.calculateAndCacheNMS1(fileDesc.getFile());
+                urnFuture.addFutureListener(new EventListener<FutureEvent<URN>>(){
+                    @Override
+                    public void handleEvent(FutureEvent<URN> event) {
+                        URN urn = event.getResult();
+                        if(urn != null && urn.isNMS1()) {
+                            for(FileDesc fd : library.getFileDescsMatching(fileDesc.getSHA1Urn())) {
+                                fd.addUrn(urn);
+                            }
+                        }
+                    }
+                });
         }
     }
 
