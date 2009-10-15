@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.assistedinject.FactoryProvider;
 import com.google.inject.name.Names;
 
 public class LimeWireUiPlayerModule extends AbstractModule {
@@ -12,6 +13,7 @@ public class LimeWireUiPlayerModule extends AbstractModule {
 
         bind(PlayerMediator.class).annotatedWith(Names.named("audio")).to(AudioPlayerMediator.class);
         bind(PlayerMediator.class).annotatedWith(Names.named("video")).to(VideoPlayerMediator.class);
+        bind(VideoPanelFactory.class).toProvider(FactoryProvider.newFactory(VideoPanelFactory.class, VideoPanel.class));
     }
 
 }

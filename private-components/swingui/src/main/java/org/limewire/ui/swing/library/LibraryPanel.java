@@ -67,7 +67,6 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.player.PlayerMediatorListener;
-import org.limewire.ui.swing.player.PlayerControlPanel;
 import org.limewire.ui.swing.player.PlayerControlPanelFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -155,7 +154,7 @@ public class LibraryPanel extends JPanel {
         selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
     }
     
-    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerControlPanel playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
+    private void layoutComponents(HeaderBarDecorator headerBarDecorator, JComponent playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
         createAddFilesButton(addFileAction, libraryAction);

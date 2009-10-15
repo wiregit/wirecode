@@ -8,13 +8,12 @@ import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.LimeJFrame;
-import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.SystemUtils;
@@ -22,64 +21,58 @@ import org.limewire.util.SystemUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+/**
+ * Class that handles the displaying of video.
+ */
 class VideoDisplayDirector {
     
-    private final JLayeredPane limeWireLayeredPane;
+    private final JLayeredPane limeWireLayeredPane;   
     
-    private final JPanel videoPanelContainer = new JPanel(new BorderLayout());    
-
-    private final Provider<VideoPlayerMediator> videoPlayerMediator;
-    
-    private final PlayerControlPanelFactory controlPanelFactory;
-    
-    private final HeaderBarDecorator headerBarDecorator;
-    
-    private VideoPanel videoPanel;
+    private JComponent videoPanel;
     
     private JFrame fullScreenFrame;
     
     @Resource(key="WireframeTop.preferredSize") private Dimension topPanelPreferredSize;
 
+    private final VideoPanelFactory videoPanelFactory;
+
 
     @Inject
     public VideoDisplayDirector(@GlobalLayeredPane JLayeredPane limeWireLayeredPane, Provider<VideoPlayerMediator> videoPlayerMediator,
-            HeaderBarDecorator headerBarDecorator, PlayerControlPanelFactory controlPanelFactory){
+            VideoPanelFactory videoPanelFactory){
         this.limeWireLayeredPane = limeWireLayeredPane;
-        this.videoPlayerMediator = videoPlayerMediator;
-        this.headerBarDecorator = headerBarDecorator;
-        this.controlPanelFactory = controlPanelFactory;
+        this.videoPanelFactory = videoPanelFactory;
         
         GuiUtils.assignResources(this);
         
-        limeWireLayeredPane.add(videoPanelContainer, JLayeredPane.DEFAULT_LAYER);
-        limeWireLayeredPane.moveToBack(videoPanelContainer);
+        
         limeWireLayeredPane.addComponentListener(new VideoPanelResizer());
     }
     
     public void show(Component videoRenderer, boolean isFullScreen){
-        videoPanel = new VideoPanel(controlPanelFactory.createVideoControlPanel(), videoRenderer,
-                headerBarDecorator, videoPlayerMediator.get());
+        
+        if(this.videoPanel != null){
+            close();
+        }
+        
+        videoPanel = videoPanelFactory.createVideoPanel(videoRenderer).getComponent();
+        
         if(isFullScreen){
-            showFullScreen(videoPanel.getComponent());
+            showFullScreen();
         } else {
-            showInClient(videoPanel.getComponent());
+            showInClient();
         }           
     }
     
-    private void showInClient(Component videoPanel){
-        if (isFullScreen()){
-            closeFullScreen();
-        }
-        
-        videoPanelContainer.add(videoPanel);  
-        limeWireLayeredPane.moveToFront(videoPanelContainer);
+    private void showInClient(){
+        limeWireLayeredPane.add(videoPanel, JLayeredPane.DEFAULT_LAYER);
+        limeWireLayeredPane.moveToFront(videoPanel);
         resizeVideoContainer();     
         //Make sure the flash of native video window doesn't steal focus
         GuiUtils.getMainFrame().toFront();   
     }
     
-    private void showFullScreen(Component videoPanel){
-        closeClientVideo();
+    private void showFullScreen(){
         GuiUtils.getMainFrame().setVisible(false);
         
         fullScreenFrame = new LimeJFrame();
@@ -107,8 +100,9 @@ class VideoDisplayDirector {
         if (isFullScreen()) {
             closeFullScreen();
         } else {
-            closeClientVideo();
+            closeInClient();
         }
+        videoPanel = null;
     }
     
     private void closeFullScreen() {
@@ -117,14 +111,14 @@ class VideoDisplayDirector {
         GuiUtils.getMainFrame().setVisible(true);
     }
 
-    private void closeClientVideo(){
-        videoPanelContainer.removeAll(); 
-        limeWireLayeredPane.moveToBack(videoPanelContainer); 
+    private void closeInClient(){    
+        //moving to back before removing ensures everything looks right
+        limeWireLayeredPane.moveToBack(videoPanel); 
+        limeWireLayeredPane.remove(videoPanel); 
     }
 
     
-    private class VideoPanelResizer extends ComponentAdapter {
-        
+    private class VideoPanelResizer extends ComponentAdapter {        
         @Override
         public void componentResized(ComponentEvent e) {
             resizeVideoContainer();
@@ -133,10 +127,12 @@ class VideoDisplayDirector {
     
 
     private void resizeVideoContainer() {
-        Rectangle parentBounds = videoPanelContainer.getParent().getBounds();
-        //TODO: this knows too much about the layered pane's layout
-        videoPanelContainer.setBounds(0, (int)topPanelPreferredSize.getHeight(), 
-                (int)parentBounds.getWidth(), (int)parentBounds.getHeight()-(int)topPanelPreferredSize.getHeight());
-        videoPanelContainer.revalidate();
+        if (videoPanel != null) {
+            Rectangle parentBounds = videoPanel.getParent().getBounds();
+            // TODO: this knows too much about the layered pane's layout
+            videoPanel.setBounds(0, (int)topPanelPreferredSize.getHeight(), (int)parentBounds.getWidth(), 
+                    (int)parentBounds.getHeight() - (int)topPanelPreferredSize.getHeight());
+            videoPanel.revalidate();
+        }
     }
 }

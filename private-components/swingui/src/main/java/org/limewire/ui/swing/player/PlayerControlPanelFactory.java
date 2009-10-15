@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.player;
 
+import javax.swing.JComponent;
+
 import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
 
 import com.google.inject.Inject;
@@ -19,17 +21,15 @@ public class PlayerControlPanelFactory {
         this.sliderBarDecorator = sliderBarDecorator;
     }
 
-    public PlayerControlPanel createAudioControlPanel() {
+    public JComponent createAudioControlPanel() {
         return createControlPanel(audioMediator);
     }
 
-    public PlayerControlPanel createVideoControlPanel() {
+    public JComponent createVideoControlPanel() {
         return createControlPanel(videoMediator);
     }
     
-    private PlayerControlPanel createControlPanel(Provider<PlayerMediator> mediator){
-        PlayerControlPanel panel = new PlayerControlPanel(mediator, sliderBarDecorator);
-        panel.register();
-        return panel;
+    private JComponent createControlPanel(Provider<PlayerMediator> mediator){
+        return new PlayerControlPanel(mediator, sliderBarDecorator);
     }
 }

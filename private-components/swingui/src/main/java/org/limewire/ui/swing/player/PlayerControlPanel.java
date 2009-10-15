@@ -40,13 +40,12 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
  * Main UI container for the media player.
  */
-public class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
+class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
     
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -227,13 +226,14 @@ public class PlayerControlPanel extends JXPanel implements PlayerMediatorListene
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             }
         });
+        
+        register();
     }
     
     /**
      * Registers listeners for player events.
      */
-    @Inject
-    void register() {
+    private void register() {
         getPlayerMediator().addMediatorListener(this);
         
         // Stop player if disabled, and show/hide player.
@@ -264,6 +264,7 @@ public class PlayerControlPanel extends JXPanel implements PlayerMediatorListene
         progressSlider.setPreferredSize(new Dimension(206, 6));
         progressSlider.setSize(new Dimension(206, 4));
         progressSlider.setEnabled(false);
+        progressSlider.setMinorTickSpacing(1);
         progressSlider.addMouseListener(new MouseAdapter() {
             /**
              * Reposition the thumb on the jslider to the location of the mouse
@@ -286,6 +287,7 @@ public class PlayerControlPanel extends JXPanel implements PlayerMediatorListene
              */
             protected void mouseSkip(int x) {
                 if (progressSlider.getUI() instanceof BasicSliderUI) {
+                    System.out.print(((BasicSliderUI)progressSlider.getUI()).valueForXPosition(x) == progressSlider.getMaximum());
                     progressSlider.setValue(((BasicSliderUI)progressSlider.getUI()).valueForXPosition(x));
                 }
             }
@@ -344,7 +346,7 @@ public class PlayerControlPanel extends JXPanel implements PlayerMediatorListene
     }
     
     /**
-     * Hanldes state change in the player to the specified state.
+     * Handles state change in the player to the specified state.
      */
     @Override
     public void stateChanged(PlayerState playerState) {

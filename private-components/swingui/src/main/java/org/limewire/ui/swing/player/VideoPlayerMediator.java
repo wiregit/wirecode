@@ -24,6 +24,12 @@ import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavMediator;
+import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.nav.NavigationListener;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -36,20 +42,35 @@ import com.google.inject.Singleton;
 
 @Singleton
 class VideoPlayerMediator implements PlayerMediator {
-    
+
     private Player player;
     private File currentVideo;
     private final VideoDisplayDirector displayDirector;
     private final List<PlayerMediatorListener> listenerList;
     private volatile Timer updateTimer;
     private final CategoryManager categoryManager;
-    
+    private final Navigator navigator;
+    private NavigationListener closeVideoOnNavigation;
+
     @Inject
-    VideoPlayerMediator(VideoDisplayDirector displayDirector,
-            CategoryManager categoryManager){
+    VideoPlayerMediator(VideoDisplayDirector displayDirector, Navigator navigator,
+            CategoryManager categoryManager) {
         this.displayDirector = displayDirector;
+        this.navigator = navigator;
         this.categoryManager = categoryManager;
         this.listenerList = new ArrayList<PlayerMediatorListener>();
+    }
+
+    private void registerNavigationListener() {
+        if (closeVideoOnNavigation == null) {
+            closeVideoOnNavigation = new CloseVideoOnNavigationListener();
+        }
+
+        navigator.addNavigationListener(closeVideoOnNavigation);
+    }
+    
+    private void removeNavigationListener(){
+        navigator.removeNavigationListener(closeVideoOnNavigation);
     }
 
     @Override
@@ -69,13 +90,18 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public PlayerState getStatus() {
-        if (player == null){
+        if (player == null) {
             return PlayerState.UNKNOWN;
         }
         return convertControllerState(player.getState());
     }
 
+    private boolean isSeeking;
     private PlayerState convertControllerState(int controllerState) {
+        if(isSeeking){
+            return PlayerState.SEEKING;
+        }
+        
         // TODO: there a lot of states missing but this is enough to get it
         // working
         switch (controllerState) {
@@ -96,7 +122,8 @@ class VideoPlayerMediator implements PlayerMediator {
     @Override
     public boolean isPaused(File file) {
         // TODO: this isn't 100% correct but it's close enough to start
-        return file.equals(currentVideo) && player != null && player.getState() != Controller.Started;
+        return file.equals(currentVideo) && player != null
+                && player.getState() != Controller.Started;
     }
 
     @Override
@@ -134,13 +161,18 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void play(File file) {
-        if(initializePlayerOrNativeLaunch(file, null, true)){
-            displayDirector.show(player.getVisualComponent(), false);
+        if (initializePlayerOrNativeLaunch(file, null, true)) {
+            showVideo(false);
+            registerNavigationListener();            
         }
     }
     
-  
-     /**
+    private void showVideo(boolean isFullScreen){
+        displayDirector.show(player.getVisualComponent(), isFullScreen);
+        fireSongChanged(currentVideo.getName());        
+    }
+
+    /**
      * Initializes an FMJ player for the video if possible, launches natively if
      * not.
      * 
@@ -151,7 +183,7 @@ class VideoPlayerMediator implements PlayerMediator {
      * @return true if the player is successfully initialized, false if it is
      *         not initialized and the file is natively launched
      */
-    private boolean initializePlayerOrNativeLaunch(File file, Time time, boolean autoPlay){
+    private boolean initializePlayerOrNativeLaunch(File file, Time time, boolean autoPlay) {
         GuiUtils.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         currentVideo = file;
 
@@ -161,42 +193,37 @@ class VideoPlayerMediator implements PlayerMediator {
             nativeLaunch(file);
             return false;
         } catch (NoPlayerException e) {
-           nativeLaunch(file);
-           return false;
+            nativeLaunch(file);
+            return false;
         } catch (MalformedURLException e) {
-           nativeLaunch(file);
-           return false;
+            nativeLaunch(file);
+            return false;
         } catch (IOException e) {
-            //TODO: how should this be handled?
+            // TODO: how should this be handled?
             nativeLaunch(file);
             return false;
         }
-        
-        
-        
-        if(time != null){
+
+        if (time != null) {
             player.setMediaTime(time);
         }
         player.start();
-        
-        player.addControllerListener(new VideoControllerListener());        
+
+        player.addControllerListener(new VideoControllerListener());
         updateTimer = new Timer(1000, new TimerAction());
         updateTimer.start();
-        
-        fireSongChanged(file.getName());   
 
         if (!autoPlay) {
-            //start and stop to get initial frame on screen
+            // start and stop to get initial frame on screen
             pause();
         }
         GuiUtils.getMainFrame().setCursor(Cursor.getDefaultCursor());
-        
-        return true;    
+
+        return true;
     }
- 
-    
-    private void nativeLaunch(File file){
-        NativeLaunchUtils.safeLaunchFile(file, categoryManager);        
+
+    private void nativeLaunch(File file) {
+        NativeLaunchUtils.safeLaunchFile(file, categoryManager);
     }
 
     @Override
@@ -208,7 +235,6 @@ class VideoPlayerMediator implements PlayerMediator {
     public void prevSong() {
         throw new UnsupportedOperationException(getPlaylistsNotSupportedMessage());
     }
-
 
     @Override
     public void resume() {
@@ -237,19 +263,20 @@ class VideoPlayerMediator implements PlayerMediator {
             player.getGainControl().setLevel((float) value);
         }
     }
-    
+
     @Override
-    public boolean isVolumeSettable(){
+    public boolean isVolumeSettable() {
         return player.getGainControl() != null;
     }
 
     @Override
     public void skip(double percent) {
-        if(!isDurationMeasurable()){
+        if (!isDurationMeasurable()) {
             throw new IllegalStateException("Can not skip when duration is unmeasurable");
         }
-        
+        isSeeking = true;
         player.setMediaTime(new Time(percent * player.getDuration().getSeconds()));
+        isSeeking = false;
     }
 
     @Override
@@ -258,23 +285,23 @@ class VideoPlayerMediator implements PlayerMediator {
             player.stop();
         }
     }
-    
-    private String getPlaylistsNotSupportedMessage(){
+
+    private String getPlaylistsNotSupportedMessage() {
         return I18n.tr("Playlists not supported in video");
     }
-    
+
     private void firePlayerStateChanged(PlayerState state) {
         for (PlayerMediatorListener listener : listenerList) {
             listener.stateChanged(state);
         }
     }
-    
+
     private void fireProgressUpdated(float progress) {
         for (PlayerMediatorListener listener : listenerList) {
             listener.progressUpdated(progress);
         }
     }
-    
+
     private void fireSongChanged(String name) {
         for (PlayerMediatorListener listener : listenerList) {
             listener.songChanged(name);
@@ -283,20 +310,24 @@ class VideoPlayerMediator implements PlayerMediator {
 
     public void closeVideoPanel() {
         killTimer();
-        killPlayer();        
+        killPlayer();
 
         currentVideo = null;
 
         displayDirector.close();
+        
+        removeNavigationListener();
     }
-    
-    private void killTimer(){
-        if(updateTimer != null && updateTimer.isRunning()){
-            updateTimer.stop();
+
+    private void killTimer() {
+        if (updateTimer != null) {
+            if (updateTimer.isRunning()) {
+                updateTimer.stop();
+            }
             updateTimer = null;
         }
     }
-    
+
     private void killPlayer() {
         player.close();
         player.deallocate();
@@ -308,14 +339,13 @@ class VideoPlayerMediator implements PlayerMediator {
         if (displayDirector.isFullScreen() == isFullScreen) {
             return;
         }
-        
-        reInitializePlayer();
-        
-        displayDirector.show(player.getVisualComponent(), isFullScreen);
 
+        reInitializePlayer();
+
+        showVideo(isFullScreen);
     }
-    
-    private void reInitializePlayer(){
+
+    private void reInitializePlayer() {
 
         if (player == null) {
             throw new IllegalStateException("Video player not initialized");
@@ -334,21 +364,18 @@ class VideoPlayerMediator implements PlayerMediator {
         if (!playerInitialized) {
             // TODO: how should we handle this?
             throw new IllegalStateException("Video player initialization failed");
-        }         
-            
+        }
+
     }
-    
-    public boolean isFullScreen(){
+
+    public boolean isFullScreen() {
         return displayDirector.isFullScreen();
     }
 
-    
-    private boolean isDurationMeasurable(){
+    private boolean isDurationMeasurable() {
         return player != null && player.getDuration() != Player.DURATION_UNBOUNDED
-        && player.getDuration() != Player.DURATION_UNKNOWN;
+                && player.getDuration() != Player.DURATION_UNKNOWN;
     }
-    
-
 
     private class VideoControllerListener implements ControllerListener {
 
@@ -364,12 +391,12 @@ class VideoPlayerMediator implements PlayerMediator {
                         if (updateTimer == null) {
                             updateTimer = new Timer(500, new TimerAction());
                         }
-                        
+
                         if (!updateTimer.isRunning()) {
                             updateTimer.start();
                         }
 
-                    } else if (controllerEvent instanceof StopEvent){
+                    } else if (controllerEvent instanceof StopEvent) {
                         firePlayerStateChanged(PlayerState.STOPPED);
                         if (updateTimer != null) {
                             updateTimer.stop();
@@ -379,26 +406,57 @@ class VideoPlayerMediator implements PlayerMediator {
             });
         }
     }
-    
+
     private class TimerAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(!isDurationMeasurable()){
+            if (!isDurationMeasurable()) {
                 return;
             }
-            
+
             if (player.getMediaTime().getSeconds() >= player.getDuration().getSeconds()) {
-                //FMJ doesn't seem to fire EndOfMediaEvents so we need to do this manually
+                // FMJ doesn't seem to fire EndOfMediaEvents so we need to do
+                // this manually
                 player.stop();
                 updateTimer.stop();
                 player.setMediaTime(new Time(0));
                 fireProgressUpdated(0);
                 firePlayerStateChanged(PlayerState.EOM);
             } else {
-                fireProgressUpdated((float) (player.getMediaTime().getSeconds() / player.getDuration().getSeconds()));
+                fireProgressUpdated((float) (player.getMediaTime().getSeconds() / 
+                        player.getDuration().getSeconds()));
             }
         }
 
     }
-  
+    
+    private class CloseVideoOnNavigationListener implements NavigationListener {
+
+        @Override
+        public void itemSelected(NavCategory category, NavItem navItem,
+                NavSelectable selectable, NavMediator navMediator) {
+            closeVideoPanel();                    
+        }
+
+        @Override
+        public void categoryAdded(NavCategory category) {
+            // do nothing
+        }
+
+        @Override
+        public void categoryRemoved(NavCategory category, boolean wasSelected) {
+            // do nothing
+        }
+
+        @Override
+        public void itemAdded(NavCategory category, NavItem navItem) {
+            // do nothing
+        }
+
+        @Override
+        public void itemRemoved(NavCategory category, NavItem navItem, boolean wasSelected) {
+            // do nothing
+        }
+    }
+
 }
