@@ -69,7 +69,10 @@ public class LimeWireSwingUI extends JPanel {
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
             Provider<SignOnMessageLayer> signOnMessageProvider,
-            MainDownloadPanel mainDownloadPanel, DownloadHeaderPanel downloadHeaderPanel, @GlobalLayeredPane JLayeredPane limeWireLayeredPane) {
+            MainDownloadPanel mainDownloadPanel,
+            @GlobalLayeredPane JLayeredPane limeWireLayeredPane,
+            BottomPanel bottomPanel,
+            BottomHeaderFactory bottomHeaderFactory) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;  	
@@ -78,10 +81,12 @@ public class LimeWireSwingUI extends JPanel {
     	this.signOnMessageProvider = signOnMessageProvider;
         this.centerPanel = new JPanel(new GridBagLayout());   
         this.mainDownloadPanel = mainDownloadPanel;
-        this.downloadHeaderPanel = downloadHeaderPanel;
+        
+        // Create bottom header panel.
+        downloadHeaderPanel = bottomHeaderFactory.create(bottomPanel.getTabActions());
     	
-    	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanel.getComponent());
-    	mainDownloadPanel.setVisible(false);
+        // Create split pane for bottom tray.
+    	splitPane = createSplitPane(mainPanel, bottomPanel, downloadHeaderPanel.getComponent());
 
         setLayout(new BorderLayout());
 
@@ -167,7 +172,7 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-   private LimeSplitPane createSplitPane(final JComponent top, final MainDownloadPanel bottom, JComponent divider) {
+    private LimeSplitPane createSplitPane(final JComponent top, final BottomPanel bottom, JComponent divider) {
         final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
         splitPane.setDividerSize(0);
         bottom.setVisible(false);
@@ -188,14 +193,16 @@ public class LimeWireSwingUI extends JPanel {
             }
         });
         
-        mainDownloadPanel.addComponentListener(new ComponentAdapter(){
+        // Add listener to save bottom tray size.
+        bottom.addComponentListener(new ComponentAdapter(){
             @Override
             public void componentResized(ComponentEvent e) {
                 int height = bottom.getHeight();
-                if(height > bottom.getDefaultPreferredHeight()){
+                int minHeight = bottom.getDefaultPreferredHeight(); 
+                if (height > minHeight) {
                     SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(height);
                 } else {
-                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(bottom.getDefaultPreferredHeight());
+                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(minHeight);
                 }
             }
         });
