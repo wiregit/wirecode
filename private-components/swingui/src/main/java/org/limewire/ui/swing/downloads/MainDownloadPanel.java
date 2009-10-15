@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -16,7 +15,6 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Application;
-import org.jdesktop.application.Resource;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -28,7 +26,6 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -56,7 +53,6 @@ public class MainDownloadPanel extends JPanel {
     
     private TrayNotifier notifier;
     private boolean isInitialized = false;
-    @Resource private int preferredHeight;    
     private DownloadTable table;
     
     
@@ -76,9 +72,6 @@ public class MainDownloadPanel extends JPanel {
         this.notifier = notifier;
 
         GuiUtils.assignResources(this);
-        int savedHeight = SwingUiSettings.DOWNLOAD_TRAY_SIZE.getValue();
-        int height = savedHeight == 0 ? preferredHeight : savedHeight;
-        setPreferredSize(new Dimension(getPreferredSize().width, height));
     }
     
     public void selectAndScrollTo(URN urn) {
@@ -139,11 +132,6 @@ public class MainDownloadPanel extends JPanel {
         return table.getSelectedItems();
     }
     
-    public int getDefaultPreferredHeight(){
-        return preferredHeight;
-    }
-
-    
     private void initializeDownloadListeners(final DownloadListManager downloadListManager) {
         // handle individual completed downloads
         downloadListManager.addPropertyChangeListener(new DownloadPropertyListener());
@@ -184,30 +172,46 @@ public class MainDownloadPanel extends JPanel {
      * Adjusts visibility of the panel depending on whether or not the list is empty.
      */
     private class VisibilityListListener implements ListEventListener<DownloadItem> {
+        private int downloadCount;
       
         @Override
         public void listChanged(ListEvent<DownloadItem> listChanges) {
-            EventList sourceList = listChanges.getSourceList(); 
-            updateVisibility(sourceList);
+            EventList sourceList = listChanges.getSourceList();
+            if (sourceList.size() > downloadCount) {
+                downloadCount = sourceList.size();
+                if (!DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+                    DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.setValue(true);
+                } else {
+                    updateVisibility(sourceList);
+                }
+            }
         }
     }
     
+    /**
+     * Updates the visibility of this download panel based on the size of the
+     * specified source list.  This method is called when the download list 
+     * changes, or when the "show downloads" setting changes.
+     */
     private void updateVisibility(EventList sourceList) {
         if(!isInitialized){
             initialize();
         }
         
-        int downloadCount = sourceList.size();
+//        int downloadCount = sourceList.size();
         
+        // TODO review this
         if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) { // && !isVisible()){
             alertDownloadVisibilityListeners(true);
 //        } else if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
 //            //Do nothing - it is already set.
 //            return;
-        } else if (downloadCount == 0 && isVisible()) {
+//        } else if (downloadCount == 0 && isVisible()) {
+//            alertDownloadVisibilityListeners(false);
+//        } else if (downloadCount > 0 && !isVisible()) {
+//            alertDownloadVisibilityListeners(true);
+        } else {
             alertDownloadVisibilityListeners(false);
-        } else if (downloadCount > 0 && !isVisible()) {
-            alertDownloadVisibilityListeners(true);
         }
     }
     
