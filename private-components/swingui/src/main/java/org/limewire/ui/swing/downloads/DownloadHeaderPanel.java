@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -32,6 +32,8 @@ import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.mainframe.BottomPanel.TabAction;
+import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -43,6 +45,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * Panel that is displayed above the download table.
@@ -72,11 +75,10 @@ public class DownloadHeaderPanel {
     
     private final JXPanel component;
 
-    private FancyTabList tabList;
     private List<TabActionMap> tabActionList;
-    private Action downloadTabAction;
-    private Action uploadTabAction;
+    private Map<TabId, Action> actionMap = new EnumMap<TabId, Action>(TabId.class);
     
+    private FancyTabList tabList;
     private JLabel titleTextLabel;
     private HyperlinkButton fixStalledButton;
     private HyperlinkButton clearFinishedNowButton;
@@ -88,13 +90,15 @@ public class DownloadHeaderPanel {
     @Inject
     public DownloadHeaderPanel(DownloadMediator downloadMediator, DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
             ClearFinishedDownloadAction clearFinishedNowAction, FixStalledDownloadAction fixStalledDownloadAction,
-            ComboBoxDecorator comboBoxDecorator, BarPainterFactory barPainterFactory, DockIconFactory iconFactory) {
+            ComboBoxDecorator comboBoxDecorator, BarPainterFactory barPainterFactory, DockIconFactory iconFactory,
+            @Assisted List<TabActionMap> tabActionList) {
         
         this.downloadMediator = downloadMediator;
         this.downloadHeaderPopupMenu = downloadHeaderPopupMenu;
         this.clearFinishedDownloadAction = clearFinishedNowAction;
         this.fixStalledDownloadAction = fixStalledDownloadAction;
         this.comboBoxDecorator = comboBoxDecorator;
+        this.tabActionList = tabActionList;
         
         GuiUtils.assignResources(this);
         hyperlinkFont = FontUtils.deriveUnderline(hyperlinkFont, true);
@@ -203,26 +207,10 @@ public class DownloadHeaderPanel {
     }
     
     /**
-     * Adds Download and Upload tabs to tab list.
+     * Initializes the tab list to select content.
      */
     private void initializeTabList() {
-        // Create tab actions.
-        downloadTabAction = new AbstractAction(I18n.tr("Downloads")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showDownloads();
-            }
-        };
-        
-        uploadTabAction = new AbstractAction(I18n.tr("Uploads")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showUploads();
-            }
-        };
-        
         // Create tab list.
-        tabActionList = TabActionMap.createMapForMainActions(downloadTabAction, uploadTabAction);
         tabList = new FancyTabList(tabActionList);
         
         // Set tab list attributes.
@@ -234,15 +222,26 @@ public class DownloadHeaderPanel {
                 selectionTopBorderColor, selectionBottomBorderColor));
         tabList.setHighlightPainter(new TabPainter(highlightBackground, highlightBackground, 
                 highlightBorderColor, highlightBorderColor));
+        
+        // Initialize action map.
+        for (TabActionMap tabActionMap : tabActionList) {
+            TabAction action = (TabAction) tabActionMap.getMainAction();
+            actionMap.put(action.getTabId(), action);
+        }
     }
     
     /**
-     * Selects the tab associated with the specified main action.
+     * Selects the tab associated with the specified tab id.
      */
-    private void selectAction(Action action) {
+    private void selectAction(TabId tabId) {
+        // Update indicator.
+        downloadVisible = (tabId == TabId.DOWNLOADS);
+        
+        // Select tab.
         List<FancyTab> tabs = tabList.getTabs();
         for (FancyTab tab : tabs) {
-            if (action == tab.getTabActionMap().getMainAction()) {
+            TabAction action = (TabAction) tab.getTabActionMap().getMainAction();
+            if (tabId == action.getTabId()) {
                 tab.select();
             }
         }
@@ -252,7 +251,7 @@ public class DownloadHeaderPanel {
      * Selects the Downloads tab.
      */
     public void selectDownloads(boolean uploadVisible) {
-        selectAction(downloadTabAction);
+        selectAction(TabId.DOWNLOADS);
         updateDownloadTitle();
         updateLayout(true, uploadVisible);
     }
@@ -261,27 +260,9 @@ public class DownloadHeaderPanel {
      * Selects the Uploads tab.
      */
     public void selectUploads(boolean downloadVisible) {
-        selectAction(uploadTabAction);
+        selectAction(TabId.UPLOADS);
         updateUploadTitle();
         updateLayout(downloadVisible, true);
-    }
-    
-    /**
-     * Displays the Downloads table.
-     */
-    private void showDownloads() {
-        downloadVisible = true;
-        System.out.println("showDownloads...");
-        // TODO implement
-    }
-    
-    /**
-     * Displays the Uploads table.
-     */
-    private void showUploads() {
-        downloadVisible = false;
-        System.out.println("showUploads...");
-        // TODO implement
     }
     
     /**
@@ -304,10 +285,9 @@ public class DownloadHeaderPanel {
      */
     private void updateDownloadTitle() {
         String title = (activeList.size() > 0) ?
-                I18n.tr("Downloads ({0})", activeList.size()) :
-                I18n.tr("Downloads");
+                I18n.tr("Downloads ({0})", activeList.size()) : I18n.tr("Downloads");
 
-        downloadTabAction.putValue(Action.NAME, title);
+        actionMap.get(TabId.DOWNLOADS).putValue(Action.NAME, title);
         if (downloadVisible) titleTextLabel.setText(title);
     }
     
@@ -318,7 +298,7 @@ public class DownloadHeaderPanel {
         // TODO get uploads count
         String title = I18n.tr("Uploads");
 
-        uploadTabAction.putValue(Action.NAME, title);
+        actionMap.get(TabId.UPLOADS).putValue(Action.NAME, title);
         if (!downloadVisible) titleTextLabel.setText(title);
     }
     
