@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -344,7 +345,7 @@ public final class UrnCache {
                     LOG.debug("Hashing sha1 file: " + file);
                 try {
                     UrnSet calculatedUrns = URN.generateUrnsFromFile(file);
-                    UrnSet set = new UrnSet();
+                    Set<URN> set = new HashSet<URN>();
                     synchronized (UrnCache.this) {
                         set.addAll(getUrns(file));
                         set.addAll(calculatedUrns);
@@ -391,7 +392,7 @@ public final class UrnCache {
                     try {
                         nms1 = MP3HashingUtils.generateNonMetaDataSHA1FromFile(file);
                         if(nms1 != null) {
-                            UrnSet set = new UrnSet();
+                            Set<URN> set = new HashSet<URN>();
                             synchronized (UrnCache.this) {
                                 set.addAll(getUrns(file));
                                 set.add(nms1);

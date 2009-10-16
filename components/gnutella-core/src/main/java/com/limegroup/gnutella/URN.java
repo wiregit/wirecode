@@ -849,7 +849,7 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
 	
 	private static URN generateURN(File file, long offset, long length, Type type, MessageDigest md) throws IOException, InterruptedException {
 	       if(offset < 0 || length <= 0 || offset > file.length() || offset + length > file.length())
-	            return null;
+	            throw new IOException("invalid offset or length while calculating URN");
 
 	        byte[] buffer = threadLocal.get();
 	        int read = 0;
