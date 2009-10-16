@@ -77,6 +77,7 @@ public class AppFrame extends SingleFrameApplication {
     /** Default background color for panels. */
     @Resource private Color bgColor;
     @Resource private Color glassPaneColor;
+    @Resource private Color menuSelectionBackgroundColor;
     
     // Icons for JFileChooser bug workaround on Vista. 
     @Resource private Icon upFolderVistaFixIcon;
@@ -379,6 +380,9 @@ public class AppFrame extends SingleFrameApplication {
         UIManager.put("MenuItemUI", "javax.swing.plaf.basic.BasicMenuItemUI");
         UIManager.put("CheckBoxMenuItemUI", "javax.swing.plaf.basic.BasicCheckBoxMenuItemUI");
         UIManager.put("RadioButtonMenuItemUI", "javax.swing.plaf.basic.BasicRadioButtonMenuItemUI");
+        UIManager.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
+        UIManager.put("Menu.selectionBackground", menuSelectionBackgroundColor);
+        UIManager.put("Menu.selectionForeground", Color.BLACK);
     }
         
     /**
