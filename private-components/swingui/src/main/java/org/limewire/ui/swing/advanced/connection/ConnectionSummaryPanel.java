@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
@@ -11,19 +13,20 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.connection.ConnectionItem;
 import org.limewire.core.api.connection.FWTStatusReason;
@@ -36,6 +39,7 @@ import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.advanced.connection.PopupManager.PopupProvider;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -53,7 +57,6 @@ public class ConnectionSummaryPanel extends JPanel {
     private static final String IS_NOT_FIREWALLED = I18n.tr("You are not behind a firewall");
     private static final String IS_FIREWALLED_TRANSFERS = I18n.tr("You are behind a firewall and support firewall transfers");
     private static final String IS_FIREWALLED_NO_TRANSFERS = I18n.tr("You are behind a firewall and do not support firewall transfers");
-    private static final String WHY = I18n.tr("why");
     private static final String CONNECTED_TO = I18n.tr("Connected to:");
     private static final String RESOLVE = I18n.tr("Show hostnames of connected peers");
     
@@ -62,6 +65,9 @@ public class ConnectionSummaryPanel extends JPanel {
     private static final String PEERS = I18n.tr("Peers");
     private static final String STANDARD = I18n.tr("Standard");
     private static final String ULTRAPEERS = I18n.tr("Ultrapeers");
+    
+    @Resource
+    private Icon questionMarkIcon;
     
     /** Manager instance for connection data. */
     private final GnutellaConnectionManager gnutellaConnectionManager;
@@ -75,11 +81,8 @@ public class ConnectionSummaryPanel extends JPanel {
     /** List of connections. */
     private TransformedList<ConnectionItem, ConnectionItem> connectionList;
 
-    /** Popup manager for transfer status reason. */
-    private final PopupManager reasonPopupManager;
-
     private JLabel nodeLabel = new JLabel();
-    private FirewallLabel firewallLabel = new FirewallLabel();
+    private FirewallPanel firewallLabelPanel;
     private JLabel summaryLabel = new JLabel();
     private JTable summaryTable = new JTable();
     private SummaryTableModel summaryTableModel = new SummaryTableModel();
@@ -92,11 +95,11 @@ public class ConnectionSummaryPanel extends JPanel {
     public ConnectionSummaryPanel(GnutellaConnectionManager gnutellaConnectionManager,
             EventBean<FirewallStatusEvent> firewallStatusBean,
             EventBean<FirewallTransferStatusEvent> firewallTransferBean) {
+        GuiUtils.assignResources(this);
         
         this.gnutellaConnectionManager = gnutellaConnectionManager;
         this.firewallStatusBean = firewallStatusBean;
         this.firewallTransferBean = firewallTransferBean;
-        this.reasonPopupManager = new PopupManager(firewallLabel);
         
         setBorder(BorderFactory.createTitledBorder(""));
         setLayout(new MigLayout("insets 0 0 0 0,fill",
@@ -105,20 +108,10 @@ public class ConnectionSummaryPanel extends JPanel {
         setPreferredSize(new Dimension(120, 120));
         setOpaque(false);
         
-        firewallLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        firewallLabel.setOpaque(false);
-        firewallLabel.setOpenUrlsNatively(false);
-        firewallLabel.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == EventType.ACTIVATED) {
-                    Point location = firewallLabel.getPopupLocation();
-                    reasonPopupManager.showTimedPopup(firewallLabel, 
-                            location.x + 18, location.y + 10);
-                }
-            }
-        });
-
+        firewallLabelPanel = new FirewallPanel(questionMarkIcon);
+        firewallLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        firewallLabelPanel.setOpaque(false);
+        
         summaryLabel.setText(CONNECTED_TO);
 
         summaryTable.setModel(summaryTableModel);
@@ -146,7 +139,7 @@ public class ConnectionSummaryPanel extends JPanel {
         });
 
         add(nodeLabel      , "cell 0 0");
-        add(firewallLabel  , "cell 0 1, growx 100");
+        add(firewallLabelPanel  , "cell 0 1, growx 100");
         add(summaryLabel   , "cell 0 2");
         add(summaryTable   , "cell 0 3");
         add(resolveCheckBox, "cell 0 4");
@@ -213,14 +206,14 @@ public class ConnectionSummaryPanel extends JPanel {
 
             // Set firewall status and reason.
             if (transferStatus == FirewallTransferStatus.DOES_NOT_SUPPORT_FWT) {
-                firewallLabel.setStatusText(IS_FIREWALLED_NO_TRANSFERS, getReasonText(transferReason));
+                firewallLabelPanel.setStatusText(IS_FIREWALLED_NO_TRANSFERS, getReasonText(transferReason));
             } else {
-                firewallLabel.setStatusText(IS_FIREWALLED_TRANSFERS, null);
+                firewallLabelPanel.setStatusText(IS_FIREWALLED_TRANSFERS, null);
             }
             
         } else {
             // Not firewalled so clear transfer status and reason.
-            firewallLabel.setStatusText(IS_NOT_FIREWALLED, null);
+            firewallLabelPanel.setStatusText(IS_NOT_FIREWALLED, null);
         }
     }
 
@@ -245,21 +238,55 @@ public class ConnectionSummaryPanel extends JPanel {
     }
 
     /**
-     * Label to display firewall transfer status and reason.  FirewallLabel
-     * displays a hyperlink when the reason is not blank; the reason is 
-     * displayed in a popup window when the link is clicked.
+     * Panel to display the firewall's transfer status with a question mark icon
+     * that opens a popup giving further explanation of the transfer status.  
      */
-    private class FirewallLabel extends HTMLLabel implements PopupProvider {
+    private class FirewallPanel extends JPanel implements PopupProvider {
         private Point popupLocation;
         private String reasonText;
+        private HTMLLabel statusLabel;
+        private JButton reasonButton;
+        private Icon icon;
+        private PopupManager reasonPopupManager;
         
-        public FirewallLabel() {
-            addMouseMotionListener(new MouseMotionAdapter() {
+        public FirewallPanel(Icon argIcon) {           
+            icon = argIcon;
+            
+            statusLabel = new HTMLLabel();
+            statusLabel.setOpaque(false);
+            reasonButton = new JButton("");
+            reasonButton.setBorder(null);
+            reasonButton.addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
                 public void mouseMoved(MouseEvent e) {
                     popupLocation = e.getPoint();
+                    // the location is relative to the component which in this case is a button,
+                    // but we're interested in knowing the location relative to the container panel.
+                    // So, let's set the panel width as the x position since the button is at 
+                    // the far right hand side of the container.
+                    popupLocation.x = getWidth();
+                    
+                    showPopup();
                 }
             });
+            
+            reasonButton.addActionListener( new ActionListener() {
+                public void actionPerformed(ActionEvent event) {
+                    showPopup();
+                }
+            });
+
+            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+            add(statusLabel);
+            add(reasonButton);
+            reasonButton.setVisible(false);
+            setVisible(true);
+
+            this.reasonPopupManager = new PopupManager(this);
+        }
+
+        private void showPopup() {               
+            reasonPopupManager.showTimedPopup(this, popupLocation.x + 18, popupLocation.y + 10);
         }
 
         @Override
@@ -267,29 +294,49 @@ public class ConnectionSummaryPanel extends JPanel {
             if ((reasonText != null) && (reasonText.length() > 0)) {
                 // Return tooltip component for popup.
                 JToolTip toolTip = createToolTip();
+                toolTip.setBackground(Color.WHITE);
                 toolTip.setTipText(reasonText);
+                toolTip.setOpaque(true);
+                toolTip.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 return toolTip;
             } else {
                 return null;
             }
         }
         
-        public Point getPopupLocation() {
-            return popupLocation;
+        public void setStatusText(String statusText, String reasonText) {
+            statusLabel.setText(statusText);
+            
+            this.reasonText = reasonText;
+            if ((statusText != null) && (statusText.length() > 0) && (reasonText != null) && (reasonText.length() > 0)) {
+                reasonButton.setIcon(icon);
+                reasonButton.setBorder(null);
+                reasonButton.setVisible(true);
+            } else {
+                reasonButton.setIcon(null);
+                reasonButton.setVisible(false);
+            }
+
+            invalidate();
+        }
+
+        /*
+         * For some reason the panel was sometimes resized to show only one of the two lines of text.
+         * So, I overrode this method to return the minimum size from the status label. 
+         */
+        @Override
+        public Dimension getMinimumSize() {
+            return statusLabel.getMinimumSize();
         }
         
-        public void setStatusText(String statusText, String reasonText) {
-            this.reasonText = reasonText;
-            
-            if ((reasonText != null) && (reasonText.length() > 0)) {
-                StringBuilder builder = new StringBuilder();
-                builder.append(statusText);
-                builder.append(" (<a href=\"#\">").append(WHY).append("</a>)");
-                setText(builder.toString());
-            } else {
-                setText(statusText);
-            }
-        }
+        /*
+         * For some reason the panel was sometimes resized to show only one of the two lines of text.
+         * So, I overrode this method to return the minimum size from the status label. 
+         */
+        @Override
+        public Dimension getPreferredSize() {
+            return statusLabel.getPreferredSize();
+        }    
     }
     
     /**
