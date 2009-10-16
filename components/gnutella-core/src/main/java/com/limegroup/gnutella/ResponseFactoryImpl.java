@@ -230,8 +230,6 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @param doc the <tt>LimeXMLDocument</tt> instance associated with the
      *        file
      * @param extensions The raw unparsed extension bytes.
-     * @param endpoints a collection of other locations on this network that
-     *        will have this file
      */
     // NOTE: not in the interface, but public so tests not in this package can use.
     public Response createResponse(long index, long size, String name, int incomingNameByteArraySize,

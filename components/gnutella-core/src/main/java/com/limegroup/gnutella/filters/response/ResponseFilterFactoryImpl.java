@@ -14,7 +14,7 @@ import com.limegroup.gnutella.filters.URNFilter;
 
 @Singleton
 class ResponseFilterFactoryImpl implements ResponseFilterFactory {
-    
+
     private final Provider<XMLDocFilter> xmlDocFilter;
     private final Provider<MandragoreWormFilter> wormFilter;
     private final Provider<ResponseQueryFilter> queryFilter;
@@ -25,7 +25,8 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     private final Provider<MutableGUIDFilter> mutableGUIDFilter;
     private final Provider<KeywordFilter> keywordFilter;
     private final Provider<URNFilter> urnFilter;
-    
+    private final Provider<AltLocFilter> altLocFilter;
+
     @Inject
     public ResponseFilterFactoryImpl(Provider<XMLDocFilter> xmlDocFilter,
             Provider<MandragoreWormFilter> wormFilter,
@@ -36,7 +37,8 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
             Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter,
             Provider<MutableGUIDFilter> mutableGUIDFilter,
             Provider<KeywordFilter> keywordFilter,
-            Provider<URNFilter> urnFilter) {
+            Provider<URNFilter> urnFilter,
+            Provider<AltLocFilter> altLocFilter) {
         this.xmlDocFilter = xmlDocFilter;
         this.wormFilter = wormFilter;
         this.queryFilter = queryFilter;
@@ -47,12 +49,14 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         this.mutableGUIDFilter = mutableGUIDFilter;
         this.keywordFilter = keywordFilter;
         this.urnFilter = urnFilter;
+        this.altLocFilter = altLocFilter;
     }
-    
+
     @Override
     public ResponseFilter createResponseFilter() {
         List<ResponseFilter> filters = new ArrayList<ResponseFilter>();
-        
+
+        filters.add(altLocFilter.get());
         filters.add(urnFilter.get());
         filters.add(keywordFilter.get());
         if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
@@ -63,7 +67,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         filters.add(secureResultFilter.get());
         filters.add(programsFilter.get());
         filters.add(xmlDocFilter.get());
-        
+
         return new CompoundResponseFilter(filters,
                 Collections.singletonList(whiteListUpdateUrnFilter.get()));
     }
