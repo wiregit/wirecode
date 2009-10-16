@@ -109,7 +109,6 @@ public class ConnectionSummaryPanel extends JPanel {
         setOpaque(false);
         
         firewallLabelPanel = new FirewallPanel(questionMarkIcon);
-        firewallLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         firewallLabelPanel.setOpaque(false);
         
         summaryLabel.setText(CONNECTED_TO);
@@ -282,7 +281,8 @@ public class ConnectionSummaryPanel extends JPanel {
             this.reasonPopupManager = new PopupManager(this);
         }
 
-        private void showPopup() {               
+        private void showPopup() {     
+            // We offset the popup box a bit from the mouse location.  So, the popup won't be under the mouse and won't occlude the text.
             reasonPopupManager.showTimedPopup(this, popupLocation.x + 18, popupLocation.y + 10);
         }
 
