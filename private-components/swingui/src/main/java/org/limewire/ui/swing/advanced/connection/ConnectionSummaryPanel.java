@@ -15,7 +15,6 @@ import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,6 +37,7 @@ import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.advanced.connection.PopupManager.PopupProvider;
 import org.limewire.ui.swing.components.HTMLLabel;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -245,16 +245,14 @@ public class ConnectionSummaryPanel extends JPanel {
         private Point popupLocation;
         private String reasonText;
         private HTMLLabel statusLabel;
-        private JButton reasonButton;
-        private Icon icon;
+        private IconButton reasonButton;
         private PopupManager reasonPopupManager;
         
         public FirewallPanel(Icon argIcon) {           
-            icon = argIcon;
             
             statusLabel = new HTMLLabel();
             statusLabel.setOpaque(false);
-            reasonButton = new JButton("");
+            reasonButton = new IconButton(argIcon);
             reasonButton.setBorder(null);
             reasonButton.addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
@@ -280,7 +278,6 @@ public class ConnectionSummaryPanel extends JPanel {
             add(statusLabel);
             add(reasonButton);
             reasonButton.setVisible(false);
-            setVisible(true);
 
             this.reasonPopupManager = new PopupManager(this);
         }
@@ -296,7 +293,6 @@ public class ConnectionSummaryPanel extends JPanel {
                 JToolTip toolTip = createToolTip();
                 toolTip.setBackground(Color.WHITE);
                 toolTip.setTipText(reasonText);
-                toolTip.setOpaque(true);
                 toolTip.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 return toolTip;
             } else {
@@ -309,15 +305,12 @@ public class ConnectionSummaryPanel extends JPanel {
             
             this.reasonText = reasonText;
             if ((statusText != null) && (statusText.length() > 0) && (reasonText != null) && (reasonText.length() > 0)) {
-                reasonButton.setIcon(icon);
-                reasonButton.setBorder(null);
                 reasonButton.setVisible(true);
             } else {
-                reasonButton.setIcon(null);
                 reasonButton.setVisible(false);
             }
 
-            invalidate();
+            repaint();
         }
 
         /*
