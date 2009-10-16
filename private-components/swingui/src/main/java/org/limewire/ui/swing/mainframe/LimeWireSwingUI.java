@@ -252,17 +252,35 @@ public class LimeWireSwingUI extends JPanel {
      */
     private void setDownloadTrayVisible(boolean visible) {
         assert (SwingUtilities.isEventDispatchThread());
+        
+        // Set component visibility.
+        boolean wasVisible = splitPane.getBottomComponent().isVisible();
         splitPane.getBottomComponent().setVisible(visible);
+        
         if (visible) {
-            splitPane.setDividerSize(downloadHeaderPanel.getComponent().getPreferredSize().height);           
-            int preferredDividerPosition = splitPane.getSize().height - splitPane.getInsets().bottom
-                - splitPane.getDividerSize()
-                - splitPane.getBottomComponent().getPreferredSize().height;
-            if (preferredDividerPosition < (splitPane.getHeight() / 2)) {
-                preferredDividerPosition = splitPane.getHeight() / 2;
+            // Restore divider size.
+            splitPane.setDividerSize(downloadHeaderPanel.getComponent().getPreferredSize().height);
+            
+            // Restore divider location if newly visible.  If the last location
+            // is not valid, compute perferred position and apply.
+            if (!wasVisible) {
+                int lastLocation = splitPane.getLastDividerLocation(); 
+                if ((lastLocation <= 0) || (lastLocation > splitPane.getHeight())) {
+                    int preferredDividerPosition = splitPane.getSize().height -
+                        splitPane.getInsets().bottom - splitPane.getDividerSize() -
+                        splitPane.getBottomComponent().getPreferredSize().height;
+                    if (preferredDividerPosition < (splitPane.getHeight() / 2)) {
+                        preferredDividerPosition = splitPane.getHeight() / 2;
+                    }
+                    splitPane.setDividerLocation(preferredDividerPosition);
+                } else {
+                    splitPane.setDividerLocation(lastLocation);
+                }
             }
-            splitPane.setDividerLocation(preferredDividerPosition);
-        } else {            
+            
+        } else {
+            // Save divider location and reset divider size.
+            splitPane.setLastDividerLocation(splitPane.getDividerLocation());
             splitPane.setDividerSize(0);
         }
     }
