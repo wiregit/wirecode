@@ -71,14 +71,14 @@ public final class BrowseForFolder {
 
         //A Java version of the C++ struct used for this dialog
         public class BROWSEINFO extends Structure {
-           public Pointer hwndOwner;
-           public Pointer pidlRoot;
-           public Pointer pszDisplayName;
-           public String lpszTitle;
-           public int ulFlags;
-           public Pointer lpfn;
-           public Pointer lParam;
-           public int iImage;
+           @SuppressWarnings("unused") public Pointer hwndOwner;
+           @SuppressWarnings("unused") public Pointer pidlRoot;
+           @SuppressWarnings("unused") public Pointer pszDisplayName;
+           @SuppressWarnings("unused") public String lpszTitle;
+           @SuppressWarnings("unused") public int ulFlags;
+           @SuppressWarnings("unused") public Pointer lpfn;
+           @SuppressWarnings("unused") public Pointer lParam;
+           @SuppressWarnings("unused") public int iImage;
         }
     
        //Method headers we will be calling from Java
