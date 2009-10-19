@@ -12,7 +12,7 @@ interface Message {
      * RECEIVED            == message received from friend
      * SERVER              == server chat status related message
      */
-    enum Type { SENT, RECEIVED, SERVER };
+    enum Type { SENT, RECEIVED, SERVER }
 
     /**
      * @return the sender display name

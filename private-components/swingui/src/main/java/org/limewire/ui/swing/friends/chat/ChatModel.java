@@ -15,6 +15,7 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -41,12 +42,19 @@ class ChatModel {
      * Listener for incoming chat events. 
      */
     private final List<IncomingListener> incomingListeners = new CopyOnWriteArrayList<IncomingListener>();
-        
+    
+    private final EventBroadcaster<ChatMessageEvent> chatMessageList;
+    private final EventBroadcaster<ChatStateEvent> chatStateList;
+    
     @Inject
-    public ChatModel(ListenerSupport<FriendPresenceEvent> presenceSupport) {
+    public ChatModel(ListenerSupport<FriendPresenceEvent> presenceSupport,
+                     EventBroadcaster<ChatMessageEvent> chatMessageList,
+                     EventBroadcaster<ChatStateEvent> chatStateList) {
         this.presenceSupport = presenceSupport;
         this.chatFriends = new BasicEventList<ChatFriend>();
         this.idToFriendMap = new HashMap<String, ChatFriend>();
+        this.chatStateList = chatStateList;
+        this.chatMessageList = chatMessageList;
     }
     
     /**
@@ -110,15 +118,25 @@ class ChatModel {
             break;
         case REMOVED:
             if (chatFriend != null) {
-                if (shouldRemoveFromFriendsList(chatFriend)) {
-                    chatFriends.remove(idToFriendMap.remove(friend.getId()));
-                    idToFriendMap.remove(chatFriend);
-                    friend.removeChatListener();
-                }
+                removeFriendIfNecessary(chatFriend);
                 chatFriend.update();
             }
             break;
         }
+    }
+
+    /**
+     * Remove friend from the friends list if necessary (not chatting, and no presences
+     * are signed in anymore).
+     * 
+     * @param chatFriend friend to remove from friends list.
+     */
+    public void removeFriendIfNecessary(ChatFriend chatFriend) {
+        if (shouldRemoveFromFriendsList(chatFriend)) {
+            Friend friend = chatFriend.getFriend();
+            chatFriends.remove(idToFriendMap.remove(friend.getId()));
+            friend.removeChatListener();
+        }    
     }
     
     /**
@@ -155,11 +173,11 @@ class ChatModel {
                 SwingUtils.invokeAndWait(new Runnable() {
                     @Override
                     public void run() {
-                        MessageWriter writerWrapper = new MessageWriterImpl(friend, writer);
+                        MessageWriter writerWrapper = new MessageWriterImpl(friend, writer, chatMessageList);
                         fireIncomingEvent(friend, writerWrapper);
                     }
                 });
-                return new MessageReaderImpl(friend);
+                return new MessageReaderImpl(friend, chatMessageList, chatStateList);
             }
         };
         presence.getFriend().setChatListenerIfNecessary(incomingChatListener);

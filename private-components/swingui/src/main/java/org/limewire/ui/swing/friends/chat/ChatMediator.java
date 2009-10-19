@@ -38,9 +38,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.OverlayPopupPanel;
-import org.limewire.ui.swing.components.decorators.ButtonDecorator;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -63,8 +60,6 @@ import net.miginfocom.swing.MigLayout;
  */
 @LazySingleton
 public class ChatMediator {
-
-    private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     
     @Resource private Font font;
     @Resource private Color foreground;
@@ -87,8 +82,8 @@ public class ChatMediator {
 
     @Inject
     public ChatMediator(Provider<ChatFrame> chatFrameProvider, Provider<ChatHeader> chatHeaderProvider,
-                        ButtonDecorator buttonDecorator, TrayNotifier trayNotifier,
-            Provider<ChatModel> chatModel, @GlobalLayeredPane JLayeredPane layeredPane) {
+                        TrayNotifier trayNotifier, Provider<ChatModel> chatModel, 
+                        @GlobalLayeredPane JLayeredPane layeredPane) {
         this.chatFrameProvider = chatFrameProvider;
         this.chatHeaderProvider = chatHeaderProvider;
         this.layeredPane = layeredPane;
@@ -182,7 +177,16 @@ public class ChatMediator {
         chatButton.setBackgroundPainter(new ChatButtonPainter());
     }
     
-    @Inject void register(ListenerSupport<FriendConnectionEvent> connectionSupport) {
+    @Inject void register(ListenerSupport<FriendConnectionEvent> connectionSupport,
+                          final ListenerSupport<ChatMessageEvent> messageList) {
+        final EventListener<ChatMessageEvent> messageListener = new EventListener<ChatMessageEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(ChatMessageEvent event) {
+                handleChatMessage(event.getData());
+            }
+        };
+        
         // listen for login/logout events
         connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
@@ -205,7 +209,7 @@ public class ChatMediator {
                     }
                     chatModel.get().addIncomingListener(incomingChatListener);
                     getChatButton().setVisible(true);
-                    EventAnnotationProcessor.subscribe(ChatMediator.this);
+                    messageList.addListener(messageListener);
                     break;
                 // unregister listeners and hide the chat window/chat button
                 case DISCONNECTED:
@@ -219,7 +223,7 @@ public class ChatMediator {
                     }
                     chatModel.get().unregisterListeners();
                     chatModel.get().removeIncomingListener(incomingChatListener);
-                    EventAnnotationProcessor.unsubscribe(ChatMediator.this);
+                    messageList.removeListener(messageListener);
                     panel = null;
                     break;
                 }
@@ -237,18 +241,19 @@ public class ChatMediator {
     
     /**
      * Listen for incoming messages. This doesn't care what the message is, it simply
-     * updates UI components that a new message has arrived. 
+     * updates UI components that a new message has arrived.
+     *  
+     * @param message chat message
      */
-    @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
-    public void handleMessageReceived(String topic, MessageReceivedEvent event) {
-        if (event.getMessage().getType() != Message.Type.SENT) { 
-            String messageFriendID = event.getMessage().getFriendID();
+    public void handleChatMessage(Message message) {
+        if (message.getType() != Message.Type.SENT) { 
+            String messageFriendID = message.getFriendID();
             ChatFriend chatFriend = chatModel.get().getChatFriend(messageFriendID);
             
             // if the chat frame not visible, update unseen message
             if(!isVisible()) {
                 chatFriend.setHasUnviewedMessages(true);
-                unseenMessages.add(event.getMessage().getFriendID());
+                unseenMessages.add(messageFriendID);
                 setUnseenMessageCount(unseenMessages.size());
             } // otherwise, if chatframe visible and the friend is not selected, update friend with unseen message. 
             else if(chatFriend != chatFrame.getSelectedConversation() && chatFrame.getSelectedConversation() != null) {
@@ -257,21 +262,16 @@ public class ChatMediator {
         }
 
         // if chat panel not visible, notify in tray
-        if (event.getMessage().getType() != Message.Type.SENT && 
+        if (message.getType() != Message.Type.SENT && 
              (!GuiUtils.getMainFrame().isActive() || !isVisible())) {
-            trayNotifier.showMessage(getNoticeForMessage(event));
-        } 
-    }
-    
-    public String getMessagingTopicPatternName() {
-        return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
+            trayNotifier.showMessage(getNoticeForMessage(message));
+        }
     }
     
     /**
      * Creates Notification to display in the TrayNotifier.
      */
-    private Notification getNoticeForMessage(MessageReceivedEvent event) {
-        final Message message = event.getMessage();
+    private Notification getNoticeForMessage(final Message message) {
 
         // todo: each message type should know how to display itself as a notification
         String title = message.getType() == Message.Type.SERVER ? tr("Message from the chat server") : tr("Chat from {0}", message.getSenderName());

@@ -35,7 +35,6 @@ import org.limewire.ui.support.FatalBugManager;
 import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
-import org.limewire.ui.swing.event.ExceptionPublishingSwingEventService;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
@@ -336,10 +335,6 @@ final class Initializer {
         // Set the default event error handler so we can receive uncaught
         // AWT errors.
         DefaultErrorCatcher.install();
-        stopwatch.resetAndLog("DefaultErrorCatcher install");
-
-        //Enable the EDT event service (used by the EventBus library) that publishes to LW error handling
-        ExceptionPublishingSwingEventService.install();
         stopwatch.resetAndLog("DefaultErrorCatcher install");
         
         if (OSUtils.isMacOSX()) {

@@ -1,32 +1,14 @@
 package org.limewire.ui.swing.friends.chat;
 
+import org.limewire.listener.DefaultSourceTypeEvent;
 import org.limewire.friend.api.ChatState;
-import org.limewire.ui.swing.event.AbstractEDTEvent;
 
-public class ChatStateEvent extends AbstractEDTEvent {
-    private static final String TOPIC_PREFIX = "chatstate-";
-    private final ChatFriend chatFriend;
-    private final ChatState state;
-
-    public ChatStateEvent(ChatFriend chatFriend, ChatState state) {
-        this.chatFriend = chatFriend;
-        this.state = state;
-    }
+/**
+ * event for updated chat state.
+ */
+public class ChatStateEvent extends DefaultSourceTypeEvent<String, ChatState> {
     
-    public ChatFriend getFriend() {
-        return chatFriend;
-    }
-    
-    public ChatState getState() {
-        return state;
-    }
-    
-    public static String buildTopic(String conversationName) {
-        return TOPIC_PREFIX + conversationName;
-    }
-    
-    @Override
-    public void publish() {
-        super.publish(buildTopic(chatFriend.getID()));
+    public ChatStateEvent(String friendId, ChatState event) {
+        super(friendId, event);
     }
 }

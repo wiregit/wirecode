@@ -37,8 +37,8 @@ public class ChatDocumentBuilderTest extends TestCase {
     
     public void testBuildChatTextForRealMessage() {
         compareOutput("<div class=\"them\">you:</div>hey there<br/>", ChatState.active, 
-                new Type[] {Type.RECEIVED}, 
-                new String[] {"hey there"});
+                new Type[] {Type.RECEIVED},
+                "hey there");
     }
 
     public void testBuildChatTextForExternallyInitiatedConversationWhenTheyAreTyping() {
@@ -46,8 +46,8 @@ public class ChatDocumentBuilderTest extends TestCase {
         conversation.append("<div class=\"them\">you:</div>heynow<br/>")
                     .append("<div class=\"typing\">you is typing...</div><br/>");
         compareOutput(conversation.toString(), ChatState.composing, 
-                new Type[] {Type.RECEIVED},  
-                new String[] {"heynow"});
+                new Type[] {Type.RECEIVED},
+                "heynow");
     }
 
     public void testBuildChatTextForExternallyInitiatedConversationWhenTheyArePaused() {
@@ -55,8 +55,8 @@ public class ChatDocumentBuilderTest extends TestCase {
         conversation.append("<div class=\"them\">you:</div>heynow<br/>")
         .append("<div class=\"typing\">you has entered text</div><br/>");
         compareOutput(conversation.toString(), ChatState.paused, 
-                new Type[] {Type.RECEIVED},  
-                new String[] {"heynow"});
+                new Type[] {Type.RECEIVED},
+                "heynow");
     }
 
     public void testBuildChatTextForConversationWhenTheyHaveSignedOff() {
@@ -64,8 +64,8 @@ public class ChatDocumentBuilderTest extends TestCase {
         conversation.append("<div class=\"them\">you:</div>heynow<br/>")
         .append("<div class=\"typing\">you has signed off</div><br/>");
         compareOutput(conversation.toString(), null, true, 
-                new Type[] {Type.RECEIVED},  
-                new String[] {"heynow"});
+                new Type[] {Type.RECEIVED},
+                "heynow");
     }
 
     public void testBuildChatTextShowingTypingMessagesRemovedAfterReceivingFollowupMessage() {
@@ -73,8 +73,8 @@ public class ChatDocumentBuilderTest extends TestCase {
         conversation.append("<div class=\"them\">you:</div>heynow<br/>")
                     .append("foobar<br/>");
         compareOutput(conversation.toString(), ChatState.active,
-                new Type[] {Type.RECEIVED, Type.RECEIVED},  
-                new String[] {"heynow", "foobar"});
+                new Type[] {Type.RECEIVED, Type.RECEIVED},
+                "heynow", "foobar");
     }
     
     public void testBuildChatTextForATwoPartyExchangeThatIsExternallyInitiated() {
@@ -84,8 +84,8 @@ public class ChatDocumentBuilderTest extends TestCase {
                     .append("<div class=\"them\">you:</div>fooey<br/>");
         
         compareOutput(conversation.toString(), ChatState.active, 
-                new Type[] {Type.RECEIVED, Type.SENT, Type.RECEIVED}, 
-                new String[] {"heynow", "yo", "fooey"});
+                new Type[] {Type.RECEIVED, Type.SENT, Type.RECEIVED},
+                "heynow", "yo", "fooey");
     }
     
     public void testBuildChatTextForALargeMessage() {
@@ -95,8 +95,8 @@ public class ChatDocumentBuilderTest extends TestCase {
                     .append("<div class=\"them\">you:</div>yeah I can't beleive it is an actual site.<br/>");
         
         compareOutput(conversation.toString(), ChatState.active, 
-                new Type[] {Type.RECEIVED, Type.SENT, Type.RECEIVED}, 
-                new String[] {"http://gooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle.com/", "wow cool link", "yeah I can't beleive it is an actual site."});
+                new Type[] {Type.RECEIVED, Type.SENT, Type.RECEIVED},
+                "http://gooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle.com/", "wow cool link", "yeah I can't beleive it is an actual site.");
     }
 
     public void testBuildChatTextForMessagesISendMoreThan60SecondsApart() {

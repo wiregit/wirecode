@@ -8,16 +8,20 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
+import org.limewire.listener.EventBroadcaster;
 
 class MessageWriterImpl implements MessageWriter {
     private static final Log LOG = LogFactory.getLog(MessageWriterImpl.class);
     
     private final ChatFriend chatFriend;
     private final MessageWriter writer;
+    private final EventBroadcaster<ChatMessageEvent> messageList;
 
-    MessageWriterImpl(ChatFriend chatFriend, MessageWriter writer) {
+    MessageWriterImpl(ChatFriend chatFriend, MessageWriter writer,
+                      EventBroadcaster<ChatMessageEvent> messageList) {
         this.chatFriend = chatFriend;
         this.writer = writer;
+        this.messageList = messageList;
     }
 
     @Override
@@ -35,11 +39,11 @@ class MessageWriterImpl implements MessageWriter {
                     }
                 }
             }, "send-message");
-            new MessageReceivedEvent(msg).publish();
+            messageList.broadcast(new ChatMessageEvent(msg));
         } else {
             String errorMsg = tr("Message not sent because friend signed off.");
             Message error = new ErrorMessage(errorMsg, msg);
-            new MessageReceivedEvent(error).publish();
+            messageList.broadcast(new ChatMessageEvent(error));
         }
     }
 

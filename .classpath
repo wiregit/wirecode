@@ -128,7 +128,6 @@
 	<classpathentry kind="lib" path="lib/jars/smack.jar" sourcepath="lib/sources/smack-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx-debug.jar" sourcepath="lib/sources/smack-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx.jar" sourcepath="lib/sources/smack-src.jar"/>
-	<classpathentry kind="lib" path="lib/jars/EventBus-1.2b.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/javax.servlet-5.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>

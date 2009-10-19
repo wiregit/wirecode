@@ -17,6 +17,7 @@ import org.limewire.friend.api.MessageWriter;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.listener.EventBroadcaster;
 
 import com.google.inject.Inject;
 
@@ -35,16 +36,23 @@ class ChatFrame extends JPanel {
     private final ConversationPanel conversationPanel;
     private final ChatMediator chatMediator;
     
+    private final EventBroadcaster<ChatMessageEvent> chatMessageList;
+    private final EventBroadcaster<ChatStateEvent> chatStateList;
+    
     @Inject
     public ChatFrame(ChatHeader chatHeader, ChatFriendList chatList, 
             ConversationPanel conversationPanel, ChatPopupHandler popupHandler,
-            ChatMediator chatMediator) {
+            ChatMediator chatMediator,
+            EventBroadcaster<ChatMessageEvent> chatMessageList,
+            EventBroadcaster<ChatStateEvent> chatStateList) {
         super(new MigLayout("gap 0, insets 0, fill"));
         
         this.chatHeader = chatHeader;
         this.chatList = chatList;
         this.conversationPanel = conversationPanel;
         this.chatMediator = chatMediator;           
+        this.chatMessageList = chatMessageList;
+        this.chatStateList = chatStateList;
         
         GuiUtils.assignResources(this);
         
@@ -112,8 +120,8 @@ class ChatFrame extends JPanel {
      * Creates a new MessageWriter for this ChatFriend if one doesn't already exist.
      */
     private MessageWriter createMessageWriter(ChatFriend chatFriend) {
-        MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
-        MessageWriter messageWriter = new MessageWriterImpl(chatFriend, writer);
+        MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend, chatMessageList, chatStateList));
+        MessageWriter messageWriter = new MessageWriterImpl(chatFriend, writer, chatMessageList);
         return messageWriter;
     }
     

@@ -28,12 +28,13 @@ import org.limewire.ui.swing.action.PasteAction;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.action.SelectAllAction;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.collection.Periodic;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.MessageWriter;
 
-class ResizingInputPanel extends JPanel implements Displayable {
+class ResizingInputPanel extends JPanel implements Displayable, Disposable {
     private static final Log LOG = LogFactory.getLog(ResizingInputPanel.class);
     private static final int DELAY_IN_MILLIS_FOR_CHAT_PAUSED = 3000;
     private final JTextArea text;
@@ -86,6 +87,10 @@ class ResizingInputPanel extends JPanel implements Displayable {
         }
     }
 
+    /**
+     * Stop tracking chat state updates.
+     */
+    @Override
     public void dispose() {
         chatStateManager.cancelPendingChatStateUpdates();        
     }

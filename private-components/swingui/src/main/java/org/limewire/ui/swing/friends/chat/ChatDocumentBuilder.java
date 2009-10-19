@@ -97,7 +97,7 @@ class ChatDocumentBuilder {
     }
     
     private static void appendIsTypingMessage(StringBuilder builder, String senderName, ChatState chatState, boolean friendSignedOff) {
-        String stateMessage = null;
+        String stateMessage;
         if (friendSignedOff) {
             stateMessage = tr("{0} has signed off", senderName);
         } else if (chatState == ChatState.composing) {

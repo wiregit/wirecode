@@ -32,6 +32,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
+import javax.swing.JComponent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import net.miginfocom.swing.MigLayout;
@@ -41,7 +42,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.Friend;
@@ -58,8 +58,8 @@ import org.limewire.friend.impl.feature.NoSave;
 import org.limewire.friend.impl.feature.NoSaveFeature;
 import org.limewire.friend.impl.feature.NoSaveStatus;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -67,8 +67,6 @@ import org.limewire.ui.swing.action.CopyAllAction;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.search.FriendPresenceActions;
@@ -111,10 +109,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private ChatState currentChatState;
     private NoSave noSaveState;
 
-    private ListenerSupport<FriendEvent> friendSupport;
-    private ListenerSupport<FeatureEvent> featureSupport;
-    private EventListener<FeatureEvent> featureListener;
-    private EventListener<FriendEvent> friendListener;
+    private final EventBroadcaster<ChatMessageEvent> messageBroadcaster;
     
     @Resource(key="ChatConversation.toolbarTopColor") private Color toolbarTopColor;
     @Resource(key="ChatConversation.toolbarBottomColor") private Color toolbarBottomColor;
@@ -127,11 +122,12 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     @Inject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend,
-                            SharedFileListManager libraryManager, Provider<IconManager> iconManager,
-                            ChatHyperlinkListenerFactory chatHyperlinkListenerFactory, 
+                            Provider<IconManager> iconManager,
+                            ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
                             CloseChatMessage closeChatMessage,
                             FriendPresenceActions remoteHostActions,
-                            @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
+                            @Named("backgroundExecutor") ScheduledExecutorService schedExecService,
+                            EventBroadcaster<ChatMessageEvent> messageBroadcaster) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.conversationName = chatFriend.getName();
@@ -139,6 +135,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         this.iconManager = iconManager;
         this.noSaveState = null;
         this.remoteHostActions = remoteHostActions;
+        this.messageBroadcaster = messageBroadcaster;
         
         GuiUtils.assignResources(this);
 
@@ -213,45 +210,16 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         setBackground(DEFAULT_BACKGROUND);
 
         editor.addHyperlinkListener(chatHyperlinkListenerFactory.create(this));
-        EventAnnotationProcessor.subscribe(this);
     }
 
-    
-    @Inject
-    public void register(@Named("available")ListenerSupport<FriendEvent> friendSupport,
-                         ListenerSupport<FeatureEvent> featureSupport) {
-        this.friendSupport = friendSupport;
-        this.featureSupport = featureSupport;
-
-        featureListener = new EventListener<FeatureEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FeatureEvent event) {
-                if (event.getSource().getFriend().getId().equals(friendId)) {
-                    handleFeatureUpdate(event);
-                }
-            }
-        };
-
-        friendListener = new EventListener<FriendEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendEvent event) {
-                if (event.getData().getId().equals(friendId)) {
-                    handleFriendEvent(event);
-                }
-            }
-        };
-        friendSupport.addListener(friendListener);
-        featureSupport.addListener(featureListener);
-    }
-
-    @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
-    public void handleConversationMessage(String topic, MessageReceivedEvent event) {
-
+    /**
+     * Add a new {@link Message} to this conversation.
+     * 
+     * @param message being added
+     */
+    public void newChatMessage(Message message) {
         // TODO: Refactor this,ChatDocumentBuilder, etc into cleaner/clearer, way to display msgs
-        Message message = event.getMessage();
-        LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
+        LOG.debugf("Message: from {0} text: {1}", message.getSenderName(), message.toString());
         messages.add(message);
         Type type = message.getType();
 
@@ -281,18 +249,26 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                 I18n.tr("Off the Record")) + "</u></html>");
     }
 
-
-    @RuntimeTopicEventSubscriber(methodName="getChatStateTopicName")
-    public void handleChatStateUpdate(String topic, ChatStateEvent event) {
-        LOG.debugf("Chat state update for {0} to {1}", event.getFriend().getName(), event.getState());
-        if (currentChatState != event.getState()) {
-            currentChatState = event.getState();
+    /**
+     * Called to indicate a new chat state in this conversation.
+     * 
+     * @param chatState being added.
+     */
+    public void newChatState(ChatState chatState) {
+        LOG.debugf("Chat state update for {0} to {1}", chatFriend.getName(), chatState);
+        if (currentChatState != chatState) {
+            currentChatState = chatState;
             displayMessages();
         }
     }
 
-    private void handleFriendEvent(FriendEvent event) {
-        switch(event.getType()) {
+    /**
+     * Update availability of friend associated with this conversation.
+     * 
+     * @param update type of update.
+     */
+    public void friendAvailableUpdate(FriendEvent.Type update) {
+        switch(update) {
         case ADDED:
             currentChatState = ChatState.active;
             displayMessages(false);
@@ -309,60 +285,58 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         }
     }
 
-    private void handleFeatureUpdate(FeatureEvent featureEvent) {
-        FeatureEvent.Type featureEventType = featureEvent.getType();
-        Feature feature = featureEvent.getData();
-
+    /**
+     * Called to indicate a new feature addition/removal.
+     * 
+     * @param feature the feature being updated
+     * @param action whether the feature is added or removed.
+     */
+    public void featureUpdate(Feature feature, FeatureEvent.Type action) {
         if (feature.getID().equals(LimewireFeature.ID)) {
-            if (featureEventType == FeatureEvent.Type.ADDED) {
+            if (action == FeatureEvent.Type.ADDED) {
                 downloadlink.setEnabled(true);
-            } else if (featureEventType == FeatureEvent.Type.REMOVED) {
+            } else if (action == FeatureEvent.Type.REMOVED) {
                 downloadlink.setEnabled(chatFriend.isSignedInToLimewire());
             }
         } else if (feature.getID().equals(NoSaveFeature.ID)) {
-            if (featureEventType == FeatureEvent.Type.ADDED) {
+            if (action == FeatureEvent.Type.ADDED) {
                 ensureNoSaveLinkExists();
                 NoSave status = ((NoSaveStatus)feature.getFeature()).getStatus();
                 if (status != noSaveState) {
                     NoSaveStatusMessage msg = new NoSaveStatusMessage(friendId,
                             Message.Type.SERVER, status);
-                    new MessageReceivedEvent(msg).publish();
+                    messageBroadcaster.broadcast(new ChatMessageEvent(msg));
                 }
             }
         }
     }
 
-    public void setChatStateGone() {
-        try {
-            writer.setChatState(ChatState.gone);
-        } catch (FriendException e) {
-            LOG.error("Could not set chat state while closing the conversation", e);
-        }
-    }
-
+    /**
+     * Performs necessary cleanup for this conversation.
+     */
+    @Override
     public void dispose() {
-        EventAnnotationProcessor.unsubscribe(this);
-        featureSupport.removeListener(featureListener);
-        friendSupport.removeListener(friendListener);
         inputPanel.dispose();
     }
 
-    public String getMessageReceivedTopicName() {
-        return MessageReceivedEvent.buildTopic(friendId);
-    }
-
-    public String getChatStateTopicName() {
-        return ChatStateEvent.buildTopic(friendId);
-    }
-
+    @Override
     public void displayMessages() {
         displayMessages(!chatFriend.isSignedIn());
     }
 
+    @Override
     public ChatFriend getChatFriend() {
         return chatFriend;
     }
+    
+    @Override
+    public JComponent asComponent() {
+        return this;
+    }
 
+    /**
+     * @return Map of file offer IDs to file offer messages ({@link MessageFileOffer}).
+     */
     public Map<String, MessageFileOffer> getFileOfferMessages() {
         return Collections.unmodifiableMap(new HashMap<String, MessageFileOffer>(idToMessageWithFileOffer));
     }
@@ -569,7 +543,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                        String errorMsg = I18n.tr("File offer not sent because friend signed off.");
                        Message msg = new MessageFileOfferImpl(I18n.tr("me"), friendId, 
                            Message.Type.SENT, metadata, null);
-                       new MessageReceivedEvent(new ErrorMessage(errorMsg, msg)).publish();
+                       messageBroadcaster.broadcast(
+                           new ChatMessageEvent(new ErrorMessage(errorMsg, msg)));
                        return;
                    }
 
@@ -585,8 +560,9 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                    }
 
                    if (sentFileOffer) {
-                        new MessageReceivedEvent(new MessageFileOfferImpl(I18n.tr("me"), 
-                                friendId, Message.Type.SENT, metadata, null)).publish();
+                        messageBroadcaster.broadcast(new ChatMessageEvent(
+                            new MessageFileOfferImpl(I18n.tr("me"), friendId, 
+                                Message.Type.SENT, metadata, null)));
                    } else {
                        // TODO: handle file offer sending failures (consider using ErrorMessage)
                    }
