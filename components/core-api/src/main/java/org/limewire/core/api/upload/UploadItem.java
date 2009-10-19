@@ -91,4 +91,14 @@ public interface UploadItem extends PropertiableFile {
      * Returns the seed ratio for torrent uploaders. Other uploaders will return -1 indicating the seed ratio is not supported. 
      */
     public float getSeedRatio();
+    
+    /**
+     * Pauses the UploadeItem if possible.
+     */
+    public void pause();
+    
+    /**
+     * Resumes the UploadItem if possible.
+     */
+    public void resume();
 }

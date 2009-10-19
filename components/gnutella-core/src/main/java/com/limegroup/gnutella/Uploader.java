@@ -171,6 +171,15 @@ public interface Uploader extends BandwidthTracker, Connectable {
      */
     public float getSeedRatio();
     
-
+    /**
+     * Pauses the Uploader if possible.
+     */
+    public void pause();
+    
+    /**
+     * Resumes the Uploader if possible.
+     */
+    public void resume();
+    
 }
 

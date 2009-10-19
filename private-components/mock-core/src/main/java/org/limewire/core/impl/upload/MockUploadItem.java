@@ -152,4 +152,14 @@ public class MockUploadItem implements UploadItem {
     public float getSeedRatio() {
         return -1;
     }
+
+    @Override
+    public void pause() {
+        
+    }
+
+    @Override
+    public void resume() {
+        
+    }
 }

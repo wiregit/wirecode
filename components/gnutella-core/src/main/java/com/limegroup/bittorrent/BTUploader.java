@@ -315,4 +315,14 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     public float getSeedRatio() {
         return torrent.getSeedRatio();
     }
+    
+    @Override
+    public void pause() {
+        torrent.pause();
+    }
+    
+    @Override
+    public void resume() {
+        torrent.resume();
+    }
 }

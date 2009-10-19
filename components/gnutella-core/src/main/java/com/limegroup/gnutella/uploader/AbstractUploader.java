@@ -428,5 +428,13 @@ public abstract class AbstractUploader implements Uploader {
             return ((InetSocketAddress)getSession().getIOSession().getRemoteAddress()).getPort();
     }
     
-
+    @Override
+    public void pause() {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void resume() {
+        throw new UnsupportedOperationException();  
+    }
 }
