@@ -28,10 +28,10 @@ public final class UploadSettings extends LimeProps {
     /**
      *  Setting for the number of bytes/second to allow for all uploads.
      *  
-     *  Minimum of 8 KB/sec
+     *  Minimum of 10 KB/sec
      */
     public static final IntSetting MAX_UPLOAD_SPEED =
-        FACTORY.createIntSetting("MAX_UPLOAD_SPEED", SpeedConstants.CABLE_SPEED_INT/8 * 1024, 8 * 1024, Integer.MAX_VALUE);
+        FACTORY.createIntSetting("MAX_UPLOAD_SPEED", SpeedConstants.CABLE_SPEED_INT/8 * 1024, 10 * 1024, Integer.MAX_VALUE);
 
     /**
      * Setting for the size of the upload queue.

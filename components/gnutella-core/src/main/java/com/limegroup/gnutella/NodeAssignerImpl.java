@@ -10,19 +10,11 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.core.settings.DownloadSettings;
-import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UltrapeerSettings;
-import org.limewire.core.settings.UploadSettings;
 import org.limewire.inject.EagerSingleton;
-import org.limewire.inspection.InspectionHistogram;
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
-import org.limewire.statistic.BasicKilobytesStatistic;
-import org.limewire.statistic.Statistic;
-import org.limewire.statistic.StatisticAccumulator;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -61,29 +53,9 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     static final int TIMER_DELAY = 1000;
     
     /**
-     * Constant for the number of seconds between the timer's calls
-     * to its <tt>Runnable</tt>s.
+     * Start time of the NodeAssignerImpl. Bootstrapped from System.currentTimeMillis()
      */
-    private static final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
-
-    /**
-     * Variable for the current uptime of this node.
-     */
-    private long _currentUptime = 0;
-
-    /**
-     * Variable for the maximum number of kilobytes per second transferred 
-     * upstream over the history of the application.
-     */
-    private int _maxUpstreamKiloBytesPerSec =
-        UploadSettings.MAX_MEASURED_UPLOAD_KBPS.getValue();
-
-    /**
-     * Variable for the maximum number of kilobytes per second transferred 
-     * downstream over the history of the application.
-     */
-    private int _maxDownstreamKiloBytesPerSec = 
-        DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.getValue();
+    private long startTime = 0;
     
     /**
      * Variable for whether or not this node has such good values that it is too
@@ -111,9 +83,6 @@ class NodeAssignerImpl implements NodeAssigner, Service {
      */
     private ScheduledFuture<?>  timer;
     
-
-    private final Provider<BandwidthTracker> uploadTracker;
-    private final Provider<BandwidthTracker> downloadTracker;
     private final Provider<ConnectionManager> connectionManager;
     private final NetworkManager networkManager;
     private final SearchServices searchServices;
@@ -123,22 +92,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private final ConnectionServices connectionServices;
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final BandwidthCollectorDriver bandwidthCollector;
     
-    
-    // these inspections include:
-    // gnutella downloads and uploads, torrents,
-    // gnutella messaging and mozilla downloads.    
-    
-    @InspectionPoint("upstream bandwidth history")
-    private final Statistic uploadStat;  // 200 measurements are saved, 1 per second.  
-    @InspectionPoint("downstream bandwidth history")
-    private final Statistic downloadStat; // 200 measurements are saved, 1 per second.
-    @InspectionPoint("upload bandwidth histogram")
-    private final InspectionHistogram<Integer> uploadHistogram;
-    @InspectionPoint("download bandwidth histogram")
-    private final InspectionHistogram<Integer> downloadHistogram;
-    
-
     /** 
      * Creates a new <tt>NodeAssigner</tt>. 
      *
@@ -149,9 +104,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
      * @param connectionManager reference to the ConnectionManager for this node
      */
     @Inject
-    public NodeAssignerImpl(@Named("uploadTracker") Provider<BandwidthTracker>uploadTracker, 
-                        @Named("downloadTracker") Provider<BandwidthTracker> downloadTracker,
-                        Provider<ConnectionManager> connectionManager,
+    public NodeAssignerImpl(Provider<ConnectionManager> connectionManager,
                         NetworkManager networkManager,
                         SearchServices searchServices,
                         Provider<DHTManager> dhtManager,
@@ -160,9 +113,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
                         ConnectionServices connectionServices,
                         TcpBandwidthStatistics tcpBandwidthStatistics,
                         NetworkInstanceUtils networkInstanceUtils,
-                        StatisticAccumulator statisticAccumulator) {
-        this.uploadTracker = uploadTracker;
-        this.downloadTracker = downloadTracker;  
+                        BandwidthCollectorDriver bandwidthCollector) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.searchServices = searchServices;
@@ -172,19 +123,18 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         this.unlimitedExecutor = unlimitedExecutor;
         this.tcpBandwidthStatistics = tcpBandwidthStatistics;
         this.networkInstanceUtils = networkInstanceUtils;
-        this.uploadStat = new BandwidthStat(statisticAccumulator);
-        this.downloadStat = new BandwidthStat(statisticAccumulator);
-        this.downloadHistogram = new InspectionHistogram<Integer>();
-        this.uploadHistogram = new InspectionHistogram<Integer>();
+        this.bandwidthCollector = bandwidthCollector;
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.NodeAssigner#start()
      */
     public void start() {
+        startTime = System.currentTimeMillis();
+        
         Runnable task=new Runnable() {
             public void run() {
-                collectBandwidthData();
+                bandwidthCollector.collectBandwidthData();
                 //check if became Hardcore capable
                 setHardcoreCapable();
                 //check if became ultrapeer capable
@@ -219,58 +169,19 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     }
     
     /**
-     * Collects data on the bandwidth that has been used for file uploads
-     * and downloads.
-     */
-    private void collectBandwidthData() {
-        _currentUptime += TIMER_DELAY_IN_SECONDS;
-        uploadTracker.get().measureBandwidth();
-        downloadTracker.get().measureBandwidth();
-        connectionManager.get().measureBandwidth();
-        float bandwidth;
-        try {
-            bandwidth = uploadTracker.get().getMeasuredBandwidth();
-        }catch(InsufficientDataException ide) {
-            bandwidth = 0;
-        }
-        int newUpstreamKiloBytesPerSec = 
-            (int)bandwidth
-           +(int)connectionManager.get().getMeasuredUpstreamBandwidth();
-        uploadStat.addData(newUpstreamKiloBytesPerSec);
-        uploadHistogram.count(newUpstreamKiloBytesPerSec);
-        try {
-            bandwidth = downloadTracker.get().getMeasuredBandwidth();
-        } catch (InsufficientDataException ide) {
-            bandwidth = 0;
-        }
-        int newDownstreamKiloBytesPerSec = 
-            (int)bandwidth
-           +(int)connectionManager.get().getMeasuredDownstreamBandwidth();
-        downloadStat.addData(newDownstreamKiloBytesPerSec);
-        downloadHistogram.count(newDownstreamKiloBytesPerSec);
-        if(newUpstreamKiloBytesPerSec > _maxUpstreamKiloBytesPerSec) {
-            _maxUpstreamKiloBytesPerSec = newUpstreamKiloBytesPerSec;
-            UploadSettings.MAX_MEASURED_UPLOAD_KBPS.setValue(_maxUpstreamKiloBytesPerSec);
-        }
-        if(newDownstreamKiloBytesPerSec > _maxDownstreamKiloBytesPerSec) {
-            _maxDownstreamKiloBytesPerSec = newDownstreamKiloBytesPerSec;
-            DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.setValue(_maxDownstreamKiloBytesPerSec);
-        }
-    }
-    
-    /**
      * Determines whether or not a node is capable of handling a special
      * function such as being an ultrapeer or connecting to the DHT.
      */
     private void setHardcoreCapable() {
+        int maxUpstreamKiloBytesPerSec = bandwidthCollector.getMaxMeasuredUploadBandwidth();
+        int maxDownstreamKiloBytesPerSec = bandwidthCollector.getMaxMeasuredDownloadBandwidth();
+        
         _isHardcoreCapable = 
         //Is upstream OR downstream high enough?
-        ((_maxUpstreamKiloBytesPerSec >= 
+        ((maxUpstreamKiloBytesPerSec >= 
                 UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() ||
-         _maxDownstreamKiloBytesPerSec >= 
+         maxDownstreamKiloBytesPerSec >= 
                 UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) &&
-        //AND I'm not a modem (in case estimate wrong)
-        (ConnectionSettings.CONNECTION_SPEED.getValue() > SpeedConstants.MODEM_SPEED_INT) &&
         //AND am I not firewalled?
         ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
         //AND am I a capable OS?
@@ -283,14 +194,11 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         }
         
         if (!_isHardcoreCapable && LOG.isTraceEnabled()) {
-            if (_maxUpstreamKiloBytesPerSec < UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue()) {
-                LOG.trace("not enough upstream: " + _maxUpstreamKiloBytesPerSec);
+            if (maxUpstreamKiloBytesPerSec < UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue()) {
+                LOG.trace("not enough upstream: " + maxUpstreamKiloBytesPerSec);
             }
-            if (_maxDownstreamKiloBytesPerSec < UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) {
-                LOG.trace("not enough downstream: " + _maxDownstreamKiloBytesPerSec);
-            }
-            if (ConnectionSettings.CONNECTION_SPEED.getValue() <= SpeedConstants.MODEM_SPEED_INT) {
-                LOG.trace("Not enoug speed: " + ConnectionSettings.CONNECTION_SPEED.getValue());
+            if (maxDownstreamKiloBytesPerSec < UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) {
+                LOG.trace("not enough downstream: " + maxDownstreamKiloBytesPerSec);
             }
             if (!ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
                 LOG.trace("not accepted incoming ever");
@@ -326,7 +234,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         }
         
         boolean avgUptimePasses = ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue();
-        boolean curUptimePasses = _currentUptime >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue();
+        boolean curUptimePasses = getCurrentUptime() >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue();
         boolean uptimePasses = avgUptimePasses | curUptimePasses;
         
         boolean isUltrapeerCapable = _isHardcoreCapable && uptimePasses && networkManager.isGUESSCapable();
@@ -482,15 +390,16 @@ class NodeAssignerImpl implements NodeAssigner, Service {
             boolean activeCapable = isActiveDHTCapable();
             
             if (LOG.isDebugEnabled()) {
+                long currentUptime  = getCurrentUptime();
                 if (passiveCapable && !activeCapable) {
                     LOG.debug("Node is passive DHT capable\n average time: " 
-                            + averageTime + "\n currentUptime: " + _currentUptime);
+                            + averageTime + "\n currentUptime: " + currentUptime);
                 } else if (activeCapable) {
                     LOG.debug("Node is active DHT capable\n average time: " 
-                            + averageTime + "\n currentUptime: " + _currentUptime);
+                            + averageTime + "\n currentUptime: " + currentUptime);
                 } else {
                     LOG.debug("Node is NOT DHT capable\n average time: " 
-                            + averageTime + "\n currentUptime: " + _currentUptime);
+                            + averageTime + "\n currentUptime: " + currentUptime);
                 }
             }
             
@@ -560,7 +469,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         long averageTime = getAverageTime();
         return ULTRAPEER_OS
         && (averageTime >= DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()
-                && _currentUptime >= (DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
+                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
                 && networkManager.canReceiveSolicited();
     }
     
@@ -572,7 +481,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         
         return ULTRAPEER_OS
                 && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
-                && _currentUptime >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
+                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
                 && networkManager.canReceiveSolicited();
     }
     
@@ -592,9 +501,11 @@ class NodeAssignerImpl implements NodeAssigner, Service {
             }
             return false;
         }
-        if (_currentUptime < (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L)) {
+        
+        long currentUptime = getCurrentUptime();
+        if (currentUptime < (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L)) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("not long enough current uptime: " + _currentUptime);
+                LOG.trace("not long enough current uptime: " + currentUptime);
             }
             return false;
         }
@@ -627,10 +538,14 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private boolean acceptUltrapeer() {
         return (Math.random() < DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.getValue());
     }
-
-    private class BandwidthStat extends BasicKilobytesStatistic {
-        public BandwidthStat(StatisticAccumulator statisticAccumulator) {
-            super(statisticAccumulator);
+    
+    /**
+     * Returns the current uptime in seconds. Calculated from the startTime variable.
+     */
+    private long getCurrentUptime() {
+        if(startTime == 0) {
+            return 0;
         }
+        return (System.currentTimeMillis() - startTime) / 1000;
     }
 }

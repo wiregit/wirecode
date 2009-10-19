@@ -10,7 +10,6 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
@@ -255,10 +254,9 @@ public class DownloadAltLocTest extends DownloadTestCase {
 
         LOG.info("-Testing that downloader adds itself to the mesh if it has a tree");
 
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-                SpeedConstants.MODEM_SPEED_INT);
-
+        bandwidthCollector.overrideMaxMeasureDownloadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        bandwidthCollector.overrideMaxMeasureUploadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        
         List u1Alt = testUploaders[0].getIncomingGoodAltLocs();
         List u2Alt = testUploaders[1].getIncomingGoodAltLocs();
 
@@ -312,7 +310,6 @@ public class DownloadAltLocTest extends DownloadTestCase {
 
         assertLessThanOrEquals("u1 did too much work", STOP_AFTER, u1);
         assertGreaterThan("u2 did no work", 0, u2);
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
 
     public void testNotAddSelfToMeshIfNoTree() throws Exception {
@@ -324,9 +321,8 @@ public class DownloadAltLocTest extends DownloadTestCase {
             
         LOG.info("-Testing that downloader does not add itself to the mesh if it has no tree");
         
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-            SpeedConstants.MODEM_SPEED_INT);
+        bandwidthCollector.overrideMaxMeasureDownloadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        bandwidthCollector.overrideMaxMeasureUploadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
         
         List u1Alt = testUploaders[0].getIncomingGoodAltLocs();
         List u2Alt = testUploaders[1].getIncomingGoodAltLocs();
@@ -373,7 +369,6 @@ public class DownloadAltLocTest extends DownloadTestCase {
 
         assertLessThanOrEquals("u1 did too much work", STOP_AFTER, u1);
         assertGreaterThan("u2 did no work", 0, u2);
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
     public void testPartialAddsAltsActiveDownload() throws Exception {
@@ -389,9 +384,8 @@ public class DownloadAltLocTest extends DownloadTestCase {
     private void altBootstrapTest(final boolean complete) throws Exception {
         LOG.info("-Testing a shared partial funnels alt locs to downloader");
         
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-            SpeedConstants.MODEM_SPEED_INT);
+        bandwidthCollector.overrideMaxMeasureDownloadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        bandwidthCollector.overrideMaxMeasureUploadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
             
         final int RATE=200;
         //second half of file + 1/8 of the file
@@ -443,7 +437,6 @@ public class DownloadAltLocTest extends DownloadTestCase {
         assertEquals("u1 did too much work", STOP_AFTER, u1);
         assertEquals("u2 did too much work", STOP_AFTER, u2);
         assertGreaterThan("u3 did no work", 0, u3);
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
 
     /**

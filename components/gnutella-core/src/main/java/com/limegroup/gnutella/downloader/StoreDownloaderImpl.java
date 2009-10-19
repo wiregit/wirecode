@@ -11,6 +11,7 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
@@ -90,7 +91,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager, Library library,
-            CategoryManager categoryManager) {
+            CategoryManager categoryManager, BandwidthCollector bandwidthCollector) {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -100,7 +101,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
                 backgroundExecutor, messageRouter, tigerTreeCache,
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
-                dangerousFileChecker, spamManager, library, categoryManager);
+                dangerousFileChecker, spamManager, library, categoryManager, bandwidthCollector);
         this.metaDataFactory = metaDataFactory;
         this.categoryManager = categoryManager;
     }

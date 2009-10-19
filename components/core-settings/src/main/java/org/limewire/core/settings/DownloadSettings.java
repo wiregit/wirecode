@@ -25,9 +25,9 @@ public class DownloadSettings extends LimeProps {
     /**
      * Setting for the number of bytes/second to allow for all downloads.
      * 
-     * Minimum of 8 KB/sec
+     * Minimum of 10 KB/sec
      */
-    public static final IntSetting MAX_DOWNLOAD_SPEED = FACTORY.createIntSetting("MAX_DOWNLOAD_SPEED", SpeedConstants.CABLE_SPEED_INT/8 * 1024, 8 * 1024, Integer.MAX_VALUE);
+    public static final IntSetting MAX_DOWNLOAD_SPEED = FACTORY.createIntSetting("MAX_DOWNLOAD_SPEED", SpeedConstants.CABLE_SPEED_INT/8 * 1024, 10 * 1024, Integer.MAX_VALUE);
 
     /**
      * The maximum number of downstream kilobytes per second ever passed by this

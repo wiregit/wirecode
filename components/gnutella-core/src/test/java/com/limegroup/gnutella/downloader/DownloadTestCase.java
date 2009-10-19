@@ -11,9 +11,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.SpeedConstants;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -37,6 +40,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.BandwidthCollectorDriver;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadServices;
@@ -60,6 +64,7 @@ import com.limegroup.gnutella.library.IncompleteFileCollection;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.stubs.BandwidthCollectorStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
@@ -110,6 +115,8 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     @Inject protected AlternateLocationFactory alternateLocationFactory;
 
+    protected BandwidthCollectorStub bandwidthCollector;
+    
     protected NetworkManagerStub networkManager;
 
     @Inject protected UDPService udpService;
@@ -142,6 +149,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
     @Inject @GnutellaFiles protected FileCollection gnutellaFileCollection;
     @Inject protected IncompleteFileCollection incompleteFileCollection;
     @Inject @Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService;
+    
 
     protected DownloadTestCase(String name) {
         super(name);
@@ -154,8 +162,6 @@ public abstract class DownloadTestCase extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         setDownloadWaitTime(DEFAULT_WAIT_TIME);
-        // raise the download-bytes-per-sec so stealing is easier
-        DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.setValue(10);
 
         activityCallback = new MyCallback();
         injector = LimeTestUtils.createInjector(new LimeWireIOTestModule(), NetworkManagerStub.MODULE, 
@@ -164,6 +170,8 @@ public abstract class DownloadTestCase extends LimeTestCase {
             protected void configure() {
                 bind(ActivityCallback.class).toInstance(activityCallback);
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+                bind(BandwidthCollector.class).to(BandwidthCollectorStub.class);
+                bind(BandwidthCollectorDriver.class).to(BandwidthCollectorStub.class);
             }
         }, LimeTestUtils.createModule(this));
 
@@ -174,6 +182,8 @@ public abstract class DownloadTestCase extends LimeTestCase {
         networkManager.setOutgoingTLSEnabled(false);
         networkManager.setIncomingTLSEnabled(true);
 
+        bandwidthCollector = (BandwidthCollectorStub) injector.getInstance(BandwidthCollector.class);
+        
         ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector
                 .getInstance(ConnectionManager.class);
         connectionManager.setConnected(true);
@@ -212,7 +222,9 @@ public abstract class DownloadTestCase extends LimeTestCase {
         //Pick random name for file.
         savedFile = new File(saveDir, savedFileName);
         savedFile.delete();
-        ConnectionSettings.CONNECTION_SPEED.setValue(1000);
+        
+        DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.setValue(SpeedConstants.T1_SPEED_INT / 8);
+        UploadSettings.MAX_MEASURED_UPLOAD_KBPS.setValue(SpeedConstants.T1_SPEED_INT / 8);
 
         tigerTreeCache = injector.getInstance(HashTreeCache.class);
         tigerTreeCache.purgeTree(TestFile.hash());

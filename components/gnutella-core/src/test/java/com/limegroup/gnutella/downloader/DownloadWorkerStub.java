@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
 
@@ -15,9 +16,9 @@ class DownloadWorkerStub extends DownloadWorker {
             HTTPDownloaderFactory httpDownloaderFactory,
             ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,
-            TLSManager TLSManager) {
+            TLSManager TLSManager, BandwidthCollector bandwidthCollector) {
         super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
-                pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl(), TLSManager);
+                pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl(), TLSManager, bandwidthCollector);
     }
 
     @Override

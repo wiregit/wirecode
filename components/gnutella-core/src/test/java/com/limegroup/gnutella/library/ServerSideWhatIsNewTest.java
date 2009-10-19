@@ -18,7 +18,6 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.core.settings.SpeedConstants;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -55,7 +54,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * Tests that What is new support is fully functional.  We use a leaf here - we
  * assume that an Ultrapeer will be equally functional.
- * 
  */
 
 public class ServerSideWhatIsNewTest 
@@ -104,8 +102,6 @@ public class ServerSideWhatIsNewTest
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
-        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        

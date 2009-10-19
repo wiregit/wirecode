@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
@@ -22,6 +23,7 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
     @InspectionPoint("download connection stats")
     private final DownloadStatsTracker statsTracker;
     private final TLSManager TLSManager;
+    private final BandwidthCollector bandwidthCollector;
 
     @Inject
     public DownloadWorkerFactoryImpl(
@@ -30,7 +32,7 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
             @Named("nioExecutor")ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager,
             SocketsManager socketsManager,
-            DownloadStatsTracker statsTracker, TLSManager TLSManager) {
+            DownloadStatsTracker statsTracker, TLSManager TLSManager, BandwidthCollector bandwidthCollector) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
@@ -38,6 +40,7 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
         this.socketsManager = socketsManager;
         this.statsTracker = statsTracker;
         this.TLSManager = TLSManager;
+        this.bandwidthCollector = bandwidthCollector;
     }
     
 
@@ -48,7 +51,7 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
             RemoteFileDescContext rfdContext, VerifyingFile vf) {
         return new DownloadWorker(manager, rfdContext, vf, httpDownloaderFactory,
                 backgroundExecutor, nioExecutor, pushDownloadManager,
-                socketsManager, statsTracker, TLSManager);
+                socketsManager, statsTracker, TLSManager, bandwidthCollector);
     }
 
 }

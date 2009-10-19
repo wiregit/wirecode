@@ -30,7 +30,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
@@ -481,7 +481,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final SpamManager spamManager;
     protected final Library library;
     protected final CategoryManager categoryManager;
-
+    private final BandwidthCollector bandwidthCollector;
+    
     private final SocketsManager socketsManager;
 
     private final ConnectivityChangeEventHandler connectivityChangeEventHandler = new ConnectivityChangeEventHandler();
@@ -514,7 +515,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                                                  SocketsManager socketsManager,
                                                  @Named("downloadStateProcessingQueue")ListeningExecutorService downloadStateProcessingQueue,
                                                  DangerousFileChecker dangerousFileChecker,
-                                                 SpamManager spamManager, Library library, CategoryManager categoryManager) {
+                                                 SpamManager spamManager, Library library, CategoryManager categoryManager, BandwidthCollector bandwidthCollector) {
         super(saveLocationManager, categoryManager);
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
@@ -546,6 +547,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.spamManager = spamManager;
         this.library = library;
         this.categoryManager = categoryManager;
+        this.bandwidthCollector = bandwidthCollector;
     }
 
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -2567,7 +2569,20 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
 
     int getSwarmCapacity() {
-        int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
+        //max measured download speed in kilobits.
+        int capacity = bandwidthCollector.getMaxMeasuredDownloadBandwidth() * 8;
+        if(capacity == 0) {
+            //default to cable speed if no measurements taken yet
+            //assume larger than modem to get better measurement stats.
+            capacity = SpeedConstants.CABLE_SPEED_INT;
+        }
+
+        //max download speec in kilobits
+        int maxDownloadSpeed = DownloadSettings.MAX_DOWNLOAD_SPEED.getValue() / 1024 * 8;
+        if(DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.getValue() && capacity > maxDownloadSpeed) {
+            capacity = maxDownloadSpeed;
+        }
+        
         if (capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
             return SpeedConstants.MODEM_SWARM;
         else if (capacity <= SpeedConstants.T1_SPEED_INT) //DSL, Cable, T1 = 6

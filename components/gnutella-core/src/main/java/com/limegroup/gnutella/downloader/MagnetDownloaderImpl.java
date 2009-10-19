@@ -12,6 +12,7 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.io.InvalidDataException;
 import org.limewire.net.SocketsManager;
 
@@ -119,7 +120,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	        @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
 	        DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager, Library library,
-            CategoryManager categoryManager) {
+            CategoryManager categoryManager, BandwidthCollector bandwidthCollector) {
 	    super(saveLocationManager, downloadManager, gnutellaFileCollection,
 	            incompleteFileManager, downloadCallback, networkManager,
 	            alternateLocationFactory, requeryManagerFactory,
@@ -129,7 +130,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	            backgroundExecutor, messageRouter, tigerTreeCache,
 	            applicationServices, remoteFileDescFactory, pushListProvider,
 	            socketsManager, downloadStateProcessingQueue,
-	            dangerousFileChecker, spamManager, library, categoryManager);
+	            dangerousFileChecker, spamManager, library, categoryManager, bandwidthCollector);
     }
     
     @Override

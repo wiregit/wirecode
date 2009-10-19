@@ -7,7 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.api.network.BandwidthCollector;
+import org.limewire.core.settings.SpeedConstants;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecurityToken;
@@ -31,16 +33,18 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
     private final NetworkManager networkManager;
     private final ApplicationServices applicationServices;
     private final ConnectionManager connectionManager;
+    private final BandwidthCollector bandwidthCollector;
 
     @Inject
     public OutgoingQueryReplyFactoryImpl(QueryReplyFactory queryReplyFactory, 
             UploadManager uploadManager, NetworkManager networkManager,
-            ApplicationServices applicationServices, ConnectionManager connectionManager) {
+            ApplicationServices applicationServices, ConnectionManager connectionManager, BandwidthCollector bandwidthCollector) {
         this.queryReplyFactory = queryReplyFactory;
         this.uploadManager = uploadManager;
         this.networkManager = networkManager;
         this.applicationServices = applicationServices;
         this.connectionManager = connectionManager;
+        this.bandwidthCollector = bandwidthCollector;
     }
     
     public List<QueryReply> createReplies(Response[] responses, QueryRequest queryRequest,
@@ -103,9 +107,22 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
 
         long speed = uploadManager.measuredUploadSpeed();
         boolean measuredSpeed = true;
+        
         if (speed == -1) {
-            speed = ConnectionSettings.CONNECTION_SPEED.getValue();
+            //measured speed in kilobits
+            speed = bandwidthCollector.getMaxMeasuredUploadBandwidth() * 8;
+            if(speed == 0) {
+                //default to cable speed if no measurement have been done yet.
+                //assume larger than modem to get better measurement stats.
+                speed = SpeedConstants.CABLE_SPEED_INT;
+            }
             measuredSpeed = false;
+        }
+        
+        //max upload speed in kilobits
+        int maxUploadSpeed = UploadSettings.MAX_UPLOAD_SPEED.getValue() / 1024 * 8;
+        if(UploadSettings.LIMIT_MAX_UPLOAD_SPEED.getValue() && speed > maxUploadSpeed) {
+            speed = maxUploadSpeed;
         }
         
         List<QueryReply> queryReplies = new ArrayList<QueryReply>();

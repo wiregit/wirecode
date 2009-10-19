@@ -6,7 +6,6 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SpeedConstants;
@@ -448,9 +447,10 @@ public class DownloadTest extends DownloadTestCase {
     public void testFullSwarmDownloadsNotDropped() throws Exception {
         LOG.info("-testing that a good source does not dislodge other good ones"+
               " when swarming at capacity");
-       int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-                                            SpeedConstants.MODEM_SPEED_INT);
+        
+        bandwidthCollector.overrideMaxMeasureDownloadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        bandwidthCollector.overrideMaxMeasureUploadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        
         final int RATE = 30;
         testUploaders[0].setRate(RATE);
         testUploaders[2].setRate(RATE);
@@ -495,8 +495,6 @@ public class DownloadTest extends DownloadTestCase {
         assertGreaterThan("u2 did not do any work",0,u2);
         assertGreaterThanOrEquals("u3 did some work",TestFile.length(),u1+u2);
         assertEquals("u3 replaced a good downloader",0,u3);
-
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
     }
 
     public void testPartialDownloads() throws Exception {

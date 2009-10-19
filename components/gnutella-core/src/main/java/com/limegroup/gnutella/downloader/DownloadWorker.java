@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
@@ -126,8 +126,7 @@ public class DownloadWorker {
      * The lowest (cumulative) bandwidth we will accept without stealing the
      * entire grey area from a downloader for a new one.
      */
-    private static final float MIN_ACCEPTABLE_SPEED = DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS
-            .getValue() < 8 ? 0.1f : 0.5f;
+    private final float minAcceptableSpeed;
 
     /**
      * The speed of download workers that haven't been started yet or do not
@@ -249,7 +248,7 @@ public class DownloadWorker {
                              ScheduledExecutorService nioExecutor,
                              Provider<PushDownloadManager> pushDownloadManager,
                              SocketsManager socketsManager,
-                             DownloadStatsTracker statsTracker, TLSManager TLSManager) {
+                             DownloadStatsTracker statsTracker, TLSManager TLSManager, BandwidthCollector bandwidthCollector) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
@@ -261,6 +260,9 @@ public class DownloadWorker {
         _commonOutFile = vf;
         this.statsTracker = statsTracker;
         this.TLSManager = TLSManager;
+        
+        minAcceptableSpeed =  bandwidthCollector.getMaxMeasuredDownloadBandwidth() < 8 ? 0.1f : 0.5f;
+        
         _currentState = new DownloadHttpRequestState();
 
         // if we'll be debugging, we want to distinguish the different workers
@@ -1340,7 +1342,7 @@ public class DownloadWorker {
      */
     boolean isSlow() {
         float ourSpeed = getOurSpeed();
-        return ourSpeed < MIN_ACCEPTABLE_SPEED && ourSpeed != UNKNOWN_SPEED;
+        return ourSpeed < minAcceptableSpeed && ourSpeed != UNKNOWN_SPEED;
     }
 
     // //// various handlers for failure states of the assign process /////

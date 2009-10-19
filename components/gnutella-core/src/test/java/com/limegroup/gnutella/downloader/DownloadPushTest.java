@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -109,8 +109,9 @@ public class DownloadPushTest extends DownloadTestCase {
     public void testBigSwarm() throws Exception {
         LOG.info(" Testing swarming from many sources");
 
-        int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
+        DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.setValue(SpeedConstants.T3_SPEED_INT/8);
+        UploadSettings.MAX_MEASURED_UPLOAD_KBPS.setValue(SpeedConstants.T3_SPEED_INT/8);
+
         final int RATE = 10; // slow to allow swarming
         RemoteFileDesc rfd1 = newRFDWithURN(PORTS[0], false);
         RemoteFileDesc rfd2 = newRFDWithURN(PORTS[1], false);
@@ -153,9 +154,6 @@ public class DownloadPushTest extends DownloadTestCase {
         tGeneric(rfds);
 
         // no assesrtions really - just test completion and observe behavior in logs
-
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
-
     }
 
     /**

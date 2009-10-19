@@ -10,6 +10,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.FilterSettings;
@@ -26,6 +27,7 @@ import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.BandwidthCollectorDriver;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
@@ -41,6 +43,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
+import com.limegroup.gnutella.stubs.BandwidthCollectorStub;
 import com.limegroup.gnutella.stubs.CapabilitiesVMFactoryImplStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 
@@ -87,6 +90,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             protected void configure() {
                 bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImplStub.class);
                 bind(NodeAssigner.class).toInstance(na);
+                bind(BandwidthCollector.class).toInstance(new BandwidthCollectorStub());
+                bind(BandwidthCollectorDriver.class).toInstance(new BandwidthCollectorStub());
             }            
         });
 
@@ -389,7 +394,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         return c;
     }
     
-    private class NodeAssignerStub implements NodeAssigner {
+    private class NodeAssignerStub implements NodeAssigner{
 
         public boolean isTooGoodUltrapeerToPassUp() {
             return false;

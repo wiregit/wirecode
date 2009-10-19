@@ -14,6 +14,7 @@ import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.LimeWireCoreSettingsModule;
 import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
@@ -311,6 +312,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
         bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
         bind(FECUtils.class).to(FECUtilsImpl.class);
+        bind(BandwidthCollector.class).to(BandwidthCollectorImpl.class);
+        bind(BandwidthCollectorDriver.class).to(BandwidthCollectorImpl.class);
         bind(NodeAssigner.class).to(NodeAssignerImpl.class);
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);

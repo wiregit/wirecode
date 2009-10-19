@@ -4,7 +4,6 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SpeedConstants;
 
@@ -45,9 +44,10 @@ public class DownloadQueueTest extends DownloadTestCase {
     public void testDownloadAtCapacityReplaceQueued() throws Exception {
         LOG.info("-testing that if max threads are queued or downloading, and a "+
               "good location comes along, the queued downloader is dislodged");
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-                                            SpeedConstants.MODEM_SPEED_INT);
+        
+        bandwidthCollector.overrideMaxMeasureDownloadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        bandwidthCollector.overrideMaxMeasureUploadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        
         final int RATE = 30;
         testUploaders[0].setRate(RATE);
         testUploaders[2].setRate(RATE);
@@ -94,7 +94,6 @@ public class DownloadQueueTest extends DownloadTestCase {
         assertEquals("queued uploader uploaded",0,u2);
         assertGreaterThan("u3 not given a chance to run", 0, u3);
         assertLessThan("u1 did all the work",TestFile.length(),u1);  
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
     }
 
     /**
@@ -108,9 +107,9 @@ public class DownloadQueueTest extends DownloadTestCase {
               "queued downloader gets by a queued downloader only if the new "+
               "one has a better queue position");
         
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-                                            SpeedConstants.MODEM_SPEED_INT);
+        bandwidthCollector.overrideMaxMeasureDownloadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        bandwidthCollector.overrideMaxMeasureUploadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        
         final int RATE = 50;
         testUploaders[0].setRate(RATE);
         testUploaders[1].setRate(RATE);
@@ -173,8 +172,6 @@ public class DownloadQueueTest extends DownloadTestCase {
             LOG.debug("pass \n");
         else
             fail("FAILED: complete corrupt");
-
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
     }
 
     /**
@@ -186,9 +183,10 @@ public class DownloadQueueTest extends DownloadTestCase {
         LOG.info("-testing that if queued downloaders advance we downloaders "+
               "register that they did, so that the choice of which downloader"+
               " to replace is made correctly");
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-                                            SpeedConstants.MODEM_SPEED_INT);
+       
+        bandwidthCollector.overrideMaxMeasureDownloadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        bandwidthCollector.overrideMaxMeasureUploadBandwidth(SpeedConstants.MODEM_SPEED_INT/8);
+        
         final int RATE = 50;
         testUploaders[0].setRate(RATE);
         testUploaders[1].setRate(RATE);
@@ -241,7 +239,5 @@ public class DownloadQueueTest extends DownloadTestCase {
             LOG.debug("pass \n");
         else
             fail("FAILED: complete corrupt");
-
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
     }
 }

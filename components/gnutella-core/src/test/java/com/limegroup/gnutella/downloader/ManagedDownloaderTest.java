@@ -25,6 +25,7 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.download.DownloadException.ErrorCode;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -566,7 +567,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null, null, categoryManager);
+                    null, null, null, categoryManager, null);
 	    managedDownloaderImpl1.addListener(downloadListener1);
         
         ManagedDownloaderImpl managedDownloaderImpl2 =
@@ -574,7 +575,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null, null, categoryManager);
+                    null, null, null, categoryManager, null);
         managedDownloaderImpl2.addListener(downloadListener2);
         
 	    context.checking(new Expectations() {{
@@ -697,7 +698,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final TcpBandwidthStatistics tcpBandwidthStatistics;
         private final NetworkInstanceUtils networkInstanceUtils;
 
-        @Inject @SuppressWarnings("unused") 
+        @Inject
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
                 AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
                 Provider<CreationTimeCache> creationTimeCache, BandwidthManager bandwidthManager,
@@ -732,7 +733,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	private boolean _stubFalts;
         private final RemoteFileDesc rfd;
         
-    	public AltLocDownloaderStub(RemoteFileDescContext rfdContext,
+    	AltLocDownloaderStub(RemoteFileDescContext rfdContext,
                                     NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                                     DownloadManager downloadManager, CreationTimeCache creationTimeCache,
                                     BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
@@ -778,28 +779,30 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final Provider<PushDownloadManager> pushDownloadManager;
         private final SocketsManager socketsManager;
         private final NetworkManager networkManager;
+        private final BandwidthCollector bandwidthCollector;
         
-        @Inject @SuppressWarnings("unused") 
-        public AltLocWorkerStubFactory(
+        @Inject
+        AltLocWorkerStubFactory(
                 HTTPDownloaderFactory httpDownloaderFactory,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 @Named("nioExecutor") ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager,
                 SocketsManager socketsManager,
-                NetworkManager networkManager) {
+                NetworkManager networkManager, BandwidthCollector bandwidthCollector) {
             this.httpDownloaderFactory = httpDownloaderFactory;
             this.backgroundExecutor = backgroundExecutor;
             this.nioExecutor = nioExecutor;
             this.pushDownloadManager = pushDownloadManager;
             this.socketsManager = socketsManager;
             this.networkManager = networkManager;
+            this.bandwidthCollector = bandwidthCollector;
         }
         
         public DownloadWorker create(DownloadWorkerSupport manager,
                 RemoteFileDescContext rfd, VerifyingFile vf) {
             return new AltLocWorkerStub(manager, rfd, vf, httpDownloaderFactory,
                     backgroundExecutor, nioExecutor, pushDownloadManager,
-                    socketsManager, networkManager);
+                    socketsManager, networkManager, bandwidthCollector);
         }
     }
     
@@ -810,9 +813,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 HTTPDownloaderFactory httpDownloaderFactory,
                 ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,
-                TLSManager TLSManager) {
+                TLSManager TLSManager, BandwidthCollector bandwidthCollector) {
             super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
-                    pushDownloadManager, socketsManager, TLSManager);
+                    pushDownloadManager, socketsManager, TLSManager, bandwidthCollector);
         }
 
         public void setHTTPDownloader(HTTPDownloader httpDownloader) {

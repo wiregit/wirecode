@@ -177,12 +177,6 @@ public final class ConnectionSettings extends LimeProps {
     public static final ByteSetting TTL = FACTORY.createByteSetting("TTL", (byte) 4);
 
     /**
-     * The connection speed in kilobits/s.
-     */
-    public static final IntSetting CONNECTION_SPEED = FACTORY.createIntSetting("CONNECTION_SPEED",
-            SpeedConstants.CABLE_SPEED_INT); // 350 == SpeedConstants.CABLE
-
-    /**
      * Sets whether or not the users ip address should be forced to the value
      * they have entered.
      */
