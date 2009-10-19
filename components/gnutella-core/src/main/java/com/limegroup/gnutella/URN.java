@@ -862,12 +862,16 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
 	            fis = new FileInputStream(file);
 	            long skipped = fis.skip(offset);
 	            assert(skipped == offset);
-	            while(progress.get() < length) {
+	            while(read != -1 && progress.get() < length) {
 	                if(length - progress.get() > buffer.length) {
 	                    read = fis.read(buffer);
 	                } else {
 	                    read = fis.read(buffer, 0, (int)(length - progress.get()));
 	                }
+	                
+	                // if the EOF was reached, exit the loop
+	                if(read == -1)
+	                    break;
 
 	                long start = System.nanoTime();
 	                md.update(buffer,0,read);

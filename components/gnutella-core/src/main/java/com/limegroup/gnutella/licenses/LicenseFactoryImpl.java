@@ -141,6 +141,8 @@ public final class LicenseFactoryImpl implements LicenseFactory {
             return null;
             
         String url = license.substring(urlStart).trim();
+        url = url.split(" ")[0];
+        
         URI uri = null;
         try {
             uri = URIUtils.toURI(url);
