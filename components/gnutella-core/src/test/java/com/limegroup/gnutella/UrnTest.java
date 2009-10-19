@@ -2,10 +2,9 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Locale;
 
 import junit.framework.Assert;
@@ -337,24 +336,21 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
     }
 	
     private boolean writeToFile(File file, int position, int length) {
-	    FileOutputStream stream = null;
-	    
+	    RandomAccessFile raf = null;
 	    try {
-            stream = new FileOutputStream(file, true);
-            FileChannel channel = stream.getChannel();
-            channel.position(position);
-            ByteBuffer buffer = ByteBuffer.allocateDirect(length);
-            for(int i = 0; i < buffer.capacity(); i++)
-                buffer.put((byte)0);
-            buffer.rewind();
-            int written = channel.write(buffer, position);
-            channel.close();
-            
-            return written == length;
+	        raf = new RandomAccessFile(file, "rw");
+	        raf.seek(position);
+	        ByteBuffer buffer = ByteBuffer.allocate(length);
+	        for(int i = 0; i < buffer.capacity(); i++) {
+	            buffer.put((byte)0);
+	        }
+	        raf.write(buffer.array());
+
+	        return true;
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
         } finally {
-            FileUtils.close(stream);
+            FileUtils.close(raf);
         }
         return false;
 	}
