@@ -4,10 +4,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -32,9 +34,10 @@ import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
-import org.limewire.ui.swing.mainframe.BottomPanel.TabAction;
+import org.limewire.ui.swing.mainframe.BottomPanel;
 import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
+import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -48,9 +51,9 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 /**
- * Panel that is displayed above the download table.
+ * Control panel that is displayed above the downloads/uploads tables.
  */
-public class DownloadHeaderPanel {
+public class BottomHeaderPanel {
 
     @Resource
     private Icon moreButtonArrow;
@@ -71,34 +74,39 @@ public class DownloadHeaderPanel {
     private final DownloadHeaderPopupMenu downloadHeaderPopupMenu;
     private final ClearFinishedDownloadAction clearFinishedDownloadAction;
     private final FixStalledDownloadAction fixStalledDownloadAction;
+    private final UploadMediator uploadMediator;
     private final ComboBoxDecorator comboBoxDecorator;
+    private final BottomPanel bottomPanel;
     
     private final JXPanel component;
 
-    private List<TabActionMap> tabActionList;
     private Map<TabId, Action> actionMap = new EnumMap<TabId, Action>(TabId.class);
+    private List<TabActionMap> tabActionList;
     
     private FancyTabList tabList;
     private JLabel titleTextLabel;
     private HyperlinkButton fixStalledButton;
     private HyperlinkButton clearFinishedNowButton;
     private LimeComboBox moreButton;      
+    private LimeComboBox uploadMoreButton;      
     
     private EventList<DownloadItem> activeList;
     private boolean downloadVisible;
     
     @Inject
-    public DownloadHeaderPanel(DownloadMediator downloadMediator, DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
+    public BottomHeaderPanel(DownloadMediator downloadMediator, DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
             ClearFinishedDownloadAction clearFinishedNowAction, FixStalledDownloadAction fixStalledDownloadAction,
+            UploadMediator uploadMediator,
             ComboBoxDecorator comboBoxDecorator, BarPainterFactory barPainterFactory, DockIconFactory iconFactory,
-            @Assisted List<TabActionMap> tabActionList) {
+            @Assisted BottomPanel bottomPanel) {
         
         this.downloadMediator = downloadMediator;
         this.downloadHeaderPopupMenu = downloadHeaderPopupMenu;
         this.clearFinishedDownloadAction = clearFinishedNowAction;
         this.fixStalledDownloadAction = fixStalledDownloadAction;
+        this.uploadMediator = uploadMediator;
         this.comboBoxDecorator = comboBoxDecorator;
-        this.tabActionList = tabActionList;
+        this.bottomPanel = bottomPanel;
         
         GuiUtils.assignResources(this);
         hyperlinkFont = FontUtils.deriveUnderline(hyperlinkFont, true);
@@ -144,7 +152,8 @@ public class DownloadHeaderPanel {
         component.add(titleTextLabel, "gapbefore 5, push, hidemode 3");
         component.add(fixStalledButton, "gapafter 5, hidemode 3");  
         component.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
-        component.add(moreButton, "gapafter 5");  
+        component.add(moreButton, "gapafter 5, hidemode 3");
+        component.add(uploadMoreButton, "gapafter 5, hidemode 3");
     }
         
     @Inject
@@ -204,12 +213,31 @@ public class DownloadHeaderPanel {
         });
         
         moreButton.overrideMenu(downloadHeaderPopupMenu);
+        
+        // Create options button for uploads.
+        uploadMoreButton = new LimeComboBox();
+        uploadMoreButton.setText(I18n.tr("Options"));
+        comboBoxDecorator.decorateMiniComboBox(uploadMoreButton);
+        
+        uploadMoreButton.setFont(hyperlinkFont);
+        uploadMoreButton.setIcon(moreButtonArrow);
+        uploadMoreButton.setForeground(fixStalledButton.getForeground());
+        ResizeUtils.forceHeight(uploadMoreButton, 16);
+        
+        uploadMoreButton.overrideMenu(uploadMediator.getHeaderPopupMenu());
     }
     
     /**
      * Initializes the tab list to select content.
      */
     private void initializeTabList() {
+        // Create actions for tab list.
+        Action downloadAction = new ShowDownloadsAction();
+        Action uploadAction = new ShowUploadsAction();
+        actionMap.put(TabId.DOWNLOADS, downloadAction);
+        actionMap.put(TabId.UPLOADS, uploadAction);
+        tabActionList = TabActionMap.createMapForMainActions(downloadAction, uploadAction);
+        
         // Create tab list.
         tabList = new FancyTabList(tabActionList);
         
@@ -222,37 +250,14 @@ public class DownloadHeaderPanel {
                 selectionTopBorderColor, selectionBottomBorderColor));
         tabList.setHighlightPainter(new TabPainter(highlightBackground, highlightBackground, 
                 highlightBorderColor, highlightBorderColor));
-        
-        // Initialize action map.
-        for (TabActionMap tabActionMap : tabActionList) {
-            TabAction action = (TabAction) tabActionMap.getMainAction();
-            actionMap.put(action.getTabId(), action);
-        }
-    }
-    
-    /**
-     * Selects the tab associated with the specified tab id.
-     */
-    private void selectAction(TabId tabId) {
-        // Update indicator.
-        downloadVisible = (tabId == TabId.DOWNLOADS);
-        
-        // Select tab.
-        List<FancyTab> tabs = tabList.getTabs();
-        for (FancyTab tab : tabs) {
-            TabAction action = (TabAction) tab.getTabActionMap().getMainAction();
-            if (tabId == action.getTabId()) {
-                tab.select();
-            }
-        }
     }
     
     /**
      * Selects the Downloads tab.
      */
     public void selectDownloads(boolean uploadVisible) {
-        selectAction(TabId.DOWNLOADS);
-        updateDownloadTitle();
+        bottomPanel.show(TabId.DOWNLOADS);
+        updateHeader(TabId.DOWNLOADS);
         updateLayout(true, uploadVisible);
     }
     
@@ -260,9 +265,28 @@ public class DownloadHeaderPanel {
      * Selects the Uploads tab.
      */
     public void selectUploads(boolean downloadVisible) {
-        selectAction(TabId.UPLOADS);
-        updateUploadTitle();
+        bottomPanel.show(TabId.UPLOADS);
+        updateHeader(TabId.UPLOADS);
         updateLayout(downloadVisible, true);
+    }
+    
+    /**
+     * Updates the header title and controls.
+     */
+    private void updateHeader(TabId tabId) {
+        switch (tabId) {
+        case DOWNLOADS:
+            updateDownloadTitle();
+            moreButton.setVisible(true);
+            uploadMoreButton.setVisible(false);
+            break;
+            
+        case UPLOADS:
+            updateUploadTitle();
+            moreButton.setVisible(false);
+            uploadMoreButton.setVisible(true);
+            break;
+        }
     }
     
     /**
@@ -311,6 +335,28 @@ public class DownloadHeaderPanel {
 //                titleTextLabel.setText(I18n.tr("Downloads"));
 //            }
             updateDownloadTitle();
+        }
+    }
+    
+    /**
+     * Action to display downloads table.
+     */
+    private class ShowDownloadsAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            selectDownloads(true);
+        }
+    }
+    
+    /**
+     * Action to display uploads table.
+     */
+    private class ShowUploadsAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            selectUploads(true);
         }
     }
     
