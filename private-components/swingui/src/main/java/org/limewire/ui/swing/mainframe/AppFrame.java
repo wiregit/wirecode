@@ -77,7 +77,7 @@ public class AppFrame extends SingleFrameApplication {
     /** Default background color for panels. */
     @Resource private Color bgColor;
     @Resource private Color glassPaneColor;
-    @Resource private Color menuSelectionBackgroundColor;
+    @Resource private Color selectionBackgroundColor;
     
     // Icons for JFileChooser bug workaround on Vista. 
     @Resource private Icon upFolderVistaFixIcon;
@@ -338,14 +338,13 @@ public class AppFrame extends SingleFrameApplication {
         }
         
         // Set default selection colours
-        Color selectionBackground = new Color(0xc2e986);
-        UIManager.put("TextField.selectionBackground", selectionBackground);
-        UIManager.put("PasswordField.selectionBackground", selectionBackground);
-        UIManager.put("EditorPane.selectionBackground", selectionBackground);
-        UIManager.put("TextArea.selectionBackground", selectionBackground);
-        UIManager.put("MenuItem.selectionBackground", selectionBackground);
-        UIManager.put("CheckBoxMenuItem.selectionBackground", selectionBackground);
-        UIManager.put("RadioButtonMenuItem.selectionBackground", selectionBackground);
+        UIManager.put("TextField.selectionBackground", selectionBackgroundColor);
+        UIManager.put("PasswordField.selectionBackground", selectionBackgroundColor);
+        UIManager.put("EditorPane.selectionBackground", selectionBackgroundColor);
+        UIManager.put("TextArea.selectionBackground", selectionBackgroundColor);
+        UIManager.put("MenuItem.selectionBackground", selectionBackgroundColor);
+        UIManager.put("CheckBoxMenuItem.selectionBackground", selectionBackgroundColor);
+        UIManager.put("RadioButtonMenuItem.selectionBackground", selectionBackgroundColor);
         
         // Set the menu item highlight colors to avoid contrast issues with
         //  new highlight background in default XP theme
@@ -381,7 +380,10 @@ public class AppFrame extends SingleFrameApplication {
         UIManager.put("CheckBoxMenuItemUI", "javax.swing.plaf.basic.BasicCheckBoxMenuItemUI");
         UIManager.put("RadioButtonMenuItemUI", "javax.swing.plaf.basic.BasicRadioButtonMenuItemUI");
         UIManager.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
-        UIManager.put("Menu.selectionBackground", menuSelectionBackgroundColor);
+        // these two lines have to be here in the mac UI settings method.
+        // if they're put under initUIDefaults, then they turn the application menus in Windows green as well...
+        // On OSX they have no effect on the application menu color.
+        UIManager.put("Menu.selectionBackground", selectionBackgroundColor);
         UIManager.put("Menu.selectionForeground", Color.BLACK);
     }
         
