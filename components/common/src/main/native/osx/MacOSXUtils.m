@@ -242,6 +242,165 @@ JNIEXPORT jobjectArray JNICALL OS_NATIVE(GetAllHandlersForFileType)
     }
 }
 
+/**
+* This object encapsulates the code for opening a file dialog.
+* It's necessary to do this so that we can run this code on the main
+* thread.  All the OSX user interface classes must be used from the
+* main thread (just as Swing classes must be used by the AWT thread)
+* in order to avoid concurrency problems.
+*/
+@interface RunnableForShowingFileDialogOnMainThread : NSObject
+{
+    NSString* title;
+    NSString* directoryPath;
+    bool canChooseFiles;
+    bool canChooseDirectories;
+    bool allowMultipleSelections;
+    NSArray* urls;
+}
+
+- (void) run;
+- (void) setTitle: (NSString*) argTitle;
+- (void) setDirectoryPath: (NSString*) argDirectoryPath;
+- (void) setCanChooseFiles: (bool) argCanChooseFiles;
+- (void) setCanChooseDirectories: (bool) argCanChooseDirectories;
+- (void) setAllowMultipleSelections: (bool) argAllowMultipleSelections;
+- (NSArray*) getFileURLs;
+
+@end
+
+@implementation RunnableForShowingFileDialogOnMainThread
+-(void) run {
+    // Create the File Open Dialog class.
+    NSOpenPanel* openDlg = [NSOpenPanel openPanel];
+    
+    // Set the dialogs title
+    [openDlg setTitle:title];
+    
+    // Enable / disable the selection of files in the dialog.
+    [openDlg setCanChooseFiles:canChooseFiles];
+    
+    // Enable / disable the selection of directories in the dialog.
+    [openDlg setCanChooseDirectories:canChooseDirectories];
+
+    // Enable / disable the selection of multiple files in the dialog.
+    [openDlg setAllowsMultipleSelection:allowMultipleSelections];
+
+    // Display the dialog.  If the OK button was pressed,
+    // process the files.
+    if ( [openDlg runModalForDirectory:directoryPath file:nil] == NSOKButton ) {
+        // Get an array containing the full filenames of all
+        // files and directories selected.
+        urls = [[openDlg URLs] copy];
+    } else {
+        urls = nil;
+    }
+}
+
+-(void) setTitle: (NSString*) argTitle {
+    title = argTitle;
+}
+
+-(void) setDirectoryPath: (NSString*) argDirectoryPath {
+    directoryPath = argDirectoryPath;
+}
+
+-(void) setCanChooseFiles: (bool) argCanChooseFiles {
+    canChooseFiles = argCanChooseFiles;
+}
+
+-(void) setCanChooseDirectories: (bool) argCanChooseDirectories {
+    canChooseDirectories = argCanChooseDirectories;
+}
+
+-(void) setAllowMultipleSelections: (bool) argAllowMultipleSelections {
+    allowMultipleSelections = argAllowMultipleSelections;
+}
+
+-(NSArray*) getFileURLs {
+    return urls;
+}
+@end
+
+/**
+* This method opens up a native file dialog.  It was implemented in objective C
+* and uses Cocoa, because the Carbon API for opening up file dialogs is 32 bit only.
+*/
+JNIEXPORT jobjectArray JNICALL OS_NATIVE(OpenNativeFileDialog)
+(JNIEnv *env, jobject this, jstring title, jstring directoryPath, jboolean canChooseFiles, 
+ jboolean canChooseDirectories, jboolean allowMultipleSelections)
+{
+    // we create an auto release pool to manage our objective c objects
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    // We create a runnable object for opening up the file dialog so that we can
+    // run this code from the main thread.
+    RunnableForShowingFileDialogOnMainThread* runnable = [[RunnableForShowingFileDialogOnMainThread alloc] init]; // Obj-C class
+
+    // let's pass over the arguments to the runnable object
+
+    // convert the Java string for the title into an NSString object
+    const jchar *titleChars = (*env)->GetStringChars(env, title, NULL);
+    NSString* titleNSString = [NSString stringWithCharacters:(UniChar *)titleChars
+                            length:(*env)->GetStringLength(env, title)];
+    (*env)->ReleaseStringChars(env, title, titleChars);
+
+    [runnable setTitle:titleNSString];
+
+    // convert the Java string for the directoryPath into an NSString object
+    const jchar *directoryPathChars = (*env)->GetStringChars(env, directoryPath, NULL);
+    NSString* directoryPathNSString = [NSString stringWithCharacters:(UniChar *)directoryPathChars
+                                       length:(*env)->GetStringLength(env, directoryPath)];
+    (*env)->ReleaseStringChars(env, directoryPath, directoryPathChars);
+
+    [runnable setDirectoryPath:directoryPathNSString];
+
+    [runnable setCanChooseFiles:canChooseFiles];
+    
+    [runnable setCanChooseDirectories:canChooseDirectories];
+    
+    [runnable setAllowMultipleSelections:allowMultipleSelections];
+    
+    // give the runnable object over to the main thread and wait for the
+    // file dialog to open and close
+    [runnable performSelectorOnMainThread:@selector(run)
+                               withObject:nil
+                               waitUntilDone:YES];
+
+    // we get the list of NSURL objects for the files that the user selected
+    NSArray* urls = [runnable getFileURLs];
+    
+    // if the user cancelled the operation, the list of files will be nil
+    if ( urls == nil ) {
+        [runnable release];
+        [pool release];
+		
+        return nil;
+    } else {		
+        // if we have a valid list of file URLs, then let's convert them to 
+        // a java string array and pass it out.
+        jclass strCls = (*env)->FindClass(env,"Ljava/lang/String;");
+        jobjectArray strarray = (*env)->NewObjectArray(env, [urls count], strCls, NULL);
+    
+        // Loop through all the files and process them.
+        for( int counter = 0; counter < [urls count]; counter++ )
+        {
+            NSURL* url = [urls objectAtIndex:counter];
+    
+            // convert the file URL into a file path and then into a C style string,
+            // turn it into a java string, and set it in the java string array
+            jstring str = (*env)->NewStringUTF(env, [[url path] UTF8String]);
+            (*env)->SetObjectArrayElement(env, strarray, counter, str);
+            (*env)->DeleteLocalRef(env, str);            
+        }
+    
+        [runnable release];
+        [pool release];
+    
+        return strarray;
+    }
+}
+
 #ifdef __cplusplus
 }
 #endif

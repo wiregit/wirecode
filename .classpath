@@ -163,5 +163,6 @@
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger-1.0.9.1.jar"/>
+	<classpathentry kind="lib" path="lib/jars/foxtrot-core-3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,8 +1,21 @@
 package org.limewire.ui.swing.util;
 
+import java.awt.FileDialog;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.swing.filechooser.FileFilter;
+
 import org.limewire.service.ErrorService;
+import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
+
+import foxtrot.Job;
+import foxtrot.Worker;
 
 /**
  * A collection of utility methods for OSX.
@@ -161,6 +174,112 @@ public class MacOSXUtils {
     }
     
     /**
+     * This method opens up a native OS-X file dialog. These native dialogs are better than the FileDialog and JFileChooser
+     * currently available in jdk6, because they have the native look and feel and navigation features of a FileDialog, but
+     * they also allow for multiple file selections as JFileChoosers do.  If a native file dialog cannot be opened
+     * however because the native library cannot be found, then this shows a Java based dialog instead.
+     *
+     * @param dialogTitle - the title to be shown in the dialog. this should already have been translated.
+     * @param directory - the directory that the file dialog should open to
+     * @param canChooseFiles - whether files can be selected
+     * @param canChooseDirectories - whether directories can be selected
+     * @param allowMultipleSelections - whether multiple files or directories can be selected
+     * @return an array of file objects that were selected by the user or null if the user canceled the operation
+     */
+    public static List<File> openNativeFileDialog(final String dialogTitle, final File directory, final boolean canChooseFiles, 
+                                                  final boolean canChooseDirectories, final boolean allowMultipleSelections,
+                                                  final FileFilter filter) {
+        try {
+            String[] filePaths = (String[]) Worker.post(new Job()
+            {
+                @Override
+                public Object run()
+                {
+                    String[] filePaths = OpenNativeFileDialog(dialogTitle, directory.getAbsolutePath(), canChooseFiles, canChooseDirectories, allowMultipleSelections); 
+                    return filePaths;
+                }
+            });
+            
+            if (filePaths == null) {
+                return null;
+            } else {
+                List<File> selectedFileList = new ArrayList<File>();
+                for (String filePath : filePaths) {
+                    File selectedFile = new File(filePath);
+                    // since we couldn't pass the file filter over to the native dialog, 
+                    // let's filter the files here if the filter is not null...
+                    if (filter != null) {
+                        if (filter.accept(selectedFile)) {
+                            selectedFileList.add(selectedFile);
+                        }
+                    } else {
+                        selectedFileList.add(selectedFile);                       
+                    }
+                }
+                             
+                return selectedFileList;
+            }
+        } catch(UnsatisfiedLinkError ule) {
+            // If we can't open up a native file dialog, then let's open a Java dialog in the same way we did before we
+            // started using native dialogs
+            return openJavaFileDialog(dialogTitle, directory, canChooseFiles, canChooseDirectories, allowMultipleSelections, filter);
+        }
+    }
+
+    /**
+     * This opens up a Java file dialog that's been fine tuned for OS-X for selecting files or directories.
+     * Java based file dialogs (as of JDK6) do not allow users to select multiple files or directories.
+     * Clients should prefer to use the openNativeFileDialog() method rather than this one,
+     * and for this reason this method is currently private.
+     * This method is intended to serve only as a fallback if the native library for opening
+     * native file dialogs cannot be loaded.
+     * 
+     * @param dialogTitle - the title to be shown in the dialog. this should already have been translated.
+     * @param directory - the directory that the file dialog should open to
+     * @param canChooseFiles - whether files can be selected
+     * @param canChooseDirectories - whether directories can be selected
+     * @param allowMultipleSelections - whether multiple files or directories can be selected. (This is ignored 
+     *                                  when using a Java based dialog.)
+     * @param filter - a file filter for disallowing users to select certain files
+     * @return an array of file objects that were selected by the user or null if the user canceled the operation
+     */
+    private static List<File> openJavaFileDialog(String dialogTitle, File directory, boolean canChooseFiles, 
+                                                boolean canChooseDirectories, boolean allowMultipleSelections,
+                                                final FileFilter filter) {        
+        FileDialog dialog;
+        if(canChooseDirectories && !canChooseFiles) {
+            dialog = MacUtils.getFolderDialog(null);
+        } else {
+            dialog = new FileDialog(new LimeJFrame(), "");
+        }
+        
+        dialog.setTitle(dialogTitle);
+        
+        if(filter != null) {
+            FilenameFilter f = new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return filter.accept(new File(dir, name));
+                }
+            };
+            dialog.setFilenameFilter(f);
+        }
+        
+        dialog.setVisible(true);
+        String dirStr = dialog.getDirectory();
+        String fileStr = dialog.getFile();
+        if((dirStr==null) || (fileStr==null))
+            return null;
+
+        // if the filter didn't work, pretend that the person picked
+        // nothing
+        File f = new File(dirStr, fileStr);
+        if(filter != null && !filter.accept(f))
+            return null;
+        
+        return Collections.singletonList(f);        
+    }
+    
+    /**
      * Uses OS-X's launch services API to check whether any application has registered itself
      * as a handler for this application. 
      */
@@ -183,6 +302,14 @@ public class MacOSXUtils {
      * the platform while still allowing for multiple file selections.
      */
     private static final native String[] GetAllHandlersForFileType(String fileType); 
+
+    /**
+     * Open a native file dialog for selecting files and folders.
+     * Native dialogs have the advantage of preserving the look and feel of
+     * the platform while still allowing for multiple file selections.
+     */
+    private static final native String[] OpenNativeFileDialog(String title, String directoryPath, boolean canChooseFiles, 
+                                                              boolean canChooseDirectories, boolean allowMultipleSelections);
 
     /**
      * Gets the full user's name.

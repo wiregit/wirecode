@@ -17,7 +17,6 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
@@ -248,36 +247,30 @@ public final class FileChooser {
                 }
                 
             } else {
-                FileDialog dialog;
-                if(mode == JFileChooser.DIRECTORIES_ONLY) {
-                    dialog = MacUtils.getFolderDialog(null);
-                }
-                else
-                    dialog = new FileDialog(new LimeJFrame(), "");
-                
-                dialog.setTitle(I18n.tr(titleKey));
-                if(filter != null) {
-                    FilenameFilter f = new FilenameFilter() {
-                        public boolean accept(File dir, String name) {
-                            return filter.accept(new File(dir, name));
+                // Okay, we're on Mac OS-X...  Let's open up a native file dialog so that we can get the OS-X
+                // navigation features and allow multiple selections of files and directories as well...
+                boolean canChooseFiles = (mode == JFileChooser.FILES_ONLY || mode == JFileChooser.FILES_AND_DIRECTORIES);
+                boolean canChooseDirectories = (mode == JFileChooser.DIRECTORIES_ONLY || mode == JFileChooser.FILES_AND_DIRECTORIES);
+                List<File> selectedFiles = MacOSXUtils.openNativeFileDialog(I18n.tr(titleKey), directory, canChooseFiles, canChooseDirectories, allowMultiSelect, filter);
+                if ( selectedFiles == null) {
+                    return null;
+                } else {                   
+                    // Users can only select multiple files that are in the same directory.  So, taking the directory 
+                    // from the first file in the list is okay, because all the files in the list should be from that same directory...
+                    // If it's a list of directories, then we'll take the parent directory rather than the first directory in the list.
+                    if(selectedFiles.size() > 0) {
+                        if (selectedFiles.get(0).isFile()) {
+                            setLastInputDirectory(selectedFiles.get(0));
+                        } else {
+                            if (selectedFiles.get(0).getParent() != null)
+                                setLastInputDirectory(new File(selectedFiles.get(0).getParent()));
+                            else
+                                setLastInputDirectory(selectedFiles.get(0));
                         }
-                    };
-                    dialog.setFilenameFilter(f);
+                    } 
+
+                    return selectedFiles;                    
                 }
-                
-                dialog.setVisible(true);
-                String dirStr = dialog.getDirectory();
-                String fileStr = dialog.getFile();
-                if((dirStr==null) || (fileStr==null))
-                    return null;
-                setLastInputDirectory(new File(dirStr));
-                // if the filter didn't work, pretend that the person picked
-                // nothing
-                File f = new File(dirStr, fileStr);
-                if(filter != null && !filter.accept(f))
-                    return null;
-                
-                return Collections.singletonList(f);
             }       
     }
     
