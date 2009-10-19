@@ -2,19 +2,14 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
@@ -71,40 +66,9 @@ public class BottomPanel extends JPanel {
     }
     
     /**
-     * Returns a List of tab actions that may be used to select the display
-     * content.
-     */
-    public List<TabActionMap> getTabActions() {
-        return TabActionMap.createMapForMainActions(
-                new TabAction(I18n.tr("Downloads"), TabId.DOWNLOADS),
-                new TabAction(I18n.tr("Uploads"), TabId.UPLOADS));
-    }
-    
-    /**
      * Displays the content associated with the specified tab id.
      */
     public void show(TabId tabId) {
         cardLayout.show(this, tabId.toString());
-    }
-    
-    /**
-     * An Action that displays one of the content tabs.
-     */
-    public class TabAction extends AbstractAction {
-        private final TabId tabId;
-        
-        public TabAction(String name, TabId tabId) {
-            super(name);
-            this.tabId = tabId;
-        }
-        
-        public TabId getTabId() {
-            return tabId;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            show(tabId);
-        }
     }
 }
