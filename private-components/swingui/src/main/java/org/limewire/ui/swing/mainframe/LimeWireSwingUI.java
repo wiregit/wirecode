@@ -144,7 +144,10 @@ public class LimeWireSwingUI extends JPanel {
     public void paint(Graphics g){
 	    if(isFirstPainting && splitPane.getHeight() > 0){
 	        isFirstPainting = false;
-	        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
+            if (UploadSettings.SHOW_UPLOADS_TRAY.getValue()) {
+                handleUploadVisibilityChange(true);
+            }
+	        if (DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
 	            handleDownloadVisibilityChange(true);
 	        }
 	    }
