@@ -18,6 +18,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -39,7 +42,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Provider;
 
@@ -313,6 +318,10 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         }
         
         private void setText() {
+            if(propertiableFile instanceof LocalFileItem) {
+                int maxFileLength = getMaxFileSize(((LocalFileItem)propertiableFile).getFile());
+                textField.setDocument(new FileNameDocument(maxFileLength));
+            }
             String fileName = FileUtils.getFilenameNoExtension(nameLabel.getText());
             textField.setText(fileName);
             textField.setFont(headerFont);
@@ -341,6 +350,9 @@ class FileInfoOverviewPanel implements FileInfoPanel {
             // try performing the file rename, if something goes wrong, revert textfield.
             if(FileUtils.forceRename(oldFile, newFile)) {
                 updateFileNameInLibrary(oldFile, newFile);
+            } else {
+            	newFile.delete();
+                textField.setText(oldFileItem.getName());
             }
         }
         
@@ -355,8 +367,42 @@ class FileInfoOverviewPanel implements FileInfoPanel {
          * Returns true if the text is a valid file name.
          */
         private boolean isValidFileName(String fileName) {
-            return fileName != null && fileName.length() > 0;
+            return fileName != null && fileName.length() > 0 && CommonUtils.santizeString(fileName).equals(fileName);
         }
         
+    }
+    
+    /**
+     * Returns the maximum length the filename can be.
+     */
+    private int getMaxFileSize(File file) {
+        String fileName = FileUtils.getFilenameNoExtension(file.getName());
+        return OSUtils.getMaxPathLength() - file.getAbsolutePath().length() + fileName.length();
+    }
+    
+    /**
+     * Prevents a TextField from having a String beyond a certain length. Also
+     * prevents non-valid filename characters from being entered.
+     */
+    private class FileNameDocument extends PlainDocument {
+        
+        private int maxLength = Integer.MAX_VALUE;
+        
+        public FileNameDocument(int length) {
+            this.maxLength = length;
+        }
+        
+        @Override
+        public void insertString(int offset, String str, AttributeSet attr) throws BadLocationException {
+            if(str == null)
+                return;
+            String santize = CommonUtils.santizeString(str);
+            // only add the string if it contains valid characters and is below the max length
+            if(santize.equals(str) && getLength() + str.length() <= maxLength) {
+                super.insertString(offset, str, attr);
+            } else {
+                Toolkit.getDefaultToolkit().beep();
+            }
+        }
     }
 }
