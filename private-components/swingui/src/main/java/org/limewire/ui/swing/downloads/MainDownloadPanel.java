@@ -168,8 +168,8 @@ public class MainDownloadPanel extends JPanel {
     }
 
     /**
-     * Initializes the download panel contents the first time the list changes (when the first DownloadItem is added).  
-     * Adjusts visibility of the panel depending on whether or not the list is empty.
+     * Initializes the download panel contents when the list changes (when a 
+     * DownloadItem is added).
      */
     private class VisibilityListListener implements ListEventListener<DownloadItem> {
         private int downloadCount;
@@ -177,6 +177,7 @@ public class MainDownloadPanel extends JPanel {
         @Override
         public void listChanged(ListEvent<DownloadItem> listChanges) {
             EventList sourceList = listChanges.getSourceList();
+            // Update download tray setting only when items are added.
             if (sourceList.size() > downloadCount) {
                 downloadCount = sourceList.size();
                 if (!DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
@@ -189,27 +190,17 @@ public class MainDownloadPanel extends JPanel {
     }
     
     /**
-     * Updates the visibility of this download panel based on the size of the
-     * specified source list.  This method is called when the download list 
-     * changes, or when the "show downloads" setting changes.
+     * Updates the visibility of this download panel.  This method is called
+     * when the download list changes, or when the "show downloads" setting 
+     * changes.
      */
     private void updateVisibility(EventList sourceList) {
         if(!isInitialized){
             initialize();
         }
         
-//        int downloadCount = sourceList.size();
-        
-        // TODO review this
-        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) { // && !isVisible()){
+        if (DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
             alertDownloadVisibilityListeners(true);
-//        } else if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
-//            //Do nothing - it is already set.
-//            return;
-//        } else if (downloadCount == 0 && isVisible()) {
-//            alertDownloadVisibilityListeners(false);
-//        } else if (downloadCount > 0 && !isVisible()) {
-//            alertDownloadVisibilityListeners(true);
         } else {
             alertDownloadVisibilityListeners(false);
         }
