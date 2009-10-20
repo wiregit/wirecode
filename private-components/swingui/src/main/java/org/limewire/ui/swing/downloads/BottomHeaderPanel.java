@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -39,6 +41,7 @@ import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.mainframe.BottomPanel;
 import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -157,6 +160,25 @@ public class BottomHeaderPanel {
         uploadButtonPanel.setOpaque(false);
         
         initializeMoreButton();
+        
+        // Install listener to show appropriate popup menu.
+        component.addMouseListener(new MousePopupListener() {
+            @Override
+            public void handlePopupMouseEvent(MouseEvent e) {
+                // Determine popup menu.
+                JPopupMenu popupMenu = null;
+                if (downloadButtonPanel.isVisible()) {
+                    popupMenu = downloadHeaderPopupMenu;
+                } else if (uploadButtonPanel.isVisible()) {
+                    popupMenu = uploadMediator.getHeaderPopupMenu();
+                }
+                
+                // Display popup menu.
+                if (popupMenu != null) {
+                    popupMenu.show(component, e.getX(), e.getY());
+                }
+            }
+        });
     }
     
     private void layoutComponents(){
