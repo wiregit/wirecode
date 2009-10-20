@@ -646,7 +646,7 @@ final class Initializer {
     /** Fails because internet is blocked. */
     private void failInternetBlocked() {
         fail(I18n
-                .tr("LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire\'s access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire."));
+                .tr("LimeWire was unable to initialize and start. This is usually due to a security program blocking LimeWire\'s access to the internet or loopback connections on the local machine. Please add LimeWire as an exception to your security software and restart LimeWire.."));
     }
     
     /** Fails because preferences can't be set. */
