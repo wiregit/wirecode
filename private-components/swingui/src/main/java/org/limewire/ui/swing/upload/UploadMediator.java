@@ -9,10 +9,14 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JPopupMenu;
 
+import org.limewire.core.api.upload.UploadItem;
+import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -22,7 +26,9 @@ public class UploadMediator implements NavMediator<UploadPanel> {
     
     public static final String NAME = "UploadPanel";
     
+    private final UploadListManager uploadListManager;
     private final Provider<UploadPanel> uploadPanel;
+    
     private UploadPanel upload;
     
     private Action clearFinishedAction;
@@ -31,7 +37,9 @@ public class UploadMediator implements NavMediator<UploadPanel> {
     private JPopupMenu headerPopupMenu;
     
     @Inject
-    public UploadMediator(Provider<UploadPanel> uploadPanel) {
+    public UploadMediator(UploadListManager uploadListManager,
+            Provider<UploadPanel> uploadPanel) {
+        this.uploadListManager = uploadListManager;
         this.uploadPanel = uploadPanel;
     }
         
@@ -40,6 +48,14 @@ public class UploadMediator implements NavMediator<UploadPanel> {
         if(upload == null)
             upload = uploadPanel.get();
         return upload;
+    }
+    
+    /**
+     * Returns the number of active uploads.
+     */
+    public int getActiveListSize() {
+        // TODO return active uploads only
+        return uploadListManager.getSwingThreadSafeUploads().size();
     }
     
     /**
@@ -65,10 +81,18 @@ public class UploadMediator implements NavMediator<UploadPanel> {
     }
     
     /**
+     * Returns a list of uploads.
+     */
+    public EventList<UploadItem> getUploadList() {
+        return uploadListManager.getSwingThreadSafeUploads();
+    }
+    
+    /**
      * Clears all finished uploads.
      */
     private void clearFinished() {
         // TODO implement
+        System.out.println("UploadMediator.clearFinished()");
     }
     
     /**
