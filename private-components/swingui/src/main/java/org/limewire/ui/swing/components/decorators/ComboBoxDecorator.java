@@ -8,7 +8,6 @@ import javax.swing.Icon;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -110,8 +109,6 @@ public class ComboBoxDecorator {
     }
 
     private void tryInstallHandCursor(JXButton box) {
-        if (box instanceof LimeComboBox) {
-            ((LimeComboBox)box).setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        }
+        box.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 }

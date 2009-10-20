@@ -2,7 +2,6 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -67,9 +66,6 @@ public class LimeComboBox extends JXButton {
     
     /** The menu, lazily created. */
     private JPopupMenu menu = null;
-    
-    /** The cursor to display when the mouse is over the combobox. */
-    private Cursor mouseOverCursor = Cursor.getDefaultCursor();
     
     /** True if the menu is visible. */
     private boolean menuVisible = false;
@@ -353,12 +349,6 @@ public class LimeComboBox extends JXButton {
         menuDirty = true;
         ResizeUtils.updateSize(this, actions);
     }
-    
-
-    /** Sets the cursor that will be shown when the button is hovered-over. */
-    public void setMouseOverCursor(Cursor cursor) {
-        mouseOverCursor = cursor;
-    }
 
     /**
      * Adds a listener to be notified when the selection changes.
@@ -466,12 +456,10 @@ public class LimeComboBox extends JXButton {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                setCursor(mouseOverCursor);     
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                setCursor(Cursor.getDefaultCursor());
             }
             
             @Override

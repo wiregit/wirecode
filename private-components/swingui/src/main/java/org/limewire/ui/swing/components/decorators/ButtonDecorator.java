@@ -216,7 +216,7 @@ public class ButtonDecorator {
         
         decorateHeaderGeneral(button);
         
-        button.setBorder(BorderFactory.createEmptyBorder(0,6,0,6));    
+        button.setBorder(BorderFactory.createEmptyBorder(0,6,0,6));
     }
     
     /**
@@ -240,7 +240,7 @@ public class ButtonDecorator {
         button.setVerticalTextPosition(SwingConstants.BOTTOM);
         button.setHorizontalTextPosition(SwingConstants.CENTER);
         button.setIconTextGap(0);
-        
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));        
     }
     
     private static void decorateGeneral(JXButton button) {
