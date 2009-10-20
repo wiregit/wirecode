@@ -12,8 +12,10 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -25,6 +27,7 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.components.FancyTab;
@@ -57,20 +60,17 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class BottomHeaderPanel {
 
-    @Resource
-    private Icon moreButtonArrow;
-    @Resource
-    private Font hyperlinkFont;
-    // TODO define resources
-    private Color highlightBackground = Color.decode("#d8d8d8");
-    private Color highlightBorderColor = Color.decode("#d8d8d8");
-    private Color selectionTopGradientColor = Color.decode("#565656");
-    private Color selectionBottomGradientColor = Color.decode("#8b8b8b");
-    private Color selectionTopBorderColor = Color.decode("#383838");
-    private Color selectionBottomBorderColor = Color.decode("#383838");
-    private Font textFont = Font.decode("DIALOG-PLAIN-11");
-    private Color textForeground = Color.decode("#313131");
-    private Color textSelectedForeground = Color.decode("#ffffff");
+    @Resource private Icon moreButtonArrow;
+    @Resource private Font hyperlinkFont;
+    @Resource private Color highlightBackground;
+    @Resource private Color highlightBorderColor;
+    @Resource private Color selectionTopGradientColor;
+    @Resource private Color selectionBottomGradientColor;
+    @Resource private Color selectionTopBorderColor;
+    @Resource private Color selectionBottomBorderColor;
+    @Resource private Font textFont;
+    @Resource private Color textForeground;
+    @Resource private Color textSelectedForeground;
 
     private final DownloadMediator downloadMediator;    
     private final DownloadHeaderPopupMenu downloadHeaderPopupMenu;
@@ -89,8 +89,10 @@ public class BottomHeaderPanel {
     private JLabel titleTextLabel;
     private HyperlinkButton fixStalledButton;
     private HyperlinkButton clearFinishedNowButton;
-    private LimeComboBox downloadMoreButton;      
-    private LimeComboBox uploadMoreButton;      
+    private JPanel downloadButtonPanel;
+    private JPanel uploadButtonPanel;
+    private LimeComboBox downloadMoreButton;
+    private LimeComboBox uploadMoreButton;
     
     private EventList<DownloadItem> activeList;
     private boolean downloadSelected;
@@ -99,7 +101,9 @@ public class BottomHeaderPanel {
     public BottomHeaderPanel(DownloadMediator downloadMediator, DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
             ClearFinishedDownloadAction clearFinishedNowAction, FixStalledDownloadAction fixStalledDownloadAction,
             UploadMediator uploadMediator,
-            ComboBoxDecorator comboBoxDecorator, BarPainterFactory barPainterFactory, DockIconFactory iconFactory,
+            ComboBoxDecorator comboBoxDecorator, 
+            BarPainterFactory barPainterFactory, 
+            DockIconFactory iconFactory,
             @Assisted BottomPanel bottomPanel) {
         
         this.downloadMediator = downloadMediator;
@@ -146,16 +150,31 @@ public class BottomHeaderPanel {
         fixStalledButton.setFont(hyperlinkFont);
         fixStalledButton.setVisible(false);
 
+        downloadButtonPanel = new JPanel(new MigLayout("insets 0 0 0 0, gap 0, novisualpadding"));
+        downloadButtonPanel.setOpaque(false);
+
+        uploadButtonPanel = new JPanel(new MigLayout("insets 0 0 0 0, gap 0, novisualpadding"));
+        uploadButtonPanel.setOpaque(false);
+        
         initializeMoreButton();
     }
     
     private void layoutComponents(){
+        downloadButtonPanel.add(fixStalledButton, "gapafter 5, hidemode 3");
+        downloadButtonPanel.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
+        downloadButtonPanel.add(downloadMoreButton, "gapafter 5");
+        
+        List<JButton> uploadButtons = uploadMediator.getHeaderButtons();
+        for (JButton button : uploadButtons) {
+            button.setFont(hyperlinkFont);
+            uploadButtonPanel.add(button, "gapafter 5");
+        }
+        uploadButtonPanel.add(uploadMoreButton, "gapafter 5");
+        
         component.add(tabList, "growy, push, hidemode 3");
         component.add(titleTextLabel, "gapbefore 5, push, hidemode 3");
-        component.add(fixStalledButton, "gapafter 5, hidemode 3");  
-        component.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
-        component.add(downloadMoreButton, "gapafter 5, hidemode 3");
-        component.add(uploadMoreButton, "gapafter 5, hidemode 3");
+        component.add(downloadButtonPanel, "hidemode 3");
+        component.add(uploadButtonPanel, "hidemode 3");
     }
         
     @Inject
@@ -164,6 +183,13 @@ public class BottomHeaderPanel {
                 new DownloadStateExcluder(DownloadState.ERROR, DownloadState.DONE, DownloadState.CANCELLED));
         downloadMediator.getDownloadList().addListEventListener(new LabelUpdateListListener());
 
+        uploadMediator.getUploadList().addListEventListener(new ListEventListener<UploadItem>() {
+            @Override
+            public void listChanged(ListEvent<UploadItem> listChanges) {
+                updateUploadTitle();
+            }
+        });
+        
         initializeListListeners();
     }
 
@@ -189,6 +215,7 @@ public class BottomHeaderPanel {
     }
 
     private void initializeMoreButton(){
+        // Create options button for downloads.
         downloadMoreButton = new LimeComboBox();
         downloadMoreButton.setText(I18n.tr("Options"));
         
@@ -287,14 +314,14 @@ public class BottomHeaderPanel {
         switch (tabId) {
         case DOWNLOADS:
             updateDownloadTitle();
-            downloadMoreButton.setVisible(true);
-            uploadMoreButton.setVisible(false);
+            downloadButtonPanel.setVisible(true);
+            uploadButtonPanel.setVisible(false);
             break;
             
         case UPLOADS:
             updateUploadTitle();
-            downloadMoreButton.setVisible(false);
-            uploadMoreButton.setVisible(true);
+            downloadButtonPanel.setVisible(false);
+            uploadButtonPanel.setVisible(true);
             break;
         }
     }
@@ -321,8 +348,8 @@ public class BottomHeaderPanel {
      * Updates title for Downloads tray.
      */
     private void updateDownloadTitle() {
-        String title = (activeList.size() > 0) ?
-                I18n.tr("Downloads ({0})", activeList.size()) : I18n.tr("Downloads");
+        int size = activeList.size();
+        String title = (size > 0) ? I18n.tr("Downloads ({0})", size) : I18n.tr("Downloads");
 
         actionMap.get(TabId.DOWNLOADS).putValue(Action.NAME, title);
         if (downloadSelected) titleTextLabel.setText(title);
@@ -332,21 +359,19 @@ public class BottomHeaderPanel {
      * Updates title for Uploads tray.
      */
     private void updateUploadTitle() {
-        // TODO get uploads count
-        String title = I18n.tr("Uploads");
+        int size = uploadMediator.getActiveListSize();
+        String title = (size > 0) ? I18n.tr("Uploads ({0})", size) : I18n.tr("Uploads");
 
         actionMap.get(TabId.UPLOADS).putValue(Action.NAME, title);
         if (!downloadSelected) titleTextLabel.setText(title);
     }
     
+    /**
+     * Listener to update tab and header title when download list changes. 
+     */
     private class LabelUpdateListListener implements ListEventListener<DownloadItem> {       
         @Override
         public void listChanged(ListEvent<DownloadItem> listChanges) {
-//            if (activeList.size() > 0) {
-//                titleTextLabel.setText(I18n.tr("Downloads({0})", activeList.size()));
-//            } else {
-//                titleTextLabel.setText(I18n.tr("Downloads"));
-//            }
             updateDownloadTitle();
         }
     }
