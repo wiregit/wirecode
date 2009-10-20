@@ -264,12 +264,17 @@ public final class NativeLaunchUtils {
             } catch (IOException ignored) {
             } 
             
+            // the file path is quoted to escape any commas
+            // that may be located within the path since the openFile
+            // command is comma delimited
+            explorePath = "\"" + explorePath + "\"";
+            
             if(file.isDirectory()) {
                 SystemUtils.openFile("explorer", explorePath);
                 
             } else {
                 // launches explorer and highlights the file
-                SystemUtils.openFile("explorer", "/select, " + explorePath);
+                SystemUtils.openFile("explorer", "/select," + explorePath);
             }
             
         } else if (OSUtils.isMacOSX()) {
