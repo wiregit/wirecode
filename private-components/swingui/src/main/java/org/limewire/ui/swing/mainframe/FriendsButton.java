@@ -357,7 +357,7 @@ public class FriendsButton extends LimeComboBox {
     }
     
     private void refreshMenu() {
-        if (menu.isVisible()) {
+        if (menu != null && menu.isVisible()) {
             menu.setVisible(false);
             menu.setVisible(true);
         }
