@@ -179,13 +179,13 @@ public class MainDownloadPanel extends JPanel {
             EventList sourceList = listChanges.getSourceList();
             // Update download tray setting only when items are added.
             if (sourceList.size() > downloadCount) {
-                downloadCount = sourceList.size();
                 if (!DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
                     DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.setValue(true);
                 } else {
                     updateVisibility(sourceList);
                 }
             }
+            downloadCount = sourceList.size();
         }
     }
     
