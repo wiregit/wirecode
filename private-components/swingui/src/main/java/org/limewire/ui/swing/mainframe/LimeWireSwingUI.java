@@ -35,6 +35,7 @@ import org.limewire.ui.swing.downloads.DownloadVisibilityListener;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
+import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -224,9 +225,9 @@ public class LimeWireSwingUI extends JPanel {
         boolean uploadVisible = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
         
         if (visible) {
-            bottomHeaderPanel.selectDownloads(uploadVisible);
+            bottomHeaderPanel.selectTab(TabId.DOWNLOADS);
         } else if (uploadVisible) {
-            bottomHeaderPanel.selectUploads(false);
+            bottomHeaderPanel.selectTab(TabId.UPLOADS);
         }
         
         setDownloadTrayVisible(visible || uploadVisible);
@@ -239,9 +240,9 @@ public class LimeWireSwingUI extends JPanel {
         boolean downloadVisible = DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue();
         
         if (visible) {
-            bottomHeaderPanel.selectUploads(downloadVisible);
+            bottomHeaderPanel.selectTab(TabId.UPLOADS);
         } else if (downloadVisible) {
-            bottomHeaderPanel.selectDownloads(false);
+            bottomHeaderPanel.selectTab(TabId.DOWNLOADS);
         }
         
         setDownloadTrayVisible(visible || downloadVisible);

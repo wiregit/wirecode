@@ -25,6 +25,8 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -87,11 +89,11 @@ public class BottomHeaderPanel {
     private JLabel titleTextLabel;
     private HyperlinkButton fixStalledButton;
     private HyperlinkButton clearFinishedNowButton;
-    private LimeComboBox moreButton;      
+    private LimeComboBox downloadMoreButton;      
     private LimeComboBox uploadMoreButton;      
     
     private EventList<DownloadItem> activeList;
-    private boolean downloadVisible;
+    private boolean downloadSelected;
     
     @Inject
     public BottomHeaderPanel(DownloadMediator downloadMediator, DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
@@ -152,7 +154,7 @@ public class BottomHeaderPanel {
         component.add(titleTextLabel, "gapbefore 5, push, hidemode 3");
         component.add(fixStalledButton, "gapafter 5, hidemode 3");  
         component.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
-        component.add(moreButton, "gapafter 5, hidemode 3");
+        component.add(downloadMoreButton, "gapafter 5, hidemode 3");
         component.add(uploadMoreButton, "gapafter 5, hidemode 3");
     }
         
@@ -187,15 +189,15 @@ public class BottomHeaderPanel {
     }
 
     private void initializeMoreButton(){
-        moreButton = new LimeComboBox();
-        moreButton.setText(I18n.tr("Options"));
+        downloadMoreButton = new LimeComboBox();
+        downloadMoreButton.setText(I18n.tr("Options"));
         
-        comboBoxDecorator.decorateMiniComboBox(moreButton);
+        comboBoxDecorator.decorateMiniComboBox(downloadMoreButton);
         
-        moreButton.setFont(hyperlinkFont);
-        moreButton.setIcon(moreButtonArrow);
-        moreButton.setForeground(fixStalledButton.getForeground());
-        ResizeUtils.forceHeight(moreButton, 16);
+        downloadMoreButton.setFont(hyperlinkFont);
+        downloadMoreButton.setIcon(moreButtonArrow);
+        downloadMoreButton.setForeground(fixStalledButton.getForeground());
+        ResizeUtils.forceHeight(downloadMoreButton, 16);
         
         downloadHeaderPopupMenu.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -212,7 +214,7 @@ public class BottomHeaderPanel {
             }
         });
         
-        moreButton.overrideMenu(downloadHeaderPopupMenu);
+        downloadMoreButton.overrideMenu(downloadHeaderPopupMenu);
         
         // Create options button for uploads.
         uploadMoreButton = new LimeComboBox();
@@ -253,21 +255,29 @@ public class BottomHeaderPanel {
     }
     
     /**
-     * Selects the Downloads tab.
+     * Selects the tab for the specified tab id.
      */
-    public void selectDownloads(boolean uploadVisible) {
-        bottomPanel.show(TabId.DOWNLOADS);
-        updateHeader(TabId.DOWNLOADS);
-        updateLayout(true, uploadVisible);
+    public void selectTab(TabId tabId) {
+        Action mainAction = actionMap.get(tabId);
+        List<FancyTab> tabs = tabList.getTabs();
+        for (FancyTab tab : tabs) {
+            if (mainAction == tab.getTabActionMap().getMainAction()) {
+                tab.select();
+                break;
+            }
+        }
     }
     
     /**
-     * Selects the Uploads tab.
+     * Selects the content for the specified tab id.
      */
-    public void selectUploads(boolean downloadVisible) {
-        bottomPanel.show(TabId.UPLOADS);
-        updateHeader(TabId.UPLOADS);
-        updateLayout(downloadVisible, true);
+    private void select(TabId tabId) {
+        bottomPanel.show(tabId);
+        
+        downloadSelected = (tabId == TabId.DOWNLOADS);
+        
+        updateHeader(tabId);
+        updateLayout();
     }
     
     /**
@@ -277,22 +287,25 @@ public class BottomHeaderPanel {
         switch (tabId) {
         case DOWNLOADS:
             updateDownloadTitle();
-            moreButton.setVisible(true);
+            downloadMoreButton.setVisible(true);
             uploadMoreButton.setVisible(false);
             break;
             
         case UPLOADS:
             updateUploadTitle();
-            moreButton.setVisible(false);
+            downloadMoreButton.setVisible(false);
             uploadMoreButton.setVisible(true);
             break;
         }
     }
     
     /**
-     * Updates component layout based on specified visibility indicators.
+     * Updates the component layout based on the visible tables.
      */
-    private void updateLayout(boolean downloadVisible, boolean uploadVisible) {
+    private void updateLayout() {
+        boolean downloadVisible = DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue();
+        boolean uploadVisible  = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
+        
         if (downloadVisible && uploadVisible) {
             tabList.setVisible(true);
             titleTextLabel.setVisible(false);
@@ -312,7 +325,7 @@ public class BottomHeaderPanel {
                 I18n.tr("Downloads ({0})", activeList.size()) : I18n.tr("Downloads");
 
         actionMap.get(TabId.DOWNLOADS).putValue(Action.NAME, title);
-        if (downloadVisible) titleTextLabel.setText(title);
+        if (downloadSelected) titleTextLabel.setText(title);
     }
     
     /**
@@ -323,7 +336,7 @@ public class BottomHeaderPanel {
         String title = I18n.tr("Uploads");
 
         actionMap.get(TabId.UPLOADS).putValue(Action.NAME, title);
-        if (!downloadVisible) titleTextLabel.setText(title);
+        if (!downloadSelected) titleTextLabel.setText(title);
     }
     
     private class LabelUpdateListListener implements ListEventListener<DownloadItem> {       
@@ -345,7 +358,7 @@ public class BottomHeaderPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            selectDownloads(true);
+            select(TabId.DOWNLOADS);
         }
     }
     
@@ -356,7 +369,7 @@ public class BottomHeaderPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            selectUploads(true);
+            select(TabId.UPLOADS);
         }
     }
     
