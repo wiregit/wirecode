@@ -38,6 +38,10 @@ import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.components.PlainCheckBoxMenuItemUI;
 import org.limewire.ui.swing.components.PlainMenuItemUI;
+import org.limewire.ui.swing.components.PlainMenuUI;
+import org.limewire.ui.swing.components.PlainWindowsCheckBoxMenuItemUI;
+import org.limewire.ui.swing.components.PlainWindowsMenuItemUI;
+import org.limewire.ui.swing.components.PlainWindowsMenuUI;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.settings.InstallSettings;
@@ -333,8 +337,14 @@ public class AppFrame extends SingleFrameApplication {
             = (Color) UIManager.get("MenuItem.selectionForeground");
 
         if (originalSelectionForeground != null && originalSelectionBackground != null) {
+            PlainMenuUI.overrideDefaults(originalSelectionForeground, originalSelectionBackground);
             PlainMenuItemUI.overrideDefaults(originalSelectionForeground, originalSelectionBackground);
             PlainCheckBoxMenuItemUI.overrideDefaults(originalSelectionForeground, originalSelectionBackground);
+            
+            PlainWindowsMenuUI.overrideDefaults(originalSelectionForeground, originalSelectionBackground);
+            PlainWindowsMenuItemUI.overrideDefaults(originalSelectionForeground, originalSelectionBackground);
+            PlainWindowsCheckBoxMenuItemUI.overrideDefaults(originalSelectionForeground, originalSelectionBackground);
+            
         }
         
         // Set default selection colours
@@ -342,6 +352,7 @@ public class AppFrame extends SingleFrameApplication {
         UIManager.put("PasswordField.selectionBackground", selectionBackgroundColor);
         UIManager.put("EditorPane.selectionBackground", selectionBackgroundColor);
         UIManager.put("TextArea.selectionBackground", selectionBackgroundColor);
+        UIManager.put("Menu.selectionBackground", selectionBackgroundColor);
         UIManager.put("MenuItem.selectionBackground", selectionBackgroundColor);
         UIManager.put("CheckBoxMenuItem.selectionBackground", selectionBackgroundColor);
         UIManager.put("RadioButtonMenuItem.selectionBackground", selectionBackgroundColor);
@@ -353,6 +364,7 @@ public class AppFrame extends SingleFrameApplication {
         UIManager.put("PasswordField.selectionForeground", selectionForeground);
         UIManager.put("EditorPane.selectionForeground", selectionForeground);
         UIManager.put("TextArea.selectionForeground", selectionForeground);
+        UIManager.put("Menu.selectionForeground", selectionForeground);
         UIManager.put("MenuItem.selectionForeground", selectionForeground);
         UIManager.put("CheckBoxMenuItem.selectionForeground", selectionForeground);
         UIManager.put("RadioButtonMenuItem.selectionForeground", selectionForeground);
