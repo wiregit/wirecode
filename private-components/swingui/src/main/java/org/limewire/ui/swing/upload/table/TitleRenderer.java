@@ -1,44 +1,34 @@
 package org.limewire.ui.swing.upload.table;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import org.jdesktop.application.Resource;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
+import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * Cell renderer for the title column in the Uploads table.
  */
 class TitleRenderer extends JLabel implements TableCellRenderer {
 
-    @Resource(key="DownloadRendererProperties.font") private Font font;
-    @Resource(key="DownloadRendererProperties.labelColor") private Color foreground;
-    @Resource(key="UploadTableRendererEditor.friendBrowseHostIcon") private Icon friendBrowseHostIcon;
-    @Resource(key="UploadTableRendererEditor.p2pBrowseHostIcon") private Icon p2pBrowseHostIcon;
-    
     private final CategoryIconManager iconManager;
+    private final DownloadRendererProperties rendererProperties;
     
     /**
      * Constructs a TitleRenderer.
      */
     public TitleRenderer(CategoryIconManager iconManager) {
         this.iconManager = iconManager;
+        this.rendererProperties = new DownloadRendererProperties();
         
-        GuiUtils.assignResources(this);
-        
+        rendererProperties.decorateComponent(this);
         setBorder(BorderFactory.createEmptyBorder(0,4,0,0));
-        setFont(font);
-        setForeground(foreground);
         setIconTextGap(6);
         // Row highlighters only work on opaque renderers
         setOpaque(true);
@@ -73,9 +63,9 @@ class TitleRenderer extends JLabel implements TableCellRenderer {
         case BROWSE_HOST:
         case BROWSE_HOST_DONE:
             if (uploadItem.getBrowseType() == BrowseType.FRIEND) {
-                setIcon(friendBrowseHostIcon);
+                setIcon(rendererProperties.getBrowseHostFriendIcon());
             } else {
-                setIcon(p2pBrowseHostIcon);
+                setIcon(rendererProperties.getBrowseHostP2PIcon());
             }
             break;
 

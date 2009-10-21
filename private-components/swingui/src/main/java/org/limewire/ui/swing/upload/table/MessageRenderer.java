@@ -1,18 +1,16 @@
 package org.limewire.ui.swing.upload.table;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import org.jdesktop.application.Resource;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
+import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -21,19 +19,13 @@ import org.limewire.ui.swing.util.I18n;
  */
 class MessageRenderer extends DefaultTableCellRenderer {
 
-    @Resource(key="DownloadRendererProperties.font") private Font font;
-    @Resource(key="DownloadRendererProperties.labelColor") private Color foreground;
-    
     private final NumberFormat formatter = new DecimalFormat("0.00");
     
     /**
      * Constructs a MessageRenderer.
      */
     public MessageRenderer() {
-        GuiUtils.assignResources(this);
-        
-        setFont(font);
-        setForeground(foreground);
+        new DownloadRendererProperties().decorateComponent(this);
     }
     
     @Override
