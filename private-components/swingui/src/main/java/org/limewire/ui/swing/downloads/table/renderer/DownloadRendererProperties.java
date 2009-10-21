@@ -3,30 +3,87 @@ package org.limewire.ui.swing.downloads.table.renderer;
 import java.awt.Color;
 import java.awt.Font;
 
+import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
 
-class DownloadRendererProperties {
+/**
+ * Container for resources used by the Download and Upload table renderers.
+ */
+public class DownloadRendererProperties {
 
-    @Resource
-    private Color labelColor;
+    @Resource private Font font;
+    @Resource private Color foreground;
 
-    @Resource
-    private Font font;
+    @Resource(key="DownloadProgressRenderer.progressBarHeight") private int progressBarHeight;
+    @Resource(key="DownloadProgressRenderer.progressBarWidth") private int progressBarWidth;
+    /**the progress bar disappears when the column width is less than this value*/
+    @Resource(key="DownloadProgressRenderer.progressBarCutoffWidth") private int progressBarCutoffWidth;
+    @Resource(key="DownloadProgressRenderer.progressBarBorder") private Color progressBarBorder;
+    
+    @Resource(key="DownloadCancelRendererEditor.cancelIcon") private Icon cancelIcon;
+    @Resource(key="DownloadCancelRendererEditor.cancelIconPressed") private Icon cancelIconPressed;
+    @Resource(key="DownloadCancelRendererEditor.cancelIconRollover") private Icon cancelIconRollover;
+    
+    @Resource(key="UploadTableRendererEditor.friendBrowseHostIcon") private Icon friendBrowseHostIcon;
+    @Resource(key="UploadTableRendererEditor.p2pBrowseHostIcon") private Icon p2pBrowseHostIcon;
 
+    /**
+     * Constructs a DownloadRendererProperties object.
+     */
     public DownloadRendererProperties() {
         GuiUtils.assignResources(this);
     }
     
-    public void decorateComponent(JComponent component){
-        component.setForeground(labelColor);
+    /**
+     * Sets the icons for the specified cancel button.
+     */
+    public void decorateCancelButton(JButton button) {
+        button.setIcon(cancelIcon);
+        button.setPressedIcon(cancelIconPressed);
+        button.setRolloverIcon(cancelIconRollover);
+    }
+    
+    /**
+     * Sets the font and foreground color for the specified component.
+     */
+    public void decorateComponent(JComponent component) {
         component.setFont(font);
+        component.setForeground(foreground);
     }
 
+    public Icon getBrowseHostFriendIcon() {
+        return friendBrowseHostIcon;
+    }
+    
+    public Icon getBrowseHostP2PIcon() {
+        return p2pBrowseHostIcon;
+    }
+    
     public Font getFont() {
         return font;
     }
-
+    
+    public Color getForeground() {
+        return foreground;
+    }
+    
+    public int getProgressBarHeight() {
+        return progressBarHeight;
+    }
+    
+    public int getProgressBarWidth() {
+        return progressBarWidth;
+    }
+    
+    public int getProgressBarCutoffWidth() {
+        return progressBarCutoffWidth;
+    }
+    
+    public Color getProgressBarBorderColor() {
+        return progressBarBorder;
+    }
 }
