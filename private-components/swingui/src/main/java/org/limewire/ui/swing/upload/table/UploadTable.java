@@ -1,16 +1,20 @@
 package org.limewire.ui.swing.upload.table;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
-import org.limewire.ui.swing.library.LibraryMediator;
-import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -19,10 +23,7 @@ import com.google.inject.assistedinject.Assisted;
 /**
  * Table to display the list of UploadItems.
  */
-public class UploadTable 
-    extends TransferTable<UploadItem> {
-//    extends MouseableTable {
-//    private final DefaultEventTableModel<UploadItem> model;
+public class UploadTable extends TransferTable<UploadItem> {
     
     @Resource private int rowHeight;  
     @Resource private int gapMinWidth;  
@@ -47,16 +48,14 @@ public class UploadTable
     private final CategoryIconManager iconManager;
     private final ProgressBarDecorator progressBarDecorator;
     private final Provider<UploadActionHandler> uploadActionHandlerFactory;
+    private final DefaultEventSelectionModel<UploadItem> selectionModel;
     
     @Inject
     public UploadTable(@Assisted UploadMediator uploadMediator,
-            LibraryMediator libraryMediator, 
             LibraryManager libraryManager,
             CategoryIconManager iconManager,
             ProgressBarDecorator progressBarDecorator,
-            FileInfoDialogFactory fileInfoFactory,
-            UploadTableRendererEditor editor,
-            UploadTableRendererEditor renderer,
+            UploadPopupMenuFactory popupMenuFactory,
             Provider<UploadActionHandler> uploadActionHandlerFactory) {
         super(uploadMediator.getUploadList(), new UploadTableFormat());
         
@@ -66,24 +65,14 @@ public class UploadTable
         
         GuiUtils.assignResources(this);
         
-//        model = new DefaultEventTableModel<UploadItem>(
-//                uploadMediator.getUploadList(), new LimeSingleColumnTableFormat<UploadItem>(UploadItem.class));
-//        setModel(model);
-//        
-//        setStripeHighlighterEnabled(false);
-//        setEmptyRowsPainted(false);
-//        setFillsViewportHeight(false);
-        
-//        UploadActionHandler actionHandler = uploadActionHandlerFactory.get();        
-//        editor.setActionHandler(actionHandler);
-//        getColumn(0).setCellEditor(editor);
-//        getColumn(0).setCellRenderer(renderer);
-//        setRowHeight(editor.getPreferredSize().height);
-//        
-//        setPopupHandler(new UploadPopupHandler(this, actionHandler, libraryManager));
+        // Set selection model.
+        selectionModel = new DefaultEventSelectionModel<UploadItem>(uploadMediator.getUploadList());
+        selectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        setSelectionModel(selectionModel);
         
         setEmptyRowsPainted(true);
         setRowHeight(rowHeight);
+        setPopupHandler(new UploadPopupHandler(this, popupMenuFactory));
         
         initializeColumns();
         initializeRenderers();
@@ -112,8 +101,8 @@ public class UploadTable
         setColumnRenderer(UploadTableFormat.TITLE_COL, new UploadTitleRenderer(iconManager));
         setColumnRenderer(UploadTableFormat.MESSAGE_COL, new UploadMessageRenderer());
         setColumnRenderer(UploadTableFormat.PROGRESS_COL, new UploadProgressRenderer(progressBarDecorator));
-// TODO setColumnRenderer(UploadTableFormat.ACTION_COL, new ActionRendererEditor(uploadActionHandlerFactory.get()));
-        setColumnRenderer(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(uploadActionHandlerFactory.get()));
+        setColumnRenderer(UploadTableFormat.ACTION_COL, new UploadActionRendererEditor(null));
+        setColumnRenderer(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(null));
         
         // Set column gap renderers.
         TableCellRenderer gapRenderer = new GapRenderer();
@@ -123,14 +112,21 @@ public class UploadTable
         setColumnRenderer(UploadTableFormat.ACTION_GAP, gapRenderer);
         
         // Set column editors.
+        setColumnEditor(UploadTableFormat.ACTION_COL, new UploadActionRendererEditor(uploadActionHandlerFactory.get()));
         setColumnEditor(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(uploadActionHandlerFactory.get()));
+    }
+    
+    /**
+     * Returns a list of the selected upload items.
+     */
+    public List<UploadItem> getSelectedItems() {
+        return Collections.unmodifiableList(selectionModel.getSelected());
     }
     
     /**
      * Returns the upload item associated with the specified table row.
      */
     public UploadItem getUploadItem(int row) {
-//        return model.getElementAt(row);
         return getElementAt(row);
     }
 }

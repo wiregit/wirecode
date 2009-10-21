@@ -22,15 +22,19 @@ import org.limewire.ui.swing.util.I18n;
  */
 class UploadCancelRendererEditor extends TableRendererEditor {
 
+    private final UploadActionHandler actionHandler;
     private final JButton cancelButton;
     private final JButton removeButton;
     
     private UploadItem item;
     
     /**
-     * Constructs an UploadCancelRendererEditor.
+     * Constructs an UploadCancelRendererEditor with the specified action 
+     * handler.
      */
-    public UploadCancelRendererEditor(final UploadActionHandler actionHandler) {
+    public UploadCancelRendererEditor(UploadActionHandler actionHandler) {
+        this.actionHandler = actionHandler;
+        
         setLayout(new MigLayout("insets 0, gap 0, nogrid, novisualpadding, alignx center, aligny center"));
         
         DownloadRendererProperties properties = new DownloadRendererProperties();
@@ -45,15 +49,11 @@ class UploadCancelRendererEditor extends TableRendererEditor {
         removeButton.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
         removeButton.setToolTipText(I18n.tr("Remove upload"));
 
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionHandler.performAction(e.getActionCommand(), item);
-                cancelCellEditing();
-            }
-        };
-        cancelButton.addActionListener(listener);
-        removeButton.addActionListener(listener);
+        if (actionHandler != null) {
+            ActionListener listener = new ButtonListener();
+            cancelButton.addActionListener(listener);
+            removeButton.addActionListener(listener);
+        }
         
         add(cancelButton, "hidemode 3");
         add(removeButton, "hidemode 3");
@@ -88,5 +88,17 @@ class UploadCancelRendererEditor extends TableRendererEditor {
     private void updateButtons(UploadState state) {
         cancelButton.setVisible(state != UploadState.DONE);
         removeButton.setVisible(state == UploadState.DONE);
+    }
+    
+    /**
+     * Listener to handle button actions.
+     */
+    private class ButtonListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            actionHandler.performAction(e.getActionCommand(), item);
+            cancelCellEditing();
+        }
     }
 }

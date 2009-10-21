@@ -17,6 +17,8 @@ import com.google.inject.Inject;
 class UploadActionHandler {
 
     public final static String PLAY_COMMAND = "play";
+    public final static String PAUSE_COMMAND = "pause";
+    public final static String RESUME_COMMAND = "resume";
     public final static String CANCEL_COMMAND = "cancel";
     public final static String LIBRARY_COMMAND = "library";
     public final static String LAUNCH_COMMAND = "launch";
@@ -60,6 +62,12 @@ class UploadActionHandler {
             NativeLaunchUtils.safeLaunchFile(item.getFile(), categoryManager);
         } else if (actionCommmand == PLAY_COMMAND){
             PlayerUtils.playOrLaunch(item.getFile(), categoryManager);
+        } else if (actionCommmand == PAUSE_COMMAND) {
+            // TODO implement
+            System.out.println("pausing upload...");
+        } else if (actionCommmand == RESUME_COMMAND) {
+            // TODO implement
+            System.out.println("resuming upload...");
         }
     }
 }
