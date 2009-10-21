@@ -33,9 +33,8 @@ public interface Uploader extends BandwidthTracker, Connectable {
         PUSH_PROXY,
         UNAVAILABLE_RANGE,
         BANNED_GREEDY,
-        THEX_REQUEST,
-        SUSPENDED, //bt-specific
-        WAITING_REQUESTS //bt-specific
+        THEX_REQUEST, 
+        PAUSED 
     }
     
     /**

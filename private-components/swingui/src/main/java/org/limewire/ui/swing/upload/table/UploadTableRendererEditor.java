@@ -265,7 +265,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                         GuiUtils.toUnitbytes(item.getFileSize()), 
                         GuiUtils.rate2speed(item.getUploadSpeed()));
             }
-        case WAITING:
+        case PAUSED:
         case QUEUED:
             return I18n.tr("Waiting...");
         case UNABLE_TO_UPLOAD:

@@ -328,7 +328,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
                 ignoring(uploadUploading1);
                 
                 allowing(uploadUploading2).getState();
-                will(returnValue(UploadState.WAITING));
+                will(returnValue(UploadState.PAUSED));
                 ignoring(uploadUploading2);
                 
                 allowing(uploadUploading3).getState();
@@ -458,7 +458,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
                 allowing(item2).getState();
                 will(returnValue(UploadState.QUEUED));
                 allowing(item3).getState();
-                will(returnValue(UploadState.WAITING));
+                will(returnValue(UploadState.PAUSED));
                 
                 // Assertions
                 exactly(1).of(itemDone).addPropertyChangeListener(with(any(PropertyChangeListener.class)));

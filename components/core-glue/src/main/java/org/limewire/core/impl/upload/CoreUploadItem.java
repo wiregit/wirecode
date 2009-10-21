@@ -88,15 +88,14 @@ class CoreUploadItem implements UploadItem {
         case QUEUED:
             return UploadState.QUEUED;
 
-        case WAITING_REQUESTS:
-            return UploadState.WAITING;
+        case PAUSED:
+            return UploadState.PAUSED;
             
         case LIMIT_REACHED:
         case INTERRUPTED:
         case FILE_NOT_FOUND:
         case UNAVAILABLE_RANGE:
         case MALFORMED_REQUEST:
-        case SUSPENDED:
         case BANNED_GREEDY:
         case FREELOADER:
             return UploadState.UNABLE_TO_UPLOAD;
@@ -251,9 +250,6 @@ class CoreUploadItem implements UploadItem {
         case FREELOADER:
             return UploadErrorState.LIMIT_REACHED;
         case INTERRUPTED:
-        case SUSPENDED:
-        case WAITING_REQUESTS:
-            return UploadErrorState.INTERRUPTED;
         case FILE_NOT_FOUND:
         case MALFORMED_REQUEST:
         case UNAVAILABLE_RANGE:
