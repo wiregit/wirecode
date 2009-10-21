@@ -3230,13 +3230,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return rfds;
     }
 
-    /**
-     * Only for testing.
-     */
-    Set<RemoteFileDesc> getCachedRFDs() {
-        return cachedRFDs;
-    }
-
     public void addListener(EventListener<DownloadStateEvent> listener) {
         listeners.addListener(listener);
     }
