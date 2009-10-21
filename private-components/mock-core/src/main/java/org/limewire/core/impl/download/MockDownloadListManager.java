@@ -2,6 +2,7 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -28,26 +30,31 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class MockDownloadListManager implements DownloadListManager {
+    private final EventList<DownloadItem> threadSafeDownloadItems;
+    private final EventList<DownloadItem> observableDownloadItems;
     private final RemoveCancelledListener cancelListener = new RemoveCancelledListener();
-	private final EventList<DownloadItem> downloadItems;
+    private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
+    
+    private EventList<DownloadItem> swingThreadDownloadItems;
 	
 	public MockDownloadListManager(){
-	    ObservableElementList.Connector<DownloadItem> downloadConnector =
-            GlazedLists.beanConnector(DownloadItem.class);
-	    downloadItems = GlazedLists.threadSafeList(
-	        new ObservableElementList<DownloadItem>(
-            new BasicEventList<DownloadItem>(), downloadConnector));
+        threadSafeDownloadItems = GlazedLists.threadSafeList(new BasicEventList<DownloadItem>());
+	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
+	    observableDownloadItems = GlazedListsFactory.observableElementList(threadSafeDownloadItems, downloadConnector);
 		initializeMockData();
 	}
 
 	@Override
 	public EventList<DownloadItem> getDownloads() {
-		return downloadItems;
+		return observableDownloadItems;
 	}
 	
 	@Override
 	public EventList<DownloadItem> getSwingThreadSafeDownloads() {
-	    return GlazedListsFactory.swingThreadProxyEventList(getDownloads());
+        if (swingThreadDownloadItems == null) {
+            swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(threadSafeDownloadItems);
+        }
+        return swingThreadDownloadItems;
 	}
 
 	@Override
@@ -66,7 +73,8 @@ public class MockDownloadListManager implements DownloadListManager {
 
 	public void addDownload(DownloadItem downloadItem){
 	    downloadItem.addPropertyChangeListener(cancelListener);
-		downloadItems.add(downloadItem);
+		threadSafeDownloadItems.add(downloadItem);
+		changeSupport.firePropertyChange(DOWNLOAD_ADDED, false, true);
 	}
 	
 	private void initializeMockData(){
@@ -113,7 +121,7 @@ public class MockDownloadListManager implements DownloadListManager {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getNewValue() == DownloadState.CANCELLED) {
-                downloadItems.remove(evt.getSource());
+                threadSafeDownloadItems.remove(evt.getSource());
             }
         }
     }
@@ -148,10 +156,12 @@ public class MockDownloadListManager implements DownloadListManager {
     
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
     }
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
     }
     
     @Override
@@ -166,25 +176,25 @@ public class MockDownloadListManager implements DownloadListManager {
     @Override
     public void clearFinished() {
         List<DownloadItem> finishedItems = new ArrayList<DownloadItem>();
-        downloadItems.getReadWriteLock().writeLock().lock();
+        threadSafeDownloadItems.getReadWriteLock().writeLock().lock();
         try {
-            for (DownloadItem item : downloadItems) {
+            for (DownloadItem item : threadSafeDownloadItems) {
                 if (item.getState() == DownloadState.DONE) {
                     finishedItems.add(item);
                 }
             }
             
             for (DownloadItem item : finishedItems) {
-                downloadItems.remove(item);
+                threadSafeDownloadItems.remove(item);
             }
         } finally {
-            downloadItems.getReadWriteLock().writeLock().unlock();
+            threadSafeDownloadItems.getReadWriteLock().writeLock().unlock();
         }
     }
     
     @Override
     public void remove(DownloadItem item) {
-        downloadItems.remove(item);
+        threadSafeDownloadItems.remove(item);
     }
     
 }
