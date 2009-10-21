@@ -31,7 +31,10 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -97,7 +100,7 @@ public class BottomHeaderPanel {
     private LimeComboBox downloadMoreButton;
     private LimeComboBox uploadMoreButton;
     
-    private EventList<DownloadItem> activeList;
+    private EventList<DownloadItem> activeDownloadList;
     private boolean downloadSelected;
     
     @Inject
@@ -201,14 +204,27 @@ public class BottomHeaderPanel {
         
     @Inject
     public void register(){
-        activeList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
+        activeDownloadList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
                 new DownloadStateExcluder(DownloadState.ERROR, DownloadState.DONE, DownloadState.CANCELLED));
-        downloadMediator.getDownloadList().addListEventListener(new LabelUpdateListListener());
+        activeDownloadList.addListEventListener(new LabelUpdateListListener());
 
-        uploadMediator.getUploadList().addListEventListener(new ListEventListener<UploadItem>() {
+        uploadMediator.getActiveList().addListEventListener(new ListEventListener<UploadItem>() {
             @Override
             public void listChanged(ListEvent<UploadItem> listChanges) {
                 updateUploadTitle();
+            }
+        });
+        
+        // Add setting listener to clear finished downloads.  When set, we
+        // clear finished downloads and hide the "clear finished" button.
+        SharingSettings.CLEAR_DOWNLOAD.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                boolean clearDownloads = SharingSettings.CLEAR_DOWNLOAD.getValue();
+                if (clearDownloads) {
+                    clearFinishedNowButton.doClick();
+                }
+                clearFinishedNowButton.setVisible(!clearDownloads);
             }
         });
         
@@ -370,7 +386,7 @@ public class BottomHeaderPanel {
      * Updates title for Downloads tray.
      */
     private void updateDownloadTitle() {
-        int size = activeList.size();
+        int size = activeDownloadList.size();
         String title = (size > 0) ? I18n.tr("Downloads ({0})", size) : I18n.tr("Downloads");
 
         actionMap.get(TabId.DOWNLOADS).putValue(Action.NAME, title);
@@ -381,9 +397,9 @@ public class BottomHeaderPanel {
      * Updates title for Uploads tray.
      */
     private void updateUploadTitle() {
-        int size = uploadMediator.getActiveListSize();
+        int size = uploadMediator.getActiveList().size();
         String title = (size > 0) ? I18n.tr("Uploads ({0})", size) : I18n.tr("Uploads");
-
+        
         actionMap.get(TabId.UPLOADS).putValue(Action.NAME, title);
         if (!downloadSelected) titleTextLabel.setText(title);
     }
