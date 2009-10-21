@@ -16,6 +16,9 @@ public class RemoteFileDescContext {
 
     private final RemoteFileDesc remoteFileDesc;
     
+    /** The last http status code this received, if failure. */
+    private int lastHttpCode;
+    
     /**
      * The number of times this download has failed while attempting
      * to transfer data.
@@ -81,6 +84,14 @@ public class RemoteFileDescContext {
      */
     public void resetFailedCount() {
         this.failedCount = 0;
+    }
+    
+    public void setLastHttpCode(int code) {
+        this.lastHttpCode = code;
+    }
+    
+    public int getLastHttpCode() {
+        return lastHttpCode;
     }
 
     /**

@@ -164,6 +164,8 @@ public class SourceRankerFactoryTest extends BaseTestCase {
             will(returnValue(null));
             one(original).getShareableHosts();
             will(returnValue(Collections.emptyList()));
+            one(original).getRfdVisitor();
+            will(returnValue(null));
         }});
         
         expectPingRanker();

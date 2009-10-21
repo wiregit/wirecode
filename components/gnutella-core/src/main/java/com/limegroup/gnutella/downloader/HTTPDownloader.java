@@ -500,6 +500,8 @@ public class HTTPDownloader implements BandwidthTracker {
             throw new IllegalArgumentException("invalid start: " + start);
         if (stop <= start)
             throw new IllegalArgumentException("stop(" + stop + ") <= start(" + start + ")");
+        
+        rfdContext.setLastHttpCode(-1);
 
         synchronized (this) {
             _isActive = true;
@@ -730,6 +732,8 @@ public class HTTPDownloader implements BandwidthTracker {
     public void requestHashTree(URN sha1, IOStateObserver observer) {
         if (LOG.isDebugEnabled())
             LOG.debug("requesting HashTree for " + _thexUri + " from " + _rfd.getAddress());
+        
+        rfdContext.setLastHttpCode(-1);
 
         observerHandler.setDelegate(observer);
 
@@ -761,6 +765,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _requestingThex = false;
         try {
             int code = parseHTTPCode(_headerReader.getConnectLine(), _rfd);
+            rfdContext.setLastHttpCode(code);
             boolean failed = false;
             if (code < 200 || code >= 300)
                 failed = true;
@@ -860,6 +865,7 @@ public class HTTPDownloader implements BandwidthTracker {
             throw new IOException();
 
         int code = parseHTTPCode(connectLine, _rfd);
+        rfdContext.setLastHttpCode(code);
         _contentLength = -1;
         // Note: According to the specification there are 5 headers, LimeWire
         // ignores 2 of them - queue length, and maxUploadSlots.

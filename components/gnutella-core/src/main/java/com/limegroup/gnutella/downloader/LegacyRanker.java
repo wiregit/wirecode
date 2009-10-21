@@ -7,7 +7,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.Visitor;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 /**
@@ -42,19 +45,35 @@ public class LegacyRanker extends AbstractSourceRanker {
         if (!hasMore())
             return null;
 
-        RemoteFileDescContext ret = getBest(rfds.iterator());
-        // The best rfd found so far
-        boolean removed = rfds.remove(ret);
-        assert removed : "unable to remove RFD.";
-
+        RemoteFileDescContext ret = getBest(rfds.iterator(), getRfdVisitor());
+        if(ret != null) {
+            // The best rfd found so far
+            boolean removed = rfds.remove(ret);
+            assert removed : "unable to remove RFD.";
+        }
+        
         if (LOG.isDebugEnabled())
             LOG.debug("the best we came with is " + ret);
 
         return ret;
     }
 
-    static RemoteFileDescContext getBest(Iterator<RemoteFileDescContext> iter) {
-        RemoteFileDescContext currentRfdContext = iter.next();
+    static RemoteFileDescContext getBest(Iterator<RemoteFileDescContext> iter, final Visitor<RemoteFileDescContext> rfdVisitor) {
+        // If we were supplied a visitor, filter out invalid elements from the iterator.
+        if(rfdVisitor != null) {
+            iter = Iterators.filter(iter, new Predicate<RemoteFileDescContext>() {
+                @Override
+                public boolean apply(RemoteFileDescContext input) {
+                    return rfdVisitor.visit(input);
+                }
+            });
+        }
+        
+        if(!iter.hasNext()) {
+            return null;
+        }
+        
+        RemoteFileDescContext currentRfdContext  = iter.next();
 
         long now = System.currentTimeMillis();
         // Find max of each (remaining) element, storing in max.
@@ -69,8 +88,7 @@ public class LegacyRanker extends AbstractSourceRanker {
 
             RemoteFileDescContext potentialRfdContext = iter.next();
             RemoteFileDesc potentialRfd = potentialRfdContext.getRemoteFileDesc();
-
-            // 1.
+            
             if (potentialRfdContext.isBusy(now)) {
                 continue;
             }
@@ -78,18 +96,15 @@ public class LegacyRanker extends AbstractSourceRanker {
             if (currentRfdContext.isBusy(now)) {
                 currentRfdContext = potentialRfdContext;
             }
-            // 2.
             else if (potentialRfd.getSHA1Urn() != null && currentRfd.getSHA1Urn() == null) {
                 currentRfdContext = potentialRfdContext;
             }
             // (note the use of == so that the comparison is only done
             // if both rfd & ret either had or didn't have a SHA1)
             else if ((potentialRfd.getSHA1Urn() == null) == (currentRfd.getSHA1Urn() == null)) {
-                // 3.
                 if (potentialRfd.getQuality() > currentRfd.getQuality()) {
                     currentRfdContext = potentialRfdContext;
                 } else if (potentialRfd.getQuality() == currentRfd.getQuality()) {
-                    // 4.
                     if (potentialRfd.getSpeed() > currentRfd.getSpeed()) {
                         currentRfdContext = potentialRfdContext;
                     }
@@ -109,14 +124,14 @@ public class LegacyRanker extends AbstractSourceRanker {
     public Collection<RemoteFileDescContext> getShareableHosts() {
         return rfds;
     }
-
+    
     @Override
-    protected Collection<RemoteFileDescContext> getPotentiallyBusyHosts() {
-        return rfds;
-    }
-
-    @Override
-    public int getNumKnownHosts() {
-        return rfds.size();
+    protected boolean applyToSources(Visitor<RemoteFileDescContext> contextVisitor) {
+        for(RemoteFileDescContext context : rfds) {
+            if(!contextVisitor.visit(context)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

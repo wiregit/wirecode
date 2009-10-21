@@ -34,7 +34,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
-import com.limegroup.gnutella.downloader.FileNotFoundException;
 import com.limegroup.gnutella.downloader.RemoteFileDescImpl;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
@@ -69,7 +68,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     
     public List<DownloadMemento> readAndConvertOldDownloads(File inputFile) throws IOException {
         if(!inputFile.exists())
-            throw new FileNotFoundException("file " + inputFile + " doesn't exist!");
+            throw new java.io.FileNotFoundException("file " + inputFile + " doesn't exist!");
         
         DownloadConverterObjectInputStream in = null;
         List roots = null;

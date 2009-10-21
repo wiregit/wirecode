@@ -104,11 +104,6 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     }
 
     @Override
-    public int getBusyHostCount() {
-        return 0;
-    }
-
-    @Override
     public int getChunkSize() {
         return 0;
     }
@@ -146,21 +141,6 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     public List<Address> getSourcesAsAddresses() {
         // TODO: Get the source from moz.
         return Collections.emptyList();
-    }
-
-    @Override
-    public int getNumberOfAlternateLocations() {
-        return 0;
-    }
-
-    @Override
-    public int getNumberOfInvalidAlternateLocations() {
-        return 0;
-    }
-
-    @Override
-    public int getPossibleHostCount() {
-        return 1;
     }
 
     @Override

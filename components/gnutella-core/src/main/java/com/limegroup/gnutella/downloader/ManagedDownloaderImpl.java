@@ -1021,7 +1021,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * reloads any previously busy hosts in the ranker, as well as other
      * hosts that we know about
      */
-    private synchronized void initializeRanker() {
+    protected synchronized void initializeRanker(SourceRanker ranker) {
         ranker.setMeshHandler(this);
         ranker.addToPool(getContexts(cachedRFDs));
     }
@@ -1738,8 +1738,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // if any guys were busy, reduce their retry time to 0,
         // since the user really wants to resume right now.
-        for (RemoteFileDesc rfd : cachedRFDs)
-            getContext(rfd).setRetryAfter(0);
+        for (RemoteFileDesc rfd : cachedRFDs) {
+            resetRfdContext(getContext(rfd));
+        }
 
         if (paused) {
             paused = false;
@@ -1750,6 +1751,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         setState(DownloadState.QUEUED);
 
         return true;
+    }
+    
+    /** Resets the context of an RFD for new use. */
+    protected void resetRfdContext(RemoteFileDescContext rfdContext) {
+        rfdContext.setRetryAfter(0);
+        rfdContext.setLastHttpCode(-1);
     }
 
     /* (non-Javadoc)
@@ -1940,7 +1947,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             initializeHashTree();
 
         // load up the ranker with the hosts we know about
-        initializeRanker();
+        initializeRanker(ranker);
 
         return DownloadState.CONNECTING;
     }
@@ -2409,7 +2416,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             synchronized (this) {
                 // if everybody we know about is busy (or we don't know about anybody)
                 // and we're not downloading from anybody - terminate the download.
-                if (_workers.size() == 0 && !ranker.hasNonBusy()) {
+                if (_workers.size() == 0 && !ranker.hasUsableHosts()) {
 
                     receivedNewSources = false;
 
@@ -2545,20 +2552,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (invalidAlts == null) return 0;
             return invalidAlts.size();
         }
-    }
-
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#getPossibleHostCount()
-    */
-    public synchronized int getPossibleHostCount() {
-        return ranker == null ? 0 : ranker.getNumKnownHosts();
-    }
-
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#getBusyHostCount()
-    */
-    public synchronized int getBusyHostCount() {
-        return ranker == null ? 0 : ranker.getNumBusyHosts();
     }
 
     /* (non-Javadoc)

@@ -6,6 +6,7 @@ import java.util.Collections;
 import org.limewire.collection.MultiCollection;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.util.Visitor;
 
 import com.limegroup.gnutella.PushEndpoint;
 
@@ -70,15 +71,14 @@ public class FriendsFirstSourceRanker extends AbstractSourceRanker {
         RemoteFileDescContext best = legacyRanker.getBest();
         return best != null ? best : pingRanker.getBest();
     }
-
+    
     @Override
-    public int getNumKnownHosts() {
-        return pingRanker.getNumKnownHosts() + legacyRanker.getNumKnownHosts();
-    }
-
-    @Override
-    protected Collection<RemoteFileDescContext> getPotentiallyBusyHosts() {
-        return new MultiCollection<RemoteFileDescContext>(pingRanker.getPotentiallyBusyHosts(), legacyRanker.getPotentiallyBusyHosts());
+    protected boolean applyToSources(Visitor<RemoteFileDescContext> contextVisitor) {
+        if(pingRanker.applyToSources(contextVisitor)) {
+            return legacyRanker.applyToSources(contextVisitor);
+        } else {
+            return false;
+        }
     }
 
     @Override

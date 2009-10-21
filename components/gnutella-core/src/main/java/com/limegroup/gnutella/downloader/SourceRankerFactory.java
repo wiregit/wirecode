@@ -44,18 +44,20 @@ public class SourceRankerFactory {
             return getAppropriateRanker();
         
         SourceRanker better;
-        if (networkManager.canReceiveSolicited() && 
-                DownloadSettings.USE_HEADPINGS.getValue()) {
-            if (original instanceof FriendsFirstSourceRanker)
+        if (networkManager.canReceiveSolicited() && DownloadSettings.USE_HEADPINGS.getValue()) {
+            if (original instanceof FriendsFirstSourceRanker) {
                 return original;
+            }
             better = createFriendsFirstSourceRanker();
-        }else {
-            if (original instanceof LegacyRanker)
+        } else {
+            if (original instanceof LegacyRanker) {
                 return original;
+            }
             better = new LegacyRanker();
         }
-        
+
         better.setMeshHandler(original.getMeshHandler());
+        better.setRfdVisitor(original.getRfdVisitor());
         better.addToPool(original.getShareableHosts());
         original.stop();
         return better;

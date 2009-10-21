@@ -16,10 +16,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.DualIterator;
+import org.limewire.collection.MultiIterable;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.MessageListener;
@@ -167,7 +169,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         ret = ret | !running;
         
         // initialize the guid if we don't have one
-        if (myGUID == null && meshHandler != null) {
+        if (myGUID == null && getMeshHandler() != null) {
             myGUID = new GUID();
             messageRouter.registerMessageListener(myGUID.bytes(),this);
         }
@@ -188,17 +190,19 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         RemoteFileDescContext ret;
         
         // try a verified host
-        if (!verifiedHosts.isEmpty()){
+        if (!verifiedHosts.isEmpty()) {
             LOG.debug("getting a verified host");
             ret = verifiedHosts.first();
             verifiedHosts.remove(ret);
-        }
-        else {
+        } else {
             LOG.debug("getting a non-verified host");
             // use the legacy ranking logic to select a non-verified host
             Iterator<RemoteFileDescContext> dual =
                 new DualIterator<RemoteFileDescContext>(testedLocations.iterator(),newHosts.iterator());
-            ret = LegacyRanker.getBest(dual);
+            ret = LegacyRanker.getBest(dual, getRfdVisitor());
+            if(ret == null) {
+                return null; // no valid host.
+            }
             newHosts.remove(ret);
             testedLocations.remove(ret);
             Address address = ret.getAddress();
@@ -234,7 +238,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             return;
         
         // if we don't have anybody to ping, don't ping
-        if (!hasNonBusy())
+        if (!hasUsableHosts())
             return;
         
         // if we haven't found a single RFD with URN, don't ping anybody
@@ -285,12 +289,6 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         
         udpPinger.rank(toSend,null,this,ping);
         lastPingTime = now;
-    }
-    
-    
-    @Override
-    protected Collection<RemoteFileDescContext> getPotentiallyBusyHosts() {
-        return newHosts;
     }
     
     /**
@@ -381,7 +379,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
                     pingedHosts.remove(ipp);
             }
             
-            mesh = meshHandler;
+            mesh = getMeshHandler();
             if (pong.hasFile()) {
                 //update the rfd with information from the pong
                 updateContext(rfd, pong);
@@ -449,17 +447,22 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
     
     @Override
+    protected synchronized boolean applyToSources(Visitor<RemoteFileDescContext> contextVisitor) {
+        for(RemoteFileDescContext context : new MultiIterable<RemoteFileDescContext>(verifiedHosts, newHosts, testedLocations)) {
+            if(!contextVisitor.visit(context)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    @Override
     public synchronized Collection<RemoteFileDescContext> getShareableHosts(){
         List<RemoteFileDescContext>  ret = new ArrayList<RemoteFileDescContext> (verifiedHosts.size()+newHosts.size()+testedLocations.size());
         ret.addAll(verifiedHosts);
         ret.addAll(newHosts);
         ret.addAll(testedLocations);
         return ret;
-    }
-    
-    @Override
-    public synchronized int getNumKnownHosts() {
-        return verifiedHosts.size()+newHosts.size()+testedLocations.size();
     }
     
     private static boolean isFirewalled(RemoteFileDescContext rfdContext) {

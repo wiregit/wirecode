@@ -185,27 +185,6 @@ public interface Downloader extends BandwidthTracker,
      * the downloader is queued.
      */
     public int getQueuePosition();
-    
-    /**
-     * Return the number of validated alternate locations for this download.
-     */
-    public int getNumberOfAlternateLocations();
-    
-    /**
-     * Return the number of invalid alternate locations for this download.
-     */
-    public int getNumberOfInvalidAlternateLocations();
-    
-    /**
-     * @return the number of possible hosts for this download
-     */
-    public int getPossibleHostCount();
-
-    /**
-     * @return the number of hosts we tried which were busy. We will try these
-     * later
-     */
-    public int getBusyHostCount();
 
     /**
      * @return the number of hosts we are remotely queued on. 

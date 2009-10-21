@@ -16,6 +16,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -105,9 +106,19 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         this.metaDataFactory = metaDataFactory;
         this.categoryManager = categoryManager;
     }
-
-    // //////////////////////////// Requery Logic ///////////////////////////
-
+    
+    @Override
+    protected synchronized void initializeRanker(SourceRanker ranker) {
+        super.initializeRanker(ranker);
+        ranker.setRfdVisitor(new Visitor<RemoteFileDescContext>() {            
+            @Override
+            public boolean visit(RemoteFileDescContext context) {
+                int code = context.getLastHttpCode();
+                return code < 400 || code >= 499;
+            }
+        });
+    }
+    
     /**
      * Overrides ManagedDownloader to return quickly
      * since we can't requery the store

@@ -445,10 +445,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             }
             // handle downloads from LWS separately, only allow 3 at a time
             else if( storeDownloadCount < 3 && md.getDownloadType() == DownloaderType.STORE ) {
-                    i.remove();
-                    storeDownloadCount++;
-                    active.add(md);
-                    md.startDownload();
+                i.remove();
+                storeDownloadCount++;
+                active.add(md);
+                md.startDownload();
             } else if(hasFreeSlot() && (md.shouldBeRestarted()) && (md.getDownloadType() != DownloaderType.STORE)) {
                 i.remove();
                 if(md.getDownloadType() == DownloaderType.INNETWORK)

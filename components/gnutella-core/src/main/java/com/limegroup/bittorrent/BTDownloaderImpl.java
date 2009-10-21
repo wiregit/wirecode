@@ -495,26 +495,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public int getNumberOfAlternateLocations() {
-        return getPossibleHostCount();
-    }
-
-    @Override
-    public int getNumberOfInvalidAlternateLocations() {
-        return 0; // not applicable to torrents
-    }
-
-    @Override
-    public int getPossibleHostCount() {
-        return torrent.getNumPeers();
-    }
-
-    @Override
-    public int getBusyHostCount() {
-        return 0;
-    }
-
-    @Override
     public int getQueuedHostCount() {
         return 0;
     }

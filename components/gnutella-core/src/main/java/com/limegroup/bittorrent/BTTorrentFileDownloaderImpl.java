@@ -198,11 +198,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     @Override
-    public int getBusyHostCount() {
-        return 0;
-    }
-
-    @Override
     public int getChunkSize() {
         return 1;
     }
@@ -230,21 +225,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Override
     public List<Address> getSourcesAsAddresses() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public int getNumberOfAlternateLocations() {
-        return 0;
-    }
-
-    @Override
-    public int getNumberOfInvalidAlternateLocations() {
-        return 0;
-    }
-
-    @Override
-    public int getPossibleHostCount() {
-        return 0;
     }
 
     @Override

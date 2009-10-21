@@ -18,93 +18,77 @@ import com.limegroup.gnutella.tigertree.HashTree;
  */
 public class ConnectionStatus {
     
-    static final int TYPE_NO_FILE = 0;
-    static final int TYPE_QUEUED = 1;
-    static final int TYPE_CONNECTED = 2;
-    static final int TYPE_NO_DATA = 3;
-    static final int TYPE_PARTIAL_DATA = 4;
-    static final int TYPE_THEX_RESPONSE = 5;
+    enum StatusType {
+        NO_FILE,
+        QUEUED,
+        CONNECTED,
+        NO_DATA,
+        PARTIAL_DATA,
+        THEX_RESPONSE;
+    }
     
-    /**
-     * The status of this connection.
-     */
-    private final int STATUS;
-    
-    /**
-     * The queue position.  Only valid if queued.
-     */
+    /** The status of this connection. */
+    private final StatusType STATUS;
+
+    /** The queue position. Only valid if queued. */
     private final int QUEUE_POSITION;
-    
-    /**
-     * The queue poll time.  Only valid if queued.
-     */
+
+    /** The queue poll time. Only valid if queued. */
     private final int QUEUE_POLL_TIME;
-    
-    /**
-     * The hash tree.  Only valid if thex response.
-     */
+
+    /** The hash tree. Only valid if thex response. */
     private final HashTree HASH_TREE;
     
-    /**
-     * The sole NO_FILE instance.
-     */
-    private static final ConnectionStatus NO_FILE =
-        new ConnectionStatus(TYPE_NO_FILE);
-        
-    /**
-     * The sole CONNECTED instance.
-     */
-    private static final ConnectionStatus CONNECTED =
-        new ConnectionStatus(TYPE_CONNECTED);
-        
-    /**
-     * The sole NO_DATA instance.
-     */
-    private static final ConnectionStatus NO_DATA =
-        new ConnectionStatus(TYPE_NO_DATA);
-        
-    /**
-     * The sole PARTIAL_DATA instance.
-     */
-    private static final ConnectionStatus PARTIAL_DATA =
-        new ConnectionStatus(TYPE_PARTIAL_DATA);
+    /** The code that caused this status, -1 if unknown. */
+    private final int CODE;
+    
+    /** The sole NO_FILE instance. */
+    private static final ConnectionStatus NO_FILE = new ConnectionStatus(StatusType.NO_FILE);
+
+    /** The sole CONNECTED instance. */
+    private static final ConnectionStatus CONNECTED = new ConnectionStatus(StatusType.CONNECTED);
+
+    /** The sole NO_DATA instance. */
+    private static final ConnectionStatus NO_DATA = new ConnectionStatus(StatusType.NO_DATA);
+
+    /** The sole PARTIAL_DATA instance. */
+    private static final ConnectionStatus PARTIAL_DATA = new ConnectionStatus(StatusType.PARTIAL_DATA);
        
-    /**
-     * Constructs a ConnectionStatus of the specified status.
-     */
-    private ConnectionStatus(int status) {
-        if(status == TYPE_QUEUED || status == TYPE_THEX_RESPONSE)
+    /** Constructs a ConnectionStatus of the specified status. */
+    private ConnectionStatus(StatusType status) {
+        if(status == StatusType.QUEUED || status == StatusType.THEX_RESPONSE)
             throw new IllegalArgumentException();
         STATUS = status;
         QUEUE_POSITION = -1;
         QUEUE_POLL_TIME = -1;
+        CODE = -1;
         HASH_TREE = null;
     }
     
-    /**
-     * Constructs a ConnectionStatus for being queued.
-     */
-    private ConnectionStatus(int status, int queuePos, int queuePoll) {
-        if(status != TYPE_QUEUED)
+    /** Constructs a ConnectionStatus for being queued. */
+    private ConnectionStatus(StatusType status, int queuePos, int queuePoll) {
+        if(status != StatusType.QUEUED)
             throw new IllegalArgumentException();
             
         STATUS = status;
         QUEUE_POSITION = queuePos;
         QUEUE_POLL_TIME = queuePoll;
+        CODE = -1;
         HASH_TREE = null;
     }
     
-    private ConnectionStatus(int status, HashTree tree) {
-        if(status != TYPE_THEX_RESPONSE)
+    private ConnectionStatus(StatusType status, HashTree tree) {
+        if(status != StatusType.THEX_RESPONSE)
             throw new IllegalArgumentException();
         if(tree == null)
             throw new NullPointerException("null tree");
             
         STATUS = status;
         HASH_TREE = tree;
+        CODE = -1;
         QUEUE_POSITION = -1;
         QUEUE_POLL_TIME = -1;
-    }
+    }    
     
     /**
      * Returns a ConnectionStatus for the server not having the file.
@@ -142,20 +126,20 @@ public class ConnectionStatus {
         // convert to milliseconds & add an extra second.
         poll *= 1000;
         poll += 1000;
-        return new ConnectionStatus(TYPE_QUEUED, pos, poll);
+        return new ConnectionStatus(StatusType.QUEUED, pos, poll);
     }
     
     /**
      * Returns a ConnectionStatus for having a THEX tree.
      */
     static ConnectionStatus getThexResponse(HashTree tree) {
-        return new ConnectionStatus(TYPE_THEX_RESPONSE, tree);
+        return new ConnectionStatus(StatusType.THEX_RESPONSE, tree);
     }
     
     /**
      * Returns the type of this ConnectionStatus.
      */
-    int getType() {
+    StatusType getType() {
         return STATUS;
     }
     
@@ -163,42 +147,42 @@ public class ConnectionStatus {
      * Determines if this is a NoFile ConnectionStatus.
      */
     boolean isNoFile() {
-        return STATUS == TYPE_NO_FILE;
+        return STATUS == StatusType.NO_FILE;
     }
     
     /**
      * Determines if this is a Connected ConnectionStatus.
      */    
     public boolean isConnected() {
-        return STATUS == TYPE_CONNECTED;
+        return STATUS == StatusType.CONNECTED;
     }
     
     /**
      * Determines if this is a NoData ConnectionStatus.
      */
     boolean isNoData() {
-        return STATUS == TYPE_NO_DATA;
+        return STATUS == StatusType.NO_DATA;
     }
     
     /**
      * Determines if this is a PartialData ConnectionStatus.
      */
     boolean isPartialData() {
-        return STATUS == TYPE_PARTIAL_DATA;
+        return STATUS == StatusType.PARTIAL_DATA;
     }
     
     /**
      * Determines if this is a Queued ConnectionStatus.
      */
     boolean isQueued() {
-        return STATUS == TYPE_QUEUED;
+        return STATUS == StatusType.QUEUED;
     }
     
     /**
      * Determines if this is a ThexResponse ConnectionStatus.
      */
     public boolean isThexResponse() {
-        return STATUS == TYPE_THEX_RESPONSE;
+        return STATUS == StatusType.THEX_RESPONSE;
     }
     
     /**
@@ -230,16 +214,21 @@ public class ConnectionStatus {
             throw new IllegalStateException();
         return HASH_TREE;
     }
+    
+    /** Returns the HTTP response code that caused this status, or -1 if unknown. */
+    public int getCode() {
+        return CODE;
+    }
 
     @Override
     public String toString() {
         switch(STATUS) {
-        case TYPE_NO_FILE: return "No File";
-        case TYPE_QUEUED: return "Queued";
-        case TYPE_CONNECTED: return "Connected";
-        case TYPE_NO_DATA: return "No Data";
-        case TYPE_PARTIAL_DATA: return "Partial Data";
-        case TYPE_THEX_RESPONSE: return "Thex Response";
+        case NO_FILE: return "No File";
+        case QUEUED: return "Queued";
+        case CONNECTED: return "Connected";
+        case NO_DATA: return "No Data";
+        case PARTIAL_DATA: return "Partial Data";
+        case THEX_RESPONSE: return "Thex Response";
         default: return "Unknown: " + STATUS;
         }
     }

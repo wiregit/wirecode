@@ -698,6 +698,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final TcpBandwidthStatistics tcpBandwidthStatistics;
         private final NetworkInstanceUtils networkInstanceUtils;
 
+        @SuppressWarnings("unused")
         @Inject
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
                 AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
@@ -781,6 +782,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final NetworkManager networkManager;
         private final BandwidthCollector bandwidthCollector;
         
+        @SuppressWarnings("unused")
         @Inject
         AltLocWorkerStubFactory(
                 HTTPDownloaderFactory httpDownloaderFactory,
