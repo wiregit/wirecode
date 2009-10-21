@@ -15,7 +15,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
 public class CompositeQueue implements MessageQueue {
     /*
      * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
-     * http://wiki.limewire.org/index.php?title=Sachrifc.  The basic idea is to use
+     * http://wiki.limewire.org/index.php?title=Sachrifc .  The basic idea is to use
      * one buffer for each message type.  Messages are removed from the buffers in
      * a biased round-robin fashion.  This prioritizes some messages types while
      * preventing any one message type from dominating traffic.  Query replies
