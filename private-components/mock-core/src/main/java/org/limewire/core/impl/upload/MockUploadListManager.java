@@ -11,26 +11,29 @@ import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
 
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.impl.ThreadSafeList;
 
+@Singleton
 public class MockUploadListManager implements UploadListManager {
 
     private EventList<UploadItem> uploadItems;
     private ThreadSafeList<UploadItem> threadSafeUploadItems;
+    private EventList<UploadItem> swingThreadUploadItems;
 
     public MockUploadListManager() {
         threadSafeUploadItems = GlazedListsFactory.threadSafeList(new BasicEventList<UploadItem>());
         Connector<UploadItem> uploadConnector = GlazedLists.beanConnector(UploadItem.class);
-        uploadItems = GlazedListsFactory.swingThreadProxyEventList(GlazedListsFactory
-                .observableElementList(threadSafeUploadItems, uploadConnector));
+        uploadItems = GlazedListsFactory.observableElementList(threadSafeUploadItems, uploadConnector);
         
         addUpload(UploadState.DONE, "File.mp3", 30000, 15000, Category.AUDIO);
         addUpload(UploadState.QUEUED, "File.avi", 3000, 150, Category.VIDEO);
-        addUpload(UploadState.UPLOADING, "File2mp3", 30000, 25544, Category.AUDIO);
+        addUpload(UploadState.UPLOADING, "File2.mp3", 30000, 25544, Category.AUDIO);
         addUpload(UploadState.DONE, "File3.exe", 300, 150, Category.PROGRAM);
         addUpload(UploadState.UNABLE_TO_UPLOAD, "File3.doc", 300, 15, Category.DOCUMENT);
         addUpload(UploadState.BROWSE_HOST, "string", 300, 15, Category.DOCUMENT);
@@ -39,13 +42,16 @@ public class MockUploadListManager implements UploadListManager {
     
     private void addUpload(UploadState state, String fileName, long fileSize, long amtUploaded, Category category) {
         UploadItem item = new MockUploadItem(state, fileName, fileSize, amtUploaded, category);
-        uploadItems.add(item);
+        threadSafeUploadItems.add(item);
         item.addPropertyChangeListener(new UploadPropertyListener(item));
     }
 
     @Override
     public EventList<UploadItem> getSwingThreadSafeUploads() {
-        return uploadItems;
+        if (swingThreadUploadItems == null) {
+            swingThreadUploadItems = GlazedListsFactory.swingThreadProxyEventList(uploadItems);
+        }
+        return swingThreadUploadItems;
     }
 
     @Override
@@ -74,7 +80,7 @@ public class MockUploadListManager implements UploadListManager {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (item.getState() == UploadState.CANCELED) {
-                uploadItems.remove(item);
+                remove(item);
             }
         }
     }
