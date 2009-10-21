@@ -32,14 +32,15 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-//EagerSingleton to ensure that register() is called and the listeners are in place at startup
+/**
+ * Container to display the Downloads table.
+ * 
+ * Note: This is an EagerSingleton to ensure that register() is called and the
+ * listeners are in place at startup.
+ */
 @EagerSingleton
 public class MainDownloadPanel extends JPanel {  	
     
@@ -84,15 +85,15 @@ public class MainDownloadPanel extends JPanel {
     
     @Inject
     public void register() {              
-        downloadMediator.getDownloadList().addListEventListener(new VisibilityListListener());
+        // Add listener for "show downloads" setting.
         DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
            @Override
             public void settingChanged(SettingEvent evt) {
                SwingUtils.invokeLater(new Runnable() {
                    @Override
-                    public void run() {
-                       updateVisibility(downloadMediator.getDownloadList());
-                    }
+                   public void run() {
+                       updateVisibility();
+                   }
                });
             } 
         });
@@ -103,6 +104,9 @@ public class MainDownloadPanel extends JPanel {
         if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
             initialize();
         }
+        
+        // Add listener for downloads added and completed.
+        downloadListManager.addPropertyChangeListener(new DownloadPropertyListener());
     }
     
     public void addDownloadVisibilityListener(DownloadVisibilityListener listener){
@@ -123,23 +127,27 @@ public class MainDownloadPanel extends JPanel {
         JScrollPane pane = new JScrollPane(table);
         pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         add(pane, BorderLayout.CENTER);
-
-        // handle individual completed downloads
-        initializeDownloadListeners(downloadListManager);
     }
     
     public List<DownloadItem> getSelectedDownloadItems(){
         return table.getSelectedItems();
     }
-    
-    private void initializeDownloadListeners(final DownloadListManager downloadListManager) {
-        // handle individual completed downloads
-        downloadListManager.addPropertyChangeListener(new DownloadPropertyListener());
-    }
 
+    /**
+     * Listener to handle download added/completed events from the download 
+     * list manager.
+     */
     private class DownloadPropertyListener implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
-            if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
+            if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_ADDED)) {
+                // Display this panel whenever a download is added. 
+                if (!DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+                    DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.setValue(true);
+                } else {
+                    updateVisibility();
+                }
+                
+            } else if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
                 final DownloadItem downloadItem = (DownloadItem) event.getNewValue();
                 notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
                         new AbstractAction() {
@@ -166,35 +174,12 @@ public class MainDownloadPanel extends JPanel {
             }
         }
     }
-
-    /**
-     * Initializes the download panel contents when the list changes (when a 
-     * DownloadItem is added).
-     */
-    private class VisibilityListListener implements ListEventListener<DownloadItem> {
-        private int downloadCount;
-      
-        @Override
-        public void listChanged(ListEvent<DownloadItem> listChanges) {
-            EventList sourceList = listChanges.getSourceList();
-            // Update download tray setting only when items are added.
-            if (sourceList.size() > downloadCount) {
-                if (!DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
-                    DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.setValue(true);
-                } else {
-                    updateVisibility(sourceList);
-                }
-            }
-            downloadCount = sourceList.size();
-        }
-    }
     
     /**
      * Updates the visibility of this download panel.  This method is called
-     * when the download list changes, or when the "show downloads" setting 
-     * changes.
+     * when a download is added, or when the "show downloads" setting changes.
      */
-    private void updateVisibility(EventList sourceList) {
+    private void updateVisibility() {
         if(!isInitialized){
             initialize();
         }
