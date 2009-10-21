@@ -72,7 +72,7 @@ public class Wizard extends JPanel {
     };
     
     private JXButton finishButton;    
-    private Action finishAction = new AbstractAction(I18n.tr("Finish")) {
+    private Action finishAction = new AbstractAction(I18n.tr("Continue")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             finish();
