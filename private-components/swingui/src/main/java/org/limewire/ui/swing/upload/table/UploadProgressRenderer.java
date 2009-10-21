@@ -22,7 +22,7 @@ import org.limewire.util.CommonUtils;
 /**
  * Cell renderer for the progress column in the Uploads table.
  */
-class ProgressRenderer extends JXPanel implements TableCellRenderer {
+class UploadProgressRenderer extends JXPanel implements TableCellRenderer {
 
     private final DownloadRendererProperties rendererProperties;
     
@@ -30,9 +30,9 @@ class ProgressRenderer extends JXPanel implements TableCellRenderer {
     private JLabel timeLabel;
     
     /**
-     * Constructs a ProgressRenderer.
+     * Constructs an UploadProgressRenderer.
      */
-    public ProgressRenderer(ProgressBarDecorator progressBarDecorator) {
+    public UploadProgressRenderer(ProgressBarDecorator progressBarDecorator) {
         super(new MigLayout("insets 0, gap 0, novisualpadding, nogrid, aligny center"));
         
         rendererProperties = new DownloadRendererProperties();

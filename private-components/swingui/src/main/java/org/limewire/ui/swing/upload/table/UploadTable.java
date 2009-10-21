@@ -109,11 +109,11 @@ public class UploadTable
      */
     private void initializeRenderers() {
         // Set column renderers.
-        setColumnRenderer(UploadTableFormat.TITLE_COL, new TitleRenderer(iconManager));
-        setColumnRenderer(UploadTableFormat.MESSAGE_COL, new MessageRenderer());
-        setColumnRenderer(UploadTableFormat.PROGRESS_COL, new ProgressRenderer(progressBarDecorator));
+        setColumnRenderer(UploadTableFormat.TITLE_COL, new UploadTitleRenderer(iconManager));
+        setColumnRenderer(UploadTableFormat.MESSAGE_COL, new UploadMessageRenderer());
+        setColumnRenderer(UploadTableFormat.PROGRESS_COL, new UploadProgressRenderer(progressBarDecorator));
 // TODO setColumnRenderer(UploadTableFormat.ACTION_COL, new ActionRendererEditor(uploadActionHandlerFactory.get()));
-        setColumnRenderer(UploadTableFormat.CANCEL_COL, new CancelRendererEditor(uploadActionHandlerFactory.get()));
+        setColumnRenderer(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(uploadActionHandlerFactory.get()));
         
         // Set column gap renderers.
         TableCellRenderer gapRenderer = new GapRenderer();
@@ -123,7 +123,7 @@ public class UploadTable
         setColumnRenderer(UploadTableFormat.ACTION_GAP, gapRenderer);
         
         // Set column editors.
-        setColumnEditor(UploadTableFormat.CANCEL_COL, new CancelRendererEditor(uploadActionHandlerFactory.get()));
+        setColumnEditor(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(uploadActionHandlerFactory.get()));
     }
     
     /**

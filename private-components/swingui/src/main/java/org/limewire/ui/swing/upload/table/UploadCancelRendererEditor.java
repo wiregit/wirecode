@@ -20,7 +20,7 @@ import org.limewire.ui.swing.util.I18n;
  * Cell renderer/editor to display the cancel and remove buttons for the 
  * uploads table.
  */
-class CancelRendererEditor extends TableRendererEditor {
+class UploadCancelRendererEditor extends TableRendererEditor {
 
     private final JButton cancelButton;
     private final JButton removeButton;
@@ -28,9 +28,9 @@ class CancelRendererEditor extends TableRendererEditor {
     private UploadItem item;
     
     /**
-     * Constructs a CancelRendererEditor.
+     * Constructs an UploadCancelRendererEditor.
      */
-    public CancelRendererEditor(final UploadActionHandler actionHandler) {
+    public UploadCancelRendererEditor(final UploadActionHandler actionHandler) {
         setLayout(new MigLayout("insets 0, gap 0, nogrid, novisualpadding, alignx center, aligny center"));
         
         DownloadRendererProperties properties = new DownloadRendererProperties();

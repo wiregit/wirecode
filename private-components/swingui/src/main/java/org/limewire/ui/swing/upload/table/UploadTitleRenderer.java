@@ -15,15 +15,15 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 /**
  * Cell renderer for the title column in the Uploads table.
  */
-class TitleRenderer extends JLabel implements TableCellRenderer {
+class UploadTitleRenderer extends JLabel implements TableCellRenderer {
 
     private final CategoryIconManager iconManager;
     private final DownloadRendererProperties rendererProperties;
     
     /**
-     * Constructs a TitleRenderer.
+     * Constructs an UploadTitleRenderer.
      */
-    public TitleRenderer(CategoryIconManager iconManager) {
+    public UploadTitleRenderer(CategoryIconManager iconManager) {
         this.iconManager = iconManager;
         this.rendererProperties = new DownloadRendererProperties();
         

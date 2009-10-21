@@ -17,14 +17,14 @@ import org.limewire.ui.swing.util.I18n;
 /**
  * Cell renderer for the message column in the Uploads table.
  */
-class MessageRenderer extends DefaultTableCellRenderer {
+class UploadMessageRenderer extends DefaultTableCellRenderer {
 
     private final NumberFormat formatter = new DecimalFormat("0.00");
     
     /**
-     * Constructs a MessageRenderer.
+     * Constructs an UploadMessageRenderer.
      */
-    public MessageRenderer() {
+    public UploadMessageRenderer() {
         new DownloadRendererProperties().decorateComponent(this);
     }
     
