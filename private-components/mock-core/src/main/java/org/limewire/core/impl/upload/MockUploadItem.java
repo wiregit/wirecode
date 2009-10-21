@@ -19,12 +19,14 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 public class MockUploadItem implements UploadItem {
     
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
-    private UploadState state;
+    private volatile UploadState state;
     private String fileName;
     private long fileSize;
-    private long amtUploaded;
+    private volatile long amtUploaded;
     private Category category;
     private RemoteHost uploadRemoteHost;
+    
+    private volatile boolean running = true;
     
     public MockUploadItem(UploadState state, String fileName, long fileSize, long amtUploaded, Category category){
         this.state = state;
@@ -32,6 +34,30 @@ public class MockUploadItem implements UploadItem {
         this.fileSize = fileSize;
         this.amtUploaded = amtUploaded;
         this.category = category;
+        
+        if (this.state == UploadState.UPLOADING) {
+            start();
+        }
+    }
+    
+    private boolean isRunning() {
+        return running;
+    }
+    
+    private void start() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isRunning() && getTotalAmountUploaded() < getFileSize()) {
+                    setTotalAmountUploaded(getTotalAmountUploaded() + 512);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        // eat InterruptedException
+                    }
+                }
+            }
+        }).start();
     }
     
     @Override
@@ -57,6 +83,16 @@ public class MockUploadItem implements UploadItem {
     @Override
     public long getTotalAmountUploaded() {
         return amtUploaded;
+    }
+    
+    private void setTotalAmountUploaded(long amtUploaded) {
+        long oldAmount = this.amtUploaded;
+        this.amtUploaded = (amtUploaded < getFileSize()) ? amtUploaded : getFileSize();
+        if (this.amtUploaded == getFileSize()) {
+            setState(UploadState.DONE);
+        } else {
+            support.firePropertyChange("totalAmountUploaded", oldAmount, this.amtUploaded);
+        }
     }
 
     @Override
@@ -92,12 +128,18 @@ public class MockUploadItem implements UploadItem {
 
     @Override
     public long getRemainingUploadTime() {
-        return 999;
+        float speed = getUploadSpeed();
+        if (speed > 0) {
+            double remaining = (getFileSize() - getTotalAmountUploaded()) / 1024.0;
+            return (long) (remaining / speed);
+        } else {
+            return Long.MAX_VALUE;
+        }
     }
 
     @Override
     public float getUploadSpeed() {
-        return 64;
+        return 1;
     }
 
     @Override
