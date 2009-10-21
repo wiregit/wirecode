@@ -160,32 +160,6 @@ public class MockUploadItem implements UploadItem {
         return -1;
     }
     
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        MockUploadItem other = (MockUploadItem) obj;
-        if (fileName == null) {
-            if (other.fileName != null)
-                return false;
-        } else if (!fileName.equals(other.fileName)) {
-            return false;
-        }
-        return true;
-    }
-    
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
-        return result;
-    }
-    
     private class MockUploadRemoteHost implements RemoteHost {
 
         @Override
