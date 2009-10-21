@@ -47,11 +47,6 @@ public class MacOSXUtils {
      */
     private static final String APP_NAME = "LimeWire.app";
 
-    /**
-     * The name of the app that launches.
-     */
-    private static final String PATH_TO_NATIVE_LIBRARIES = "/Applications/LimeWire.app/Contents/Resources/Java/";
-
     private static boolean nativeLibraryLoadedCorrectly = false;
     
     static {
@@ -80,17 +75,18 @@ public class MacOSXUtils {
     * can be used to trace what other libraries this library is dependent
     * on and whether those libraries are present on the user's system.
     */
-    public static String traceLibraryDependencies(String libraryName) {
+    public static String traceLibraryDependencies(String libraryName) {       
         StringBuffer traceResultsBuffer = new StringBuffer("ls command output: ");
-        String lsCommand = "ls " + PATH_TO_NATIVE_LIBRARIES + libraryName;
+        String lsCommand = "ls " + System.getProperty("user.dir") + "/" + libraryName;
+        traceResultsBuffer.append("(").append(lsCommand).append(") "); 
         traceResultsBuffer.append( getCommandOutput(lsCommand) );
         traceResultsBuffer.append( "\n" );
 
-        String otoolCommand = "otool -L " + PATH_TO_NATIVE_LIBRARIES + libraryName;
+        String otoolCommand = "otool -L " + System.getProperty("user.dir") + "/" + libraryName;
         traceResultsBuffer.append("otool command output: ");
         traceResultsBuffer.append( getCommandOutput(otoolCommand) );
         traceResultsBuffer.append( "\n" );
-        
+               
         return traceResultsBuffer.toString();
     }
     
@@ -125,11 +121,10 @@ public class MacOSXUtils {
                 }
             }
             catch (InterruptedException e) {
-                System.err.println(e);
             }
         } catch (IOException exc) {
-            System.err.println(exc);
         }
+        
         return otoolOutputBuffer.toString();
     }
 
