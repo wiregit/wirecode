@@ -3,10 +3,11 @@ package org.limewire.ui.swing.upload;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -14,10 +15,15 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
+import org.limewire.core.api.upload.UploadState;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.LazySingleton;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.ui.swing.upload.table.UploadTable;
@@ -25,6 +31,7 @@ import org.limewire.ui.swing.upload.table.UploadTableFactory;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
 
@@ -40,10 +47,11 @@ public class UploadMediator implements NavMediator<JComponent> {
     private final UploadListManager uploadListManager;
     private final UploadTableFactory uploadTableFactory;
     
+    private EventList<UploadItem> activeList;
+    
     private JPanel uploadPanel;
     
-    private Action clearFinishedAction;
-    
+    private JButton clearFinishedButton;
     private List<JButton> headerButtons;
     private JPopupMenu headerPopupMenu;
     
@@ -62,6 +70,21 @@ public class UploadMediator implements NavMediator<JComponent> {
     @Inject
     public void register(ServiceRegistry serviceRegister) {
         serviceRegister.start(uploadListManager);
+        
+        // Add setting listener to clear finished uploads.  When set, we clear
+        // finished uploads and hide the "clear finished" button.
+        SharingSettings.CLEAR_UPLOAD.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                boolean clearUploads = SharingSettings.CLEAR_UPLOAD.getValue();
+                if (clearUploads) {
+                    clearFinished();
+                }
+                if (clearFinishedButton != null) {
+                    clearFinishedButton.setVisible(!clearUploads);
+                }
+            }
+        });
     }
     
     @Override
@@ -73,7 +96,7 @@ public class UploadMediator implements NavMediator<JComponent> {
     }
     
     /**
-     * Creates a panel containing the upload table.
+     * Creates a display panel containing the upload table.
      */
     private JPanel createUploadPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -90,11 +113,15 @@ public class UploadMediator implements NavMediator<JComponent> {
     }
     
     /**
-     * Returns the number of active uploads.
+     * Returns a list of active upload items.
      */
-    public int getActiveListSize() {
-        // TODO return active uploads only
-        return uploadListManager.getSwingThreadSafeUploads().size();
+    public EventList<UploadItem> getActiveList() {
+        if (activeList == null) {
+            activeList = GlazedListsFactory.filterList(getUploadList(), 
+                    new UploadStateMatcher(false, UploadState.DONE, UploadState.CANCELED, 
+                            UploadState.BROWSE_HOST_DONE, UploadState.UNABLE_TO_UPLOAD));
+        }
+        return activeList;
     }
     
     /**
@@ -102,10 +129,13 @@ public class UploadMediator implements NavMediator<JComponent> {
      */
     public List<JButton> getHeaderButtons() {
         if (headerButtons == null) {
-            clearFinishedAction = new ClearFinishedAction();
+            clearFinishedButton = new HyperlinkButton(new ClearFinishedAction());
+            clearFinishedButton.setVisible(!SharingSettings.CLEAR_UPLOAD.getValue());
+            
             headerButtons = new ArrayList<JButton>();
-            headerButtons.add(new HyperlinkButton(clearFinishedAction));
+            headerButtons.add(clearFinishedButton);
         }
+        
         return headerButtons;
     }
     
@@ -145,6 +175,31 @@ public class UploadMediator implements NavMediator<JComponent> {
         @Override
         public void actionPerformed(ActionEvent e) {
             clearFinished();
+        }
+    }
+    
+    /**
+     * Matcher to filter for upload states.
+     */
+    private static class UploadStateMatcher implements Matcher<UploadItem> {
+        private final boolean inclusive;
+        private final Set<UploadState> uploadStates;
+        
+        /**
+         * Constructs a matcher that either includes or excludes the specified
+         * upload states.
+         */
+        public UploadStateMatcher(boolean inclusive, UploadState first, UploadState... rest) {
+            this.inclusive = inclusive;
+            this.uploadStates = EnumSet.of(first, rest);
+        }
+        
+        @Override
+        public boolean matches(UploadItem item) {
+            if (item == null) return false;
+            
+            boolean match = uploadStates.contains(item.getState());
+            return inclusive ? match : !match;
         }
     }
 }
