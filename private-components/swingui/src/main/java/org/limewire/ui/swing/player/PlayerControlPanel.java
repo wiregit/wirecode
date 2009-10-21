@@ -40,13 +40,12 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
  * Main UI container for the media player.
  */
-public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
+class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
     
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -92,7 +91,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     private final LimeSliderBar progressSlider;
     private final JPanel statusPanel;
     private final JButton volumeButton;
-    private final JButton shuffleButton;
+    private JButton shuffleButton;
     
     private final JPopupMenu volumeControlPopup;
     private final VolumeSlider volumeSlider; 
@@ -112,8 +111,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
      * Constructs a PlayerPanel with the specified component providers and
      * decorators.
      */
-    @Inject
-    public PlayerPanel(Provider<PlayerMediator> playerProvider,
+    public PlayerControlPanel(Provider<PlayerMediator> playerProvider,
             SliderBarDecorator sliderBarDecorator) {
         
         this.playerProvider = playerProvider;
@@ -161,11 +159,13 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         volumeSlider = new VolumeSlider(0, 100);
         volumeControlPopup = volumeSlider.createPopup();
         
-        shuffleButton = new IconButton(shuffleIcon, shuffleIconRollover, shuffleIconPressed, shuffleIconActive);
-        shuffleButton.addActionListener(playerListener);
-        shuffleButton.setActionCommand(SHUFFLE);
-        shuffleButton.setRolloverSelectedIcon(shuffleIconActive);
-        shuffleButton.setToolTipText(I18n.tr("Shuffle"));
+        if (isPlaylistSupported()) {
+            shuffleButton = new IconButton(shuffleIcon, shuffleIconRollover, shuffleIconPressed, shuffleIconActive);
+            shuffleButton.addActionListener(playerListener);
+            shuffleButton.setActionCommand(SHUFFLE);
+            shuffleButton.setRolloverSelectedIcon(shuffleIconActive);
+            shuffleButton.setToolTipText(I18n.tr("Shuffle"));
+        }
         
         progressSlider = new LimeSliderBar();
         sliderBarDecorator.decoratePlain(progressSlider);
@@ -193,13 +193,19 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         innerPanel.setOpaque(false);
         innerPanel.setBackgroundPainter(createStatusBackgroundPainter());
         
-        innerPanel.add(backButton, "gapright 1");
+        if (isPlaylistSupported()) {
+            innerPanel.add(backButton, "gapright 1");
+        }
         innerPanel.add(pauseButton, "hidemode 3");
         innerPanel.add(playButton, "hidemode 3");
-        innerPanel.add(forwardButton, "gapright 3");
+        if (isPlaylistSupported()) {
+            innerPanel.add(forwardButton, "gapright 3");
+        }
         innerPanel.add(statusPanel, "gapbottom 2, hidemode 2");
         innerPanel.add(volumeButton, "gapleft 2");
-        innerPanel.add(shuffleButton, "gapleft 2");
+        if (isPlaylistSupported()) {
+            innerPanel.add(shuffleButton, "gapleft 2");
+        }
         
         innerPanel.setVisible(SwingUiSettings.PLAYER_ENABLED.getValue());
         add(innerPanel, "gaptop 2, gapbottom 2");
@@ -220,13 +226,14 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             }
         });
+        
+        register();
     }
     
     /**
      * Registers listeners for player events.
      */
-    @Inject
-    void register() {
+    private void register() {
         getPlayerMediator().addMediatorListener(this);
         
         // Stop player if disabled, and show/hide player.
@@ -239,7 +246,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
                         if (!enabled) {
                             getPlayerMediator().stop();
                         }
-                        PlayerPanel.this.innerPanel.setVisible(enabled);
+                        PlayerControlPanel.this.innerPanel.setVisible(enabled);
                     }
                 });
             }
@@ -250,13 +257,14 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
      * Initializes the progress component.
      */
     private void initProgressControl() {
-        progressSlider.addChangeListener(new AudioProgressListener());
+        progressSlider.addChangeListener(new ProgressListener());
         progressSlider.setMaximum(Integer.MAX_VALUE);
         progressSlider.setMaximumSize(new Dimension(206, 6));
         progressSlider.setMinimumSize(new Dimension(206, 6));
         progressSlider.setPreferredSize(new Dimension(206, 6));
         progressSlider.setSize(new Dimension(206, 4));
         progressSlider.setEnabled(false);
+        progressSlider.setMinorTickSpacing(1);
         progressSlider.addMouseListener(new MouseAdapter() {
             /**
              * Reposition the thumb on the jslider to the location of the mouse
@@ -320,6 +328,9 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         // Update volume.
         updateVolume();
         
+        //enable volume control
+        volumeButton.setEnabled(getPlayerMediator().isVolumeSettable());
+        
         // Enable progress slider.
         progressSlider.setEnabled(getPlayerMediator().isSeekable());
         
@@ -334,14 +345,14 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
     }
     
     /**
-     * Hanldes state change in the player to the specified state.
+     * Handles state change in the player to the specified state.
      */
     @Override
     public void stateChanged(PlayerState playerState) {
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
             updateVolume();
         } else if (playerState == PlayerState.GAIN) {
-            // Exit on volumn change.
+            // Exit on volume change.
             return;
         }
         
@@ -360,11 +371,17 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
         }        
     }
     
+    private boolean isPlaylistSupported(){
+        return getPlayerMediator().isPlaylistSupported();
+    }
+    
     /**
      * Updates the volume in the player.
      */
     private void updateVolume() {
-        getPlayerMediator().setVolume(((double) volumeSlider.getValue()) / volumeSlider.getMaximum());
+        if (getPlayerMediator().isVolumeSettable()) {
+            getPlayerMediator().setVolume(((double) volumeSlider.getValue()) / volumeSlider.getMaximum());
+        }
     }
     
     /**
@@ -414,7 +431,7 @@ public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
      * Listener to handle change to progress bar to skip to a new position in 
      * the song.
      */
-    private class AudioProgressListener implements ChangeListener {
+    private class ProgressListener implements ChangeListener {
         
         private boolean waiting = false; 
        

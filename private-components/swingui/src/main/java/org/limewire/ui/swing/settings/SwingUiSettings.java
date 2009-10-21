@@ -243,11 +243,15 @@ public final class SwingUiSettings extends LimeProps {
     /** If the 'online contacts' in the nav are collapsed. */
     public static final BooleanSetting ONLINE_COLLAPSED =
         FACTORY.createBooleanSetting("ONLINE_CONTACTS_COLLAPSED", false);
-    
+
     /** If the LimeWire media player is enabled. */
     @InspectablePrimitive(value = "player enabled", category = DataCategory.USAGE)
     public static final BooleanSetting PLAYER_ENABLED =
         FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
+      
+    /** Setting for whether or not video should stretch to fill the screen. */
+    public static final BooleanSetting VIDEO_FIT_TO_SCREEN =
+        FACTORY.createBooleanSetting("VIDEO_FIT_TO_SCREEN", false);
     
     /** Shows a sign-on overlay message to highlight the Library/Private Shared feature. */
     public static final BooleanSetting SHOW_LIBRARY_OVERLAY_MESSAGE =

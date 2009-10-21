@@ -208,7 +208,7 @@ public class LibraryTable extends MouseableTable {
         return GlazedListsFactory.filterList(sourceList, new Matcher<LocalFileItem>() {
             @Override
             public boolean matches(LocalFileItem item) {
-                return PlayerUtils.isPlayableFile(item.getFile());
+                return PlayerUtils.isFileAllowedInPlaylist(item.getFile());
             }
         });
     }

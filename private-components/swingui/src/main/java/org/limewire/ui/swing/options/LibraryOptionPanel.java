@@ -132,7 +132,7 @@ public class LibraryOptionPanel extends OptionPanel {
             setLayout(new MigLayout("ins 0 0 0 0, gap 0"));
 
             useLimeWirePlayer = new JCheckBox(I18n
-                    .tr("Use the LimeWire player when I play Audio files"));
+                    .tr("Use the LimeWire player when I play Audio and Video files"));
             useLimeWirePlayer.setOpaque(false);
 
             add(useLimeWirePlayer);

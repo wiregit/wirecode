@@ -3,9 +3,11 @@ package org.limewire.ui.swing.player;
 import java.io.File;
 import java.util.Locale;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -19,27 +21,46 @@ import com.google.inject.Provider;
 public class PlayerUtils {
 
     // TODO: This is terrible.  Never use static injection!
-    @Inject private static Provider<PlayerMediator> playerProvider;
+    @Inject private static @Audio Provider<PlayerMediator> audioPlayerProvider;
+    // TODO: This is terrible.  Never use static injection!
+    @Inject private static @Video Provider<PlayerMediator> videoPlayerProvider;
 
-    private static void play(File audioFile){
-        playerProvider.get().play(audioFile);
+    private static void playAudio(File mediaFile) {
+        audioPlayerProvider.get().play(mediaFile);
     }
     
-    public static boolean isPlaying(File audioFile){
-        return playerProvider.get().isPlaying(audioFile);
+    private static void playVideo(File mediaFile) {
+        videoPlayerProvider.get().play(mediaFile);
     }
     
-    public static boolean isPlayableFile(File file) {
+    public static boolean isPlaying(File mediaFile){
+        return audioPlayerProvider.get().isPlaying(mediaFile) || videoPlayerProvider.get().isPlaying(mediaFile);
+    }
+    
+    /**
+     * @return true if the file is video.  It is possible that playback may fail anyway.
+     */
+    public static boolean isPlayableVideoFile(File file, CategoryManager categoryManager) {
+        return OSUtils.isWindows() && categoryManager.getCategoryForFile(file) == Category.VIDEO;
+    }
+    
+    public static boolean isFileAllowedInPlaylist(File file) {
+        return isPlayableAudioFile(file);
+    }
+    
+    public static boolean isPlayableAudioFile(File file){
         String name = file.getName().toLowerCase(Locale.US);
         return name.endsWith(".mp3") || name.endsWith(".ogg") || name.endsWith(".wav");
     }
 
     public static void pause() {
-        playerProvider.get().pause();
+        audioPlayerProvider.get().pause();
+        videoPlayerProvider.get().pause();
     }
     
     public static void stop() {
-        playerProvider.get().stop();
+        audioPlayerProvider.get().stop();
+        videoPlayerProvider.get().stop();
     }
     
     /**Plays file internally if playable.  Launches native player otherwise.
@@ -47,14 +68,16 @@ public class PlayerUtils {
      * @return true if file is played internally, false if played in native player
      */
     public static boolean playOrLaunch(File file, CategoryManager categoryManager) {
-        if (SwingUiSettings.PLAYER_ENABLED.getValue() && isPlayableFile(file)) {
-            play(file);
+        if (SwingUiSettings.PLAYER_ENABLED.getValue() && isPlayableAudioFile(file)) {
+            playAudio(file);
             return true;
-        } else {    
-            NativeLaunchUtils.safeLaunchFile(file, categoryManager);
-            return false;
-        }
-
+        } if (SwingUiSettings.PLAYER_ENABLED.getValue() && isPlayableVideoFile(file, categoryManager)) {
+            playVideo(file);
+            return true;
+        } 
+  
+        NativeLaunchUtils.safeLaunchFile(file, categoryManager);
+        return false;
     }
     
     /**
@@ -62,6 +85,6 @@ public class PlayerUtils {
      *         nothing is playing or if the audio source is not a file.
      */
     public static File getCurrentSongFile(){
-        return playerProvider.get().getCurrentSongFile();
+        return audioPlayerProvider.get().getCurrentMediaFile();
     }
 }
