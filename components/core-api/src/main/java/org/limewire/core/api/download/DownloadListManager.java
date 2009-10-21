@@ -13,6 +13,9 @@ import ca.odell.glazedlists.EventList;
  * Defines the manager API for the list of downloads.
  */
 public interface DownloadListManager extends ResultDownloader {
+    /** Property name for a download added event. */
+    public static final String DOWNLOAD_ADDED = "downloadAdded";
+
     /** Property name for downloads completed event. */
     public static final String DOWNLOADS_COMPLETED = "downloadsCompleted";
 
