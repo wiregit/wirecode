@@ -1,8 +1,12 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.FileDialog;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +47,11 @@ public class MacOSXUtils {
      */
     private static final String APP_NAME = "LimeWire.app";
 
+    /**
+     * The name of the app that launches.
+     */
+    private static final String PATH_TO_NATIVE_LIBRARIES = "/Applications/LimeWire.app/Contents/Resources/Java/";
+
     private static boolean nativeLibraryLoadedCorrectly = false;
     
     static {
@@ -65,6 +74,65 @@ public class MacOSXUtils {
     }
 
     private MacOSXUtils() {}
+    
+    /**
+    * If a given library is not loading for some users on OS-X, this method
+    * can be used to trace what other libraries this library is dependent
+    * on and whether those libraries are present on the user's system.
+    */
+    public static String traceLibraryDependencies(String libraryName) {
+        StringBuffer traceResultsBuffer = new StringBuffer("ls command output: ");
+        String lsCommand = "ls " + PATH_TO_NATIVE_LIBRARIES + libraryName;
+        traceResultsBuffer.append( getCommandOutput(lsCommand) );
+        traceResultsBuffer.append( "\n" );
+
+        String otoolCommand = "otool -L " + PATH_TO_NATIVE_LIBRARIES + libraryName;
+        traceResultsBuffer.append("otool command output: ");
+        traceResultsBuffer.append( getCommandOutput(otoolCommand) );
+        traceResultsBuffer.append( "\n" );
+        
+        return traceResultsBuffer.toString();
+    }
+    
+    /**
+    * This method runs a system command and returns the command's output as a string.
+    *
+    */
+    private static String getCommandOutput(String command) {
+        StringBuffer otoolOutputBuffer = new StringBuffer("");
+
+        try {
+            // start the command running
+            Runtime runtime = Runtime.getRuntime();
+            Process process = runtime.exec(command);
+    
+            // put a BufferedReader on the command output
+            InputStream inputstream = process.getInputStream();
+            InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
+            BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
+    
+            // read the command output   
+            String line;
+            while ((line = bufferedreader.readLine()) != null) {
+                otoolOutputBuffer.append(line).append("\n");
+            }
+        
+            // check for otool failure
+            try {
+                if (process.waitFor() != 0) {
+                    otoolOutputBuffer.append("exit value = ");
+                    otoolOutputBuffer.append(process.exitValue());
+                }
+            }
+            catch (InterruptedException e) {
+                System.err.println(e);
+            }
+        } catch (IOException exc) {
+            System.err.println(exc);
+        }
+        return otoolOutputBuffer.toString();
+    }
+
     
     /**
      * Modifies the loginwindow.plist file to either include or exclude

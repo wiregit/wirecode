@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
+
 import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.util.OSUtils;
@@ -29,11 +30,12 @@ public class Dock {
                 hasDock = true;
             } catch (UnsatisfiedLinkError err) {
                  ErrorService.error(err, "java.library.path=" + System.getProperty("java.library.path"));
+                 ErrorService.error(err, "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("libDock.jnilib"));
             }
         }
         HAS_DOCK = hasDock;
-    }
-    
+    }   
+
     /**
      * These constants specify the level of severity of a user 
      * attention request and are used by 
