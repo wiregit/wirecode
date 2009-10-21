@@ -33,6 +33,7 @@
         <dependency org="none" name="mozdom4java" rev="${mozdom4java.version}" conf="compile,runtime"/>
         <dependency org="none" name="MozillaInterfaces" rev="${MozillaInterfaces.version}" conf="compile,runtime"/>
         <dependency org="none" name="MozillaGlue" rev="${MozillaGlue.version}" conf="compile,runtime"/>
+        <dependency org="none" name="jmf" rev="${jmf.version}" conf="compile,runtime"/>
         <dependency org="none" name="jna" rev="${jna.version}" conf="compile,runtime"/>
         <dependency org="none" name="jdic" rev="${jdic.version}" conf="compile,runtime"/>
         <dependency org="none" name="gettext-commons" rev="${gettext-commons.version}" conf="compile,runtime"/>
