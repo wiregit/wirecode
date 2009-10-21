@@ -52,7 +52,7 @@ public class MockDownloadListManager implements DownloadListManager {
 	@Override
 	public EventList<DownloadItem> getSwingThreadSafeDownloads() {
         if (swingThreadDownloadItems == null) {
-            swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(threadSafeDownloadItems);
+            swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(observableDownloadItems);
         }
         return swingThreadDownloadItems;
 	}
