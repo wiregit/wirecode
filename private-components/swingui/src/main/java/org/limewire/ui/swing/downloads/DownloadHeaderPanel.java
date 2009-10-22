@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.downloads;
 
+import java.awt.Cursor;
 import java.awt.Font;
 
 import javax.swing.Icon;
@@ -38,11 +39,10 @@ import com.google.inject.Inject;
  */
 public class DownloadHeaderPanel {
 
-    @Resource
-    private Icon moreButtonArrow;
-    @Resource
-    private Font hyperlinkFont;
-
+    @Resource private Icon moreButtonArrow;
+    @Resource private Font hyperlinkFont;
+    @Resource private Icon scrollPaneNub;
+    
     private final DownloadMediator downloadMediator;    
     private final DownloadHeaderPopupMenu downloadHeaderPopupMenu;
     private final ClearFinishedDownloadAction clearFinishedDownloadAction;
@@ -50,11 +50,12 @@ public class DownloadHeaderPanel {
     private final ComboBoxDecorator comboBoxDecorator;
     
     private final JXPanel component;
-
+    private JComponent dragNub;
+    
     private JLabel titleTextLabel;
     private HyperlinkButton fixStalledButton;
     private HyperlinkButton clearFinishedNowButton;
-    private LimeComboBox moreButton;      
+    private LimeComboBox moreButton;
     
     private EventList<DownloadItem> activeList;
     
@@ -86,6 +87,10 @@ public class DownloadHeaderPanel {
         return component;
     }
     
+    public JComponent getDragComponent() {
+        return dragNub;
+    }
+    
     private void initialize(){
         initializeComponents();        
         layoutComponents();        
@@ -101,6 +106,9 @@ public class DownloadHeaderPanel {
         fixStalledButton = new HyperlinkButton(fixStalledDownloadAction);
         fixStalledButton.setFont(hyperlinkFont);
         fixStalledButton.setVisible(false);
+        
+        dragNub = new JLabel(scrollPaneNub);
+        dragNub.setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
 
         initializeMoreButton();
     }
@@ -109,7 +117,9 @@ public class DownloadHeaderPanel {
         component.add(titleTextLabel, "gapbefore 5, push");   
         component.add(fixStalledButton, "gapafter 5, hidemode 3");  
         component.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
-        component.add(moreButton, "gapafter 5");  
+        component.add(moreButton, "gapafter 5");
+        
+        component.add(dragNub, "pos 0.5al 0");
     }
         
     @Inject

@@ -76,7 +76,7 @@ public class LimeWireSwingUI extends JPanel {
         this.mainDownloadPanel = mainDownloadPanel;
         this.downloadHeaderPanel = downloadHeaderPanel;
     	
-    	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanel.getComponent());
+    	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanel.getComponent(), downloadHeaderPanel.getDragComponent());
     	mainDownloadPanel.setVisible(false);
 
         setLayout(new BorderLayout());
@@ -150,20 +150,26 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-   private LimeSplitPane createSplitPane(final JComponent top, final MainDownloadPanel bottom, JComponent divider) {
+   private LimeSplitPane createSplitPane(final JComponent top, 
+           final MainDownloadPanel bottom, 
+           JComponent divider, JComponent dragComponent) {
         final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
         splitPane.setDividerSize(0);
         bottom.setVisible(false);
         splitPane.setBorder(BorderFactory.createEmptyBorder());
 
-        //Allow bottom panel to be minimized
+        // Allow bottom panel to be minimized
         bottom.setMinimumSize(new Dimension(0, 0));
         
-        //The bottom panel remains the same size when the splitpane is resized
-        splitPane.setResizeWeight(1);  
+        // The bottom panel remains the same size when the splitpane is resized
+        splitPane.setResizeWeight(1);
         
-        //set top panel's minimum height to half of split pane height 
-        //(this fires when the app is initialized)
+        // Move dragability from the entire divider to a single component
+        splitPane.setDividerDraggable(false);
+        splitPane.setDragComponent(dragComponent);
+        
+        // Set top panel's minimum height to half of split pane height 
+        //  (this fires when the app is initialised)
         splitPane.addComponentListener(new ComponentAdapter(){            
             @Override
             public void componentResized(ComponentEvent e) {
