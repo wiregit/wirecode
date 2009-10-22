@@ -95,7 +95,7 @@ public class MacOSXUtils {
     *
     */
     private static String getCommandOutput(String command) {
-        StringBuffer otoolOutputBuffer = new StringBuffer("");
+        StringBuffer outputBuffer = new StringBuffer("");
 
         try {
             // start the command running
@@ -110,14 +110,14 @@ public class MacOSXUtils {
             // read the command output   
             String line;
             while ((line = bufferedreader.readLine()) != null) {
-                otoolOutputBuffer.append(line).append("\n");
+                outputBuffer.append(line).append("\n");
             }
         
-            // check for otool failure
+            // check for command failure
             try {
                 if (process.waitFor() != 0) {
-                    otoolOutputBuffer.append("exit value = ");
-                    otoolOutputBuffer.append(process.exitValue());
+                    outputBuffer.append("exit value = ");
+                    outputBuffer.append(process.exitValue());
                 }
             }
             catch (InterruptedException e) {
@@ -125,7 +125,7 @@ public class MacOSXUtils {
         } catch (IOException exc) {
         }
         
-        return otoolOutputBuffer.toString();
+        return outputBuffer.toString();
     }
 
     
