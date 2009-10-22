@@ -293,9 +293,17 @@ public class UploadMediator implements NavMediator<JComponent> {
     }
     
     /**
+     * Returns true if the specified upload item is a browse item.
+     */
+    public static boolean isBrowseHost(UploadItem uploadItem) {
+        UploadState state = uploadItem.getState();
+        return (state == UploadState.BROWSE_HOST) || (state == UploadState.BROWSE_HOST_DONE);
+    }
+    
+    /**
      * Returns true if the specified upload item may be paused.
      */
-    public boolean isPausable(UploadItem uploadItem) {
+    public static boolean isPausable(UploadItem uploadItem) {
         return (uploadItem.getUploadItemType() == UploadItemType.BITTORRENT) &&
             (uploadItem.getState() == UploadState.UPLOADING);
     }
@@ -303,9 +311,18 @@ public class UploadMediator implements NavMediator<JComponent> {
     /**
      * Returns true if the specified upload item may be resumed.
      */
-    public boolean isResumable(UploadItem uploadItem) {
+    public static boolean isResumable(UploadItem uploadItem) {
         return (uploadItem.getUploadItemType() == UploadItemType.BITTORRENT) &&
             (uploadItem.getState() == UploadState.PAUSED);
+    }
+    
+    /**
+     * Returns true if the specified upload item may be removed.
+     */
+    public static boolean isRemovable(UploadItem uploadItem) {
+        UploadState state = uploadItem.getState();
+        return (state == UploadState.DONE) || (state == UploadState.BROWSE_HOST_DONE) ||
+            (state == UploadState.CANCELED) || (state == UploadState.UNABLE_TO_UPLOAD);
     }
     
     /**
