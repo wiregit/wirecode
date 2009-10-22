@@ -13,11 +13,10 @@ import javax.swing.JTable;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadState;
-import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
 import org.limewire.ui.swing.table.TableRendererEditor;
+import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -99,14 +98,8 @@ class UploadActionRendererEditor extends TableRendererEditor {
      * Updates the visibility of the buttons.
      */
     private void updateButtons(UploadItem uploadItem) {
-        UploadState state = uploadItem.getState();
-        UploadItemType type = uploadItem.getUploadItemType();
-        
-        boolean pausable = (type == UploadItemType.BITTORRENT) && (state == UploadState.UPLOADING);
-        boolean resumable = (type == UploadItemType.BITTORRENT) && (state == UploadState.PAUSED);
-        
-        pauseButton.setVisible(pausable);
-        resumeButton.setVisible(resumable);
+        pauseButton.setVisible(UploadMediator.isPausable(uploadItem));
+        resumeButton.setVisible(UploadMediator.isResumable(uploadItem));
     }
     
     /**

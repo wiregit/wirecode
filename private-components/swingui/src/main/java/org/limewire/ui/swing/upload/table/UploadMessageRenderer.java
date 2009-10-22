@@ -91,7 +91,7 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
         case LIMIT_REACHED:
             return I18n.tr("Unable to upload: upload limit reached");
         default:
-            return null;
+            return I18n.tr("Unable to upload: " + errorState);
         }
     }
 }
