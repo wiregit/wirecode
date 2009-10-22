@@ -114,7 +114,9 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             @Override
             public boolean visit(RemoteFileDescContext context) {
                 int code = context.getLastHttpCode();
-                return code < 400 || code >= 499;
+                // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+                // all 4xx codes are error codes in http.
+                return code < 400 || code > 499;
             }
         });
     }

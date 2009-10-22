@@ -17,7 +17,7 @@ public class RemoteFileDescContext {
     private final RemoteFileDesc remoteFileDesc;
     
     /** The last http status code this received, if failure. */
-    private int lastHttpCode;
+    private int lastHttpCode = -1;
     
     /**
      * The number of times this download has failed while attempting

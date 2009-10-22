@@ -447,7 +447,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
     
     @Override
-    protected synchronized boolean applyToSources(Visitor<RemoteFileDescContext> contextVisitor) {
+    protected synchronized boolean visitSources(Visitor<RemoteFileDescContext> contextVisitor) {
         for(RemoteFileDescContext context : new MultiIterable<RemoteFileDescContext>(verifiedHosts, newHosts, testedLocations)) {
             if(!contextVisitor.visit(context)) {
                 return false;

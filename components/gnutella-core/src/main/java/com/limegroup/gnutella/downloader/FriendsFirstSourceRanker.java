@@ -73,9 +73,9 @@ public class FriendsFirstSourceRanker extends AbstractSourceRanker {
     }
     
     @Override
-    protected boolean applyToSources(Visitor<RemoteFileDescContext> contextVisitor) {
-        if(pingRanker.applyToSources(contextVisitor)) {
-            return legacyRanker.applyToSources(contextVisitor);
+    protected boolean visitSources(Visitor<RemoteFileDescContext> contextVisitor) {
+        if(pingRanker.visitSources(contextVisitor)) {
+            return legacyRanker.visitSources(contextVisitor);
         } else {
             return false;
         }

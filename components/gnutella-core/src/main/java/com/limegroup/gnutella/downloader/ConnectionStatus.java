@@ -222,14 +222,6 @@ public class ConnectionStatus {
 
     @Override
     public String toString() {
-        switch(STATUS) {
-        case NO_FILE: return "No File";
-        case QUEUED: return "Queued";
-        case CONNECTED: return "Connected";
-        case NO_DATA: return "No Data";
-        case PARTIAL_DATA: return "Partial Data";
-        case THEX_RESPONSE: return "Thex Response";
-        default: return "Unknown: " + STATUS;
-        }
+        return STATUS.toString();
     }
 }

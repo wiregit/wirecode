@@ -45,7 +45,7 @@ public abstract class AbstractSourceRanker implements SourceRanker {
         final long now = System.currentTimeMillis();        
         final Visitor<RemoteFileDescContext> rfdValidator = getRfdVisitor();
         final AtomicBoolean usable = new AtomicBoolean(false);
-        applyToSources(new Visitor<RemoteFileDescContext>() {
+        visitSources(new Visitor<RemoteFileDescContext>() {
             @Override
             public boolean visit(RemoteFileDescContext context) {
                 if((rfdValidator == null || rfdValidator.visit(context)) && !context.isBusy(now)) {
@@ -67,7 +67,7 @@ public abstract class AbstractSourceRanker implements SourceRanker {
         final AtomicInteger waitTime = new AtomicInteger(Integer.MAX_VALUE);
         final long now = System.currentTimeMillis();
         final Visitor<RemoteFileDescContext> rfdValidator = getRfdVisitor();
-        applyToSources(new Visitor<RemoteFileDescContext>() {
+        visitSources(new Visitor<RemoteFileDescContext>() {
             @Override
             public boolean visit(RemoteFileDescContext context) {
                 if((rfdValidator == null || rfdValidator.visit(context)) && context.isBusy(now)) {
@@ -109,5 +109,11 @@ public abstract class AbstractSourceRanker implements SourceRanker {
         return rfdVisitor;
     }
     
-    abstract protected boolean applyToSources(Visitor<RemoteFileDescContext> contextVisitor);
+    /**
+     * Visits each source in the ranker with the visitor.
+     * When the visitor returns false, iteration stops and this method returns false.
+     * If all sources are visited (with the iterator returning true for each one),
+     * then this method returns true.
+     */
+    abstract protected boolean visitSources(Visitor<RemoteFileDescContext> contextVisitor);
 }

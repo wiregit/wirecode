@@ -126,7 +126,7 @@ public class LegacyRanker extends AbstractSourceRanker {
     }
     
     @Override
-    protected boolean applyToSources(Visitor<RemoteFileDescContext> contextVisitor) {
+    protected boolean visitSources(Visitor<RemoteFileDescContext> contextVisitor) {
         for(RemoteFileDescContext context : rfds) {
             if(!contextVisitor.visit(context)) {
                 return false;
