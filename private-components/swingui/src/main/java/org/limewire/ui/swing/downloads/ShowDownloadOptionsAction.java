@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 class ShowDownloadOptionsAction extends AbstractAction {
     @Inject
     public ShowDownloadOptionsAction() {
-        super(I18n.tr("Download Options..."));
+        super(I18n.tr("More Transfer Options..."));
     }
     
     @Override
