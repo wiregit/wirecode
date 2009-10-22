@@ -63,11 +63,9 @@ class UploadActionHandler {
         } else if (actionCommmand == PLAY_COMMAND){
             PlayerUtils.playOrLaunch(item.getFile(), categoryManager);
         } else if (actionCommmand == PAUSE_COMMAND) {
-            // TODO implement
-            System.out.println("pausing upload...");
+            item.pause();
         } else if (actionCommmand == RESUME_COMMAND) {
-            // TODO implement
-            System.out.println("resuming upload...");
+            item.resume();
         }
     }
 }

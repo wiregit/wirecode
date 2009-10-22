@@ -102,9 +102,8 @@ class UploadActionRendererEditor extends TableRendererEditor {
         UploadState state = uploadItem.getState();
         UploadItemType type = uploadItem.getUploadItemType();
         
-        // TODO determine valid conditions
         boolean pausable = (type == UploadItemType.BITTORRENT) && (state == UploadState.UPLOADING);
-        boolean resumable = (type == UploadItemType.BITTORRENT) && (state != UploadState.UPLOADING);
+        boolean resumable = (type == UploadItemType.BITTORRENT) && (state == UploadState.WAITING);
         
         pauseButton.setVisible(pausable);
         resumeButton.setVisible(resumable);
