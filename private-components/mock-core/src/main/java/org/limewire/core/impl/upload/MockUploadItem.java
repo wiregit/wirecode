@@ -25,6 +25,7 @@ public class MockUploadItem implements UploadItem {
     private volatile long amtUploaded;
     private Category category;
     private RemoteHost uploadRemoteHost;
+    private final long startTime;
     
     private volatile boolean running = true;
     
@@ -34,6 +35,8 @@ public class MockUploadItem implements UploadItem {
         this.fileSize = fileSize;
         this.amtUploaded = amtUploaded;
         this.category = category;
+        
+        startTime = System.currentTimeMillis();
         
         if (this.state == UploadState.UPLOADING) {
             start();
@@ -197,6 +200,11 @@ public class MockUploadItem implements UploadItem {
         return uploadRemoteHost;
     }
 
+    @Override
+    public long getStartTime() {
+        return startTime;
+    }
+    
     @Override
     public float getSeedRatio() {
         return -1;
