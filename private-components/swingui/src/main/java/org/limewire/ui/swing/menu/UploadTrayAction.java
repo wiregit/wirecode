@@ -6,6 +6,8 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -17,6 +19,9 @@ class UploadTrayAction extends AbstractAction {
     private static final String SHOW_UPLOAD_TEXT = I18n.tr("Show Upload Tray");
     private static final String HIDE_UPLOAD_TEXT = I18n.tr("Hide Upload Tray");
 
+    @InspectablePrimitive(value = "search view", category = DataCategory.USAGE)
+    private static volatile int uploadsViewed = 0;
+    
     @Inject
     public UploadTrayAction() {
         updateText();
@@ -25,8 +30,10 @@ class UploadTrayAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         // Toggle setting.
-        UploadSettings.SHOW_UPLOADS_TRAY.setValue(
-                !UploadSettings.SHOW_UPLOADS_TRAY.getValue());
+        boolean newValue = !UploadSettings.SHOW_UPLOADS_TRAY.getValue(); 
+        UploadSettings.SHOW_UPLOADS_TRAY.setValue(newValue);
+        
+        if (newValue) uploadsViewed++;
     }
     
     /**
