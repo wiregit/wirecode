@@ -5,7 +5,7 @@ package org.limewire.core.api.upload;
  *  the generic {@link UploadItem}. 
  */
 public enum UploadErrorState {
-    LIMIT_REACHED, INTERRUPTED, FILE_ERROR, 
+    LIMIT_REACHED, FILE_ERROR, 
     
     /**
      * The {@link Uploader} managed by the {@link UploadItem} is not in an error state.

@@ -278,8 +278,6 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         switch(errorState){
         case FILE_ERROR:
             return I18n.tr("Unable to upload: file error"); 
-        case INTERRUPTED:
-            return I18n.tr("Unable to upload: transfer interrupted"); 
         case LIMIT_REACHED:
             return I18n.tr("Unable to upload: upload limit reached"); 
         }
