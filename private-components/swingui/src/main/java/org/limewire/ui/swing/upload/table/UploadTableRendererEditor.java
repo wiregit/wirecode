@@ -63,8 +63,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     @Resource private Icon cancelIcon;
     @Resource private Icon cancelIconRollover;
     @Resource private Icon cancelIconPressed;
-    @Resource private Icon friendBrowseHostIcon;
-    @Resource private Icon p2pBrowseHostIcon;
+    @Resource(key="UploadTitleRenderer.friendBrowseHostIcon") private Icon friendBrowseHostIcon;
+    @Resource(key="UploadTitleRenderer.p2pBrowseHostIcon") private Icon p2pBrowseHostIcon;
     
     @Inject
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, ProgressBarDecorator progressBarFactory,

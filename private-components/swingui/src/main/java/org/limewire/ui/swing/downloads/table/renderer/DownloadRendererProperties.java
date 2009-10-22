@@ -27,9 +27,6 @@ public class DownloadRendererProperties {
     @Resource(key="DownloadCancelRendererEditor.cancelIcon") private Icon cancelIcon;
     @Resource(key="DownloadCancelRendererEditor.cancelIconPressed") private Icon cancelIconPressed;
     @Resource(key="DownloadCancelRendererEditor.cancelIconRollover") private Icon cancelIconRollover;
-    
-    @Resource(key="UploadTableRendererEditor.friendBrowseHostIcon") private Icon friendBrowseHostIcon;
-    @Resource(key="UploadTableRendererEditor.p2pBrowseHostIcon") private Icon p2pBrowseHostIcon;
 
     /**
      * Constructs a DownloadRendererProperties object.
@@ -53,14 +50,6 @@ public class DownloadRendererProperties {
     public void decorateComponent(JComponent component) {
         component.setFont(font);
         component.setForeground(foreground);
-    }
-
-    public Icon getBrowseHostFriendIcon() {
-        return friendBrowseHostIcon;
-    }
-    
-    public Icon getBrowseHostP2PIcon() {
-        return p2pBrowseHostIcon;
     }
     
     public Font getFont() {

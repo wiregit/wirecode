@@ -3,20 +3,26 @@ package org.limewire.ui.swing.upload.table;
 import java.awt.Component;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * Cell renderer for the title column in the Uploads table.
  */
 class UploadTitleRenderer extends JLabel implements TableCellRenderer {
 
+    @Resource private Icon friendBrowseHostIcon;
+    @Resource private Icon p2pBrowseHostIcon;
+    
     private final CategoryIconManager iconManager;
     private final DownloadRendererProperties rendererProperties;
     
@@ -26,6 +32,8 @@ class UploadTitleRenderer extends JLabel implements TableCellRenderer {
     public UploadTitleRenderer(CategoryIconManager iconManager) {
         this.iconManager = iconManager;
         this.rendererProperties = new DownloadRendererProperties();
+        
+        GuiUtils.assignResources(this);
         
         rendererProperties.decorateComponent(this);
         setBorder(BorderFactory.createEmptyBorder(0,4,0,0));
@@ -63,9 +71,9 @@ class UploadTitleRenderer extends JLabel implements TableCellRenderer {
         case BROWSE_HOST:
         case BROWSE_HOST_DONE:
             if (uploadItem.getBrowseType() == BrowseType.FRIEND) {
-                setIcon(rendererProperties.getBrowseHostFriendIcon());
+                setIcon(friendBrowseHostIcon);
             } else {
-                setIcon(rendererProperties.getBrowseHostP2PIcon());
+                setIcon(p2pBrowseHostIcon);
             }
             break;
 
