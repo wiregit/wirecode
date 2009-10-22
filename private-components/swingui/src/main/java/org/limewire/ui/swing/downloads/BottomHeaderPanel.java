@@ -163,25 +163,26 @@ public class BottomHeaderPanel {
         uploadButtonPanel.setOpaque(false);
         
         initializeMoreButton();
-        
-        // Install listener to show appropriate popup menu.
-        component.addMouseListener(new MousePopupListener() {
-            @Override
-            public void handlePopupMouseEvent(MouseEvent e) {
-                // Determine popup menu.
-                JPopupMenu popupMenu = null;
-                if (downloadButtonPanel.isVisible()) {
-                    popupMenu = downloadHeaderPopupMenu;
-                } else if (uploadButtonPanel.isVisible()) {
-                    popupMenu = uploadMediator.getHeaderPopupMenu();
-                }
-                
-                // Display popup menu.
-                if (popupMenu != null) {
-                    popupMenu.show(component, e.getX(), e.getY());
-                }
-            }
-        });
+
+        // TODO reinstate this after "nubbins" resize button is implemented
+//        // Install listener to show appropriate popup menu.
+//        component.addMouseListener(new MousePopupListener() {
+//            @Override
+//            public void handlePopupMouseEvent(MouseEvent e) {
+//                // Determine popup menu.
+//                JPopupMenu popupMenu = null;
+//                if (downloadButtonPanel.isVisible()) {
+//                    popupMenu = downloadHeaderPopupMenu;
+//                } else if (uploadButtonPanel.isVisible()) {
+//                    popupMenu = uploadMediator.getHeaderPopupMenu();
+//                }
+//                
+//                // Display popup menu.
+//                if (popupMenu != null) {
+//                    popupMenu.show(component, e.getX(), e.getY());
+//                }
+//            }
+//        });
     }
     
     private void layoutComponents(){
