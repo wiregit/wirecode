@@ -17,6 +17,7 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.SegmentLayout;
+import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -29,7 +30,7 @@ public class SetupPage2 extends WizardPage {
     private final LibraryData libraryData;
 
     @Resource private Icon p2pSharedListIcon;
-    @Resource private Icon sharingMyFilesMacIcon;
+    @Resource private Icon sharingMyFilesNoStoreIcon;
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
 
@@ -84,25 +85,21 @@ public class SetupPage2 extends WizardPage {
     }
 
     private void initSettings() {
-        shareDownloadedFilesCheckBox
-                .setSelected(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES
-                        .getValue());
+        shareDownloadedFilesCheckBox.setSelected(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
     }
 
     @Override
     public void applySettings() {
         // Auto-Sharing downloaded files Setting
-        SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES
-                .setValue(shareDownloadedFilesCheckBox.isSelected());
+        SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareDownloadedFilesCheckBox.isSelected());
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareDownloadedFilesCheckBox.isSelected());
         InstallSettings.AUTO_SHARING_OPTION.setValue(true);
     }
 
     @Override
     public String getFooter() {
-        return OSUtils.isMacOSX() ? I18n
-                .tr("All settings can be changed later from LimeWire > Preferences") : I18n
-                .tr("All settings can be changed later in Tools > Options");
+        return OSUtils.isMacOSX() ? I18n.tr("All settings can be changed later from LimeWire > Preferences") 
+                : I18n.tr("All settings can be changed later in Tools > Options");
     }
 
     @Override
@@ -123,28 +120,19 @@ public class SetupPage2 extends WizardPage {
         
         JPanel autoSharingPanel = new JPanel(new MigLayout("insets 0, gap 0, nogrid"));
 
-        autoSharingPanel.add(createAndDecorateHeader(I18n
-                .tr("Files in your Public Shared list are shared with the world.")),
+        autoSharingPanel.add(createAndDecorateHeader(I18n.tr("Files in your Public Shared list are shared with the world.")),
                 "alignx center, wrap");
 
         if (newInstall) {
             autoSharingPanel.add(shareDownloadedFilesCheckBox);
-            autoSharingPanel.add(createAndDecorateMultiLine(I18n
-                    .tr("Add files I download from P2P Users to my Public Shared list."),
+            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from P2P Users to my Public Shared list."),
                     shareDownloadedFilesCheckBox));
-            autoSharingPanel
-            .add(
-                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+            autoSharingPanel.add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
                     "wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-            autoSharingPanel
-                    .add(
-                            createAndDecorateSubHeading(I18n
-                                    .tr("LimeWire will add files you download from P2P Users into your Public Shared list.")),
+            autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("LimeWire will add files you download from P2P Users into your Public Shared list.")),
                             "alignx center");
-            autoSharingPanel
-            .add(
-                    createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
+            autoSharingPanel.add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
                     "wrap");
         }
 
@@ -156,16 +144,14 @@ public class SetupPage2 extends WizardPage {
         JPanel outerPanel = new JPanel(new GridBagLayout());
         
         Icon myFilesIcon = null;
-        if (OSUtils.isMacOSX()) {
-            myFilesIcon = sharingMyFilesMacIcon;
-        } 
-        else {
+        if (StoreMediator.canShowStoreButton()) {
             myFilesIcon = sharingMyFilesIcon;
+        } else {
+            myFilesIcon = sharingMyFilesNoStoreIcon;
         }
         
         JPanel modifyInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
-        modifyInfoPanel.add(createAndDecorateHeader(I18n
-                .tr("To see or modify files in your Public Shared list, go to")),
+        modifyInfoPanel.add(createAndDecorateHeader(I18n.tr("To see or modify files in your Public Shared list, go to")),
                 "alignx center, wrap");
 
         JLabel myFiles = new JLabel(I18n.tr("My Files"), myFilesIcon, JLabel.CENTER);
@@ -174,8 +160,7 @@ public class SetupPage2 extends WizardPage {
 
         modifyInfoPanel.add(myFiles, "alignx center");
         modifyInfoPanel.add(new JLabel(sharingArrowIcon), "aligny top, gaptop 17");
-        modifyInfoPanel.add(new JLabel(I18n.tr("Public Shared"), p2pSharedListIcon,
-                JLabel.RIGHT), "aligny top, gaptop 15");
+        modifyInfoPanel.add(new JLabel(I18n.tr("Public Shared"), p2pSharedListIcon, JLabel.RIGHT), "aligny top, gaptop 15");
 
         outerPanel.add(modifyInfoPanel, new GridBagConstraints());
         
@@ -195,11 +180,9 @@ public class SetupPage2 extends WizardPage {
         JLabel label;
         
         if(fourUpgrade) {
-            label = createAndDecorateHeader(I18n
-                    .tr("Shared files from your old version will continue to be shared with the world."));
+            label = createAndDecorateHeader(I18n.tr("Shared files from your old version will continue to be shared with the world."));
         } else {
-            label = createAndDecorateHeader(I18n
-                    .tr("{0} shared files from your previous version will continue to be shared with the world.", 
+            label = createAndDecorateHeader(I18n.tr("{0} shared files from your previous version will continue to be shared with the world.", 
                             peekNumPublicSharedFiles()));
         }
         

@@ -27,27 +27,12 @@ public class SetupWizard {
         createWizard(decoratorFactory.get(), libraryData);
     }
 
-    public static boolean shouldShowWizard(Application application) {
-        if (shouldShowPage1()) {
-            return true;
-        }
-
-        String lastRunVersion = InstallSettings.LAST_VERSION_RUN.get();
-        if (lastRunVersion != null && !lastRunVersion.equals(application.getVersion())) {
-            return true;
-        }
-
-        return false;
+    public static boolean shouldShowWizard() {
+        return shouldShowPage1();
     }
 
-    public void showDialog(Frame owner, Application application) {
-            
+    public void showDialog(Frame owner) {           
         wizard.showDialog(owner);
-
-        // Sets the upgraded flag after the setup wizard completes
-        InstallSettings.UPGRADED_TO_5.setValue(true);
-        InstallSettings.LAST_VERSION_RUN.set(application.getVersion());
-        InstallSettings.PREVIOUS_RAN_VERSIONS.add(application.getVersion());
     }
 
     private void createWizard(SetupComponentDecoratorFactory decoratorFactory,

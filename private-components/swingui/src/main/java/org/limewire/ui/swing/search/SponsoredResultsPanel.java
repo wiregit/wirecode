@@ -20,7 +20,6 @@ import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -114,11 +113,7 @@ public class SponsoredResultsPanel extends JXPanel {
                     navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
                     break;
                 case STORE:
-                    storeMediator.getComponent().load(result.getUrl());
-                    NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME);
-                    if(item != null) {
-                        item.select();
-                    }
+                    storeMediator.load(result.getUrl());
                     break;
                 case EXTERNAL:
                 default:

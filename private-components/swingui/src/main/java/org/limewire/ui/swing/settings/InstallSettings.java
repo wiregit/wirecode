@@ -74,6 +74,13 @@ public final class InstallSettings extends LimeWireSettings {
     public static final BooleanSetting UPGRADED_TO_5 =
         FACTORY.createBooleanSetting("UPGRADED_TO_5", false);
     
+    /**
+     * True if the geolocation has been located for a new install,
+     * false otherwise.
+     */
+    public static final BooleanSetting HAS_LOADED_LWS_GEO =
+        FACTORY.createBooleanSetting("HAS_LOADED_LWS_GEO", false);
+    
     /** Whether to use the old style pro dialog or the new one. */
     public static final ProbabilisticBooleanSetting RANDOM_USE_MODAL = 
         FACTORY.createRemoteProbabilisticBooleanSetting("RANDOM_USE_MODAL", .5f, "InstallSettings.UseOldProNag", 0f, 1f);

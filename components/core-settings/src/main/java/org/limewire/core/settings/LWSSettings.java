@@ -2,6 +2,7 @@ package org.limewire.core.settings;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
 /**
@@ -64,5 +65,11 @@ public final class LWSSettings extends LimeProps {
      */
     public static final BooleanSetting LWS_IS_ENABLED = FACTORY.createRemoteBooleanSetting(
             "LWS_IS_ENABLED", true, "LWSSettings.lwsIsEnabled");
+    
+    /**
+     * A list of country codes where its appropriate to show the LWS.
+     */
+    public static final StringArraySetting LWS_VALID_COUNTRY_CODES = FACTORY.createRemoteStringArraySetting(
+            "LWS_VALID_COUNTRY_CODES", new String[]{"US"}, "LWSSettings.lwsValidCountryCodes");
    
 }

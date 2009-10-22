@@ -327,5 +327,10 @@ public final class SwingUiSettings extends LimeProps {
         }
         return builder.build();
     }    
-
+    
+    /**
+     * True if Store related items should be shown, false otherwise.
+     */
+    public static final BooleanSetting SHOW_STORE_COMPONENTS = 
+        FACTORY.createBooleanSetting("SHOW_STORE_COMPONENTS", false);
 }

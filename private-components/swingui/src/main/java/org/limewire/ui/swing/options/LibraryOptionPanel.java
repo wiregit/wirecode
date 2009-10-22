@@ -13,6 +13,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -26,7 +27,7 @@ import com.google.inject.Provider;
 public class LibraryOptionPanel extends OptionPanel {
     
     @Resource private Icon p2pSharedListIcon;
-    @Resource private Icon sharingMyFilesMacIcon;
+    @Resource private Icon sharingMyFilesNoStoreIcon;
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
     
@@ -40,8 +41,7 @@ public class LibraryOptionPanel extends OptionPanel {
     private final Provider<ITunesOptionPanel> iTunesOptionPanelProvider;
     
     @Inject
-    public LibraryOptionPanel(
-            Provider<UnsafeTypeOptionPanel> unsafeTypeOptionPanelProvider,
+    public LibraryOptionPanel(Provider<UnsafeTypeOptionPanel> unsafeTypeOptionPanelProvider,
             Provider<ITunesOptionPanel> iTunesOptionPanelProvider,
             Application application) {
         this.application = application;
@@ -58,8 +58,7 @@ public class LibraryOptionPanel extends OptionPanel {
 
         if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
             add(getITunesPanel(), "growx, wrap");
-        }
-        else {
+        } else {
             iTunesPanel = null;
         }
         
@@ -204,11 +203,10 @@ public class LibraryOptionPanel extends OptionPanel {
         private void addModifyInfo() {
             
             Icon myFilesIcon = null;
-            if (OSUtils.isMacOSX()) {
-                myFilesIcon = sharingMyFilesMacIcon;
-            } 
-            else {
+            if (StoreMediator.canShowStoreButton()) {
                 myFilesIcon = sharingMyFilesIcon;
+            } else {
+                myFilesIcon = sharingMyFilesNoStoreIcon;
             }
             
             JPanel modifyInfoPanel = new JPanel(new MigLayout("nogrid, insets 0, gap 0"));
@@ -225,27 +223,22 @@ public class LibraryOptionPanel extends OptionPanel {
             modifyInfoPanel.add(new JLabel(sharingArrowIcon), "aligny top, gaptop 17");
             
             
-            modifyInfoPanel
-                    .add(new JLabel(I18n.tr("Public Shared"), p2pSharedListIcon, JLabel.RIGHT), "aligny top, gaptop 15");
+            modifyInfoPanel.add(new JLabel(I18n.tr("Public Shared"), p2pSharedListIcon, JLabel.RIGHT), "aligny top, gaptop 15");
 
             add(modifyInfoPanel, "wrap");
         }
         
         @Override
         boolean applyOptions() {
-            SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES
-                .setValue(shareP2PdownloadedFilesCheckBox.isSelected());
-            SharingSettings.ALLOW_PARTIAL_SHARING
-                .setValue(shareP2PdownloadedFilesCheckBox.isSelected());
+            SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
+            SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
             return unsafeTypeOptionPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES
-                    .getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
-                || SharingSettings.ALLOW_PARTIAL_SHARING
-                    .getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
+            return SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
+                || SharingSettings.ALLOW_PARTIAL_SHARING.getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
                 || unsafeTypeOptionPanel.hasChanged();
         }
 

@@ -9,21 +9,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JPanel;
 
 import org.limewire.core.api.Application;
-import org.limewire.inject.EagerSingleton;
 import org.limewire.ui.swing.browser.Browser;
-import org.limewire.ui.swing.browser.BrowserUtils;
-import org.limewire.ui.swing.browser.UriAction;
-import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-@EagerSingleton
+@Singleton
 public class StorePanel extends JPanel {
     private final Browser browser;
 
@@ -69,19 +64,6 @@ public class StorePanel extends JPanel {
                 }
             }
         });     
-        BrowserUtils.addTargetedUrlAction("_lwStore", new UriAction() {
-            @Override
-            public boolean uriClicked(final TargetedUri targetedUrl) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        navigator.getNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME).select();
-                        load(targetedUrl.getUri());
-                    }
-                });
-                return true;
-            }
-        }); 
     }
     
     /**
@@ -103,13 +85,9 @@ public class StorePanel extends JPanel {
 
     public void load(String url) {
         url = application.addClientInfoToUrl(url);
-        if (!MozillaInitialization.isInitialized()) {
-            NativeLaunchUtils.openURL(url);
-        } else {
-            // Reset the page to blank before continuing -- blocking is OK
-            // because this is fast.
-            MozillaAutomation.blockingLoad(browser, "about:blank");
-            browser.load(url + "&isClient=true");
-        }
+        // Reset the page to blank before continuing -- blocking is OK
+        // because this is fast.
+        MozillaAutomation.blockingLoad(browser, "about:blank");
+        browser.load(url + "&isClient=true");
     }
 }

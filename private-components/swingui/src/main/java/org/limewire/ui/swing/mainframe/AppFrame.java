@@ -27,12 +27,18 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
+import org.limewire.core.settings.GeocodeSettings;
+import org.limewire.core.settings.LWSSettings;
+import org.limewire.geocode.GeocodeInformation;
+import org.limewire.geocode.GeocodeInformation.Property;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.inject.LimeWireInjectModule;
 import org.limewire.inject.Modules;
 import org.limewire.inspection.Inspector;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
@@ -97,6 +103,7 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private TrayNotifier trayNotifier;
     @Inject private LimeMenuBar limeMenuBar;
     @Inject private DelayedShutdownHandler delayedShutdownHandler;
+    @Inject private Provider<GeocodeInformation> geoLocation;
     
     private OptionsDialog lastOptionsDialog;
     
@@ -193,24 +200,34 @@ public class AppFrame extends SingleFrameApplication {
     }
     
     @Override
-    protected void ready() {
-        if (SetupWizard.shouldShowWizard(application)) {
-            JXPanel glassPane = new JXPanel();
-            glassPane.setOpaque(false);
-            glassPane.setBackgroundPainter(new AbstractPainter<JComponent>() {
-                @Override
-                protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
-                    g.setPaint(glassPaneColor);
-                    g.fillRect(0, 0, width, height);
-                }
-            });
-            getMainFrame().setGlassPane(glassPane);
+    protected void ready() {        
+        String lastRunVersion = InstallSettings.LAST_VERSION_RUN.get();
+        if (lastRunVersion != null && !lastRunVersion.equals(application.getVersion())) {
+            initializeNewInstall();
+        }
+        if (SetupWizard.shouldShowWizard()) {
+            showSetupWizard();
+        }
 
-            ui.hideMainPanel();
-            glassPane.setVisible(true);
-            setupWizardProvider.get().showDialog(getMainFrame(), application);
-            glassPane.setVisible(false);
-            ui.showMainPanel();
+        // if still no geo-location found, register listener for geo update
+        if(!InstallSettings.HAS_LOADED_LWS_GEO.getValue()) {
+            // check if the geo locates, otherwise register a listener for when it
+            // is calculated. 
+            if(geoLocation.get().isEmpty()) {
+                GeocodeSettings.GEO_LOCATION.addSettingListener(new SettingListener(){                    
+                    @Override
+                    public void settingChanged(SettingEvent evt) {
+                        if(!geoLocation.get().isEmpty()) {
+                            updateGeoLocation();
+                            GeocodeSettings.GEO_LOCATION.removeSettingListener(this);
+                        }
+                    }
+                });
+            }
+            // possible but unlikely geo was updated before listener was installed
+            if(!geoLocation.get().isEmpty()) {
+                updateGeoLocation();
+            }
         }
         
         // Make absolutely positively certain that we've set this to true.
@@ -226,6 +243,70 @@ public class AppFrame extends SingleFrameApplication {
 
         if(!isStartup) {
             ui.loadProNag();
+        }
+    }
+    
+    /**
+     * Run iff this is a new install of LW.
+     */
+    private void initializeNewInstall() {
+        // reset the geo setting so we properlly reassociate this LW install
+        // with the the LWS.
+        InstallSettings.HAS_LOADED_LWS_GEO.set(false);
+        SwingUiSettings.SHOW_STORE_COMPONENTS.set(false);
+
+        // check if the geolocation already exists, this will ensure the 
+        // ui visuals in the setup wizard are correct.
+        if(!geoLocation.get().isEmpty()) {
+            updateGeoLocation();
+        }
+        
+        //setup wizard is always shown on new installs
+        showSetupWizard();
+        
+        // Sets the upgraded flag after the setup wizard completes
+        InstallSettings.UPGRADED_TO_5.setValue(true);
+        InstallSettings.LAST_VERSION_RUN.set(application.getVersion());
+        InstallSettings.PREVIOUS_RAN_VERSIONS.add(application.getVersion());
+    }
+    
+    private void showSetupWizard() {
+        JXPanel glassPane = new JXPanel();
+        glassPane.setOpaque(false);
+        glassPane.setBackgroundPainter(new AbstractPainter<JComponent>() {
+            @Override
+            protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
+                g.setPaint(glassPaneColor);
+                g.fillRect(0, 0, width, height);
+            }
+        });
+        getMainFrame().setGlassPane(glassPane);
+        
+        ui.hideMainPanel();
+        glassPane.setVisible(true);
+        setupWizardProvider.get().showDialog(getMainFrame());
+        glassPane.setVisible(false);
+        ui.showMainPanel();
+    }
+    
+    /**
+	 * When a GeoLocation has been located for this client after a new install,
+     * update whether the LWS components should be shown or not. Disabled modifying
+     * their visibility till the next install.
+	 */
+    private synchronized void updateGeoLocation() {
+    	if(!InstallSettings.HAS_LOADED_LWS_GEO.getValue()) {
+        	String[] validCountryCodes = LWSSettings.LWS_VALID_COUNTRY_CODES.get();
+       		boolean showStoreComponents = false;
+        
+        	for(String country : validCountryCodes) {
+            	if(country.equals(geoLocation.get().getProperty(Property.CountryCode))) {
+                	showStoreComponents = true;
+                	break;
+            	}
+        	}
+        	InstallSettings.HAS_LOADED_LWS_GEO.set(true);
+        	SwingUiSettings.SHOW_STORE_COMPONENTS.set(showStoreComponents);
         }
     }
    
