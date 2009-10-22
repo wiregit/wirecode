@@ -11,7 +11,7 @@ import org.limewire.ui.swing.options.OptionsDialog;
 public class ChangeLanguageAction extends AbstractAction {
     public ChangeLanguageAction() {
         // Always English
-        super("C&hange Language");
+        super("C&hange Language...");
     }
         
     @Override
