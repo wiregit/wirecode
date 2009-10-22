@@ -91,7 +91,7 @@ class CoreUploadItem implements UploadItem {
             return UploadState.QUEUED;
 
         case WAITING_REQUESTS:
-            return UploadState.WAITING;
+            return UploadState.PAUSED;
             
         case LIMIT_REACHED:
         case INTERRUPTED:

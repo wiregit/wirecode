@@ -34,7 +34,7 @@ public enum UploadState {
      * Only related to bittorrent?
      * <p>{@link UploadStatus.WAITING_REQUESTS}
      */
-    WAITING, 
+    PAUSED, 
     
     /**
      * This upload corresponds to a a live browse host.

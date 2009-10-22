@@ -305,7 +305,7 @@ public class UploadMediator implements NavMediator<JComponent> {
      */
     public boolean isResumable(UploadItem uploadItem) {
         return (uploadItem.getUploadItemType() == UploadItemType.BITTORRENT) &&
-            (uploadItem.getState() == UploadState.WAITING);
+            (uploadItem.getState() == UploadState.PAUSED);
     }
     
     /**
@@ -516,7 +516,7 @@ public class UploadMediator implements NavMediator<JComponent> {
             switch (state) {
             case DONE: return 1;
             case UPLOADING: return 2;
-            case WAITING: return 3;
+            case PAUSED: return 3;
             case QUEUED: return 4;
             case UNABLE_TO_UPLOAD: return 5;       
             case CANCELED: return 6;

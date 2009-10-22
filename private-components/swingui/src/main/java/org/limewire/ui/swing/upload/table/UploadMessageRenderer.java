@@ -67,7 +67,7 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
                         GuiUtils.rate2speed(item.getUploadSpeed()));
             }
             
-        case WAITING:
+        case PAUSED:
         case QUEUED:
             return I18n.tr("Waiting...");
             
