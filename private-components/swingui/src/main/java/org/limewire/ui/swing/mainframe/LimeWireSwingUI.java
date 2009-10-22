@@ -30,7 +30,6 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
-import org.limewire.ui.swing.downloads.BottomHeaderPanel;
 import org.limewire.ui.swing.downloads.DownloadVisibilityListener;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;

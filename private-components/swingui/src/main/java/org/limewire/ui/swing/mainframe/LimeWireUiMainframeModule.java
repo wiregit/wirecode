@@ -2,7 +2,6 @@ package org.limewire.ui.swing.mainframe;
 
 import javax.swing.JLayeredPane;
 
-import org.limewire.ui.swing.downloads.BottomHeaderPanel;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.warnings.DocumentWarningController;
 

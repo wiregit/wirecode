@@ -1,11 +1,10 @@
-package org.limewire.ui.swing.downloads;
+package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -42,10 +40,12 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dock.DockIconFactory;
+import org.limewire.ui.swing.downloads.ClearFinishedDownloadAction;
+import org.limewire.ui.swing.downloads.DownloadHeaderPopupMenu;
+import org.limewire.ui.swing.downloads.DownloadMediator;
+import org.limewire.ui.swing.downloads.FixStalledDownloadAction;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
-import org.limewire.ui.swing.listener.MousePopupListener;
-import org.limewire.ui.swing.mainframe.BottomPanel;
 import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.upload.UploadMediator;
@@ -104,8 +104,10 @@ public class BottomHeaderPanel {
     private boolean downloadSelected;
     
     @Inject
-    public BottomHeaderPanel(DownloadMediator downloadMediator, DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
-            ClearFinishedDownloadAction clearFinishedNowAction, FixStalledDownloadAction fixStalledDownloadAction,
+    public BottomHeaderPanel(DownloadMediator downloadMediator,
+            DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
+            ClearFinishedDownloadAction clearFinishedNowAction,
+            FixStalledDownloadAction fixStalledDownloadAction,
             UploadMediator uploadMediator,
             ComboBoxDecorator comboBoxDecorator, 
             BarPainterFactory barPainterFactory, 
@@ -164,7 +166,8 @@ public class BottomHeaderPanel {
         
         initializeMoreButton();
 
-        // TODO reinstate this after "nubbins" resize button is implemented
+        // TODO Reinstate this after "nubbins" resize button is implemented.
+        // Note: This interferes with the divider behavior of the split pane.
 //        // Install listener to show appropriate popup menu.
 //        component.addMouseListener(new MousePopupListener() {
 //            @Override

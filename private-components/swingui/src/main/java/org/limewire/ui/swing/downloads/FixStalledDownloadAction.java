@@ -11,7 +11,7 @@ import com.google.inject.Provider;
 /**
  * Attempts to fix all downloads that are in a stalled state.
  */
-class FixStalledDownloadAction extends AbstractAction {
+public class FixStalledDownloadAction extends AbstractAction {
     private final Provider<DownloadMediator> downloadMediator;
     
     @Inject

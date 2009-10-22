@@ -11,7 +11,7 @@ import com.google.inject.Provider;
 /**
  * Clears all downloads that have finished.
  */
-class ClearFinishedDownloadAction extends AbstractAction {
+public class ClearFinishedDownloadAction extends AbstractAction {
     private final Provider<DownloadMediator> downloadMediator;
 
     @Inject
