@@ -11,9 +11,11 @@ import javax.swing.table.TableCellRenderer;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
+import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 /**
  * Cell renderer for the title column in the Uploads table.
@@ -95,7 +97,11 @@ class UploadTitleRenderer extends JLabel implements TableCellRenderer {
             break;
             
         default:
-            setText(uploadItem.getFileName());
+            if (uploadItem.getUploadItemType() == UploadItemType.BITTORRENT) {
+                setText(I18n.tr("{0} (torrent)", uploadItem.getFileName()));
+            } else {
+                setText(uploadItem.getFileName());
+            }
             break;
         }
     }

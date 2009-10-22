@@ -11,8 +11,10 @@ import javax.swing.table.TableCellRenderer;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 
 import com.google.inject.Inject;
@@ -72,7 +74,11 @@ public class DownloadTitleRenderer extends JLabel implements TableCellRenderer {
         }
     }
     
-    private void updateTitle(DownloadItem item){
-        setText(PropertiableFileUtils.getNameProperty(item, true));
+    private void updateTitle(DownloadItem item) {
+        if (item.getDownloadItemType() == DownloadItemType.BITTORRENT) {
+            setText(I18n.tr("{0} (torrent)", PropertiableFileUtils.getNameProperty(item, true)));
+        } else {
+            setText(PropertiableFileUtils.getNameProperty(item, true));
+        }
     }
 }
