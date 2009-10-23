@@ -93,6 +93,7 @@ public class UploadPopupMenu extends JPopupMenu {
         ActionListener listener = new DefaultMenuListener();
         
         boolean done = UploadMediator.isRemovable(uploadItem);
+        boolean browseItem = UploadMediator.isBrowseHost(uploadItem);
         
         if (done) {
             JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
@@ -101,7 +102,7 @@ public class UploadPopupMenu extends JPopupMenu {
             add(removeMenuItem);
         }
         
-        if (!UploadMediator.isBrowseHost(uploadItem)) {
+        if (!browseItem) {
             if (getComponentCount() > 0) {
                 addSeparator();
             }
@@ -123,7 +124,7 @@ public class UploadPopupMenu extends JPopupMenu {
             add(showInLibraryMenuItem).setEnabled(libraryManager.getLibraryManagedList().contains(uploadItem.getUrn()));
         }
         
-        if (!done || UploadMediator.isBrowseHost(uploadItem)) {
+        if (!done || browseItem) {
             if (getComponentCount() > 0) {
                 addSeparator();
             }
@@ -146,7 +147,7 @@ public class UploadPopupMenu extends JPopupMenu {
             add(showInListMenu);
         }
             
-        if (!UploadMediator.isBrowseHost(uploadItem)) {
+        if (!browseItem) {
             if (getComponentCount() > 0) {
                 addSeparator();
             }
@@ -165,6 +166,7 @@ public class UploadPopupMenu extends JPopupMenu {
         ActionListener listener = new DefaultMenuListener();
 
         boolean done = UploadMediator.isRemovable(uploadItem);
+        boolean browseItem = UploadMediator.isBrowseHost(uploadItem);
         
         if (done) {
             JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
@@ -173,14 +175,14 @@ public class UploadPopupMenu extends JPopupMenu {
             add(removeMenuItem);
         }
         
-        if (!UploadMediator.isBrowseHost(uploadItem)) {
+        if (!browseItem) {
             JMenuItem locateOnDiskMenuItem = new JMenuItem(I18n.tr("Locate on Disk"));
             locateOnDiskMenuItem.setActionCommand(UploadActionHandler.LOCATE_ON_DISK_COMMAND);
             locateOnDiskMenuItem.addActionListener(listener);
             add(locateOnDiskMenuItem);
         }
         
-        if (!done || UploadMediator.isBrowseHost(uploadItem)) {
+        if (!done || browseItem) {
             if (getComponentCount() > 0) {
                 addSeparator();
             }
@@ -199,7 +201,7 @@ public class UploadPopupMenu extends JPopupMenu {
             add(addToListMenu);
         }
             
-        if (!UploadMediator.isBrowseHost(uploadItem)) {
+        if (!browseItem) {
             if (getComponentCount() > 0) {
                 addSeparator();
             }
