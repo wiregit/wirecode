@@ -224,7 +224,7 @@ public class MockUploadItem implements UploadItem {
 
         @Override
         public FriendPresence getFriendPresence() {
-            return new MockFriendPresence(new MockFriend("uploader"));
+            return new MockFriendPresence(new MockFriend("uploader"), "uploader");
         }
 
         @Override
