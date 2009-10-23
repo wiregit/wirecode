@@ -50,7 +50,7 @@ public class BottomPanel extends JPanel {
         cardLayout = new CardLayout();
         setLayout(cardLayout);
         
-        int savedHeight = SwingUiSettings.DOWNLOAD_TRAY_SIZE.getValue();
+        int savedHeight = SwingUiSettings.BOTTOM_TRAY_SIZE.getValue();
         int height = (savedHeight == 0) ? preferredHeight : savedHeight;
         setPreferredSize(new Dimension(getPreferredSize().width, height));
         

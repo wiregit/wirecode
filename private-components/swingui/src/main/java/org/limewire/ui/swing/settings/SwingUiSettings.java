@@ -266,8 +266,8 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting RESOLVE_CONNECTION_HOSTNAMES =
         FACTORY.createBooleanSetting("RESOLVE_CONNECTION_HOSTNAMES", true);
     
-    /**Saves the download tray size when it the tray is resized    */
-    public static final IntSetting DOWNLOAD_TRAY_SIZE = 
+    /** Saves the bottom tray size when the tray is resized. */
+    public static final IntSetting BOTTOM_TRAY_SIZE = 
         FACTORY.createIntSetting("DOWNLOAD_TRAY_SIZE", 0);
 
     /**

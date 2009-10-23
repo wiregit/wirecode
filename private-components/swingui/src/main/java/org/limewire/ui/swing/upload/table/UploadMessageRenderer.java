@@ -10,7 +10,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
-import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
+import org.limewire.ui.swing.transfer.TransferRendererResources;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -25,7 +25,7 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
      * Constructs an UploadMessageRenderer.
      */
     public UploadMessageRenderer() {
-        new DownloadRendererProperties().decorateComponent(this);
+        new TransferRendererResources().decorateComponent(this);
     }
     
     @Override
@@ -55,11 +55,9 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
             if (UploadItemType.BITTORRENT == item.getUploadItemType()) {
                 int numConnections = item.getNumUploadConnections();
                 String ratio = formatter.format(item.getSeedRatio());
-                if (numConnections == 1) {
-                    return I18n.tr("Connected to {0} P2P user, uploading at {1} - Ratio {2}", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
-                } else {
-                    return I18n.tr("Connected to {0} P2P users, uploading at {1} - Ratio {2}", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
-                }
+                return I18n.trn("Connected to {0} P2P user, uploading at {1} - Ratio {2}",
+                        "Connected to {0} P2P users, uploading at {1} - Ratio {2}",                        
+                        numConnections, numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
             } else {
                 return I18n.tr("Uploading - {0} of {1}({2})", 
                         GuiUtils.toUnitbytes(item.getTotalAmountUploaded()), 
@@ -75,7 +73,7 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
             return getErrorMessage(item.getErrorState());
 
         default:
-            return null;
+            return "";
         }
     }
     
@@ -91,7 +89,7 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
         case LIMIT_REACHED:
             return I18n.tr("Unable to upload: upload limit reached");
         default:
-            return I18n.tr("Unable to upload: " + errorState);
+            return I18n.tr("Unable to upload: {0}", errorState);
         }
     }
 }

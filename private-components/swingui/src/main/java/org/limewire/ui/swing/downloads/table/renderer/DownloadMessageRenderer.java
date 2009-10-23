@@ -12,6 +12,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.friend.api.Friend;
+import org.limewire.ui.swing.transfer.TransferRendererResources;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
@@ -22,7 +23,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
     
     @Inject
     public DownloadMessageRenderer(){
-        new DownloadRendererProperties().decorateComponent(this);
+        new TransferRendererResources().decorateComponent(this);
     }
 
     @Override

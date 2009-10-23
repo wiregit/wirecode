@@ -86,7 +86,7 @@ public class MainDownloadPanel extends JPanel {
     @Inject
     public void register() {              
         // Add listener for "show downloads" setting.
-        DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
+        DownloadSettings.SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
            @Override
             public void settingChanged(SettingEvent evt) {
                SwingUtils.invokeLater(new Runnable() {
@@ -98,10 +98,10 @@ public class MainDownloadPanel extends JPanel {
             } 
         });
         
-        //we have to eagerly initialize the table when the ALWAYS_SHOW_DOWNLOAD_TRAY setting
+        //we have to eagerly initialize the table when the SHOW_DOWNLOAD_TRAY setting
         //is set to true on startup, otherwise the table space will be empty and the lines will
         //be put in the first time a download comes in, which looks a little weird
-        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
             initialize();
         }
         
@@ -141,8 +141,8 @@ public class MainDownloadPanel extends JPanel {
         public void propertyChange(PropertyChangeEvent event) {
             if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_ADDED)) {
                 // Display this panel whenever a download is added. 
-                if (!DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
-                    DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.setValue(true);
+                if (!DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
+                    DownloadSettings.SHOW_DOWNLOADS_TRAY.setValue(true);
                 } else {
                     updateVisibility();
                 }
@@ -184,7 +184,7 @@ public class MainDownloadPanel extends JPanel {
             initialize();
         }
         
-        if (DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
             alertDownloadVisibilityListeners(true);
         } else {
             alertDownloadVisibilityListeners(false);

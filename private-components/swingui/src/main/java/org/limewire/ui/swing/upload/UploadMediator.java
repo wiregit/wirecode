@@ -23,7 +23,7 @@ import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.inject.LazySingleton;
+import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -44,7 +44,7 @@ import com.google.inject.Inject;
  * Mediator to control the interaction between the uploads table and various
  * services.
  */
-@LazySingleton
+@EagerSingleton
 public class UploadMediator {
     public enum SortOrder {
         ORDER_STARTED, NAME, PROGRESS, TIME_REMAINING, SPEED, STATUS, 
@@ -78,7 +78,7 @@ public class UploadMediator {
         sortAscending = true;
         
         sortedList = GlazedListsFactory.sortedList(uploadListManager.getSwingThreadSafeUploads(),
-                getSortComparator(sortOrder, sortAscending));
+                new OrderedComparator<UploadItem>(getSortComparator(sortOrder), sortAscending));
     }
     
     /**
@@ -200,30 +200,31 @@ public class UploadMediator {
         this.sortAscending = ascending;
         
         // Apply sort order.
-        sortedList.setComparator(getSortComparator(sortOrder, ascending));
+        sortedList.setComparator(new OrderedComparator<UploadItem>(
+                getSortComparator(sortOrder), ascending));
     }
     
     /**
      * Returns a comparator for the specified sort key and direction.
      */
-    private Comparator<UploadItem> getSortComparator(SortOrder sortOrder, boolean ascending) {
+    private Comparator<UploadItem> getSortComparator(SortOrder sortOrder) {
         switch (sortOrder) {
         case ORDER_STARTED:
-            return new OrderStartedComparator(ascending);
+            return new OrderStartedComparator();
         case NAME:
-            return new NameComparator(ascending);
+            return new NameComparator();
         case PROGRESS:
-            return new ProgressComparator(ascending);
+            return new ProgressComparator();
         case TIME_REMAINING:
-            return new TimeRemainingComparator(ascending);
+            return new TimeRemainingComparator();
         case SPEED:
-            return new SpeedComparator(ascending);
+            return new SpeedComparator();
         case STATUS:
-            return new StateComparator(ascending);
+            return new StateComparator();
         case FILE_TYPE:
-            return new CategoryComparator(ascending);
+            return new CategoryComparator();
         case FILE_EXTENSION:
-            return new FileExtensionComparator(ascending);
+            return new FileExtensionComparator();
         default:
             throw new IllegalArgumentException("Unknown SortOrder: " + sortOrder);
         }
@@ -234,13 +235,13 @@ public class UploadMediator {
      */
     public boolean hasPausable() {
         EventList<UploadItem> uploadList = getUploadList();
-        uploadList.getReadWriteLock().writeLock().lock();
+        uploadList.getReadWriteLock().readLock().lock();
         try {
             for (UploadItem item : uploadList) {
                 if (isPausable(item)) return true;
             }
         } finally {
-            uploadList.getReadWriteLock().writeLock().unlock();
+            uploadList.getReadWriteLock().readLock().unlock();
         }
         return false;
     }
@@ -250,13 +251,13 @@ public class UploadMediator {
      */
     public boolean hasResumable() {
         EventList<UploadItem> uploadList = getUploadList();
-        uploadList.getReadWriteLock().writeLock().lock();
+        uploadList.getReadWriteLock().readLock().lock();
         try {
             for (UploadItem item : uploadList) {
                 if (isResumable(item)) return true;
             }
         } finally {
-            uploadList.getReadWriteLock().writeLock().unlock();
+            uploadList.getReadWriteLock().readLock().unlock();
         }
         return false;
     }
@@ -266,13 +267,13 @@ public class UploadMediator {
      */
     public boolean hasState(UploadState state) {
         EventList<UploadItem> uploadList = getUploadList();
-        uploadList.getReadWriteLock().writeLock().lock();
+        uploadList.getReadWriteLock().readLock().lock();
         try {
             for (UploadItem item : uploadList) {
                 if (item.getState() == state) return true;
             }
         } finally {
-            uploadList.getReadWriteLock().writeLock().unlock();
+            uploadList.getReadWriteLock().readLock().unlock();
         }
         return false;
     }
@@ -282,13 +283,13 @@ public class UploadMediator {
      */
     public boolean hasTorrents() {
         EventList<UploadItem> uploadList = getUploadList();
-        uploadList.getReadWriteLock().writeLock().lock();
+        uploadList.getReadWriteLock().readLock().lock();
         try {
             for (UploadItem item : uploadList) {
                 if (item.getUploadItemType() == UploadItemType.BITTORRENT) return true;
             }
         } finally {
-            uploadList.getReadWriteLock().writeLock().unlock();
+            uploadList.getReadWriteLock().readLock().unlock();
         }
         return false;
     }
@@ -368,13 +369,13 @@ public class UploadMediator {
      */
     public void pauseAll() {
         EventList<UploadItem> uploadList = getUploadList();
-        uploadList.getReadWriteLock().writeLock().lock();
+        uploadList.getReadWriteLock().readLock().lock();
         try {
             for (UploadItem item : uploadList) {
                 if (isPausable(item)) item.pause();
             }
         } finally {
-            uploadList.getReadWriteLock().writeLock().unlock();
+            uploadList.getReadWriteLock().readLock().unlock();
         }
     }
     
@@ -383,13 +384,13 @@ public class UploadMediator {
      */
     public void resumeAll() {
         EventList<UploadItem> uploadList = getUploadList();
-        uploadList.getReadWriteLock().writeLock().lock();
+        uploadList.getReadWriteLock().readLock().lock();
         try {
             for (UploadItem item : uploadList) {
                 if (isResumable(item)) item.resume();
             }
         } finally {
-            uploadList.getReadWriteLock().writeLock().unlock();
+            uploadList.getReadWriteLock().readLock().unlock();
         }
     }
     
@@ -434,48 +435,30 @@ public class UploadMediator {
     }
     
     private static class OrderStartedComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public OrderStartedComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) { 
             if (o1 == o2) return 0;
-            return (ascending ? 1 : -1) * (int) (o1.getStartTime() - o2.getStartTime());
+            return (int) (o1.getStartTime() - o2.getStartTime());
         }      
     }
 
     private static class NameComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public NameComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) {
             if (o1 == o2) return 0;
             String name1 = o1.getFileName();
             String name2 = o2.getFileName();
-            return (ascending ? 1 : -1) * Objects.compareToNullIgnoreCase(name1, name2, false);
+            return Objects.compareToNullIgnoreCase(name1, name2, false);
         }
     }
 
     private static class ProgressComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public ProgressComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) {
             if (o1 == o2) return 0;
             int pct1 = getProgressPct(o1);
             int pct2 = getProgressPct(o2);
-            return (ascending ? 1 : -1) * (pct1 - pct2);
+            return (pct1 - pct2);
         }
         
         private int getProgressPct(UploadItem item) {
@@ -484,50 +467,32 @@ public class UploadMediator {
     }
     
     private static class TimeRemainingComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public TimeRemainingComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) {
             if (o1 == o2) return 0;
             long time1 = o1.getRemainingUploadTime();
             long time2 = o2.getRemainingUploadTime();
-            return (ascending ? 1 : -1) * (int) (time1 - time2);
+            return (int) (time1 - time2);
         }
     }
 
     private static class SpeedComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public SpeedComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) {
             if (o1 == o2) return 0;
             float speed1 = o1.getUploadSpeed();
             float speed2 = o2.getUploadSpeed();
-            return (ascending ? 1 : -1) * (int) (speed1 - speed2);
+            return (int) (speed1 - speed2);
         }
     }
 
     private static class StateComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public StateComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) {
             if (o1 == o2) return 0;
             int value1 = getSortValue(o1.getState());
             int value2 = getSortValue(o2.getState());
-            return (ascending ? 1 : -1) * (value1 - value2);
+            return (value1 - value2);
         }
         
         private int getSortValue(UploadState state) {
@@ -547,28 +512,16 @@ public class UploadMediator {
     }
     
     private static class CategoryComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public CategoryComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) {
             if (o1 == o2) return 0;
             Category cat1 = o1.getCategory();
             Category cat2 = o2.getCategory();
-            return (ascending ? 1 : -1) * cat1.compareTo(cat2);
+            return cat1.compareTo(cat2);
         }
     }
 
     private static class FileExtensionComparator implements Comparator<UploadItem> {
-        private final boolean ascending;
-        
-        public FileExtensionComparator(boolean ascending) {
-            this.ascending = ascending;
-        }
-        
         @Override
         public int compare(UploadItem o1, UploadItem o2) {
             if (o1 == o2) return 0;
@@ -576,14 +529,29 @@ public class UploadMediator {
             String name1 = o1.getFileName();
             String name2 = o2.getFileName();
             if (name1 == null) {
-                return (name2 == null) ? 0 : (ascending ? -1 : 1);
+                return (name2 == null) ? 0 : -1;
             } else if (name2 == null) {
-                return (ascending ? 1 : -1);
+                return 1;
             }
             
             String ext1 = FileUtils.getFileExtension(name1);
             String ext2 = FileUtils.getFileExtension(name2);
-            return (ascending ? 1 : -1) * Objects.compareToNullIgnoreCase(ext1, ext2, false);
+            return Objects.compareToNullIgnoreCase(ext1, ext2, false);
+        }
+    }
+    
+    private static class OrderedComparator<T> implements Comparator<T> {
+        private final Comparator<T> delegate;
+        private final boolean ascending;
+
+        public OrderedComparator(Comparator<T> delegate, boolean ascending) {
+            this.delegate = delegate;
+            this.ascending = ascending;
+        }
+
+        @Override
+        public int compare(T o1, T o2) {
+            return (ascending ? 1 : -1) * delegate.compare(o1, o2);
         }
     }
 }

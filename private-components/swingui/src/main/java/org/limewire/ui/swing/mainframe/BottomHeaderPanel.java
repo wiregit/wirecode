@@ -101,7 +101,7 @@ public class BottomHeaderPanel {
     private LimeComboBox uploadMoreButton;
     
     private EventList<DownloadItem> activeDownloadList;
-    private boolean downloadSelected;
+    private TabId selectedTab;
     
     @Inject
     public BottomHeaderPanel(DownloadMediator downloadMediator,
@@ -341,10 +341,9 @@ public class BottomHeaderPanel {
      * Selects the content for the specified tab id.
      */
     private void select(TabId tabId) {
+        selectedTab = tabId;
+        
         bottomPanel.show(tabId);
-        
-        downloadSelected = (tabId == TabId.DOWNLOADS);
-        
         updateHeader(tabId);
         updateLayout();
     }
@@ -372,7 +371,7 @@ public class BottomHeaderPanel {
      * Updates the component layout based on the visible tables.
      */
     private void updateLayout() {
-        boolean downloadVisible = DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue();
+        boolean downloadVisible = DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue();
         boolean uploadVisible  = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
         
         if (downloadVisible && uploadVisible) {
@@ -394,7 +393,7 @@ public class BottomHeaderPanel {
         String title = (size > 0) ? I18n.tr("Downloads ({0})", size) : I18n.tr("Downloads");
 
         actionMap.get(TabId.DOWNLOADS).putValue(Action.NAME, title);
-        if (downloadSelected) titleTextLabel.setText(title);
+        if (selectedTab == TabId.DOWNLOADS) titleTextLabel.setText(title);
     }
     
     /**
@@ -405,7 +404,7 @@ public class BottomHeaderPanel {
         String title = (size > 0) ? I18n.tr("Uploads ({0})", size) : I18n.tr("Uploads");
         
         actionMap.get(TabId.UPLOADS).putValue(Action.NAME, title);
-        if (!downloadSelected) titleTextLabel.setText(title);
+        if (selectedTab == TabId.UPLOADS) titleTextLabel.setText(title);
     }
     
     /**

@@ -21,14 +21,14 @@ class ShowHideDownloadTrayAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY
-                .setValue(!DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue());
+        DownloadSettings.SHOW_DOWNLOADS_TRAY.setValue(
+                !DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue());
     }
 
     private void updateText() {
         if(!isEnabled()) {
             this.putValue(Action.NAME, hideDownloadTrayText);
-        } else if (DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+        } else if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
             this.putValue(Action.NAME, hideDownloadTrayText);
         } else {
             this.putValue(Action.NAME, showDownloadTrayText);

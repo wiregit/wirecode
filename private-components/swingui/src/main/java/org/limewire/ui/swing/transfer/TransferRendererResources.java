@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.downloads.table.renderer;
+package org.limewire.ui.swing.transfer;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -13,25 +13,25 @@ import org.limewire.ui.swing.util.GuiUtils;
 /**
  * Container for resources used by the Download and Upload table renderers.
  */
-public class DownloadRendererProperties {
+public class TransferRendererResources {
 
     @Resource private Font font;
     @Resource private Color foreground;
 
-    @Resource(key="DownloadProgressRenderer.progressBarHeight") private int progressBarHeight;
-    @Resource(key="DownloadProgressRenderer.progressBarWidth") private int progressBarWidth;
+    @Resource private int progressBarHeight;
+    @Resource private int progressBarWidth;
     /**the progress bar disappears when the column width is less than this value*/
-    @Resource(key="DownloadProgressRenderer.progressBarCutoffWidth") private int progressBarCutoffWidth;
-    @Resource(key="DownloadProgressRenderer.progressBarBorder") private Color progressBarBorder;
+    @Resource private int progressBarCutoffWidth;
+    @Resource private Color progressBarBorder;
     
     @Resource(key="DownloadCancelRendererEditor.cancelIcon") private Icon cancelIcon;
     @Resource(key="DownloadCancelRendererEditor.cancelIconPressed") private Icon cancelIconPressed;
     @Resource(key="DownloadCancelRendererEditor.cancelIconRollover") private Icon cancelIconRollover;
 
     /**
-     * Constructs a DownloadRendererProperties object.
+     * Constructs a TransferRendererResources object.
      */
-    public DownloadRendererProperties() {
+    public TransferRendererResources() {
         GuiUtils.assignResources(this);
     }
     

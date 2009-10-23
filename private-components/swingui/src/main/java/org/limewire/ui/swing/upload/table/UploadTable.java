@@ -9,6 +9,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
+import org.limewire.ui.swing.transfer.TransferTable;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -70,7 +71,6 @@ public class UploadTable extends TransferTable<UploadItem> {
         selectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         setSelectionModel(selectionModel);
         
-        setEmptyRowsPainted(true);
         setRowHeight(rowHeight);
         setPopupHandler(new UploadPopupHandler(this, popupMenuFactory));
         

@@ -85,8 +85,14 @@ public interface UploadItem extends PropertiableFile {
      */
     public int getNumUploadConnections();
 
+    /**
+     * @return the {@link BrowseType} of the upload
+     */
     BrowseType getBrowseType();
     
+    /**
+     * Returns the time the upload was added to the upload list.
+     */
     long getStartTime();
     
     /**

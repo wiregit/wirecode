@@ -146,7 +146,7 @@ public class LimeWireSwingUI extends JPanel {
             if (UploadSettings.SHOW_UPLOADS_TRAY.getValue()) {
                 handleUploadVisibilityChange(true);
             }
-	        if (DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+	        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
 	            handleDownloadVisibilityChange(true);
 	        }
 	    }
@@ -203,9 +203,9 @@ public class LimeWireSwingUI extends JPanel {
                 int height = bottom.getHeight();
                 int minHeight = bottom.getDefaultPreferredHeight(); 
                 if (height > minHeight) {
-                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(height);
+                    SwingUiSettings.BOTTOM_TRAY_SIZE.setValue(height);
                 } else {
-                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(minHeight);
+                    SwingUiSettings.BOTTOM_TRAY_SIZE.setValue(minHeight);
                 }
             }
         });
@@ -232,14 +232,14 @@ public class LimeWireSwingUI extends JPanel {
             bottomHeaderPanel.selectTab(TabId.UPLOADS);
         }
         
-        setDownloadTrayVisible(visible || uploadVisible);
+        setBottomTrayVisible(visible || uploadVisible);
     }
     
     /**
      * Handles change in visible state of Uploads tray.
      */
     private void handleUploadVisibilityChange(boolean visible) {
-        boolean downloadVisible = DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue();
+        boolean downloadVisible = DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue();
         
         if (visible) {
             bottomHeaderPanel.selectTab(TabId.UPLOADS);
@@ -247,13 +247,13 @@ public class LimeWireSwingUI extends JPanel {
             bottomHeaderPanel.selectTab(TabId.DOWNLOADS);
         }
         
-        setDownloadTrayVisible(visible || downloadVisible);
+        setBottomTrayVisible(visible || downloadVisible);
     }
     
     /**
      * Sets the visibility of the downloads/uploads tray.
      */
-    private void setDownloadTrayVisible(boolean visible) {
+    private void setBottomTrayVisible(boolean visible) {
         assert (SwingUtilities.isEventDispatchThread());
         
         // Set component visibility.

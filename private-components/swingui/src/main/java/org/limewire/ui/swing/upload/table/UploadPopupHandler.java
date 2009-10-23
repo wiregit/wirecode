@@ -35,11 +35,14 @@ public class UploadPopupHandler implements TablePopupHandler {
 
     @Override
     public void maybeShowPopup(Component component, int x, int y) {
-        // Get upload item for popup row.
+        // Get popup row.
         int popupRow = table.rowAtPoint(new Point(x, y));
-        UploadItem item = table.getUploadItem(popupRow);
+        if (popupRow < 0) {
+            return;
+        }
         
-        // Get selected items.
+        // Get item for popup row, and selected items.
+        UploadItem item = table.getUploadItem(popupRow);
         List<UploadItem> uploadItems = table.getSelectedItems();
         
         // Adjust selection if popup row is not selected.

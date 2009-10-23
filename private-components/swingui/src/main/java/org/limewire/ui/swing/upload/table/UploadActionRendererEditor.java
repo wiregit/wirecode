@@ -14,8 +14,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
 import org.limewire.ui.swing.table.TableRendererEditor;
+import org.limewire.ui.swing.transfer.TransferRendererResources;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.I18n;
 
@@ -39,16 +39,16 @@ class UploadActionRendererEditor extends TableRendererEditor {
         
         setLayout(new BorderLayout());
         
-        DownloadRendererProperties properties = new DownloadRendererProperties();
+        TransferRendererResources resources = new TransferRendererResources();
         
         pauseButton = new HyperlinkButton(I18n.tr("Pause"));
         pauseButton.setActionCommand(UploadActionHandler.PAUSE_COMMAND);
-        pauseButton.setFont(properties.getFont());
+        pauseButton.setFont(resources.getFont());
         pauseButton.setToolTipText(I18n.tr("Pause upload"));
         
         resumeButton =  new HyperlinkButton(I18n.tr("Resume"));
         resumeButton.setActionCommand(UploadActionHandler.RESUME_COMMAND);
-        resumeButton.setFont(properties.getFont());
+        resumeButton.setFont(resources.getFont());
         resumeButton.setToolTipText(I18n.tr("Resume upload"));
         
         if (actionHandler != null) {

@@ -6,7 +6,7 @@ package org.limewire.ui.swing.mainframe;
 public interface BottomHeaderFactory {
 
     /**
-     * Creates a DownloadHeaderPanel with the specified components.
+     * Creates a BottomHeaderPanel with the specified components.
      */
     BottomHeaderPanel create(BottomPanel bottomPanel);
 }

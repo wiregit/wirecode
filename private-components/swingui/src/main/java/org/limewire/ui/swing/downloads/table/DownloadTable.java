@@ -1,20 +1,14 @@
 package org.limewire.ui.swing.downloads.table;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.file.CategoryManager;
@@ -24,10 +18,9 @@ import org.limewire.ui.swing.downloads.table.renderer.DownloadCancelRendererEdit
 import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
-import org.limewire.ui.swing.table.MouseableTable;
-import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.transfer.TransferTable;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -39,9 +32,8 @@ import com.google.inject.assistedinject.Assisted;
 
 /**
  * Table showing DownloadItems. Provides popup menus and double click handling.
- * No renderers or editors are set by default.
  */
-public class DownloadTable extends MouseableTable {   
+public class DownloadTable extends TransferTable<DownloadItem> {
 
     @Resource private int rowHeight;  
     @Resource private int gapMinWidth;  
@@ -74,22 +66,13 @@ public class DownloadTable extends MouseableTable {
 	        DownloadMessageRenderer downloadMessageRenderer, DownloadCancelRendererEditor cancelEditor,
 	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, DownloadPopupHandlerFactory downloadPopupHandlerFactory,
 	        @Assisted EventList<DownloadItem> downloadItems, DownloadableTransferHandler downloadableTransferHandler, CategoryManager categoryManager) {
+        super(new DownloadTableModel(downloadItems));
+        
         this.categoryManager = categoryManager;
+        
         GuiUtils.assignResources(this);
                 
         initialize(downloadItems, buttonEditor, cancelEditor, downloadPopupHandlerFactory);
-        
-        TableColors colors = new TableColors();
-        setHighlighters(
-                new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor,
-                        colors.evenForeground, colors.selectionColor,
-                        colors.selectionForeground),
-                new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor,
-                        colors.evenForeground, colors.selectionColor,
-                        colors.selectionForeground));
-        
-        setShowGrid(true, false);      
-        setEmptyRowsPainted(true);
         
         TableCellRenderer gapRenderer = new GapRenderer();
 
@@ -141,17 +124,13 @@ public class DownloadTable extends MouseableTable {
     }
     
     private void setUpColumn(int index, TableCellRenderer renderer, int minWidth, int prefWidth, int maxWidth){
-        TableColumn column = getColumnModel().getColumn(index);
-        column.setCellRenderer(renderer);
-        column.setMinWidth(minWidth);
-        column.setPreferredWidth(prefWidth);
-        column.setMaxWidth(maxWidth);
+        setColumnRenderer(index, renderer);
+        setColumnWidths(index, minWidth, prefWidth, maxWidth);
     }
 
     private void initialize(EventList<DownloadItem> downloadItems, DownloadButtonRendererEditor buttonEditor, 
             DownloadCancelRendererEditor cancelEditor, DownloadPopupHandlerFactory downloadPopupHandlerFactory) {
-        model = new DownloadTableModel(downloadItems);
-        setModel(model);
+        model = (DownloadTableModel) getModel();
         
         DefaultEventSelectionModel<DownloadItem> model = new DefaultEventSelectionModel<DownloadItem>(downloadItems);
         setSelectionModel(model);
@@ -193,15 +172,5 @@ public class DownloadTable extends MouseableTable {
         if(item != null && item.isLaunchable()) {
             DownloadItemUtils.launch(item, categoryManager);
         }
-    }
-    
-    private static class GapRenderer extends DefaultTableCellRenderer {
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-            return super.getTableCellRendererComponent(table, null, isSelected, false, row, column);
-        }
-        
     }
 }

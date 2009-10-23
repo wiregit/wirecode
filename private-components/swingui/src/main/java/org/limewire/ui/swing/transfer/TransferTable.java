@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.upload.table;
+package org.limewire.ui.swing.transfer;
 
 import java.awt.Component;
 
@@ -18,7 +18,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 /**
- * Base class for transfer tables like the Uploads table.
+ * Base class for transfer tables to display downloads and uploads.
  */
 public abstract class TransferTable<E> extends MouseableTable {
 
@@ -29,13 +29,20 @@ public abstract class TransferTable<E> extends MouseableTable {
      * format.
      */
     public TransferTable(EventList<E> eventList, TableFormat<E> tableFormat) {
-        this.model = new DefaultEventTableModel<E>(eventList, tableFormat);
+        this(new DefaultEventTableModel<E>(eventList, tableFormat));
+    }
+    
+    /**
+     * Constructs a new TransferTable with the specified table model.
+     */
+    public TransferTable(DefaultEventTableModel<E> model) {        
+        this.model = model;
         
         setModel(model);
         setShowGrid(true, false);      
         setEmptyRowsPainted(true);
         
-        TableColors colors = new TableColors();
+        TableColors colors = getTableColors();
         setHighlighters(
                 new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor,
                         colors.evenForeground, colors.selectionColor,
@@ -43,7 +50,6 @@ public abstract class TransferTable<E> extends MouseableTable {
                 new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor,
                         colors.evenForeground, colors.selectionColor,
                         colors.selectionForeground));
-        
     }
 
     /**

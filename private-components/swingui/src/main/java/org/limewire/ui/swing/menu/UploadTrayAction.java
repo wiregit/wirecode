@@ -19,7 +19,7 @@ class UploadTrayAction extends AbstractAction {
     private static final String SHOW_UPLOAD_TEXT = I18n.tr("Show Upload Tray");
     private static final String HIDE_UPLOAD_TEXT = I18n.tr("Hide Upload Tray");
 
-    @InspectablePrimitive(value = "search view", category = DataCategory.USAGE)
+    @InspectablePrimitive(value = "upload view", category = DataCategory.USAGE)
     private static volatile int uploadsViewed = 0;
     
     @Inject

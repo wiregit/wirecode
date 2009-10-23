@@ -12,8 +12,8 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.downloads.table.renderer.DownloadRendererProperties;
 import org.limewire.ui.swing.table.TableRendererEditor;
+import org.limewire.ui.swing.transfer.TransferRendererResources;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -37,15 +37,15 @@ class UploadCancelRendererEditor extends TableRendererEditor {
         
         setLayout(new MigLayout("insets 0, gap 0, nogrid, novisualpadding, alignx center, aligny center"));
         
-        DownloadRendererProperties properties = new DownloadRendererProperties();
+        TransferRendererResources resources = new TransferRendererResources();
 
         cancelButton = new IconButton();
-        properties.decorateCancelButton(cancelButton);
+        resources.decorateCancelButton(cancelButton);
         cancelButton.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
         cancelButton.setToolTipText(I18n.tr("Cancel upload"));
 
         removeButton = new IconButton();
-        properties.decorateCancelButton(removeButton);
+        resources.decorateCancelButton(removeButton);
         removeButton.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
         removeButton.setToolTipText(I18n.tr("Remove upload"));
 
