@@ -252,7 +252,7 @@ public final class SwingUiSettings extends LimeProps {
     
     /** Volume for the LimeWire media player. */
     public static final FloatSetting PLAYER_VOLUME =
-        FACTORY.createFloatSetting("PLAYER_VOLUME", .5f);
+        FACTORY.createFloatSetting("PLAYER_VOLUME", .5f, 0, 1);
       
     /** Setting for whether or not video should stretch to fill the screen. */
     public static final BooleanSetting VIDEO_FIT_TO_SCREEN =
