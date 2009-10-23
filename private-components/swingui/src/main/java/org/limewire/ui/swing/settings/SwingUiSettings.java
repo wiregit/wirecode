@@ -14,6 +14,7 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileArraySetting;
 import org.limewire.setting.FileSetting;
+import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
@@ -248,6 +249,10 @@ public final class SwingUiSettings extends LimeProps {
     @InspectablePrimitive(value = "player enabled", category = DataCategory.USAGE)
     public static final BooleanSetting PLAYER_ENABLED =
         FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
+    
+    /** Volume for the LimeWire media player. */
+    public static final FloatSetting PLAYER_VOLUME =
+        FACTORY.createFloatSetting("PLAYER_VOLUME", .5f);
       
     /** Setting for whether or not video should stretch to fill the screen. */
     public static final BooleanSetting VIDEO_FIT_TO_SCREEN =

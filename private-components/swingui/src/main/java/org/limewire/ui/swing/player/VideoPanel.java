@@ -91,12 +91,12 @@ class VideoPanel {
         
         videoPanel.setBackground(Color.BLACK);        
         this.videoRenderer.setBackground(Color.BLACK);
+        fitToScreenContainer.setBackground(Color.BLACK);
         
         setUpMouseListener(videoPanel);
         setUpMouseListener(fitToScreenContainer);
         setUpMouseListener(this.videoRenderer);
 
-        fitToScreenContainer.setOpaque(false);
         fitToScreenContainer.add(this.videoRenderer);
         setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());        
 

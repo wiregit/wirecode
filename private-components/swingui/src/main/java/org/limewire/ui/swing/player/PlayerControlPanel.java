@@ -157,6 +157,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
         volumeButton.setToolTipText(I18n.tr("Volume"));
         
         volumeSlider = new VolumeSlider(0, 100);
+        volumeSlider.setValue((int)(SwingUiSettings.PLAYER_VOLUME.getValue() * volumeSlider.getMaximum()));        
         volumeControlPopup = volumeSlider.createPopup();
         
         if (isPlaylistSupported()) {
@@ -326,7 +327,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
     @Override
     public void songChanged(String name) {
         // Update volume.
-        updateVolume();
+        updateVolumeFromSetting();
         
         //enable volume control
         volumeButton.setEnabled(getPlayerMediator().isVolumeSettable());
@@ -350,7 +351,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
     @Override
     public void stateChanged(PlayerState playerState) {
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
-            updateVolume();
+            updateVolumeFromSetting();
         } else if (playerState == PlayerState.GAIN) {
             // Exit on volume change.
             return;
@@ -375,12 +376,17 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
         return getPlayerMediator().isPlaylistSupported();
     }
     
+    private void setVolume(float volume){
+        SwingUiSettings.PLAYER_VOLUME.setValue(volume);
+        updateVolumeFromSetting();
+    }
+    
     /**
      * Updates the volume in the player.
      */
-    private void updateVolume() {
+    private void updateVolumeFromSetting() {
         if (getPlayerMediator().isVolumeSettable()) {
-            getPlayerMediator().setVolume(((double) volumeSlider.getValue()) / volumeSlider.getMaximum());
+            getPlayerMediator().setVolume(SwingUiSettings.PLAYER_VOLUME.getValue());
         }
     }
     
@@ -460,7 +466,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
         @Override
         public void stateChanged(ChangeEvent e) {
             PlayerInspectionUtils.playerUsed();
-            updateVolume();
+            setVolume(((float) volumeSlider.getValue()) / volumeSlider.getMaximum());
         }
     }
 }
