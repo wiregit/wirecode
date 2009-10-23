@@ -131,7 +131,7 @@
 	<classpathentry kind="lib" path="lib/jars/tests/javax.servlet-5.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
-	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.14.3.jar"/>
+	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.14.3.jar" sourcepath="lib/sources/jacob-1.14.3_src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/google-collect-1.0-rc2.jar" sourcepath="lib/sources/google-collect-src-1.0-rc2.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/jars/mime-util.jar" sourcepath="lib/sources/mime-util-src.jar"/>
