@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.table;
 
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseListener;
 import java.util.Vector;
 
 import javax.swing.Action;
@@ -18,7 +19,14 @@ import org.jdesktop.swingx.JXTable;
  * and changes the 'enter' key to not move down.
  */
 public class BasicJXTable extends JXTable {
-    
+
+    // DO NOT INITIALIZE proxyMouseListener!!!!!
+    // It is used in addMouseListener BEFORE the constuctor is run
+    // (called from the base class constructor). If it is set here
+    // or in the constructor, it will clobber the value set by the
+    // call from the base class constructor.
+    private AquaMouseListenerProxy proxyMouseListener;
+
     public BasicJXTable() {
         super();
         initialize();
@@ -60,6 +68,32 @@ public class BasicJXTable extends JXTable {
         setEnterKeyAction(null);
     }
 
+    /**
+     * This method has been overridden so that Apple's Aqua mouse listener objects are wrapped
+     * by a proxy before being added as a mouse listener. This is to prevent a bug with Aqua
+     *  which causes items to be deselected when a user simulates a right mouse click with 
+     *  a CTRL click. See AquaMouseListenerProxy for more information.
+     */
+    @Override
+    public synchronized void addMouseListener (MouseListener mouseListener) {
+        if ((proxyMouseListener == null) && AquaMouseListenerProxy.isAquaMouseListener(mouseListener)) {
+            proxyMouseListener = new AquaMouseListenerProxy(mouseListener);
+            super.addMouseListener(proxyMouseListener);
+        } else { 
+            super.addMouseListener(mouseListener);
+        }
+    }
+    
+    @Override
+    public synchronized void removeMouseListener (MouseListener mouseListener) {
+        if ((proxyMouseListener != null) && (mouseListener == proxyMouseListener.getPeer())) {
+            super.removeMouseListener(proxyMouseListener);
+            proxyMouseListener = null;
+        } else {
+            super.removeMouseListener(mouseListener);
+        }
+    }
+    
     /**
      * @param action the action that occurs when the user presses the enter key on the table
      */
