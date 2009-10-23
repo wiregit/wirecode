@@ -31,7 +31,8 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     private final EventListener<RemoteLibraryEvent> eventAdapter = new RemoteLibraryToBrowseEventAdapter();
     
     private final AtomicReference<FriendLibrary> currentLibrary = new AtomicReference<FriendLibrary>();
-    private final AtomicBoolean hasRegisteredListener = new AtomicBoolean(false);
+    private boolean hasRegisteredListener = false;
+    private final AtomicBoolean hasStopped = new AtomicBoolean(false);
     private Future startFuture = null;
 
     /**
@@ -49,12 +50,18 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     public void start() {
         startFuture = executorService.submit(new Runnable() {
             public void run() {
-                synchronized(FriendSingleBrowseSearch.this) {
-                    for (SearchListener listener : searchListeners) {
-                        listener.searchStarted(FriendSingleBrowseSearch.this);
-                    }
+                for (SearchListener listener : searchListeners) {
+                    if(hasStopped.get())
+                        return;
+                    listener.searchStarted(FriendSingleBrowseSearch.this);
+                }
 
-                    installListener();
+                if(!hasStopped.get()) {
+                    synchronized(FriendSingleBrowseSearch.this) {
+                        installListener();
+                    }
+                }
+                if(!hasStopped.get()) {
                     startFriendBrowse();
                 }
             }
@@ -66,10 +73,11 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
         if(startFuture != null && !startFuture.isDone()) {
             startFuture.cancel(true);
         }
+        hasStopped.set(true);
+        for (SearchListener listener : searchListeners) {
+            listener.searchStopped(FriendSingleBrowseSearch.this);
+        }       
         synchronized(this) {
-            for (SearchListener listener : searchListeners) {
-                listener.searchStopped(FriendSingleBrowseSearch.this);
-            }       
             removeListener();
         }
     }
@@ -120,16 +128,16 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     /**Adds friendLibraryListEventListener to the FriendLibraryList*/
     private void installListener() {
         remoteLibraryManager.getFriendLibraryList().addListEventListener(friendLibraryListEventListener);
-        hasRegisteredListener.set(true);
+        hasRegisteredListener = true;
     }
     
     /**Removes friendLibraryListEventListener from the FriendLibraryList.  
      * Removes libraryPropertyChangeLister from the friend library if necessary.*/
     private void removeListener() {
-        if(hasRegisteredListener.get()) {
+        if(hasRegisteredListener) {
             remoteLibraryManager.getFriendLibraryList().removeListEventListener(friendLibraryListEventListener);
         }
-        hasRegisteredListener.set(false);
+        hasRegisteredListener = false;
         setLibrary(null);
     }
     
