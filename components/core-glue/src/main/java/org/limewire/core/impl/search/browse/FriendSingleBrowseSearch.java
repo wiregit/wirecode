@@ -3,6 +3,8 @@ package org.limewire.core.impl.search.browse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.core.api.library.FriendLibrary;
@@ -29,6 +31,8 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     private final EventListener<RemoteLibraryEvent> eventAdapter = new RemoteLibraryToBrowseEventAdapter();
     
     private final AtomicReference<FriendLibrary> currentLibrary = new AtomicReference<FriendLibrary>();
+    private final AtomicBoolean hasRegisteredListener = new AtomicBoolean(false);
+    private Future startFuture = null;
 
     /**
      * @param friend the person to be browsed - can not be anonymous or null
@@ -43,24 +47,31 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
 
     @Override
     public void start() {
-        executorService.execute(new Runnable() {
+        startFuture = executorService.submit(new Runnable() {
             public void run() {
-                for (SearchListener listener : searchListeners) {
-                    listener.searchStarted(FriendSingleBrowseSearch.this);
+                synchronized(FriendSingleBrowseSearch.this) {
+                    for (SearchListener listener : searchListeners) {
+                        listener.searchStarted(FriendSingleBrowseSearch.this);
+                    }
+
+                    installListener();
+                    startFriendBrowse();
                 }
-                
-                installListener();
-                startFriendBrowse();
             }
         });
     }
 
     @Override
     public void stop() {
-        for (SearchListener listener : searchListeners) {
-            listener.searchStopped(FriendSingleBrowseSearch.this);
-        }       
-        removeListener();
+        if(startFuture != null && !startFuture.isDone()) {
+            startFuture.cancel(true);
+        }
+        synchronized(this) {
+            for (SearchListener listener : searchListeners) {
+                listener.searchStopped(FriendSingleBrowseSearch.this);
+            }       
+            removeListener();
+        }
     }
 
 
@@ -107,14 +118,18 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     }
     
     /**Adds friendLibraryListEventListener to the FriendLibraryList*/
-    private void installListener(){
+    private void installListener() {
         remoteLibraryManager.getFriendLibraryList().addListEventListener(friendLibraryListEventListener);
+        hasRegisteredListener.set(true);
     }
     
     /**Removes friendLibraryListEventListener from the FriendLibraryList.  
      * Removes libraryPropertyChangeLister from the friend library if necessary.*/
-    private void removeListener(){
-        remoteLibraryManager.getFriendLibraryList().removeListEventListener(friendLibraryListEventListener);
+    private void removeListener() {
+        if(hasRegisteredListener.get()) {
+            remoteLibraryManager.getFriendLibraryList().removeListEventListener(friendLibraryListEventListener);
+        }
+        hasRegisteredListener.set(false);
         setLibrary(null);
     }
     
