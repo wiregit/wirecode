@@ -28,7 +28,6 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.upload.table.UploadTableFactory;
 import org.limewire.ui.swing.util.I18n;
@@ -46,7 +45,7 @@ import com.google.inject.Inject;
  * services.
  */
 @LazySingleton
-public class UploadMediator implements NavMediator<JComponent> {
+public class UploadMediator {
     public enum SortOrder {
         ORDER_STARTED, NAME, PROGRESS, TIME_REMAINING, SPEED, STATUS, 
         FILE_TYPE, FILE_EXTENSION
@@ -107,7 +106,9 @@ public class UploadMediator implements NavMediator<JComponent> {
         });
     }
     
-    @Override
+    /**
+     * Returns the component of this mediator.
+     */
     public JComponent getComponent() {
         if (uploadPanel == null) {
             uploadPanel = createUploadPanel();
