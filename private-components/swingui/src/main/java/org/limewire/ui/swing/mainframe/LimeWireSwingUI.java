@@ -169,7 +169,7 @@ public class LimeWireSwingUI extends JPanel {
         splitPane.setDragComponent(dragComponent);
         
         // Set top panel's minimum height to half of split pane height 
-        //  (this fires when the app is initialised)
+        //  (this fires when the app is initialiZZed)
         splitPane.addComponentListener(new ComponentAdapter(){            
             @Override
             public void componentResized(ComponentEvent e) {

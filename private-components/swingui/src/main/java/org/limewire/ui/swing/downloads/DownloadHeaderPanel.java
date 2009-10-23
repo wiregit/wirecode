@@ -41,7 +41,7 @@ public class DownloadHeaderPanel {
 
     @Resource private Icon moreButtonArrow;
     @Resource private Font hyperlinkFont;
-    @Resource private Icon scrollPaneNub;
+    @Resource private Icon scrollPaneNubIcon;
     
     private final DownloadMediator downloadMediator;    
     private final DownloadHeaderPopupMenu downloadHeaderPopupMenu;
@@ -50,7 +50,7 @@ public class DownloadHeaderPanel {
     private final ComboBoxDecorator comboBoxDecorator;
     
     private final JXPanel component;
-    private JComponent dragNub;
+    private JComponent dragComponent;
     
     private JLabel titleTextLabel;
     private HyperlinkButton fixStalledButton;
@@ -88,7 +88,7 @@ public class DownloadHeaderPanel {
     }
     
     public JComponent getDragComponent() {
-        return dragNub;
+        return dragComponent;
     }
     
     private void initialize(){
@@ -107,8 +107,8 @@ public class DownloadHeaderPanel {
         fixStalledButton.setFont(hyperlinkFont);
         fixStalledButton.setVisible(false);
         
-        dragNub = new JLabel(scrollPaneNub);
-        dragNub.setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
+        dragComponent = new JLabel(scrollPaneNubIcon);
+        dragComponent.setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
 
         initializeMoreButton();
     }
@@ -119,7 +119,7 @@ public class DownloadHeaderPanel {
         component.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
         component.add(moreButton, "gapafter 5");
         
-        component.add(dragNub, "pos 0.5al 0");
+        component.add(dragComponent, "pos 0.5al 0");
     }
         
     @Inject

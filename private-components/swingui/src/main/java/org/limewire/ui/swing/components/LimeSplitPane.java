@@ -17,6 +17,8 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
  */
 public class LimeSplitPane extends JSplitPane{
 
+    private boolean currentlyDraggable = true;
+    
     public LimeSplitPane(int orientation, boolean continuousLayout, Component leftComponent, Component rightComponent, JComponent dividerComponent){
         super(orientation, continuousLayout, leftComponent, rightComponent);
         
@@ -28,7 +30,7 @@ public class LimeSplitPane extends JSplitPane{
         };        
         setUI(splitUI);
 
-        CustomDivider divider = (CustomDivider) splitUI.getDivider(); 
+        BasicSplitPaneDivider divider = splitUI.getDivider(); 
         divider.setBorder(BorderFactory.createEmptyBorder());
         divider.setLayout(new BorderLayout());
         divider.removeAll();
@@ -42,7 +44,7 @@ public class LimeSplitPane extends JSplitPane{
      *  the position of the divider.
      */
     public void setDragComponent(JComponent component) {
-        checkUISafeForDragabilityChanges();
+        assertUISafeForDragabilityChanges();
         
         CustomDivider divider = (CustomDivider) ((BasicSplitPaneUI)getUI()).getDivider();
         
@@ -59,27 +61,33 @@ public class LimeSplitPane extends JSplitPane{
      *  set up using {@link #setDragComponent} 
      */
     public void setDividerDraggable(boolean draggable) {
-        checkUISafeForDragabilityChanges();
+        assertUISafeForDragabilityChanges();
             
         CustomDivider divider = (CustomDivider) ((BasicSplitPaneUI)getUI()).getDivider();
         
         if (!draggable) {
-            divider.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            if (currentlyDraggable) {
+                currentlyDraggable = false;
+                divider.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             
-            divider.removeMouseListener(divider.getMouseHandler());
-            divider.removeMouseMotionListener(divider.getMouseHandler());
-            removeMouseListener(divider.getMouseHandler());
-            removeMouseMotionListener(divider.getMouseHandler());
+                divider.removeMouseListener(divider.getMouseHandler());
+                divider.removeMouseMotionListener(divider.getMouseHandler());
+                removeMouseListener(divider.getMouseHandler());
+                removeMouseMotionListener(divider.getMouseHandler());
+            }
         } 
         else {
-            divider.setCursor((orientation == JSplitPane.HORIZONTAL_SPLIT) ?
+            if (!currentlyDraggable) {
+                currentlyDraggable = true;
+                divider.setCursor((orientation == JSplitPane.HORIZONTAL_SPLIT) ?
                     Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR) :
                     Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
             
-            divider.addMouseListener(divider.getMouseHandler());
-            divider.addMouseMotionListener(divider.getMouseHandler());
-            addMouseListener(divider.getMouseHandler());
-            addMouseMotionListener(divider.getMouseHandler());
+                divider.addMouseListener(divider.getMouseHandler());
+                divider.addMouseMotionListener(divider.getMouseHandler());
+                addMouseListener(divider.getMouseHandler());
+                addMouseMotionListener(divider.getMouseHandler());
+            }
         }
     }
 
@@ -88,7 +96,7 @@ public class LimeSplitPane extends JSplitPane{
      * Used to Ensure (soft assertion) that the modified ui elements are still
      *  installed before attempting to make changes.
      */
-    private void checkUISafeForDragabilityChanges() {
+    private void assertUISafeForDragabilityChanges() {
         if (!(getUI() instanceof BasicSplitPaneUI)) {
             throw new IllegalStateException("Can't change the divider draggability if the UI has been modified");
         }
@@ -123,7 +131,8 @@ public class LimeSplitPane extends JSplitPane{
          * <p> Done by rerouting the message source to its parent component
          *      if it matches the drag component.  This in essence relaxes
          *      the drag preconditions so it can be initiated by a specific
-         *      component.
+         *      component.  Without this modification the superclass requires
+         *      the event source to be the actual divider for anything to happen.  
          */
         public class ReroutedMouseHandler extends MouseHandler {
             
