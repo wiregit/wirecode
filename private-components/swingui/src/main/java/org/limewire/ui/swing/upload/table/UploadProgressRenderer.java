@@ -35,7 +35,7 @@ class UploadProgressRenderer extends TransferProgressRenderer {
                 }
                 
             } else {
-                // TODO show progress for torrents
+                // Progress not shown for torrents.
                 progressBar.setVisible(false);
             }
             
@@ -61,7 +61,7 @@ class UploadProgressRenderer extends TransferProgressRenderer {
                 }
                 
             } else {
-                // TODO show time left for torrents
+                // Time left not shown for torrents.
                 timeLabel.setVisible(false);
             }
             
