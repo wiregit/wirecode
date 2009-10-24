@@ -6,7 +6,7 @@ import java.awt.Dimension;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -24,7 +24,7 @@ public class BottomPanel extends JPanel {
     
     @Resource private int preferredHeight;
     
-    private final MainDownloadPanel mainDownloadPanel;
+    private final DownloadMediator downloadMediator;
     private final UploadMediator uploadMediator;
     
     private CardLayout cardLayout;
@@ -33,9 +33,9 @@ public class BottomPanel extends JPanel {
      * Constructs a BottomPanel with the specified components.
      */
     @Inject
-    public BottomPanel(MainDownloadPanel mainDownloadPanel,
+    public BottomPanel(DownloadMediator downloadMediator,
             UploadMediator uploadMediator) {
-        this.mainDownloadPanel = mainDownloadPanel;
+        this.downloadMediator = downloadMediator;
         this.uploadMediator = uploadMediator;
         
         GuiUtils.assignResources(this);
@@ -54,7 +54,7 @@ public class BottomPanel extends JPanel {
         int height = (savedHeight == 0) ? preferredHeight : savedHeight;
         setPreferredSize(new Dimension(getPreferredSize().width, height));
         
-        add(mainDownloadPanel, TabId.DOWNLOADS.toString());
+        add(downloadMediator.getComponent(), TabId.DOWNLOADS.toString());
         add(uploadMediator.getComponent(), TabId.UPLOADS.toString());
     }
     
