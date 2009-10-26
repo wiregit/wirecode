@@ -31,12 +31,22 @@ interface LibTorrent extends Library {
      * Pauses the torrent with the given sha1
      */
     public WrapperStatus pause_torrent(String id);
-
+    
     /**
      * Resumes the torrent with the given sha1
      */
     public WrapperStatus resume_torrent(String id);
 
+    /**
+     * Forces the torrent to reannounce itself to the tracker.
+     */
+    public WrapperStatus force_reannounce(String id);
+    
+    /**
+     * Scrapes the tracker to get updated torrent statistics.
+     */
+    public WrapperStatus scrape_tracker(String id);
+    
     /**
      * Used on shutdown to freeze all torrents and wait while saving fast resume
      * data for each.
@@ -104,13 +114,28 @@ interface LibTorrent extends Library {
     /**
      * Starts the dht
      */
-    public WrapperStatus start_dht();
+    public WrapperStatus start_dht(WString dht_state_file_path);
 
     /**
      * Stops the dht
      */
     public WrapperStatus stop_dht();
 
+    /**
+     * Adds the given node to the dht. 
+     */
+    public WrapperStatus add_dht_node(String address, int port);
+
+    /**
+     * Adds the given router to the dht. 
+     */
+    public WrapperStatus add_dht_router(String address, int port);
+
+    /**
+     * Saves the state of the dht in the specified file.
+     */
+    public WrapperStatus save_dht_state(WString dhtStateFilePath);
+    
     /**
      * Starts the upnp service.
      */

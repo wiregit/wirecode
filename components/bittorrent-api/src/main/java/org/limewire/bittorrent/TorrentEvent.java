@@ -1,8 +1,23 @@
 package org.limewire.bittorrent;
 
 /**
- * Enum representing various events that a Torrent can send out to listeners.
+ * Represents an event happening on a torrent. 
  */
-public enum TorrentEvent {
-    STATUS_CHANGED, STOPPED, COMPLETED, FAST_RESUME_FILE_SAVED, STARTED;
+public class TorrentEvent {
+    private final Torrent torrent;
+    private final TorrentEventType type;
+    
+    public TorrentEvent(Torrent torrent, TorrentEventType type) {
+        super();
+        this.torrent = torrent;
+        this.type = type;
+    }
+
+    public Torrent getTorrent() {
+        return torrent;
+    }
+    
+    public TorrentEventType getType() {
+        return type;
+    }
 }

@@ -49,4 +49,28 @@ public interface TorrentPeer {
      * Returns a 2 character code representing the peers country.
      */
     public String getCountry();
+
+    /**
+     * Returns true if this peer is in the list of sources from the tracker.
+     * The peer can be in multiple lists.
+     */
+    boolean isFromTracker();
+
+    /**
+     * Returns true if this peer is in the list of sources from the DHT. The
+     * peer can be in multiple lists.
+     */
+    boolean isFromDHT();
+
+    /**
+     * Returns true if this peer is in the list of sources from peer exchange.
+     * The peer can be in multiple lists.
+     */
+    boolean isFromPEX();
+
+    /**
+     * Returns true if this peer is in the list of sources from local service
+     * discovery. The peer can be in multiple lists.
+     */
+    boolean isFromLSD();
 }

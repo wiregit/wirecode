@@ -1,18 +1,29 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.limewire.bittorrent.TorrentIpPort;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.DownloadSettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.io.InvalidDataException;
+import org.limewire.io.UnresolvedIpPort;
+import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.libtorrent.LibTorrentAlert;
+import org.limewire.libtorrent.LibTorrentIpPort;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 /**
- * Implements the TorrentSetting interface with limewire specific settings. 
+ * Implements the TorrentSetting interface with limewire specific settings.
  */
 class LimeWireTorrentSettings implements TorrentManagerSettings {
+    private static final Log LOG = LogFactory.getLog(LimeWireTorrentSettings.class);
+
     @Override
     public int getMaxDownloadBandwidth() {
         if (!DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.getValue()) {
@@ -27,11 +38,6 @@ class LimeWireTorrentSettings implements TorrentManagerSettings {
             return 0;
         }
         return UploadSettings.MAX_UPLOAD_SPEED.getValue();
-    }
-
-    @Override
-    public File getTorrentDownloadFolder() {
-        return SharingSettings.INCOMPLETE_DIRECTORY.get();
     }
 
     @Override
@@ -56,9 +62,7 @@ class LimeWireTorrentSettings implements TorrentManagerSettings {
 
     @Override
     public float getSeedRatioLimit() {
-
         if (BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue()) {
-            // fake unlimited value for using the
             return Float.MAX_VALUE;
         }
         return BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue();
@@ -67,7 +71,6 @@ class LimeWireTorrentSettings implements TorrentManagerSettings {
     @Override
     public int getSeedTimeLimit() {
         if (BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue()) {
-            // fake unlimited value for using the
             return Integer.MAX_VALUE;
         }
         return BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue();
@@ -94,26 +97,35 @@ class LimeWireTorrentSettings implements TorrentManagerSettings {
     }
 
     @Override
-    public int getMaxSeedingLimit() {
-        if (BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue()) {
-            return Integer.MAX_VALUE;
-        }
-        return BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue();
-    }
-
-    @Override
     public int getAlertMask() {
         return LibTorrentAlert.storage_notification | LibTorrentAlert.progress_notification
                 | LibTorrentAlert.status_notification;
     }
 
     @Override
-    public File getTorrentUploadsFolder() {
-        return BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
+    public File getDHTStateFile() {
+        return BittorrentSettings.LIBTORRENT_DHT_STATE.get();
     }
 
     @Override
-    public boolean isUPNPEnabled() {
-        return BittorrentSettings.TORRENT_USE_UPNP.getValue();
+    public List<TorrentIpPort> getBootStrapDHTRouters() {
+        String[] routerStrings = BittorrentSettings.TORRENT_BOOTSTRAP_DHT_ROUTERS.get();
+        List<TorrentIpPort> dhtRouters = new ArrayList<TorrentIpPort>();
+        if (routerStrings != null) {
+            for (int i = 0; i < routerStrings.length; i++) {
+                String router = routerStrings[i];
+                try {
+                    UnresolvedIpPort unresolvedIpPort = new UnresolvedIpPortImpl(router);
+                    unresolvedIpPort.resolve();
+                    dhtRouters.add(new LibTorrentIpPort(unresolvedIpPort.getAddress(), unresolvedIpPort
+                            .getPort()));
+                } catch (UnknownHostException e) {
+                    LOG.debugf(e, "Address not valid: {0}", router);
+                } catch (InvalidDataException e) {
+                    LOG.debugf(e, "Router not valid: {0}", router);
+                }
+            }
+        }
+        return dhtRouters;
     }
 }

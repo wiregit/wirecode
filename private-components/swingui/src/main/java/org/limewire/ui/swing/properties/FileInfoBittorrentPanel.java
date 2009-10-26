@@ -30,6 +30,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.PropertiableFile;
@@ -515,7 +516,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     
     @Override
     public void handleEvent(TorrentEvent event) {
-        if (event == TorrentEvent.STATUS_CHANGED || event == TorrentEvent.COMPLETED) {
+        if (event.getType() == TorrentEventType.STATUS_CHANGED || event.getType() == TorrentEventType.COMPLETED) {
             SwingUtils.invokeLater(new Runnable() {
                 @Override
                 public void run() {

@@ -3,12 +3,10 @@ package org.limewire.core.impl.bittorrent;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentFileEntry;
-import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 
@@ -49,32 +47,12 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public void moveTorrent(Torrent torrent, File directory) {
-        
-    }
-
-    @Override
-    public void pauseTorrent(Torrent torrent) {
-        
-    }
-
-    @Override
-    public void recoverTorrent(Torrent torrent) {
-        
-    }
-
-    @Override
-    public void registerTorrent(Torrent torrent) {
-        
+    public boolean addTorrent(Torrent torrent) {
+        return false;
     }
 
     @Override
     public void removeTorrent(Torrent torrent) {
-        
-    }
-
-    @Override
-    public void resumeTorrent(Torrent torrent) {
         
     }
 
@@ -109,27 +87,6 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<TorrentPeer> getTorrentPeers(Torrent torrent) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public void setAutoManaged(Torrent torrent, boolean autoManaged) {
-        
-    }
-
-    @Override
-    public void setTorrenFileEntryPriority(Torrent torrent, TorrentFileEntry torrentFileEntry,
-            int priority) {
-        
-    }
-
-    @Override
     public boolean isInitialized() {
         return false;
     }
@@ -140,17 +97,42 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public boolean isValid(Torrent torrent) {
-        return false;
-    }
-
-    @Override
-    public boolean hasMetaData(Torrent torrent) {
-        return false;
-    }
-
-    @Override
-    public TorrentInfo getTorrentInfo(Torrent torrent) {
+    public Lock getLock() {
         return null;
+    }
+
+    @Override
+    public boolean isDHTStarted() {
+        return false;
+    }
+
+    @Override
+    public void startDHT(File dhtStateFile) {
+        
+    }
+
+    @Override
+    public void stopDHT() {
+        
+    }
+
+    @Override
+    public void saveDHTState(File dhtStateFile) {
+        
+    }
+
+    @Override
+    public boolean isUPnPStarted() {
+        return false;
+    }
+
+    @Override
+    public void startUPnP() {
+        
+    }
+
+    @Override
+    public void stopUPnP() {
+        
     }
 }

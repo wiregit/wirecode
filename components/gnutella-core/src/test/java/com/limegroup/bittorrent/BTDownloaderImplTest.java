@@ -17,8 +17,10 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
-import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.inspection.InspectionUtils;
 
 import com.google.inject.Guice;
@@ -96,13 +98,13 @@ public class BTDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(localIsPrivateBackup);
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(forceIPAddressBackup);
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.set(forceIPAddressStringBackup);
-        BittorrentSettings.LIBTORRENT_ENABLED.set(false);
         fileServer.stop();
         fileServer.destroy();
         FileUtils.deleteRecursive(torrentDir);
         FileUtils.deleteRecursive(fileDir);
         super.tearDown();
         injector.getInstance(TorrentManager.class).stop();
+        BittorrentSettings.LIBTORRENT_ENABLED.set(false);
     }
     
     public void testInspections() throws Exception {
@@ -110,12 +112,13 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         injector.getInstance(TorrentManager.class).isValid();
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
+        Torrent torrent = downloader.getTorrent();
         try {
             // TODO more InspectionTool code into common so it can generate the mapping
             assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
             assertEquals("0", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsFinished", injector, true));
             //downloader.startDownload();
-            downloader.handleEvent(TorrentEvent.STARTED);
+            downloader.handleEvent(new TorrentEvent(torrent, TorrentEventType.STARTED));
             Thread.sleep(500);
             assertEquals("1", InspectionUtils.inspectValue("com.limegroup.bittorrent.BTDownloaderImpl:torrentsStarted", injector, true));
 //            downloader.handleEvent(TorrentEvent.COMPLETED);

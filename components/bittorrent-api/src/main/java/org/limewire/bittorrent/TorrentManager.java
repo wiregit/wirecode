@@ -2,43 +2,36 @@ package org.limewire.bittorrent;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
+/**
+ * The torrent manager allows for adding an removing torrents, as well as
+ * controlling shared torrent features.
+ * 
+ * When multiple method calls need to be called in tandem and must be valid
+ * across calls the provided getLock method can be used to get a lock, so the
+ * calls will stay consistent across the multiple methods.
+ * 
+ * One thing to note, when sharing locks between the torrent manager and
+ * individual torrents. The torrent manager must be locked first, before any
+ * torrents are lock. If this is not adhered to then a deadlock situacion might
+ * occur.
+ */
 public interface TorrentManager {
 
     /**
      * Removes torrent from control of the torrent manager. Also delegates a
-     * remove torrent call to the libtorrent wrapper lbirary.
+     * remove torrent call to the libtorrent wrapper library.
      */
     public void removeTorrent(Torrent torrent);
 
     /**
-     * Delegates a pause torrent call to the libtorrent wrapper library.
-     */
-    public void pauseTorrent(Torrent torrent);
-
-    /**
-     * Delegates a resume torrent call to the libtorrent wrapper library.
-     */
-    public void resumeTorrent(Torrent torrent);
-
-    /**
-     * Delegates to clear any error state and restarts the torrent.
-     */
-    public void recoverTorrent(Torrent torrent);
-
-    /**
-     * Moves the underlying storage of the torrent to the specified directory.
-     * Currently this is used to move an a completed torrent from the incomplete
-     * directory to the complete directory, without interrupting any seeding
-     * which maybe be happening.
-     */
-    public void moveTorrent(Torrent torrent, File directory);
-
-    /**
      * Registers the specified torrent with the TorrentManager. Delegates an add
      * torrent call to the underlying libtorrent wrapper library.
+     * 
+     * Returns true if the torrent was successfully added, false otherwise.
      */
-    void registerTorrent(Torrent torrent);
+    public boolean addTorrent(Torrent torrent);
 
     /**
      * Returns the torrent for the given torrent file if found. null otherwise.
@@ -86,21 +79,6 @@ public interface TorrentManager {
     public float getTotalDownloadRate();
 
     /**
-     * Returns a list of torrent file entries for the given torrent.
-     */
-    public List<TorrentFileEntry> getTorrentFileEntries(Torrent torrent);
-
-    /**
-     * Returns a list of connected peers for the given torrent.
-     */
-    public List<TorrentPeer> getTorrentPeers(Torrent torrent);
-
-    /**
-     * Sets the automanaged flag to the given value for the torrent.
-     */
-    public void setAutoManaged(Torrent torrent, boolean autoManaged);
-
-    /**
      * Starts the torrent manager, and its necessary worker threads.
      */
     public void start();
@@ -116,33 +94,56 @@ public interface TorrentManager {
     public void initialize();
 
     /**
-     * Sets the given priority for the given TorrentFileEntry. 
-     */
-    public void setTorrenFileEntryPriority(Torrent torrent, TorrentFileEntry torrentFileEntry,
-            int priority);
-
-    /**
      * Returns true if the torrent manager is initialized.
      */
     public boolean isInitialized();
-    
-    /**
-     * Returns a snapshot list of the torrents that are currently in the torrent manager.
-     */
-    public List<Torrent> getTorrents();
-    
-    /**
-     * Returns true if the given torrent is valid.
-     */
-    public boolean isValid(Torrent torrent);
-    
-    /**
-     * Returns true if the given torrent has metadata. 
-     */
-    public boolean hasMetaData(Torrent torrent);
 
     /**
-     * Returns the torrent info for the given torrent.  
+     * Returns a snapshot list of the torrents that are currently in the torrent
+     * manager.
      */
-    public TorrentInfo getTorrentInfo(Torrent torrent);
+    public List<Torrent> getTorrents();
+
+    /**
+     * Returns a lock for the torrent manager. Locking is only required if state
+     * needs to be consistent across multiple method calls. Otherwise locking is
+     * done internally for single method calls.
+     */
+    public Lock getLock();
+
+    /**
+     * Stops the mainline bittorrent dht.
+     */
+    public void stopDHT();
+
+    /**
+     * Starts the mainline bittorrent dht. Using the given file to help
+     * bootstrap its state.
+     */
+    public void startDHT(File dhtStateFile);
+
+    /**
+     * Starts upnp for the torrents.
+     */
+    public void startUPnP();
+
+    /**
+     * Stops upnp for the torrents.
+     */
+    public void stopUPnP();
+
+    /**
+     * Returns true if upnp has been started.
+     */
+    public boolean isUPnPStarted();
+
+    /**
+     * Returns true if the dht has been started.
+     */
+    public boolean isDHTStarted();
+
+    /**
+     * Saves the current dht state into the given file.
+     */
+    public void saveDHTState(File dhtStateFile);
 }

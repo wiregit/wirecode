@@ -1,5 +1,6 @@
 package org.limewire.libtorrent;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -8,6 +9,7 @@ import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.inject.LazySingleton;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -23,6 +25,7 @@ import com.sun.jna.ptr.IntByReference;
  * Wrapper class for the LibTorrent c interface. Provides library loading logic,
  * and handles rethrowing c++ exceptions as java exceptions.
  */
+@LazySingleton
 class LibTorrentWrapper {
 
     private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
@@ -101,14 +104,24 @@ class LibTorrentWrapper {
         LOG.debugf("before pause_torrent: {0}", id);
         catchWrapperException(libTorrent.pause_torrent(id));
         LOG.debugf("after pause_torrent: {0}", id);
-
     }
 
     public void resume_torrent(String id) {
         LOG.debugf("before resume_torrent: {0}", id);
         catchWrapperException(libTorrent.resume_torrent(id));
         LOG.debugf("after resume_torrent: {0}", id);
-
+    }
+    
+    public void scrape_tracker(String id) {
+        LOG.debugf("before scrape_tracker: {0}", id);
+        catchWrapperException(libTorrent.scrape_tracker(id));
+        LOG.debugf("after scrape_tracker: {0}", id);
+    }
+    
+    public void force_reannounce(String id) {
+        LOG.debugf("before force_reannounce: {0}", id);
+        catchWrapperException(libTorrent.force_reannounce(id));
+        LOG.debugf("after force_reannounce: {0}", id);
     }
 
     public void get_torrent_status(String id, TorrentStatus status) {
@@ -207,8 +220,12 @@ class LibTorrentWrapper {
     }
 
     public void start_dht() {
+        start_dht(null);
+    }
+    public void start_dht(File dhtStateFile) {
         LOG.debugf("before start_dht");
-        catchWrapperException(libTorrent.start_dht());
+        WString dhtStateFilePath = dhtStateFile != null ? new WString(dhtStateFile.getAbsolutePath()) : null;
+        catchWrapperException(libTorrent.start_dht(dhtStateFilePath));
         LOG.debugf("after start_dht");
     }
 
@@ -216,6 +233,28 @@ class LibTorrentWrapper {
         LOG.debugf("before stop_dht");
         catchWrapperException(libTorrent.stop_dht());
         LOG.debugf("after stop_dht");
+    }
+    
+    public void save_dht_state(File dhtStateFile) {
+        LOG.debugf("before save_dht_state");
+        if(dhtStateFile != null) {
+            dhtStateFile.getParentFile().mkdirs();
+        }
+        WString dhtStateFilePath = dhtStateFile != null ? new WString(dhtStateFile.getAbsolutePath()) : null;
+        catchWrapperException(libTorrent.save_dht_state(dhtStateFilePath));
+        LOG.debugf("after save_dht_state");
+    }
+    
+    public void add_dht_router(String address, int port) {
+        LOG.debugf("before add_dht_router: address={0}, port={1}", address, port);
+        catchWrapperException(libTorrent.add_dht_router(address, port));
+        LOG.debugf("after add_dht_router: address={0}, port={1}", address, port);
+    }
+    
+    public void add_dht_node(String address, int port) {
+        LOG.debugf("before add_dht_node: address={0}, port={1}", address, port);
+        catchWrapperException(libTorrent.add_dht_node(address, port));
+        LOG.debugf("after add_dht_node: address={0}, port={1}", address, port);
     }
 
     public void start_upnp() {

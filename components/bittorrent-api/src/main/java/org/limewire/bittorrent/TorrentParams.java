@@ -4,62 +4,31 @@ import java.io.File;
 
 public class TorrentParams {
 
-    private String name;
-
-    private String sha1;
-
-    private String trackerURL;
-
-    private File fastResumeFile;
-
-    private File torrentFile;
-
-    private File torrentDataFile;
-
-    private Boolean isPrivate;
+    private final File downloadFolder;
     
-    public TorrentParams(File torrentFile) {
-        setTorrentFile(torrentFile);
-    }
+    private String name = null;;
+
+    private String sha1 = null;
+
+    private String trackerURL = null;
+
+    private File fastResumeFile = null;
+
+    private File torrentFile = null;
+
+    private File torrentDataFile = null;
     
-    public TorrentParams(String name, String sha1) {
-        setName(name);
-        setSha1(sha1);
-    }
-
-    public TorrentParams name(String name) {
-        setName(name);
-        return this;
-    }
-
-    public TorrentParams trackerURL(String trackerURL) {
-        setTrackerURL(trackerURL);
-        return this;
-    }
-
-    public TorrentParams sha1(String sha1) {
-        setSha1(sha1);
-        return this;
-    }
-
-    public TorrentParams torrentFile(File torrentFile) {
-        setTorrentFile(torrentFile);
-        return this;
-    }
-
-    public TorrentParams torrentDataFile(File torrentDataFile) {
-        setTorrentDataFile(torrentDataFile);
-        return this;
-    }
-
-    public TorrentParams fastResumeFile(File fastResumeFile) {
-        setFastResumeFile(fastResumeFile);
-        return this;
+    private Boolean isPrivate = null;
+    
+    public TorrentParams(File downloadFolder, File torrentFile) {
+        this.downloadFolder = downloadFolder;
+        this.torrentFile = torrentFile;
     }
     
-    public TorrentParams isPrivate(boolean isPrivate) {
-        setPrivate(isPrivate);
-        return this;
+    public TorrentParams(File downloadFolder, String name, String sha1) {
+        this.downloadFolder = downloadFolder;
+        this.name = name;
+        this.sha1 = sha1;
     }
 
     public String getName() {
@@ -96,6 +65,10 @@ public class TorrentParams {
 
     public File getTorrentFile() {
         return torrentFile;
+    }
+    
+    public File getDownloadFolder() {
+        return downloadFolder;
     }
 
     public void setTorrentFile(File torrentFile) {

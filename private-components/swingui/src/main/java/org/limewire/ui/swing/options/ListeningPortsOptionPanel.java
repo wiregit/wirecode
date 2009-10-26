@@ -23,6 +23,7 @@ import org.limewire.ui.swing.components.EmbeddedComponentLabel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NumericTextField;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -293,7 +294,17 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                     .setValue(torrentPlugAndPlayRadioButton.isSelected());
 
             if (torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
-                torrentManager.get().setTorrentManagerSettings(torrentSettings);
+                BackgroundExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        torrentManager.get().setTorrentManagerSettings(torrentSettings);
+                        if(BittorrentSettings.TORRENT_USE_UPNP.getValue()) {
+                            torrentManager.get().startUPnP();
+                        } else {
+                            torrentManager.get().stopUPnP();
+                        }
+                    }
+                });
             }
 
             return false;

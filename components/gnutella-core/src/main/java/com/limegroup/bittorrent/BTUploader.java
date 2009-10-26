@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
@@ -55,13 +56,13 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     @Override
     public void handleEvent(TorrentEvent event) {
-        if (event == TorrentEvent.STOPPED) {
+        if (event.getType() == TorrentEventType.STOPPED) {
             if (!finished.get()) {
                 cancel();
             } else {
                 remove();
             }
-        } else if (event == TorrentEvent.STATUS_CHANGED) {
+        } else if (event.getType() == TorrentEventType.STATUS_CHANGED) {
             // considered to be finished uploading if seed ratio has been
             // reached
             boolean finished = torrent.isFinished();

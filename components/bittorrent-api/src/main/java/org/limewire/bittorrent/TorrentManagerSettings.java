@@ -1,6 +1,7 @@
 package org.limewire.bittorrent;
 
 import java.io.File;
+import java.util.List;
 
 public interface TorrentManagerSettings {
 
@@ -22,11 +23,6 @@ public interface TorrentManagerSettings {
     public boolean isTorrentsEnabled();
 
     /**
-     * Returns the path that incomplete torrent downloads will be downloaded to.
-     */
-    public File getTorrentDownloadFolder();
-
-    /**
      * Returns true if the setting to report library load failures is turned on.
      */
     boolean isReportingLibraryLoadFailture();
@@ -40,12 +36,6 @@ public interface TorrentManagerSettings {
      * Returns the listening end port.
      */
     public int getListenEndPort();
-
-    /**
-     * Returns the directory that the fast resume file and torrent file are
-     * stored for torrent uploads.
-     */
-    public File getTorrentUploadsFolder();
 
     /**
      * Default seed ratio to have considered met seeding criteria.
@@ -65,7 +55,8 @@ public interface TorrentManagerSettings {
     public int getSeedTimeLimit();
 
     /**
-     * Returns the limit for the active number of active managed torrent downloads.
+     * Returns the limit for the active number of active managed torrent
+     * downloads.
      */
     public int getActiveDownloadsLimit();
 
@@ -78,20 +69,20 @@ public interface TorrentManagerSettings {
      * Returns the limit for the total number of active managed torrents.
      */
     public int getActiveLimit();
-    
-    /**
-     * Returns the maximum number of seeding torrents allowed. 
-     */
-    public int getMaxSeedingLimit();
 
     /**
-     * Returns the alert mask for the torrent session. 
+     * Returns the alert mask for the torrent session.
      */
     public int getAlertMask();
 
     /**
-     * Returns true if upnp should be used by the torrent manager for torrent
-     * connections.
+     * Returns the file the dht state used for bootstrapping he dht will be
+     * stored it.
      */
-    public boolean isUPNPEnabled();
+    public File getDHTStateFile();
+
+    /**
+     * Returns a list of bootstrapping routers for the dht.
+     */
+    public List<TorrentIpPort> getBootStrapDHTRouters();
 }

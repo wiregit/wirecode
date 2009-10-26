@@ -15,6 +15,7 @@ public interface TorrentAlert {
     public static final int progress_notification = 0x80;
     public static final int ip_block_notification = 0x100;
     public static final int performance_warning = 0x200;
+    public static final int all_categories = 0xffffffff;
 
     /**
      * Returns the category for this alert.

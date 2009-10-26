@@ -1,13 +1,15 @@
 package org.limewire.core.impl.bittorrent;
 
 import java.io.File;
+import java.util.List;
 
+import org.limewire.bittorrent.TorrentIpPort;
 import org.limewire.bittorrent.TorrentManagerSettings;
 
 public class MockTorrentManagerSettings implements TorrentManagerSettings {
 
     private boolean reportLibraryLoadFailure = false;
-    
+
     @Override
     public int getMaxDownloadBandwidth() {
         return 0;
@@ -16,11 +18,6 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     @Override
     public int getMaxUploadBandwidth() {
         return 0;
-    }
-
-    @Override
-    public File getTorrentDownloadFolder() {
-        return null;
     }
 
     @Override
@@ -74,22 +71,17 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     }
 
     @Override
-    public int getMaxSeedingLimit() {
-        return 0;
-    }
-
-    @Override
     public int getAlertMask() {
         return 0;
     }
 
     @Override
-    public File getTorrentUploadsFolder() {
+    public List<TorrentIpPort> getBootStrapDHTRouters() {
         return null;
     }
 
     @Override
-    public boolean isUPNPEnabled() {
-        return true;
+    public File getDHTStateFile() {
+        return null;
     }
 }

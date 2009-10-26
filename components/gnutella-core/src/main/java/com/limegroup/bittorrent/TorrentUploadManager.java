@@ -71,7 +71,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         LOG.error("Error reading memento for: " + mementoFile, e);
                     }
                     if (memento != null) {
-                        
+
                         File torrentFile = (File) memento.get("torrentFile");
                         File fastResumeFile = (File) memento.get("fastResumeFile");
                         File torrentDataFile = (File) memento.get("torrentDataFile");
@@ -79,27 +79,35 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         String trackerURL = (String) memento.get("trackerURL");
                         String name = (String) memento.get("name");
 
-                        if (torrentDataFile.exists()) {
-                            
-                            // TODO show error message when seeds cannot be
-                            // resumed?
+                        if (torrentDataFile.exists() && fastResumeFile != null
+                                && fastResumeFile.exists()) {
                             if (torrentManager.get().isValid()
                                     && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
                                 Torrent torrent = torrentProvider.get();
                                 try {
-                                    TorrentParams params = new TorrentParams(name, sha1);
-                                    params.trackerURL(trackerURL).fastResumeFile(fastResumeFile)
-                                            .torrentFile(torrentFile).torrentDataFile(
-                                                    torrentDataFile);
+                                    TorrentParams params = new TorrentParams(torrentDataFile
+                                            .getParentFile(), name, sha1);
+                                    params.setTrackerURL(trackerURL);
+                                    params.setFastResumeFile(fastResumeFile);
+                                    params.setTorrentFile(torrentFile);
+                                    params.setTorrentDataFile(torrentDataFile);
                                     torrent.init(params);
                                 } catch (IOException e) {
                                     LOG.error("Error initializing memento from: " + mementoFile, e);
                                 }
-                                torrentManager.get().registerTorrent(torrent);
+                                torrentManager.get().addTorrent(torrent);
                                 createBTUploader(torrent);
                                 torrent.setAutoManaged(true);
                                 torrent.start();
                             }
+                        } else {
+                            if (torrentFile != null) {
+                                FileUtils.delete(torrentFile, false);
+                            }
+                            if (fastResumeFile != null) {
+                                FileUtils.delete(fastResumeFile, false);
+                            }
+                            FileUtils.delete(mementoFile, false);
                         }
                     }
                 }
@@ -135,8 +143,9 @@ public class TorrentUploadManager implements BTUploaderFactory {
     }
 
     private File getMementoFile(Torrent torrent) {
-        File torrentMomento = new File(torrentManager.get().getTorrentManagerSettings()
-                .getTorrentUploadsFolder(), torrent.getName() + ".memento");
+        File torrentMomento = new File(BittorrentSettings.TORRENT_UPLOADS_FOLDER.get(), torrent
+                .getName()
+                + ".memento");
         return torrentMomento;
     }
 

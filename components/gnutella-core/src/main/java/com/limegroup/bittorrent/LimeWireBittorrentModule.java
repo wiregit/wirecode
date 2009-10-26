@@ -4,7 +4,6 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
-import org.limewire.libtorrent.LazyTorrentManager;
 import org.limewire.libtorrent.TorrentImpl;
 
 import com.google.inject.AbstractModule;
@@ -25,6 +24,6 @@ public class LimeWireBittorrentModule extends AbstractModule {
                         return new LimeWireTorrentSettings();
                     }
                 });
-        bind(TorrentManager.class).to(LazyTorrentManager.class);
+        bind(TorrentManager.class).to(LimeWireTorrentManager.class);
     }
 }

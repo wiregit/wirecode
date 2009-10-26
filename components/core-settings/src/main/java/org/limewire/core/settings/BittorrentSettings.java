@@ -6,6 +6,7 @@ import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.util.CommonUtils;
 
 /**
@@ -21,9 +22,9 @@ public class BittorrentSettings extends LimeProps {
      * Whether to show a popup dialog allowing the user to select files within
      * the torrent to download prior to starting the download.
      */
-    public static final BooleanSetting TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING = 
-        FACTORY.createBooleanSetting("TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING", true);
-    
+    public static final BooleanSetting TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING = FACTORY
+            .createBooleanSetting("TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING", true);
+
     /**
      * Setting for whether or not be want to report issues loading the
      * libtorrent libraries.
@@ -64,9 +65,8 @@ public class BittorrentSettings extends LimeProps {
     /**
      * The folder where all the upload mementos are saved for torrents.
      */
-    public static FileSetting TORRENT_UPLOADS_FOLDER = FACTORY
-            .createFileSetting("TORRENT_UPLOADS_FOLDER", new File(CommonUtils
-                    .getUserSettingsDir(), "uploads.dat/"));
+    public static FileSetting TORRENT_UPLOADS_FOLDER = FACTORY.createFileSetting(
+            "TORRENT_UPLOADS_FOLDER", new File(CommonUtils.getUserSettingsDir(), "uploads.dat/"));
 
     /**
      * The target seed ratio for torrents. Torrents which have met this ratio
@@ -118,8 +118,8 @@ public class BittorrentSettings extends LimeProps {
             "LIBTORRENT_ACTIVE_DOWNLOADS_LIMIT", 8);
 
     /**
-     * The total number of active seeds limit. This number is also used via
-     * the libtorrent queuing algorithm when trying to decide to queue/dequeue
+     * The total number of active seeds limit. This number is also used via the
+     * libtorrent queuing algorithm when trying to decide to queue/dequeue
      * automanaged torrents. This limit only effect automanaged torrents, but
      * will take other torrents into account as we.
      */
@@ -134,10 +134,10 @@ public class BittorrentSettings extends LimeProps {
      */
     public static final IntSetting LIBTORRENT_ACTIVE_LIMIT = FACTORY.createIntSetting(
             "LIBTORRENT_ACTIVE_LIMIT", 15);
-    
+
     /**
-     * The maximum number of torrents that can be seeded at once.  One the limit is reached
-     *  seeding torrents will be stopped.
+     * The maximum number of torrents that can be seeded at once. One the limit
+     * is reached seeding torrents will be stopped.
      */
     public static final IntSetting TORRENT_SEEDING_LIMIT = FACTORY.createRemoteIntSetting(
             "TORRENT_SEEDING_LIMIT", 40, "torrents.torrentSeedingLimit", 0, Integer.MAX_VALUE);
@@ -148,4 +148,21 @@ public class BittorrentSettings extends LimeProps {
      */
     public static final BooleanSetting UPLOAD_TORRENTS_FOREVER = FACTORY.createBooleanSetting(
             "UPLOAD_TORRENTS_FOREVER", false);
+
+    /**
+     * The file that previous dht states have been stored in.
+     */
+    public static final FileSetting LIBTORRENT_DHT_STATE = FACTORY.createFileSetting(
+            "LIBTORRENT_DHT_STATE", new File(CommonUtils.getUserSettingsDir(),
+                    "libtorrent/libtorrentdht.dat"));
+
+    /**
+     * Contains a list of dht router address and ip pairs to allow libtorrent to
+     * find dht nodes, when we have none.
+     */
+    public static final StringArraySetting TORRENT_BOOTSTRAP_DHT_ROUTERS = FACTORY
+            .createRemoteStringArraySetting("TORRENT_DHT_ROUTERS", new String[] {
+                    "router.bittorrent.com:6881", "router.utorrent.com:6881",
+                    "router.bitcomet.com:6881" }, "torrent bootstrap dht routers");
+
 }

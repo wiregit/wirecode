@@ -3,11 +3,21 @@ package org.limewire.bittorrent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import org.limewire.listener.EventListener;
 
 /**
- * Class representing the torrent being downloaded.
+ * Class representing the torrent being downloaded/uploaded.
+ * 
+ * When multiple method calls need to be called in tandem and must be valid
+ * across calls the provided getLock method can be used to get a lock, so the
+ * calls will stay consistent across the multiple methods.
+ * 
+ * One thing to note, when sharing locks between the torrent manager and
+ * individual torrents. The torrent manager must be locked first, before any
+ * torrents are lock. If this is not adhered to then a deadlock situacion might
+ * occur.
  */
 public interface Torrent {
 
@@ -140,14 +150,6 @@ public interface Torrent {
     public void handleFastResumeAlert(TorrentAlert alert);
 
     /**
-     * Registers the torrent with the torrent manager.
-     * 
-     * @returns true if the torrent was registered, or false if an error
-     *          occurred.
-     */
-    public boolean registerWithTorrentManager();
-
-    /**
      * Removes the listener from the torrent. Returning true if the listener
      * attached and removed.
      */
@@ -227,9 +229,50 @@ public interface Torrent {
      * Gets the value for the given property for this torrent. Null if not set.
      */
     public Object getProperty(String key);
-    
+
     /**
      * Returns true of this torrent is still considered valid.
      */
     public boolean isValid();
+
+    /**
+     * Returns the time in milliseconds that this torrent was started in the
+     * current session.
+     */
+    public long getStartTime();
+
+    /**
+     * Sets the new path for the torrent file.
+     */
+    public void setTorrentFile(File torrentFile);
+
+    /**
+     * Sets the new path for the fast resume file.
+     */
+    public void setFastResumeFile(File fastResumeFile);
+
+    /**
+     * Forces the torrent to reannounce itself to its tracker.
+     */
+    public void forceReannounce();
+
+    /**
+     * Makes the torrent rescrape its tracker to get updated statistics for the
+     * torrent.
+     */
+    public void scrapeTracker();
+
+    /**
+     * Tells the torrent to save its fast resume data to the given fastResume
+     * file.
+     */
+    public void saveFastResumeData();
+
+    /**
+     * Returns a lock for this torrent. Locking is only required if state needs
+     * to be consistent across multiple method calls. Otherwise locking is done
+     * internally for single method calls.
+     */
+    public Lock getLock();
+
 }
