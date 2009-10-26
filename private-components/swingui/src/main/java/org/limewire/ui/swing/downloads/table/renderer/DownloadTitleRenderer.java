@@ -1,78 +1,68 @@
 package org.limewire.ui.swing.downloads.table.renderer;
 
-import java.awt.Component;
-
 import javax.swing.Icon;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
+import org.limewire.ui.swing.transfer.TransferTitleRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 
 import com.google.inject.Inject;
 
-public class DownloadTitleRenderer extends JLabel implements TableCellRenderer {
-    @Resource
-    private Icon warningIcon;
-    @Resource
-    private Icon downloadingIcon;
-    
+/**
+ * Cell renderer for the title column in the Downloads table.
+ */
+public class DownloadTitleRenderer extends TransferTitleRenderer {
+
+    @Resource private Icon warningIcon;
+    @Resource private Icon downloadingIcon;
     
     private CategoryIconManager categoryIconManager;
     
     @Inject
-    public DownloadTitleRenderer(CategoryIconManager categoryIconManager){
-        
-        GuiUtils.assignResources(this);
-        
-        //row highlighters only work on opaque renderers
-        setOpaque(true);
-        
+    public DownloadTitleRenderer(CategoryIconManager categoryIconManager) {
         this.categoryIconManager = categoryIconManager;
         
-        new DownloadRendererProperties().decorateComponent(this);
-        setIconTextGap(6);
-        setBorder(new EmptyBorder(0,4,0,0));
+        GuiUtils.assignResources(this);
     }
     
-
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
-        if(value instanceof DownloadItem) {
-            DownloadItem item = (DownloadItem)value;
-            updateIcon(item.getState(), item);
-            updateTitle(item);
-        } else {
-            setIcon(null);
-            setText("");
+    protected Icon getIcon(Object value) {
+        if (!(value instanceof DownloadItem)) {
+            return null;
         }
-        return this;
-    }
-    
-    private void updateIcon(DownloadState state, DownloadItem item) {
+        DownloadItem item = (DownloadItem) value;
+        DownloadState state = item.getState();
+        
         switch (state) {
         case ERROR:
-            setIcon(warningIcon);
-            break;
+            return warningIcon;
 
         case FINISHING:
         case DONE:
-            setIcon(categoryIconManager.getIcon(item.getCategory()));
-            break;
+            return categoryIconManager.getIcon(item.getCategory());
             
         default:
-            setIcon(downloadingIcon);
+            return downloadingIcon;
         }
     }
     
-    private void updateTitle(DownloadItem item){
-        setText(PropertiableFileUtils.getNameProperty(item, true));
+    @Override
+    protected String getText(Object value) {
+        if (!(value instanceof DownloadItem)) {
+            return "";
+        }
+        DownloadItem item = (DownloadItem) value;
+        
+        if (item.getDownloadItemType() == DownloadItemType.BITTORRENT) {
+            return I18n.tr("{0} (torrent)", PropertiableFileUtils.getNameProperty(item, true));
+        } else {
+            return PropertiableFileUtils.getNameProperty(item, true);
+        }
     }
 }

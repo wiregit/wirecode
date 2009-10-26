@@ -291,6 +291,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             downloader.addListener(new RecentDownloadListener(downloader));
             downloader.addListener(itunesDownloadListenerFactory.createListener(downloader));
             threadSafeDownloadItems.add(item);
+            changeSupport.firePropertyChange(DOWNLOAD_ADDED, false, true);
             URN urn = item.getUrn();
             if(urn != null) {
                 //the bittorrent File Downloader can have a null urn

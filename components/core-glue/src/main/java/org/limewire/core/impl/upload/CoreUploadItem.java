@@ -42,6 +42,7 @@ class CoreUploadItem implements UploadItem {
     private final UploadItemType uploadItemType;
     private boolean isFinished = false;
     private UploadRemoteHost uploadRemoteHost;
+    private final long startTime;
     
     @Inject
     CoreUploadItem(@Assisted Uploader uploader, @Assisted FriendPresence friendPresence, CategoryManager categoryManager) {
@@ -49,6 +50,7 @@ class CoreUploadItem implements UploadItem {
         this.uploader = uploader;
         this.friendPresence = friendPresence;
         uploadItemType = uploader instanceof BTUploader ? UploadItemType.BITTORRENT : UploadItemType.GNUTELLA;
+        startTime = System.currentTimeMillis();
     }
 
     @Override
@@ -312,6 +314,11 @@ class CoreUploadItem implements UploadItem {
     @Override
     public int getNumUploadConnections() {
         return uploader.getNumUploadConnections();
+    }
+    
+    @Override
+    public long getStartTime() {
+        return startTime;
     }
     
     /**

@@ -8,6 +8,7 @@ import org.limewire.friend.impl.AbstractFriendPresence;
 public class MockFriendPresence extends AbstractFriendPresence implements FriendPresence{
     
     private MockFriend friend;
+    private String presenceId;
     
     public MockFriendPresence() {
         this(new MockFriend());
@@ -20,6 +21,14 @@ public class MockFriendPresence extends AbstractFriendPresence implements Friend
         }
     }
     
+    public MockFriendPresence(MockFriend friend, String presenceId, Feature...features) {
+        this.friend = friend;
+        this.presenceId = presenceId;
+        for(Feature feature : features) {
+            addFeature(feature);
+        }
+    }
+    
     @Override
     public Friend getFriend() {
         return friend;
@@ -27,7 +36,7 @@ public class MockFriendPresence extends AbstractFriendPresence implements Friend
 
     @Override
     public String getPresenceId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return presenceId;
     }
 
     @Override

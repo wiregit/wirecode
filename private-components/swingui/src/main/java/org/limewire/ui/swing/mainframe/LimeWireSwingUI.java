@@ -20,18 +20,21 @@ import javax.swing.SwingUtilities;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
-import org.limewire.ui.swing.downloads.DownloadHeaderPanel;
 import org.limewire.ui.swing.downloads.DownloadVisibilityListener;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
+import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -41,6 +44,7 @@ import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -54,7 +58,7 @@ public class LimeWireSwingUI extends JPanel {
     private final LimeSplitPane splitPane;
     private final Provider<SignOnMessageLayer> signOnMessageProvider;
     private final MainDownloadPanel mainDownloadPanel;
-    private final DownloadHeaderPanel downloadHeaderPanel;
+    private final BottomHeaderPanel bottomHeaderPanel;
     
 	@Inject
     public LimeWireSwingUI(
@@ -65,19 +69,25 @@ public class LimeWireSwingUI extends JPanel {
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
             Provider<SignOnMessageLayer> signOnMessageProvider,
-            MainDownloadPanel mainDownloadPanel, DownloadHeaderPanel downloadHeaderPanel, @GlobalLayeredPane JLayeredPane limeWireLayeredPane) {
+            MainDownloadPanel mainDownloadPanel,
+            @GlobalLayeredPane JLayeredPane limeWireLayeredPane,
+            BottomPanel bottomPanel,
+            BottomHeaderFactory bottomHeaderFactory) {
     	GuiUtils.assignResources(this);
-    	        
+    	
     	this.topPanel = topPanel;  	
     	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
     	this.signOnMessageProvider = signOnMessageProvider;
         this.centerPanel = new JPanel(new GridBagLayout());   
         this.mainDownloadPanel = mainDownloadPanel;
-        this.downloadHeaderPanel = downloadHeaderPanel;
+        
+        // Create bottom header panel.
+        bottomHeaderPanel = bottomHeaderFactory.create(bottomPanel);
     	
-    	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanel.getComponent(), downloadHeaderPanel.getDragComponent());
-    	mainDownloadPanel.setVisible(false);
+        // Create split pane for bottom tray.
+    	splitPane = createSplitPane(mainPanel, bottomPanel, 
+    	        bottomHeaderPanel.getComponent(), bottomHeaderPanel.getDragComponent());
 
         setLayout(new BorderLayout());
 
@@ -114,6 +124,19 @@ public class LimeWireSwingUI extends JPanel {
 	@Inject
 	public void registerListener(){
 	    mainDownloadPanel.addDownloadVisibilityListener(new DownloadVisibilityHandler());
+	    
+	    // Add listener for Uploads setting.
+	    UploadSettings.SHOW_UPLOADS_TRAY.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleUploadVisibilityChange(UploadSettings.SHOW_UPLOADS_TRAY.getValue());
+                    }
+                });
+            }
+	    });
 	}
 	
 	private boolean isFirstPainting = true;
@@ -121,8 +144,11 @@ public class LimeWireSwingUI extends JPanel {
     public void paint(Graphics g){
 	    if(isFirstPainting && splitPane.getHeight() > 0){
 	        isFirstPainting = false;
-	        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
-	            handleDownloadVisibiltyChange(true);
+            if (UploadSettings.SHOW_UPLOADS_TRAY.getValue()) {
+                handleUploadVisibilityChange(true);
+            }
+	        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
+	            handleDownloadVisibilityChange(true);
 	        }
 	    }
 	    super.paint(g);
@@ -150,8 +176,7 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-   private LimeSplitPane createSplitPane(final JComponent top, 
-           final MainDownloadPanel bottom, 
+   private LimeSplitPane createSplitPane(final JComponent top, final BottomPanel bottom, 
            JComponent divider, JComponent dragComponent) {
         final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
         splitPane.setDividerSize(0);
@@ -168,8 +193,8 @@ public class LimeWireSwingUI extends JPanel {
         splitPane.setDividerDraggable(false);
         splitPane.setDragComponent(dragComponent);
         
-        // Set top panel's minimum height to half of split pane height 
-        //  (this fires when the app is initialiZZed)
+        //set top panel's minimum height to half of split pane height 
+        //(this fires when the app is initialized)
         splitPane.addComponentListener(new ComponentAdapter(){            
             @Override
             public void componentResized(ComponentEvent e) {
@@ -177,14 +202,16 @@ public class LimeWireSwingUI extends JPanel {
             }
         });
         
-        mainDownloadPanel.addComponentListener(new ComponentAdapter(){
+        // Add listener to save bottom tray size.
+        bottom.addComponentListener(new ComponentAdapter(){
             @Override
             public void componentResized(ComponentEvent e) {
                 int height = bottom.getHeight();
-                if(height > bottom.getDefaultPreferredHeight()){
-                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(height);
+                int minHeight = bottom.getDefaultPreferredHeight(); 
+                if (height > minHeight) {
+                    SwingUiSettings.BOTTOM_TRAY_SIZE.setValue(height);
                 } else {
-                    SwingUiSettings.DOWNLOAD_TRAY_SIZE.setValue(bottom.getDefaultPreferredHeight());
+                    SwingUiSettings.BOTTOM_TRAY_SIZE.setValue(minHeight);
                 }
             }
         });
@@ -195,27 +222,77 @@ public class LimeWireSwingUI extends JPanel {
     private class DownloadVisibilityHandler implements DownloadVisibilityListener {
         @Override
         public void updateVisibility(DownloadVisibilityEvent event) {
-            handleDownloadVisibiltyChange(event.getVisibility());
+            handleDownloadVisibilityChange(event.getVisibility());
         }
     }
    
+    /**
+     * Handles change in visible state of Downloads tray.
+     */
+    private void handleDownloadVisibilityChange(boolean visible) {
+        boolean uploadVisible = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
+        
+        if (visible) {
+            bottomHeaderPanel.selectTab(TabId.DOWNLOADS);
+        } else if (uploadVisible) {
+            bottomHeaderPanel.selectTab(TabId.UPLOADS);
+        }
+        
+        setBottomTrayVisible(visible || uploadVisible);
+    }
     
-   private void handleDownloadVisibiltyChange(boolean isVisible){
-       assert(SwingUtilities.isEventDispatchThread());
-       splitPane.getBottomComponent().setVisible(isVisible);
-       if (isVisible) {
-           splitPane.setDividerSize(downloadHeaderPanel.getComponent().getPreferredSize().height);           
-           int preferredDividerPosition = splitPane.getSize().height - splitPane.getInsets().bottom
-           - splitPane.getDividerSize()
-           - splitPane.getBottomComponent().getPreferredSize().height;
-           if (preferredDividerPosition < (splitPane.getHeight()/2)){
-               preferredDividerPosition = splitPane.getHeight()/2;
-           }
-           splitPane.setDividerLocation(preferredDividerPosition);
-        } else {            
+    /**
+     * Handles change in visible state of Uploads tray.
+     */
+    private void handleUploadVisibilityChange(boolean visible) {
+        boolean downloadVisible = DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue();
+        
+        if (visible) {
+            bottomHeaderPanel.selectTab(TabId.UPLOADS);
+        } else if (downloadVisible) {
+            bottomHeaderPanel.selectTab(TabId.DOWNLOADS);
+        }
+        
+        setBottomTrayVisible(visible || downloadVisible);
+    }
+    
+    /**
+     * Sets the visibility of the downloads/uploads tray.
+     */
+    private void setBottomTrayVisible(boolean visible) {
+        assert (SwingUtilities.isEventDispatchThread());
+        
+        // Set component visibility.
+        boolean wasVisible = splitPane.getBottomComponent().isVisible();
+        splitPane.getBottomComponent().setVisible(visible);
+        
+        if (visible) {
+            // Restore divider size.
+            splitPane.setDividerSize(bottomHeaderPanel.getComponent().getPreferredSize().height);
+            
+            // Restore divider location if newly visible.  If the last location
+            // is not valid, compute perferred position and apply.
+            if (!wasVisible) {
+                int lastLocation = splitPane.getLastDividerLocation(); 
+                if ((lastLocation <= 0) || (lastLocation > splitPane.getHeight())) {
+                    int preferredDividerPosition = splitPane.getSize().height -
+                        splitPane.getInsets().bottom - splitPane.getDividerSize() -
+                        splitPane.getBottomComponent().getPreferredSize().height;
+                    if (preferredDividerPosition < (splitPane.getHeight() / 2)) {
+                        preferredDividerPosition = splitPane.getHeight() / 2;
+                    }
+                    splitPane.setDividerLocation(preferredDividerPosition);
+                } else {
+                    splitPane.setDividerLocation(lastLocation);
+                }
+            }
+            
+        } else {
+            // Save divider location and reset divider size.
+            splitPane.setLastDividerLocation(splitPane.getDividerLocation());
             splitPane.setDividerSize(0);
         }
-   }
+    }
     
     private static class MainPanelResizer extends ComponentAdapter {
         private final JComponent target;

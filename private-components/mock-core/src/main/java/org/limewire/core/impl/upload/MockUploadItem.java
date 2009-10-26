@@ -11,16 +11,23 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
+import org.limewire.core.impl.friend.MockFriend;
+import org.limewire.core.impl.friend.MockFriendPresence;
+import org.limewire.friend.api.FriendPresence;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 public class MockUploadItem implements UploadItem {
     
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
-    private UploadState state;
+    private volatile UploadState state;
     private String fileName;
     private long fileSize;
-    private long amtUploaded;
+    private volatile long amtUploaded;
     private Category category;
+    private RemoteHost uploadRemoteHost;
+    private final long startTime;
+    
+    private volatile boolean running = true;
     
     public MockUploadItem(UploadState state, String fileName, long fileSize, long amtUploaded, Category category){
         this.state = state;
@@ -28,6 +35,32 @@ public class MockUploadItem implements UploadItem {
         this.fileSize = fileSize;
         this.amtUploaded = amtUploaded;
         this.category = category;
+        
+        startTime = System.currentTimeMillis();
+        
+        if (this.state == UploadState.UPLOADING) {
+            start();
+        }
+    }
+    
+    private boolean isRunning() {
+        return running;
+    }
+    
+    private void start() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isRunning() && getTotalAmountUploaded() < getFileSize()) {
+                    setTotalAmountUploaded(getTotalAmountUploaded() + 512);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        // eat InterruptedException
+                    }
+                }
+            }
+        }).start();
     }
     
     @Override
@@ -54,6 +87,16 @@ public class MockUploadItem implements UploadItem {
     public long getTotalAmountUploaded() {
         return amtUploaded;
     }
+    
+    private void setTotalAmountUploaded(long amtUploaded) {
+        long oldAmount = this.amtUploaded;
+        this.amtUploaded = (amtUploaded < getFileSize()) ? amtUploaded : getFileSize();
+        if (this.amtUploaded == getFileSize()) {
+            setState(UploadState.DONE);
+        } else {
+            support.firePropertyChange("totalAmountUploaded", oldAmount, this.amtUploaded);
+        }
+    }
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener){
@@ -78,7 +121,7 @@ public class MockUploadItem implements UploadItem {
     
     @Override
     public String toString(){
-        return "CoreUploadItem: " + getFileName() + ", " + getState();
+        return "MockUploadItem: " + getFileName() + ", " + getState();
     }
 
     @Override
@@ -88,12 +131,18 @@ public class MockUploadItem implements UploadItem {
 
     @Override
     public long getRemainingUploadTime() {
-        return 999;
+        float speed = getUploadSpeed();
+        if (speed > 0) {
+            double remaining = (getFileSize() - getTotalAmountUploaded()) / 1024.0;
+            return (long) (remaining / speed);
+        } else {
+            return Long.MAX_VALUE;
+        }
     }
 
     @Override
     public float getUploadSpeed() {
-        return 64;
+        return 1;
     }
 
     @Override
@@ -145,9 +194,17 @@ public class MockUploadItem implements UploadItem {
 
     @Override
     public RemoteHost getRemoteHost() {
-        return null;
+        if (uploadRemoteHost == null) {
+            uploadRemoteHost = new MockUploadRemoteHost();
+        }
+        return uploadRemoteHost;
     }
 
+    @Override
+    public long getStartTime() {
+        return startTime;
+    }
+    
     @Override
     public float getSeedRatio() {
         return -1;
@@ -161,5 +218,28 @@ public class MockUploadItem implements UploadItem {
     @Override
     public void resume() {
         
+    }
+    
+    private class MockUploadRemoteHost implements RemoteHost {
+
+        @Override
+        public FriendPresence getFriendPresence() {
+            return new MockFriendPresence(new MockFriend("uploader"), "uploader");
+        }
+
+        @Override
+        public boolean isBrowseHostEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isChatEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isSharingEnabled() {
+            return false;
+        }
     }
 }

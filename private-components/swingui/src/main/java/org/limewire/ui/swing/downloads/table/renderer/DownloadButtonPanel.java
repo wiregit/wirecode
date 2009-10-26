@@ -12,6 +12,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
+import org.limewire.ui.swing.transfer.TransferRendererResources;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -38,7 +39,7 @@ public class DownloadButtonPanel extends JPanel {
 
         setOpaque(false);
 
-        Font font = new DownloadRendererProperties().getFont();
+        Font font = new TransferRendererResources().getFont();
 
         pauseButton = new HyperlinkButton(I18n.tr("Pause"));
         pauseButton.setActionCommand(DownloadActionHandler.PAUSE_COMMAND);

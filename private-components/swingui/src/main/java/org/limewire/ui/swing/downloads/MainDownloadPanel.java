@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -16,7 +15,6 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Application;
-import org.jdesktop.application.Resource;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -28,21 +26,21 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-//EagerSingleton to ensure that register() is called and the listeners are in place at startup
+/**
+ * Container to display the Downloads table.
+ * 
+ * Note: This is an EagerSingleton to ensure that register() is called and the
+ * listeners are in place at startup.
+ */
 @EagerSingleton
 public class MainDownloadPanel extends JPanel {  	
     
@@ -56,7 +54,6 @@ public class MainDownloadPanel extends JPanel {
     
     private TrayNotifier notifier;
     private boolean isInitialized = false;
-    @Resource private int preferredHeight;    
     private DownloadTable table;
     
     
@@ -76,9 +73,6 @@ public class MainDownloadPanel extends JPanel {
         this.notifier = notifier;
 
         GuiUtils.assignResources(this);
-        int savedHeight = SwingUiSettings.DOWNLOAD_TRAY_SIZE.getValue();
-        int height = savedHeight == 0 ? preferredHeight : savedHeight;
-        setPreferredSize(new Dimension(getPreferredSize().width, height));
     }
     
     public void selectAndScrollTo(URN urn) {
@@ -91,25 +85,28 @@ public class MainDownloadPanel extends JPanel {
     
     @Inject
     public void register() {              
-        downloadMediator.getDownloadList().addListEventListener(new VisibilityListListener());
-        DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
+        // Add listener for "show downloads" setting.
+        DownloadSettings.SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
            @Override
             public void settingChanged(SettingEvent evt) {
                SwingUtils.invokeLater(new Runnable() {
                    @Override
-                    public void run() {
-                       updateVisibility(downloadMediator.getDownloadList());
-                    }
+                   public void run() {
+                       updateVisibility();
+                   }
                });
             } 
         });
         
-        //we have to eagerly initialize the table when the ALWAYS_SHOW_DOWNLOAD_TRAY setting
+        //we have to eagerly initialize the table when the SHOW_DOWNLOAD_TRAY setting
         //is set to true on startup, otherwise the table space will be empty and the lines will
         //be put in the first time a download comes in, which looks a little weird
-        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()) {
+        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
             initialize();
         }
+        
+        // Add listener for downloads added and completed.
+        downloadListManager.addPropertyChangeListener(new DownloadPropertyListener());
     }
     
     public void addDownloadVisibilityListener(DownloadVisibilityListener listener){
@@ -130,28 +127,27 @@ public class MainDownloadPanel extends JPanel {
         JScrollPane pane = new JScrollPane(table);
         pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         add(pane, BorderLayout.CENTER);
-
-        // handle individual completed downloads
-        initializeDownloadListeners(downloadListManager);
     }
     
     public List<DownloadItem> getSelectedDownloadItems(){
         return table.getSelectedItems();
     }
-    
-    public int getDefaultPreferredHeight(){
-        return preferredHeight;
-    }
 
-    
-    private void initializeDownloadListeners(final DownloadListManager downloadListManager) {
-        // handle individual completed downloads
-        downloadListManager.addPropertyChangeListener(new DownloadPropertyListener());
-    }
-
+    /**
+     * Listener to handle download added/completed events from the download 
+     * list manager.
+     */
     private class DownloadPropertyListener implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
-            if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
+            if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_ADDED)) {
+                // Display this panel whenever a download is added. 
+                if (!DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
+                    DownloadSettings.SHOW_DOWNLOADS_TRAY.setValue(true);
+                } else {
+                    updateVisibility();
+                }
+                
+            } else if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
                 final DownloadItem downloadItem = (DownloadItem) event.getNewValue();
                 notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
                         new AbstractAction() {
@@ -178,36 +174,20 @@ public class MainDownloadPanel extends JPanel {
             }
         }
     }
-
-    /**
-     * Initializes the download panel contents the first time the list changes (when the first DownloadItem is added).  
-     * Adjusts visibility of the panel depending on whether or not the list is empty.
-     */
-    private class VisibilityListListener implements ListEventListener<DownloadItem> {
-      
-        @Override
-        public void listChanged(ListEvent<DownloadItem> listChanges) {
-            EventList sourceList = listChanges.getSourceList(); 
-            updateVisibility(sourceList);
-        }
-    }
     
-    private void updateVisibility(EventList sourceList) {
+    /**
+     * Updates the visibility of this download panel.  This method is called
+     * when a download is added, or when the "show downloads" setting changes.
+     */
+    private void updateVisibility() {
         if(!isInitialized){
             initialize();
         }
         
-        int downloadCount = sourceList.size();
-        
-        if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue() && !isVisible()){
+        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
             alertDownloadVisibilityListeners(true);
-        } else if(DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY.getValue()){
-            //Do nothing - it is already set.
-            return;
-        } else if (downloadCount == 0 && isVisible()) {
+        } else {
             alertDownloadVisibilityListeners(false);
-        } else if (downloadCount > 0 && !isVisible()) {
-            alertDownloadVisibilityListeners(true);
         }
     }
     

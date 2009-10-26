@@ -29,6 +29,7 @@ class ViewMenu extends MnemonicMenu {
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     
     private final Provider<ShowHideDownloadTrayAction> showHideDownloadTrayActionProvider;
+    private final Provider<UploadTrayAction> uploadTrayActionProvider;
     private final Provider<ChatMediator> chatFrameProvider;
     private final Provider<ChangeLanguageAction> changeLanguageActionProvider;
     
@@ -37,6 +38,7 @@ class ViewMenu extends MnemonicMenu {
             Provider<AutoLoginService> autoLoginServiceProvider,
             EventBean<FriendConnectionEvent> friendConnectionEventBean,
             Provider<ShowHideDownloadTrayAction> showHideDownloadTrayAction,
+            Provider<UploadTrayAction> uploadTrayActionProvider,
             Provider<ChatMediator> chatFrameProvider,
             Provider<ChangeLanguageAction> changeLanguageActionProvider) {
         
@@ -47,6 +49,7 @@ class ViewMenu extends MnemonicMenu {
         this.friendConnectionEventBean = friendConnectionEventBean;
         
         this.showHideDownloadTrayActionProvider = showHideDownloadTrayAction;
+        this.uploadTrayActionProvider = uploadTrayActionProvider;
         this.chatFrameProvider = chatFrameProvider;
         this.changeLanguageActionProvider = changeLanguageActionProvider;
     }
@@ -55,6 +58,7 @@ class ViewMenu extends MnemonicMenu {
     public void createMenuItems() {
         add(buildShowHideChatWindowAction(chatFrameProvider));
         add(showHideDownloadTrayActionProvider.get());
+        add(uploadTrayActionProvider.get());
         addSeparator();
         add(changeLanguageActionProvider.get());
     }

@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JComponent;
+
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -25,6 +27,7 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 @LazySingleton
 public class DownloadMediator {
@@ -36,7 +39,9 @@ public class DownloadMediator {
 	 */
 	@InspectableForSize(value = "download count", category = DataCategory.USAGE)
     private final SortedList<DownloadItem> commonBaseList;
-	private DownloadListManager downloadListManager;
+	private final DownloadListManager downloadListManager;
+	private final Provider<MainDownloadPanel> downloadPanelFactory;
+	
 	private boolean isAscending = true;
 	private SortOrder sortOrder = SortOrder.ORDER_ADDED;
 	
@@ -60,10 +65,16 @@ public class DownloadMediator {
     }
 	
 	@Inject
-	public DownloadMediator(DownloadListManager downloadManager) {
+	public DownloadMediator(DownloadListManager downloadManager,
+	        Provider<MainDownloadPanel> downloadPanelFactory) {
 	    this.downloadListManager = downloadManager;
+	    this.downloadPanelFactory = downloadPanelFactory;
 	    EventList<DownloadItem> baseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
 	    commonBaseList = GlazedListsFactory.sortedList(baseList, new DescendingComparator(new OrderAddedComparator()));
+	}
+	
+	public JComponent getComponent() {
+	    return downloadPanelFactory.get();
 	}
 	
 	public boolean isSortAscending() {

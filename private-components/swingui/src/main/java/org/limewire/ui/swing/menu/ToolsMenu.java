@@ -10,21 +10,15 @@ import javax.swing.JMenu;
 import javax.swing.event.MenuListener;
 
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
 import org.limewire.ui.swing.mainframe.OptionsAction;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
-import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
@@ -39,22 +33,15 @@ class ToolsMenu extends MnemonicMenu {
     private final JMenu whatsNewSubmenu;
     
     private final Provider<AdvancedToolsPanel> advancedToolsPanelProvider; 
-    private final Provider<Navigator> navigatorProvider;
-    private final Provider<UploadMediator> uploadMediatorProvider;
     private final Provider<SearchHandler> searchHandlerProvider;
     private final Provider<SearchNavigator> searchNavigatorProvider;
     private final Provider<OptionsAction> optionsAction;
-    
-    @InspectablePrimitive(value = "search view", category = DataCategory.USAGE)
-    private static volatile int uploadsViewed = 0;
     
     private AdvancedToolsPanel advancedTools = null;
     
     @Inject
     public ToolsMenu(
             Provider<AdvancedToolsPanel> advancedToolsPanelProvider, 
-            Provider<Navigator> navigatorProvider, 
-            Provider<UploadMediator> uploadMediatorProvider,
             Provider<SearchHandler> searchHandlerProvider, 
             Provider<SearchNavigator> searchNavigatorProvider,
             Provider<OptionsAction> optionsAction) {
@@ -62,8 +49,6 @@ class ToolsMenu extends MnemonicMenu {
         super(I18n.tr("&Tools"));
         
         this.advancedToolsPanelProvider = advancedToolsPanelProvider;
-        this.navigatorProvider = navigatorProvider;
-        this.uploadMediatorProvider = uploadMediatorProvider;
         this.searchHandlerProvider = searchHandlerProvider;
         this.searchNavigatorProvider = searchNavigatorProvider;
         this.optionsAction = optionsAction;
@@ -73,20 +58,6 @@ class ToolsMenu extends MnemonicMenu {
     
     @Override
     public void createMenuItems() {
-        add(new AbstractAction(I18n.tr("&Uploads")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-                NavItem navItem = navigatorProvider.get().getNavItem(NavCategory.UPLOAD, UploadMediator.NAME);
-                if (navItem == null) {
-                    navItem = navigatorProvider.get().createNavItem(NavCategory.UPLOAD, UploadMediator.NAME, uploadMediatorProvider.get());
-                }
-                navItem.select();
-                uploadsViewed++;
-            }
-        });
-        
-        addSeparator();
         add(new AbstractAction(I18n.tr("Advanced &Search")) {
             @Override
             public void actionPerformed(ActionEvent e) {
