@@ -94,8 +94,8 @@ public class TorrentDHTScheduler implements Runnable {
     }
 
     private boolean dhtEnabled(Torrent torrent) {
-        Boolean dhtEnabled = (Boolean) torrent.getProperty(DHT_ENABLED);
-        return dhtEnabled != null && dhtEnabled.booleanValue();
+        Boolean dhtEnabled = torrent.getProperty(DHT_ENABLED, Boolean.FALSE);
+        return dhtEnabled.booleanValue();
     }
 
     private boolean shouldDisableDHT(Torrent torrent) {
@@ -105,9 +105,8 @@ public class TorrentDHTScheduler implements Runnable {
             return true;
         }
 
-        Boolean dhtEnabled = (Boolean) torrent.getProperty(DHT_ENABLED);
-        Long lastDHTStartTime = (Long) torrent.getProperty(LAST_DHT_START_TIME);
-        if (dhtEnabled != null && dhtEnabled.booleanValue() && lastDHTStartTime != null) {
+        Long lastDHTStartTime = torrent.getProperty(LAST_DHT_START_TIME, null);
+        if (dhtEnabled(torrent) && lastDHTStartTime != null) {
             long runningTimeMillis = getTimeSinceLastDHTStartForTorrent(lastDHTStartTime);
             long runningTimeMinutes = runningTimeMillis / (60 * 1000);
             if (LOG.isDebugEnabled()) {
@@ -145,8 +144,8 @@ public class TorrentDHTScheduler implements Runnable {
     }
 
     private boolean shouldTryDHT(Torrent torrent) {
-        Boolean dhtEnabled = (Boolean) torrent.getProperty(DHT_ENABLED);
-        Long lastDHTStartTime = (Long) torrent.getProperty(LAST_DHT_START_TIME);
+        Boolean dhtEnabled = torrent.getProperty(DHT_ENABLED, null);
+        Long lastDHTStartTime = torrent.getProperty(LAST_DHT_START_TIME, null);
 
         if (dhtEnabled == null || lastDHTStartTime == null) {
             return true;

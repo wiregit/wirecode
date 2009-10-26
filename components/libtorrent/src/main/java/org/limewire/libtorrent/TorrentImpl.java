@@ -482,9 +482,14 @@ public class TorrentImpl implements Torrent {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object getProperty(String key) {
-        return properties.get(key);
+    public <T> T getProperty(String key, T defaultValue) {
+        T value = (T)properties.get(key);
+        if(value == null) {
+            value = defaultValue;
+        }
+        return value;
     }
 
     @Override

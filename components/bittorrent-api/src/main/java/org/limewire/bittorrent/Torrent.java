@@ -226,9 +226,10 @@ public interface Torrent {
     public void setProperty(String key, Object value);
 
     /**
-     * Gets the value for the given property for this torrent. Null if not set.
+     * Gets the value for the given property for this torrent. The supplied
+     * default value is used if unset.
      */
-    public Object getProperty(String key);
+    public <T> T getProperty(String key, T defaultValue);
 
     /**
      * Returns true of this torrent is still considered valid.
