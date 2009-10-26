@@ -12,7 +12,7 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallbackAdapter;
 import com.limegroup.gnutella.LimeWireCoreModule;
 
-public class LazyTorrentManagerTest extends LimeTestCase {
+public class LimeWireTorrentManagerTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -28,8 +28,8 @@ public class LazyTorrentManagerTest extends LimeTestCase {
         Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new LimeWireCoreModule(
                 ActivityCallbackAdapter.class));
         GuiceUtils.loadEagerSingletons(injector);
-        assertEquals("NOT_INITIALIZED", InspectionUtils.inspectValue("org.limewire.libtorrent.LazyTorrentManager,torrentManagerStatus", injector, true));
+        assertEquals("NOT_INITIALIZED", InspectionUtils.inspectValue("com.limegroup.bittorrent.LimeWireTorrentManager,torrentManagerStatus", injector, true));
         injector.getInstance(TorrentManager.class).isValid();
-        assertEquals("LOADED", InspectionUtils.inspectValue("org.limewire.libtorrent.LazyTorrentManager,torrentManagerStatus", injector, true));
+        assertEquals("LOADED", InspectionUtils.inspectValue("com.limegroup.bittorrent.LimeWireTorrentManager,torrentManagerStatus", injector, true));
     }
 }
