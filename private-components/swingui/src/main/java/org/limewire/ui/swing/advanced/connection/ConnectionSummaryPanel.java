@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.Arrays;
@@ -267,6 +268,13 @@ public class ConnectionSummaryPanel extends JPanel {
                 }
             });
             
+            reasonButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    reasonPopupManager.hidePopup();
+                }
+            });
+            
             reasonButton.addActionListener( new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
                     showPopup();
@@ -304,7 +312,7 @@ public class ConnectionSummaryPanel extends JPanel {
             statusLabel.setText(statusText);
             
             this.reasonText = reasonText;
-            if ((statusText != null) && (statusText.length() > 0) && (reasonText != null) && (reasonText.length() > 0)) {
+            if ((statusText != null) && (statusText.length() > 0) && (reasonText != null) && (reasonText.length() > 0) && !reasonText.equals(I18n.tr("Unknown"))) {
                 reasonButton.setVisible(true);
             } else {
                 reasonButton.setVisible(false);
