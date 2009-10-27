@@ -38,8 +38,8 @@ import com.google.inject.Provider;
 /**
  * Container to display the Downloads table.
  * 
- * Note: This is an EagerSingleton to ensure that register() is called and the
- * listeners are in place at startup.
+ * <p>Note: This is an EagerSingleton to ensure that register() is called and 
+ * the listeners are in place at startup.</p>
  */
 @EagerSingleton
 public class MainDownloadPanel extends JPanel {  	
