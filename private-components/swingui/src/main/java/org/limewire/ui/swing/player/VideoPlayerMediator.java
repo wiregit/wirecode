@@ -9,20 +9,16 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.CannotRealizeException;
 import javax.media.Controller;
 import javax.media.ControllerEvent;
 import javax.media.ControllerListener;
-import javax.media.Manager;
-import javax.media.MediaLocator;
-import javax.media.NoPlayerException;
+import javax.media.IncompatibleSourceException;
 import javax.media.Player;
 import javax.media.StopEvent;
 import javax.media.Time;
 import javax.swing.Timer;
 
 import net.sf.fmj.concurrent.ExecutorServiceManager;
-import net.sf.fmj.utility.URLUtils;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.file.CategoryManager;
@@ -203,11 +199,8 @@ class VideoPlayerMediator implements PlayerMediator {
             @Override
             public Object run() {
                 try {
-                    return Manager.createRealizedPlayer(new MediaLocator(URLUtils.createUrlStr(file)));
-                } catch (CannotRealizeException e) {
-                    nativeLaunch(file);
-                    return null;
-                } catch (NoPlayerException e) {
+                    return VideoPlayerFactory.createVideoPlayer(file);
+                } catch (IncompatibleSourceException e) {
                     nativeLaunch(file);
                     return null;
                 } catch (MalformedURLException e) {
