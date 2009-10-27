@@ -473,10 +473,13 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
+        if(UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue())
+            return true;
+        if(UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue())
+            return false;
         return !networkInstanceUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
-               !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
                !isBehindProxy() &&
                minConnectTimePassed();
     }
