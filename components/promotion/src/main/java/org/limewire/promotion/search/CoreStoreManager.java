@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
@@ -21,15 +20,16 @@ import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.StoreListener;
 import org.limewire.core.api.search.store.StoreManager;
 import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreResults;
 import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.api.search.store.StoreStyle.Type;
 import org.limewire.core.api.search.store.TrackResult;
+import org.limewire.geocode.GeoLocation;
+import org.limewire.inject.MutableProvider;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
-import org.limewire.geocode.GeoLocation;
-import org.limewire.inject.MutableProvider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -139,32 +139,21 @@ public class CoreStoreManager implements StoreManager {
         executorService.submit(new Runnable() {
             public void run() {
                 try {
-                    // Execute query.
                     String query = searchDetails.getSearchQuery();
                     String jsonStr = storeConnection.doQuery(query);
                 
-                    if (!StringUtils.isEmpty(jsonStr)) {
-                    
-                        // Create JSON object from query result.
+                    if (!StringUtils.isEmpty(jsonStr)) {                    
                         JSONObject jsonObj = new JSONObject(jsonStr);
 //                        long time = valueToTimestamp(jsonObj.getString("styleTimestamp"));
                         
                         // Get store results array.
-                        StoreResult[] storeResults = readStoreResults(jsonObj);
+                        StoreResults storeResults = readStoreResults(jsonObj);
                         
                         StoreStyle style = getStyle(jsonObj);
-                        // Load new style if necessary.
-                        //if (storeStyle == null) {
-                            //JSONObject styleJson = new JSONObject(storeConnection.loadStyle(type.toString()));
-                            //storeStyle = readStoreStyle(styleJson);
-                            //styleMap.put(type, storeStyle);
-                        //}
-                        
                         // Fire event to update style.
                         storeSearchListener.styleUpdated(style);
-
                         // Fire event to handle results.
-                        storeSearchListener.resultsFound(storeResults);
+                        storeSearchListener.resultsFound(storeResults.getItems().toArray(new StoreResult[storeResults.getItems().size()]));
                     }
                         
                 } catch (IOException e) {
@@ -210,18 +199,11 @@ public class CoreStoreManager implements StoreManager {
     /**
      * Returns an array of store results contained in the specified JSON object.
      */
-    private StoreResult[] readStoreResults(JSONObject jsonObj) throws IOException, JSONException {
+    private StoreResults readStoreResults(JSONObject jsonObj) throws IOException, JSONException {
         // Retrieve JSON array of results.
-        JSONArray resultsArr = jsonObj.getJSONArray("storeResults");
+        JSONObject storeResults = jsonObj.getJSONObject("storeResults");
         
-        // Create StoreResult array.
-        StoreResult[] storeResults = new StoreResult[resultsArr.length()];
-        for (int i = 0, len = resultsArr.length(); i < len; i++) {
-            JSONObject resultObj = resultsArr.getJSONObject(i);
-            storeResults[i] = new StoreResultAdapter(resultObj, storeConnection);
-        }
-        
-        return storeResults;
+        return new StoreResultsAdapter(storeResults, storeConnection);
     }
     
     /**

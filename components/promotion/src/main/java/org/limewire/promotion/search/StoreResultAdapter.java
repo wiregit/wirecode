@@ -67,19 +67,19 @@ public class StoreResultAdapter implements StoreResult {
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         trackList = new ArrayList<TrackResult>();
         
-        albumIconUri = jsonObj.optString("albumIcon");
-        albumId = jsonObj.optString("albumId");
+        albumIconUri = jsonObj.optString("albumIcon", "");
+        albumId = jsonObj.optString("albumId", "");
         category = getCategory(jsonObj);
-        fileName = jsonObj.optString("fileName");
+        fileName = jsonObj.optString("fileName", "");
         fileExtension = FileUtils.getFileExtension(fileName);
-        infoUri = jsonObj.optString("infoPage");
-        price = jsonObj.optString("price");
+        infoUri = jsonObj.optString("infoPage", "");
+        price = jsonObj.optString("price", "");
         remoteHost = new RemostHostImpl(new StorePresence("Store"));
         size = jsonObj.optLong("fileSize");
         sortPriority = getSortPriority(jsonObj);
-        streamUri = jsonObj.optString("streamUrl");
+        streamUri = jsonObj.optString("streamUrl", "");
         trackCount = jsonObj.optLong("trackCount");
-        String urnString = jsonObj.optString("URN");
+        String urnString = jsonObj.optString("URN", "");
         if(urnString != null && urnString.trim().length() > 0) {
             urn = com.limegroup.gnutella.URN.createUrnFromString(urnString);
         } else {
