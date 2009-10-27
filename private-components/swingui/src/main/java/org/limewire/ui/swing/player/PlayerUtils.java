@@ -41,7 +41,7 @@ public class PlayerUtils {
      * @return true if the file is video.  It is possible that playback may fail anyway.
      */
     public static boolean isPlayableVideoFile(File file, CategoryManager categoryManager) {
-        return OSUtils.isWindows() && categoryManager.getCategoryForFile(file) == Category.VIDEO;
+        return (OSUtils.isWindows() || OSUtils.isMacOSX()) && categoryManager.getCategoryForFile(file) == Category.VIDEO;
     }
     
     public static boolean isFileAllowedInPlaylist(File file) {
