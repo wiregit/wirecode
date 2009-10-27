@@ -44,7 +44,7 @@ class FriendsMenu extends MnemonicMenu {
             Provider<LoginAction> loginActionProvider,
             Provider<LogoutAction> logoutActionProvider) {
         
-        super(I18n.tr("&Friends"));
+        super(I18n.tr("F&riends"));
 
         this.friendConnectionEventBean = friendConnectionEventBean;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
