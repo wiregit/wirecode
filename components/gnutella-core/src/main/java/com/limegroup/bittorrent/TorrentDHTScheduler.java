@@ -49,7 +49,7 @@ public class TorrentDHTScheduler implements Runnable {
             boolean dhtStarted = torrentManager.isDHTStarted();
             boolean dhtEnabled = false;
             for (Torrent torrent : torrentManager.getTorrents()) {
-                if (shouldDisableDHT(torrent)) {
+                if (dhtEnabled(torrent) && shouldDisableDHT(torrent)) {
                     torrent.setProperty(DHT_ENABLED, Boolean.FALSE);
                     dhtEnabled |= false;
                     LOG.debugf("Disabling DHT for torrent: {0}", torrent.getName());
@@ -79,7 +79,7 @@ public class TorrentDHTScheduler implements Runnable {
                 // this comment then.
                 // or we can add the fix into our own build once it becomes
                 // available.
-            } else if (!dhtEnabled) {
+            } else if (dhtStarted && !dhtEnabled) {
                 torrentManager.saveDHTState(dhtStateFile);
                 torrentManager.stopDHT();
                 LOG.debugf("DHT Stopped");
