@@ -103,8 +103,8 @@ public class BottomHeaderPanel {
     private HyperlinkButton clearFinishedNowButton;
     private JPanel downloadButtonPanel;
     private JPanel uploadButtonPanel;
-    private LimeComboBox downloadMoreButton;
-    private LimeComboBox uploadMoreButton;
+    private LimeComboBox downloadOptionsButton;
+    private LimeComboBox uploadOptionsButton;
     
     private EventList<DownloadItem> activeDownloadList;
     private TabId selectedTab;
@@ -177,7 +177,7 @@ public class BottomHeaderPanel {
         uploadButtonPanel = new JPanel(new MigLayout("insets 0 0 0 0, gap 0, novisualpadding"));
         uploadButtonPanel.setOpaque(false);
         
-        initializeMoreButton();
+        initializeOptionsButton();
 
         // Install listener to show appropriate popup menu.
         component.addMouseListener(new MousePopupListener() {
@@ -202,14 +202,14 @@ public class BottomHeaderPanel {
     private void layoutComponents(){
         downloadButtonPanel.add(fixStalledButton, "gapafter 5, hidemode 3");
         downloadButtonPanel.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
-        downloadButtonPanel.add(downloadMoreButton, "gapafter 5");
+        downloadButtonPanel.add(downloadOptionsButton, "gapafter 5");
         
         List<JButton> uploadButtons = uploadMediator.getHeaderButtons();
         for (JButton button : uploadButtons) {
             button.setFont(hyperlinkFont);
             uploadButtonPanel.add(button, "gapafter 5");
         }
-        uploadButtonPanel.add(uploadMoreButton, "gapafter 5");
+        uploadButtonPanel.add(uploadOptionsButton, "gapafter 5");
         
         component.add(tabList, "growy, push, hidemode 3");
         component.add(titleTextLabel, "gapbefore 5, push, hidemode 3");
@@ -269,17 +269,17 @@ public class BottomHeaderPanel {
         });        
     }
 
-    private void initializeMoreButton(){
+    private void initializeOptionsButton(){
         // Create options button for downloads.
-        downloadMoreButton = new LimeComboBox();
-        downloadMoreButton.setText(I18n.tr("Options"));
+        downloadOptionsButton = new LimeComboBox();
+        downloadOptionsButton.setText(I18n.tr("Options"));
         
-        comboBoxDecorator.decorateMiniComboBox(downloadMoreButton);
+        comboBoxDecorator.decorateMiniComboBox(downloadOptionsButton);
         
-        downloadMoreButton.setFont(hyperlinkFont);
-        downloadMoreButton.setIcon(moreButtonArrow);
-        downloadMoreButton.setForeground(fixStalledButton.getForeground());
-        ResizeUtils.forceHeight(downloadMoreButton, 16);
+        downloadOptionsButton.setFont(hyperlinkFont);
+        downloadOptionsButton.setIcon(moreButtonArrow);
+        downloadOptionsButton.setForeground(fixStalledButton.getForeground());
+        ResizeUtils.forceHeight(downloadOptionsButton, 16);
         
         downloadHeaderPopupMenu.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -296,19 +296,19 @@ public class BottomHeaderPanel {
             }
         });
         
-        downloadMoreButton.overrideMenu(downloadHeaderPopupMenu);
+        downloadOptionsButton.overrideMenu(downloadHeaderPopupMenu);
         
         // Create options button for uploads.
-        uploadMoreButton = new LimeComboBox();
-        uploadMoreButton.setText(I18n.tr("Options"));
-        comboBoxDecorator.decorateMiniComboBox(uploadMoreButton);
+        uploadOptionsButton = new LimeComboBox();
+        uploadOptionsButton.setText(I18n.tr("Options"));
+        comboBoxDecorator.decorateMiniComboBox(uploadOptionsButton);
         
-        uploadMoreButton.setFont(hyperlinkFont);
-        uploadMoreButton.setIcon(moreButtonArrow);
-        uploadMoreButton.setForeground(fixStalledButton.getForeground());
-        ResizeUtils.forceHeight(uploadMoreButton, 16);
+        uploadOptionsButton.setFont(hyperlinkFont);
+        uploadOptionsButton.setIcon(moreButtonArrow);
+        uploadOptionsButton.setForeground(fixStalledButton.getForeground());
+        ResizeUtils.forceHeight(uploadOptionsButton, 16);
         
-        uploadMoreButton.overrideMenu(uploadMediator.getHeaderPopupMenu());
+        uploadOptionsButton.overrideMenu(uploadMediator.getHeaderPopupMenu());
     }
     
     /**
