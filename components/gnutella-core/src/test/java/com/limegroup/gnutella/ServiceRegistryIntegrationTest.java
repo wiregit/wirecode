@@ -87,7 +87,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "ForMeReplyHandler.Clear Push Requests", "ScheduledService",
         "DiskContrller.CacheCleaner", "ScheduledService",
         "urncache persister", "ScheduledService",
-        "TorrentManager", "LazyTorrentManager",
+        "TorrentManager", "LimeWireTorrentManager",
         "Settings Saver", "SettingsSaverService",
         "URNBlacklistManager", "URNBlacklistManagerImpl",
         "GeocodeLocation", "CachedGeoLocationImpl",
