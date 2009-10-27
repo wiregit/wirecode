@@ -279,6 +279,10 @@ public final class SwingUiSettings extends LimeProps {
     public static final IntSetting BOTTOM_TRAY_SIZE = 
         FACTORY.createIntSetting("DOWNLOAD_TRAY_SIZE", 0);
 
+    /** Hides the bottom tray size when all transfers are cleared. */
+    public static final BooleanSetting HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS =
+        FACTORY.createBooleanSetting("HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS", true);
+    
     /**
      * Returns the default directory for the file chooser.
      * Defaults to the users home directory if it exists,

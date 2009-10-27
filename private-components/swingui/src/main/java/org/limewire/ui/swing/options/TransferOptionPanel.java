@@ -292,6 +292,7 @@ public class TransferOptionPanel extends OptionPanel {
 
     private class TrayPanel extends OptionPanel {
 
+        private JCheckBox closeTrayCheckBox;
         private JCheckBox clearDownloadsCheckBox;
         private JCheckBox clearUploadCheckBox;
 
@@ -299,6 +300,9 @@ public class TransferOptionPanel extends OptionPanel {
 
         public TrayPanel() {
             super(I18n.tr("Tray"));
+            closeTrayCheckBox = new JCheckBox(I18n.tr("Close tray when there are no transfers"));
+            closeTrayCheckBox.setContentAreaFilled(false);
+
             clearDownloadsCheckBox = new JCheckBox(I18n
                     .tr("Clear downloads from list when finished"));
             clearDownloadsCheckBox.setContentAreaFilled(false);
@@ -312,6 +316,7 @@ public class TransferOptionPanel extends OptionPanel {
             // deleteFileOnCancelCheckBox.setContentAreaFilled(false);
             // deleteFileOnCancelCheckBox.setVisible(false);
 
+            add(closeTrayCheckBox, "wrap");
             add(clearDownloadsCheckBox, "wrap");
             add(clearUploadCheckBox, "wrap");
             // add(deleteFileOnCancelCheckBox);
@@ -320,6 +325,7 @@ public class TransferOptionPanel extends OptionPanel {
 
         @Override
         boolean applyOptions() {
+            SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.setValue(closeTrayCheckBox.isSelected());
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
             SharingSettings.CLEAR_UPLOAD.setValue(clearUploadCheckBox.isSelected());
 
@@ -330,14 +336,16 @@ public class TransferOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            return SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected()
-                    || SharingSettings.CLEAR_UPLOAD.getValue() != clearUploadCheckBox.isSelected();
+            return (SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.getValue() != closeTrayCheckBox.isSelected()) 
+                || (SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected())
+                || (SharingSettings.CLEAR_UPLOAD.getValue() != clearUploadCheckBox.isSelected());
             // || DownloadSettings.DELETE_CANCELED_DOWNLOADS.getValue() !=
             // deleteFileOnCancelCheckBox.isSelected();
         }
 
         @Override
         public void initOptions() {
+            closeTrayCheckBox.setSelected(SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.getValue());
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
             clearUploadCheckBox.setSelected(SharingSettings.CLEAR_UPLOAD.getValue());
 
