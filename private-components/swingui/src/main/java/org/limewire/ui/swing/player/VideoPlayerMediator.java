@@ -14,6 +14,7 @@ import javax.media.Controller;
 import javax.media.ControllerEvent;
 import javax.media.ControllerListener;
 import javax.media.Manager;
+import javax.media.MediaLocator;
 import javax.media.NoPlayerException;
 import javax.media.Player;
 import javax.media.StopEvent;
@@ -21,6 +22,7 @@ import javax.media.Time;
 import javax.swing.Timer;
 
 import net.sf.fmj.concurrent.ExecutorServiceManager;
+import net.sf.fmj.utility.URLUtils;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.file.CategoryManager;
@@ -201,7 +203,7 @@ class VideoPlayerMediator implements PlayerMediator {
             @Override
             public Object run() {
                 try {
-                    return Manager.createRealizedPlayer(file.toURI().toURL());
+                    return Manager.createRealizedPlayer(new MediaLocator(URLUtils.createUrlStr(file)));
                 } catch (CannotRealizeException e) {
                     nativeLaunch(file);
                     return null;
