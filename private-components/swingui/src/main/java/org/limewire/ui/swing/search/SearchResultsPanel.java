@@ -40,6 +40,8 @@ import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
+import org.limewire.ui.swing.search.SearchResultsMessagePanel.MessageType;
+import org.limewire.ui.swing.search.SearchResultsOverlay.OverlayType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
@@ -81,6 +83,12 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private final ResultsContainer resultsContainer;
     
     /**
+     * This shows the "LimeWire is connecting..." message with a big revolving circle busy signal 
+     * over the search results area until the first search result arrives.
+     */
+    private final SearchResultsOverlay searchResultsOverlay;
+    
+    /**
      * This is the subpanel that appears in the upper-right corner
      * of each search results tab.
      */
@@ -94,14 +102,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     
     /** The ScrollablePanel that the scroll pane is embedding. */
     private ScrollablePanel scrollablePanel;
-    
-    /** The label where text about your search started poorly or later is written. */
-    private JLabel messageLabel;
-    /** The panel that displays the {@link #messageLabel}. */
-    private JPanel messagePanel;
-    
-    /** The class search warning panel. */
-    private ClassicSearchWarningPanel classicSearchReminderPanel;
+       
+    /** The panel for showing messages and a pointer to the classic search results view button. */
+    private final SearchResultsMessagePanel messagePanel;
     
     /** Listener for changes in the view type. */
     private final SettingListener viewTypeListener;
@@ -168,6 +171,11 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         // Create results container with tables.
         resultsContainer = containerFactory.create(searchResultsModel);
         
+        // This accepts the component which shows the search results and shows
+        // a "LimeWire is connecting..." message if LimeWire is not connected yet to all of its 
+        // ultra peers and hasn't received any search results yet for the user's query.
+        searchResultsOverlay = new SearchResultsOverlay(scrollPane);
+       
         viewTypeListener = new SettingListener() {
             int oldSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
             @Override
@@ -195,7 +203,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         resultCountListener = new ListEventListener<VisualSearchResult>() {
             @Override
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
+                // these updates are coming in on the AWT thread. so, it's safe to make GUI updates here.
                 updateTitle();
+                updateMessages();
             }
         };
         searchResultsModel.getUnfilteredList().addListEventListener(resultCountListener);
@@ -218,14 +228,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             }
         });
 
-        messageLabel = new JLabel();
-        messagePanel = new JPanel();
-        messagePanel.add(messageLabel);
-        messagePanel.setVisible(false);
-        
         browseStatusPanel = new BrowseStatusPanel(searchResultsModel, allFriendsRefreshManager);
         
-        classicSearchReminderPanel = new ClassicSearchWarningPanel();
+        messagePanel = new SearchResultsMessagePanel();
+        
         layoutComponents();
     }
 
@@ -240,7 +246,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         searchResultsModel.getUnfilteredList().removeListEventListener(resultCountListener);
         sortAndFilterPanel.dispose();
         filterPanel.dispose();
-        classicSearchReminderPanel.dispose();
+        messagePanel.dispose();
         browseFailedPanel.dispose();
         searchResultsModel.dispose();
         browseStatusPanel.dispose();
@@ -433,7 +439,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private void layoutComponents() {
         MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!, novisualpadding", 
                                 "[][grow]",       // col constraints
-                                "[][][][grow]");  // row constraints
+                                "[][][grow]");  // row constraints
         
         setLayout(layout);
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
@@ -452,11 +458,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         sortAndFilterPanel.layoutComponents(header);
         
-        add(header                    , "spanx 2, growx, growy, wrap");
-        add(classicSearchReminderPanel, "spanx 2, growx, wrap");
-        add(messagePanel              , "spanx 2, growx, wrap");
-        add(filterPanel, "grow");
-        add(scrollPane , "hidemode 3, grow");
+        add(header, "spanx 2, growx, growy, wrap");
+        add(filterPanel, "grow, spany 2");
+        add(messagePanel, "spanx 1, growx, wrap");
+        add(searchResultsOverlay , "hidemode 3, grow");
         add(browseFailedPanel , "hidemode 3, grow");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
@@ -465,11 +470,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         scrollablePanel.add(resultsContainer, BorderLayout.CENTER);
         scrollablePanel.add(sponsoredResultsPanel, BorderLayout.EAST);
         scrollPane.setViewportView(scrollablePanel);
-
         
         syncScrollPieces();
     }
-
+    
     /**
      * Updates the view components in the scroll pane. 
      */
@@ -577,22 +581,29 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private void updateMessages() {
         browseStatusPanel.setBrowseStatus(browseStatus);
         
+        boolean receivedSearchResults = (searchResultsModel.getUnfilteredList().size() > 0);
+
+        if (!fullyConnected && receivedSearchResults) {
+            messagePanel.setMessageType(MessageType.CONNECTING_TO_ULTRAPEERS);
+        } else if (fullyConnected && receivedSearchResults && messagePanel.isShowClassicSearchResultsHint()) {
+            messagePanel.setMessageType(MessageType.CLASSIC_SEARCH_RESULTS_HINT);            
+        } else {
+            messagePanel.setMessageType(MessageType.NONE);            
+        }
+       
+        searchResultsOverlay.setOverlayType((!receivedSearchResults && !fullyConnected) ? OverlayType.AWAITING_CONNECTIONS : OverlayType.NONE);
+
         if (!lifeCycleComplete) {
-            messageLabel.setText(I18n.tr("LimeWire will start your search right after it finishes loading."));
-            messagePanel.setVisible(true);
             browseFailedPanel.setVisible(false);
-        } else if (!fullyConnected) {
-            messageLabel.setText(I18n.tr("You might not receive many results until LimeWire finishes loading..."));
-            messagePanel.setVisible(true);
+        } else if (!fullyConnected) {            
             browseFailedPanel.setVisible(false);            
         } else if (browseStatus != null && !browseStatus.getState().isOK()) {
             browseFailedPanel.update(browseStatus.getState(), browseStatus.getBrowseSearch(), browseStatus.getFailedFriends());
             browseFailedPanel.setVisible(true);
         } else {
-            messagePanel.setVisible(false);
             browseFailedPanel.setVisible(false);
         }
-
+        
         filterPanel.setVisible(!browseFailedPanel.isVisible());
         scrollPane.setVisible(!browseFailedPanel.isVisible());
     }

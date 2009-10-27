@@ -75,8 +75,7 @@ public class Browser extends MozillaPanel {
         if(loadStatus != VisibilityMode.FORCED_HIDDEN) {
             loadingPane.setLayout(new BorderLayout());
             
-            JXBusyLabel busySpinner = new ColoredBusyLabel(new Dimension(12, 12), 
-                    new Color(0xacacac),  new Color(0x545454));
+            JXBusyLabel busySpinner = new ColoredBusyLabel(new Dimension(12, 12));
             
             busySpinner.setBusy(true);
             busySpinner.setOpaque(false);

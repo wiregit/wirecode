@@ -134,7 +134,7 @@ public class FancyTab extends JXPanel {
     }
     
     JLabel createBusyLabel() {
-        final JXBusyLabel busy = new ColoredBusyLabel(new Dimension(12, 12), Color.decode("#acacac"),  Color.decode("#545454"));
+        final JXBusyLabel busy = new ColoredBusyLabel(new Dimension(12, 12));
         
         busy.setVisible(false);
         
