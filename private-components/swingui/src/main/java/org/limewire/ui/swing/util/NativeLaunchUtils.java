@@ -71,20 +71,22 @@ public final class NativeLaunchUtils {
             @Override
             public void run() {
                 try {
-                    Desktop.getDesktop().browse(new URI(url));
-                } catch (Throwable t) {
-                    try {
-                        if (OSUtils.isWindows()) {
-                            openURLWindows(url);
-                        } else if (OSUtils.isMacOSX()) {
-                            openURLMac(url);
-                        } else {
-                            openURLLinux(url);
-                        }
-                    } catch (IOException iox) {
-                        logException(I18n.tr("Unable to open URL"), I18n.tr("Open URL"), iox);
+                    if (OSUtils.isWindows()) {
+                        openURLWindows(url);
+                    } else if (OSUtils.isMacOSX()) {
+                        openURLMac(url);
+                    } else {
+                        openURLLinux(url);
                     }
-                } 
+                } catch (IOException iox) {
+                    // Desktop.browse has various problems on different OSs. Trying
+                    // native calls and falling back to this if an error occurs.
+                    try {
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (Throwable t) {
+                        logException(I18n.tr("Unable to open URL"), I18n.tr("Open URL"), new Exception(t));
+                    } 
+                }
             }
         });
         managedThread.start();
@@ -188,47 +190,32 @@ public final class NativeLaunchUtils {
                     !extCheckString.endsWith(".bat") &&
                     !extCheckString.endsWith(".sys") &&
                     !extCheckString.endsWith(".com")) {
-            
-             if(OSUtils.isLinux()) {
-                 //Desktop.open is not working well under linux
-                 //it converts the path to a uri and many programs are not supporting it properly
-                 int exitCode = -1;
-                 try {
-                     Process process = launchFileLinux(path);
-                     exitCode = process.waitFor();
-                 } catch(Exception e) {
-                     //exceptions can be thrown when launcher does not exist
-                     exitCode = -1;
-                 }
-                 
-                 if(exitCode != 0) {
-                     //a non-zero exit value means there was an error opening the file
-                     //failing back to Desktop.open
-                     openFile(file);
-                 }
-             } else {
-                 //Using Desktop.open for windows and mac
-                 openFile(file);
-             }
+            openFile(file);
         } else {
-             throw new SecurityException();
-         }
+            throw new SecurityException();
+        }
     }
 
     private static void openFile(File file) throws IOException {
         String path = file.getCanonicalPath();
-         try {
-             Desktop.getDesktop().open(file);
-         } catch(Throwable t) {
-             //failing over to native implementations when Desktop.open fails.
-             if (OSUtils.isWindows()) {
-                 launchFileWindows(path);
-             } else if (OSUtils.isMacOSX()) {
-                 launchFileMacOSX(path);
-             } else {
-                 launchFileLinux(path);
-             }
-         }
+
+        try {
+            if (OSUtils.isWindows()) {
+                launchFileWindows(path);
+            } else if (OSUtils.isMacOSX()) {
+                launchFileMacOSX(path);
+            } else {
+                launchFileLinux(path);
+            }
+        } catch(IOException e) {
+            // Desktop.open has various problems on different OSs. Trying
+            // native calls and falling back to this if an error occurs.
+            try {
+                Desktop.getDesktop().open(file);
+            } catch(Throwable t) {
+                throw new IOException(t);
+            }
+        }
     }
 
     /**
