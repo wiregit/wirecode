@@ -55,11 +55,11 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
             if (UploadItemType.BITTORRENT == item.getUploadItemType()) {
                 int numConnections = item.getNumUploadConnections();
                 String ratio = formatter.format(item.getSeedRatio());
-                return I18n.trn("Connected to {0} P2P user, uploading at {1} - Ratio {2}",
-                        "Connected to {0} P2P users, uploading at {1} - Ratio {2}",                        
-                        numConnections, numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
+                return I18n.trn("{0} to {1} person - ratio: {2}",
+                        "{0} to {1} people - ratio: {2}",
+                        numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), numConnections, ratio);
             } else {
-                return I18n.tr("Uploading - {0} of {1}({2})", 
+                return I18n.tr("{0} of {1} ({2})", 
                         GuiUtils.toUnitbytes(item.getTotalAmountUploaded()), 
                         GuiUtils.toUnitbytes(item.getFileSize()), 
                         GuiUtils.rate2speed(item.getUploadSpeed()));
