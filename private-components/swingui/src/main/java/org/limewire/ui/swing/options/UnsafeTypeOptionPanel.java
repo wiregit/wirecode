@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Application;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -26,7 +27,6 @@ import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.NotImplementedException;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
@@ -48,7 +48,8 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     public UnsafeTypeOptionPanel(LibraryManager libraryManager,
             SharedFileListManager shareListManager,
             UnsafeTypeOptionPanelStateManager manager,
-            final Provider<ExtensionClassificationPanel> extensionClassificationPanelProvider) {
+            final Provider<ExtensionClassificationPanel> extensionClassificationPanelProvider,
+            Application application) {
         
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -101,12 +102,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         JPanel buttonPanel = new JPanel(new MigLayout("fill"));
         buttonPanel.setOpaque(false);
         
-        buttonPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("Learn More")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new NotImplementedException("Link not known?");
-            }
-        }));
+        buttonPanel.add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=unsafeLM", application));
         
         buttonPanel.add(okButton, "tag ok");
         add(buttonPanel, BorderLayout.SOUTH);
