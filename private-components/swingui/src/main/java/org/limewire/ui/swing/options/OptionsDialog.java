@@ -2,7 +2,6 @@ package org.limewire.ui.swing.options;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -43,9 +42,7 @@ import com.google.inject.Provider;
  * Main Dialog for the Options.
  */
 public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
-    
-    @Resource
-    private Color backgroundColor;
+
     @Resource
     private Icon advancedIcon;
     @Resource
@@ -212,7 +209,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
     private void createFooter() {
         footerPanel.setLayout(new MigLayout("insets 0 15 0 15, aligny 50%"));
-        footerPanel.setBackground(backgroundColor);
+        footerPanel.setBackground(GuiUtils.getMainFrame().getBackground());
         
         helpButton = new JButton(new HelpAction(application));
         
@@ -272,7 +269,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
      * Lazily loads and inits a subPanel in the OptionDialog.
      */
     private void createPanel(String id, OptionPanel panel) {
-        panel.setBackground(backgroundColor);
+        panel.setBackground(GuiUtils.getMainFrame().getBackground());
         panels.put(selectedItem.getId(), panel);
         cardPanel.add(panels.get(selectedItem.getId()), selectedItem.getId());
         // Library is always shown so it will always be initialized prior to being shown
