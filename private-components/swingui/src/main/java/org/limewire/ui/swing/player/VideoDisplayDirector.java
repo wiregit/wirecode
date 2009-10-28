@@ -106,6 +106,8 @@ class VideoDisplayDirector {
             closeInClient();
         }
         videoPanel = null;
+        //Force a repaint on close - gets rid of artifacts (especially noticable on Mac)
+        GuiUtils.getMainFrame().repaint();
     }
     
     private void closeFullScreen() {
