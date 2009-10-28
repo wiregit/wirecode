@@ -76,6 +76,7 @@ class VideoDisplayDirector {
         GuiUtils.getMainFrame().setVisible(false);
         
         fullScreenFrame = new LimeJFrame();
+        fullScreenFrame.setTitle(GuiUtils.getMainFrame().getTitle());
         // fullScreenFrame.setAlwaysOnTop(true) and
         // SystemUtils.setWindowTopMost(fullScreenFrame) don't play nicely with
         // dialog boxes so we aren't using them here.
