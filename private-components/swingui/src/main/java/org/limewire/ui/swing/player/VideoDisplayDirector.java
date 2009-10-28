@@ -27,6 +27,8 @@ class VideoDisplayDirector {
     
     private final JLayeredPane limeWireLayeredPane;   
     
+    private final Integer videoLayer = new Integer(JLayeredPane.DEFAULT_LAYER + 1);
+    
     private JComponent videoPanel;
     
     private JFrame fullScreenFrame;
@@ -65,8 +67,7 @@ class VideoDisplayDirector {
     }
     
     private void showInClient(){
-        limeWireLayeredPane.add(videoPanel, JLayeredPane.DEFAULT_LAYER);
-        limeWireLayeredPane.moveToFront(videoPanel);
+        limeWireLayeredPane.add(videoPanel, videoLayer);
         resizeVideoContainer();     
         //Make sure the flash of native video window doesn't steal focus
         GuiUtils.getMainFrame().toFront();   
@@ -118,8 +119,6 @@ class VideoDisplayDirector {
     }
 
     private void closeInClient(){    
-        //moving to back before removing ensures everything looks right
-        limeWireLayeredPane.moveToBack(videoPanel); 
         limeWireLayeredPane.remove(videoPanel); 
     }
 
