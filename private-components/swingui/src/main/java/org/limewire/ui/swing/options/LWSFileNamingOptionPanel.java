@@ -63,12 +63,12 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
         add(new JLabel(I18n.tr("Choose how to organize files you purchased from the LimeWire Store")), "span, gapbottom 11, wrap");
         
         add(new JLabel(I18n.tr("Subfolder")));
-        add(new JLabel(I18n.tr("File Name")),"growx , wrap");
+        add(new JLabel(I18n.tr("File Name")),"wrap");
         
-        add(subFolderComboBox, "gapBottom 20, push");
-        add(fileNameComboBox, "gapBottom 20, growx, wrap");
+        add(subFolderComboBox, "gapBottom 20, gapright 15, growx, pushx 50");
+        add(fileNameComboBox, "gapBottom 20, growx, pushx 50, wrap");
         
-        add(okButton, "tag ok, skip 1, alignx right, growx, split 2");
+        add(okButton, "tag ok, skip 1, alignx right, split 2");
         add(cancelButton, "tag cancel");
         
     }
