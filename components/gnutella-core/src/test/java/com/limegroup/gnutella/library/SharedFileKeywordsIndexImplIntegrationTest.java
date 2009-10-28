@@ -6,15 +6,19 @@ import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChan
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenames;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertLoads;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewExtensionTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -22,6 +26,9 @@ import org.limewire.lifecycle.ServiceRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseFactory;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 
 public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
@@ -32,6 +39,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
     @Inject private SharedFilesKeywordIndex keywordIndex;
     private Response[] responses;
     @Inject private Injector injector;
+    @Inject private ResponseFactory responseFactory;
 
     private File f1, f2, f3;
 
@@ -57,7 +65,6 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
 
         // it is important to check the query at all bounds,
         // // including tests for case.
-        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         responses = keywordIndex.query(queryRequestFactory.createQuery("unit", (byte) 3));
         assertEquals("Unexpected number of responses", 1, responses.length);
         responses = keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte) 3));
@@ -69,6 +76,42 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         responses = keywordIndex.query(queryRequestFactory.createQuery("FileManager UNIT tEsT",
                 (byte) 3));
         assertEquals("Unexpected number of responses", 1, responses.length);
+    }
+    
+    public void testResponseContainsNMS1Urn() throws Exception {
+        SearchSettings.DESIRES_NMS1_URNS.setValue(true);
+        f1 = createNewExtensionTestFile(4096, "mp3", _scratchDir);
+        assertAdds(fileList, f1);
+        FileDesc fileDesc = fileList.getFileDesc(f1);
+        fileDesc.addUrn(URN.createNMS1FromBytes(new byte[20]));
+        URN nms1Urn = fileDesc.getNMS1Urn();
+        assertNotNull(nms1Urn);
+        responses = keywordIndex.query(queryRequestFactory.createQuery("unit"));
+        assertEquals("Unexpected number of responses", 1, responses.length);
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        responses[0].writeToStream(out);
+        Response response = responseFactory.createFromStream(new ByteArrayInputStream(out.toByteArray()));
+        assertContains(response.getUrns(), nms1Urn);
+    }
+    
+    public void testResponseDoesNotContainNMS1Urn() throws Exception {
+        SearchSettings.DESIRES_NMS1_URNS.setValue(false);
+        f1 = createNewExtensionTestFile(4096, "mp3", _scratchDir);
+        assertAdds(fileList, f1);
+        FileDesc fileDesc = fileList.getFileDesc(f1);
+        fileDesc.addUrn(URN.createNMS1FromBytes(new byte[20]));
+        URN nms1Urn = fileDesc.getNMS1Urn();
+        assertNotNull(nms1Urn);
+        QueryRequest request = queryRequestFactory.createQuery("unit");
+        assertFalse(request.desiresNMS1Urn());
+        responses = keywordIndex.query(request);
+        assertEquals("Unexpected number of responses", 1, responses.length);
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        responses[0].writeToStream(out);
+        Response response = responseFactory.createFromStream(new ByteArrayInputStream(out.toByteArray()));
+        assertNotContains(response.getUrns(), nms1Urn);
     }
     
     public void testAddAnotherSharedFile() throws Exception {

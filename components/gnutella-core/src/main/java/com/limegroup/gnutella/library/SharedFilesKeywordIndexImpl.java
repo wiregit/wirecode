@@ -192,7 +192,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             // starts with the keywords of the request
             documents = queryMetaDataWithPlaintext(request);
         }
-        return createResponses(documents);
+        return createResponses(documents, request);
     }
 
     /*
@@ -221,6 +221,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         Set<Response> responses = new HashSet<Response>();
         Predicate<String> filter = mediaTypeAggregator.getPredicateForQuery(request);
         LimeXMLDocument doc = request.getRichQuery();
+        boolean includeNMs1Urn = request.desiresNMS1Urn();
 
         // Iterate through our hit indices to create a list of results.
         for (IntSet.IntSetIterator iter = matches.iterator(); iter.hasNext();) {
@@ -238,7 +239,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
                 activityCallback.handleSharedFileUpdate(desc.getFile());
     
-                Response resp = responseFactory.get().createResponse(desc);
+                Response resp = responseFactory.get().createResponse(desc, includeNMs1Urn);
                 if (includeXML) {
                     if (doc != null && resp.getDocument() != null && !isValidXMLMatch(resp, doc))
                         continue;
@@ -281,6 +282,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      */
     private Set<Response> queryWhatsNew(QueryRequest request) {
         boolean includeXML = request.shouldIncludeXMLInResponse();
+        boolean includeNMs1Urn = request.desiresNMS1Urn();
 
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns. we don't need to worry
@@ -302,7 +304,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 throw new RuntimeException("Bad Rep - No IFDs allowed!");
 
             // Formulate the response
-            Response r = responseFactory.get().createResponse(desc);
+            Response r = responseFactory.get().createResponse(desc, includeNMs1Urn);
             if(!includeXML) {
                 r.setDocument(null);
             }
@@ -606,8 +608,9 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         return "";
     }
 
-    private Set<Response> createResponses(Set<LimeXMLDocument> documents) {
+    private Set<Response> createResponses(Set<LimeXMLDocument> documents, QueryRequest request) {
         Set<Response> responses = new HashSet<Response>(documents.size());
+        boolean includeNMs1Urn = request.desiresNMS1Urn();
 
         for (LimeXMLDocument currDoc : documents) {
             File file = currDoc.getIdentifier();// returns null if none
@@ -625,7 +628,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             }
 
             // we found a file with the right name
-            res = responseFactory.get().createResponse(fd);
+            res = responseFactory.get().createResponse(fd, includeNMs1Urn);
             res.setDocument(null);
             activityCallback.handleSharedFileUpdate(fd.getFile());
             res.setDocument(currDoc);

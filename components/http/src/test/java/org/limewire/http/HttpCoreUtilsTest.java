@@ -1,5 +1,7 @@
 package org.limewire.http;
 
+import java.util.Collections;
+
 import junit.framework.Test;
 
 import org.apache.http.HttpVersion;
@@ -7,6 +9,8 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.limewire.util.BaseTestCase;
+
+import com.google.common.collect.ImmutableMap;
 
 public class HttpCoreUtilsTest extends BaseTestCase {
 
@@ -64,4 +68,15 @@ public class HttpCoreUtilsTest extends BaseTestCase {
         assertFalse(HttpCoreUtils.hasHeaderListValue(msg, "key1", "foo"));
     }
 
+    public void testParseQuery() throws Exception {
+        assertEmpty(HttpCoreUtils.parseQuery("fldkjf", null).entrySet());
+        assertEmpty(HttpCoreUtils.parseQuery("http://hello.world/", null).entrySet());
+        assertEmpty(HttpCoreUtils.parseQuery("http://hello.world/?", null).entrySet());
+        assertEquals(Collections.singletonMap("t", null), HttpCoreUtils.parseQuery("http://hello.world/?t", null));
+        assertEquals(Collections.singletonMap("t", null), HttpCoreUtils.parseQuery("http://hello.world/?t=", null));
+        assertEquals(Collections.singletonMap("q", "single"), HttpCoreUtils.parseQuery("http://hello.world/?q=single", null));
+        assertEquals(Collections.singletonMap("q", "with space"), HttpCoreUtils.parseQuery("http://hello.world/?q=with%20space", null));
+        assertEquals(Collections.singletonMap("q", "un encoded"), HttpCoreUtils.parseQuery("http://hello.world/?q=un encoded", null));
+        assertEquals(ImmutableMap.of("key1", "value1", "key2", "value2"), HttpCoreUtils.parseQuery("http://hello.world/?key1=value1&key2=value2", null));
+    }
 }

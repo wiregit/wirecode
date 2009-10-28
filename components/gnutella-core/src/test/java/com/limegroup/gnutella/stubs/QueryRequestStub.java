@@ -254,4 +254,9 @@ public class QueryRequestStub implements QueryRequest {
         return false;
     }
 
+    @Override
+    public boolean desiresNMS1Urn() {
+        return false;
+    }
+
 }

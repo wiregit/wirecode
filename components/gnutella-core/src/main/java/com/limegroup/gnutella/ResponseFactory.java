@@ -34,6 +34,19 @@ public interface ResponseFactory {
      *        <tt>Response</tt> -- must not be <tt>null</tt>
      */
     public Response createResponse(FileDesc fd);
+    
+    /**
+     * Constructs a new <tt>Response</tt> instance from the data in the
+     * specified <tt>FileDesc</tt>. LimeXmlDocument is set by default if 
+     * the data is available. It can be unset by calling response.setDocument(null)
+     * to save bandwidth over the wire.
+     * 
+     * @param fd the <tt>FileDesc</tt> containing the data to construct this
+     *        <tt>Response</tt> -- must not be <tt>null</tt>
+     * @param includeNMS1Urn whether the response should contain the 
+     * non-metadata sha1 or not
+     */
+    public Response createResponse(FileDesc fd, boolean includeNMS1Urn);
 
     /**
      * Factory method for instantiating individual responses from an

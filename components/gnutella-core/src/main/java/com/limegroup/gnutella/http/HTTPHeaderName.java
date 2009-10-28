@@ -143,8 +143,10 @@ public enum HTTPHeaderName {
     TRANSFER_ENCODING("Transfer-Encoding"),
 
     /** The firewalled push proxy info of this client. */
-    FW_NODE_INFO("X-FW-Node-Info");
-
+    FW_NODE_INFO("X-FW-Node-Info"),
+    
+    /** Header to signal interest in and support of non-metadata urns. **/
+    NMS1("X-NMS1");
     /**
      * Constant for the HTTP header name as a string.
      */

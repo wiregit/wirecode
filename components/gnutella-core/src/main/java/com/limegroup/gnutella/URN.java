@@ -417,7 +417,7 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
     /**
      * Creates a NMS1 from a byte[].
      */
-    public static URN createNMS1FromBytes(byte[] bytes) throws Exception {
+    public static URN createNMS1FromBytes(byte[] bytes) throws IOException {
         if(bytes == null || bytes.length != 20)
             throw new IOException("invalid bytes!");
         

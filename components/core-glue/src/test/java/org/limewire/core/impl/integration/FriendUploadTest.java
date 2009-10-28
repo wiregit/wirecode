@@ -231,7 +231,7 @@ public class FriendUploadTest extends LimeTestCase {
         registry.register(authenticator);
         context.checking(new Expectations() {{
             one(authenticator).authenticate(with(any(UsernamePasswordCredentials.class)));
-            will(new CustomAction("check passowrd") {
+            will(new CustomAction("check password") {
                 @Override
                 public Object invoke(Invocation invocation) throws Throwable {
                     UsernamePasswordCredentials credentials = (UsernamePasswordCredentials)invocation.getParameter(0);

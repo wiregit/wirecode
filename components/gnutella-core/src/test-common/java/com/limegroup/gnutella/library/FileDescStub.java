@@ -169,8 +169,7 @@ public class FileDescStub implements FileDesc {
     }
     @Override
     public URN getNMS1Urn() {
-        // TODO Auto-generated method stub
-        return null;
+        return UrnSet.getNMS1(urns);
     }
 
     @Override
@@ -249,7 +248,8 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void addUrn(URN ttroot) {
+    public void addUrn(URN urn) {
+        urns.add(urn);
     }
 
     @Override

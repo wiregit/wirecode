@@ -30,8 +30,8 @@ import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
+import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
@@ -85,6 +85,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     
     /** If the query desires partial results */
     private boolean _partialResultsDesired;
+    
+    private boolean _desiresNMS1Urns;
     
     /**
      * Whether or not the GGEP header for Do Not Proxy was found and its
@@ -323,6 +325,11 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                 _partialResultsDesired = true;
                 ggepBlock.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
             }
+            
+            if (SearchSettings.DESIRES_NMS1_URNS.getValue()) {
+                _desiresNMS1Urns = true;
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_NMS1);
+            }
 
             if (QUERY.length() > OLD_LW_MAX_QUERY_FIELD_LEN) {
                 ggepBlock.put(GGEPKeys.GGEP_HEADER_EXTENDED_QUERY, QUERY);
@@ -423,6 +430,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         _isSecurityTokenRequired = parser.hasSecurityTokenRequest;
         
         _partialResultsDesired = parser.partialResultsDesired;
+        
+        _desiresNMS1Urns = parser.desiresNMS1Urns;
 
         if (parser.queryUrns == null) {
             QUERY_URNS = Collections.emptySet();
@@ -656,6 +665,11 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 
     public boolean desiresPartialResults() {
         return _partialResultsDesired;
+    }
+    
+    @Override
+    public boolean desiresNMS1Urn() {
+        return _desiresNMS1Urns;
     }
     
     /** Returns the address to send a out-of-band reply to.  Only useful
@@ -966,7 +980,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     }
     
     static class QueryRequestPayloadParser {
-
+        
         String query = "";
         String richQuery = "";
         int minSpeed = 0;
@@ -987,6 +1001,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         boolean hasSecurityTokenRequest;
         
         boolean partialResultsDesired;
+        
+        boolean desiresNMS1Urns;
         
         int hugeStart;
         
@@ -1030,6 +1046,10 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                         if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX))
                             partialResultsDesired = true;
 
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_NMS1)) {
+                            desiresNMS1Urns = true;
+                        }
+                        
                         if (ggep.hasKey(GGEPKeys.GGEP_HEADER_EXTENDED_QUERY)) {
                             this.query = ggep.getString(GGEPKeys.GGEP_HEADER_EXTENDED_QUERY);
                         }

@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,7 +98,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             // TODO handler code should not know that much about request uris
             String uri = request.getRequestLine().getUri();
             String friendID;
-            if(uri.equals("/")) {
+            if(uri.equals("/") || uri.startsWith("/?")) {
                 friendID = null;
                 uploader = sessionManager.getOrCreateUploader(request,
                         context, UploadType.BROWSE_HOST, "");
@@ -120,7 +121,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
                 
                 response.setStatusCode(HttpStatus.SC_NOT_ACCEPTABLE);
             } else {
-                response.setEntity(new BrowseResponseEntity(uploader, files));
+                response.setEntity(new BrowseResponseEntity(uploader, files, shouldIncludeNMS1Urns(request)));
                 response.setStatusCode(HttpStatus.SC_OK);
             }
         } catch (com.limegroup.gnutella.uploader.HttpException he) {
@@ -133,6 +134,19 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             uploader = sessionManager.getOrCreateUploader(request, context, UploadType.BROWSE_HOST, I18nMarker.marktr("Browse"));
         }
         sessionManager.sendResponse(uploader, response);
+    }
+    
+    static boolean shouldIncludeNMS1Urns(HttpRequest request) {
+        boolean includeNMS1Urns = HttpCoreUtils.hasHeaderListValue(request, HTTPHeaderName.NMS1.httpStringValue(), "1");
+        if (includeNMS1Urns) {
+            return true;
+        }
+        Map<String, String> query = HttpCoreUtils.parseQuery(request.getRequestLine().getUri(), null);
+        String nms1 = query.get("nms1");
+        if (nms1 != null && nms1.equals("1")) {
+            return true;
+        }
+        return false;
     }
     
     /**
@@ -179,11 +193,14 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         private volatile int pendingMessageCount = 0;
 
         private GUID sessionGUID = new GUID();
+        
+        private final boolean includeNMS1Urn;
 
-        public BrowseResponseEntity(HTTPUploader uploader, Iterable<FileDesc> files) {
+        public BrowseResponseEntity(HTTPUploader uploader, Iterable<FileDesc> files, boolean includeNMS1Urn) {
             this.uploader = uploader;
             iterator = files.iterator();
-
+            this.includeNMS1Urn = includeNMS1Urn;
+            
             // XXX LW can't handle chunked responses: CORE-199
             //setChunked(true);
             
@@ -232,7 +249,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             List<Response> responses = new ArrayList<Response>(RESPONSES_PER_REPLY); 
             for (int i = 0; iterator.hasNext() && i < RESPONSES_PER_REPLY; i++) {
                 FileDesc fileDesc = iterator.next();
-                Response response = responseFactory.get().createResponse(fileDesc); 
+                Response response = responseFactory.get().createResponse(fileDesc, includeNMS1Urn); 
                 responses.add(response);
             }
             

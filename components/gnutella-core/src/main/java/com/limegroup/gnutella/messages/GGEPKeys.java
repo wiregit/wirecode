@@ -89,5 +89,6 @@ public class GGEPKeys {
     public static final String GGEP_HEADER_RETURN_PATH_HOPS = "RPH";
     public static final String GGEP_HEADER_RETURN_PATH_ME = "RPI";
     public static final String GGEP_HEADER_RETURN_PATH_TTL = "RPT";
-
+    /** The extension header key to signal interest in non-metadata sha1 urns. */
+    public static final String GGEP_HEADER_NMS1 = "NM";
 }

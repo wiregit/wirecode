@@ -21,6 +21,7 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -99,11 +100,15 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             }
         });
         for(File file : testFiles) {
-            assertNotNull(gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS));
+            FileDesc fileDesc = gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS);
+            // add fake nms1 urn
+            fileDesc.addUrn(URN.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
         }
         
         File testMp3 = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
-        assertNotNull(gnutellaFileCollection.add(testMp3).get(1, TimeUnit.SECONDS));
+        FileDesc fileDesc = gnutellaFileCollection.add(testMp3).get(1, TimeUnit.SECONDS);
+        // add fake nms1 urn
+        fileDesc.addUrn(URN.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
         
         assertGreaterThan("Not enough files to test against", 50, testFiles.length);
         assertGreaterThan(0, gnutellaFileCollection.size());
@@ -143,8 +148,17 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             // expected result
         }
     }
+    
+    public void testBrowseHostNoNMS1() throws Exception {
+        browseHost(false);
+    }
+    
+    public void testBrowseHostWithNMS1HeaderRequest() throws Exception {
+        SearchSettings.DESIRES_NMS1_URNS.setValue(true);
+        browseHost(true);
+    }
 
-    public void testBrowseHost() throws Exception {
+    public void browseHost(boolean includeNMS1Urn) throws Exception {
         Connectable host = new ConnectableImpl("localhost", PORT, false); // TODO true
         SocketsManager.ConnectType type = SocketsManager.ConnectType.PLAIN;  // TODO ConnectType.TLS
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
@@ -161,6 +175,9 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 files.add(result.getName());
                 assertTrue("Expected .class, .mp3 or LimeWire file, got: " + result.getName(),
                         result.getName().endsWith(".tmp") || result.getName().endsWith(".mp3") || result.getName().toLowerCase().startsWith("limewire"));
+                if (includeNMS1Urn) {
+                    assertNotNull(UrnSet.getNMS1(result.getUrns()));
+                }
             }
         }
 

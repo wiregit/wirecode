@@ -30,6 +30,7 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.AuthTokenFeature;
@@ -49,9 +50,9 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -240,7 +241,10 @@ public class BrowseHostHandler {
         get.addHeader(HTTPHeaderName.USER_AGENT.create(LimeWireUtils.getVendor()));
         get.addHeader(HTTPHeaderName.ACCEPT.create(Constants.QUERYREPLY_MIME_TYPE));
         get.addHeader(HTTPHeaderName.CONNECTION.create(HTTP.CONN_KEEP_ALIVE));
-        
+        if (SearchSettings.DESIRES_NMS1_URNS.getValue()) {
+            get.addHeader(HTTPHeaderName.NMS1.create("1"));
+        }
+                
         if (!networkManager.acceptedIncomingConnection() && networkManager.canDoFWT()) {
             get.addHeader(HTTPHeaderName.FW_NODE_INFO.create(pushEndpointFactory.createForSelf()));
         }

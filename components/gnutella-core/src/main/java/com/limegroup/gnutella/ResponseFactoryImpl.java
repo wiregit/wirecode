@@ -26,6 +26,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.NameValue;
@@ -53,6 +55,8 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
 
 @Singleton
 public class ResponseFactoryImpl implements ResponseFactory {
+    
+    private static final Log LOG = LogFactory.getLog(ResponseFactoryImpl.class);
 
     /** The magic byte to use as extension separators. */
     private static final byte EXT_SEPARATOR = 0x1c;
@@ -96,10 +100,14 @@ public class ResponseFactoryImpl implements ResponseFactory {
         return createResponse(index, size, name, -1, new UrnSet(urn), doc, null, null);
     }
     
+    public Response createResponse(FileDesc fileDesc) {
+        return createResponse(fileDesc, false);
+    }
+    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.ResponseFactory#createResponse(com.limegroup.gnutella.FileDesc)
      */
-    public Response createResponse(FileDesc fd) {
+    public Response createResponse(FileDesc fd, boolean includeNMS1Urn) {
         IntervalSet ranges = null;
         boolean verified = false;
         if (fd instanceof IncompleteFileDesc) {
@@ -111,7 +119,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
         GGEPContainer container = new GGEPContainer(getAsIpPorts(altLocManager
                 .getDirect(fd.getSHA1Urn())), creationTimeCache.get()
                 .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize(), ranges, 
-                verified, fd.getTTROOTUrn());
+                verified, fd.getTTROOTUrn(), includeNMS1Urn ? fd.getNMS1Urn() : null);
 
         LimeXMLDocument doc = getLimeXmlDoc(fd);
         
@@ -186,7 +194,6 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (is.available() < 16) {
                 throw new IOException("not enough room for the GUID");
             }
-            //changed to pass an additional parameter (incomingNameByteArraySize) for the new response
             return createResponse(index, size, name, incomingNameByteArraySize, null, null, null, null);
         } else {
             // now handle between-the-nulls
@@ -208,9 +215,25 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (ggep.size64 > Integer.MAX_VALUE)
                 size = ggep.size64;
 
-            //changed to pass an additional parameter (baosByteArraySize) for the new response
+            urns = updateUrns(urns, ggep.nms1Urn);
+            
             return createResponse(index, size, name, incomingNameByteArraySize, urns, doc, ggep, rawMeta);
         }
+    }
+    
+    /**
+     * Updates <code>urns</code> of urns adding <code>nms1Urn</code> if
+     * if is not null. 
+     */
+    static Set<URN> updateUrns(Set<URN> urns, URN nms1Urn) {
+        if (nms1Urn == null) {
+            return urns;
+        }
+        if (!(urns instanceof UrnSet)) {
+            urns = new UrnSet(urns);
+        }
+        urns.add(nms1Urn);
+        return urns;
     }
 
     /**
@@ -241,7 +264,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (size <= Integer.MAX_VALUE)
                 ggepData = GGEPContainer.EMPTY;
             else // large filesizes require GGEP now
-                ggepData = new GGEPContainer(null, -1L, size, null, false, null);
+                ggepData = new GGEPContainer(null, -1L, size, null, false, null, null);
         }
 
         // build up extensions if it wasn't already!
@@ -359,6 +382,10 @@ public class ResponseFactoryImpl implements ResponseFactory {
                     if (!urn.isSHA1() && MessageSettings.TTROOT_IN_GGEP.getValue()) 
                         continue;
                     
+                    if (urn.isNMS1()) {
+                        continue;
+                    }
+                    
                     baos.write(StringUtils.toAsciiBytes(urn.toString()));
                     // If there's another URN, add the separator.
                     if (iter.hasNext()) {
@@ -366,8 +393,6 @@ public class ResponseFactoryImpl implements ResponseFactory {
                     }
                 }
                 
-                assert !(ggep.isEmpty() && urns.size() > 1);
-
                 // If there's ggep data, write the separator.
                 if (!ggep.isEmpty())
                     baos.write(EXT_SEPARATOR);
@@ -444,7 +469,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
                         ggep.createTime <= 0 && 
                         ggep.size64 <= Integer.MAX_VALUE &&
                         ggep.ranges == null &&
-                        ggep.ttroot == null))
+                        ggep.ttroot == null &&
+                        ggep.nms1Urn == null))
             throw new IllegalArgumentException(
                     "null or empty locations and small size");
 
@@ -472,6 +498,10 @@ public class ResponseFactoryImpl implements ResponseFactory {
         if (ggep.ttroot != null && MessageSettings.TTROOT_IN_GGEP.getValue())
             info.put(GGEPKeys.GGEP_HEADER_TTROOT,ggep.ttroot.getBytes());
 
+        if (ggep.nms1Urn != null) {
+            info.put(GGEPKeys.GGEP_HEADER_NMS1, ggep.nms1Urn.getBytes());
+        }
+        
         info.write(out);
     }
 
@@ -489,6 +519,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
         long createTime = -1;
         long size64 = size;
         URN ttroot = null;
+        URN nms1Urn = null;
 
         // if the block has a ALTS value, get it, parse it,
         // and move to the next.
@@ -529,6 +560,15 @@ public class ResponseFactoryImpl implements ResponseFactory {
             } catch (IOException bad){}
         }
         
+        if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_NMS1)) {
+            try {
+                byte[] nms1 = ggep.get(GGEPKeys.GGEP_HEADER_NMS1);
+                nms1Urn = URN.createNMS1FromBytes(nms1);
+            } catch (IOException ie) {
+                LOG.debug("invalid non-metadata urn", ie);
+            }
+        }
+        
         boolean verified = false;
         IntervalSet ranges = null;
         try {
@@ -538,10 +578,10 @@ public class ResponseFactoryImpl implements ResponseFactory {
         
         
         if (locations == null && createTime == -1 && size64 <= Integer.MAX_VALUE && 
-                ranges == null & ttroot == null)
+                ranges == null && ttroot == null && nms1Urn == null)
             return GGEPContainer.EMPTY;
         
-        return new GGEPContainer(locations, createTime, size64, ranges, verified, ttroot);
+        return new GGEPContainer(locations, createTime, size64, ranges, verified, ttroot, nms1Urn);
     }
 
     /**
@@ -597,12 +637,18 @@ public class ResponseFactoryImpl implements ResponseFactory {
         final IntervalSet ranges;
         final boolean verified;
         final URN ttroot;
+        private final URN nms1Urn;
 
         private GGEPContainer() {
-            this(null, -1, 0, null, false, null);
+            this(null, -1, 0, null, false, null, null);
         }
 
-        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges, boolean verified, URN ttroot) {
+        /**
+         * @param nms1Urn can be null
+         */
+        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges, boolean verified, URN ttroot,
+                URN nms1Urn) {
+            this.nms1Urn = nms1Urn;
             if (locs == null)
                 locations = Collections.emptySet();
             else
@@ -613,12 +659,13 @@ public class ResponseFactoryImpl implements ResponseFactory {
             this.verified = verified;
             this.ttroot = ttroot;
             assert ttroot == null || ttroot.isTTRoot();
+            assert nms1Urn == null || nms1Urn.isNMS1();
         }
 
         boolean isEmpty() {
             return locations.isEmpty() && createTime <= 0
                     && size64 <= Integer.MAX_VALUE && ranges == null && 
-                    ttroot == null;
+                    (ttroot == null || !MessageSettings.TTROOT_IN_GGEP.getValue()) && nms1Urn == null;
         }
     }
 

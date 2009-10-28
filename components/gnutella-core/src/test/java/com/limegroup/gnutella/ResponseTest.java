@@ -691,7 +691,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false, null);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false, null, null);
         addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.
@@ -733,7 +733,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false, null);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false, null, null);
         addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.

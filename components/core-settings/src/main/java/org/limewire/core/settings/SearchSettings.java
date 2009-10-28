@@ -412,4 +412,11 @@ public final class SearchSettings extends LimeProps {
     public static final BooleanSetting INCLUDE_METADATA_IN_PLAINTEXT_SEARCH = FACTORY
             .createRemoteBooleanSetting("INCLUDE_METADATA_IN_PLAINTEXT_SEARCH", true,
                     "SearchSettings.includeMetadataInPlaintextSearch");
+    
+    /**
+     * Setting to turn on whether client is interested in non-metadata
+     * sha1 urns for responses in query replies.
+     */
+    public static final BooleanSetting DESIRES_NMS1_URNS = 
+        FACTORY.createBooleanSetting("DESIRES_NMS1_URNS", false);
 }

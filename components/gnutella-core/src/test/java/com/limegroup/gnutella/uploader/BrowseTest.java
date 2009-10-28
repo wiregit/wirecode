@@ -18,6 +18,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpProtocolParams;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
@@ -27,6 +28,8 @@ import org.limewire.http.httpclient.HttpClientUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
@@ -85,18 +88,49 @@ public class BrowseTest extends LimeTestCase {
         });
         assertGreaterThan("Not enough files to test against", 50, testFiles.length);
         for(File file : testFiles) {
-            assertNotNull(gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS));
+            FileDesc fileDesc = gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS);
+            assertNotNull(fileDesc);
+            URN sha1Urn = fileDesc.getSHA1Urn();
+            // add sha1 as non-metadata hash
+            fileDesc.addUrn(URN.createNMS1FromBytes(sha1Urn.getBytes()));
         }
         
         host = protocol + "://localhost:" + PORT;
     }
 
-    public void testBrowse() throws Exception {
-        HttpGet method = new HttpGet(host + "/");
-        method.addHeader("Accept", "application/x-gnutella-packets");
+    public void testBrowseWithoutNMS1Urn() throws Exception {
+        HttpGet request = new HttpGet(host + "/");
+        browse(request, false);
+    }
+    
+    public void testBrowseWithNMS1UrnInQuery() throws Exception {
+        HttpGet request = new HttpGet(host + "/?nms1=1");
+        browse(request, true);
+    }
+    
+    public void testBrowseWithNMS1UrnInQueryAndOtherParam() throws Exception {
+        HttpGet request = new HttpGet(host + "/?foo=bar&nms1=1");
+        browse(request, true);
+    }
+    
+    public void testBrowseWithNMS1UrnInHeader() throws Exception {
+        HttpGet request = new HttpGet(host + "/");
+        request.addHeader(new BasicHeader("X-NMS1", "1"));
+        browse(request, true);
+    }
+    
+    public void testBrowseWithNMS1UrnInHeaderAndExtraHeader() throws Exception {
+        HttpGet request = new HttpGet(host + "/");
+        request.addHeader(new BasicHeader("X-NMS1", "1"));
+        request.addHeader(new BasicHeader("foo", "bar"));
+        browse(request, true);
+    }
+    
+    public void browse(HttpUriRequest request, boolean includeNMS1Urn) throws Exception {
+        request.addHeader("Accept", "application/x-gnutella-packets");
         HttpResponse response = null;
         try {
-            response = client.execute(method);
+            response = client.execute(request);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
 
             InputStream in = new BufferedInputStream(response.getEntity().getContent());
@@ -112,13 +146,19 @@ public class BrowseTest extends LimeTestCase {
                     }
                     break;
                 }
-                assertTrue(m instanceof QueryReply);
+                assertInstanceof(QueryReply.class, m);
                 QueryReply q = (QueryReply) m;
                 Response[] results = q.getResultsArray();
                 for (Response result : results) {
                     files.add(result.getName());
                     assertTrue("Expected .tmp or LimeWire file, got: " + result.getName(),
                             result.getName().endsWith(".tmp") || result.getName().toLowerCase().startsWith("limewire"));
+                    URN nms1Urn = UrnSet.getNMS1(result.getUrns());
+                    if (includeNMS1Urn) {
+                        assertNotNull(nms1Urn);
+                    } else {
+                        assertNull(nms1Urn);
+                    }
                 }
             }
 

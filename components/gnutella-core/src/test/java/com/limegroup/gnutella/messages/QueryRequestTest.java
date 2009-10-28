@@ -1464,6 +1464,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getMetaMask(), proxy.getMetaMask());
         assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
         assertEquals(query.getNetwork(), proxy.getNetwork());
+        assertEquals(query.desiresNMS1Urn(), proxy.desiresNMS1Urn());
         
         // idempotence
         proxy.originate();
@@ -1480,6 +1481,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getMetaMask(), proxy.getMetaMask());
         assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
         assertEquals(query.getNetwork(), proxy.getNetwork());
+        assertEquals(query.desiresNMS1Urn(), proxy.desiresNMS1Urn());
     }
     
     public void testIsQueryForLWAllLocales() {
@@ -1631,6 +1633,18 @@ public final class QueryRequestTest extends LimeTestCase {
     public void testQueryStringOldLwLimitNotExceeded() throws Exception {
         extendedQueryStringTest("testa testy test rest",
                                 "testa testy test rest");
+    }
+    
+    public void testQueryRequestDesiresNMS1Urn() {
+        SearchSettings.DESIRES_NMS1_URNS.setValue(true);
+        QueryRequest request = queryRequestFactory.createQuery("hello world");
+        assertTrue(request.desiresNMS1Urn());
+    }
+    
+    public void testQueryRequestDoesNotDesireNMS1Urn() {
+        SearchSettings.DESIRES_NMS1_URNS.setValue(false);
+        QueryRequest request = queryRequestFactory.createQuery("hello world");
+        assertFalse(request.desiresNMS1Urn());
     }
 
     /**

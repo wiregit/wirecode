@@ -109,8 +109,7 @@ class FileDescImpl implements FileDesc {
      * @param urns the URNs to associate with this FileDesc
      * @param index the index in the FileManager
      */
-    FileDescImpl(RareFileStrategy rareFileStrategy,
-            LicenseFactory licenseFactory,
+    FileDescImpl(RareFileStrategy rareFileStrategy, LicenseFactory licenseFactory,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster,
             File file,
             Set<? extends URN> urns,

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.limewire.security.AddressSecurityToken;
 
+import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -283,4 +284,10 @@ public interface QueryRequest extends Message {
      * @return whether or not a response to this query should include XML.
      */
     public boolean shouldIncludeXMLInResponse();
+    
+    /**
+     * @return true if the requestor is interested in the non-metadata
+     * sha1 urn of files in {@link Response responses}
+     */
+    public boolean desiresNMS1Urn();
 }
