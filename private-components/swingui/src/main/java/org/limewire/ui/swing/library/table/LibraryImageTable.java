@@ -61,6 +61,7 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         super(new MigLayout("insets 0 0 0 0, fill"));
         
         this.imageEditor = imageEditor;
+        imageEditor.setVisible(false);
         
         GuiUtils.assignResources(this); 
         
