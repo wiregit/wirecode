@@ -44,7 +44,7 @@ public class SystemOptionPanel extends OptionPanel {
     @Inject
     public SystemOptionPanel(TrayNotifier trayNotifier) {
         this.trayNotifier = trayNotifier;
-        setLayout(new MigLayout("hidemode 2, insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("hidemode 3, insets 15, fillx, wrap"));
 
         setOpaque(false);
 
@@ -86,7 +86,7 @@ public class SystemOptionPanel extends OptionPanel {
 
         public FileAssociationPanel() {
             super(I18n.tr("File Associations"));
-            setLayout(new MigLayout("insets 0, gap 0"));
+            setLayout(new MigLayout("insets 0, gap 0, hidemode 3"));
             setOpaque(false);
 
             magnetCheckBox = new JCheckBox(I18n.tr("\".magnet\" files"));
@@ -106,8 +106,7 @@ public class SystemOptionPanel extends OptionPanel {
                     updateView();
                 }
             });
-            warnCheckBox = new JCheckBox(I18n
-                    .tr("Warn me when other programs want to automatically open these types"));
+            warnCheckBox = new JCheckBox(I18n.tr("Warn me when other programs want to automatically open these types"));
             warnCheckBox.setContentAreaFilled(false);
 
             add(magnetCheckBox, "gapleft 5, gapbottom 5, wrap");

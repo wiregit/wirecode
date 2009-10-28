@@ -4,10 +4,12 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
@@ -44,8 +46,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
     public ListeningPortsOptionPanel(NetworkManager networkManager,
             Provider<TorrentManager> torrentManager,
             @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
-        super(null);
-        setLayout(new MigLayout("insets 4, fillx, nogrid"));
+        setLayout(new MigLayout("insets 15, fillx"));
         setOpaque(false);
         
         this.networkManager = networkManager;
@@ -55,15 +56,18 @@ public class ListeningPortsOptionPanel extends OptionPanel {
         gnutellaListeningPorts = new GnutellaListeningPortsOptionPanel();
         torrentListeningPorts = new TorrentListeningPortsOptionPanel();
 
-        add(
-                new MultiLineLabel(
-                        I18n
-                                .tr("You can set the local network port that listens for incoming connections. This port may be changed in case of conflict with another program or if a specific port number is required for direct incoming connections by your firewall. You must also configure your router when choosing \"manual port forward\" or \"do nothing\""),
+        JPanel p = new JPanel();
+        p.setBorder(BorderFactory.createTitledBorder(""));
+        p.setLayout(new MigLayout("fillx"));
+        p.setOpaque(false);
+        
+        p.add(new MultiLineLabel(I18n.tr("You can set the local network port that listens for incoming connections. This port may be changed in case of conflict with another program or if a specific port number is required for direct incoming connections by your firewall. You must also configure your router when choosing \"manual port forward\" or \"do nothing\""),
                         AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "pad 0, growx, wrap");
 
-        add(gnutellaListeningPorts, "gaptop 10, growx, wrap");
-
-        add(torrentListeningPorts, "gaptop 10, growx, wrap");
+        p.add(gnutellaListeningPorts, "gaptop 10, growx, wrap");
+        p.add(torrentListeningPorts, "gaptop 10, growx, wrap");
+        
+        add(p, "pushx, growx");
     }
 
     @Override

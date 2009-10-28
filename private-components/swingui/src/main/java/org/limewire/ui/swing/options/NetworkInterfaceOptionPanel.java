@@ -56,7 +56,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     
     @Inject
     public NetworkInterfaceOptionPanel() {
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("insets 15, fillx, wrap"));
         setOpaque(false);
         
         add(getNetworkPanel(), "pushx, growx");

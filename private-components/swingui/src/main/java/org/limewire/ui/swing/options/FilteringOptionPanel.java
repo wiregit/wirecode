@@ -51,7 +51,7 @@ public class FilteringOptionPanel extends OptionPanel {
         super();
         this.spamManager = spamManager;
         
-        setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));
+        setLayout(new MigLayout("insets 15, fillx, wrap"));
         setOpaque(false);
         
         add(getBlockHostsPanel(), "pushx, growx");
