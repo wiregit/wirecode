@@ -126,8 +126,7 @@ public class TransferOptionPanel extends OptionPanel {
 
             ButtonGroup downloadOptions = new ButtonGroup();
             singleLocationButton = new JRadioButton(I18n.tr("Save all downloads to one folder:"));
-            multiLocationButton = new JRadioButton(I18n
-                    .tr("Save different categories to different folders"));
+            multiLocationButton = new JRadioButton(I18n.tr("Save different categories to different folders"));
             singleLocationButton.setOpaque(false);
             multiLocationButton.setOpaque(false);
             downloadOptions.add(singleLocationButton);
@@ -136,24 +135,20 @@ public class TransferOptionPanel extends OptionPanel {
             downloadSaveTextField = new LabelTextField(iconManager);
             downloadSaveTextField.setEditable(false);
 
-            BrowseDirectoryAction directoryAction = new BrowseDirectoryAction(
-                    TransferOptionPanel.this, downloadSaveTextField);
+            BrowseDirectoryAction directoryAction = new BrowseDirectoryAction(TransferOptionPanel.this, downloadSaveTextField);
             downloadSaveTextField.addMouseListener(directoryAction);
             browseSaveLocationButton = new JButton(directoryAction);
-            autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n
-                    .tr("If the file already exists, download it with a different name"));
+            autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
 
             add(singleLocationButton);
             add(downloadSaveTextField, "span, growx");
             add(browseSaveLocationButton, "wrap");
 
-            saveFolderPanel = manageFoldersOptionPanelFactory.create(new OKDialogAction(),
-                    new CancelDialogAction());
+            saveFolderPanel = manageFoldersOptionPanelFactory.create(new OKDialogAction(), new CancelDialogAction());
             ResizeUtils.forceSize(saveFolderPanel, new Dimension(600, 430));
             
-            storeOptionPanel = new LWSFileNamingOptionPanel(new OKDialogAction(),
-                    new CancelDialogAction());
+            storeOptionPanel = new LWSFileNamingOptionPanel(new OKDialogAction(), new CancelDialogAction());
 
 
             multiLocationConfigureButton = new JButton(new DialogDisplayAction(this,
@@ -182,8 +177,12 @@ public class TransferOptionPanel extends OptionPanel {
             singleLocationButton.addActionListener(downloadSwitchAction);
             multiLocationButton.addActionListener(downloadSwitchAction);
             
-            add(new JLabel(I18n.tr("Configure how LimeWire Store downloads are organized")));
-            add(new JButton(new DialogDisplayAction(TransferOptionPanel.this, storeOptionPanel, I18n.tr("Store File Organization"), I18n.tr("Configure..."), I18n.tr("Configure how files downloaded from the LimeWire Store are organized"))));
+            // only show the store download option if the geo location
+            // can be used to purchase from the LWS
+            if(SwingUiSettings.SHOW_STORE_COMPONENTS.get()) {
+                add(new JLabel(I18n.tr("Configure how LimeWire Store downloads are organized")));
+                add(new JButton(new DialogDisplayAction(TransferOptionPanel.this, storeOptionPanel, I18n.tr("Store File Organization"), I18n.tr("Configure..."), I18n.tr("Configure how files downloaded from the LimeWire Store are organized"))));
+            }
         }
 
         @Override
