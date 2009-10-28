@@ -233,7 +233,7 @@ public class ConnectionSummaryPanel extends JPanel {
             return I18n.tr("LimeWire is behind a NAT or firewall that assigns a different external port to each connection");
         case UNKNOWN:
         default:
-            return I18n.tr("Unknown");
+            return "";
         }
     }
 
@@ -312,7 +312,7 @@ public class ConnectionSummaryPanel extends JPanel {
             statusLabel.setText(statusText);
             
             this.reasonText = reasonText;
-            if ((statusText != null) && (statusText.length() > 0) && (reasonText != null) && (reasonText.length() > 0) && !reasonText.equals(I18n.tr("Unknown"))) {
+            if ((statusText != null) && (statusText.length() > 0) && (reasonText != null) && (reasonText.length() > 0)) {
                 reasonButton.setVisible(true);
             } else {
                 reasonButton.setVisible(false);
