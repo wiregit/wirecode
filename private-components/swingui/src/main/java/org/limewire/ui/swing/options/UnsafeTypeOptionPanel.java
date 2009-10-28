@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -12,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -23,7 +23,6 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.Setting;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.options.OptionPanelStateManager.SettingChangedListener;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
@@ -83,7 +82,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
             }
         }), "wrap");
         
-        contentPanel.add(Line.createHorizontalLine(Color.BLACK), "grow, wrap");
+        contentPanel.add(new JSeparator(), "growx, gaptop 5, gapbottom 5, wrap");
         
         contentPanel.add(new JLabel("<html>" + I18n.tr("Enabling this setting makes you more prone to viruses")
         + "</html>"), "wrap");
