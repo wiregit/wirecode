@@ -100,6 +100,7 @@ public class TorrentDHTScheduler implements Runnable {
 
     private boolean shouldDisableDHT(Torrent torrent) {
         long runningTimeOfTorrent = getTorrentRunningTime(torrent);
+
         if (!torrent.isStarted() || torrent.isFinished() || torrent.isPrivate()
                 || runningTimeOfTorrent < ONE_MINUTE) {
             return true;
@@ -109,10 +110,17 @@ public class TorrentDHTScheduler implements Runnable {
         if (dhtEnabled(torrent) && lastDHTStartTime != null) {
             long runningTimeMillis = getTimeSinceLastDHTStartForTorrent(lastDHTStartTime);
             long runningTimeMinutes = runningTimeMillis / (60 * 1000);
+
             if (LOG.isDebugEnabled()) {
                 LOG.debugf("DHT Running for torrent: {0} for {1} minutes.", torrent.getName(),
                         runningTimeMinutes);
             }
+
+            if (runningTimeMinutes > 30) {
+                // only try the dht for 30 minutes at a time
+                return true;
+            }
+            
             // check the number of peers every five minutes max.
             if (runningTimeMinutes % 5 == 0) {
                 int numDHTNonTrackerPeers = 0;
