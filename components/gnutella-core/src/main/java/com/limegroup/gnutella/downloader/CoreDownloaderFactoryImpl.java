@@ -118,6 +118,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return torrentFileDownloader;
     }
 
+    @Override
     public CoreDownloader createFromMemento(DownloadMemento memento) throws InvalidDataException {
         try {
             Provider<? extends CoreDownloader> coreFactory = providerForMemento(memento);
