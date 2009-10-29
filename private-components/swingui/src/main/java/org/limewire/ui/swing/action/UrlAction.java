@@ -17,6 +17,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.components.HTMLPane.LoadResult;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
@@ -135,12 +136,11 @@ public class UrlAction extends AbstractAction {
                 setLocationRelativeTo(null);
                 
                 // If popout browser does not work use the system browser.
-                browser.setPageAsynchronous(urlToShow, null).addFutureListener(new EventListener<FutureEvent<Boolean>>() {
-
+                browser.setPageAsynchronous(urlToShow, null).addFutureListener(new EventListener<FutureEvent<LoadResult>>() {
 					@SwingEDTEvent
                     @Override
-                    public void handleEvent(FutureEvent<Boolean> event) {
-                        if (!(event.getResult() == Boolean.TRUE)) {
+                    public void handleEvent(FutureEvent<LoadResult> event) {
+                        if (event.getResult() != LoadResult.SERVER_PAGE) {
                             dispose();
                             NativeLaunchUtils.openURL(urlToShow);
                         }

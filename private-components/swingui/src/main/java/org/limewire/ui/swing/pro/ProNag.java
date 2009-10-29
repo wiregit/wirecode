@@ -1,18 +1,21 @@
 package org.limewire.ui.swing.pro;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Panel;
-import java.awt.Rectangle;
 import java.net.URL;
 
+import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
 import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLDocument;
 
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.color.ColorUtil;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Application;
@@ -20,52 +23,49 @@ import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HTMLPane;
-import org.limewire.ui.swing.components.Resizable;
-import org.limewire.ui.swing.settings.InstallSettings;
-import org.limewire.ui.swing.statusbar.ProStatusPanel;
-import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
+import org.limewire.ui.swing.components.HTMLPane.LoadResult;
+import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 
 /** A nag to go to LimeWire PRO. */ 
-class ProNag extends JXPanel implements Resizable {
+class ProNag extends JXPanel {
     
+    private JDialog container;
     private final Application application;
-    private final ProStatusPanel proStatusPanel;
-    
-    private final java.awt.Panel parent;
     private final HTMLPane editorPane;
     
     private long offlineShownAt = -1;
     
-    @Inject public ProNag(Application application, ProStatusPanel proStatusPanel, 
+    @Inject public ProNag(Application application, 
                           final GnutellaConnectionManager connectionManager) {
         super(new BorderLayout());
         
-        this.application = application;
-        this.proStatusPanel = proStatusPanel;
-        
-        this.parent = new Panel(new BorderLayout()); // heavyweight, to show over other things.
+        this.application = application;        
         this.editorPane = new HTMLPane();
+        editorPane.putClientProperty(BasicHTML.documentBaseKey, "");
 
         setOpaque(false);
-        parent.setMinimumSize(new Dimension(350, 200));
-        parent.setMaximumSize(new Dimension(350, 200));
-        parent.setPreferredSize(new Dimension(350, 200));
 
         editorPane.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    // Look for the HREF attribute of the A tag...
+                    // Look for the HREF attribute of the A tag,
+                    // or the ACTION attribute (which will be there if it was a form)
                     Object a = e.getSourceElement().getAttributes().getAttribute(HTML.Tag.A);
+                    Object action = e.getSourceElement().getAttributes().getAttribute(HTML.Attribute.ACTION);
                     Object href = "";
                     if(a instanceof AttributeSet) {
                         href = ((AttributeSet)a).getAttribute(HTML.Attribute.HREF);
+                    } else if(action instanceof String) {
+                        href = action;
                     }
+                    
                     if(href != null && href.equals("_hide_nag_")) {
-                        ProNag.this.setVisible(false);
+                        container.dispose();
                     } else if(e.getURL() != null) {
                         String url = e.getURL().toExternalForm();
                         url += "&gs=" + connectionManager.getConnectionStrength().getStrengthId();
@@ -75,73 +75,73 @@ class ProNag extends JXPanel implements Resizable {
                             url += "&offlineDelay=" + delay;
                         }
                         NativeLaunchUtils.openURL(url);
+                        container.dispose();
                     }
                 }
             }            
-        });   
-        
-        add(parent, BorderLayout.CENTER);
+        });
         
         JScrollPane scroller = new JScrollPane(editorPane, 
                                                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        parent.add(scroller, BorderLayout.CENTER);
-    }
-
-    @Override
-    public void resize() {
-        Rectangle parentBounds = getParent().getBounds();
-        Dimension childPreferredSize = parent.getPreferredSize();
-        int w = childPreferredSize.width;
-        int h = childPreferredSize.height; 
-        setBounds(parentBounds.width / 2 - w / 2, parentBounds.height - h, w, h);
-        
-        notifyVisibilityChange();
+        add(scroller, BorderLayout.CENTER);
     }
     
-    @Override
-    public void setVisible(boolean flag) {
-        boolean notViz = !isVisible();
-        super.setVisible(flag);
-        if(notViz && isVisible()) {
-            resize();
+    /** Returns true if any content was loaded. */
+    boolean hasContent() {
+        Document document = editorPane.getDocument();
+        if (document != null) {
+            return document.getLength() > 0;
         } else {
-            notifyVisibilityChange();
+            return false;
         }
     }
 
-    /**
-     *  Add or remove the pro add shown condition for the pro add status panel.
-     *    May cause the pro status add to change visibility.
-     */
-    private void notifyVisibilityChange() {
-       if (isVisible()) {
-            proStatusPanel.addCondition(InvisibilityCondition.PRO_ADD_SHOWN);
-        } else {
-            proStatusPanel.removeCondition(InvisibilityCondition.PRO_ADD_SHOWN);    
+    /** Sets the container that should close when something in the nag is clicked. */
+    void setContainer(JDialog dialog) {
+        this.container = dialog;
+    }
+    
+    /** Returns the title of the pro nag. */
+    String getTitle() {
+        Document document = editorPane.getDocument();
+        if(document != null) {
+            Object title = document.getProperty(Document.TitleProperty);
+            if(title instanceof String) {
+                return (String)title;
+            }
         }
+        return null;
+    }
+
+    /** Returns true if the dialog wants to be rendered without decoration. */
+    boolean isUndecorated() {
+        Document document = editorPane.getDocument();
+        if(document instanceof HTMLDocument) {
+            HTMLDocument html = (HTMLDocument)document;
+            Element element = html.getElement(html.getDefaultRootElement(), "undecorated", "true");
+            if(element != null && element.getName().equals("body")) {
+                return true;
+            }
+        }
+        return false;
     }    
     
-    public ListeningFuture<Boolean> loadContents(boolean firstLaunch) {
-        String ref = "ref=";
-        if(InstallSettings.isRandomNag()) {
-            ref += "lwn6";    
-        } else { // InstallSettings.NagStyles.NON_MODAL
-            ref += "lwn7";
-        }
+    public ListeningFuture<LoadResult> loadContents(boolean firstLaunch) {
+        String bgColor = ColorUtil.toHexString(GuiUtils.getMainFrame().getBackground());
         String url = application.addClientInfoToUrl(
-                "http://client-data.limewire.com/client_startup/nag/?html32=true&fromFirstRun=" + firstLaunch + "&" + ref);
-        String backupUrl = createDefaultPage(firstLaunch, ref);
+                "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch + "&bgcolor=" + bgColor);
+        String backupUrl = createDefaultPage(firstLaunch, bgColor);
         
-        ListeningFuture<Boolean> future = editorPane.setPageAsynchronous(url, backupUrl);
+        ListeningFuture<LoadResult> future = editorPane.setPageAsynchronous(url, backupUrl);
         
         // add a listener to calculate when the offline was shown (if it was shown)
-        future.addFutureListener(new EventListener<FutureEvent<Boolean>>() {
+        future.addFutureListener(new EventListener<FutureEvent<LoadResult>>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(FutureEvent<Boolean> event) {
+            public void handleEvent(FutureEvent<LoadResult> event) {
                 // If we used the backup text, set the 'shown at' time.
-                if(event.getResult() == Boolean.FALSE) {
+                if(event.getResult() == LoadResult.OFFLINE_PAGE) {
                     offlineShownAt = System.currentTimeMillis();
                 }
             };
@@ -150,48 +150,54 @@ class ProNag extends JXPanel implements Resizable {
         return future;        
     }
     
-    private String createDefaultPage(boolean firstLaunch, String ref) {
-        URL closeImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/close.png");
-        URL bgImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/bg.png");
-        URL getImage = ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/button_get_limewire_pro.png");             
+    private String createDefaultPage(boolean firstLaunch, String bgColor) {
+        URL bgImage =  ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/update_background.png");
         
-        String outgoing = "http://www.limewire.com/download/pro/?" + ref + "&rnv=z&fromFirstRun=" + firstLaunch;
+        String outgoing = "http://www.limewire.com/download/pro/?rnv=z&fromFirstRun=" + firstLaunch;
         outgoing = application.addClientInfoToUrl(outgoing); // add common LW info
-        outgoing = outgoing.replace("&", "&amp;"); // must HTML-encode, otherwise things get messed up
-        return
-           "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"
-         + "<html>"
-         + "<body>"
-         + "<center>"
-         + "<table width=\"346\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" background=\""+ bgImage.toExternalForm() +"\">"
-         + "<tr>"
-         + "<td>"
-         + "<table width=\"346\" height=\"58\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">"
-         + "<tr>"
-         + "<td align=\"right\" valign=\"top\" height=\"66\">"
-         + "<a href=\"_hide_nag_\"><img src=\""+ closeImage.toExternalForm() +"\" alt=\"\" border=\"0\" /></a>"
-         + "</td>"
-         + "</tr>"
-         + "</table>"
-         + "<table width=\"346\" height=\"51\" border=\"0\" cellspacing=\"0\" cellpadding=\"25\">"
-         + "<tr>"
-         + "<td align=\"left\">"
-         + "<a href=\"" + outgoing + "\"><img src=\""+getImage.toExternalForm()+"\" alt=\"\" border=\"0\" /></a>"
-         + "</td>"
-         + "</tr>"
-         + "</table>"
-         + "<table width=\"346\" height=\"32\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">"
-         + "<tr>"
-         + "<td height=\"28\"></td>"
-         + "</tr>"
-         + "</table>"       
-         + "</td>"
-         + "</tr>"
-         + "</table>"
-         + "</center>"
-         + "</body>"
-         + "</html>"
-         ;
+        
+        String yes = (outgoing + "&ref=lwn8").replace("&", "&amp;");
+        String why = (outgoing + "&ref=lwn9").replace("&", "&amp;");
+        
+        return 
+            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"
+            + "<html>"
+            + "<head><title>" + I18n.tr("Upgrade to Pro!") + "</title></head>"
+            + "<body>"
+            + "<center>"
+                + "<table cellspacing=\"0\" cellpadding=\"8\" border=\"0\" bgcolor=\"" + bgColor + "\">"
+                + "<tr><td align=\"center\">"
+                    + "<table width=\"355\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" background=\"" + bgImage.toExternalForm() + "\">"
+                    + "<tr><td height=\"126\">"
+                        + "<table cellpadding=\"0\" cellspacing\"0\" border=\"0\">"
+                        + "<tr>" 
+                        + "<td>"
+                        + "<table width=\"110\" cellpadding=\"0\" cellspacing\"0\" border=\"0\"></table>"
+                        + "</td>"
+                        + "<td align=\"left\" valign=\"center\">"
+                        + "<b>"   + I18n.tr("Upgrade to PRO today!") + "</b>"
+                        + "<br/>" + I18n.tr("Turbo-charged downloads")
+                        + "<br/>" + I18n.tr("More search results")
+                        + "<br/>" + I18n.tr("Free tech support and upgrades")
+                        + "</td>"
+                        + "</tr>"
+                        + "</table>"
+                    + "</td></tr>"
+                    + "</table>"
+               + "</tr></td>"
+                + "<tr><td align=\"center\">"
+                    + I18n.tr("Upgrade to LimeWire PRO?") + "<br/>"
+                    + "<table cellspacing=\"3\" cellpadding=\"0\" border=\"0\"><tr>"                    
+                    + "<td><form action=\"" + yes + "\"><input type=\"submit\" value=\"" + I18n.tr("Yes") + "\"/></form></td>"
+                    + "<td><form action=\"" + why + "\"><input type=\"submit\" value=\"" + I18n.tr("Why") + "\"/></form></td>"
+                    + "<td><form action=\"_hide_nag_\"><input type=\"submit\" value=\"" + I18n.tr("Later") + "\"/></form></td>"
+                    + "</tr></table>"
+                + "</td>"
+                + "</tr>"
+                + "</table>"
+            + "</center>"
+            + "</body>"
+            + "</html>";
     }
 
 }

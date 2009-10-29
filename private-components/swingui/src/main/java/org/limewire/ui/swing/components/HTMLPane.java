@@ -37,13 +37,18 @@ import org.limewire.util.ExceptionUtils;
  */
 public class HTMLPane extends JEditorPane {
     
+    public static enum LoadResult {
+        SERVER_PAGE,
+        OFFLINE_PAGE;
+    }
+    
     private static final ListeningExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("HTMLPane Queue");
 
     private final SynchronousEditorKit kit = new SynchronousEditorKit();    
     private HashMap<Object, Object> pageProperties;
     
     private volatile boolean pageLoaded;
-    private ListeningFuture<Boolean> currentLoad;
+    private ListeningFuture<LoadResult> currentLoad;
     
     public HTMLPane() {
         setEditorKit(kit);
@@ -55,23 +60,23 @@ public class HTMLPane extends JEditorPane {
     }
     
     /** Loads the given URL, loading the backup page if it fails to load. */
-    public ListeningFuture<Boolean> setPageAsynchronous(final String url, final String backupPage) {        
+    public ListeningFuture<LoadResult> setPageAsynchronous(final String url, final String backupPage) {        
         assert SwingUtilities.isEventDispatchThread();        
         if(currentLoad != null) {
             currentLoad.cancel(true);
         }        
-        currentLoad = QUEUE.submit(new Callable<Boolean>() {
+        currentLoad = QUEUE.submit(new Callable<LoadResult>() {
             @Override
-            public Boolean call() {
+            public LoadResult call() {
                 try {
                     setPageImpl(new URL(url));
-                    return true;
+                    return LoadResult.SERVER_PAGE;
                 } catch(IOException iox) {
                     setBackup();
-                    return false;
+                    return LoadResult.OFFLINE_PAGE;
                 } catch(RuntimeInterruptedException rie) {
                     setBackup();
-                    return false;
+                    return LoadResult.OFFLINE_PAGE;
                 }
             }
             
