@@ -210,9 +210,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
                 // these updates are coming in on the AWT thread. so, it's safe to make GUI updates here.
                 updateTitle();
-                updateMessages();
 
                 receivedSearchResults = (SearchResultsPanel.this.searchResultsModel.getUnfilteredList().size() > 0);
+
+                updateMessages();
             }
         };
         searchResultsModel.getUnfilteredList().addListEventListener(resultCountListener);
