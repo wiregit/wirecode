@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -122,6 +123,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
     private boolean fullyConnected = true;
 
+    private boolean receivedSponsoredResults = false;
+
+    private boolean receivedSearchResults = false;
+    
     private BrowseStatus browseStatus = null;
     
     /** Shows status of failed browses and refresh button.
@@ -206,6 +211,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
                 // these updates are coming in on the AWT thread. so, it's safe to make GUI updates here.
                 updateTitle();
                 updateMessages();
+
+                receivedSearchResults = (SearchResultsPanel.this.searchResultsModel.getUnfilteredList().size() > 0);
             }
         };
         searchResultsModel.getUnfilteredList().addListEventListener(resultCountListener);
@@ -286,6 +293,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             sponsoredResultsPanel.setVisible(true);
             syncColumnHeader();
         }
+
+        receivedSponsoredResults = true;
+        updateMessages();      
     }
     
     /**
@@ -439,7 +449,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private void layoutComponents() {
         MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!, novisualpadding", 
                                 "[][grow]",       // col constraints
-                                "[][][grow]");  // row constraints
+                                "[][][][grow]");  // row constraints
         
         setLayout(layout);
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
@@ -459,8 +469,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         sortAndFilterPanel.layoutComponents(header);
         
         add(header, "spanx 2, growx, growy, wrap");
-        add(filterPanel, "grow, spany 2");
+        add(filterPanel, "grow, spany 3");
         add(messagePanel, "spanx 1, growx, wrap");
+        add(Box.createVerticalStrut(1), "spanx 1, growx, wrap");
         add(searchResultsOverlay , "hidemode 3, grow");
         add(browseFailedPanel , "hidemode 3, grow");
 
@@ -581,9 +592,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private void updateMessages() {
         browseStatusPanel.setBrowseStatus(browseStatus);
         
-        boolean receivedSearchResults = (searchResultsModel.getUnfilteredList().size() > 0);
-
-        if (!fullyConnected && receivedSearchResults) {
+        if (!fullyConnected && (receivedSearchResults || receivedSponsoredResults)) {
             messagePanel.setMessageType(MessageType.CONNECTING_TO_ULTRAPEERS);
         } else if (fullyConnected && receivedSearchResults && messagePanel.isShowClassicSearchResultsHint()) {
             messagePanel.setMessageType(MessageType.CLASSIC_SEARCH_RESULTS_HINT);            
@@ -591,7 +600,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             messagePanel.setMessageType(MessageType.NONE);            
         }
        
-        searchResultsOverlay.setOverlayType((!receivedSearchResults && !fullyConnected) ? OverlayType.AWAITING_CONNECTIONS : OverlayType.NONE);
+        searchResultsOverlay.setOverlayType((!receivedSearchResults && !fullyConnected && !receivedSponsoredResults) ? OverlayType.AWAITING_CONNECTIONS : OverlayType.NONE);
 
         if (!lifeCycleComplete) {
             browseFailedPanel.setVisible(false);
