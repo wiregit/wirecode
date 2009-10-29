@@ -59,8 +59,13 @@ public class SetupPage2 extends WizardPage {
        
         if (!newInstall) {
             JPanel oldVersionInfoPanel = createOldVersionInfoPanel(fourUpgrade);
-            oldVersionInfoPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK));
-            add(oldVersionInfoPanel);
+            
+            // The old version panel may be null if there are no shared files
+            //  in the old version.
+            if (oldVersionInfoPanel != null) {
+                oldVersionInfoPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK));
+                add(oldVersionInfoPanel);
+            }
         }
 
         initSettings();
@@ -182,12 +187,19 @@ public class SetupPage2 extends WizardPage {
         if(fourUpgrade) {
             label = createAndDecorateHeader(I18n.tr("Shared files from your old version will continue to be shared with the world."));
         } else {
-            label = createAndDecorateHeader(I18n.tr("{0} shared files from your previous version will continue to be shared with the world.", 
-                            peekNumPublicSharedFiles()));
+            int numSharedFiles = peekNumPublicSharedFiles();
+
+            if (numSharedFiles > 0) {
+                label = createAndDecorateHeader(I18n.tr("{0} shared files from your previous version will continue to be shared with the world.", 
+                            numSharedFiles));
+            } 
+            else {
+                return null;
+            }
+                
         }
         
         outerPanel.add(label, new GridBagConstraints());
-
         return outerPanel;
     }
     
