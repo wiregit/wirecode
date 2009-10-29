@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +34,7 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
@@ -49,10 +52,16 @@ public class ExtensionClassificationPanel extends JPanel {
 
     private static final Category[] ALL_CATEGORIES = Category.values();
     
+    private static final String TABLE_VIEW = "TABLE_VIEW";
+    private static final String OTHER_VIEW = "OTHER_VIEW";
+    
     private final CategoryManager categoryManager;
     private final IconManager iconManager;
-    private final JXTable table;
     private final ButtonDecorator buttonDecorator;
+    
+    private final JXTable table;
+    private final JPanel contentPanel;
+    private final CardLayout contentSwitcher;
     
     private Category[] currentCategories = null;
     
@@ -96,7 +105,26 @@ public class ExtensionClassificationPanel extends JPanel {
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setOpaque(false);
         
-        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        contentSwitcher = new CardLayout();
+        contentPanel = new JPanel(contentSwitcher);
+        contentPanel.setOpaque(false);
+        
+        contentPanel.add(scrollPane, TABLE_VIEW);
+        
+        JPanel otherPanel = new JPanel(new GridBagLayout());
+        otherPanel.setOpaque(false);
+        
+        JLabel otherLabel = new MultiLineLabel(I18n.tr("File types that LimeWire doesn't know about are " +
+                "classified as \"Other\". Add these files to a List by dragging them, or " +
+                "when adding a folder, click \"Advanced\" and choose specific file " +
+                "extensions"), 450);
+        otherLabel.setOpaque(false);
+        
+        otherPanel.add(otherLabel);
+        
+        contentPanel.add(otherPanel, OTHER_VIEW);
+        
+        centerPanel.add(contentPanel, BorderLayout.CENTER);
         add(centerPanel, BorderLayout.CENTER);
 
     }
@@ -209,6 +237,13 @@ public class ExtensionClassificationPanel extends JPanel {
             return;
         }
         
+        if (categories.length == 1 && categories[0] == Category.OTHER) {
+            contentSwitcher.show(contentPanel, OTHER_VIEW);
+        }
+        else {
+            contentSwitcher.show(contentPanel, TABLE_VIEW);
+        }
+        
         currentCategories = categories;
         TableModel model = createTableModel(currentCategories);
 
@@ -275,11 +310,9 @@ public class ExtensionClassificationPanel extends JPanel {
         switchPanel.add(allButton);
         
         for ( Category category : ALL_CATEGORIES ) {
-            if (categoryManager.getExtensionsForCategory(category).size() > 0) {
-                JButton categoryButton = createSelectionButton(new CategorySwitchAction(category));
-                categoryButton.setSelected(currentCategories.length == 1 && category == currentCategories[0]);
-                switchPanel.add(categoryButton);
-            }
+            JButton categoryButton = createSelectionButton(new CategorySwitchAction(category));
+            categoryButton.setSelected(currentCategories.length == 1 && category == currentCategories[0]);
+            switchPanel.add(categoryButton);
         }
     }
 
