@@ -87,14 +87,14 @@ public class MainDownloadPanel extends JPanel {
     public void register() {              
         // Add listener for "show downloads" setting.
         DownloadSettings.SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
-           @Override
+            @Override
             public void settingChanged(SettingEvent evt) {
-               SwingUtils.invokeLater(new Runnable() {
-                   @Override
-                   public void run() {
-                       updateVisibility();
-                   }
-               });
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateVisibility();
+                    }
+                });
             } 
         });
         
@@ -143,9 +143,8 @@ public class MainDownloadPanel extends JPanel {
                 // Display this panel whenever a download is added. 
                 if (!DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
                     DownloadSettings.SHOW_DOWNLOADS_TRAY.setValue(true);
-                } else {
-                    updateVisibility();
                 }
+                updateVisibility();
                 
             } else if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
                 final DownloadItem downloadItem = (DownloadItem) event.getNewValue();
