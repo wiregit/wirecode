@@ -34,6 +34,9 @@ public class BrowseRequestHandlerTest extends BaseTestCase {
         
         get = new HttpGet("http://localhost:4545/me%40you.com/?foo=bar&nms1=1");
         assertTrue(BrowseRequestHandler.shouldIncludeNMS1Urns(get));
+        
+        get = new HttpGet("http://12.4.4.4:4545/");
+        assertFalse(BrowseRequestHandler.shouldIncludeNMS1Urns(get));
     }
 
 }
