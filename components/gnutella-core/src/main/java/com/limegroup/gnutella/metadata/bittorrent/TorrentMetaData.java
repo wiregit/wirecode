@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.metadata;
+package com.limegroup.gnutella.metadata.bittorrent;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

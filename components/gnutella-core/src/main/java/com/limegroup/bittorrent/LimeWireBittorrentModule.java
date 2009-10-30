@@ -8,14 +8,11 @@ import org.limewire.libtorrent.TorrentImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
-import com.limegroup.bittorrent.metadata.TorrentMetaReader;
 
 public class LimeWireBittorrentModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        // bound eagerly so it registers itself with MetaDataFactory
-        bind(TorrentMetaReader.class).asEagerSingleton();
         bind(Torrent.class).to(TorrentImpl.class);
         bind(TorrentManagerSettings.class).annotatedWith(TorrentSettingsAnnotation.class)
                 .toProvider(new Provider<TorrentManagerSettings>() {

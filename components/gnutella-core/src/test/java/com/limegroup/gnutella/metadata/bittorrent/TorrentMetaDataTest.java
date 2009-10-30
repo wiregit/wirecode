@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.metadata;
+package com.limegroup.gnutella.metadata.bittorrent;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,13 +10,12 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.bittorrent.BTData;
+import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.NameValue;
 import org.limewire.util.URIUtils;
-
-import org.limewire.bittorrent.BTData;
-import org.limewire.bittorrent.BTData.BTFileData;
 
 public class TorrentMetaDataTest extends BaseTestCase {
 
@@ -28,6 +27,7 @@ public class TorrentMetaDataTest extends BaseTestCase {
 
     public static Test suite() {
         return buildTestSuite(TorrentMetaDataTest.class);
+        
     }
     
     @Override

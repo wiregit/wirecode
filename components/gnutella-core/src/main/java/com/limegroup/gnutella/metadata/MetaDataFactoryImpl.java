@@ -13,12 +13,12 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Singleton;
-import com.limegroup.bittorrent.metadata.TorrentMetaReader;
 import com.limegroup.gnutella.metadata.audio.reader.AudioDataReader;
 import com.limegroup.gnutella.metadata.audio.reader.MP3Reader;
 import com.limegroup.gnutella.metadata.audio.reader.WMAReader;
 import com.limegroup.gnutella.metadata.audio.writer.AudioDataEditor;
 import com.limegroup.gnutella.metadata.audio.writer.MP3DataEditor;
+import com.limegroup.gnutella.metadata.bittorrent.TorrentMetaReader;
 import com.limegroup.gnutella.metadata.video.reader.MOVMetaData;
 import com.limegroup.gnutella.metadata.video.reader.MPEGMetaData;
 import com.limegroup.gnutella.metadata.video.reader.OGMMetaData;

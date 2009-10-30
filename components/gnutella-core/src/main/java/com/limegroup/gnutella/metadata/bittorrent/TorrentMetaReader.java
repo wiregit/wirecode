@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.metadata;
+package com.limegroup.gnutella.metadata.bittorrent;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,14 +11,12 @@ import org.limewire.bittorrent.BTDataValueException;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.IOUtils;
 
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaReader;
 
 /**
  * Converts a torrent file into a MetaData object. 
  */
-@Singleton
 public class TorrentMetaReader implements MetaReader {
 
     @Override

@@ -6,12 +6,10 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
 
-import com.google.inject.Injector;
-import com.limegroup.bittorrent.metadata.TorrentMetaData;
+import com.limegroup.gnutella.metadata.bittorrent.TorrentMetaData;
 
 public class MetaDataFactoryImplTest extends LimeTestCase {
 
@@ -27,8 +25,7 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjectorNonEagerly();
-        metaDataFactory = (MetaDataFactoryImpl) injector.getInstance(MetaDataFactory.class);
+        metaDataFactory = new MetaDataFactoryImpl();
     }
     
     /**
