@@ -66,6 +66,8 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
             }
             
         case PAUSED:
+            return I18n.tr("Paused");
+            
         case QUEUED:
             return I18n.tr("Waiting...");
             
