@@ -101,8 +101,6 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         JPanel buttonPanel = new JPanel(new MigLayout("fill"));
         buttonPanel.setOpaque(false);
         
-        buttonPanel.add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=unsafeLM", application));
-        
         buttonPanel.add(okButton, "tag ok");
         add(buttonPanel, BorderLayout.SOUTH);
         
