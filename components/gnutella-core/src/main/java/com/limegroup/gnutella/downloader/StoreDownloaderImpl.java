@@ -11,6 +11,7 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.lws.LWSConstants;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.net.SocketsManager;
@@ -45,7 +46,6 @@ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.templates.StoreFileNameTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreSubDirectoryTemplateProcessor;
-import com.limegroup.gnutella.templates.StoreTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreTemplateProcessor.IllegalTemplateException;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
@@ -325,10 +325,10 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         track = sanitizeTrack(track);
         title = CommonUtils.santizeString(title);
 
-        subs.put(StoreTemplateProcessor.ARTIST_LABEL, artist);
-        subs.put(StoreTemplateProcessor.ALBUM_LABEL, album);
-        subs.put(StoreTemplateProcessor.TITLE_LABEL, title);
-        subs.put(StoreTemplateProcessor.TRACK_LABEL, track);
+        subs.put(LWSConstants.ARTIST_LABEL, artist);
+        subs.put(LWSConstants.ALBUM_LABEL, album);
+        subs.put(LWSConstants.TITLE_LABEL, title);
+        subs.put(LWSConstants.TRACK_LABEL, track);
 
         return true;
     }

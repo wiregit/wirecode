@@ -14,10 +14,8 @@ import java.util.zip.Inflater;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.CompressingOutputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.UncompressingInputStream;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 

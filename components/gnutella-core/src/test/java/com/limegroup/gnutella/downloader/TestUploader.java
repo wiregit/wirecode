@@ -25,7 +25,6 @@ import javax.net.ssl.SSLServerSocket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Function;
-import org.limewire.collection.IntPair;
 import org.limewire.collection.RoundRobinQueue;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -692,15 +691,15 @@ public class TestUploader {
             int i=line.indexOf("Range:");
             assertLessThanOrEquals("Range should be at the beginning or not at all", 0, i);
             if (i==0) {
-                IntPair p = null;
+                int[] p = null;
                 try {
                     p=parseRange(line);
                 } catch (Exception e) { 
                     throw new RuntimeException("Bad Range request: \""+line+"\"", e);
                 }
-                start = Math.max(0, p.a + lowChunkOffset);
+                start = Math.max(0, p[0] + lowChunkOffset);
                 stop = Math.min(TestFile.length(),
-                               Math.max(1, p.b + highChunkOffset));
+                               Math.max(1, p[1] + highChunkOffset));
 
             }
             
@@ -965,7 +964,7 @@ public class TestUploader {
      * @exception NumberFormatException parse error
      * @exception IOException socket closed
      */
-    private IntPair parseRange(String str) 
+    private int[] parseRange(String str) 
             throws IndexOutOfBoundsException, 
                    NumberFormatException, IOException {
         int start=0;
@@ -1051,7 +1050,7 @@ public class TestUploader {
             assertEquals("invalid start range", 50000, start);
             assertEquals("invalid stop range", 150010, stop);
         }                
-        return new IntPair(start, stop);
+        return new int[] { start, stop };
     }
 	/**
 	 * Reads alternate location header.  The header can contain only one

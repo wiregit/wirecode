@@ -12,7 +12,6 @@ public class AllLicenseTests {
         suite.addTest(LicenseFactoryTest.suite());
         suite.addTest(LicenseReadingTest.suite());
         suite.addTest(LicenseSharingTest.suite());
-        suite.addTest(LicenseVerifierTest.suite());
         suite.addTest(WeedLicenseTest.suite());
         //$JUnit-END$
         return suite;

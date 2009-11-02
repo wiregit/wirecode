@@ -21,7 +21,7 @@ public class StoreSubDirectoryTemplateProcessor extends StoreTemplateProcessor {
      * </xmp>
      * Valid values for the keys of <code>substitutions</code> are
      * <ul>
-     * <li>{@link #ARTIST_LABEL}</li>
+     * <li>{@link LWSConstants#ARTIST_LABEL}</li>
      * <li>{@link #AlBUM_LABEL}</li>
      * </ul>
      * 

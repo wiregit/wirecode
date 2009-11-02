@@ -9,11 +9,12 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.lws.LWSConstants;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.NonNullJComboBox;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.StoreTemplateProcessor;
+
 
 public class LWSFileNamingOptionPanel extends OptionPanel {
 
@@ -46,10 +47,10 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
      * Variables for template substitutable values, always saved in
      * English to avoid problems when converting between different languages
      */
-    private final String artistVar = "<" + StoreTemplateProcessor.ARTIST_LABEL + ">";
-    private final String albumVar =  "<" + StoreTemplateProcessor.ALBUM_LABEL  + ">";
-    private final String trackVar =  "<" + StoreTemplateProcessor.TRACK_LABEL  + ">";
-    private final String titleVar =  "<" + StoreTemplateProcessor.TITLE_LABEL  + ">";
+    private final String artistVar = "<" + LWSConstants.ARTIST_LABEL + ">";
+    private final String albumVar =  "<" + LWSConstants.ALBUM_LABEL  + ">";
+    private final String trackVar =  "<" + LWSConstants.TRACK_LABEL  + ">";
+    private final String titleVar =  "<" + LWSConstants.TITLE_LABEL  + ">";
     
     public LWSFileNamingOptionPanel(Action okAction, CancelDialogAction cancelAction) {
         setLayout(new MigLayout("insets 10 10 10 10"));

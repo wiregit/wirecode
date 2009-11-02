@@ -12,15 +12,6 @@ import java.util.Map;
 public abstract class StoreTemplateProcessor {
 
     /**
-     * Substitutable values, currently on artist, album, track title, and track number are
-     * substitutable.
-     */
-    public final static String ARTIST_LABEL = "artist";
-    public final static String ALBUM_LABEL = "album";
-    public final static String TITLE_LABEL = "title";
-    public final static String TRACK_LABEL = "track";
-    
-    /**
      * States of the substitution.
      */
     protected static enum States {

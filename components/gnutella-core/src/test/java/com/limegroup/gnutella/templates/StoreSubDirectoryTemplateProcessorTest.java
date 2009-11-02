@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.lws.LWSConstants;
 import org.limewire.gnutella.tests.LimeTestCase;
 
 import junit.framework.Test;
@@ -22,13 +23,13 @@ public class StoreSubDirectoryTemplateProcessorTest extends LimeTestCase {
     private final static Map<String,String> SUBSTITUTIONS = new HashMap<String,String>();
     private static final String ALBUM       = "album";
     private static final String ARTIST      = "artist";
-    private static final String ALBUM_VAR   = "<" + StoreTemplateProcessor.ALBUM_LABEL +   ">";
-    private static final String ARTIST_VAR  = "<" + StoreTemplateProcessor.ARTIST_LABEL +  ">";
+    private static final String ALBUM_VAR   = "<" + LWSConstants.ALBUM_LABEL +   ">";
+    private static final String ARTIST_VAR  = "<" + LWSConstants.ARTIST_LABEL +  ">";
 
     private static final File OUTDIR = new File(".");
     static {
-        SUBSTITUTIONS.put(StoreTemplateProcessor.ALBUM_LABEL,   ALBUM);
-        SUBSTITUTIONS.put(StoreTemplateProcessor.ARTIST_LABEL,ARTIST);
+        SUBSTITUTIONS.put(LWSConstants.ALBUM_LABEL,   ALBUM);
+        SUBSTITUTIONS.put(LWSConstants.ARTIST_LABEL,ARTIST);
     }
     
     public void testNull() {

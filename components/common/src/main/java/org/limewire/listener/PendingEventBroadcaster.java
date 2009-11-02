@@ -7,6 +7,7 @@ package org.limewire.listener;
  * broadcaster is holding a lock.  (It is unsafe to fire callbacks within
  * a lock, as it can easily lead to deadlock.)
  */
+// duplicate of asynchronous broadcaster ???
 public interface PendingEventBroadcaster<E> {
     
     /** Adds an event that will be fired the next time {@link #firePendingEvents()} is called. */ 

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.templates;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.lws.LWSConstants;
 import org.limewire.gnutella.tests.LimeTestCase;
 
 import junit.framework.Test;
@@ -23,18 +24,18 @@ public class StoreFileNameTemplateProcessorTest extends LimeTestCase {
     private static final String ARTIST      = "artist";
     private static final String TITLE       = "title";
     private static final String TRACK       = "track";
-    private static final String ALBUM_VAR   = "<" + StoreTemplateProcessor.ALBUM_LABEL  +   ">";
-    private static final String ARTIST_VAR  = "<" + StoreTemplateProcessor.ARTIST_LABEL +   ">";
-    private static final String TITLE_VAR   = "<" + StoreTemplateProcessor.TITLE_LABEL  +   ">";
-    private static final String TRACK_VAR   = "<" + StoreTemplateProcessor.TRACK_LABEL  +   ">";
+    private static final String ALBUM_VAR   = "<" + LWSConstants.ALBUM_LABEL  +   ">";
+    private static final String ARTIST_VAR  = "<" + LWSConstants.ARTIST_LABEL +   ">";
+    private static final String TITLE_VAR   = "<" + LWSConstants.TITLE_LABEL  +   ">";
+    private static final String TRACK_VAR   = "<" + LWSConstants.TRACK_LABEL  +   ">";
     
     private final static Map<String,String> SUBSTITUTIONS = new HashMap<String,String>();
     
     static {
-        SUBSTITUTIONS.put(StoreTemplateProcessor.ALBUM_LABEL,   ALBUM);
-        SUBSTITUTIONS.put(StoreTemplateProcessor.ARTIST_LABEL,  ARTIST);
-        SUBSTITUTIONS.put(StoreTemplateProcessor.TITLE_LABEL,   TITLE);
-        SUBSTITUTIONS.put(StoreTemplateProcessor.TRACK_LABEL,   TRACK);
+        SUBSTITUTIONS.put(LWSConstants.ALBUM_LABEL,   ALBUM);
+        SUBSTITUTIONS.put(LWSConstants.ARTIST_LABEL,  ARTIST);
+        SUBSTITUTIONS.put(LWSConstants.TITLE_LABEL,   TITLE);
+        SUBSTITUTIONS.put(LWSConstants.TRACK_LABEL,   TRACK);
     }
     
     public void testNull(){

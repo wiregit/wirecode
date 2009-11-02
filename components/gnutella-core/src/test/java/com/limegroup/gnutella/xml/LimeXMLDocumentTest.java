@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.limewire.collection.KeyValue;
+import junit.framework.Test;
+
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.util.NameValue;
 
 import com.google.inject.Injector;
-
-import junit.framework.Test;
 
 public class LimeXMLDocumentTest extends LimeTestCase {
             
@@ -38,8 +38,8 @@ public class LimeXMLDocumentTest extends LimeTestCase {
 	
     public void testHashcode() throws Exception {
         LimeXMLDocumentFactory factory = limeXMLDocumentFactory;
-    	List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-    	map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+    	List<NameValue<String>> map = new ArrayList<NameValue<String>>();
+    	map.add(new NameValue<String>(LimeXMLNames.APPLICATION_NAME, "value"));
     	LimeXMLDocument doc1 = factory.createLimeXMLDocument(map,
                 LimeXMLNames.APPLICATION_SCHEMA);
     	LimeXMLDocument doc2 = factory.createLimeXMLDocument(map,
