@@ -20,12 +20,12 @@ import org.limewire.bittorrent.TorrentIpPort;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentState;
+import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
-import com.google.common.base.Predicate;
 
 /**
  * Test integration with LW IP blacklists.
@@ -61,6 +61,7 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
     @Override
     protected void tearDown() throws Exception {
         torrentManager.stop();
+        FileUtils.deleteRecursive(tempDir);
     }
 
     /**
@@ -75,21 +76,16 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
         torrentManager.setIpFilter(ipFilter);
        Torrent torrent = initializeTorrent();
 
-        try {
-            torrent.start();
-            
-            // download should not finish.
-            boolean downloadFinished = finishDownload(torrent);
-            assertFalse(downloadFinished);
-            
-            // check to make sure that the peer's address was blocked.
-            Collection<Integer> blockedAddresses = ipFilter.getActualBlockedAddresses();
-            assertEquals(1, blockedAddresses.size());
-            assertEquals(addrAsInt, blockedAddresses.iterator().next());
-            
-        } finally {
-            FileUtils.deleteRecursive(tempDir);
-        }
+        torrent.start();
+        
+        // download should not finish.
+        boolean downloadFinished = finishDownload(torrent);
+        assertFalse(downloadFinished);
+        
+        // check to make sure that the peer's address was blocked.
+        Collection<Integer> blockedAddresses = ipFilter.getActualBlockedAddresses();
+        assertEquals(1, blockedAddresses.size());
+        assertEquals(addrAsInt, blockedAddresses.iterator().next());
     }
     
     /**
@@ -103,21 +99,16 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
             new TestIPFilter(Collections.singletonList(addrAsInt));
         torrentManager.setIpFilter(ipFilter);
         Torrent torrent = initializeTorrent();
-        try {
-            torrent.start();
-            
-            // download should finish - verify download when done.
-            boolean downloadFinished = finishDownload(torrent);
-            assertTrue(downloadFinished);
-            assertDownload("8055d620ba0c507c1af957b43648c99f", torrent.getTorrentDataFile(), 44425);
-            
-            // check to make sure that the peer's address was not blocked
-            Collection<Integer> blockedAddresses = ipFilter.getActualBlockedAddresses();
-            assertEquals(0, blockedAddresses.size());
-            
-        } finally {
-            FileUtils.deleteRecursive(tempDir);
-        }
+        torrent.start();
+        
+        // download should finish - verify download when done.
+        boolean downloadFinished = finishDownload(torrent);
+        assertTrue(downloadFinished);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", torrent.getTorrentDataFile(), 44425);
+        
+        // check to make sure that the peer's address was not blocked
+        Collection<Integer> blockedAddresses = ipFilter.getActualBlockedAddresses();
+        assertEquals(0, blockedAddresses.size());
     }
 
     /**
@@ -125,16 +116,12 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
      */
     public void testNoBlackList() throws Exception {
         Torrent torrent = initializeTorrent();
-        try {
-            torrent.start();
-            
-            // download should finish - verify download when done.
-            boolean downloadFinished = finishDownload(torrent);
-            assertTrue(downloadFinished);
-            assertDownload("8055d620ba0c507c1af957b43648c99f", torrent.getTorrentDataFile(), 44425);
-        } finally {
-            FileUtils.deleteRecursive(tempDir);
-        }
+        torrent.start();
+        
+        // download should finish - verify download when done.
+        boolean downloadFinished = finishDownload(torrent);
+        assertTrue(downloadFinished);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", torrent.getTorrentDataFile(), 44425);
     }
     
     private Torrent initializeTorrent() throws Exception {
@@ -192,7 +179,7 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
         return tempDir;
     }
     
-    private class TestIPFilter implements Predicate<Integer> {
+    private class TestIPFilter implements TorrentIpFilter {
         private Collection<Integer> notAllowed;
 
         private Collection<Integer> iPAddressesBlocked = new HashSet<Integer>();
@@ -206,8 +193,7 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
         }
 
         @Override
-        public boolean apply(Integer ipAddress) {
-            
+        public boolean allow(int ipAddress) {
             if (notAllowed.contains(ipAddress)) {
                 iPAddressesBlocked.add(ipAddress);
                 return false;

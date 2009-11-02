@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
-import com.google.common.base.Predicate;
 
 /**
  * The torrent manager allows for adding an removing torrents, as well as
@@ -102,7 +101,7 @@ public interface TorrentManager {
      *  
      * @param ipFilter the filter to apply
      */
-    public void setIpFilter(Predicate<Integer> ipFilter);
+    public void setIpFilter(TorrentIpFilter ipFilter);
     
     /**
      * Returns true if the torrent manager is initialized.

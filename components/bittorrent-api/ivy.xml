@@ -12,6 +12,5 @@
     
     	<!-- test dependencies. -->
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
-        <dependency org="none" name="google-collect" rev="${google-collect.version}" conf="compile,runtime"/>
     </dependencies>
 </ivy-module>

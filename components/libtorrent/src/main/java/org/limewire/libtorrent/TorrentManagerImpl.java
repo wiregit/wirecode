@@ -24,6 +24,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -36,7 +37,6 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.google.common.base.Predicate;
 
 @LazySingleton
 public class TorrentManagerImpl implements TorrentManager {
@@ -235,7 +235,7 @@ public class TorrentManagerImpl implements TorrentManager {
     }
    
     @Override
-    public void setIpFilter(Predicate<Integer> ipFilter) {
+    public void setIpFilter(TorrentIpFilter ipFilter) {
         IpFilterCallback ipFilterCallback = new IpFilterCallback(ipFilter);
         libTorrent.set_ip_filter(ipFilterCallback);
         this.ipFilterCallback = ipFilterCallback;

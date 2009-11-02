@@ -14,6 +14,7 @@ import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
@@ -28,7 +29,6 @@ import org.limewire.io.IP;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.common.base.Predicate;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
@@ -128,7 +128,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     }
 
     @Override
-    public void setIpFilter(Predicate<Integer> ipFilterPredicate) {
+    public void setIpFilter(TorrentIpFilter ipFilterPredicate) {
         setupTorrentManager();
         torrentManager.get().setIpFilter(ipFilterPredicate);    
     }
@@ -257,7 +257,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         NOT_INITIALIZED, LOADED, FAILED
     }
     
-    private static class IpFilterPredicate implements Predicate<Integer> {
+    private static class IpFilterPredicate implements TorrentIpFilter {
         
         private final IPFilter ipFilter;
         
@@ -266,8 +266,8 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         }
         
         @Override
-        public boolean apply(Integer ipAddress) {
-            return ipFilter.allow(new IP(ipAddress, -1));    
+        public boolean allow(int ipAddress) {
+            return ipFilter.allow(new IP(ipAddress, -1));
         }
     }
             

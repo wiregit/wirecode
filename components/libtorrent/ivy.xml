@@ -28,8 +28,5 @@
 
 		<dependency org="org.limewire" name="common" rev="latest.integration"
 			conf="test, test-common->master(*), test-common" />
-
-        <dependency org="none" name="google-collect" rev="${google-collect.version}"
-            conf="compile,runtime"/>
 	</dependencies>
 </ivy-module>
