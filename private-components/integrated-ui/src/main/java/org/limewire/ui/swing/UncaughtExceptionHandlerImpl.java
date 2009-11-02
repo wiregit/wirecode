@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.service.ErrorService;
-
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.sun.jna.Callback;
 
+/**
+ * This class serves as the error handler for both java threads
+ * as well as errors occurring in JNA callbacks.  
+ */
 public class UncaughtExceptionHandlerImpl implements Thread.UncaughtExceptionHandler, 
                                                      Callback.UncaughtExceptionHandler {
-    private final List<StackTraceElement> filters;
+    private final List<StackTraceElement> notReported;
 
     public UncaughtExceptionHandlerImpl() {
-        filters = new ArrayList<StackTraceElement>();
-        filters.add(new StackTraceElement("javax.jmdns.DNSRecord", "suppressedBy", null, -1));
-        // add more filters here.
+        notReported = new ArrayList<StackTraceElement>();
+        notReported.add(new StackTraceElement("javax.jmdns.DNSRecord", "suppressedBy", null, -1));
+        // add more unreported stacktraces here.
     }
 
 
@@ -31,24 +33,23 @@ public class UncaughtExceptionHandlerImpl implements Thread.UncaughtExceptionHan
     }
     
     private void handleUncaughtException(String name, Throwable throwable) {
-        if (LimeWireUtils.isTestingVersion()) {
-            StackTraceElement[] stackTraceElements = throwable.getStackTrace();
-            for (StackTraceElement stackTraceElement : stackTraceElements) {
-                if (matches(stackTraceElement)) {
-                    throwable.printStackTrace();
-                    return;
-                }
+        StackTraceElement[] stackTraceElements = throwable.getStackTrace();
+        for (StackTraceElement stackTraceElement : stackTraceElements) {
+            if (matchesUnreported(stackTraceElement)) {
+                throwable.printStackTrace();
+                return;
             }
-            ErrorService.error(throwable, "Uncaught thread error: " + name);
-        }    
+        }
+        ErrorService.error(throwable, "Uncaught thread error: " + name);
     }
 
     /**
-     * Checks to see if the give stack trace matches any of the filters.
+     * Checks to see if the give stack trace matches any of the stacktraces
+     * which we will NOT report.
      */
-    private boolean matches(StackTraceElement stackTraceElement) {
-        for (StackTraceElement filter : filters) {
-            if (matches(filter, stackTraceElement)) {
+    private boolean matchesUnreported(StackTraceElement stackTraceElement) {
+        for (StackTraceElement notReportedStackTrace : notReported) {
+            if (matches(notReportedStackTrace, stackTraceElement)) {
                 return true;
             }
         }
