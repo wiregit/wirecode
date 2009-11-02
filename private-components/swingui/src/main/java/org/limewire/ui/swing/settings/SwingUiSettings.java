@@ -283,6 +283,10 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS =
         FACTORY.createBooleanSetting("HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS", true);
     
+    /** Displays total bandwidth for transfers in bottom tray header. */
+    public static final BooleanSetting SHOW_TOTAL_BANDWIDTH = 
+        FACTORY.createBooleanSetting("SHOW_TOTAL_BANDWIDTH", false);
+    
     /**
      * Returns the default directory for the file chooser.
      * Defaults to the users home directory if it exists,

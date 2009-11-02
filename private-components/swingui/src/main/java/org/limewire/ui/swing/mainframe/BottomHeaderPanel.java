@@ -30,6 +30,7 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -52,6 +53,7 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -89,6 +91,7 @@ public class BottomHeaderPanel {
     private final FixStalledDownloadAction fixStalledDownloadAction;
     private final UploadMediator uploadMediator;
     private final ComboBoxDecorator comboBoxDecorator;
+    private final BandwidthCollector bandwidthCollector;
     private final BottomPanel bottomPanel;
     
     private final JXPanel component;
@@ -118,6 +121,7 @@ public class BottomHeaderPanel {
             ComboBoxDecorator comboBoxDecorator, 
             BarPainterFactory barPainterFactory, 
             DockIconFactory iconFactory,
+            BandwidthCollector bandwidthCollector,
             @Assisted BottomPanel bottomPanel) {
         
         this.downloadMediator = downloadMediator;
@@ -126,6 +130,7 @@ public class BottomHeaderPanel {
         this.fixStalledDownloadAction = fixStalledDownloadAction;
         this.uploadMediator = uploadMediator;
         this.comboBoxDecorator = comboBoxDecorator;
+        this.bandwidthCollector = bandwidthCollector;
         this.bottomPanel = bottomPanel;
         
         GuiUtils.assignResources(this);
@@ -402,9 +407,18 @@ public class BottomHeaderPanel {
      * Updates title for Downloads tray.
      */
     private void updateDownloadTitle() {
+        String title;
         int size = activeDownloadList.size();
-        String title = (size > 0) ? I18n.tr("Downloads ({0})", size) : I18n.tr("Downloads");
+        
+        // Create title with size and bandwidth.
+        if (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue()) {
+            int bandwidth = bandwidthCollector.getCurrentDownloadBandwidth();
+            title = (size > 0) ? I18n.tr("Downloads ({0} | {1} Kb/sec)", size, bandwidth) : I18n.tr("Downloads");
+        } else {
+            title = (size > 0) ? I18n.tr("Downloads ({0})", size) : I18n.tr("Downloads");
+        }
 
+        // Apply title to tab action and label.
         actionMap.get(TabId.DOWNLOADS).putValue(Action.NAME, title);
         if (selectedTab == TabId.DOWNLOADS) titleTextLabel.setText(title);
     }
@@ -413,9 +427,18 @@ public class BottomHeaderPanel {
      * Updates title for Uploads tray.
      */
     private void updateUploadTitle() {
+        String title;
         int size = uploadMediator.getActiveList().size();
-        String title = (size > 0) ? I18n.tr("Uploads ({0})", size) : I18n.tr("Uploads");
         
+        // Create title with size and bandwidth.
+        if (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue()) {
+            int bandwidth = bandwidthCollector.getCurrentUploadBandwidth();
+            title = (size > 0) ? I18n.tr("Uploads ({0} | {1} Kb/sec)", size, bandwidth) : I18n.tr("Uploads");
+        } else {
+            title = (size > 0) ? I18n.tr("Uploads ({0})", size) : I18n.tr("Uploads");
+        }
+        
+        // Apply title to tab action and label.
         actionMap.get(TabId.UPLOADS).putValue(Action.NAME, title);
         if (selectedTab == TabId.UPLOADS) titleTextLabel.setText(title);
     }

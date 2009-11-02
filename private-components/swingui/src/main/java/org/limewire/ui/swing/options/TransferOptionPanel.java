@@ -292,6 +292,7 @@ public class TransferOptionPanel extends OptionPanel {
     private class TrayPanel extends OptionPanel {
 
         private JCheckBox closeTrayCheckBox;
+        private JCheckBox showBandwidthCheckBox;
         private JCheckBox clearDownloadsCheckBox;
         private JCheckBox clearUploadCheckBox;
 
@@ -301,6 +302,9 @@ public class TransferOptionPanel extends OptionPanel {
             super(I18n.tr("Tray"));
             closeTrayCheckBox = new JCheckBox(I18n.tr("Close tray when there are no transfers"));
             closeTrayCheckBox.setContentAreaFilled(false);
+
+            showBandwidthCheckBox = new JCheckBox(I18n.tr("Show total bandwidth"));
+            showBandwidthCheckBox.setContentAreaFilled(false);
 
             clearDownloadsCheckBox = new JCheckBox(I18n
                     .tr("Clear downloads from list when finished"));
@@ -316,6 +320,7 @@ public class TransferOptionPanel extends OptionPanel {
             // deleteFileOnCancelCheckBox.setVisible(false);
 
             add(closeTrayCheckBox, "wrap");
+            add(showBandwidthCheckBox, "wrap");
             add(clearDownloadsCheckBox, "wrap");
             add(clearUploadCheckBox, "wrap");
             // add(deleteFileOnCancelCheckBox);
@@ -325,6 +330,7 @@ public class TransferOptionPanel extends OptionPanel {
         @Override
         boolean applyOptions() {
             SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.setValue(closeTrayCheckBox.isSelected());
+            SwingUiSettings.SHOW_TOTAL_BANDWIDTH.setValue(showBandwidthCheckBox.isSelected());
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
             SharingSettings.CLEAR_UPLOAD.setValue(clearUploadCheckBox.isSelected());
 
@@ -335,7 +341,8 @@ public class TransferOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            return (SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.getValue() != closeTrayCheckBox.isSelected()) 
+            return (SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.getValue() != closeTrayCheckBox.isSelected())
+                || (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue() != showBandwidthCheckBox.isSelected())
                 || (SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected())
                 || (SharingSettings.CLEAR_UPLOAD.getValue() != clearUploadCheckBox.isSelected());
             // || DownloadSettings.DELETE_CANCELED_DOWNLOADS.getValue() !=
@@ -345,6 +352,7 @@ public class TransferOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             closeTrayCheckBox.setSelected(SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.getValue());
+            showBandwidthCheckBox.setSelected(SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue());
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
             clearUploadCheckBox.setSelected(SharingSettings.CLEAR_UPLOAD.getValue());
 
