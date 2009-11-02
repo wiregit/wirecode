@@ -142,7 +142,9 @@ public class UploadPopupMenu extends JPopupMenu {
             add(browseMenu);
             
             JMenu blockMenu = blockUserMenuFactory.createDownloadBlockMenu(getRemoteHosts());
-            add(blockMenu);
+            if (blockMenu != null) {
+                add(blockMenu);
+            }
             
         } else if (done) {
             addSeparator();
@@ -198,7 +200,9 @@ public class UploadPopupMenu extends JPopupMenu {
             add(browseMenu);
             
             JMenu blockMenu = blockUserMenuFactory.createDownloadBlockMenu(getRemoteHosts());
-            add(blockMenu);
+            if (blockMenu != null) {
+                add(blockMenu);
+            }
             
         } else if (done) {
             addSeparator();
@@ -258,7 +262,9 @@ public class UploadPopupMenu extends JPopupMenu {
             add(browseMenu);
 
             JMenu blockMenu = blockUserMenuFactory.createDownloadBlockMenu(getRemoteHosts());
-            add(blockMenu);
+            if (blockMenu != null) {
+                add(blockMenu);
+            }
 
             addSeparator();
             
