@@ -60,6 +60,8 @@ public class FileInfoDialog extends LimeJDialog {
     
     @Resource private Color backgroundColor;
 
+    private final LibraryManager libraryManager;
+    
     private final FileInfoTabPanel tabPanel;
     private final FileInfoOverviewPanel overviewPanel;
     private final JPanel cardPanel;
@@ -71,8 +73,10 @@ public class FileInfoDialog extends LimeJDialog {
     @Inject
     public FileInfoDialog(@Assisted PropertiableFile propertiable, @Assisted final FileInfoType type,
                         FileInfoTabPanel fileInfoTabPanel, final FileInfoPanelFactory fileInfoFactory,
-                        final LibraryManager libraryManager) {
+                        LibraryManager libraryManager) {
         super(GuiUtils.getMainFrame());
+        
+        this.libraryManager = libraryManager;
         
         tabPanel = fileInfoTabPanel;
         cardPanel = new JPanel(new BorderLayout());
@@ -95,13 +99,18 @@ public class FileInfoDialog extends LimeJDialog {
         overviewPanel = (FileInfoOverviewPanel) fileInfoFactory.createOverviewPanel(type, propertiableFile);
         add(overviewPanel.getComponent(), "growx, wrap");
         add(tabPanel.getComponent(), "growx, wrap");
-        add(cardPanel, "grow");
+        add(cardPanel, "gapleft 10, grow, gapright 10");
         createFooter();
     
         setPreferredSize(new Dimension(500,565));
-        setModalityType(ModalityType.APPLICATION_MODAL);
         setDefaultCloseOperation(FileInfoDialog.DISPOSE_ON_CLOSE);
 
+        // TODO: In KDE there is a problem where minimise is possible and
+        //  a minimised modal dialogue can't be restored.  The dialogue
+        //  disappears and control can never be restored to the rest of the
+        //  app.  Stopping resizability prevents this problem.
+        setModalityType(ModalityType.APPLICATION_MODAL);
+        
         pack();
 
         setLocationRelativeTo(GuiUtils.getMainFrame());
@@ -110,12 +119,7 @@ public class FileInfoDialog extends LimeJDialog {
         addComponentListener(new ComponentListener(){
             @Override
             public void componentHidden(ComponentEvent e) {
-                //unregister any listeners used and dispose of dialog when made invisible
-                for(FileInfoPanel panel : cards.values()) {
-                    panel.unregisterListeners();
-                }
-                libraryManager.getLibraryManagedList().removePropertyChangeListener(renameListener);
-                FileInfoDialog.this.dispose();
+                dispose();
             }
 
             @Override
@@ -127,8 +131,8 @@ public class FileInfoDialog extends LimeJDialog {
                 if(okButton != null)
                     okButton.requestFocusInWindow();
             }
-        });
-        
+        });  
+
         renameListener = new RenameListener(libraryManager);
         libraryManager.getLibraryManagedList().addPropertyChangeListener(renameListener);
         
@@ -162,6 +166,17 @@ public class FileInfoDialog extends LimeJDialog {
                 FileInfoDialog.this.repaint();
             }
         });
+    }
+    
+    @Override
+    public void dispose() {
+        //unregister any listeners used and dispose of dialog when made invisible
+        for(FileInfoPanel panel : cards.values()) {
+            panel.unregisterListeners();
+        }
+        libraryManager.getLibraryManagedList().removePropertyChangeListener(renameListener);
+        
+        super.dispose();
     }
     
     private void updateTitle(String fileName) {
@@ -219,10 +234,10 @@ public class FileInfoDialog extends LimeJDialog {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            setVisible(false);
             for(FileInfoPanel panel : cards.values()) {
                 panel.save();
             }
+            setVisible(false);
         }
     }
 

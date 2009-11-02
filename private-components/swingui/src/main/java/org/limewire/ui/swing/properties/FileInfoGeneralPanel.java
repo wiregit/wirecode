@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.properties;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
@@ -19,7 +20,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
@@ -52,6 +52,7 @@ import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -62,6 +63,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
  */
 public class FileInfoGeneralPanel implements FileInfoPanel {
 
+    @Resource private Color foreground;
     @Resource private Font smallFont;
     @Resource private Font mediumFont;
     @Resource private Font headerFont;
@@ -106,7 +108,10 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     @Override
     public void updatePropertiableFile(PropertiableFile file) {
         this.propertiableFile = file;
-        locationField.setText(((LocalFileItem)propertiableFile).getFile().getAbsolutePath());
+        String path = ((LocalFileItem)propertiableFile).getFile().getAbsolutePath();
+        locationField.setText(path);
+        locationField.setToolTipText(path);
+        locationField.setCaretPosition(0);
     }
 
     @Override
@@ -212,15 +217,15 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             break;
         case IMAGE:
             component.add(createPlainLabel(I18n.tr("Title")), "wrap");
-            component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TITLE), FilePropertyKey.TITLE), "growx, wrap");
+            component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TITLE), FilePropertyKey.TITLE), "span, growx, wrap");
             component.add(createPlainLabel(I18n.tr("Description")), "wrap");
-            component.add(descriptionScrollPane, "growx, hmin 42, wrap");
+            component.add(descriptionScrollPane, "span, growx, hmin 42, wrap");
             break;
         case DOCUMENT:
             component.add(createPlainLabel(I18n.tr("Author")), "wrap");
-            component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.AUTHOR), FilePropertyKey.AUTHOR), "growx, wrap");
+            component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.AUTHOR), FilePropertyKey.AUTHOR), "span, growx, wrap");
             component.add(createPlainLabel(I18n.tr("Description")), "wrap");
-            component.add(descriptionScrollPane, "growx, hmin 42, wrap");
+            component.add(descriptionScrollPane, "span, growx, hmin 42, wrap");
             break;
         case PROGRAM:
             component.add(createPlainLabel(I18n.tr("Title")), "wrap");
@@ -236,16 +241,11 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     }
     
     private void createLocation() {
-        component.add(createHeaderLabel(I18n.tr("Location")), "span, gaptop 15, wrap");
-        
         switch(type) {
         case LOCAL_FILE:
             if(propertiableFile instanceof LocalFileItem) {
-                locationField = createLabelField(((LocalFileItem)propertiableFile).getFile().getAbsolutePath());
-                component.add(locationField, "span, growx, wrap");
-                
                 HyperlinkButton locateOnDisk = new HyperlinkButton(
-                    new AbstractAction(I18n.tr("Locate on Disk")) {
+                    new AbstractAction(I18n.tr("locate on disk")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             NativeLaunchUtils.launchExplorer(((LocalFileItem)propertiableFile).getFile());
@@ -253,22 +253,30 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                     });
                 
                 HyperlinkButton locateInLibrary = new HyperlinkButton( 
-                    new AbstractAction(I18n.tr("Locate in Library")) {
+                    new AbstractAction(I18n.tr("locate in library")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             component.getRootPane().getParent().setVisible(false);
                             libraryMediator.selectInLibrary(((LocalFileItem)propertiableFile).getFile());
                         }
                     });
-                
+            
+                component.add(createHeaderLabel(I18n.tr("Location")), "gaptop 15");
                 component.add(locateOnDisk, "span, alignx right, split");
                 component.add(locateInLibrary, "gapleft 15, wrap");
+                
+                locationField = createLabelField("");
+                updatePropertiableFile(propertiableFile);
+                
+                component.add(locationField, "span, growx, wrap");
             }
             break;
         case REMOTE_FILE:
+            component.add(createHeaderLabel(I18n.tr("Location")), "span, gaptop 15, wrap");
+            
             if(propertiableFile instanceof VisualSearchResult) {
                 final ReadOnlyTableModel model = new ReadOnlyTableModel();
-                final JTable table = new JTable(model);
+                final MouseableTable table = new MouseableTable(model);
                 
                 model.setColumnIdentifiers(new Object[] { I18n.tr("Name"), I18n.tr("Address"), I18n.tr("Filename") });
     
@@ -310,10 +318,6 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         case DOWNLOADING_FILE:
             if(propertiableFile instanceof DownloadItem) {
                 File launchableFile = ((DownloadItem)propertiableFile).getDownloadingFile();
-                if(launchableFile != null && launchableFile.getAbsoluteFile() != null)
-                    component.add(createLabelField(launchableFile.getAbsolutePath()), "span, growx, wrap");
-                else
-                    component.add(createLabelField(propertiableFile.getFileName()), "span, growx, wrap");
                 
                 HyperlinkButton locateOnDisk2 = new HyperlinkButton(
                     new AbstractAction(I18n.tr("Locate on Disk")) {
@@ -333,9 +337,18 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                             libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getUrn());
                         }
                     });
+
+                component.add(createHeaderLabel(I18n.tr("Location")), "gaptop 15");
                 
                 component.add(locateOnDisk2, "span, alignx right, split");
                 component.add(locateInLibrary2, "gapleft 15, wrap");
+                
+                if(launchableFile != null && launchableFile.getAbsoluteFile() != null) {
+                    component.add(createLabelField(launchableFile.getAbsolutePath()), "span, growx, wrap");
+                }
+                else {
+                    component.add(createLabelField(propertiableFile.getFileName()), "span, growx, wrap");
+                }
             }
             break;
         }
@@ -344,12 +357,14 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     private JLabel createPlainLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(smallFont);
+        label.setForeground(foreground);
         return label;
     }
     
     private JLabel createHeaderLabel(String text) { 
         JLabel label = new JLabel(text);
         label.setFont(headerFont);
+        label.setForeground(foreground);
         return label;
     }
     
@@ -361,6 +376,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         else
             changedProps.put(key, field);
         field.setFont(mediumFont);
+        field.setForeground(foreground);
         return field;
     }
     
@@ -373,6 +389,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             changedProps.put(key, area);
         }
         area.setFont(mediumFont);
+        area.setForeground(foreground);
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
         return area;
@@ -414,6 +431,8 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         if(current == null) {
             current = "";
         }
+        
+        comboBox.setForeground(foreground);
         
         // If any are listed, current is non-empty, and possibles doesn't contain, add it in.
         if(!possibles.contains(current) && !current.equals("") && possibles.size() > 0) {
@@ -471,6 +490,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         field.setEditable(false);
         field.setOpaque(false);
         field.setFont(smallFont);
+        field.setForeground(foreground);
         field.setBorder(BorderFactory.createEmptyBorder(0,1,0,1));
         return field;
     }

@@ -8,8 +8,8 @@ import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.spam.SpamManager;
-import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.LibraryMediator;
+import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.IconManager;
@@ -24,30 +24,31 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     private final Provider<IconManager> iconManager;
     private final Provider<MagnetLinkFactory> magnetLinkFactory;
     private final Provider<CategoryIconManager> categoryIconManager;
-    private final Provider<ThumbnailManager> thumbnailManager;   
     private final Provider<PropertyDictionary> propertyDictionary;
     private final Provider<SpamManager> spamManager;
     private final Provider<SharedFileListManager> sharedFileListManager;
     private final Provider<MetaDataManager> metaDataManager;
     private final Provider<LibraryMediator> libraryMediator;
     private final Provider<LibraryManager> libraryManager;
+    private final Provider<BarPainterFactory> barPainterFactory;
     
     @Inject
     public FileInfoPanelFactoryImpl(Provider<IconManager> iconManager, Provider<MagnetLinkFactory> magnetLinkFactory, 
-            Provider<CategoryIconManager> categoryIconManager, Provider<ThumbnailManager> thumbnailManager,
+            Provider<CategoryIconManager> categoryIconManager,
             Provider<PropertyDictionary> propertyDictionary, Provider<SpamManager> spamManager,
             Provider<SharedFileListManager> sharedFileListManager, Provider<MetaDataManager> metaDataManager,
-            Provider<LibraryMediator> libraryMediator, Provider<LibraryManager> libraryManager) {
+            Provider<LibraryMediator> libraryMediator, Provider<LibraryManager> libraryManager,
+            Provider<BarPainterFactory> barPainterFactory) {
         this.iconManager = iconManager;
         this.magnetLinkFactory = magnetLinkFactory;
         this.categoryIconManager = categoryIconManager;
-        this.thumbnailManager = thumbnailManager;
         this.propertyDictionary = propertyDictionary;
         this.spamManager = spamManager;
         this.sharedFileListManager = sharedFileListManager;
         this.metaDataManager = metaDataManager;
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
+        this.barPainterFactory = barPainterFactory;
     }
     
     @Override
@@ -67,7 +68,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
 
     @Override
     public FileInfoPanel createOverviewPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoOverviewPanel(type, propertiableFile, iconManager, magnetLinkFactory.get(), categoryIconManager.get(), thumbnailManager.get(), libraryManager.get());
+        return new FileInfoOverviewPanel(type, propertiableFile, iconManager, magnetLinkFactory.get(), categoryIconManager.get(), libraryManager.get(), barPainterFactory.get());
     }
 
     @Override

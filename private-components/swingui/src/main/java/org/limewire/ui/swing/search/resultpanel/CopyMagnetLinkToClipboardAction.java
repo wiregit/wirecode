@@ -14,7 +14,7 @@ public class CopyMagnetLinkToClipboardAction extends AbstractAction {
     private final VisualSearchResult vsr;
 
     public CopyMagnetLinkToClipboardAction(VisualSearchResult vsr) {
-        super(tr("Copy Link"));
+        super(tr("copy link"));
         this.vsr = vsr;
     }
 

@@ -38,7 +38,19 @@ public class FileInfoUtils {
     public static String getFileSize(PropertiableFile propertiable) {
         Long fileSize = getFileSizeLong(propertiable);
         if (fileSize != null) {
-            return GuiUtils.toUnitbytes(fileSize) + "  (" + GuiUtils.toBytes(fileSize) + ")";
+            return GuiUtils.toUnitbytes(fileSize);
+        }
+        return "";
+    }
+    
+    /**
+     * Returns the exact file size in bytes format or empty string
+     * if no size exists.
+     */
+    public static String getFileSizeBytes(PropertiableFile propertiable) {
+        Long fileSize = getFileSizeLong(propertiable);
+        if (fileSize != null) {
+            return GuiUtils.toBytes(fileSize);
         }
         return "";
     }

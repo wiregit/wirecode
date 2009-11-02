@@ -27,6 +27,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class TorrentSelectorPanel implements PropertyChangeListener {
+    
+    @Resource private Color foreground;
     @Resource private Color backgroundColor;
     @Resource private Font headerFont;
     
@@ -88,6 +90,7 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
     private JLabel createHeaderLabel(String text) { 
         JLabel label = new JLabel(text);
         label.setFont(headerFont);
+        label.setForeground(foreground);
         return label;
     }
     

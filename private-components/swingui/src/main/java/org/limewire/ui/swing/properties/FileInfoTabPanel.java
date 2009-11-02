@@ -72,7 +72,7 @@ class FileInfoTabPanel {
     @Inject
     public FileInfoTabPanel() {
         tabActionMaps = new ArrayList<TabActionMap>();
-        component = new JPanel(new MigLayout("insets 0 5 0 5, gap 0, fill", "", "[28!]"));
+        component = new JPanel(new MigLayout("insets 0 14 0 5, gap 0, fill", "", "[28!]"));
         tabList = new FancyTabList(tabActionMaps);
         listeners = new CopyOnWriteArrayList<FileInfoTabListener>();
         
@@ -83,7 +83,7 @@ class FileInfoTabPanel {
     
     private void init() {
         component.setBackground(backgroundColor);
-        component.setBorder(BorderFactory.createMatteBorder(1,0,1,0, borderColor));
+        component.setBorder(BorderFactory.createMatteBorder(0,0,1,0, borderColor));
         
         tabList.setSelectionPainter(new CategoryTabPainter(selectionTopGradientColor, selectionBottomGradientColor, selectionBorderTopColor, selectionBorderBottomColor));
         tabList.setHighlightPainter(new CategoryTabPainter(highlightBackgroundColor, highlightBackgroundColor, highlightBorderColor, highlightBorderColor));
