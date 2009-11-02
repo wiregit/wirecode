@@ -3,6 +3,7 @@ package org.limewire.ui.swing.downloads.table;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.ui.swing.library.table.ListMenuFactory;
 import org.limewire.ui.swing.search.BlockUserMenuFactory;
 import org.limewire.ui.swing.search.RemoteHostMenuFactory;
 import org.limewire.ui.swing.util.I18n;
@@ -31,8 +33,8 @@ public class DownloadTableMenu extends JPopupMenu{
     private final DownloadTable table;
     private final RemoteHostMenuFactory remoteHostMenuFactory;
     private final BlockUserMenuFactory blockUserMenuFactory;
-    private final Provider<DownloadAddToListMenu> dowloadAddtoListMenu;
-    private final Provider<DownloadShowInListMenu> showInListMenu;
+    private final ListMenuFactory listMenuFactory;
+    private final Provider<List<File>> selectedFiles;
     
     private List<DownloadItem> downloadItems;
 
@@ -41,15 +43,18 @@ public class DownloadTableMenu extends JPopupMenu{
      * display table.
      */
     @Inject
-    public DownloadTableMenu(RemoteHostMenuFactory remoteHostMenuFactory, BlockUserMenuFactory blockUserMenuFactory, 
-            DownloadActionHandler actionHandler, Provider<DownloadAddToListMenu> dowloadAddtoListMenu, 
-            Provider<DownloadShowInListMenu> showInListMenu, @Assisted DownloadTable table) {
+    public DownloadTableMenu(RemoteHostMenuFactory remoteHostMenuFactory,
+            BlockUserMenuFactory blockUserMenuFactory, 
+            DownloadActionHandler actionHandler,
+            ListMenuFactory listMenuFactory,
+            @FinishedDownloadSelected Provider<List<File>> selectedFiles,
+            @Assisted DownloadTable table) {
         this.remoteHostMenuFactory = remoteHostMenuFactory;
         this.blockUserMenuFactory = blockUserMenuFactory;
         this.actionHandler = actionHandler;
         this.table = table;
-        this.dowloadAddtoListMenu = dowloadAddtoListMenu;
-        this.showInListMenu = showInListMenu;
+        this.listMenuFactory = listMenuFactory;
+        this.selectedFiles = selectedFiles;
 
         menuListener = new MenuListener();   
         
@@ -79,8 +84,8 @@ public class DownloadTableMenu extends JPopupMenu{
             add(createLocateOnDiskMenuItem());
             add(createLocateInLibraryMenuItem());
             addSeparator();
-            add(dowloadAddtoListMenu.get());
-            add(showInListMenu.get());
+            add(listMenuFactory.createAddToListMenu(selectedFiles));
+            add(listMenuFactory.createShowInListMenu(selectedFiles));
             addSeparator();
             add(createPropertiesMenuItem());
             
@@ -165,7 +170,7 @@ public class DownloadTableMenu extends JPopupMenu{
         
         if(allDone){
             add(createCancelWithRemoveNameMenuItem());
-            add(dowloadAddtoListMenu.get());
+            add(listMenuFactory.createAddToListMenu(selectedFiles));
         } else {
             if (hasPause) {
                 add(createPauseMenuItem());

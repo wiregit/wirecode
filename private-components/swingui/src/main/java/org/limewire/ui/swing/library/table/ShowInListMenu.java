@@ -23,10 +23,9 @@ import org.limewire.ui.swing.library.LibraryPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public abstract class ShowInListMenu extends JMenu {
+class ShowInListMenu extends JMenu {
     
     private final Provider<List<File>> selectedFiles;
     private LibraryPanel libraryPanel;
@@ -51,7 +50,6 @@ public abstract class ShowInListMenu extends JMenu {
         this.selectedLocalFileList = selectedLocalFileList;
     }
     
-    @Inject
     public void initialize(final SharedFileListManager manager, final LibraryManager libraryManager,
         LibraryPanel libraryPanel){
         

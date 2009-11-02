@@ -3,6 +3,7 @@ package org.limewire.ui.swing.upload;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
@@ -63,6 +64,7 @@ public class UploadMediator {
     private SortOrder sortOrder;
     
     private JPanel uploadPanel;
+    private UploadTable uploadTable;
     
     private JButton clearFinishedButton;
     private List<JButton> headerButtons;
@@ -122,10 +124,10 @@ public class UploadMediator {
     private JPanel createUploadPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         
-        UploadTable table = uploadTableFactory.create(this);
-        table.setTableHeader(null);
+        uploadTable = uploadTableFactory.create(this);
+        uploadTable.setTableHeader(null);
         
-        JScrollPane scrollPane = new JScrollPane(table);
+        JScrollPane scrollPane = new JScrollPane(uploadTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -176,6 +178,17 @@ public class UploadMediator {
      */
     public EventList<UploadItem> getUploadList() {
         return sortedList;
+    }
+    
+    /**
+     * Returns a list of selected upload items.
+     */
+    public List<UploadItem> getSelectedUploads() {
+        if (uploadTable != null) {
+            return uploadTable.getSelectedItems();
+        } else {
+            return Collections.emptyList();
+        }
     }
     
     /**

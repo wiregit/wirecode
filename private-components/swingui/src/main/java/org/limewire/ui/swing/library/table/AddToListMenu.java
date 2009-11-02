@@ -22,10 +22,9 @@ import org.limewire.ui.swing.library.ShareListIcons;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public abstract class AddToListMenu extends JMenu {
+class AddToListMenu extends JMenu {
 
     private final Provider<List<File>> selectedFiles;
     private final Provider<LocalFileList> selectedLocalFileList; 
@@ -50,7 +49,6 @@ public abstract class AddToListMenu extends JMenu {
     }
         
         
-    @Inject
     public void initialize(final SharedFileListManager manager){        
         addChangeListener(new ChangeListener(){
             @Override
