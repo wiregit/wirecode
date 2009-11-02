@@ -60,6 +60,12 @@ interface LibTorrent extends Library {
     public WrapperStatus get_alerts(AlertCallback alertCallback);
 
     /**
+     * Set a callback for the JNA to call back into the java code
+     * in order to filter out bad IP addresses of peers
+     */
+    public WrapperStatus set_ip_filter(IpFilterCallback ipFilterCallback);
+    
+    /**
      * Fills in the Libtorrent status struct for the torrent with the given sha1
      */
     public WrapperStatus get_torrent_status(String id, TorrentStatus status);

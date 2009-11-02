@@ -6,8 +6,10 @@ import java.util.List;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
+import com.sun.jna.Callback;
 
-public class UncaughtExceptionHandlerImpl implements Thread.UncaughtExceptionHandler {
+public class UncaughtExceptionHandlerImpl implements Thread.UncaughtExceptionHandler, 
+                                                     Callback.UncaughtExceptionHandler {
     private final List<StackTraceElement> filters;
 
     public UncaughtExceptionHandlerImpl() {
@@ -17,7 +19,18 @@ public class UncaughtExceptionHandlerImpl implements Thread.UncaughtExceptionHan
     }
 
 
+    @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
+        handleUncaughtException(thread.getName(), throwable);
+    }
+    
+    
+    @Override
+    public void uncaughtException(Callback c, Throwable e) {
+        handleUncaughtException(Thread.currentThread().getName(), e);
+    }
+    
+    private void handleUncaughtException(String name, Throwable throwable) {
         if (LimeWireUtils.isTestingVersion()) {
             StackTraceElement[] stackTraceElements = throwable.getStackTrace();
             for (StackTraceElement stackTraceElement : stackTraceElements) {
@@ -26,8 +39,8 @@ public class UncaughtExceptionHandlerImpl implements Thread.UncaughtExceptionHan
                     return;
                 }
             }
-            ErrorService.error(throwable, "Uncaught thread error: " + thread.getName());
-        }
+            ErrorService.error(throwable, "Uncaught thread error: " + name);
+        }    
     }
 
     /**

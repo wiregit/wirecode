@@ -11,6 +11,7 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 
 import com.google.inject.Inject;
+import com.google.common.base.Predicate;
 
 public class MockTorrentManager implements TorrentManager {
 
@@ -63,6 +64,11 @@ public class MockTorrentManager implements TorrentManager {
 
     @Override
     public void initialize() {
+        
+    }
+
+    @Override
+    public void setIpFilter(Predicate<Integer> ipFilter) {
         
     }
 

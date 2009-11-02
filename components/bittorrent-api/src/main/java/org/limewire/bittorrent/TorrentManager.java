@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
+import com.google.common.base.Predicate;
+
 /**
  * The torrent manager allows for adding an removing torrents, as well as
  * controlling shared torrent features.
@@ -93,6 +95,15 @@ public interface TorrentManager {
      */
     public void initialize();
 
+    /**
+     * Set a way to filter peers based
+     * on IP Address, where IP is represented as
+     * network byte order integer
+     *  
+     * @param ipFilter the filter to apply
+     */
+    public void setIpFilter(Predicate<Integer> ipFilter);
+    
     /**
      * Returns true if the torrent manager is initialized.
      */

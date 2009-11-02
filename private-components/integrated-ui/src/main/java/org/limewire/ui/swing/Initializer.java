@@ -69,6 +69,7 @@ import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.connection.ConnectionReporter;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
+import com.sun.jna.Native;
 
 /** Initializes (creates, starts, & displays) the LimeWire Core & UI. */
 final class Initializer {
@@ -325,7 +326,9 @@ final class Initializer {
         ErrorService.setErrorCallback(new ErrorHandler(bugManager.get()));
 
         // set error handler for uncaught exceptions originating from non-LW
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandlerImpl());
+        UncaughtExceptionHandlerImpl uncaughtHandler = new UncaughtExceptionHandlerImpl();
+        Thread.setDefaultUncaughtExceptionHandler(uncaughtHandler);
+        Native.setCallbackExceptionHandler(uncaughtHandler);
         stopwatch.resetAndLog("ErrorHandler install");
         
         // Set the messaging handler so we can receive core messages

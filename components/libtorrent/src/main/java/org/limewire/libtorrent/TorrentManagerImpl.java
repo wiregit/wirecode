@@ -36,6 +36,7 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.google.common.base.Predicate;
 
 @LazySingleton
 public class TorrentManagerImpl implements TorrentManager {
@@ -49,6 +50,10 @@ public class TorrentManagerImpl implements TorrentManager {
     private final Map<String, Torrent> torrents;
 
     private final BasicAlertCallback alertCallback = new BasicAlertCallback();
+    
+    // We maintain a member variable in order to prevent the JVM from
+    // garbage collecting something the C++ libtorrent code relies on.
+    private IpFilterCallback ipFilterCallback;
 
     private final AtomicReference<TorrentManagerSettings> torrentSettings = new AtomicReference<TorrentManagerSettings>(
             null);
@@ -227,6 +232,13 @@ public class TorrentManagerImpl implements TorrentManager {
                 }
             }
         }
+    }
+   
+    @Override
+    public void setIpFilter(Predicate<Integer> ipFilter) {
+        IpFilterCallback ipFilterCallback = new IpFilterCallback(ipFilter);
+        libTorrent.set_ip_filter(ipFilterCallback);
+        this.ipFilterCallback = ipFilterCallback;
     }
 
     public void scheduleWithFixedDelay(Runnable command, long initialDelay, long delay,

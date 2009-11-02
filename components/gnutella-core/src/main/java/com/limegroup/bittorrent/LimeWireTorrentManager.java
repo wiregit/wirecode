@@ -24,9 +24,12 @@ import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
+import org.limewire.io.IP;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.common.base.Predicate;
+import com.limegroup.gnutella.filters.IPFilter;
 
 /**
  * Lazy TorrentManager wraps the TorrentManagerImpl and allows holding off
@@ -50,14 +53,17 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     };
 
     private volatile boolean initialized = false;
+    private final IpFilterPredicate ipFilterPredicate;
 
     @SuppressWarnings("unused")
     @InspectionPoint("torrent manager status")
     private final Inspectable torrentManagerStatus = new TorrentManagerStatus();
 
     @Inject
-    public LimeWireTorrentManager(Provider<TorrentManagerImpl> torrentManager) {
+    public LimeWireTorrentManager(Provider<TorrentManagerImpl> torrentManager,
+                                  IPFilter ipFilter) {
         this.torrentManager = torrentManager;
+        this.ipFilterPredicate = new IpFilterPredicate(ipFilter);
     }
 
     private void handleTorrentEvent(TorrentEvent event) {
@@ -81,6 +87,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
                         this.torrentManager.get().initialize();
 
                         if (torrentManager.get().isValid()) {
+                            torrentManager.get().setIpFilter(ipFilterPredicate);
                             if (BittorrentSettings.TORRENT_USE_UPNP.getValue()) {
                                 torrentManager.get().startUPnP();
                             } else {
@@ -118,6 +125,12 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     @Override
     public void initialize() {
         // handled in setup method.
+    }
+
+    @Override
+    public void setIpFilter(Predicate<Integer> ipFilterPredicate) {
+        setupTorrentManager();
+        torrentManager.get().setIpFilter(ipFilterPredicate);    
     }
 
     @Override
@@ -243,7 +256,21 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     private enum Status {
         NOT_INITIALIZED, LOADED, FAILED
     }
-
+    
+    private static class IpFilterPredicate implements Predicate<Integer> {
+        
+        private final IPFilter ipFilter;
+        
+        IpFilterPredicate(IPFilter ipFilter) {
+            this.ipFilter = ipFilter;    
+        }
+        
+        @Override
+        public boolean apply(Integer ipAddress) {
+            return ipFilter.allow(new IP(ipAddress, -1));    
+        }
+    }
+            
     private class TorrentManagerStatus implements Inspectable {
 
         @Override

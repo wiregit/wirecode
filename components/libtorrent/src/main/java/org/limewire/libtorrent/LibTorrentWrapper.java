@@ -99,6 +99,12 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.get_alerts(alertCallback));
         LOG.debug("after get_alerts");
     }
+    
+    public void set_ip_filter(IpFilterCallback ipFilterCallback) {
+        LOG.debug("before set_ip_filter");
+        catchWrapperException(libTorrent.set_ip_filter(ipFilterCallback));
+        LOG.debug("after set_ip_filter");    
+    }
 
     public void pause_torrent(String id) {
         LOG.debugf("before pause_torrent: {0}", id);

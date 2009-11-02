@@ -38,5 +38,6 @@
         
         <dependency org="none" name="tests/inspTool" rev="${inspTool.version}" conf="test"/>
         <dependency org="none" name="tests/bcel" rev="${bcel.version}" conf="test"/>
+        <dependency org="none" name="jna" rev="${jna.version}" conf="compile,runtime"/>
     </dependencies>
 </ivy-module>
