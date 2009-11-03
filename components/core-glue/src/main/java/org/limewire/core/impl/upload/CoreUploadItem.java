@@ -68,6 +68,10 @@ class CoreUploadItem implements UploadItem {
     public long getFileSize() {
         return uploader.getFileSize();
     }
+    
+    public Uploader getUploader() {
+        return uploader;
+    }
 
     @Override
     public UploadState getState() {
@@ -304,6 +308,11 @@ class CoreUploadItem implements UploadItem {
     @Override
     public File getFile() {
         return uploader.getFile();
+    }
+    
+    @Override
+    public String getRenderName() {
+        return friendPresence.getFriend().getRenderName();
     }
 
     @Override

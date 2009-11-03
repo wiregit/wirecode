@@ -213,7 +213,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         }
 
         @Override
-        public void removeUpload(Uploader u) {
+        public void uploadComplete(Uploader u) {
             boolean removed = uploads.remove(u);
             assertTrue("Upload has been added before", removed);
         }

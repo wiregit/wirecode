@@ -242,4 +242,9 @@ public class MockUploadItem implements UploadItem {
             return false;
         }
     }
+
+    @Override
+    public String getRenderName() {
+        return "";
+    }
 }

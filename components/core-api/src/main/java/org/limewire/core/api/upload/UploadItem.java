@@ -60,6 +60,11 @@ public interface UploadItem extends PropertiableFile {
     public RemoteHost getRemoteHost();
     
     /**
+     * Returns a renderer name of the RemoteHost.
+     */
+    public String getRenderName();
+    
+    /**
      * Returns the current queue position if queued.
      */
     public int getQueuePosition();

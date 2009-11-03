@@ -178,7 +178,7 @@ public class Main {
         public void addUpload(Uploader mgr) {}
     
         @Override
-        public void removeUpload(Uploader mgr) {}
+        public void uploadComplete(Uploader mgr) {}
         
         @Override
         public void handleSharedFileUpdate(File file) {}

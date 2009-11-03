@@ -88,7 +88,7 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     private void remove() {
         torrent.removeListener(this);
         torrentUploadManager.removeMemento(torrent);
-        activityCallback.removeUpload(this);
+        activityCallback.uploadComplete(this);
     };
 
     @Override

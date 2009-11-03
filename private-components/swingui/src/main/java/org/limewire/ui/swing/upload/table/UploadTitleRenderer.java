@@ -64,14 +64,13 @@ class UploadTitleRenderer extends TransferTitleRenderer {
         switch (uploadItem.getState()) {
         case BROWSE_HOST:
         case BROWSE_HOST_DONE:
-            // Name is hidden for browse host.
-            return "";
+            return uploadItem.getRenderName();
             
         default:
             if (uploadItem.getUploadItemType() == UploadItemType.BITTORRENT) {
                 return I18n.tr("{0} (torrent)", uploadItem.getFileName());
             } else {
-                return uploadItem.getFileName();
+                return uploadItem.getFileName() + " - " + uploadItem.getRenderName();
             }
         }
     }

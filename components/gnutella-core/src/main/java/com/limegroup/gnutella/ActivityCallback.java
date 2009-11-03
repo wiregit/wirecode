@@ -49,7 +49,7 @@ public interface ActivityCallback extends DownloadCallback
     public void addUpload(Uploader u);
 
     /** Remove an uploader from the upload window. */
-    public void removeUpload(Uploader u);    
+    public void uploadComplete(Uploader u);    
 
     public void handleSharedFileUpdate(File file);
     

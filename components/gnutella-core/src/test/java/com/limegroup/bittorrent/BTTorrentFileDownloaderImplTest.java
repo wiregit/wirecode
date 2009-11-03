@@ -393,7 +393,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void removeUpload(Uploader u) {
+            public void uploadComplete(Uploader u) {
             }
 
             @Override

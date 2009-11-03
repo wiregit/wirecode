@@ -46,7 +46,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void addDownload(Downloader d) { }    
     public void removeDownload(Downloader d) { }    
     public void addUpload(Uploader u) { }
-    public void removeUpload(Uploader u) { }    	
+    public void uploadComplete(Uploader u) { }    	
     public void addSharedDirectory(final File directory, final File parent) { }
     public void addSharedFile(final FileDesc file, final File parent) { }
     public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }

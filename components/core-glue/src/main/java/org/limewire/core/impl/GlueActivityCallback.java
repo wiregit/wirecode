@@ -174,9 +174,9 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
     
     @Override
-    public void removeUpload(Uploader u) {
+    public void uploadComplete(Uploader u) {
         for (UploadListener listener : uploadListeners) {
-            listener.uploadRemoved(u);
+            listener.uploadComplete(u);
         }
     }
 

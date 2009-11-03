@@ -1,7 +1,6 @@
 package org.limewire.core.impl.upload;
 
 import java.awt.EventQueue;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.Uploader.UploadStatus;
 
 @EagerSingleton
 public class CoreUploadListManager implements UploadListener, UploadListManager {
@@ -133,23 +133,63 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     @Override
     public void uploadAdded(Uploader uploader) {
         if (!uploader.getUploadType().isInternal()) {
-            UploadItem item = cuiFactory.create(uploader, getFriendPresence(uploader));
-            threadSafeUploadItems.add(item);
-            item.addPropertyChangeListener(new UploadPropertyListener(item));
+
+            CoreUploadItem currentItem = findMatchingUploader(uploader);
+            CoreUploadItem newItem = cuiFactory.create(uploader, getFriendPresence(uploader));
+            
+            // if there's no matching uploader, add as a new upload
+            if(currentItem == null) {
+                threadSafeUploadItems.add(newItem);
+            } else {
+                threadSafeUploadItems.getReadWriteLock().writeLock().lock();
+                try { 
+                    threadSafeUploadItems.set(threadSafeUploadItems.indexOf(currentItem), newItem);
+                } finally {
+                    threadSafeUploadItems.getReadWriteLock().writeLock().unlock();
+                }
+            }
         }
     }
+    
+    /**
+     * Attempts to match a newly added uploader with one that already exists in the list.
+     * If an uploader already exists that matches this Uploader, it returns the pre-existing
+     * CoreUploadItem, otherwise returns null.
+     */
+    private CoreUploadItem findMatchingUploader(Uploader uploader) {
+    	CoreUploadItem matchingItem = null;
+        threadSafeUploadItems.getReadWriteLock().readLock().lock(); 
+        try { 
+            for(UploadItem item : threadSafeUploadItems) {
+                CoreUploadItem coreUploadItem = (CoreUploadItem) item;
+                if(coreUploadItem.getUploader().getHost().equals(uploader.getHost()) && coreUploadItem.getUploader().isInactive()) {
+                    // if its a browse host, there's no file to match on
+                    if(uploader.getState() == UploadStatus.BROWSE_HOST && uploader.getUploadType() == coreUploadItem.getUploader().getUploadType()) {
+                        matchingItem = coreUploadItem;
+                        break;
+                    } else if(uploader.getFile() != null && uploader.getFile().equals(coreUploadItem.getFile())) {       
+                        matchingItem = coreUploadItem;
+                        break;
+                    }
+                }
+            }
+        } finally {
+            threadSafeUploadItems.getReadWriteLock().readLock().unlock();
+        }
+        
+        return matchingItem;
+    }
 
- // This is called when uploads complete - should be renamed?
     @Override
-    public void uploadRemoved(Uploader uploader) {
+    public void uploadComplete(Uploader uploader) {
         CoreUploadItem item = cuiFactory.create(uploader, getFriendPresence(uploader));
         //alert item that it really is finished so that getState() will be correct
         item.finish();
          
-        if (item.getState() == UploadState.DONE || item.getState() == UploadState.BROWSE_HOST_DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD) {
+        if (item.getState() == UploadState.DONE || item.getState() == UploadState.BROWSE_HOST_DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD || item.getState() == UploadState.CANCELED) {
             if (SharingSettings.CLEAR_UPLOAD.getValue()) {
                 //Remove if auto-clear is enabled.
-                threadSafeUploadItems.remove(item);
+                remove(item);
             } else {
                 //make sure upload state is correct and UI is informed of state change
                 int i = threadSafeUploadItems.indexOf(item);
@@ -196,20 +236,6 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
         }
         return currentPresence;
     }
-    
-    private class UploadPropertyListener implements PropertyChangeListener {
-        private UploadItem item;
-
-        public UploadPropertyListener(UploadItem item){
-            this.item = item;
-        }
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (item.getState() == UploadState.CANCELED) {
-                remove(item);
-            }
-        }
-    }
 
     /**
      * Thread safe method which removes any finished uploads from management.
@@ -224,6 +250,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
                     case DONE :
                     case BROWSE_HOST_DONE :
                     case UNABLE_TO_UPLOAD :
+                    case CANCELED:
                         finishedItems.add(item);
                         break;
                 }

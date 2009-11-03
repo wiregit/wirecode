@@ -353,7 +353,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             }
         }
 
-        activityCallback.get().removeUpload(uploader);
+        activityCallback.get().uploadComplete(uploader);
     }
 
     public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {

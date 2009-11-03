@@ -63,7 +63,7 @@ public class GlueActivityCallbackTest extends BaseTestCase {
             exactly(1).of(listener2).uploadAdded(uploaderA);
             exactly(1).of(listener3).uploadAdded(uploaderA);
             
-            exactly(1).of(listener1).uploadRemoved(uploaderA);
+            exactly(1).of(listener1).uploadComplete(uploaderA);
             
             exactly(1).of(listener1).uploadsCompleted();
             exactly(1).of(listener2).uploadsCompleted();
@@ -78,7 +78,7 @@ public class GlueActivityCallbackTest extends BaseTestCase {
         activityCallback.removeUploadListener(listener2);
         activityCallback.removeUploadListener(listener3);
         
-        activityCallback.removeUpload(uploaderA);
+        activityCallback.uploadComplete(uploaderA);
         
         activityCallback.addUploadListener(listener2);
             

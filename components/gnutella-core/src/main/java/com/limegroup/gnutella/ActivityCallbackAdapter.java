@@ -73,7 +73,7 @@ public class ActivityCallbackAdapter implements ActivityCallback {
         return false;
     }
 
-    public void removeUpload(Uploader u) {
+    public void uploadComplete(Uploader u) {
         
     }
 

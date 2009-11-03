@@ -114,11 +114,11 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         manager.uploadAdded(uploader);
         assertEquals(testSize, items.get(0).getFileSize());
-        manager.uploadRemoved(uploader);
+        manager.uploadComplete(uploader);
         assertEmpty(items);
         
         // Test remove when item not managed
-        manager.uploadRemoved(uploader);
+        manager.uploadComplete(uploader);
         
         context.assertIsSatisfied();
     }
@@ -171,14 +171,14 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         assertEmpty(items);
         
         items.add(new CoreUploadItem(uploaderNotComplete, presence, null));
-        manager.uploadRemoved(uploaderNotComplete);
+        manager.uploadComplete(uploaderNotComplete);
         assertGreaterThan(-1, items.size());   // Can't use assertNotEmpty() since it calls toString() on elements!
         items.clear();
         
         boolean clearUploadOriginal = SharingSettings.CLEAR_UPLOAD.getValue();
         SharingSettings.CLEAR_UPLOAD.setValue(false);
         items.add(new CoreUploadItem(uploaderSettingDisabled, presence, null));
-        manager.uploadRemoved(uploaderSettingDisabled);
+        manager.uploadComplete(uploaderSettingDisabled);
         SharingSettings.CLEAR_UPLOAD.setValue(clearUploadOriginal);
         assertGreaterThan(-1, items.size());   // Can't use assertNotEmpty() since it calls toString() on elements!
         
@@ -389,10 +389,10 @@ public class CoreUploadListManagerTest extends BaseTestCase {
                 
         context.checking(new Expectations() {
             {   
-                exactly(1).of(uploader).getPresenceId();
+                exactly(2).of(uploader).getPresenceId();
                 will(returnValue(""));
                 
-                exactly(1).of(friendManager).getMostRelevantFriendPresence("");
+                exactly(2).of(friendManager).getMostRelevantFriendPresence("");
                 will(returnValue(presence));
                 
                 // Initial probe on add
@@ -422,8 +422,11 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         item.fireDataChanged();
         assertContains(items, item);
-        
-        item.fireDataChanged();
+
+        item.cancel();
+		
+        manager.uploadComplete(uploader);
+
         assertNotContains(items, item);
         
         context.assertIsSatisfied();

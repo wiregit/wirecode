@@ -9,7 +9,7 @@ public interface UploadListener {
     
     public void uploadAdded(Uploader uploader);
 
-    public void uploadRemoved(Uploader uploader);
+    public void uploadComplete(Uploader uploader);
     
     public void uploadsCompleted();
 
