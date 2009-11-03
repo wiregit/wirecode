@@ -8,10 +8,11 @@ import javax.media.MediaLocator;
 import javax.media.Player;
 import javax.media.protocol.DataSource;
 
+import org.limewire.util.OSUtils;
+
 import net.sf.fmj.ejmf.toolkit.media.AbstractPlayer;
 import net.sf.fmj.utility.URLUtils;
 
-import com.lti.utils.OSUtils;
 
 
 public class VideoPlayerFactory {
