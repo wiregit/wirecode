@@ -4,6 +4,7 @@ package org.limewire.bittorrent;
  * Represents a peer connected to a torrent.
  */
 public interface TorrentPeer {
+    
     /**
      * Returns a hex string representation for this torrents peer id.
      */
@@ -13,11 +14,6 @@ public interface TorrentPeer {
      * Returns this peers ip address.
      */
     public String getIPAddress();
-
-    /**
-     * Returns the source for this peer.
-     */
-    public short getSource();
 
     /**
      * Returns the current total upload speed to this peer in bytes/sec.
@@ -51,6 +47,11 @@ public interface TorrentPeer {
     public String getCountry();
 
     /**
+     * The name of the peer's client.
+     */
+    public String getClientName();
+    
+    /**
      * Returns true if this peer is in the list of sources from the tracker.
      * The peer can be in multiple lists.
      */
@@ -73,4 +74,9 @@ public interface TorrentPeer {
      * discovery. The peer can be in multiple lists.
      */
     boolean isFromLSD();
+    
+    /**
+     * Whether the peer connection is encypted or not.
+     */
+    boolean isEncyrpted();
 }

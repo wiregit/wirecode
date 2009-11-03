@@ -64,7 +64,7 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
     }
     
     private void close() {
-        bittorrentPanel.unregisterListeners();
+        bittorrentPanel.dispose();
         Window window = SwingUtilities.getWindowAncestor(component);
         window.setVisible(false);
     }

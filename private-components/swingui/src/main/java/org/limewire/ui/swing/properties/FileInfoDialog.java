@@ -172,7 +172,7 @@ public class FileInfoDialog extends LimeJDialog {
     public void dispose() {
         //unregister any listeners used and dispose of dialog when made invisible
         for(FileInfoPanel panel : cards.values()) {
-            panel.unregisterListeners();
+            panel.dispose();
         }
         libraryManager.getLibraryManagedList().removePropertyChangeListener(renameListener);
         

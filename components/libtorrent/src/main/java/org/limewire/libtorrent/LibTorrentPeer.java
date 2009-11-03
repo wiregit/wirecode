@@ -9,22 +9,32 @@ public class LibTorrentPeer extends Structure implements Structure.ByReference, 
     public static final short source_dht = 0x2;
     public static final short source_pex = 0x4;
     public static final short source_lsd = 0x8;
+
+    public static final int rc4_encrypted = 0x100000;
+    public static final int plaintext_encrypted = 0x200000;
     
+    public int status_flags;
     public String peer_id;
     public String ip;
-    public short source;
+    public int source;
     public float up_speed;
     public float down_speed;
     public float payload_up_speed;
     public float payload_down_speed;
     public float progress;
     public String country;
+    public String clientName;
 
     @Override
     public String getCountry() {
         return country;
     }
 
+    @Override
+    public String getClientName() {
+        return clientName;
+    }
+    
     @Override
     public float getDownloadSpeed() {
         return down_speed;
@@ -56,11 +66,6 @@ public class LibTorrentPeer extends Structure implements Structure.ByReference, 
     }
 
     @Override
-    public short getSource() {
-        return source;
-    }
-
-    @Override
     public float getUploadSpeed() {
         return up_speed;
     }
@@ -85,4 +90,9 @@ public class LibTorrentPeer extends Structure implements Structure.ByReference, 
         return (source_lsd & source) > 0;
     }
 
+    @Override 
+    public boolean isEncyrpted() {
+        return (rc4_encrypted & status_flags) > 0 
+            || (plaintext_encrypted & status_flags) > 0;
+    }
 }

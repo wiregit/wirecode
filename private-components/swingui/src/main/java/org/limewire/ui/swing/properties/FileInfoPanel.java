@@ -3,11 +3,12 @@ package org.limewire.ui.swing.properties;
 import javax.swing.JComponent;
 
 import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.ui.swing.components.Disposable;
 
 /**
  * A subPanel that displays information about a given file.
  */
-public interface FileInfoPanel {
+public interface FileInfoPanel extends Disposable {
 
     /**
      * Returns the Component for this panel.
@@ -29,10 +30,4 @@ public interface FileInfoPanel {
      * Replaces the current PropertiableFile with this one.
      */
     public void updatePropertiableFile(PropertiableFile file);
-    
-    /**
-     * Removes any listeners that may be registered when hiding the 
-     * dialog.
-     */
-    public void unregisterListeners();
 }

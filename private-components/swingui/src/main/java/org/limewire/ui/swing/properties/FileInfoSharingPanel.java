@@ -85,7 +85,7 @@ public class FileInfoSharingPanel implements FileInfoPanel {
     }
     
     @Override
-    public void unregisterListeners() {
+    public void dispose() {
         //no listeners registered
     }
     

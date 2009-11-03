@@ -139,7 +139,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     }
 
     @Override
-    public void unregisterListeners() {
+    public void dispose() {
         torrent.removeListener(this);
     }
 

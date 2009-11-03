@@ -2,38 +2,50 @@ package org.limewire.ui.swing.properties;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.annotation.Resource;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.io.Address;
-import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
+import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class FileInfoTransfersPanel implements FileInfoPanel {
 
+    @Resource private Color foreground;
     @Resource private Font smallFont;
     @Resource private Font headerFont;
     
     private final JPanel component;
     private final FileInfoType type;
     private final PropertiableFile propertiableFile;
-    private DownloadStatus downloadStatus;
+    private DownloadStatusListener downloadStatus;
+    
+    private final MouseableTable infoTable;
+    
+    private final Timer refreshTimer;
     
     public FileInfoTransfersPanel(FileInfoType type, PropertiableFile propertiableFile) {
         this.type = type;
@@ -43,7 +55,28 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         
         component = new JPanel(new MigLayout("fillx"));
         
+        component.add(createHeaderLabel(I18n.tr("Downloading from")),"push");
+        
+        final JLabel percentLabel = createPlainLabel("");            
+        component.add(percentLabel, "alignx right, wrap");
+                
+        downloadStatus = new DownloadStatusListener(percentLabel);
+        ((DownloadItem)propertiableFile).addPropertyChangeListener(downloadStatus);
+        
+        infoTable = new MouseableTable();
+        component.add(new JScrollPane(infoTable), "span, grow, wrap");
+        
         init();
+        refreshTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                init();
+            }
+        });
+        
+        // Update by polling to avoid putting too much of a burden on the ui
+        //  with an active torrent.
+        refreshTimer.start();
     }
     
     public JComponent getComponent() {
@@ -66,35 +99,45 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     }
     
     @Override
-    public void unregisterListeners() {
+    public void dispose() {
+        
+        refreshTimer.stop();
+        
         if(downloadStatus != null && propertiableFile instanceof DownloadItem) {
             ((DownloadItem)propertiableFile).removePropertyChangeListener(downloadStatus);
         }
     }
     
     private void init() {
+        
         switch(type) {
         case DOWNLOADING_FILE:
-            if(propertiableFile instanceof DownloadItem) {
-                component.add(createHeaderLabel(I18n.tr("Downloading from")),"push");
-                
-                final JLabel percentLabel = createPlainLabel("");            
-                component.add(percentLabel, "alignx right, wrap");
-                component.add(Line.createHorizontalLine(),"span, growx 100, gapbottom 4, wrap");
-                
-                final ReadOnlyTableModel model = new ReadOnlyTableModel();
-                final JTable readOnlyInfo = new JTable(model);
-                model.setColumnCount(2);
+            ReadOnlyTableModel model = new ReadOnlyTableModel();
+            infoTable.setModel(model);
+
+            DownloadItem download = ((DownloadItem)propertiableFile);
+            if (download.getDownloadItemType() == DownloadItemType.GNUTELLA) {
                 model.setColumnIdentifiers(new Object[]{tr("Address"), tr("Filename")});
-                
-                for(Address source : ((DownloadItem)propertiableFile).getSources()) {
+                for(Address source : download.getSources()) {
                     model.addRow(new Object[] {source.getAddressDescription(), 
-                                               ((DownloadItem)propertiableFile).getDownloadingFile().getName() });
+                            download.getDownloadingFile().getName() });
                 }
-                downloadStatus = new DownloadStatus(percentLabel);
-                ((DownloadItem)propertiableFile).addPropertyChangeListener(downloadStatus);
-                
-                component.add(new JScrollPane(readOnlyInfo), "span, grow, wrap");
+            }
+            else if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
+                    
+                Torrent torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
+                    
+                model.setColumnIdentifiers(new Object[]{tr("Address"),
+                        tr("Encyption"), tr("Client"),
+                        tr("Upload"), tr("Download")});
+                    
+                for( TorrentPeer source : torrent.getTorrentPeers() ) {
+                    model.addRow(new Object[] {source.getIPAddress(),
+                            source.isEncyrpted(),
+                            source.getClientName(),
+                            source.getUploadSpeed(),
+                            source.getDownloadSpeed()});
+                }
             }
             break;
         }
@@ -103,12 +146,14 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     private JLabel createHeaderLabel(String text) { 
         JLabel label = new JLabel(text);
         label.setFont(headerFont);
+        label.setForeground(foreground);
         return label;
     }
     
     private JLabel createPlainLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(smallFont);
+        label.setForeground(foreground);
         return label;
     }
     
@@ -122,10 +167,10 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     /**
      * Listens for changes to the download status and updates the dialog.
      */
-    private class DownloadStatus implements PropertyChangeListener {
+    private class DownloadStatusListener implements PropertyChangeListener {
         private final JLabel label;
         
-        public DownloadStatus(JLabel label) {
+        public DownloadStatusListener(JLabel label) {
             this.label = label;
         }
         

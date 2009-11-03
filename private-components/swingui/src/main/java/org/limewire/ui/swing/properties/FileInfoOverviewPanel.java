@@ -106,7 +106,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
     }
     
     @Override
-    public void unregisterListeners() {
+    public void dispose() {
         //no listeners registered
     }
     
