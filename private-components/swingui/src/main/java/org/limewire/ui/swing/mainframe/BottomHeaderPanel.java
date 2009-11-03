@@ -413,7 +413,7 @@ public class BottomHeaderPanel {
         // Create title with size and bandwidth.
         if (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue()) {
             int bandwidth = bandwidthCollector.getCurrentDownloadBandwidth();
-            title = (size > 0) ? I18n.tr("Downloads ({0} | {1} Kb/sec)", size, bandwidth) : I18n.tr("Downloads");
+            title = (size > 0) ? I18n.tr("Downloads ({0} | {1} KB/sec)", size, bandwidth) : I18n.tr("Downloads");
         } else {
             title = (size > 0) ? I18n.tr("Downloads ({0})", size) : I18n.tr("Downloads");
         }
@@ -433,7 +433,7 @@ public class BottomHeaderPanel {
         // Create title with size and bandwidth.
         if (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue()) {
             int bandwidth = bandwidthCollector.getCurrentUploadBandwidth();
-            title = (size > 0) ? I18n.tr("Uploads ({0} | {1} Kb/sec)", size, bandwidth) : I18n.tr("Uploads");
+            title = (size > 0) ? I18n.tr("Uploads ({0} | {1} KB/sec)", size, bandwidth) : I18n.tr("Uploads");
         } else {
             title = (size > 0) ? I18n.tr("Uploads ({0})", size) : I18n.tr("Uploads");
         }
