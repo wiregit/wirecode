@@ -189,30 +189,46 @@ class FileInfoOverviewPanel implements FileInfoPanel {
             fileNameField.setFont(headerFont2);
             component.add(fileNameField, "gapbefore 4, wrap");
         }
-        String info = FileInfoUtils.getFileSize(propertiableFile) + " (" + FileInfoUtils.getFileSizeBytes(propertiableFile)+ ")";
         
+        String info = "";
+        if (!("".equals(FileInfoUtils.getFileSize(propertiableFile)))) {
+            info = FileInfoUtils.getFileSize(propertiableFile) + " (" + FileInfoUtils.getFileSizeBytes(propertiableFile)+ ")";
+        }
+            
         switch(propertiableFile.getCategory()) {
             case AUDIO:
                 String time = FileInfoUtils.getLength(propertiableFile);
                 String bitrate = propertiableFile.getPropertyString(FilePropertyKey.BITRATE);
             
                 if(time != null) {
-                    info += ", " + time;
+                    if (!("".equals(info))) {
+                        info += ", ";
+                    }
+
+                    info += time;
                 }
             
                 if(bitrate != null) {
                     String quality = FileInfoUtils.getQuality(propertiableFile);
+                    
+                    if (!("".equals(info))) {
+                        info += ", ";
+                    }
+                    
                     if(quality != null) {
-                        info += ", " + bitrate + " kbps (" + quality + ")";
+                        info += bitrate + " kbps (" + quality + ")";
                     }
                     else {
-                        info += ", " + bitrate + " kbps";
+                        info += bitrate + " kbps";
                     }
                 }
                 break;
 
         }
-        component.add(createLabelField(info), "gapbefore 4, wrap");
+        
+        if (!("".equals(info))) {
+            component.add(createLabelField(info), "gapbefore 4, wrap");
+        }
         
         String urn = propertiableFile.getUrn() == null ? "" : propertiableFile.getUrn().toString();
         component.add(createLabelField(urn), "gapbefore 4, growx, wrap");
