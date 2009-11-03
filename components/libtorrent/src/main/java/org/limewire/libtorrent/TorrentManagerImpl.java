@@ -19,12 +19,12 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentException;
+import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.bittorrent.TorrentIpPort;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -53,6 +53,7 @@ public class TorrentManagerImpl implements TorrentManager {
     
     // We maintain a member variable in order to prevent the JVM from
     // garbage collecting something the C++ libtorrent code relies on.
+    @SuppressWarnings("unused")
     private IpFilterCallback ipFilterCallback;
 
     private final AtomicReference<TorrentManagerSettings> torrentSettings = new AtomicReference<TorrentManagerSettings>(
