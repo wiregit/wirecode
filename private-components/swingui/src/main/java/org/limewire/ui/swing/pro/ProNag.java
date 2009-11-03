@@ -3,7 +3,6 @@ package org.limewire.ui.swing.pro;
 import java.awt.BorderLayout;
 import java.net.URL;
 
-import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -33,7 +32,7 @@ import com.google.inject.Inject;
 /** A nag to go to LimeWire PRO. */ 
 class ProNag extends JXPanel {
     
-    private JDialog container;
+    private NagContainer container;
     private final Application application;
     private final HTMLPane editorPane;
     
@@ -86,6 +85,18 @@ class ProNag extends JXPanel {
                                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(scroller, BorderLayout.CENTER);
     }
+
+    boolean isModal() {
+        Document document = editorPane.getDocument();
+        if(document instanceof HTMLDocument) {
+            HTMLDocument html = (HTMLDocument)document;
+            Element element = html.getElement(html.getDefaultRootElement(), "nonmodal", "true");
+            if(element != null && element.getName().equals("body")) {
+                return false;
+            }
+        }
+        return true;
+    }
     
     /** Returns true if any content was loaded. */
     boolean hasContent() {
@@ -98,7 +109,7 @@ class ProNag extends JXPanel {
     }
 
     /** Sets the container that should close when something in the nag is clicked. */
-    void setContainer(JDialog dialog) {
+    void setContainer(NagContainer dialog) {
         this.container = dialog;
     }
     
@@ -198,6 +209,11 @@ class ProNag extends JXPanel {
             + "</center>"
             + "</body>"
             + "</html>";
+    }
+    
+    static interface NagContainer {
+        /** Notifies the nag container that it should be set invisible & disposed. */
+        void dispose();
     }
 
 }
