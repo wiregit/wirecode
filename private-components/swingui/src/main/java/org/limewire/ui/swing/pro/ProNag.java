@@ -3,7 +3,6 @@ package org.limewire.ui.swing.pro;
 import java.awt.BorderLayout;
 import java.net.URL;
 
-import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.basic.BasicHTML;
@@ -80,10 +79,7 @@ class ProNag extends JXPanel {
             }            
         });
         
-        JScrollPane scroller = new JScrollPane(editorPane, 
-                                               JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        add(scroller, BorderLayout.CENTER);
+        add(editorPane);
     }
 
     boolean isModal() {
