@@ -233,26 +233,6 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         limitSeedingTorrents();
     }
 
-    @Override
-    public float getTotalDownloadRate() {
-        if (!initialized) {
-            return 0;
-        }
-
-        setupTorrentManager();
-        return torrentManager.get().getTotalDownloadRate();
-    }
-
-    @Override
-    public float getTotalUploadRate() {
-        if (!initialized) {
-            return 0;
-        }
-
-        setupTorrentManager();
-        return torrentManager.get().getTotalUploadRate();
-    }
-
     private enum Status {
         NOT_INITIALIZED, LOADED, FAILED
     }

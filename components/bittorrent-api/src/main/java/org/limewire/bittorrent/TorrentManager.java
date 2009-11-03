@@ -68,18 +68,6 @@ public interface TorrentManager {
     public TorrentManagerSettings getTorrentManagerSettings();
 
     /**
-     * Returns the total upload rate used by libtorrent. This includes payload
-     * and protocol overhead.
-     */
-    public float getTotalUploadRate();
-
-    /**
-     * Returns the total download rate used by libtorrent. This includes payload
-     * and protocol overhead.
-     */
-    public float getTotalDownloadRate();
-
-    /**
      * Starts the torrent manager, and its necessary worker threads.
      */
     public void start();

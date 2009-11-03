@@ -24,7 +24,6 @@ import org.limewire.bittorrent.TorrentIpPort;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
-import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -408,30 +407,6 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public TorrentManagerSettings getTorrentManagerSettings() {
         return torrentSettings.get();
-    }
-
-    @Override
-    public float getTotalDownloadRate() {
-        float rate = 0;
-        for (Torrent torrent : getTorrents()) {
-            TorrentStatus torrentStatus = torrent.getStatus();
-            if (torrentStatus != null) {
-                rate += torrentStatus.getDownloadRate();
-            }
-        }
-        return rate;
-    }
-
-    @Override
-    public float getTotalUploadRate() {
-        float rate = 0;
-        for (Torrent torrent : getTorrents()) {
-            TorrentStatus torrentStatus = torrent.getStatus();
-            if (torrentStatus != null) {
-                rate += torrentStatus.getUploadRate();
-            }
-        }
-        return rate;
     }
 
     @Override

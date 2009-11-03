@@ -2,6 +2,9 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.inject.EagerSingleton;
@@ -21,6 +24,7 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<BandwidthTracker> uploadTracker;
     private final Provider<BandwidthTracker> downloadTracker;
+    private final Provider<TorrentManager> torrentManager;
 
     // these inspections include:
     // gnutella downloads and uploads, torrents,
@@ -51,15 +55,16 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
     @Inject
     public BandwidthCollectorImpl(@Named("uploadTracker") Provider<BandwidthTracker> uploadTracker,
             @Named("downloadTracker") Provider<BandwidthTracker> downloadTracker,
-            Provider<ConnectionManager> connectionManager, StatisticAccumulator statisticAccumulator) {
+            Provider<ConnectionManager> connectionManager,
+            StatisticAccumulator statisticAccumulator, Provider<TorrentManager> torrentManager) {
         this.uploadTracker = uploadTracker;
         this.downloadTracker = downloadTracker;
         this.connectionManager = connectionManager;
+        this.torrentManager = torrentManager;
         this.uploadStat = new BandwidthStat(statisticAccumulator);
         this.downloadStat = new BandwidthStat(statisticAccumulator);
         this.downloadHistogram = new InspectionHistogram<Integer>();
         this.uploadHistogram = new InspectionHistogram<Integer>();
-
     }
 
     @Override
@@ -91,23 +96,12 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
         uploadTracker.get().measureBandwidth();
         downloadTracker.get().measureBandwidth();
         connectionManager.get().measureBandwidth();
-        float bandwidth;
-        try {
-            bandwidth = uploadTracker.get().getMeasuredBandwidth();
-        } catch (InsufficientDataException ide) {
-            bandwidth = 0;
-        }
-        int newUpstreamKiloBytesPerSec = (int) bandwidth
-                + (int) connectionManager.get().getMeasuredUpstreamBandwidth();
+
+        int newUpstreamKiloBytesPerSec = calculateUploadBandwidth();
         uploadStat.addData(newUpstreamKiloBytesPerSec);
         uploadHistogram.count(newUpstreamKiloBytesPerSec);
-        try {
-            bandwidth = downloadTracker.get().getMeasuredBandwidth();
-        } catch (InsufficientDataException ide) {
-            bandwidth = 0;
-        }
-        int newDownstreamKiloBytesPerSec = (int) bandwidth
-                + (int) connectionManager.get().getMeasuredDownstreamBandwidth();
+
+        int newDownstreamKiloBytesPerSec = calculateTotalDownloadBandwidth();
         downloadStat.addData(newDownstreamKiloBytesPerSec);
         downloadHistogram.count(newDownstreamKiloBytesPerSec);
 
@@ -125,6 +119,53 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
 
         currentDownloadBandwidthKiloBytes.set(newDownstreamKiloBytesPerSec);
         currentUploadBandwidthKiloBytes.set(newUpstreamKiloBytesPerSec);
+    }
+
+    private int calculateTotalDownloadBandwidth() {
+        float bandwidth;
+        try {
+            // this includes torrent downloads
+            bandwidth = downloadTracker.get().getMeasuredBandwidth();
+        } catch (InsufficientDataException ide) {
+            bandwidth = 0;
+        }
+        int newDownstreamKiloBytesPerSec = (int) bandwidth
+                + (int) connectionManager.get().getMeasuredDownstreamBandwidth();
+        return newDownstreamKiloBytesPerSec;
+    }
+
+    private int calculateUploadBandwidth() {
+        float bandwidth;
+        try {
+            // this does not include torrent uploads, torrent uploads need to be included seperately
+            bandwidth = uploadTracker.get().getMeasuredBandwidth();
+        } catch (InsufficientDataException ide) {
+            bandwidth = 0;
+        }
+
+        int torrentUpstreamKiloBytesPerSec = (int) calculateTorrentUpstreamBandwidth();
+        int newUpstreamKiloBytesPerSec = (int) bandwidth
+                + (int) connectionManager.get().getMeasuredUpstreamBandwidth()
+                + torrentUpstreamKiloBytesPerSec;
+        return newUpstreamKiloBytesPerSec;
+    }
+
+    /**
+     * Returns the torrent upstream bandwidth in kilobytes per second. 
+     */
+    private float calculateTorrentUpstreamBandwidth() {
+
+        float rate = 0;
+        for (Torrent torrent : torrentManager.get().getTorrents()) {
+            TorrentStatus torrentStatus = torrent.getStatus();
+            if (torrentStatus != null) {
+                // TODO should be upload rate not just the payload rate, but it
+                // will be off from the UI then.
+                // what is going to be the best course of action?
+                rate += torrentStatus.getUploadPayloadRate();
+            }
+        }
+        return rate / 1024;
     }
 
     private class BandwidthStat extends BasicKilobytesStatistic {

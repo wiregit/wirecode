@@ -83,16 +83,6 @@ public class MockTorrentManager implements TorrentManager {
     }
 
     @Override
-    public float getTotalDownloadRate() {
-        return 0;
-    }
-
-    @Override
-    public float getTotalUploadRate() {
-        return 0;
-    }
-
-    @Override
     public boolean isInitialized() {
         return false;
     }
