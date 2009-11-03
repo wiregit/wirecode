@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
@@ -140,6 +141,11 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     @Override
     public List<Address> getSourcesAsAddresses() {
         // TODO: Get the source from moz.
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public List<DownloadSourceInfo> getSourcesDetails() {
         return Collections.emptyList();
     }
 

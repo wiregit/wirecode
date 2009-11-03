@@ -15,6 +15,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadException;
@@ -169,6 +170,12 @@ public class MockDownloadItem implements DownloadItem {
 	public List<Address> getSources() {
 		return downloadSources;
 	}
+	
+    @Override
+    public List<DownloadSourceInfo> getSourcesDetails() {
+        return Collections.emptyList();
+    }
+
 
 	@Override
 	public Category getCategory() {

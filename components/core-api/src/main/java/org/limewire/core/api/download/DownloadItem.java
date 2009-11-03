@@ -128,6 +128,8 @@ public interface DownloadItem extends PropertiableFile {
 
 	public List<Address> getSources();
 	
+	public List<DownloadSourceInfo> getSourcesDetails();
+	
 	public Category getCategory();
 
     /**

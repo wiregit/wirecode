@@ -24,6 +24,7 @@ import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
+import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.BittorrentSettings;
@@ -620,6 +621,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         return list;
     }
+    
+    @Override
+    public List<DownloadSourceInfo> getSourcesDetails() {
+        List<DownloadSourceInfo> sourceInfoList = new LinkedList<DownloadSourceInfo>();
+        for ( TorrentPeer peer : torrent.getTorrentPeers() ) {
+            sourceInfoList.add(new DownloadSourceInfoAdapter(peer));
+        }
+        return sourceInfoList;
+    }
 
     @Override
     public void initialize() {
@@ -899,5 +909,32 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     public Torrent getTorrent() {
         return torrent;
+    }
+    
+    private static class DownloadSourceInfoAdapter implements DownloadSourceInfo {
+        private final TorrentPeer source;
+        public DownloadSourceInfoAdapter(TorrentPeer source) {
+            this.source = source;
+        }
+        @Override
+        public String getClientName() {
+            return source.getClientName();
+        }
+        @Override
+        public float getDownloadSpeed() {
+            return source.getDownloadSpeed();
+        }
+        @Override
+        public String getIPAddress() {
+            return source.getIPAddress();
+        }
+        @Override
+        public float getUploadSpeed() {
+            return source.getUploadSpeed();
+        }
+        @Override
+        public boolean isEncyrpted() {
+            return source.isEncyrpted();
+        }
     }
 }

@@ -20,10 +20,8 @@ import javax.swing.table.DefaultTableModel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.io.Address;
@@ -116,6 +114,8 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             infoTable.setModel(model);
 
             DownloadItem download = ((DownloadItem)propertiableFile);
+            
+            // TODO: remove this if when gnutella source info is complete
             if (download.getDownloadItemType() == DownloadItemType.GNUTELLA) {
                 model.setColumnIdentifiers(new Object[]{tr("Address"), tr("Filename")});
                 for(Address source : download.getSources()) {
@@ -125,20 +125,17 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             }
             else if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
                     
-           //     Torrent torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
-                    
                 model.setColumnIdentifiers(new Object[]{tr("Address"),
                         tr("Encyption"), tr("Client"),
                         tr("Upload"), tr("Download")});
                   
-                // TODO: Reimplement general solution that will work with gnutella.
-                /*for( TorrentPeer source : torrent.getTorrentPeers() ) {
-                    model.addRow(new Object[] {source.getIPAddress(),
-                            source.isEncyrpted(),
-                            source.getClientName(),
-                            source.getUploadSpeed(),
-                            source.getDownloadSpeed()});
-                }*/
+                for( DownloadSourceInfo info : download.getSourcesDetails() ) {
+                    model.addRow(new Object[] {info.getIPAddress(),
+                            info.isEncyrpted(),
+                            info.getClientName(),
+                            info.getUploadSpeed(),
+                            info.getDownloadSpeed()});
+                }
             }
             break;
         }
