@@ -16,6 +16,7 @@ import javax.media.IncompatibleSourceException;
 import javax.media.Player;
 import javax.media.StopEvent;
 import javax.media.Time;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import net.sf.fmj.concurrent.ExecutorServiceManager;
@@ -167,16 +168,28 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void play(File file) {
-        if (initializePlayerOrNativeLaunch(file, null, true)) {
-            showVideo(false);
-            registerNavigationListener();            
+        if (initializePlayerOrNativeLaunch(file, null)) {
+            showVideo(false, true);
+            registerNavigationListener();     
         }
     }
     
-    private void showVideo(boolean isFullScreen){
+    private void showVideo(boolean isFullScreen, boolean startVideo) {
         displayDirector.show(player.getVisualComponent(), isFullScreen);
-        fireSongChanged(currentVideo.getName());        
-        if(isPlaying(currentVideo)){
+        fireSongChanged(currentVideo.getName());
+        if (startVideo) {
+            // Must be SwingUtilities not SwingUtils.  We actually want this invoked later.
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (player != null) {
+                        player.start();
+                    }
+                }
+            });
+        }
+
+        if (isPlaying(currentVideo)) {
             firePlayerStateChanged(PlayerState.PLAYING);
         }
     }
@@ -192,7 +205,7 @@ class VideoPlayerMediator implements PlayerMediator {
      * @return true if the player is successfully initialized, false if it is
      *         not initialized and the file is natively launched
      */
-    private boolean initializePlayerOrNativeLaunch(final File file, Time time, boolean autoPlay) {
+    private boolean initializePlayerOrNativeLaunch(final File file, Time time) {
         GuiUtils.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         currentVideo = file;
         player = (Player) Worker.post(new Job() {
@@ -223,16 +236,10 @@ class VideoPlayerMediator implements PlayerMediator {
         if (time != null) {
             player.setMediaTime(time);
         }
-        player.start();
 
         player.addControllerListener(new VideoControllerListener());
         updateTimer = new Timer(1000, new TimerAction());
         updateTimer.start();
-
-        if (!autoPlay) {
-            // start and stop to get initial frame on screen
-            pause();
-        }
 
         return true;
     }
@@ -350,10 +357,12 @@ class VideoPlayerMediator implements PlayerMediator {
         if (displayDirector.isFullScreen() == isFullScreen) {
             return;
         }
+        
+        boolean isPlaying = player.getState() == Controller.Started;
 
         reInitializePlayer();
 
-        showVideo(isFullScreen);
+        showVideo(isFullScreen, isPlaying);
     }
 
     private void reInitializePlayer() {
@@ -366,11 +375,9 @@ class VideoPlayerMediator implements PlayerMediator {
 
         Time time = isDurationMeasurable() ? player.getMediaTime() : null;
 
-        boolean isPlaying = player.getState() == Controller.Started;
-
         killPlayer();
 
-        boolean playerInitialized = initializePlayerOrNativeLaunch(currentVideo, time, isPlaying);
+        boolean playerInitialized = initializePlayerOrNativeLaunch(currentVideo, time);
 
         if (!playerInitialized) {
             // TODO: how should we handle this?
