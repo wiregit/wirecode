@@ -10,10 +10,10 @@ import javax.swing.JTable;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.transfer.TransferRendererResources;
+import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -64,7 +64,7 @@ class UploadCancelRendererEditor extends TableRendererEditor {
             boolean isSelected, int row, int column) {
         if (value instanceof UploadItem) {
             item = (UploadItem) value;
-            updateButtons(item.getState());
+            updateButtons(item);
             return this;
         } else {
             return emptyPanel;
@@ -75,7 +75,7 @@ class UploadCancelRendererEditor extends TableRendererEditor {
     protected Component doTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
         if (value instanceof UploadItem) {
-            updateButtons(((UploadItem) value).getState());
+            updateButtons((UploadItem) value);
             return this;
         } else {
             return emptyPanel;
@@ -85,9 +85,10 @@ class UploadCancelRendererEditor extends TableRendererEditor {
     /**
      * Updates the visibility of the buttons.
      */
-    private void updateButtons(UploadState state) {
-        cancelButton.setVisible(state != UploadState.DONE);
-        removeButton.setVisible(state == UploadState.DONE);
+    private void updateButtons(UploadItem item) {
+        boolean removable = UploadMediator.isRemovable(item);
+        cancelButton.setVisible(!removable);
+        removeButton.setVisible(removable);
     }
     
     /**

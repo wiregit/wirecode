@@ -5,11 +5,11 @@ import javax.swing.JDialog;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
-import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
+import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
@@ -46,7 +46,7 @@ class UploadActionHandler {
         if (actionCommmand == CANCEL_COMMAND) {
             item.cancel();
             //canceled upload items end up in the DONE state so they need to be manually removed.
-            if (item.getState() == UploadState.CANCELED || item.getState() == UploadState.DONE) {
+            if (UploadMediator.isRemovable(item)) {
                 uploadListManager.remove(item);
             }
         } else if (actionCommmand == LOCATE_ON_DISK_COMMAND){
