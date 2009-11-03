@@ -125,19 +125,20 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             }
             else if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
                     
-                Torrent torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
+           //     Torrent torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
                     
                 model.setColumnIdentifiers(new Object[]{tr("Address"),
                         tr("Encyption"), tr("Client"),
                         tr("Upload"), tr("Download")});
-                    
-                for( TorrentPeer source : torrent.getTorrentPeers() ) {
+                  
+                // TODO: Reimplement general solution that will work with gnutella.
+                /*for( TorrentPeer source : torrent.getTorrentPeers() ) {
                     model.addRow(new Object[] {source.getIPAddress(),
                             source.isEncyrpted(),
                             source.getClientName(),
                             source.getUploadSpeed(),
                             source.getDownloadSpeed()});
-                }
+                }*/
             }
             break;
         }
