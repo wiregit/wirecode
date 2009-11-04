@@ -32,6 +32,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.upload.table.UploadTableFactory;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
@@ -97,13 +98,18 @@ public class UploadMediator {
         SharingSettings.CLEAR_UPLOAD.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                boolean clearUploads = SharingSettings.CLEAR_UPLOAD.getValue();
-                if (clearUploads) {
-                    clearFinished();
-                }
-                if (clearFinishedButton != null) {
-                    clearFinishedButton.setVisible(!clearUploads);
-                }
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean clearUploads = SharingSettings.CLEAR_UPLOAD.getValue();
+                        if (clearUploads) {
+                            clearFinished();
+                        }
+                        if (clearFinishedButton != null) {
+                            clearFinishedButton.setVisible(!clearUploads);
+                        }
+                    }
+                });
             }
         });
     }
