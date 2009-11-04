@@ -45,7 +45,7 @@ public class DaapSettings extends LimeProps {
      */
     public static StringSetting DAAP_LIBRARY_NAME =
         (StringSetting)FACTORY.createStringSetting("DAAP_LIBRARY_NAME",
-                getPossessiveUserName() + " LimeWire Tunes").
+                getPossessiveUserName() + " LimeWire Files").
                 setPrivate(true);
 
     /**
@@ -78,7 +78,7 @@ public class DaapSettings extends LimeProps {
      */
     public static StringSetting DAAP_SERVICE_NAME =
         (StringSetting)FACTORY.createStringSetting("DAAP_SERVICE_NAME",
-                getPossessiveUserName() + " LimeWire Tunes").
+                getPossessiveUserName() + " LimeWire Files").
                 setPrivate(true);
 
     /**
