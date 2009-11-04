@@ -1,17 +1,24 @@
 package org.limewire.ui.swing.downloads;
 
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -19,12 +26,19 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
+import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -41,6 +55,13 @@ public class DownloadMediator {
     private final SortedList<DownloadItem> commonBaseList;
 	private final DownloadListManager downloadListManager;
 	private final Provider<MainDownloadPanel> downloadPanelFactory;
+	private final Provider<DownloadHeaderPopupMenu> headerPopupMenuFactory;
+	
+	private EventList<DownloadItem> activeList;
+	private JButton clearFinishedButton;
+	private JButton fixStalledButton;
+	private List<JButton> headerButtons;
+	private DownloadHeaderPopupMenu headerPopupMenu;
 	
 	private boolean isAscending = true;
 	private SortOrder sortOrder = SortOrder.ORDER_ADDED;
@@ -55,24 +76,73 @@ public class DownloadMediator {
         private final Inspectable activeDownloads = new Inspectable() {
             @Override
             public Object inspect() {
-                FilterList<DownloadItem> activeList = GlazedListsFactory.filterList(commonBaseList, 
-                        new DownloadStateExcluder(DownloadState.CANCELLED, DownloadState.STALLED, DownloadState.DONE, DownloadState.ERROR));
-                int activeCount = activeList.size();
-                activeList.dispose();
-                return activeCount;
+                return getActiveList().size();
             }            
         };  
     }
 	
 	@Inject
 	public DownloadMediator(DownloadListManager downloadManager,
-	        Provider<MainDownloadPanel> downloadPanelFactory) {
+	        Provider<MainDownloadPanel> downloadPanelFactory,
+	        Provider<DownloadHeaderPopupMenu> headerPopupMenuFactory) {
 	    this.downloadListManager = downloadManager;
 	    this.downloadPanelFactory = downloadPanelFactory;
+	    this.headerPopupMenuFactory = headerPopupMenuFactory;
+	    
 	    EventList<DownloadItem> baseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
 	    commonBaseList = GlazedListsFactory.sortedList(baseList, new DescendingComparator(new OrderAddedComparator()));
 	}
-	
+    
+	/**
+	 * Registers listeners to update state.
+	 */
+    @Inject
+    void register() {
+        // Add setting listener to clear finished downloads.  When set, we
+        // clear finished downloads and hide the "clear finished" button.
+        SharingSettings.CLEAR_DOWNLOAD.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean clearDownloads = SharingSettings.CLEAR_DOWNLOAD.getValue();
+                        if (clearDownloads) {
+                            clearFinished();
+                        }
+                        if (clearFinishedButton != null) {
+                            clearFinishedButton.setVisible(!clearDownloads);
+                        }
+                    }
+                });
+            }
+        });
+
+        // Add list listeners to enable/show header buttons.
+        EventList<DownloadItem> doneList = GlazedListsFactory.filterList(getDownloadList(), 
+                new DownloadStateMatcher(DownloadState.DONE));
+        EventList<DownloadItem> stalledList = GlazedListsFactory.filterList(getDownloadList(), 
+                new DownloadStateMatcher(DownloadState.STALLED));
+
+        doneList.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                if (clearFinishedButton != null) {
+                    clearFinishedButton.setEnabled(listChanges.getSourceList().size() > 0);
+                }
+            }
+        });
+        
+        stalledList.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                if (fixStalledButton != null) {
+                    fixStalledButton.setVisible(listChanges.getSourceList().size() != 0);
+                }
+            }
+        });
+    }
+    
 	public JComponent getComponent() {
 	    return downloadPanelFactory.get();
 	}
@@ -154,8 +224,66 @@ public class DownloadMediator {
         }
     }
 	
+    /**
+     * Returns a list of active download items.
+     */
+	public EventList<DownloadItem> getActiveList() {
+	    if (activeList == null) {
+	        activeList = GlazedListsFactory.filterList(commonBaseList, 
+	                new DownloadStateExcluder(DownloadState.ERROR, DownloadState.DONE, DownloadState.CANCELLED));
+	    }
+	    return activeList;
+	}
+	
+    /**
+     * Returns a sorted list of downloads.
+     */
 	public EventList<DownloadItem> getDownloadList() {
-	    return this.commonBaseList;
+	    return commonBaseList;
+	}
+	
+    /**
+     * Returns a list of header buttons.
+     */
+	public List<JButton> getHeaderButtons() {
+	    if (headerButtons == null) {
+	        // Create buttons.
+            fixStalledButton = new HyperlinkButton(new FixStalledAction());
+            fixStalledButton.setVisible(false);
+	        
+            clearFinishedButton = new HyperlinkButton(new ClearFinishedAction());
+            clearFinishedButton.setEnabled(false);
+	        
+            // Add buttons to list.
+            headerButtons = new ArrayList<JButton>();
+            headerButtons.add(fixStalledButton);
+            headerButtons.add(clearFinishedButton);
+	    }
+	    return headerButtons;
+	}
+	
+    /**
+     * Returns the header popup menu associated with the downloads table.
+     */
+	public JPopupMenu getHeaderPopupMenu() {
+	    if (headerPopupMenu == null) {
+	        headerPopupMenu = headerPopupMenuFactory.get();
+	        headerPopupMenu.addPopupMenuListener(new PopupMenuListener() {
+	            @Override
+	            public void popupMenuCanceled(PopupMenuEvent e) {
+	                headerPopupMenu.removeAll();
+	            }
+	            @Override
+	            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+	                headerPopupMenu.removeAll();
+	            }
+	            @Override
+	            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+	                headerPopupMenu.populate();
+	            }
+	        });
+	    }
+	    return headerPopupMenu;
 	}
 	
 	public void clearFinished() {
@@ -240,6 +368,36 @@ public class DownloadMediator {
         }
         
         return matchingItems;
+    }
+    
+    /**
+     * Action to clear all finished downloads.
+     */
+    private class ClearFinishedAction extends AbstractAction {
+
+        public ClearFinishedAction() {
+            super(I18n.tr("Clear Finished"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            clearFinished();
+        }
+    }
+    
+    /**
+     * Action to fix all stalled downloads.
+     */
+    private class FixStalledAction extends AbstractAction {
+
+        public FixStalledAction() {
+            super(I18n.tr("Fix Stalled"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            fixStalled();
+        }
     }
     
     private static class StateComparator implements Comparator<DownloadItem>{

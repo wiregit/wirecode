@@ -19,37 +19,24 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
-import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.settings.DownloadSettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dock.DockIconFactory;
-import org.limewire.ui.swing.downloads.ClearFinishedDownloadAction;
-import org.limewire.ui.swing.downloads.DownloadHeaderPopupMenu;
 import org.limewire.ui.swing.downloads.DownloadMediator;
-import org.limewire.ui.swing.downloads.FixStalledDownloadAction;
-import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
-import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -60,7 +47,6 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -75,6 +61,7 @@ public class BottomHeaderPanel {
     @Resource private Icon moreButtonArrow;
     @Resource private Icon scrollPaneNubIcon;
     @Resource private Font hyperlinkFont;
+    @Resource(key="HyperlinkButtonResources.foreground") private Color hyperlinkForeground;
     @Resource private Color highlightBackground;
     @Resource private Color highlightBorderColor;
     @Resource private Color selectionTopGradientColor;
@@ -85,10 +72,7 @@ public class BottomHeaderPanel {
     @Resource private Color textForeground;
     @Resource private Color textSelectedForeground;
 
-    private final DownloadMediator downloadMediator;    
-    private final DownloadHeaderPopupMenu downloadHeaderPopupMenu;
-    private final ClearFinishedDownloadAction clearFinishedDownloadAction;
-    private final FixStalledDownloadAction fixStalledDownloadAction;
+    private final DownloadMediator downloadMediator;
     private final UploadMediator uploadMediator;
     private final ComboBoxDecorator comboBoxDecorator;
     private final BandwidthCollector bandwidthCollector;
@@ -102,21 +86,15 @@ public class BottomHeaderPanel {
     
     private FancyTabList tabList;
     private JLabel titleTextLabel;
-    private HyperlinkButton fixStalledButton;
-    private HyperlinkButton clearFinishedNowButton;
     private JPanel downloadButtonPanel;
     private JPanel uploadButtonPanel;
     private LimeComboBox downloadOptionsButton;
     private LimeComboBox uploadOptionsButton;
     
-    private EventList<DownloadItem> activeDownloadList;
     private TabId selectedTab;
     
     @Inject
     public BottomHeaderPanel(DownloadMediator downloadMediator,
-            DownloadHeaderPopupMenu downloadHeaderPopupMenu, 
-            ClearFinishedDownloadAction clearFinishedNowAction,
-            FixStalledDownloadAction fixStalledDownloadAction,
             UploadMediator uploadMediator,
             ComboBoxDecorator comboBoxDecorator, 
             BarPainterFactory barPainterFactory, 
@@ -125,9 +103,6 @@ public class BottomHeaderPanel {
             @Assisted BottomPanel bottomPanel) {
         
         this.downloadMediator = downloadMediator;
-        this.downloadHeaderPopupMenu = downloadHeaderPopupMenu;
-        this.clearFinishedDownloadAction = clearFinishedNowAction;
-        this.fixStalledDownloadAction = fixStalledDownloadAction;
         this.uploadMediator = uploadMediator;
         this.comboBoxDecorator = comboBoxDecorator;
         this.bandwidthCollector = bandwidthCollector;
@@ -165,14 +140,6 @@ public class BottomHeaderPanel {
         titleTextLabel.setFont(textFont);
         titleTextLabel.setForeground(textForeground);
         
-        clearFinishedNowButton = new HyperlinkButton(clearFinishedDownloadAction);
-        clearFinishedNowButton.setFont(hyperlinkFont);
-        clearFinishedNowButton.setEnabled(false);
-
-        fixStalledButton = new HyperlinkButton(fixStalledDownloadAction);
-        fixStalledButton.setFont(hyperlinkFont);
-        fixStalledButton.setVisible(false);
-        
         dragComponent = new JLabel(scrollPaneNubIcon);
         dragComponent.setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
 
@@ -191,7 +158,7 @@ public class BottomHeaderPanel {
                 // Determine popup menu.
                 JPopupMenu popupMenu = null;
                 if (downloadButtonPanel.isVisible()) {
-                    popupMenu = downloadHeaderPopupMenu;
+                    popupMenu = downloadMediator.getHeaderPopupMenu();
                 } else if (uploadButtonPanel.isVisible()) {
                     popupMenu = uploadMediator.getHeaderPopupMenu();
                 }
@@ -205,8 +172,11 @@ public class BottomHeaderPanel {
     }
     
     private void layoutComponents(){
-        downloadButtonPanel.add(fixStalledButton, "gapafter 5, hidemode 3");
-        downloadButtonPanel.add(clearFinishedNowButton, "gapafter 5, hidemode 3");
+        List<JButton> downloadButtons = downloadMediator.getHeaderButtons();
+        for (JButton button : downloadButtons) {
+            button.setFont(hyperlinkFont);
+            downloadButtonPanel.add(button, "gapafter 5");
+        }
         downloadButtonPanel.add(downloadOptionsButton, "gapafter 5");
         
         List<JButton> uploadButtons = uploadMediator.getHeaderButtons();
@@ -226,9 +196,8 @@ public class BottomHeaderPanel {
         
     @Inject
     public void register(){
-        activeDownloadList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
-                new DownloadStateExcluder(DownloadState.ERROR, DownloadState.DONE, DownloadState.CANCELLED));
-        activeDownloadList.addListEventListener(new LabelUpdateListListener());
+        // Add listeners to update header title.
+        downloadMediator.getActiveList().addListEventListener(new LabelUpdateListListener());
 
         uploadMediator.getActiveList().addListEventListener(new ListEventListener<UploadItem>() {
             @Override
@@ -236,72 +205,20 @@ public class BottomHeaderPanel {
                 updateUploadTitle();
             }
         });
-        
-        // Add setting listener to clear finished downloads.  When set, we
-        // clear finished downloads and hide the "clear finished" button.
-        SharingSettings.CLEAR_DOWNLOAD.addSettingListener(new SettingListener() {
-            @Override
-            public void settingChanged(SettingEvent evt) {
-                boolean clearDownloads = SharingSettings.CLEAR_DOWNLOAD.getValue();
-                if (clearDownloads) {
-                    clearFinishedNowButton.doClick();
-                }
-                clearFinishedNowButton.setVisible(!clearDownloads);
-            }
-        });
-        
-        initializeListListeners();
-    }
-
-    private void initializeListListeners(){
-        EventList<DownloadItem> doneList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
-                new DownloadStateMatcher(DownloadState.DONE));
-        EventList<DownloadItem> stalledList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
-                new DownloadStateMatcher(DownloadState.STALLED));
-
-        doneList.addListEventListener(new ListEventListener<DownloadItem>() {
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-                clearFinishedNowButton.setEnabled(listChanges.getSourceList().size() > 0);
-            }
-        });
-        
-        stalledList.addListEventListener(new ListEventListener<DownloadItem>() {
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-                fixStalledButton.setVisible(listChanges.getSourceList().size() != 0);                
-            }
-        });        
     }
 
     private void initializeOptionsButton(){
         // Create options button for downloads.
         downloadOptionsButton = new LimeComboBox();
         downloadOptionsButton.setText(I18n.tr("Options"));
-        
         comboBoxDecorator.decorateMiniComboBox(downloadOptionsButton);
         
         downloadOptionsButton.setFont(hyperlinkFont);
         downloadOptionsButton.setIcon(moreButtonArrow);
-        downloadOptionsButton.setForeground(fixStalledButton.getForeground());
+        downloadOptionsButton.setForeground(hyperlinkForeground);
         ResizeUtils.forceHeight(downloadOptionsButton, 16);
         
-        downloadHeaderPopupMenu.addPopupMenuListener(new PopupMenuListener() {
-            @Override
-            public void popupMenuCanceled(PopupMenuEvent e) {
-                downloadHeaderPopupMenu.removeAll();
-            }
-            @Override
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                downloadHeaderPopupMenu.removeAll();
-            }
-            @Override
-            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                downloadHeaderPopupMenu.populate();
-            }
-        });
-        
-        downloadOptionsButton.overrideMenu(downloadHeaderPopupMenu);
+        downloadOptionsButton.overrideMenu(downloadMediator.getHeaderPopupMenu());
         
         // Create options button for uploads.
         uploadOptionsButton = new LimeComboBox();
@@ -310,7 +227,7 @@ public class BottomHeaderPanel {
         
         uploadOptionsButton.setFont(hyperlinkFont);
         uploadOptionsButton.setIcon(moreButtonArrow);
-        uploadOptionsButton.setForeground(fixStalledButton.getForeground());
+        uploadOptionsButton.setForeground(hyperlinkForeground);
         ResizeUtils.forceHeight(uploadOptionsButton, 16);
         
         uploadOptionsButton.overrideMenu(uploadMediator.getHeaderPopupMenu());
@@ -408,7 +325,7 @@ public class BottomHeaderPanel {
      */
     private void updateDownloadTitle() {
         String title;
-        int size = activeDownloadList.size();
+        int size = downloadMediator.getActiveList().size();
         
         // Create title with size and bandwidth.
         if (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue()) {

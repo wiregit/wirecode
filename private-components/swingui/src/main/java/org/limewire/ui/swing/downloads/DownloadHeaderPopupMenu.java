@@ -28,7 +28,7 @@ import com.google.inject.Provider;
 /**
  * PopupMenu for performing actions on the download table.
  */
-public class DownloadHeaderPopupMenu extends JPopupMenu {
+class DownloadHeaderPopupMenu extends JPopupMenu {
 
     @Resource
     private Icon upArrow;
