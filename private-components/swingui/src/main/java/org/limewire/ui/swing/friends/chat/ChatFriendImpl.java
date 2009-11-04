@@ -78,7 +78,7 @@ class ChatFriendImpl extends AbstractBean implements ChatFriend {
     void setChatting(final boolean chatting) {
         final boolean oldChatting = isChatting();
         this.chatting = chatting;
-        SwingUtils.invokeLater(new Runnable(){
+        SwingUtils.invokeNowOrLater(new Runnable(){
             public void run() {
                 firePropertyChange("chatting", oldChatting, chatting);                
             }

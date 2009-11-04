@@ -76,7 +76,7 @@ public class HomePanel extends JXPanel {
             BrowserUtils.addTargetedUrlAction("_lwHome", new UriAction() {
                 @Override
                 public boolean uriClicked(final TargetedUri targetedUrl) {
-                    SwingUtils.invokeLater(new Runnable() {
+                    SwingUtils.invokeNowOrLater(new Runnable() {
                         @Override
                         public void run() {
                             navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
@@ -91,7 +91,7 @@ public class HomePanel extends JXPanel {
                 @Override
                 public void pageLoadStopped(final boolean failed) {
                     super.pageLoadStopped(failed);
-                    SwingUtils.invokeLater(new Runnable() {
+                    SwingUtils.invokeNowOrLater(new Runnable() {
                         @Override
                         public void run() {
                             pageLoadFinished(!failed);

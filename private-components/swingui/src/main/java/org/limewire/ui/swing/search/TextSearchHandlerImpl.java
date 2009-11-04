@@ -196,7 +196,7 @@ class TextSearchHandlerImpl implements SearchHandler {
             @Override
             public void handleSearchResult(Search search, SearchResult searchResult) {
                 if(numberOfResults.addAndGet(1) > 10) {
-                    SwingUtils.invokeLater(new Runnable() {
+                    SwingUtils.invokeNowOrLater(new Runnable() {
                         public void run() {
                             // while not fully connected, assume the
                             // connections we have are enough
@@ -211,7 +211,7 @@ class TextSearchHandlerImpl implements SearchHandler {
             @Override
             public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {
                 if(numberOfResults.addAndGet(searchResults.size()) > 10) {
-                    SwingUtils.invokeLater(new Runnable() {
+                    SwingUtils.invokeNowOrLater(new Runnable() {
                         public void run() {
                             // while not fully connected, assume the
                             // connections we have are enough

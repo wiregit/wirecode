@@ -129,7 +129,7 @@ public class LimeWireSwingUI extends JPanel {
 	    UploadSettings.SHOW_UPLOADS_TRAY.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
                         handleUploadVisibilityChange(UploadSettings.SHOW_UPLOADS_TRAY.getValue());

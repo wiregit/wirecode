@@ -399,7 +399,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
         @Override
         public void controllerUpdate(final ControllerEvent controllerEvent) {
-            SwingUtils.invokeLater(new Runnable() {
+            SwingUtils.invokeNowOrLater(new Runnable() {
 
                 @Override
                 public void run() {

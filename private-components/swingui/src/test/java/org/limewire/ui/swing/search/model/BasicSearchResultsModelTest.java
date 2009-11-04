@@ -58,7 +58,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
     
     private void waitForUiThread() {
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
             }

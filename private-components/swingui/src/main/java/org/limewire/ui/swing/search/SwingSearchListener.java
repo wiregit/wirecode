@@ -58,7 +58,7 @@ class SwingSearchListener implements SearchListener {
 
     @Override
     public void handleSponsoredResults(Search search, final List<SponsoredResult> sponsoredResults) {
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
                 sponsoredView.addSponsoredResults(sponsoredResults);

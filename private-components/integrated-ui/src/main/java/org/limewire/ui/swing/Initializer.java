@@ -231,7 +231,7 @@ final class Initializer {
 		
         String exists = properties.getProperty(LimeWireUtils.getLimeWireVersion());
         if (exists == null || !exists.equals("true")) {
-            SwingUtils.invokeAndWait(new Runnable() {
+            SwingUtils.invokeNowOrWait(new Runnable() {
                 @Override
                 public void run() {
                     if (awtSplash != null) {
@@ -297,7 +297,7 @@ final class Initializer {
         // Before anything, set a default L&F, so that
         // if an error occurs, we can display the error
         // message with the right L&F.
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
                 String name = UIManager.getSystemLookAndFeelClassName();                
                 if(OSUtils.isLinux()) {
@@ -316,7 +316,7 @@ final class Initializer {
     private void setupCallbacksAndListeners() {
         final AtomicReference<BugManager> bugManager = new AtomicReference<BugManager>();
         // Construct it on the Swing thread, 'cause it instantiates Swing things.
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
                 bugManager.set(new BugManager());
@@ -467,7 +467,7 @@ final class Initializer {
             stopwatch.resetAndLog("set OSX properties");
         }
 
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             public void run() {
                 LocaleUtils.setLocaleFromPreferences();                
                 LocaleUtils.validateLocaleAndFonts();
@@ -497,7 +497,7 @@ final class Initializer {
     
     /** Switches from the AWT splash to the Swing splash. */
     private void switchSplashes(final Frame awtSplash, final Image splashImage, final boolean isPro) {
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
                 splashRef.set(new SplashWindow(splashImage, isPro, LocaleUtils.getCurrentLocale(), 4));
@@ -522,7 +522,7 @@ final class Initializer {
         splashRef.get().setStatusText(I18n.tr("Muddling Mint..."));        //html engine
         stopwatch.resetAndLog("update splash for HTML engine");
 
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             public void run() {
                 stopwatch.resetAndLog("enter evt queue");
                 JLabel label = new JLabel();
@@ -556,7 +556,7 @@ final class Initializer {
             }
             
             stopwatch.resetAndLog("Load XUL Library Path");
-            SwingUtils.invokeAndWait(new Runnable() {
+            SwingUtils.invokeNowOrWait(new Runnable() {
                 public void run() {
                     stopwatch.resetAndLog("enter evt queue");
                     new MozillaPanel();
@@ -579,7 +579,7 @@ final class Initializer {
         // Initialize late tasks, like Icon initialization & install listeners.
         loadLateTasksForUI();
         
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             public void run() {
                 splashRef.get().dispose();
                 splashRef.set(null);
@@ -659,7 +659,7 @@ final class Initializer {
    
     /** Shows a msg & fails. */
     private void fail(final String msgKey) {
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
                 JOptionPane.showMessageDialog(null,
@@ -684,7 +684,7 @@ final class Initializer {
                 "appears to be running. Please completely shut down all " +
                 "other instances of LimeWire before continuing. If this " +
                 "problem persists, please restart your computer.");
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
                 response.set(JOptionPane.showConfirmDialog(null,

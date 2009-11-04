@@ -68,7 +68,7 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
 
         // Create Runnable to execute task on UI thread. This is necessary
         // if the handler method has been invoked from a background thread.
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
                 handleException(downLoadAction, e, supportNewSaveFileName);
             }

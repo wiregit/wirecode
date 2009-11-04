@@ -67,7 +67,7 @@ public class GuiCallbackImpl implements GuiCallback {
 
     @Override
     public void restoreApplication() {
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
                 ActionMap actionMap = Application.getInstance().getContext().getActionMap();
@@ -101,7 +101,7 @@ public class GuiCallbackImpl implements GuiCallback {
             truncated = filename;
         else
             truncated = filename.substring(0, 70) + "...";
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
                 JLabel file = new JLabel(truncated);

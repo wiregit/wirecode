@@ -170,7 +170,7 @@ class ChatModel {
         final ChatFriend friend = chatFriend;
         IncomingChatListener incomingChatListener = new IncomingChatListener() {
             public MessageReader incomingChat(final MessageWriter writer) {
-                SwingUtils.invokeAndWait(new Runnable() {
+                SwingUtils.invokeNowOrWait(new Runnable() {
                     @Override
                     public void run() {
                         MessageWriter writerWrapper = new MessageWriterImpl(friend, writer, chatMessageList);

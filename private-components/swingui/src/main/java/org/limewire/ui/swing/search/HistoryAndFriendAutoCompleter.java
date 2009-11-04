@@ -192,7 +192,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             }
         }
         
-        SwingUtils.invokeAndWaitWithInterrupted(new Runnable() {
+        SwingUtils.invokeNowOrWaitWithInterrupted(new Runnable() {
             @Override
             public void run() {
                 setItems(items);

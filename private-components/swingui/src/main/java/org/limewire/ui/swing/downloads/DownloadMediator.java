@@ -103,7 +103,7 @@ public class DownloadMediator {
         SharingSettings.CLEAR_DOWNLOAD.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
                         boolean clearDownloads = SharingSettings.CLEAR_DOWNLOAD.getValue();

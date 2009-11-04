@@ -45,7 +45,7 @@ public class BrowsePanelFactory {
 
         @Override
         public void statusChanged(final BrowseStatus status) {
-            SwingUtils.invokeLater(new Runnable() {
+            SwingUtils.invokeNowOrLater(new Runnable() {
                 @Override
                 public void run() {
                     searchPanel.setBrowseStatus(status);

@@ -40,7 +40,7 @@ class MagnetHandlerImpl implements MagnetHandler {
      * download the file specified in the magnet.
      */
     public void handleMagnet(final MagnetLink magnet) {
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
                 if (magnet.isDownloadable()) {

@@ -98,7 +98,7 @@ public class UploadMediator {
         SharingSettings.CLEAR_UPLOAD.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
                         boolean clearUploads = SharingSettings.CLEAR_UPLOAD.getValue();

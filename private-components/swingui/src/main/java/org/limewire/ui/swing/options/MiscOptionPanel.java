@@ -351,7 +351,7 @@ public class MiscOptionPanel extends OptionPanel {
         
         @Override
         public void settingChanged(SettingEvent evt) {
-            SwingUtils.invokeLater(new Runnable() {
+            SwingUtils.invokeNowOrLater(new Runnable() {
                 @Override
                 public void run() {
                     initOptions();

@@ -364,7 +364,7 @@ public final class NativeLaunchUtils {
         LOG.error(userMessage, ex);
         
         // Display user message
-        SwingUtils.invokeLater( new Runnable() {
+        SwingUtils.invokeNowOrLater( new Runnable() {
             @Override
             public void run() {
                 FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(),

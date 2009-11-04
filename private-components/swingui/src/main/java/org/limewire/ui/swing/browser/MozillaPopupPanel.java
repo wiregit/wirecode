@@ -52,7 +52,7 @@ public class MozillaPopupPanel extends MozillaPanel {
     public void onAttachBrowser(final ChromeAdapter chromeAdapter, ChromeAdapter parentChromeAdapter) {
         super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
         BrowserUtils.addDomListener(chromeAdapter);
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
                 addKeyListener(new MozillaKeyListener(chromeAdapter));
             }

@@ -16,7 +16,7 @@ public class SwingUtils {
      * Calls {@link SwingUtilities#invokeAndWait(Runnable)}
      * only if this is not currently on the Swing thread.
      */
-    public static void invokeAndWaitWithInterrupted(Runnable runnable) throws InterruptedException {
+    public static void invokeNowOrWaitWithInterrupted(Runnable runnable) throws InterruptedException {
         if (EventQueue.isDispatchThread()) {
             runnable.run();
         } else {
@@ -32,7 +32,7 @@ public class SwingUtils {
      * Calls {@link SwingUtilities#invokeAndWait(Runnable)}
      * only if this is not currently on the Swing thread.
      */
-    public static void invokeAndWait(Runnable runnable) {
+    public static void invokeNowOrWait(Runnable runnable) {
         if (EventQueue.isDispatchThread()) {
             runnable.run();
         } else {
@@ -50,7 +50,7 @@ public class SwingUtils {
      * Calls {@link SwingUtilities#invokeLater(Runnable)} only
      * if this is not currently on the Swing thread.
      */
-    public static void invokeLater(Runnable runnable) {
+    public static void invokeNowOrLater(Runnable runnable) {
         if (EventQueue.isDispatchThread()) {
             runnable.run();
         } else {

@@ -34,7 +34,7 @@ public class StoreMediator implements NavMediator<StorePanel> {
         BrowserUtils.addTargetedUrlAction("_lwStore", new UriAction() {
             @Override
             public boolean uriClicked(final TargetedUri targetedUrl) {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
                         load(targetedUrl.getUri());

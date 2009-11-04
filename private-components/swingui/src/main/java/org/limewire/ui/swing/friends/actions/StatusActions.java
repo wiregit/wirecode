@@ -109,7 +109,7 @@ public class StatusActions {
         FriendSettings.DO_NOT_DISTURB.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
                         updateSignedInStatus();

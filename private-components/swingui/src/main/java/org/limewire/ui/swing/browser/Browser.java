@@ -132,7 +132,7 @@ public class Browser extends MozillaPanel {
         super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
         BrowserUtils.addDomListener(chromeAdapter);
         chromeAdapter.getWebBrowser().addWebBrowserListener(listener, nsIWebProgressListener.NS_IWEBPROGRESSLISTENER_IID);
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
                 addKeyListener(new MozillaKeyListener(chromeAdapter));
@@ -149,7 +149,7 @@ public class Browser extends MozillaPanel {
         lastRequestFailed = false;
         requestInProgress = true;
         if(loadStatus == VisibilityMode.DEFAULT) {
-            SwingUtils.invokeLater(new Runnable() {
+            SwingUtils.invokeNowOrLater(new Runnable() {
                 @Override
                 public void run() {
                     loadingPane.setCollapsed(false);
@@ -162,7 +162,7 @@ public class Browser extends MozillaPanel {
         lastRequestFailed = failed;
         requestInProgress = false;
         if(loadStatus == VisibilityMode.DEFAULT) {
-            SwingUtils.invokeLater(new Runnable() {
+            SwingUtils.invokeNowOrLater(new Runnable() {
                 @Override
                 public void run() {
                     loadingPane.setCollapsed(true);

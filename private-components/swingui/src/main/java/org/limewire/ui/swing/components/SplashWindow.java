@@ -107,7 +107,7 @@ public class SplashWindow {
      * Sets the Splash Window to be visible.
      */
     public void begin() {
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
                 splashWindow.toFront();
                 splashWindow.setVisible(true);
@@ -124,7 +124,7 @@ public class SplashWindow {
      * @param text the text to display
      */
     public void setStatusText(final String text) {
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
                 textLabel.setText(text);
                 progressBar.setValue(progressBar.getValue() + 1);
@@ -136,7 +136,7 @@ public class SplashWindow {
     }
 
     public void dispose() {
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
                 splashWindow.dispose();
             }

@@ -151,7 +151,7 @@ public class NativeFileIconController implements FileIconController {
      */
     public SmartFileView constructFSVView() {
         final AtomicReference<SmartFileView> ref = new AtomicReference<SmartFileView>();
-        SwingUtils.invokeAndWait(new Runnable() {
+        SwingUtils.invokeNowOrWait(new Runnable() {
             public void run() {
                 try {
                     ref.set(new FSVFileView());
@@ -243,7 +243,7 @@ public class NativeFileIconController implements FileIconController {
                 final String next = j.next();
                 queue.execute(new Runnable() {
                     public void run() {
-                        SwingUtils.invokeAndWait(new Runnable() {
+                        SwingUtils.invokeNowOrWait(new Runnable() {
                             public void run() {
                                 getIconForExtension(next);
                                 if(!VIEW.isViewAvailable())

@@ -89,7 +89,7 @@ public class MainDownloadPanel extends JPanel {
         DownloadSettings.SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
                         updateVisibility();

@@ -107,7 +107,7 @@ public class BasicAutoCompleter implements AutoCompleter {
             public Boolean call() {
                 try {
                     final Collection<String> suggestions = dictionary.getPrefixedBy(currentText);
-                    SwingUtils.invokeAndWaitWithInterrupted(new Runnable() {
+                    SwingUtils.invokeNowOrWaitWithInterrupted(new Runnable() {
                         @Override
                         public void run() {
                             setSuggestions(suggestions);

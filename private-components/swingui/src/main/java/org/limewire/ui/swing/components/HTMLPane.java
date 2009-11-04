@@ -81,7 +81,7 @@ public class HTMLPane extends JEditorPane {
             }
             
             private void setBackup() {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     public void run() {
                         setContentType("text/html");
                         setText(backupPage);
@@ -145,7 +145,7 @@ public class HTMLPane extends JEditorPane {
             reloaded.set(true);
         }
         
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
                 // Start at the top, then move if necessary.
                 setCaretPosition(0);

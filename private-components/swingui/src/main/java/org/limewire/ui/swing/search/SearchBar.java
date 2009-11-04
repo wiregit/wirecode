@@ -141,7 +141,7 @@ public class SearchBar extends JXPanel {
         SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeLater(new Runnable() {
+                SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
                         autoCompleter.setSuggestionsShown(SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue());

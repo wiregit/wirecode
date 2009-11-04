@@ -517,7 +517,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     @Override
     public void handleEvent(TorrentEvent event) {
         if (event.getType() == TorrentEventType.STATUS_CHANGED || event.getType() == TorrentEventType.COMPLETED) {
-            SwingUtils.invokeLater(new Runnable() {
+            SwingUtils.invokeNowOrLater(new Runnable() {
                 @Override
                 public void run() {
                     List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();

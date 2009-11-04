@@ -127,7 +127,7 @@ class SearchResultsMessagePanel extends JXPanel implements SettingListener {
 
     @Override
     public void settingChanged(SettingEvent evt) {
-        SwingUtils.invokeLater(new Runnable() {
+        SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
                 if (SwingUiSettings.SHOW_CLASSIC_REMINDER.getValue()) {
