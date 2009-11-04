@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.core.settings.BittorrentSettings;
@@ -29,11 +31,8 @@ import com.limegroup.gnutella.ActivityCallback;
 public class TorrentUploadManager implements BTUploaderFactory {
 
     private static final Log LOG = LogFactory.getLog(TorrentUploadManager.class);
-
     private final Provider<ActivityCallback> activityCallback;
-
     private final Provider<TorrentManager> torrentManager;
-
     private final Provider<Torrent> torrentProvider;
 
     @Inject
@@ -72,6 +71,8 @@ public class TorrentUploadManager implements BTUploaderFactory {
                     }
                     if (memento != null) {
 
+                        long mementoModifiedTime = mementoFile.lastModified();
+
                         File torrentFile = (File) memento.get("torrentFile");
                         File fastResumeFile = (File) memento.get("fastResumeFile");
                         File torrentDataFile = (File) memento.get("torrentDataFile");
@@ -79,11 +80,15 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         String trackerURL = (String) memento.get("trackerURL");
                         String name = (String) memento.get("name");
 
+                        boolean torrentAdded = false;
+                        boolean torrentLoaded = false;
+                        Torrent torrent = null;
+
                         if (torrentDataFile.exists() && fastResumeFile != null
                                 && fastResumeFile.exists()) {
                             if (torrentManager.get().isValid()
                                     && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
-                                Torrent torrent = torrentProvider.get();
+                                torrent = torrentProvider.get();
                                 try {
                                     TorrentParams params = new TorrentParams(torrentDataFile
                                             .getParentFile(), name, sha1);
@@ -92,26 +97,64 @@ public class TorrentUploadManager implements BTUploaderFactory {
                                     params.setTorrentFile(torrentFile);
                                     params.setTorrentDataFile(torrentDataFile);
                                     torrent.init(params);
+
+                                    if (torrentManager.get().addTorrent(torrent)) {
+                                        torrentAdded = true;
+                                        if (torrent.hasMetaData()) {
+                                            TorrentInfo torrentInfo = torrent.getTorrentInfo();
+                                            boolean filesOk = true;
+                                            for (TorrentFileEntry entry : torrentInfo
+                                                    .getTorrentFileEntries()) {
+                                                int priority = entry.getPriority();
+                                                if (priority > 0) {
+                                                    File torrentFileEntry = torrent
+                                                            .getTorrentDataFile(entry);
+                                                    boolean exists = torrentFileEntry.exists();
+                                                    long fileModifiedTime = torrentFileEntry
+                                                            .lastModified();
+                                                    if (!exists
+                                                            || fileModifiedTime > mementoModifiedTime) {
+                                                        filesOk = false;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            if (filesOk) {
+                                                createBTUploader(torrent);
+                                                torrent.setAutoManaged(true);
+                                                torrent.start();
+                                                torrentLoaded = true;
+                                            }
+                                        }
+                                    }
                                 } catch (IOException e) {
                                     LOG.error("Error initializing memento from: " + mementoFile, e);
                                 }
-                                torrentManager.get().addTorrent(torrent);
-                                createBTUploader(torrent);
-                                torrent.setAutoManaged(true);
-                                torrent.start();
                             }
-                        } else {
-                            if (torrentFile != null) {
-                                FileUtils.delete(torrentFile, false);
+                        }
+
+                        if (!torrentLoaded) {
+                            cleanup(mementoFile, torrentFile, fastResumeFile);
+                            if (torrent != null && torrentAdded) {
+                                torrentManager.get().removeTorrent(torrent);
                             }
-                            if (fastResumeFile != null) {
-                                FileUtils.delete(fastResumeFile, false);
-                            }
-                            FileUtils.delete(mementoFile, false);
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void cleanup(File mementoFile, File torrentFile, File fastResumeFile) {
+        if (torrentFile != null) {
+            FileUtils.delete(torrentFile, false);
+        }
+        if (fastResumeFile != null) {
+            FileUtils.delete(fastResumeFile, false);
+        }
+        if (mementoFile != null) {
+            FileUtils.delete(mementoFile, false);
         }
     }
 
@@ -127,7 +170,6 @@ public class TorrentUploadManager implements BTUploaderFactory {
      * Creates an upload memento from the Torrent and writes it to disk.
      */
     public void writeMemento(Torrent torrent) throws IOException {
-        // TODO use database instead of writing to file?
         File torrentMomento = getMementoFile(torrent);
         torrentMomento.getParentFile().mkdirs();
 
