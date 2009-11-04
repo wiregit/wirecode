@@ -106,7 +106,7 @@ public class SystemOptionPanel extends OptionPanel {
                     updateView();
                 }
             });
-            warnCheckBox = new JCheckBox(I18n.tr("Warn me when other programs want to automatically open these types"));
+            warnCheckBox = new JCheckBox("<html>" + I18n.tr("Warn me when other programs want to automatically open these types") + "</html>");
             warnCheckBox.setContentAreaFilled(false);
 
             add(magnetCheckBox, "gapleft 5, gapbottom 5, wrap");
@@ -157,13 +157,20 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            initOption(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS.getValue()
-                    && LimeAssociations.isMagnetAssociationSupported()
-                    && LimeAssociations.getMagnetAssociation().isEnabled());
-            initOption(torrentCheckBox, SwingUiSettings.HANDLE_TORRENTS.getValue()
-                    && LimeAssociations.isTorrentAssociationSupported()
-                    && LimeAssociations.getTorrentAssociation().isEnabled());
-            initOption(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
+            boolean selected = SwingUiSettings.HANDLE_MAGNETS.getValue() && LimeAssociations.isMagnetAssociationSupported() && LimeAssociations.getMagnetAssociation().isEnabled();
+            initOption(magnetCheckBox, selected);
+            if (selected) {
+                magnetCheckBox.setEnabled(LimeAssociations.getMagnetAssociation().canDisassociate());
+            }
+            
+            selected = SwingUiSettings.HANDLE_TORRENTS.getValue() && LimeAssociations.isTorrentAssociationSupported() && LimeAssociations.getTorrentAssociation().isEnabled();
+            initOption(torrentCheckBox, selected);
+            if (selected) {
+                torrentCheckBox.setEnabled(LimeAssociations.getTorrentAssociation().canDisassociate());
+            }
+
+            selected = SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue();
+            initOption(warnCheckBox, selected);
             updateView();
         }
 

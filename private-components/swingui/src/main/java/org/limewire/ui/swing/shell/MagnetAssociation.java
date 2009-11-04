@@ -24,7 +24,11 @@ public class MagnetAssociation implements ShellAssociation {
 		return protocol.isRegistered();
 	}
 
-	public void register() {
+    public boolean canUnregister() {
+        return true;
+    }
+
+    public void register() {
 		protocol.register();
 		handler.register();
 	}

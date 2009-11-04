@@ -52,6 +52,10 @@ public class WindowsProtocolShellAssociation extends WindowsAssociation {
         SystemUtils.registryWriteText(HKCU, protocol + "\\shell\\open\\command", "","\"" + executable + "\" \"%1\"");
     }
 
+    public boolean canUnregister() {
+        return true;
+    }
+    
     public void unregister() {
         SystemUtils.registryDelete(HKCU, protocol);
     }

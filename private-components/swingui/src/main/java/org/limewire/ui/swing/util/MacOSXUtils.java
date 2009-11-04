@@ -13,6 +13,8 @@ import java.util.List;
 
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.util.CommonUtils;
@@ -49,13 +51,15 @@ public class MacOSXUtils {
 
     private static boolean nativeLibraryLoadedCorrectly = false;
     
+    private static final Log LOG = LogFactory.getLog(MacOSXUtils.class);
+    
     static {
         if (OSUtils.isMacOSX()) {
             try {
                 System.loadLibrary("MacOSXUtils");
                 nativeLibraryLoadedCorrectly = true;
             } catch (UnsatisfiedLinkError err) {
-                ErrorService.error(err);
+                ErrorService.error(err, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("MacOSXUtils.jnilib"));
             }
         }
     }
@@ -77,7 +81,7 @@ public class MacOSXUtils {
     */
     public static String traceLibraryDependencies(String libraryName) {       
         StringBuffer traceResultsBuffer = new StringBuffer("ls command output: ");
-        String lsCommand = "ls " + System.getProperty("user.dir") + "/" + libraryName;
+        String lsCommand = "ls " + System.getProperty("user.dir");
         traceResultsBuffer.append("(").append(lsCommand).append(") "); 
         traceResultsBuffer.append( getCommandOutput(lsCommand) );
         traceResultsBuffer.append( "\n" );
@@ -137,7 +141,7 @@ public class MacOSXUtils {
         try {
             SetLoginStatusNative(allow);
         } catch(UnsatisfiedLinkError ule) {
-            // Ignore, no big deal.
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule);
         }
     }
     
@@ -149,6 +153,8 @@ public class MacOSXUtils {
             return GetCurrentFullUserName();
         } catch(UnsatisfiedLinkError ule) {
             // No big deal, just return user name.
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule);
+            
             return CommonUtils.getUserName();
         }
     }
@@ -175,10 +181,22 @@ public class MacOSXUtils {
         try {
             SetDefaultFileTypeHandler(fileType, LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER);
         } catch(UnsatisfiedLinkError ule) {
-            // Ignore, no big deal.
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
         }
     }
-    
+
+    /**
+     * This sets LimeWire as the default handler for this URL scheme.
+     * @param url scheme -- the designator for the protocol, e.g. magnet
+     */
+    public static void setLimewireAsDefaultURLSchemeHandler(String urlScheme) {
+        try {
+            SetDefaultURLSchemeHandler(urlScheme, LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER);
+        } catch(UnsatisfiedLinkError ule) {
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
+        }
+    }
+
     /**
      * This checks whether LimeWire is the default handler for this file type.
      * @param fileType -- the file extension for the file. this will be used to look up the file type's UTI (universal type identifier)
@@ -188,12 +206,27 @@ public class MacOSXUtils {
         try {
             return IsApplicationTheDefaultFileTypeHandler(fileType, LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER);
         } catch(UnsatisfiedLinkError ule) {
-            // Ignore, no big deal.
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
         }
         
         return true;
     }
 
+    /**
+     * This checks whether LimeWire is the default handler for this URL scheme.
+     * @param urlScheme -- the designator for the protocol, e.g. magnet
+     * @return true if LimeWire is the default handler for this URL scheme
+     */
+    public static boolean isLimewireDefaultURLSchemeHandler(String urlScheme) {
+        try {
+            return IsApplicationTheDefaultURLSchemeHandler(urlScheme, LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER);
+        } catch(UnsatisfiedLinkError ule) {
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
+        }
+        
+        return true;
+    }
+    
     /**
      * This checks whether any applications are registered as handlers for this fileType in the OS-X
      * launch services database.
@@ -205,12 +238,29 @@ public class MacOSXUtils {
         try {
             return IsFileTypeHandled(fileType);
         } catch(UnsatisfiedLinkError ule) {
-            // Ignore, no big deal.
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
         }
         
         return true;
     }
-    
+
+    /**
+     * This checks whether any applications are registered as handlers for this URL scheme in the OS-X
+     * launch services database.
+     * 
+     * @param urlScheme -- the designator for the protocol, e.g. magnet
+     * @return true if any application is registered as a handler for this URL scheme
+     */
+    public static boolean isURLSchemeHandled(String urlScheme) {
+        try {
+            return IsURLSchemeHandled(urlScheme);
+        } catch(UnsatisfiedLinkError ule) {
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
+        }
+        
+        return true;
+    }
+
     /**
      * This tries to change the file type handler for the given file type from LimeWire to another application.
      * Basically, it just changes the default handler application to the first application in the list
@@ -232,8 +282,80 @@ public class MacOSXUtils {
                 }
             }
         } catch(UnsatisfiedLinkError ule) {
-            // Ignore, no big deal.
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
         }
+    }
+
+    /**
+     * This method returns true if there are any other applications on the user's system that have
+     * registered themselves as handlers for the given file type.
+     * 
+     * @param fileType -- the file extension for the file. this will be used to look up the file type's UTI (universal type identifier)
+     */
+
+    public static boolean canChangeDefaultFileTypeHandler(String fileType) {
+        try {
+            String[] handlers = GetAllHandlersForFileType(fileType);
+            if (handlers != null) {
+                for (String handler : handlers) {
+                    if (!handler.equals(LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER)) {
+                        return true;
+                    }
+                }
+            }
+        } catch(UnsatisfiedLinkError ule) {
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
+        }
+        
+        return false;
+    }
+    
+    /**
+     * This tries to change the URL scheme handler for the given file type from LimeWire to another application.
+     * Basically, it just changes the default handler application to the first application in the list
+     * returned by launch services that isn't LimeWire. It might fail if no other handlers are registered for this URL scheme.  
+     * The list of handlers that are used internally in this method should not be shown to users as they are probably not understandable
+     * by users.  For example LimeWire is represented by the application bundle identifier com.limegroup.gnutella.
+     * 
+     * @param urlScheme -- the designator for the protocol, e.g. magnet
+     */
+    public static void tryChangingDefaultURLSchemeHandler(String urlScheme) {
+        try {
+            String[] handlers = GetAllHandlersForURLScheme(urlScheme);
+            if (handlers != null) {
+                for (String handler : handlers) {
+                    if (!handler.equals(LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER)) {
+                        SetDefaultURLSchemeHandler(urlScheme, handler);
+                        break;
+                    }
+                }
+            }
+        } catch(UnsatisfiedLinkError ule) {
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
+        }
+    }
+
+    /**
+     * This method returns true if there are any other applications on the user's system that have
+     * registered themselves as handlers for the given URL scheme.
+     * 
+     * @param urlScheme -- the designator for the protocol, e.g. magnet
+     */
+    public static boolean canChangeDefaultURLSchemeHandler(String urlScheme) {
+        try {
+            String[] handlers = GetAllHandlersForURLScheme(urlScheme);
+            if (handlers != null) {
+                for (String handler : handlers) {
+                    if (!handler.equals(LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER)) {
+                        return true;
+                    }
+                }
+            }
+        } catch(UnsatisfiedLinkError ule) {
+            LOG.error("UnsatisfiedLinkError for MacOSXUtils", ule); 
+        }
+        
+        return false;
     }
     
     /**
@@ -344,9 +466,15 @@ public class MacOSXUtils {
     
     /**
      * Uses OS-X's launch services API to check whether any application has registered itself
-     * as a handler for this application. 
+     * as a handler for this file type. 
      */
     private static final native boolean IsFileTypeHandled(String fileType);
+
+    /**
+     * Uses OS-X's launch services API to check whether any application has registered itself
+     * as a handler for this URL scheme. 
+     */
+    private static final native boolean IsURLSchemeHandled(String urlScheme);
 
     /**
      * Uses OS-X's launch services API to check whether the given application is the default handler for this
@@ -355,17 +483,31 @@ public class MacOSXUtils {
     private static final native boolean IsApplicationTheDefaultFileTypeHandler(String fileType, String applicationBundleIdentifier);
 
     /**
+     * Uses OS-X's launch services API to check whether the given application is the default handler for this
+     * URL scheme.
+     */
+    private static final native boolean IsApplicationTheDefaultURLSchemeHandler(String urlScheme, String applicationBundleIdentifier);
+
+    /**
      * Uses OS-X's launch services API to set the given application as the default handler for this file type.
      */
     private static final native int SetDefaultFileTypeHandler(String fileType, String applicationBundleIdentifier);
 
     /**
-     * Open a native file dialog for selecting files and folders.
-     * Native dialogs have the advantage of preserving the look and feel of
-     * the platform while still allowing for multiple file selections.
+     * Uses OS-X's launch services API to set the given application as the default handler for this URL scheme.
+     */
+    private static final native int SetDefaultURLSchemeHandler(String urlScheme, String applicationBundleIdentifier);
+    
+    /**
+     * Uses OS-X's launch services API to get all the handlers for this file type.
      */
     private static final native String[] GetAllHandlersForFileType(String fileType); 
 
+    /**
+     * Uses OS-X's launch services API to get all the handlers for this URL scheme.
+     */
+    private static final native String[] GetAllHandlersForURLScheme(String ulrScheme); 
+    
     /**
      * Open a native file dialog for selecting files and folders.
      * Native dialogs have the advantage of preserving the look and feel of

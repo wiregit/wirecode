@@ -93,6 +93,10 @@ public class FileTypeAssociation implements ShellAssociation {
         
 	}
 
+	public boolean canUnregister() {
+	    return true;
+	}
+	
 	public void unregister() {
 	    try {
     		forceUnregister(SERVICE.getFileExtensionAssociation(extention));

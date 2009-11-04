@@ -47,6 +47,10 @@ public class WindowsMagnetHandlerAssociation extends WindowsAssociation {
 		SystemUtils.registryWriteNumber(HKCU, HANDLER + program + "\\Type", "urn:sha1", 0);
 	}
 
+   public boolean canUnregister() {
+        return true;
+    }
+
 	public void unregister() {
 		SystemUtils.registryDelete(HKCU, HANDLER + program);
 	}

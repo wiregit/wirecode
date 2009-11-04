@@ -20,8 +20,13 @@ public interface ShellAssociation {
 	 */
 	public void register();
 
+    /**
+     * Checks whether we can clear the shell association.
+     */
+	public boolean canUnregister();
+	
 	/**
-	 * Clears this shell association, leaving no program registered.
+	 * Clears this shell association, leaving another program or no program registered.
 	 */
 	public void unregister();
 

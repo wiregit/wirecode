@@ -26,6 +26,10 @@ class OSXFileTypeAssociation implements ShellAssociation {
         MacOSXUtils.setLimewireAsDefaultFileTypeHandler(extension);
     }
 
+    public boolean canUnregister() {
+        return MacOSXUtils.canChangeDefaultFileTypeHandler(extension);
+    }
+    
     @Override
     public void unregister() {
         // There is no way to unregister a file type association on OS-X except

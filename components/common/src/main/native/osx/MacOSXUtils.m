@@ -108,6 +108,45 @@ JNIEXPORT jint JNICALL OS_NATIVE(SetDefaultFileTypeHandler)
     return (jint)theErr;
 }
 
+JNIEXPORT jint JNICALL OS_NATIVE(SetDefaultURLSchemeHandler)
+    (JNIEnv *env, jobject this, jstring urlScheme, jstring applicationBundleIdentifier)
+{
+    OSErr theErr = -1;
+
+    const char *urlSchemeCstr = (*env)->GetStringUTFChars(env, urlScheme, NULL);
+    if (urlSchemeCstr == NULL) {
+        (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCstr);
+
+        return theErr; /* OutOfMemoryError already thrown */
+    }
+    
+    CFStringRef urlSchemeCFStr = CFStringCreateWithCString(NULL, urlSchemeCstr,                                    
+                                                  kCFStringEncodingMacRoman);
+
+    const char *applicationBundleIdentifierCstr = (*env)->GetStringUTFChars(env, applicationBundleIdentifier, NULL);
+    if (applicationBundleIdentifierCstr == NULL) {
+        (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCstr);
+        CFRelease(urlSchemeCFStr);
+
+        return theErr; /* OutOfMemoryError already thrown */
+    }
+    
+    CFStringRef applicationBundleIdentifierCFStr = CFStringCreateWithCString(NULL, applicationBundleIdentifierCstr,                                    
+                                                                            kCFStringEncodingMacRoman);
+
+    theErr = LSSetDefaultHandlerForURLScheme(
+                    urlSchemeCFStr,
+                    applicationBundleIdentifierCFStr);
+    
+    (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCstr);
+    (*env)->ReleaseStringUTFChars(env, urlScheme, applicationBundleIdentifierCstr);
+
+    CFRelease(urlSchemeCFStr);
+    CFRelease(applicationBundleIdentifierCFStr);
+
+    return (jint) theErr;
+}
+
 JNIEXPORT jboolean JNICALL OS_NATIVE(IsApplicationTheDefaultFileTypeHandler)
 (JNIEnv *env, jobject this, jstring fileType, jstring applicationBundleIdentifier)
 {
@@ -127,8 +166,12 @@ JNIEXPORT jboolean JNICALL OS_NATIVE(IsApplicationTheDefaultFileTypeHandler)
 
     CFStringRef defaultApplicationIdentifier = LSCopyDefaultRoleHandlerForContentType(utiForTorrents, kLSRolesAll);
 
-    if ( defaultApplicationIdentifier == NULL )
+    if ( defaultApplicationIdentifier == NULL ) {
+        CFRelease(fileTypeCFStr);
+        CFRelease(utiForTorrents);
+
         return false;
+    }
     
     const char *applicationBundleIdentifierCstr = (*env)->GetStringUTFChars(env, applicationBundleIdentifier, NULL);
     if (applicationBundleIdentifierCstr == NULL) {
@@ -145,6 +188,52 @@ JNIEXPORT jboolean JNICALL OS_NATIVE(IsApplicationTheDefaultFileTypeHandler)
 
     CFRelease(fileTypeCFStr);
     CFRelease(utiForTorrents);
+    CFRelease(defaultApplicationIdentifier);
+    CFRelease(applicationBundleIdentifierCFStr);
+
+    return isGivenApplicationTheDefaultFileTypeHandler;
+}
+
+JNIEXPORT jboolean JNICALL OS_NATIVE(IsApplicationTheDefaultURLSchemeHandler)
+(JNIEnv *env, jobject this, jstring urlScheme, jstring applicationBundleIdentifier)
+{
+    const char *urlSchemeCStr = (*env)->GetStringUTFChars(env, urlScheme, NULL);
+    if (urlSchemeCStr == NULL) {
+        (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCStr);
+
+        return false; /* OutOfMemoryError already thrown */
+    }
+    
+    CFStringRef urlSchemeCFStr = CFStringCreateWithCString(NULL, urlSchemeCStr,                                    
+                                                          kCFStringEncodingMacRoman);
+
+    CFStringRef defaultApplicationIdentifier = LSCopyDefaultHandlerForURLScheme(urlSchemeCFStr);
+
+    if ( defaultApplicationIdentifier == NULL ) {
+        (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCStr);
+        CFRelease(urlSchemeCFStr);
+
+        return false;
+    }
+    
+    const char *applicationBundleIdentifierCstr = (*env)->GetStringUTFChars(env, applicationBundleIdentifier, NULL);
+    if (applicationBundleIdentifierCstr == NULL) {
+        (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCStr);
+        CFRelease(urlSchemeCFStr);
+        CFRelease(defaultApplicationIdentifier);
+
+        return false; /* OutOfMemoryError already thrown */
+    }
+    
+    CFStringRef applicationBundleIdentifierCFStr = CFStringCreateWithCString(NULL, applicationBundleIdentifierCstr,                                    
+                                                                            kCFStringEncodingMacRoman);
+
+    bool isGivenApplicationTheDefaultFileTypeHandler = (CFStringCompare(defaultApplicationIdentifier, applicationBundleIdentifierCFStr, kCFCompareCaseInsensitive) == 0);
+
+    (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCStr);
+    (*env)->ReleaseStringUTFChars(env, urlScheme, applicationBundleIdentifierCstr);
+
+    CFRelease(urlSchemeCFStr);
     CFRelease(defaultApplicationIdentifier);
     CFRelease(applicationBundleIdentifierCFStr);
 
@@ -177,9 +266,34 @@ JNIEXPORT jboolean JNICALL OS_NATIVE(IsFileTypeHandled)
 
     CFRelease(fileTypeCFStr);
     CFRelease(utiForTorrents);
-    CFRelease(defaultApplicationIdentifier);
+    if (defaultApplicationIdentifier != nil)
+        CFRelease(defaultApplicationIdentifier);
 
     return isFileTypeHandled;
+}
+
+JNIEXPORT jboolean JNICALL OS_NATIVE(IsURLSchemeHandled)
+(JNIEnv *env, jobject this, jstring urlScheme)
+{
+    const char *urlSchemeCStr = (*env)->GetStringUTFChars(env, urlScheme, NULL);
+    if (urlSchemeCStr == NULL) {
+        return false; /* OutOfMemoryError already thrown */
+    }
+
+    CFStringRef urlSchemeCFStr = CFStringCreateWithCString(NULL, urlSchemeCStr,                                    
+                                                          kCFStringEncodingMacRoman);
+
+    CFStringRef defaultApplicationIdentifier = LSCopyDefaultHandlerForURLScheme(urlSchemeCFStr);
+
+    bool isURLSchemeHandled = (defaultApplicationIdentifier != nil);
+
+    (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCStr);
+
+    CFRelease(urlSchemeCFStr);
+    if (defaultApplicationIdentifier != nil)
+        CFRelease(defaultApplicationIdentifier);
+
+    return isURLSchemeHandled;
 }
 
 /**
@@ -234,10 +348,68 @@ JNIEXPORT jobjectArray JNICALL OS_NATIVE(GetAllHandlersForFileType)
     
         }
 
+        (*env)->ReleaseStringUTFChars(env, fileType, fileTypeCStr);
+
         CFRelease(handlers);
         CFRelease(fileTypeCFStr);
         CFRelease(utiForTorrents);
         
+        return handlerArray;
+    }
+}
+
+/**
+* This method returns all of the applications registered to handle this URL scheme
+*/
+JNIEXPORT jobjectArray JNICALL OS_NATIVE(GetAllHandlersForURLScheme)
+(JNIEnv *env, jobject this, jstring urlScheme)
+{
+    const char *urlSchemeCStr = (*env)->GetStringUTFChars(env, urlScheme, NULL);
+    if (urlSchemeCStr == NULL) {
+        /* OutOfMemoryError already thrown */
+        return NULL;
+    }
+
+    CFStringRef urlSchemeCFStr = CFStringCreateWithCString(NULL, urlSchemeCStr,                                    
+                                                          kCFStringEncodingMacRoman);
+
+    CFArrayRef handlers = LSCopyAllHandlersForURLScheme(urlSchemeCFStr);
+
+    if (handlers == NULL) {
+        (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCStr);
+        CFRelease(urlSchemeCFStr);
+        
+        return NULL;
+    } else {
+        // if we have a valid list of file URLs, then let's convert them to 
+        // a java string array and pass it out.
+        jclass strCls = (*env)->FindClass(env,"Ljava/lang/String;");
+        jobjectArray handlerArray = (*env)->NewObjectArray(env, CFArrayGetCount(handlers), strCls, NULL);
+    
+        for (int counter = 0; counter < CFArrayGetCount(handlers); counter++) {
+            CFStringRef applicationBundleIdentifier = CFArrayGetValueAtIndex(handlers, counter);
+            
+            CFRange range;
+            range.location = 0;
+            // Note that CFStringGetLength returns the number of UTF-16 characters,
+            // which is not necessarily the number of printed/composed characters
+            range.length = CFStringGetLength(applicationBundleIdentifier);
+            UniChar charBuf[range.length];
+            CFStringGetCharacters(applicationBundleIdentifier, range, charBuf);
+            jstring applicationBundleIdentifierJavaStr = (*env)->NewString(env, (jchar *)charBuf, (jsize)range.length);
+
+            // set the Java string in the java string array
+            (*env)->SetObjectArrayElement(env, handlerArray, counter, applicationBundleIdentifierJavaStr);
+            
+            (*env)->DeleteLocalRef(env, applicationBundleIdentifierJavaStr);            
+    
+        }
+
+        (*env)->ReleaseStringUTFChars(env, urlScheme, urlSchemeCStr);
+
+        CFRelease(handlers);
+        CFRelease(urlSchemeCFStr);
+
         return handlerArray;
     }
 }

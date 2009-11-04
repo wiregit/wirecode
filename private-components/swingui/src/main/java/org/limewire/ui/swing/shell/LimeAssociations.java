@@ -99,10 +99,15 @@ public class LimeAssociations {
             } else if (OSUtils.isMacOSX()) {
                 fileAssociations = new HashMap<AssociationType, LimeAssociationOption>();
                 if (OSXFileTypeAssociation.isNativeLibraryLoadedCorrectly()) {
-                    ShellAssociation file = new OSXFileTypeAssociation("torrent");
-                    LimeAssociationOption torrent = new LimeAssociationOption(file, ".torrent",
+                    LimeAssociationOption torrent = new LimeAssociationOption(new OSXFileTypeAssociation("torrent"), 
+                                                                              ".torrent",
                                                                               I18n.tr("\".torrent\" files"));
-                    fileAssociations.put(AssociationType.TORRENT, torrent);                   
+                    fileAssociations.put(AssociationType.TORRENT, torrent);
+                    
+                    LimeAssociationOption magnet = new LimeAssociationOption(new OSXURLSchemeAssociation("magnet"), 
+                                                                             "magnet:",
+                                                                             I18n.tr("\".magnet:\" links"));
+                    fileAssociations.put(AssociationType.MAGNET, magnet);
                 }
             }
         }

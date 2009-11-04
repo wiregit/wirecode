@@ -39,6 +39,10 @@ public class LimeAssociationOption {
             association.unregister();
         }
     }
+    
+    public boolean canDisassociate() {
+        return association.canUnregister();
+    }
 
     /** Determines if the association is currently registered to this program. */
     public boolean isEnabled() {
