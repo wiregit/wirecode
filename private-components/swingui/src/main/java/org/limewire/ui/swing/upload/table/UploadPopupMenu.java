@@ -191,21 +191,10 @@ public class UploadPopupMenu extends JPopupMenu {
             add(locateOnDiskMenuItem);
         }
         
-        if (!done || browseItem) {
+        if (done) {
             if (getComponentCount() > 0) {
                 addSeparator();
             }
-
-            JMenu browseMenu = browseMenuFactory.createBrowseMenu(getRemoteHosts());
-            add(browseMenu);
-            
-            JMenu blockMenu = blockUserMenuFactory.createDownloadBlockMenu(getRemoteHosts());
-            if (blockMenu != null) {
-                add(blockMenu);
-            }
-            
-        } else if (done) {
-            addSeparator();
 
             JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
             add(addToListMenu);
@@ -280,13 +269,16 @@ public class UploadPopupMenu extends JPopupMenu {
     }
     
     /**
-     * Returns the remote hosts associated with the upload items.
+     * Returns the browsable hosts associated with the upload items.
      */
     private Collection<RemoteHost> getRemoteHosts() {
         if (remoteHosts == null) {
             remoteHosts = new ArrayList<RemoteHost>();
             for (UploadItem item : uploadItems) {
-                remoteHosts.add(item.getRemoteHost());
+                RemoteHost host = item.getRemoteHost();
+                if (host.isBrowseHostEnabled()) {
+                    remoteHosts.add(host);
+                }
             }
         }
         return remoteHosts;
