@@ -17,6 +17,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
+import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.library.table.ListMenuFactory;
 import org.limewire.ui.swing.search.BlockUserMenuFactory;
 import org.limewire.ui.swing.search.RemoteHostMenuFactory;
@@ -269,15 +270,15 @@ public class UploadPopupMenu extends JPopupMenu {
     }
     
     /**
-     * Returns the browsable hosts associated with the upload items.
+     * Returns the remote hosts associated with the upload items.  Torrent
+     * items are excluded.
      */
     private Collection<RemoteHost> getRemoteHosts() {
         if (remoteHosts == null) {
             remoteHosts = new ArrayList<RemoteHost>();
             for (UploadItem item : uploadItems) {
-                RemoteHost host = item.getRemoteHost();
-                if (host.isBrowseHostEnabled()) {
-                    remoteHosts.add(host);
+                if (item.getUploadItemType() != UploadItemType.BITTORRENT) {
+                    remoteHosts.add(item.getRemoteHost());
                 }
             }
         }
