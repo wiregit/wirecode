@@ -8,6 +8,7 @@ import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
@@ -31,6 +32,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     private final Provider<LibraryMediator> libraryMediator;
     private final Provider<LibraryManager> libraryManager;
     private final Provider<BarPainterFactory> barPainterFactory;
+    private final Provider<TableDecorator> tableDecorator;
     
     @Inject
     public FileInfoPanelFactoryImpl(Provider<IconManager> iconManager, Provider<MagnetLinkFactory> magnetLinkFactory, 
@@ -38,7 +40,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
             Provider<PropertyDictionary> propertyDictionary, Provider<SpamManager> spamManager,
             Provider<SharedFileListManager> sharedFileListManager, Provider<MetaDataManager> metaDataManager,
             Provider<LibraryMediator> libraryMediator, Provider<LibraryManager> libraryManager,
-            Provider<BarPainterFactory> barPainterFactory) {
+            Provider<BarPainterFactory> barPainterFactory, Provider<TableDecorator> tableDecorator) {
         this.iconManager = iconManager;
         this.magnetLinkFactory = magnetLinkFactory;
         this.categoryIconManager = categoryIconManager;
@@ -49,6 +51,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.barPainterFactory = barPainterFactory;
+        this.tableDecorator = tableDecorator;
     }
     
     @Override
@@ -78,7 +81,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
 
     @Override
     public FileInfoPanel createTransferPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoTransfersPanel(type, propertiableFile);
+        return new FileInfoTransfersPanel(type, propertiableFile, tableDecorator.get());
     }
 
 }

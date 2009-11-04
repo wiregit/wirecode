@@ -3,35 +3,42 @@ package org.limewire.ui.swing.properties;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.io.Address;
+import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
-import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class FileInfoTransfersPanel implements FileInfoPanel {
 
+    @Resource private Icon lockIcon;
     @Resource private Color foreground;
     @Resource private Font smallFont;
     @Resource private Font headerFont;
@@ -41,11 +48,12 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     private final PropertiableFile propertiableFile;
     private DownloadStatusListener downloadStatus;
     
-    private final MouseableTable infoTable;
+    private final JXTable infoTable;
     
     private final Timer refreshTimer;
+    private final DefaultTableModel model;
     
-    public FileInfoTransfersPanel(FileInfoType type, PropertiableFile propertiableFile) {
+    public FileInfoTransfersPanel(FileInfoType type, PropertiableFile propertiableFile, TableDecorator tableDecorator) {
         this.type = type;
         this.propertiableFile = propertiableFile;
         
@@ -61,11 +69,23 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         downloadStatus = new DownloadStatusListener(percentLabel);
         ((DownloadItem)propertiableFile).addPropertyChangeListener(downloadStatus);
         
-        infoTable = new MouseableTable();
+        model = new DefaultTableModel();
+        infoTable = new JXTable(model);
+        
+        tableDecorator.decorate(infoTable);
+        
+        infoTable.setSortable(false);
+        infoTable.setRowSelectionAllowed(false);
+        infoTable.setColumnSelectionAllowed(false);
+        infoTable.setCellSelectionEnabled(false);
+        infoTable.setShowGrid(false, false);
+        
+        
+        
         component.add(new JScrollPane(infoTable), "span, grow, wrap");
         
         init();
-        refreshTimer = new Timer(1000, new ActionListener() {
+        refreshTimer = new Timer(1500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 init();
@@ -110,8 +130,9 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         
         switch(type) {
         case DOWNLOADING_FILE:
-            ReadOnlyTableModel model = new ReadOnlyTableModel();
-            infoTable.setModel(model);
+            for ( int i=0 ; i<model.getRowCount() ; i++ ) {
+                model.removeRow(0);
+            }
 
             DownloadItem download = ((DownloadItem)propertiableFile);
             
@@ -126,16 +147,22 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             else if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
                     
                 model.setColumnIdentifiers(new Object[]{tr("Address"),
-                        tr("Encyption"), tr("Client"),
+                        "", tr("Client"),
                         tr("Upload"), tr("Download")});
                   
                 for( DownloadSourceInfo info : download.getSourcesDetails() ) {
                     model.addRow(new Object[] {info.getIPAddress(),
-                            info.isEncyrpted(),
+                            info.isEncyrpted(), 
                             info.getClientName(),
-                            info.getUploadSpeed(),
-                            info.getDownloadSpeed()});
+                            I18n.tr("{0} KB/s", info.getUploadSpeed()),
+                            I18n.tr("{0} KB/s", info.getDownloadSpeed())});
                 }
+                
+                TableColumn column = infoTable.getColumn(1);
+                column.setCellRenderer(new LockRenderer());
+                column.setMaxWidth(10);
+                column.setMinWidth(10);
+                column.setWidth(12);
             }
             break;
         }
@@ -153,13 +180,6 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         label.setFont(smallFont);
         label.setForeground(foreground);
         return label;
-    }
-    
-    private static class ReadOnlyTableModel extends DefaultTableModel {
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            return false;
-        }
     }
     
     /**
@@ -180,6 +200,24 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
                     label.setText(tr("{0}% complete", ((DownloadItem)propertiableFile).getPercentComplete()));
                 } 
             });
+        }
+    }
+    
+    private class LockRenderer extends DefaultLimeTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            
+            if (value == Boolean.TRUE) {
+                setIcon(lockIcon);
+            }
+            else {
+                setIcon(null);
+            }
+  
+            return this;
+            
         }
     }
 }

@@ -8,6 +8,7 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
 
@@ -31,6 +32,8 @@ public class TableDecorator {
         
         JTableHeader th = table.getTableHeader();
         th.setDefaultRenderer(new TableCellHeaderRenderer());
+        
+        table.setDefaultRenderer(Object.class, new DefaultLimeTableCellRenderer());
     }
     
 }
