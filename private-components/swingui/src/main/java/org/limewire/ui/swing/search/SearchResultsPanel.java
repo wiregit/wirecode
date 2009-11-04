@@ -26,6 +26,7 @@ import javax.swing.table.TableColumn;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.RectanglePainter;
@@ -42,7 +43,6 @@ import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.search.SearchResultsMessagePanel.MessageType;
-import org.limewire.ui.swing.search.SearchResultsOverlay.OverlayType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
@@ -66,6 +66,19 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class SearchResultsPanel extends JXPanel implements SponsoredResultsView, Disposable {
     
+    /**
+     * The type of overlay which should be placed over the search results.
+
+     * NONE indicates that no overlay should be shown.
+     * AWAITING_CONNECTIONS indicates that an overlay with a busy icon and a "LimeWire is connecting..." message should be shown.
+     * NO_FRIENDS_ON_LIMEWIRE indicates that friends' files cannot be shown b/c no friends are logged on
+     */
+    public enum OverlayType {
+        NONE, 
+        AWAITING_CONNECTIONS,
+        NO_FRIENDS_ON_LIMEWIRE
+    }
+
     /** Decorator used to set the appearance of the header bar. */
     private final HeaderBarDecorator headerBarDecorator;
     
@@ -82,13 +95,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      * This is the subpanel that displays the actual search results.
      */
     private final ResultsContainer resultsContainer;
-    
-    /**
-     * This shows the "LimeWire is connecting..." message with a big revolving circle busy signal 
-     * over the search results area until the first search result arrives.
-     */
-    private final SearchResultsOverlay searchResultsOverlay;
-    
+       
     /**
      * This is the subpanel that appears in the upper-right corner
      * of each search results tab.
@@ -106,6 +113,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
        
     /** The panel for showing messages and a pointer to the classic search results view button. */
     private final SearchResultsMessagePanel messagePanel;
+    
+    /** This is the white gap which appears between the message panel and the search results */
+    private Component messagePanelsGap;
     
     /** Listener for changes in the view type. */
     private final SettingListener viewTypeListener;
@@ -138,6 +148,15 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
     private final BrowseFailedMessagePanel browseFailedPanel;
 
+    /** This class has a JXLayer as its sole component. The JXLayer has the search results components
+        as its main panel and sometimes places overlays over these components. */
+    private final JXLayer jxlayer;
+    
+    /** This is the active OverlayType for the JXLayer */
+    private OverlayType overlayType = OverlayType.NONE;
+    
+    private SettingListener messagePanelGapHider;
+    
     /**
      * Constructs a SearchResultsPanel with the specified components.
      */
@@ -152,7 +171,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             CategoryIconManager categoryIconManager, 
             BrowseFailedMessagePanelFactory browseFailedMessagePanelFactory,
             AllFriendsRefreshManager allFriendsRefreshManager) {
-
+        super(new BorderLayout());
+        
         GuiUtils.assignResources(this);
         
         this.searchResultsModel = searchResultsModel;
@@ -176,11 +196,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         // Create results container with tables.
         resultsContainer = containerFactory.create(searchResultsModel);
         
-        // This accepts the component which shows the search results and shows
-        // a "LimeWire is connecting..." message if LimeWire is not connected yet to all of its 
-        // ultra peers and hasn't received any search results yet for the user's query.
-        searchResultsOverlay = new SearchResultsOverlay(scrollPane);
-       
         viewTypeListener = new SettingListener() {
             int oldSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
             @Override
@@ -240,8 +255,69 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         messagePanel = new SearchResultsMessagePanel();
         
-        layoutComponents();
+        // if the user closes the hint showing where the classic search view is by clicking on the hint's close button,
+        // we need to hear about that in this class so that we can make the gap separating the message box from
+        // the search results disappear
+        if (messagePanel.isShowClassicSearchResultsHint()) {
+            messagePanelGapHider = new SettingListener() {
+                @Override
+                public void settingChanged(SettingEvent evt) {
+                    if (!SwingUiSettings.SHOW_CLASSIC_REMINDER.getValue()) {
+                        messagePanelsGap.setVisible(false);
+                    }
+                }
+            };
+            SwingUiSettings.SHOW_CLASSIC_REMINDER.addSettingListener(messagePanelGapHider);
+        }
+        
+        jxlayer = new JXLayer<JComponent>(createSearchResultsPanel());
+        jxlayer.getGlassPane().setLayout(new BorderLayout());
+        
+        add(jxlayer, BorderLayout.CENTER);
     }
+    
+    /**
+     * This method controls whether an overlay should be shown and if so, which type of overlay.
+     * 
+     * @param overlayType -- the overlay type. See the type definition for more info.
+     */
+    void setOverlayType(OverlayType overlayType) {
+        // this method can be called multiple times for the same overlay type.
+        // so, let's check to make sure that the overlay actually needs to change
+        // before installing or uninstalling an overlay panel.
+        if (this.overlayType != overlayType) {
+            this.overlayType = overlayType;
+            switch (overlayType) {
+            case AWAITING_CONNECTIONS:
+                installOverlay(new AwaitingConnectionsPanel());
+                break;
+                
+            case NO_FRIENDS_ON_LIMEWIRE:
+                installOverlay(browseFailedPanel);
+                break;
+                
+            case NONE:
+                uninstallOverlay();
+                break;
+                
+            default:
+                throw new IllegalStateException("invalid type: " + overlayType); 
+            }
+        }
+    }
+          
+    private void installOverlay(JComponent component) {
+        jxlayer.getGlassPane().setVisible(false);
+        jxlayer.getGlassPane().removeAll();
+        jxlayer.getGlassPane().add(component);
+        jxlayer.getGlassPane().setVisible(true);
+    }
+    
+    private void uninstallOverlay() {
+        jxlayer.getGlassPane().setVisible(false);
+        jxlayer.getGlassPane().removeAll();
+    }
+    
 
     /**
      * Disposes of resources used by the container.  This method is called when 
@@ -250,6 +326,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     @Override
     public void dispose() {
         SwingUiSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
+        if (messagePanelGapHider != null) SwingUiSettings.SHOW_CLASSIC_REMINDER.removeSettingListener(messagePanelGapHider);
         searchResultsModel.getFilteredList().removeListEventListener(resultCountListener);
         searchResultsModel.getUnfilteredList().removeListEventListener(resultCountListener);
         sortAndFilterPanel.dispose();
@@ -447,13 +524,12 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      * Initializes the components and adds them to the container.  Called by
      * the constructor.  
      */
-    private void layoutComponents() {
-        MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!, novisualpadding", 
-                                "[][grow]",       // col constraints
-                                "[][][][grow]");  // row constraints
+    private JPanel createSearchResultsPanel() {
+        JPanel searchResultsComponentsPanel = new JPanel( new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!, novisualpadding", 
+                                                                        "[][grow]",        // col constraints
+                                                                        "[][][][grow]") ); // row constraints
         
-        setLayout(layout);
-        setMinimumSize(new Dimension(getPreferredSize().width, 33));
+        searchResultsComponentsPanel.setMinimumSize(new Dimension(searchResultsComponentsPanel.getPreferredSize().width, 33));
         
         RectanglePainter tabHighlight = new RectanglePainter();
         tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, tabHighlightTopGradientColor, 
@@ -469,12 +545,12 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         sortAndFilterPanel.layoutComponents(header);
         
-        add(header, "spanx 2, growx, growy, wrap");
-        add(filterPanel, "grow, spany 3");
-        add(messagePanel, "spanx 1, growx, wrap");
-        add(Box.createVerticalStrut(1), "spanx 1, growx, wrap");
-        add(searchResultsOverlay , "hidemode 3, grow");
-        add(browseFailedPanel , "hidemode 3, grow");
+        searchResultsComponentsPanel.add(header, "spanx 2, growx, growy, wrap");
+        searchResultsComponentsPanel.add(filterPanel, "grow, spany 3");
+        searchResultsComponentsPanel.add(messagePanel, "spanx 1, growx, wrap");
+        messagePanelsGap = Box.createVerticalStrut(6);
+        searchResultsComponentsPanel.add(messagePanelsGap, "hidemode 3, spanx 1, growx, wrap");
+        searchResultsComponentsPanel.add(scrollPane , "hidemode 3, grow");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
 
@@ -484,6 +560,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         scrollPane.setViewportView(scrollablePanel);
         
         syncScrollPieces();
+        
+        return searchResultsComponentsPanel;
     }
     
     /**
@@ -592,29 +670,27 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      */
     private void updateMessages() {
         browseStatusPanel.setBrowseStatus(browseStatus);
-        
+
+        // let's check whether we need to show the user any messages
         if (!fullyConnected && (receivedSearchResults || receivedSponsoredResults)) {
             messagePanel.setMessageType(MessageType.CONNECTING_TO_ULTRAPEERS);
+            messagePanelsGap.setVisible(true);
         } else if (fullyConnected && receivedSearchResults && messagePanel.isShowClassicSearchResultsHint()) {
             messagePanel.setMessageType(MessageType.CLASSIC_SEARCH_RESULTS_HINT);            
+            messagePanelsGap.setVisible(true);
         } else {
-            messagePanel.setMessageType(MessageType.NONE);            
+            messagePanel.setMessageType(MessageType.NONE);
+            messagePanelsGap.setVisible(false);
         }
        
-        searchResultsOverlay.setOverlayType((!receivedSearchResults && !fullyConnected && !receivedSponsoredResults) ? OverlayType.AWAITING_CONNECTIONS : OverlayType.NONE);
-
-        if (!lifeCycleComplete) {
-            browseFailedPanel.setVisible(false);
-        } else if (!fullyConnected) {            
-            browseFailedPanel.setVisible(false);            
+        // let's check whether we need to put an overlay over the search results panel
+        if ( (!lifeCycleComplete || !fullyConnected ) && (!receivedSearchResults && !receivedSponsoredResults) ) {
+            setOverlayType(OverlayType.AWAITING_CONNECTIONS);
         } else if (browseStatus != null && !browseStatus.getState().isOK()) {
             browseFailedPanel.update(browseStatus.getState(), browseStatus.getBrowseSearch(), browseStatus.getFailedFriends());
-            browseFailedPanel.setVisible(true);
+            setOverlayType(OverlayType.NO_FRIENDS_ON_LIMEWIRE);           
         } else {
-            browseFailedPanel.setVisible(false);
+            setOverlayType(OverlayType.NONE);            
         }
-        
-        filterPanel.setVisible(!browseFailedPanel.isVisible());
-        scrollPane.setVisible(!browseFailedPanel.isVisible());
     }
 }
