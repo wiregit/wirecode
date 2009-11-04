@@ -104,11 +104,11 @@ public class CoreStoreConnection implements StoreConnection {
     }
     
     @Override
-    public String loadTracks(String albumId) throws IOException {
+    public String loadTracks(String albumId, int startTrackNumber) throws IOException {
         if (StringUtils.isEmpty(albumId)) {
             return "";
         }
-        final String request = buildTracksRequestURL(albumId);
+        final String request = buildTracksRequestURL(albumId, startTrackNumber);
         return makeHTTPRequest(request);
     }
 
@@ -120,8 +120,9 @@ public class CoreStoreConnection implements StoreConnection {
                 "&count=" + COUNT;
     }
     
-    private String buildTracksRequestURL(String albumId) throws UnsupportedEncodingException {
+    private String buildTracksRequestURL(String albumId, int startTrackNumber) throws UnsupportedEncodingException {
         return storeAPIURL.get() + "/tracks?albumId=" + albumId + 
+                "&start=" + startTrackNumber + 
                 "&lv=" + application.getVersion() + 
                 "&guid=" + new GUID(applicationServices.getMyGUID()).toHexString();
     }

@@ -30,5 +30,5 @@ public interface StoreConnection {
      * Retrieves the tracks for the specified album id, and returns the 
      * result as a JSON text string.
      */
-    String loadTracks(String albumId) throws IOException;
+    String loadTracks(String albumId, int startTrackNumber) throws IOException;
 }

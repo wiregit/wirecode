@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,11 +26,11 @@ import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.settings.MediaPlayerSettings;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.EventList;
 
 /**
  * Mediator that controls the interaction between the player view, the current
@@ -302,6 +303,23 @@ public class PlayerMediator {
     }
     
     /**
+     * Starts playing the specified file in the audio player.  The playlist
+     * is automatically cleared so the player will stop when the song finishes.
+     */
+    public void play(URL url) {
+        // Stop current song.
+        stop();
+        
+        // Play new song.
+        this.fileItem = null;
+        loadAndPlay(url);
+        
+        // Clear play and shuffle lists.
+        setActivePlaylist(null);
+        shuffleList.clear();
+    }
+    
+    /**
      * Starts playing the specified file item in the audio player.
      */
     public void play(LocalFileItem localFileItem) {
@@ -323,6 +341,13 @@ public class PlayerMediator {
         player.loadSong(fileToPlay);
         player.playSong();
         inspectable.started(fileToPlay);
+    }
+    
+    private void loadAndPlay(URL urlToPlay) {
+        AudioPlayer player = getPlayer();
+        player.loadSong(urlToPlay);
+        player.playSong();
+        //inspectable.started(fileToPlay);
     }
     
     /**

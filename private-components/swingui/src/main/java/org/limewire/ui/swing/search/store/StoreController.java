@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.store;
 
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.List;
 
 import org.apache.http.cookie.Cookie;
@@ -7,8 +9,9 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.store.StoreDownloadToken;
 import org.limewire.core.api.search.store.StoreManager;
-import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreManager.AttributeKey;
+import org.limewire.core.api.search.store.TrackResult;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.search.model.VisualStoreResult;
 
 import com.google.inject.Inject;
@@ -21,6 +24,7 @@ public class StoreController {
 
     private final Application application;
     private final StoreManager storeManager;
+    private final PlayerMediator playerMediator;
     
     /**
      * Constructs a StoreController using the specified services.
@@ -28,9 +32,10 @@ public class StoreController {
     @Inject
     public StoreController(
             Application application,
-            StoreManager storeManager) {
+            StoreManager storeManager, PlayerMediator playerMediator) {
         this.application = application;
         this.storeManager = storeManager;
+        this.playerMediator = playerMediator;
     }
     
     /**
@@ -146,15 +151,21 @@ public class StoreController {
      * Initiates streaming of the specified visual store result.
      */
     public void stream(VisualStoreResult vsr) {
-        // TODO implement
-        System.out.println("StoreController.stream: " + vsr.getHeading());
+        try {
+            playerMediator.play(new URL(vsr.getStoreResult().getStreamURI()));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Initiates streaming of the specified store track result.
      */
     public void streamTrack(TrackResult str) {
-        // TODO implement
-        System.out.println("StoreController.streamTrack: " + str.getProperty(FilePropertyKey.TITLE));
+        try {
+            playerMediator.play(new URL(str.getStreamURI()));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

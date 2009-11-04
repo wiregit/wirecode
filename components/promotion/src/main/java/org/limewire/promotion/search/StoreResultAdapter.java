@@ -215,14 +215,17 @@ public class StoreResultAdapter implements StoreResult {
                 @Override
                 public void run() {
                     try {
-                        // Use store connection to load tracks.
-                        String jsonStr = storeConnection.loadTracks(albumId);                    
-                    
-                        // Parse JSON and add tracks.
-                        JSONObject jsonObj = new JSONObject(jsonStr);
-                        List<TrackResult> newTracks = parseTracks(jsonObj);
-                        trackList.addAll(newTracks);
+                        int i = 0;
+                        while(i < trackCount){
+                            // Use store connection to load tracks.
+                            String jsonStr = storeConnection.loadTracks(albumId, i);                    
                         
+                            // Parse JSON and add tracks.
+                            JSONObject jsonObj = new JSONObject(jsonStr);
+                            List<TrackResult> newTracks = parseTracks(jsonObj);
+                            trackList.addAll(newTracks); 
+                            i += newTracks.size();
+                        }
                         // Fire event to update UI.
                         fireTracksUpdated();
                         
