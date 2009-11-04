@@ -24,7 +24,7 @@ class SourceDetails implements DownloadSourceInfo {
             encrypted = downloader.isEncrypted();
             float measured = 0;
             try {
-                measured = downloader.getMeasuredBandwidth();
+                measured = downloader.getMeasuredBandwidth()*1024;
             } catch(InsufficientDataException id) {}
             speed = measured;
         } else {
