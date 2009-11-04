@@ -8,22 +8,32 @@ import org.limewire.core.api.network.BandwidthCollector;
 public class MockBandwidthCollector implements BandwidthCollector {
 
     @Override
-    public int getCurrentDownloadBandwidth() {
+    public int getCurrentTotalDownloadBandwidth() {
         return 25;
     }
 
     @Override
-    public int getCurrentUploadBandwidth() {
+    public int getCurrentTotalUploadBandwidth() {
         return 15;
     }
 
     @Override
-    public int getMaxMeasuredDownloadBandwidth() {
+    public int getMaxMeasuredTotalDownloadBandwidth() {
         return 30;
     }
 
     @Override
-    public int getMaxMeasuredUploadBandwidth() {
+    public int getMaxMeasuredTotalUploadBandwidth() {
+        return 20;
+    }
+
+    @Override
+    public int getCurrentDownloaderBandwidth() {
+        return 30;
+    }
+
+    @Override
+    public int getCurrentUploaderBandwidth() {
         return 20;
     }
 }

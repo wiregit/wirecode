@@ -562,13 +562,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public float getMeasuredBandwidth() throws InsufficientDataException {
-        return (torrent.getDownloadRate() / 1024);
+        return torrent.isPaused() ? 0 : (torrent.getDownloadRate() / 1024);
     }
 
     @Override
     public float getAverageBandwidth() {
         // Unused by anything
-        return (torrent.getDownloadRate() / 1024);
+        return torrent.isPaused() ? 0 : (torrent.getDownloadRate() / 1024);
     }
 
     @Override
@@ -621,11 +621,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         return list;
     }
-    
+
     @Override
     public List<DownloadSourceInfo> getSourcesDetails() {
         List<DownloadSourceInfo> sourceInfoList = new LinkedList<DownloadSourceInfo>();
-        for ( TorrentPeer peer : torrent.getTorrentPeers() ) {
+        for (TorrentPeer peer : torrent.getTorrentPeers()) {
             sourceInfoList.add(new DownloadSourceInfoAdapter(peer));
         }
         return sourceInfoList;
@@ -828,7 +828,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 FileUtils.forceDeleteRecursive(incompleteFile);
             }
         }
-        if(!torrent.isStarted()) {
+        if (!torrent.isStarted()) {
             FileUtils.forceDelete(torrent.getTorrentFile());
             FileUtils.forceDelete(torrent.getFastResumeFile());
         }
@@ -910,28 +910,34 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public Torrent getTorrent() {
         return torrent;
     }
-    
+
     private static class DownloadSourceInfoAdapter implements DownloadSourceInfo {
         private final TorrentPeer source;
+
         public DownloadSourceInfoAdapter(TorrentPeer source) {
             this.source = source;
         }
+
         @Override
         public String getClientName() {
             return source.getClientName();
         }
+
         @Override
         public float getDownloadSpeed() {
             return source.getDownloadSpeed();
         }
+
         @Override
         public String getIPAddress() {
             return source.getIPAddress();
         }
+
         @Override
         public float getUploadSpeed() {
             return source.getUploadSpeed();
         }
+
         @Override
         public boolean isEncyrpted() {
             return source.isEncyrpted();

@@ -173,8 +173,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
      * function such as being an ultrapeer or connecting to the DHT.
      */
     private void setHardcoreCapable() {
-        int maxUpstreamKiloBytesPerSec = bandwidthCollector.getMaxMeasuredUploadBandwidth();
-        int maxDownstreamKiloBytesPerSec = bandwidthCollector.getMaxMeasuredDownloadBandwidth();
+        int maxUpstreamKiloBytesPerSec = bandwidthCollector.getMaxMeasuredTotalUploadBandwidth();
+        int maxDownstreamKiloBytesPerSec = bandwidthCollector.getMaxMeasuredTotalDownloadBandwidth();
         
         _isHardcoreCapable = 
         //Is upstream OR downstream high enough?

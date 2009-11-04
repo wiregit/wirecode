@@ -11,27 +11,29 @@ public class BandwidthCollectorStub implements BandwidthCollectorDriver {
 
     private Integer maxMeasuredUploadBandwidth = null;
     private Integer maxMeasuredDownloadBandwidth = null;
-    private Integer currentUploadBandwidth = null;
-    private Integer currentDownloadBandwidth = null;
+    private Integer currentTotalUploadBandwidth = null;
+    private Integer currentTotalDownloadBandwidth = null;
+    private Integer currentUploaderBandwidth = null;
+    private Integer currentDownloaderBandwidth = null;
 
     @Override
-    public int getCurrentDownloadBandwidth() {
-        if (currentDownloadBandwidth != null) {
-            return currentDownloadBandwidth.intValue();
+    public int getCurrentTotalDownloadBandwidth() {
+        if (currentTotalDownloadBandwidth != null) {
+            return currentTotalDownloadBandwidth.intValue();
         }
         return 0;
     }
 
     @Override
-    public int getCurrentUploadBandwidth() {
-        if (currentUploadBandwidth != null) {
-            return currentUploadBandwidth.intValue();
+    public int getCurrentTotalUploadBandwidth() {
+        if (currentTotalUploadBandwidth != null) {
+            return currentTotalUploadBandwidth.intValue();
         }
         return 0;
     }
 
     @Override
-    public int getMaxMeasuredDownloadBandwidth() {
+    public int getMaxMeasuredTotalDownloadBandwidth() {
         if (maxMeasuredDownloadBandwidth != null) {
             return maxMeasuredDownloadBandwidth.intValue();
         }
@@ -39,11 +41,27 @@ public class BandwidthCollectorStub implements BandwidthCollectorDriver {
     }
 
     @Override
-    public int getMaxMeasuredUploadBandwidth() {
+    public int getMaxMeasuredTotalUploadBandwidth() {
         if (maxMeasuredUploadBandwidth != null) {
             return maxMeasuredUploadBandwidth.intValue();
         }
         return UploadSettings.MAX_MEASURED_UPLOAD_KBPS.getValue();
+    }
+
+    @Override
+    public int getCurrentDownloaderBandwidth() {
+        if (currentDownloaderBandwidth != null) {
+            return currentDownloaderBandwidth.intValue();
+        }
+        return 0;
+    }
+
+    @Override
+    public int getCurrentUploaderBandwidth() {
+        if (currentUploaderBandwidth != null) {
+            return currentUploaderBandwidth.intValue();
+        }
+        return 0;
     }
 
     @Override
@@ -69,14 +87,28 @@ public class BandwidthCollectorStub implements BandwidthCollectorDriver {
     /**
      * Overrides the current download bandwidth until rest with a null value.
      */
-    public void overrideCurrentDownloadBandwidth(Integer override) {
-        this.currentDownloadBandwidth = override;
+    public void overrideCurrentTotalDownloadBandwidth(Integer override) {
+        this.currentTotalDownloadBandwidth = override;
     }
 
     /**
      * Overrides the current upload bandwidth until rest with a null value.
      */
-    public void overrideCurrentUploadBandwidth(Integer override) {
-        this.currentUploadBandwidth = override;
+    public void overrideCurrentTotalUploadBandwidth(Integer override) {
+        this.currentTotalUploadBandwidth = override;
+    }
+
+    /**
+     * Overrides the current download bandwidth until rest with a null value.
+     */
+    public void overrideCurrentDownloaderBandwidth(Integer override) {
+        this.currentDownloaderBandwidth = override;
+    }
+
+    /**
+     * Overrides the current upload bandwidth until rest with a null value.
+     */
+    public void overrideCurrentUploaderBandwidth(Integer override) {
+        this.currentUploaderBandwidth = override;
     }
 }

@@ -9,22 +9,34 @@ public interface BandwidthCollector {
      * Returns the maximum measured downstream bandwidth usage in kilobytes per
      * second.
      */
-    public int getMaxMeasuredDownloadBandwidth();
+    public int getMaxMeasuredTotalDownloadBandwidth();
 
     /**
      * Returns the maximum measured upstream bandwidth usage in kilobytes per
      * second.
      */
-    public int getMaxMeasuredUploadBandwidth();
+    public int getMaxMeasuredTotalUploadBandwidth();
 
     /**
      * Returns the current downstream bandwidth usage in kilobytes per second.
      */
-    public int getCurrentDownloadBandwidth();
+    public int getCurrentTotalDownloadBandwidth();
 
     /**
      * Returns the current upstream bandwidth usage in kilobytes per second.
      */
-    public int getCurrentUploadBandwidth();
+    public int getCurrentTotalUploadBandwidth();
+
+    /**
+     * Returns the current downstream bandwidth usage for all downloaders in
+     * kilobytes per second.
+     */
+    public int getCurrentDownloaderBandwidth();
+
+    /**
+     * Returns the current upstream bandwidth usage for all uploaders in
+     * kilobytes per second.
+     */
+    public int getCurrentUploaderBandwidth();
 
 }

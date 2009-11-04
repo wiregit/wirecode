@@ -261,7 +261,7 @@ public class DownloadWorker {
         this.statsTracker = statsTracker;
         this.TLSManager = TLSManager;
         
-        minAcceptableSpeed =  bandwidthCollector.getMaxMeasuredDownloadBandwidth() < 8 ? 0.1f : 0.5f;
+        minAcceptableSpeed =  bandwidthCollector.getMaxMeasuredTotalDownloadBandwidth() < 8 ? 0.1f : 0.5f;
         
         _currentState = new DownloadHttpRequestState();
 

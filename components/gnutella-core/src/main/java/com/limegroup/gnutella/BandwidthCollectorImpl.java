@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.bittorrent.Torrent;
@@ -49,8 +50,10 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
     @InspectionPoint("download bandwidth histogram")
     private final InspectionHistogram<Integer> downloadHistogram;
 
-    private final AtomicInteger currentUploadBandwidthKiloBytes = new AtomicInteger(0);
-    private final AtomicInteger currentDownloadBandwidthKiloBytes = new AtomicInteger(0);
+    private final AtomicInteger currentTotalUploadBandwidthKiloBytes = new AtomicInteger(0);
+    private final AtomicInteger currentTotalDownloadBandwidthKiloBytes = new AtomicInteger(0);
+    private final AtomicInteger currentUploaderPayloadBandwidthKiloBytes = new AtomicInteger(0);
+    private final AtomicInteger currentDownloaderPayloadBandwidthKiloBytes = new AtomicInteger(0);
 
     @Inject
     public BandwidthCollectorImpl(@Named("uploadTracker") Provider<BandwidthTracker> uploadTracker,
@@ -68,23 +71,33 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
     }
 
     @Override
-    public int getMaxMeasuredDownloadBandwidth() {
+    public int getMaxMeasuredTotalDownloadBandwidth() {
         return DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.getValue();
     }
 
     @Override
-    public int getMaxMeasuredUploadBandwidth() {
+    public int getMaxMeasuredTotalUploadBandwidth() {
         return UploadSettings.MAX_MEASURED_UPLOAD_KBPS.getValue();
     }
 
     @Override
-    public int getCurrentDownloadBandwidth() {
-        return currentDownloadBandwidthKiloBytes.get();
+    public int getCurrentTotalDownloadBandwidth() {
+        return currentTotalDownloadBandwidthKiloBytes.get();
     }
 
     @Override
-    public int getCurrentUploadBandwidth() {
-        return currentUploadBandwidthKiloBytes.get();
+    public int getCurrentTotalUploadBandwidth() {
+        return currentTotalUploadBandwidthKiloBytes.get();
+    }
+
+    @Override
+    public int getCurrentDownloaderBandwidth() {
+        return currentDownloaderPayloadBandwidthKiloBytes.get();
+    }
+
+    @Override
+    public int getCurrentUploaderBandwidth() {
+        return currentUploaderPayloadBandwidthKiloBytes.get();
     }
 
     /**
@@ -97,72 +110,101 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
         downloadTracker.get().measureBandwidth();
         connectionManager.get().measureBandwidth();
 
-        int newUpstreamKiloBytesPerSec = calculateUploadBandwidth();
+        float uploadTrackerBandwidth = getUploadTrackerBandwidth();
+        float downloadTrackerBandwidth = getDownloadTrackerBandwidth();
+        float connectionManagerUploadBandwidth = connectionManager.get()
+                .getMeasuredUpstreamBandwidth();
+        float connectionManagerDownloadBandwidth = connectionManager.get()
+                .getMeasuredDownstreamBandwidth();
+
+        List<Torrent> torrents = torrentManager.get().getTorrents();
+        float torrentUploadBandwidth = calculateTorrentUpstreamBandwidth(torrents);
+        float torrentUploadPayloadBandwidth = calculateTorrentUpstreamPayloadBandwidth(torrents);
+
+        int newUpstreamKiloBytesPerSec = (int) (uploadTrackerBandwidth
+                + connectionManagerUploadBandwidth + torrentUploadBandwidth);
+        int newUploaderKiloBytesPerSec = (int) (uploadTrackerBandwidth + torrentUploadPayloadBandwidth);
+
         uploadStat.addData(newUpstreamKiloBytesPerSec);
         uploadHistogram.count(newUpstreamKiloBytesPerSec);
 
-        int newDownstreamKiloBytesPerSec = calculateTotalDownloadBandwidth();
+        // TODO downstream kilobytes per sec is missing non payload torrent
+        // bandwidth.
+        int newDownstreamKiloBytesPerSec = (int) (downloadTrackerBandwidth + connectionManagerDownloadBandwidth);
+        int newDownloaderKiloBytesPerSec = (int) (downloadTrackerBandwidth);
+
         downloadStat.addData(newDownstreamKiloBytesPerSec);
         downloadHistogram.count(newDownstreamKiloBytesPerSec);
 
-        int maxUpstreamKiloBytesPerSec = getMaxMeasuredUploadBandwidth();
+        int maxUpstreamKiloBytesPerSec = getMaxMeasuredTotalUploadBandwidth();
         if (newUpstreamKiloBytesPerSec > maxUpstreamKiloBytesPerSec) {
             maxUpstreamKiloBytesPerSec = newUpstreamKiloBytesPerSec;
             UploadSettings.MAX_MEASURED_UPLOAD_KBPS.setValue(maxUpstreamKiloBytesPerSec);
         }
 
-        int maxDownstreamKiloBytesPerSec = getMaxMeasuredDownloadBandwidth();
+        int maxDownstreamKiloBytesPerSec = getMaxMeasuredTotalDownloadBandwidth();
         if (newDownstreamKiloBytesPerSec > maxDownstreamKiloBytesPerSec) {
             maxDownstreamKiloBytesPerSec = newDownstreamKiloBytesPerSec;
             DownloadSettings.MAX_MEASURED_DOWNLOAD_KBPS.setValue(maxDownstreamKiloBytesPerSec);
         }
 
-        currentDownloadBandwidthKiloBytes.set(newDownstreamKiloBytesPerSec);
-        currentUploadBandwidthKiloBytes.set(newUpstreamKiloBytesPerSec);
+        currentDownloaderPayloadBandwidthKiloBytes.set(newDownloaderKiloBytesPerSec);
+        currentUploaderPayloadBandwidthKiloBytes.set(newUploaderKiloBytesPerSec);
+        currentTotalDownloadBandwidthKiloBytes.set(newDownstreamKiloBytesPerSec);
+        currentTotalUploadBandwidthKiloBytes.set(newUpstreamKiloBytesPerSec);
     }
 
-    private int calculateTotalDownloadBandwidth() {
+    private float getDownloadTrackerBandwidth() {
         float bandwidth;
         try {
-            // this includes torrent downloads
+            // this includes torrents
             bandwidth = downloadTracker.get().getMeasuredBandwidth();
         } catch (InsufficientDataException ide) {
             bandwidth = 0;
         }
-        int newDownstreamKiloBytesPerSec = (int) bandwidth
-                + (int) connectionManager.get().getMeasuredDownstreamBandwidth();
-        return newDownstreamKiloBytesPerSec;
+        return bandwidth;
     }
 
-    private int calculateUploadBandwidth() {
+    private float getUploadTrackerBandwidth() {
         float bandwidth;
         try {
-            // this does not include torrent uploads, torrent uploads need to be included seperately
+            // this does not include torrents
             bandwidth = uploadTracker.get().getMeasuredBandwidth();
         } catch (InsufficientDataException ide) {
             bandwidth = 0;
         }
-
-        int torrentUpstreamKiloBytesPerSec = (int) calculateTorrentUpstreamBandwidth();
-        int newUpstreamKiloBytesPerSec = (int) bandwidth
-                + (int) connectionManager.get().getMeasuredUpstreamBandwidth()
-                + torrentUpstreamKiloBytesPerSec;
-        return newUpstreamKiloBytesPerSec;
+        return bandwidth;
     }
 
     /**
-     * Returns the torrent upstream bandwidth in kilobytes per second. 
+     * Returns the torrent upstream bandwidth in kilobytes per second.
      */
-    private float calculateTorrentUpstreamBandwidth() {
+    private float calculateTorrentUpstreamBandwidth(List<Torrent> torrents) {
 
         float rate = 0;
         for (Torrent torrent : torrentManager.get().getTorrents()) {
             TorrentStatus torrentStatus = torrent.getStatus();
             if (torrentStatus != null) {
-                // TODO should be upload rate not just the payload rate, but it
-                // will be off from the UI then.
-                // what is going to be the best course of action?
-                rate += torrentStatus.getUploadPayloadRate();
+                rate += torrentStatus.getUploadRate();
+            }
+        }
+        return rate / 1024;
+    }
+
+    /**
+     * Returns the torrent upstream payload bandwidth in kilobytes per second.
+     */
+    private float calculateTorrentUpstreamPayloadBandwidth(List<Torrent> torrents) {
+
+        float rate = 0;
+        for (Torrent torrent : torrentManager.get().getTorrents()) {
+            TorrentStatus torrentStatus = torrent.getStatus();
+            if (torrentStatus != null) {
+                // ignoring paused torrents because the rate takes a while to
+                // cycle down event though the number should be zero.
+                if (!torrentStatus.isPaused()) {
+                    rate += torrentStatus.getUploadPayloadRate();
+                }
             }
         }
         return rate / 1024;

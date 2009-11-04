@@ -110,7 +110,7 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
         
         if (speed == -1) {
             //measured speed in kilobits
-            speed = bandwidthCollector.getMaxMeasuredUploadBandwidth() * 8;
+            speed = bandwidthCollector.getMaxMeasuredTotalUploadBandwidth() * 8;
             if(speed == 0) {
                 //default to cable speed if no measurement have been done yet.
                 //assume larger than modem to get better measurement stats.
