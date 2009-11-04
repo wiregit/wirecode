@@ -19,9 +19,11 @@ import org.limewire.util.FileUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 
+@Singleton
 class CategoryManagerImpl implements CategoryManager {
     
     /** A secondary category class designed to deal with the fact that programs is split up. */
