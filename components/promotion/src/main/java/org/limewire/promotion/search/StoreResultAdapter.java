@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -21,9 +22,11 @@ import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreResultListener;
 import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.io.GUID;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 /**
  * Implementation of StoreResult for the live core.
@@ -36,6 +39,7 @@ public class StoreResultAdapter implements StoreResult {
     private final Map<FilePropertyKey, Object> propertyMap;
     private final List<TrackResult> trackList;
     
+    private final Type type;
     private final String albumIconUri;
     private final String albumId;
     private final Category category;
@@ -67,23 +71,25 @@ public class StoreResultAdapter implements StoreResult {
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         trackList = new ArrayList<TrackResult>();
         
+        type = Type.valueOf(jsonObj.optString("objectType", "").toUpperCase(Locale.US));
         albumIconUri = jsonObj.optString("albumIcon", "");
         albumId = jsonObj.optString("albumId", "");
         category = getCategory(jsonObj);
-        fileName = jsonObj.optString("fileName", "");
+        fileName = jsonObj.optString("sortableTrackTitle", "") + ".mp3";
         fileExtension = FileUtils.getFileExtension(fileName);
         infoUri = jsonObj.optString("infoPage", "");
         price = jsonObj.optString("price", "");
         remoteHost = new RemostHostImpl(new StorePresence("Store"));
         size = jsonObj.optLong("fileSize");
         sortPriority = getSortPriority(jsonObj);
-        streamUri = jsonObj.optString("streamUrl", "");
+        streamUri = jsonObj.optString("file", "");
         trackCount = jsonObj.optLong("trackCount");
-        String urnString = jsonObj.optString("URN", "");
+        String urnString = jsonObj.optString("urn", ""); // TODO fix urns values coming from API
         if(urnString != null && urnString.trim().length() > 0) {
-            urn = com.limegroup.gnutella.URN.createUrnFromString(urnString);
+            urn = com.limegroup.gnutella.URN.createUrnFromString("urn:" + urnString);
         } else {
-            urn = null;
+            // TODO horribly broken
+            urn = com.limegroup.gnutella.URN.createUrnFromString("urn:guid:" + new GUID());
         }
         
         initProperties(jsonObj);
@@ -94,18 +100,22 @@ public class StoreResultAdapter implements StoreResult {
      */
     private void initProperties(JSONObject jsonObj) throws JSONException {
         propertyMap.put(FilePropertyKey.AUTHOR, jsonObj.optString("artist"));
-        propertyMap.put(FilePropertyKey.ALBUM, jsonObj.optString("album"));
-        propertyMap.put(FilePropertyKey.TITLE, jsonObj.optString("title"));
-        propertyMap.put(FilePropertyKey.BITRATE, jsonObj.optLong("bitRate"));
-        propertyMap.put(FilePropertyKey.GENRE, jsonObj.optString("genre"));
-        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.optLong("length"));
-        propertyMap.put(FilePropertyKey.QUALITY, jsonObj.optLong("quality"));
+        propertyMap.put(FilePropertyKey.ALBUM, jsonObj.optString("albumTitle"));
+        if(type == Type.TRACK) {
+            propertyMap.put(FilePropertyKey.TITLE, jsonObj.optString("sortableTrackTitle"));  // TODO is thie right?
+        } else if(type == Type.ALBUM){ 
+            propertyMap.put(FilePropertyKey.TITLE, jsonObj.optString("albumTitle")); // TODO is thie right?
+        }
+        propertyMap.put(FilePropertyKey.BITRATE, 256l);
+        propertyMap.put(FilePropertyKey.GENRE, jsonObj.optString("primaryGenre"));
+        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.optLong("duration"));
+        propertyMap.put(FilePropertyKey.QUALITY, 3l);
         
         String trackNumber = jsonObj.optString("trackNumber");
         if (trackNumber.length() > 0) propertyMap.put(FilePropertyKey.TRACK_NUMBER, trackNumber);
         
-        long year = jsonObj.optLong("year");
-        if (year > 0) propertyMap.put(FilePropertyKey.YEAR, year);
+        String year = jsonObj.optString("origRelDate");
+        if (!StringUtils.isEmpty(year)) propertyMap.put(FilePropertyKey.YEAR, year.substring(0, 4));
     }
     
     @Override
@@ -232,8 +242,13 @@ public class StoreResultAdapter implements StoreResult {
     }
 
     @Override
+    public Type getType() {
+        return type;
+    }
+
+    @Override
     public boolean isAlbum() {
-        return (albumId != null) && (albumId.length() > 0) && (trackCount > 0);
+        return type == Type.ALBUM;
     }
     
     /**
@@ -258,13 +273,14 @@ public class StoreResultAdapter implements StoreResult {
      * Returns the Category from the specified JSON object.
      */
     private Category getCategory(JSONObject jsonObj) throws JSONException {
-        String value = jsonObj.optString("category");
+        return Category.AUDIO;
+        /*String value = jsonObj.optString("category");
         for (Category category : Category.values()) {
             if (category.toString().equalsIgnoreCase(value)) {
                 return category;
             }
         }
-        return null;
+        return null;*/
     }
     
     /**

@@ -32,13 +32,13 @@ public class TrackResultAdapter implements TrackResult {
     public TrackResultAdapter(JSONObject jsonObj) throws IOException, JSONException {
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         
-        albumId = jsonObj.getString("albumId");
-        fileName = jsonObj.getString("fileName");
+        albumId = jsonObj.optString("albumId");
+        fileName = jsonObj.optString("sortableTrackTitle", "") + ".mp3";
         fileExtension = FileUtils.getFileExtension(fileName);
         price = jsonObj.optString("price");
-        size = jsonObj.getLong("fileSize");
-        streamUri = jsonObj.optString("streamUrl");
-        urn = com.limegroup.gnutella.URN.createUrnFromString(jsonObj.getString("URN"));
+        size = jsonObj.optLong("fileSize");
+        streamUri = jsonObj.optString("file");
+        urn = com.limegroup.gnutella.URN.createUrnFromString("urn:" + jsonObj.getString("urn"));
         
         initProperties(jsonObj);
     }
@@ -47,16 +47,16 @@ public class TrackResultAdapter implements TrackResult {
      * Populates the properties using the specified JSON object.
      */
     private void initProperties(JSONObject jsonObj) throws JSONException {
-        propertyMap.put(FilePropertyKey.TITLE, jsonObj.getString("title"));
-        propertyMap.put(FilePropertyKey.BITRATE, jsonObj.getLong("bitRate"));
-        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.getLong("length"));
-        propertyMap.put(FilePropertyKey.QUALITY, jsonObj.getLong("quality"));
+        propertyMap.put(FilePropertyKey.TITLE, jsonObj.getString("sortableTrackTitle"));
+        propertyMap.put(FilePropertyKey.BITRATE, 256l);
+        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.getLong("duration"));
+        propertyMap.put(FilePropertyKey.QUALITY, 3l);
         propertyMap.put(FilePropertyKey.TRACK_NUMBER, jsonObj.getString("trackNumber"));
         
         String artist = jsonObj.optString("artist");
         if (artist.length() > 0) propertyMap.put(FilePropertyKey.AUTHOR, artist);
         
-        String album = jsonObj.optString("album");
+        String album = jsonObj.optString("albumTitle");
         if (album.length() > 0) propertyMap.put(FilePropertyKey.ALBUM, album);
         
         long year = jsonObj.optLong("year");

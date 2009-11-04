@@ -28,7 +28,7 @@ public class StoreResultsAdapter implements StoreResults {
 
     @Override
     public String getRenderStyle() {
-        return renderStyle;
+        return "STYLE_" + renderStyle;
     }
 
     @Override

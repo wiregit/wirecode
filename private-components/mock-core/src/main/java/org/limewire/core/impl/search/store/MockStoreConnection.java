@@ -2,282 +2,161 @@ package org.limewire.core.impl.search.store;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.List;
+import java.util.EnumMap;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.search.store.StoreConnection;
+import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreResults;
 import org.limewire.core.api.search.store.StoreStyle;
+import org.limewire.core.api.search.store.StoreSearchListener;
+import org.limewire.core.api.search.store.TrackResult;
 import org.limewire.core.api.search.store.StoreStyle.Type;
-
-import com.google.inject.Inject;
+import org.limewire.core.impl.MockURN;
 
 /**
  * Implementation of StoreConnection for the mock core.
  */
-public class MockStoreConnection implements StoreConnection {
-    private static final String COLON = ":";
-    private static final String COMMA = ",";
-    private static final String DQUOTE = "\"";
-    private static final String JSON_ARR = "[]";
-    private static final String JSON_OBJ = "{}";
-
-    private final Properties properties;
+public class MockStoreConnection  {
     
-    private StoreStyle.Type styleType;
-    
-    @Inject
-    public MockStoreConnection() {
-        properties = new Properties();
-        styleType = Type.STYLE_A;
-    }
-    
-    @Override
-    public String doQuery(String query) {
-        StringBuilder buf = new StringBuilder(JSON_OBJ);
+    public StoreResults doQuery(String query) {
         
-        try {
-            // Insert style type and results.
-            insertNameValue(buf, "styleType", styleType.toString());
-            insertNameValue(buf, "styleTimestamp", "2009-10-07 12:00:00");
-            insertValue(buf, quoted("storeResults") + COLON + createResultsJSON());
-            
-        } catch (Exception e) {
-            e.printStackTrace();
+        Type styleType;
+        if (query.indexOf("monkey") > -1) {
+            styleType = Type.STYLE_A;
+        } else if (query.indexOf("bear") > -1) {
+            styleType = Type.STYLE_B;
+        } else if (query.indexOf("cat") > -1) {
+            styleType = Type.STYLE_C;
+        } else if (query.indexOf("dog") > -1) {
+            styleType = Type.STYLE_D;
+        } else {
+            styleType = Type.STYLE_A;
         }
+
+        ArrayList<StoreResult> resultList = new ArrayList<StoreResult>();
         
-        return buf.toString();
+        MockStoreResult result1 = new MockStoreResult(this);
+        resultList.add(result1);
+        Map<FilePropertyKey, Object> properties = new HashMap<FilePropertyKey, Object>();
+        result1.setPropertyMap(properties);
+        
+        properties.put(FilePropertyKey.AUTHOR, "GreenMonkeys");
+        properties.put(FilePropertyKey.TITLE, "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
+        properties.put(FilePropertyKey.ALBUM, "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
+        result1.setAlbumIconUri("albumCover.png");
+        result1.setAlbumId("666");
+        properties.put(FilePropertyKey.BITRATE, 128l);
+        result1.setCategory(Category.AUDIO);
+        result1.setFileName("Green Monkeys The Collection.mp3");
+        result1.setSize(9 * 1024 * 1024);
+        properties.put(FilePropertyKey.GENRE, "Jazz");
+        result1.setInfoUri(getClass().getResource("fileInfo.html").toString());
+        properties.put(FilePropertyKey.LENGTH, 568l);
+        result1.setPrice("4 Credits");
+        properties.put(FilePropertyKey.QUALITY, 3l);
+        result1.setTrackCount(3);
+        result1.setUrn(new MockURN("www.store.limewire.com0"));
+        result1.setType(StoreResult.Type.ALBUM);
+        
+        MockStoreResult result2 = new MockStoreResult(this);
+        resultList.add(result2);
+        properties = new HashMap<FilePropertyKey, Object>();
+        result2.setPropertyMap(properties);
+        
+        properties.put(FilePropertyKey.AUTHOR, "GreenMonkeys");
+        properties.put(FilePropertyKey.TITLE, "Chomp");
+        properties.put(FilePropertyKey.ALBUM, "Premonitions, Echoes & Science");
+        properties.put(FilePropertyKey.BITRATE, 256l);
+        result2.setCategory(Category.AUDIO);
+        result2.setFileName("Green Monkeys Chomp.mp3");
+        result2.setSize(3 * 1024 * 1024);
+        properties.put(FilePropertyKey.GENRE, "Jazz");
+        result2.setInfoUri(getClass().getResource("fileInfo.html").toString());
+        properties.put(FilePropertyKey.LENGTH, 208l);
+        result2.setPrice("1 Credit");
+        properties.put(FilePropertyKey.QUALITY, 3l);
+        result2.setTrackCount(3);
+        result2.setUrn(new MockURN("www.store.limewire.com1"));
+        result2.setType(StoreResult.Type.TRACK);
+        
+        return new MockStoreResults(styleType.toString(), resultList);
     }
     
-    @Override
     public Icon loadIcon(String iconUri) {
         return new ImageIcon(getClass().getResource(iconUri));
     }
     
-    @Override
-    public String loadStyle(String styleId) {
-        StringBuilder buf = new StringBuilder(JSON_OBJ);
-        
-        try {
-            // Load style properties.
-            URL url = MockStoreStyle.class.getResource("MockStoreStyle.properties");
-            properties.load(url.openStream());
-            
-            insertValue(buf, quoted("storeStyle") + COLON + createStyleJSON());
-            
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        
-        return buf.toString();
+    public StoreStyle loadStyle(String styleId, StoreSearchListener storeSearchListener) throws IOException {        
+        URL url = MockStoreStyle.class.getResource(styleId + ".properties");
+        Properties properties = new Properties();
+        properties.load(url.openStream());
+        return new MockStoreStyle(properties, storeSearchListener, this);                
     }
     
-    @Override
-    public String loadTracks(String albumId) {
-        StringBuilder buf = new StringBuilder(JSON_OBJ);
-        insertValue(buf, quoted("tracks") + COLON + createTracksJSON(albumId));
-        return buf.toString();
-    }
-    
-    /**
-     * Sets the store style type for mock results.
-     */
-    public void setStyleType(StoreStyle.Type styleType) {
-        this.styleType = styleType;
-    }
-    
-    /**
-     * Returns the store style object formatted as a JSON string.
-     */
-    private String createStyleJSON() {
-        StringBuilder buf = new StringBuilder(JSON_OBJ);
+    public List<TrackResult> loadTracks(String albumId) {
+        ArrayList<TrackResult> tracks = new ArrayList<TrackResult>();
         
-        insertNameValue(buf, "type", styleType.toString());
-        insertNameValue(buf, "timestamp", "2009-10-07 12:00:00");
-        insertValue(buf, getNameValuePair("background"));
-        insertValue(buf, getNameValuePair("buyAlbumIcon"));
-        insertValue(buf, getNameValuePair("buyTrackIcon"));
-        insertValue(buf, getNameValuePair("classicBuyIcon"));
-        insertValue(buf, getNameValuePair("classicPauseIcon"));
-        insertValue(buf, getNameValuePair("classicPlayIcon"));
-        insertValue(buf, getNameValuePair("classicPriceFont"));
-        insertValue(buf, getNameValuePair("classicPriceForeground"));
-        insertValue(buf, getNameValuePair("downloadAlbumIcon"));
-        insertValue(buf, getNameValuePair("downloadTrackIcon"));
-        insertValue(buf, getNameValuePair("headingFont"));
-        insertValue(buf, getNameValuePair("headingForeground"));
-        insertValue(buf, getNameValuePair("infoFont"));
-        insertValue(buf, getNameValuePair("infoForeground"));
-        insertValue(buf, getNameValuePair("priceBackground"));
-        insertValue(buf, getNameValuePair("priceBorderColor"));
-        insertValue(buf, getNameValuePair("priceFont"));
-        insertValue(buf, getNameValuePair("priceForeground"));
-        insertValue(buf, getNameValuePair("showTracksFont"));
-        insertValue(buf, getNameValuePair("showTracksForeground"));
-        insertValue(buf, getNameValuePair("streamIcon"));
-        insertValue(buf, getNameValuePair("streamPauseIcon"));
-        insertValue(buf, getNameValuePair("subHeadingFont"));
-        insertValue(buf, getNameValuePair("subHeadingForeground"));
-        insertValue(buf, getNameValuePair("trackFont"));
-        insertValue(buf, getNameValuePair("trackForeground"));
-        insertValue(buf, getNameValuePair("trackLengthFont"));
-        insertValue(buf, getNameValuePair("trackLengthForeground"));
-        
-        insertValue(buf, getNameValuePair("downloadButtonVisible"));
-        insertValue(buf, getNameValuePair("priceButtonVisible"));
-        insertValue(buf, getNameValuePair("priceVisible"));
-        insertValue(buf, getNameValuePair("showInfoOnHover"));
-        insertValue(buf, getNameValuePair("showTracksOnHover"));
-        insertValue(buf, getNameValuePair("streamButtonVisible"));
-        
-        return buf.toString();
-    }
-    
-    /**
-     * Returns an array of store results formatted as a JSON string.
-     */
-    private String createResultsJSON() {
-        int i = 0;
-        StringBuilder resultArr = new StringBuilder(JSON_ARR);
-        
-        // Create album.
-        StringBuilder album = new StringBuilder(JSON_OBJ);
-        insertNameValue(album, "artist", "GreenMonkeys");
-        insertNameValue(album, "title", "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
-        insertNameValue(album, "album", "The Collection That Keeps on Playing and Playing and Playing and Playing and Playing");
-        insertNameValue(album, "albumIcon", "albumCover.png");
-        insertNameValue(album, "albumId", "666");
-        insertNameValue(album, "bitRate", String.valueOf(128));
-        insertNameValue(album, "category", Category.AUDIO.toString());
-        insertNameValue(album, "fileName", "Green Monkeys The Collection.mp3");
-        insertNameValue(album, "fileSize", String.valueOf(9 * 1024 * 1024));
-        insertNameValue(album, "genre", "Jazz");
-        insertNameValue(album, "infoPage", getClass().getResource("fileInfo.html").toString());
-        insertNameValue(album, "length", String.valueOf(568));
-        insertNameValue(album, "price", "4 Credits");
-        insertNameValue(album, "quality", String.valueOf(3));
-        insertNameValue(album, "trackCount", "3");
-        insertNameValue(album, "URN", "www.store.limewire.com" + i);
-        
-        // Add album to results.
-        insertValue(resultArr, album.toString());
-        
-        // Create single file result.
-        StringBuilder media = new StringBuilder(JSON_OBJ);
-        insertNameValue(media, "artist", "GreenMonkeys");
-        insertNameValue(media, "title", "Chomp");
-        insertNameValue(media, "album", "Premonitions, Echoes & Science");
-        insertNameValue(media, "bitRate", String.valueOf(256));
-        insertNameValue(media, "category", Category.AUDIO.toString());
-        insertNameValue(media, "genre", "Jazz");
-        insertNameValue(media, "fileName", "Green Monkeys Chomp.mp3");
-        insertNameValue(media, "fileSize", String.valueOf(3 * 1024 * 1024));
-        insertNameValue(media, "infoPage", getClass().getResource("fileInfo.html").toString());
-        insertNameValue(media, "length", String.valueOf(208));
-        insertNameValue(media, "price", "1 Credit");
-        insertNameValue(media, "quality", String.valueOf(3));
-        insertNameValue(media, "URN", "www.store.limewire.com" + (i + 10));
-        
-        // Add file to results.
-        insertValue(resultArr, media.toString());
-        
-        return resultArr.toString();
-    }
-    
-    /**
-     * Returns an array of track results formatted as a JSON string.
-     */
-    private String createTracksJSON(String albumId) {
-        int i = 0;
+        MockTrackResult trackResult = new MockTrackResult();
+        EnumMap<FilePropertyKey, Object> properties = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+        trackResult.setPropertyMap(properties);
+        tracks.add(trackResult);
         
         // Create tracks.
-        StringBuilder trackArr = new StringBuilder(JSON_ARR);
-        StringBuilder track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", albumId);
-        insertNameValue(track, "artist", "Green Monkeys");
-        insertNameValue(track, "title", "Heh?");
-        insertNameValue(track, "bitRate", String.valueOf(128));
-        insertNameValue(track, "fileName", "Green Monkeys - Heh.mp3");        
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
-        insertNameValue(track, "length", String.valueOf(129));
-        insertNameValue(track, "price", "1 Credit");
-        insertNameValue(track, "quality", String.valueOf(3));
-        insertNameValue(track, "trackNumber", String.valueOf(1));
-        insertNameValue(track, "URN", "www.store.limewire.com" + (i + 1));
-        insertValue(trackArr, track.toString());
+        trackResult.setAlbumId(albumId);
+        properties.put(FilePropertyKey.AUTHOR, "Green Monkeys");
+        properties.put(FilePropertyKey.TITLE, "Heh?");
+        properties.put(FilePropertyKey.BITRATE, 128l);
+        trackResult.setFileName("Green Monkeys - Heh.mp3");        
+        trackResult.setSize(3 * 1024 * 1024);
+        properties.put(FilePropertyKey.LENGTH, 129l);
+        trackResult.setPrice("1 Credit");
+        properties.put(FilePropertyKey.QUALITY , 3l);
+        properties.put(FilePropertyKey.TRACK_NUMBER, "1");
+        trackResult.setUrn(new MockURN("www.store.limewire.com1"));
+        
+        trackResult = new MockTrackResult();
+        properties = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+        trackResult.setPropertyMap(properties);
+        tracks.add(trackResult);
 
-        track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", albumId);
-        insertNameValue(track, "artist", "Green Monkeys");
-        insertNameValue(track, "title", "Take Me To Space (Man)");
-        insertNameValue(track, "bitRate", String.valueOf(128));
-        insertNameValue(track, "fileName", "Green Monkeys - Take Me To Space (Man).mp3");        
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
-        insertNameValue(track, "length", String.valueOf(251));
-        insertNameValue(track, "price", "1 Credit");
-        insertNameValue(track, "quality", String.valueOf(3));
-        insertNameValue(track, "trackNumber", String.valueOf(2));
-        insertNameValue(track, "URN", "www.store.limewire.com" + (i + 2));
-        insertValue(trackArr, track.toString());
+        trackResult.setAlbumId(albumId);
+        properties.put(FilePropertyKey.AUTHOR, "Green Monkeys");
+        properties.put(FilePropertyKey.TITLE, "Take Me To Space (Man)");
+        properties.put(FilePropertyKey.BITRATE, 128l);
+        trackResult.setFileName("Green Monkeys - Take Me To Space (Man).mp3");        
+        trackResult.setSize(3 * 1024 * 1024);
+        properties.put(FilePropertyKey.LENGTH, 251l);
+        trackResult.setPrice("1 Credit");
+        properties.put(FilePropertyKey.QUALITY , 3l);
+        properties.put(FilePropertyKey.TRACK_NUMBER, "2");
+        trackResult.setUrn(new MockURN("www.store.limewire.com2"));
+        
+        trackResult = new MockTrackResult();
+        properties = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
+        trackResult.setPropertyMap(properties);
+        tracks.add(trackResult);
 
-        track = new StringBuilder(JSON_OBJ);
-        insertNameValue(track, "albumId", albumId);
-        insertNameValue(track, "artist", "Green Monkeys");
-        insertNameValue(track, "title", "Crush");
-        insertNameValue(track, "bitRate", String.valueOf(128));
-        insertNameValue(track, "fileName", "Green Monkeys - Crush.mp3");        
-        insertNameValue(track, "fileSize", String.valueOf(3 * 1024 * 1024));
-        insertNameValue(track, "length", String.valueOf(188));
-        insertNameValue(track, "price", "1 Credit");
-        insertNameValue(track, "quality", String.valueOf(3));
-        insertNameValue(track, "trackNumber", String.valueOf(3));
-        insertNameValue(track, "URN", "www.store.limewire.com" + (i + 3));
-        insertValue(trackArr, track.toString());
+        trackResult.setAlbumId(albumId);
+        properties.put(FilePropertyKey.AUTHOR, "Green Monkeys");
+        properties.put(FilePropertyKey.TITLE, "Crush");
+        properties.put(FilePropertyKey.BITRATE, 128l);
+        trackResult.setFileName("Green Monkeys - Crush.mp3");        
+        trackResult.setSize(3 * 1024 * 1024);
+        properties.put(FilePropertyKey.LENGTH, 188l);
+        trackResult.setPrice("1 Credit");
+        properties.put(FilePropertyKey.QUALITY , 3l);
+        properties.put(FilePropertyKey.TRACK_NUMBER, "3");
+        trackResult.setUrn(new MockURN("www.store.limewire.com2"));
         
-        return trackArr.toString();
-    }
-    
-    /**
-     * Inserts the specified name and value into the JSON buffer.  Both the 
-     * name and value strings are enclosed in double-quotes.
-     */
-    private StringBuilder insertNameValue(StringBuilder buf, String name, String value) {
-        // Create quoted name/value pair.
-        String pair = quoted(name) + COLON + quoted(value);
-        insertValue(buf, pair);
-        return buf;
-    }
-    
-    /**
-     * Inserts the specified value into the JSON buffer.
-     */
-    private StringBuilder insertValue(StringBuilder buf, String value) {
-        // Insert separator if needed.
-        if (buf.length() > 2) {
-            buf.insert(buf.length() - 1, COMMA);
-        }
-        
-        // Insert value before closing character.
-        buf.insert(buf.length() - 1, value);
-        
-        return buf;
-    }
-    
-    /**
-     * Returns the name/value pair for the specified style property.  Both the
-     * name and value strings are enclosed in double-quotes.
-     */
-    private String getNameValuePair(String propertyKey) {
-        String value = properties.getProperty(styleType + "." + propertyKey);
-        return quoted(propertyKey) + COLON + quoted(value);
-    }
-    
-    /**
-     * Returns the specified text enclosed in double-quotes.
-     */
-    private String quoted(String text) {
-        return DQUOTE + text + DQUOTE;
+        return tracks;
     }
 }

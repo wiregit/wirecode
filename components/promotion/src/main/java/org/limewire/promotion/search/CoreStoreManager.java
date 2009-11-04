@@ -149,7 +149,7 @@ public class CoreStoreManager implements StoreManager {
                         // Get store results array.
                         StoreResults storeResults = readStoreResults(jsonObj);
                         
-                        StoreStyle style = getStyle(jsonObj);
+                        StoreStyle style = getStyle(storeResults);
                         // Fire event to update style.
                         storeSearchListener.styleUpdated(style);
                         // Fire event to handle results.
@@ -165,10 +165,10 @@ public class CoreStoreManager implements StoreManager {
         });
     }
     
-    private StoreStyle getStyle(JSONObject jsonObject) {        
-        if(jsonObject.has("styleType")) {
+    private StoreStyle getStyle(StoreResults storeResults) {        
+        if(!StringUtils.isEmpty(storeResults.getRenderStyle())) {
             try {
-                Type type = Type.valueOf(jsonObject.optString("styleType"));
+                Type type = Type.valueOf(storeResults.getRenderStyle());
                 StoreStyle style = styleManager.getStyle(type);
                 return style != null ? style : styleManager.getDefaultStyle();
             } catch (IllegalArgumentException e) {

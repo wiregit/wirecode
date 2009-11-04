@@ -15,7 +15,11 @@ import org.limewire.core.api.endpoint.RemoteHost;
 public interface StoreResult {
     /** Sort priority values. */
     public enum SortPriority {
-        TOP, MIXED, BOTTOM;
+        TOP, MIXED, BOTTOM
+    }
+    
+    public enum Type {
+        TRACK, ALBUM          
     }
 
     /**
@@ -29,6 +33,8 @@ public interface StoreResult {
      * store result is updated.
      */
     void removeStoreResultListener(StoreResultListener listener);
+    
+    Type getType();
     
     /**
      * Returns true if the result represents a collection of media files.

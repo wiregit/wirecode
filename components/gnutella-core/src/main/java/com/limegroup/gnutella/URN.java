@@ -63,7 +63,10 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
         INVALID("Invalid",-1),
         
         /** UrnType for a {@link GUID} URN. */
-        GUID("guid:", 32);
+        GUID("guid:", 32),
+        
+        /** UrnType for MD5 URN */
+        MD5("md5:", 32);
         
         private final String descriptor;
         

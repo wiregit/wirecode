@@ -5,13 +5,12 @@ import java.awt.Font;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Properties;
 
 import javax.swing.Icon;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.core.api.search.store.StoreConnection;
-import org.limewire.core.api.search.store.StoreConnectionFactory;
 import org.limewire.core.api.search.store.StoreSearchListener;
 import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.util.StringUtils;
@@ -22,8 +21,8 @@ import org.limewire.util.StringUtils;
 public class MockStoreStyle implements StoreStyle {
 
     private final StoreSearchListener storeSearchListener;
-    private final StoreConnectionFactory storeConnectionFactory;
-    
+    private final MockStoreConnection storeConnection;
+
     private final Type type;
     private final long timestamp;
     
@@ -78,50 +77,50 @@ public class MockStoreStyle implements StoreStyle {
     /**
      * Constructs a StoreStyle using the specified JSON object.
      */
-    public MockStoreStyle(JSONObject jsonObj, 
+    public MockStoreStyle(Properties properties, 
             StoreSearchListener storeSearchListener,
-            StoreConnectionFactory storeConnectionFactory) throws JSONException {
+            MockStoreConnection connection) {
         this.storeSearchListener = storeSearchListener;
-        this.storeConnectionFactory = storeConnectionFactory;
+        this.storeConnection = connection;
+
+        type = Type.valueOf(properties.getProperty("type"));
+        timestamp = System.currentTimeMillis();
         
-        type = getType(jsonObj);
-        timestamp = getTimestamp(jsonObj);
+        background = getColor(properties, "background");
+        buyAlbumIconUri = properties.getProperty("buyAlbumIcon");
+        buyTrackIconUri = properties.getProperty("buyTrackIcon");
+        classicBuyIconUri = properties.getProperty("classicBuyIcon");
+        classicPauseIconUri = properties.getProperty("classicPauseIcon");
+        classicPlayIconUri = properties.getProperty("classicPlayIcon");
+        classicPriceFont = getFont(properties, "classicPriceFont");
+        classicPriceForeground = getColor(properties, "classicPriceForeground");
+        downloadAlbumIconUri = properties.getProperty("downloadAlbumIcon");
+        downloadTrackIconUri = properties.getProperty("downloadTrackIcon");
+        headingFont = getFont(properties, "headingFont");
+        headingForeground = getColor(properties, "headingForeground");
+        infoFont = getFont(properties, "infoFont");
+        infoForeground = getColor(properties, "infoForeground");
+        priceBackground = getColor(properties, "priceBackground");
+        priceBorderColor = getColor(properties, "priceBorderColor");
+        priceFont = getFont(properties, "priceFont");
+        priceForeground = getColor(properties, "priceForeground");
+        showTracksFont = getFont(properties, "showTracksFont");
+        showTracksForeground = getColor(properties, "showTracksForeground");
+        streamIconUri = properties.getProperty("streamIcon");
+        streamPauseIconUri = properties.getProperty("streamIcon");
+        subHeadingFont = getFont(properties, "subHeadingFont");
+        subHeadingForeground = getColor(properties, "subHeadingForeground");
+        trackFont = getFont(properties, "trackFont");
+        trackForeground = getColor(properties, "trackForeground");
+        trackLengthFont = getFont(properties, "trackLengthFont");
+        trackLengthForeground = getColor(properties, "trackLengthForeground");
         
-        background = getColor(jsonObj, "background");
-        buyAlbumIconUri = jsonObj.optString("buyAlbumIcon");
-        buyTrackIconUri = jsonObj.optString("buyTrackIcon");
-        classicBuyIconUri = jsonObj.optString("classicBuyIcon");
-        classicPauseIconUri = jsonObj.optString("classicPauseIcon");
-        classicPlayIconUri = jsonObj.optString("classicPlayIcon");
-        classicPriceFont = getFont(jsonObj, "classicPriceFont");
-        classicPriceForeground = getColor(jsonObj, "classicPriceForeground");
-        downloadAlbumIconUri = jsonObj.optString("downloadAlbumIcon");
-        downloadTrackIconUri = jsonObj.optString("downloadTrackIcon");
-        headingFont = getFont(jsonObj, "headingFont");
-        headingForeground = getColor(jsonObj, "headingForeground");
-        infoFont = getFont(jsonObj, "infoFont");
-        infoForeground = getColor(jsonObj, "infoForeground");
-        priceBackground = getColor(jsonObj, "priceBackground");
-        priceBorderColor = getColor(jsonObj, "priceBorderColor");
-        priceFont = getFont(jsonObj, "priceFont");
-        priceForeground = getColor(jsonObj, "priceForeground");
-        showTracksFont = getFont(jsonObj, "showTracksFont");
-        showTracksForeground = getColor(jsonObj, "showTracksForeground");
-        streamIconUri = jsonObj.optString("streamIcon");
-        streamPauseIconUri = jsonObj.optString("streamIcon");
-        subHeadingFont = getFont(jsonObj, "subHeadingFont");
-        subHeadingForeground = getColor(jsonObj, "subHeadingForeground");
-        trackFont = getFont(jsonObj, "trackFont");
-        trackForeground = getColor(jsonObj, "trackForeground");
-        trackLengthFont = getFont(jsonObj, "trackLengthFont");
-        trackLengthForeground = getColor(jsonObj, "trackLengthForeground");
-        
-        downloadButtonVisible = getBoolean(jsonObj, "downloadButtonVisible");
-        priceButtonVisible = getBoolean(jsonObj, "priceButtonVisible");
-        priceVisible = getBoolean(jsonObj, "priceVisible");
-        showInfoOnHover = getBoolean(jsonObj, "showInfoOnHover");
-        showTracksOnHover = getBoolean(jsonObj, "showTracksOnHover");
-        streamButtonVisible = getBoolean(jsonObj, "streamButtonVisible");
+        downloadButtonVisible = getBoolean(properties, "downloadButtonVisible");
+        priceButtonVisible = getBoolean(properties, "priceButtonVisible");
+        priceVisible = getBoolean(properties, "priceVisible");
+        showInfoOnHover = getBoolean(properties, "showInfoOnHover");
+        showTracksOnHover = getBoolean(properties, "showTracksOnHover");
+        streamButtonVisible = getBoolean(properties, "streamButtonVisible");
         
         loadIcons();
     }
@@ -141,7 +140,6 @@ public class MockStoreStyle implements StoreStyle {
                     } catch (InterruptedException e) {}
                     
                     // Create store connection and load icons.
-                    StoreConnection storeConnection = storeConnectionFactory.create();
                     
                     if (!StringUtils.isEmpty(buyAlbumIconUri)) {
                         buyAlbumIcon = storeConnection.loadIcon(buyAlbumIconUri);
@@ -361,23 +359,23 @@ public class MockStoreStyle implements StoreStyle {
     /**
      * Returns the boolean value for the specified property key.
      */
-    private boolean getBoolean(JSONObject jsonObj, String propertyKey) {
-        return jsonObj.optBoolean(propertyKey);
+    private boolean getBoolean(Properties properties, String propertyKey) {
+        return Boolean.valueOf(properties.getProperty(propertyKey));
     }
     
     /**
      * Returns the color for the specified property key.
      */
-    private Color getColor(JSONObject jsonObj, String propertyKey) {
-        String value = jsonObj.optString(propertyKey);
+    private Color getColor(Properties properties, String propertyKey) {
+        String value = properties.getProperty(propertyKey);
         return (value != null) ? Color.decode(value) : null;
     }
     
     /**
      * Returns the font for the specified property key.
      */
-    private Font getFont(JSONObject jsonObj, String propertyKey) {
-        String value = jsonObj.optString(propertyKey);
+    private Font getFont(Properties properties, String propertyKey) {
+        String value = properties.getProperty(propertyKey);
         return (value != null) ? Font.decode(value) : null;
     }
     

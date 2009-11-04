@@ -5,23 +5,16 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.io.IOException;
 
 import javax.swing.Icon;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.store.StoreConnection;
-import org.limewire.core.api.search.store.StoreConnectionFactory;
 import org.limewire.core.api.search.store.StoreResult;
 import org.limewire.core.api.search.store.StoreResultListener;
 import org.limewire.core.api.search.store.TrackResult;
-import org.limewire.core.impl.MockURN;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.friend.api.FriendPresence;
@@ -32,73 +25,39 @@ import org.limewire.util.FileUtils;
  */
 public class MockStoreResult implements StoreResult {
 
-    private final StoreConnectionFactory storeConnectionFactory;
     private final List<StoreResultListener> listenerList;
-    private final Map<FilePropertyKey, Object> propertyMap;
-    private final List<TrackResult> trackList;
+    private Map<FilePropertyKey, Object> propertyMap;
+    private List<TrackResult> trackList;
     
-    private final String albumIconUri;
-    private final String albumId;
-    private final Category category;
-    private final RemoteHost remoteHost;
-    private final String fileExtension;
-    private final String fileName;
-    private final String infoUri;
-    private final String price;
-    private final long size;
-    private final String streamUri;
-    private final long trackCount;
-    private final URN urn;
+    private Type type;
+    private String albumIconUri;
+    private String albumId;
+    private Category category;
+    private RemoteHost remoteHost;
+    private String fileExtension;
+    private String fileName;
+    private String infoUri;
+    private String price;
+    private long size;
+    private String streamUri;
+    private long trackCount;
+    private URN urn;
     
     private Icon albumIcon;
     
     private boolean albumIconRequested;
     private boolean tracksRequested;
-    
+    private final MockStoreConnection storeConnection;
+
     /**
      * Constructs a MockStoreResult using the specified JSON object.
      */
-    public MockStoreResult(JSONObject jsonObj, StoreConnectionFactory storeConnectionFactory) throws JSONException {
-        this.storeConnectionFactory = storeConnectionFactory;
+    public MockStoreResult(MockStoreConnection storeConnection) {
+        this.storeConnection = storeConnection;
         listenerList = new CopyOnWriteArrayList<StoreResultListener>();
         propertyMap = new EnumMap<FilePropertyKey, Object>(FilePropertyKey.class);
         trackList = new ArrayList<TrackResult>();
-        
-        albumIconUri = jsonObj.optString("albumIcon");
-        albumId = jsonObj.optString("albumId");
-        category = getCategory(jsonObj);
-        fileName = jsonObj.getString("fileName");
-        fileExtension = FileUtils.getFileExtension(fileName);
-        infoUri = jsonObj.getString("infoPage");
-        price = jsonObj.optString("price");
         remoteHost = new MockStoreHost();
-        size = jsonObj.getLong("fileSize");
-        streamUri = jsonObj.optString("streamUrl");
-        trackCount = jsonObj.optLong("trackCount");
-        urn = new MockURN(jsonObj.getString("URN"));
-        
-        initProperties(jsonObj);
-    }
-    
-    /**
-     * Sets result values using the specified JSON object.
-     */
-    private void initProperties(JSONObject jsonObj) throws JSONException {
-        // Get required attributes.
-        propertyMap.put(FilePropertyKey.AUTHOR, jsonObj.getString("artist"));
-        propertyMap.put(FilePropertyKey.ALBUM, jsonObj.getString("album"));
-        propertyMap.put(FilePropertyKey.TITLE, jsonObj.getString("title"));
-        propertyMap.put(FilePropertyKey.BITRATE, jsonObj.getLong("bitRate"));
-        propertyMap.put(FilePropertyKey.GENRE, jsonObj.getString("genre"));
-        propertyMap.put(FilePropertyKey.LENGTH, jsonObj.getLong("length"));
-        propertyMap.put(FilePropertyKey.QUALITY, jsonObj.getLong("quality"));
-        
-        // Get optional attributes.
-        String trackNumber = jsonObj.optString("trackNumber");
-        if (trackNumber.length() > 0) propertyMap.put(FilePropertyKey.TRACK_NUMBER, trackNumber);
-        
-        long year = jsonObj.optLong("year");
-        if (year > 0) propertyMap.put(FilePropertyKey.YEAR, year);
     }
 
     @Override
@@ -110,10 +69,19 @@ public class MockStoreResult implements StoreResult {
     public void removeStoreResultListener(StoreResultListener listener) {
         listenerList.remove(listener);
     }
+
+    @Override
+    public Type getType() {
+        return type;
+    }
     
+    void setType(Type type) {
+        this.type = type;
+    }
+
     @Override
     public boolean isAlbum() {
-        return (albumId != null) && (albumId.length() > 0) && (trackCount > 0);
+        return type == Type.ALBUM;
     }
     
     @Override
@@ -128,7 +96,6 @@ public class MockStoreResult implements StoreResult {
                     } catch (InterruptedException e) {}
 
                     // Create connection and load album icon.
-                    StoreConnection storeConnection = storeConnectionFactory.create();
                     albumIcon = storeConnection.loadIcon(albumIconUri);
 
                     // Fire event to update UI.
@@ -139,15 +106,27 @@ public class MockStoreResult implements StoreResult {
         
         return albumIcon;
     }
-    
+
+    public void setAlbumIconUri(String albumIconUri) {
+        this.albumIconUri = albumIconUri;
+    }
+
     @Override
     public String getAlbumId() {
         return albumId;
     }
-    
+
+    public void setAlbumId(String albumId) {
+        this.albumId = albumId;
+    }
+
     @Override
     public Category getCategory() {
         return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     @Override
@@ -155,31 +134,56 @@ public class MockStoreResult implements StoreResult {
         return fileExtension;
     }
 
+    public void setFileExtension(String fileExtension) {
+        this.fileExtension = fileExtension;
+    }
+
     @Override
     public String getFileName() {
         return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+        setFileExtension(FileUtils.getFileExtension(fileName));
     }
 
     @Override
     public String getInfoURI() {
         return infoUri;
     }
-    
+
+    public void setInfoUri(String infoUri) {
+        this.infoUri = infoUri;
+    }
+
     @Override
     public String getPrice() {
         return price;
     }
-    
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
     @Override
     public Object getProperty(FilePropertyKey key) {
         return propertyMap.get(key);
     }
-    
+
+    public void setPropertyMap(Map<FilePropertyKey, Object> propertyMap) {
+        this.propertyMap = propertyMap;
+    }
+
     @Override
     public long getSize() {
         return size;
     }
-    
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
     @Override
     public SortPriority getSortPriority() {
         return SortPriority.TOP;
@@ -190,16 +194,28 @@ public class MockStoreResult implements StoreResult {
         return remoteHost;
     }
 
+    public void setRemoteHost(RemoteHost remoteHost) {
+        this.remoteHost = remoteHost;
+    }
+
     @Override
     public String getStreamURI() {
         return streamUri;
     }
-    
+
+    public void setStreamUri(String streamUri) {
+        this.streamUri = streamUri;
+    }
+
     @Override
     public long getTrackCount() {
         return trackCount;
     }
-    
+
+    public void setTrackCount(long trackCount) {
+        this.trackCount = trackCount;
+    }
+
     @Override
     public List<TrackResult> getTracks() {
         if (isAlbum() && (trackList.size() == 0) && !tracksRequested) {
@@ -212,36 +228,32 @@ public class MockStoreResult implements StoreResult {
                     } catch (InterruptedException e) {}
                     
                     // Create connection and load tracks.
-                    StoreConnection storeConnection = storeConnectionFactory.create();
-                    try {
-                        String jsonStr = storeConnection.loadTracks(albumId);
-                    
-                    
-                        // Parse JSON and add tracks.
-                        JSONObject jsonObj = new JSONObject(jsonStr);
-                        List<TrackResult> newTracks = parseTracks(jsonObj);
-                        trackList.addAll(newTracks);
-                        
-                        // Fire event to update UI.
-                        fireTracksUpdated();
-                        
-                    } catch (JSONException ex) {
-                        ex.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    List<TrackResult> newTracks = storeConnection.loadTracks(albumId);
+                    trackList.addAll(newTracks);
+
+                    // Fire event to update UI.
+                    fireTracksUpdated();
+
                 }
             }).start();
         }
         
         return trackList;
     }
-    
+
+    public void setTrackList(List<TrackResult> trackList) {
+        this.trackList = trackList;
+    }
+
     @Override
     public URN getUrn() {
         return urn;
     }
-    
+
+    public void setUrn(URN urn) {
+        this.urn = urn;
+    }
+
     private void fireAlbumIconUpdated() {
         for (StoreResultListener listener : listenerList) {
             listener.albumIconUpdated(albumIcon);
@@ -252,36 +264,6 @@ public class MockStoreResult implements StoreResult {
         for (StoreResultListener listener : listenerList) {
             listener.tracksUpdated(trackList);
         }
-    }
-    
-    /**
-     * Returns the Category from the specified JSON object.
-     */
-    private Category getCategory(JSONObject jsonObj) throws JSONException {
-        String value = jsonObj.getString("category");
-        for (Category category : Category.values()) {
-            if (category.toString().equalsIgnoreCase(value)) {
-                return category;
-            }
-        }
-        throw new JSONException("Invalid result category");
-    }
-    
-    /**
-     * Returns a list of track results by parsing the specified JSON object.
-     */
-    private List<TrackResult> parseTracks(JSONObject jsonObj) throws JSONException {
-        List<TrackResult> trackList = new ArrayList<TrackResult>();
-        
-        JSONArray trackArr = jsonObj.optJSONArray("tracks");
-        if ((trackArr != null) && (trackArr.length() > 0)) {
-            for (int i = 0, len = trackArr.length(); i < len; i++) {
-                JSONObject trackObj = trackArr.getJSONObject(i);
-                trackList.add(new MockTrackResult(trackObj));
-            }
-        }
-        
-        return trackList;
     }
     
     /**
