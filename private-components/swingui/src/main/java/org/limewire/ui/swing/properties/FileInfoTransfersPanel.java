@@ -25,14 +25,17 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.PropertiableFile;
-import org.limewire.io.Address;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -41,36 +44,32 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     @Resource private Icon lockIcon;
     @Resource private Color foreground;
     @Resource private Font smallFont;
-    @Resource private Font headerFont;
     
     private final JPanel component;
     private final FileInfoType type;
-    private final PropertiableFile propertiableFile;
+    private final DownloadItem download;
     private DownloadStatusListener downloadStatus;
     
     private final JXTable infoTable;
     
     private final Timer refreshTimer;
-    private final DefaultTableModel model;
+    private final JLabel leechersLabel;
+    private final JLabel seedersLabel;
     
     public FileInfoTransfersPanel(FileInfoType type, PropertiableFile propertiableFile, TableDecorator tableDecorator) {
+        
+        if (!(propertiableFile instanceof DownloadItem)) {
+            throw new UnsupportedOperationException("Can't create a transfers panel on anything other than a Download");
+        }
+        
         this.type = type;
-        this.propertiableFile = propertiableFile;
+        this.download = (DownloadItem) propertiableFile;
         
         GuiUtils.assignResources(this);
         
-        component = new JPanel(new MigLayout("fillx"));
+        component = new JPanel(new MigLayout("fillx, gap 0"));
         
-        component.add(createHeaderLabel(I18n.tr("Downloading from")),"push");
-        
-        final JLabel percentLabel = createPlainLabel("");            
-        component.add(percentLabel, "alignx right, wrap");
-                
-        downloadStatus = new DownloadStatusListener(percentLabel);
-        ((DownloadItem)propertiableFile).addPropertyChangeListener(downloadStatus);
-        
-        model = new DefaultTableModel();
-        infoTable = new JXTable(model);
+        infoTable = new JXTable();
         
         tableDecorator.decorate(infoTable);
         
@@ -80,9 +79,28 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         infoTable.setCellSelectionEnabled(false);
         infoTable.setShowGrid(false, false);
         
+        component.add(new JScrollPane(infoTable), "gaptop 10, span, grow, wrap");
         
+        component.add(createBoldLabel(I18n.tr("Total Completed:")), "split 2, gaptop 10");
+        JLabel percentLabel = createPlainLabel("");
+        component.add(percentLabel, "wrap");
+        downloadStatus = new DownloadStatusListener(percentLabel);
+        ((DownloadItem)propertiableFile).addPropertyChangeListener(downloadStatus);
+
+        if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
+            component.add(createBoldLabel(I18n.tr("Total Leechers:")), "split 2");
+            leechersLabel = createPlainLabel("");
+            component.add(leechersLabel, "wrap");
         
-        component.add(new JScrollPane(infoTable), "span, grow, wrap");
+            component.add(createBoldLabel(I18n.tr("Total Seeders:")), "split 2");
+            seedersLabel = createPlainLabel("");
+            component.add(seedersLabel, "wrap");
+        } 
+        else {
+            leechersLabel = null;
+            seedersLabel = null;
+        }
+        
         
         init();
         refreshTimer = new Timer(1500, new ActionListener() {
@@ -118,11 +136,10 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     
     @Override
     public void dispose() {
-        
         refreshTimer.stop();
         
-        if(downloadStatus != null && propertiableFile instanceof DownloadItem) {
-            ((DownloadItem)propertiableFile).removePropertyChangeListener(downloadStatus);
+        if(downloadStatus != null) {
+            download.removePropertyChangeListener(downloadStatus);
         }
     }
     
@@ -130,50 +147,45 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         
         switch(type) {
         case DOWNLOADING_FILE:
-            for ( int i=0 ; i<model.getRowCount() ; i++ ) {
-                model.removeRow(0);
-            }
 
-            DownloadItem download = ((DownloadItem)propertiableFile);
-            
-            // TODO: remove this if when gnutella source info is complete
-            if (download.getDownloadItemType() == DownloadItemType.GNUTELLA) {
-                model.setColumnIdentifiers(new Object[]{tr("Address"), tr("Filename")});
-                for(Address source : download.getSources()) {
-                    model.addRow(new Object[] {source.getAddressDescription(), 
-                            download.getDownloadingFile().getName() });
-                }
-            }
-            else if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
-                    
-                model.setColumnIdentifiers(new Object[]{tr("Address"),
-                        "", tr("Client"),
-                        tr("Upload"), tr("Download")});
+            DefaultTableModel model = new DefaultTableModel();
+
+            model.setColumnIdentifiers(new Object[]{tr("Address"),
+                    "", tr("Client"),
+                    tr("Upload"), tr("Download")});
                   
-                for( DownloadSourceInfo info : download.getSourcesDetails() ) {
-                    model.addRow(new Object[] {info.getIPAddress(),
-                            info.isEncyrpted(), 
-                            info.getClientName(),
-                            I18n.tr("{0} KB/s", info.getUploadSpeed()),
-                            I18n.tr("{0} KB/s", info.getDownloadSpeed())});
-                }
-                
-                TableColumn column = infoTable.getColumn(1);
-                column.setCellRenderer(new LockRenderer());
-                column.setMaxWidth(10);
-                column.setMinWidth(10);
-                column.setWidth(12);
+            for( DownloadSourceInfo info : download.getSourcesDetails() ) {
+                model.addRow(new Object[] {info.getIPAddress(),
+                        info.isEncyrpted(), 
+                        info.getClientName(),
+                        GuiUtils.rate2UnitSpeed(info.getUploadSpeed()),
+                        GuiUtils.rate2UnitSpeed(info.getDownloadSpeed())});
             }
+                
+            infoTable.setModel(model);
+                
+            TableColumn column = infoTable.getColumn(1);
+            column.setCellRenderer(new LockRenderer());
+            column.setMaxWidth(12);
+            column.setMinWidth(12);
+            column.setWidth(12);
+            
+            if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
+                Torrent torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
+                TorrentStatus status = torrent.getStatus();
+                seedersLabel.setText((status.getNumComplete() < 0) ? "?" : (""+status.getNumComplete()));
+                leechersLabel.setText((status.getNumIncomplete() < 0) ? "?" : (""+status.getNumIncomplete()));
+            }
+            
             break;
         }
     }
     
-    private JLabel createHeaderLabel(String text) { 
-        JLabel label = new JLabel(text);
-        label.setFont(headerFont);
-        label.setForeground(foreground);
+    private JLabel createBoldLabel(String text) {
+        JLabel label = createPlainLabel(text);
+        FontUtils.bold(label);        
         return label;
-    }
+    }    
     
     private JLabel createPlainLabel(String text) {
         JLabel label = new JLabel(text);
@@ -197,7 +209,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    label.setText(tr("{0}% complete", ((DownloadItem)propertiableFile).getPercentComplete()));
+                    label.setText(tr("{0}%", download.getPercentComplete()));
                 } 
             });
         }

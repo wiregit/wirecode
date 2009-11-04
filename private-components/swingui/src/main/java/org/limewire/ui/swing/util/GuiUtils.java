@@ -69,7 +69,11 @@ public class GuiUtils {
     public static String GENERAL_UNIT_GIGABYTES;
     public static String GENERAL_UNIT_TERABYTES;
     /* ambiguous name: means kilobytes/second, not kilobits/second! */
-    public static String GENERAL_UNIT_KBPSEC;    
+    public static String GENERAL_UNIT_BPSEC;
+    public static String GENERAL_UNIT_KBPSEC;
+    public static String GENERAL_UNIT_MBPSEC;    
+    public static String GENERAL_UNIT_GBPSEC;    
+    public static String GENERAL_UNIT_TBPSEC; // Oh yes, maybe one day...
    
 
     static {       
@@ -100,8 +104,17 @@ public class GuiUtils {
             I18n.tr("GB");
         GENERAL_UNIT_TERABYTES =
             I18n.tr("TB");
+        
+        GENERAL_UNIT_BPSEC =
+            I18n.tr("B/s");
         GENERAL_UNIT_KBPSEC =
             I18n.tr("KB/s");
+        GENERAL_UNIT_MBPSEC =
+            I18n.tr("MB/s");
+        GENERAL_UNIT_GBPSEC =
+            I18n.tr("GB/s");
+        GENERAL_UNIT_TBPSEC =
+            I18n.tr("TB/s");
     }
     
     /**
@@ -216,6 +229,46 @@ public class GuiUtils {
      */
     public static String rate2speed(double rate) {
         return NUMBER_FORMAT0.format(rate) + " " + GENERAL_UNIT_KBPSEC;
+    }
+    
+    public static String rate2UnitSpeed(double rate) {
+        if (rate < 0) {
+            return "? " + GENERAL_UNIT_KBPSEC;
+        }
+        long   unitValue; // the multiple associated with the unit
+        String unitName;  // one of localizable units
+        
+        if (rate < 1024) {
+            unitName = GENERAL_UNIT_BPSEC;
+            unitValue = 1;
+        } else if (rate < 0x100000) {                // below 1MB, use KB
+            unitValue = 0x400;
+            unitName = GENERAL_UNIT_KBPSEC;
+        } else if (rate < 0x40000000L) {     // below 1GB, use MB
+            unitValue = 0x100000;
+            unitName = GENERAL_UNIT_MBPSEC;
+        } else if (rate < 0x10000000000L) {   // below 1TB, use GB
+            unitValue = 0x40000000;
+            unitName = GENERAL_UNIT_GBPSEC;
+        } else {                                // at least 1TB, use TB
+            unitValue = 0x10000000000L;
+            unitName = GENERAL_UNIT_TBPSEC;
+        }
+        NumberFormat numberFormat; // one of localizable formats
+        
+        if(rate <  0x100000) {
+            numberFormat = NUMBER_FORMAT0;
+        } else {
+            // return a minimum "100.0xB", and maximum "999.9xB"
+            numberFormat = NUMBER_FORMAT1; // localized "#,##0.00"
+        }
+        
+        try {
+            return numberFormat.format(rate / unitValue) + " " + unitName;
+        } catch(ArithmeticException ae) {
+            return "0 " + unitName;
+            // internal java error, just return 0.
+        }
     }
     
     /**

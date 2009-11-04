@@ -154,6 +154,19 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
      */
     public String current_tracker;
 
+    /**
+     * Total number of peers that are seeding (complete).
+     * <p> -1 if no data from tracker
+     */
+    public int num_complete;
+
+
+    /**
+     * Total number of peers that are downloading (incomplete).
+     * <p> -1 if no data from tracker
+     */
+    public int num_incomplete;
+    
     @Override
     public float getDownloadPayloadRate() {
         return download_payload_rate;
@@ -308,5 +321,15 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
     @Override
     public String getCurrentTracker() {
         return current_tracker != null && current_tracker.isEmpty() ? null : current_tracker;
+    }
+
+    @Override
+    public int getNumComplete() {
+        return num_complete;
+    }
+
+    @Override
+    public int getNumIncomplete() {
+        return num_incomplete;
     }
 }

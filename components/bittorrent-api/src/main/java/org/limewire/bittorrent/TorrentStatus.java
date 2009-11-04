@@ -133,4 +133,17 @@ public interface TorrentStatus {
      */
     public String getCurrentTracker();
 
+    /**
+     * Total number of peers that are seeding (complete).
+     * 
+     * @return -1 if no data from tracker
+     */
+    public int getNumComplete();
+    
+    /**
+     * Total number of peers that are downloading (incomplete).
+     * 
+     * @return -1 if no data from tracker
+     */
+    public int getNumIncomplete();
 }

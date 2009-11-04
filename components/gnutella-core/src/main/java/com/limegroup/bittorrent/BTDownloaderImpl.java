@@ -5,8 +5,8 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -605,7 +605,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public List<Address> getSourcesAsAddresses() {
 
-        List<Address> list = new LinkedList<Address>();
+        List<Address> list = new ArrayList<Address>();
 
         List<TorrentPeer> peers = torrent.getTorrentPeers();
         for (TorrentPeer peer : peers) {
@@ -624,7 +624,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public List<DownloadSourceInfo> getSourcesDetails() {
-        List<DownloadSourceInfo> sourceInfoList = new LinkedList<DownloadSourceInfo>();
+        List<DownloadSourceInfo> sourceInfoList = new ArrayList<DownloadSourceInfo>();
         for (TorrentPeer peer : torrent.getTorrentPeers()) {
             sourceInfoList.add(new DownloadSourceInfoAdapter(peer));
         }
