@@ -3,10 +3,14 @@ package org.limewire.ui.swing.player;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -16,6 +20,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -74,26 +79,43 @@ class VideoDisplayDirector {
     }
     
     private void showFullScreen(){
-        GuiUtils.getMainFrame().setVisible(false);
-        
         fullScreenFrame = new LimeJFrame();
+
         fullScreenFrame.setTitle(GuiUtils.getMainFrame().getTitle());
         // fullScreenFrame.setAlwaysOnTop(true) and
         // SystemUtils.setWindowTopMost(fullScreenFrame) don't play nicely with
         // dialog boxes so we aren't using them here.
         fullScreenFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+        
         fullScreenFrame.setUndecorated(true);
         fullScreenFrame.add(videoPanel, BorderLayout.CENTER);            
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         fullScreenFrame.setBounds(0,0,screenSize.width, screenSize.height);
         
-        GuiUtils.getMainFrame().setVisible(false);
-        
-        fullScreenFrame.setVisible(true);
-        fullScreenFrame.toFront();
+        fullScreenFrame.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_F11) {
+                    if (isFullScreen()) {
+                        closeFullScreen();
+                    } 
+                }
+            }
+        });
 
+        GuiUtils.getMainFrame().setVisible(false);
+
+        GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice device = environment.getDefaultScreenDevice();
+        
+        if (OSUtils.isMacOSX() && device.isFullScreenSupported()) {
+            fullScreenFrame.setUndecorated(true);
+            device.setFullScreenWindow(fullScreenFrame);
+        } else {
+            fullScreenFrame.setVisible(true);
+            fullScreenFrame.toFront();
+        }        
     }
 
 
@@ -113,6 +135,11 @@ class VideoDisplayDirector {
     }
     
     private void closeFullScreen() {
+        GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice device = environment.getDefaultScreenDevice();
+        if (OSUtils.isMacOSX() && device.isFullScreenSupported()) {
+            device.setFullScreenWindow(null);
+        }
         fullScreenFrame.setVisible(false);
         fullScreenFrame = null;
         GuiUtils.getMainFrame().setVisible(true);
