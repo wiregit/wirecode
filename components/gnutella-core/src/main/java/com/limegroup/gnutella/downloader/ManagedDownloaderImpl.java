@@ -2808,7 +2808,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     @Override
     public List<DownloadSourceInfo> getSourcesDetails() {
-        return Collections.emptyList();
+        synchronized(this) {
+            List<DownloadSourceInfo> sources = new ArrayList<DownloadSourceInfo>(_workers.size());
+            for(DownloadWorker worker : _workers) {
+                sources.add(new SourceDetails(worker));
+            }
+            return sources;
+        }
     }
     
     public synchronized List<RemoteFileDesc> getRemoteFileDescs() {

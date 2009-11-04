@@ -41,6 +41,7 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.channel.ThrottleReader;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.statemachine.IOState;
 import org.limewire.nio.statemachine.IOStateMachine;
 import org.limewire.nio.statemachine.IOStateObserver;
@@ -253,7 +254,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     private boolean _browseEnabled = false; // also for now
 
-    private String _server = "";
+    private volatile String _server = "";
 
     private String _thexUri = null;
 
@@ -280,7 +281,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private boolean _isActive = false;
 
     private Range _requestedInterval = null;
-
+    
     /**
      * Whether the other side wants to receive firewalled altlocs.
      */
@@ -455,6 +456,10 @@ public class HTTPDownloader implements BandwidthTracker {
     public void connectHTTP(long start, long stop, boolean supportQueueing, IOStateObserver observer) {
         connectHTTP(start, stop, supportQueueing, -1, observer);
     }
+    
+    boolean isEncrypted() {
+        return SSLUtils.isTLSEnabled(_socket);
+    }
 
     /**
      * Sends a GET request using an already open socket, and reads all headers.
@@ -627,6 +632,10 @@ public class HTTPDownloader implements BandwidthTracker {
 
     Header createBasicAuthHeader(Credentials credentials) {
         return BasicScheme.authenticate(credentials, HTTP.DEFAULT_PROTOCOL_CHARSET, false);
+    }
+    
+    String getServer() {
+        return _server;
     }
 
     private String getHostAddress() {
