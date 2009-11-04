@@ -229,7 +229,7 @@ public class MockUploadItem implements UploadItem {
 
         @Override
         public boolean isBrowseHostEnabled() {
-            return false;
+            return true;
         }
 
         @Override
