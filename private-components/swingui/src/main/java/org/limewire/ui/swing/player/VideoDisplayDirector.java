@@ -9,8 +9,6 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -93,17 +91,6 @@ class VideoDisplayDirector {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         fullScreenFrame.setBounds(0,0,screenSize.width, screenSize.height);
         
-        fullScreenFrame.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_F11) {
-                    if (isFullScreen()) {
-                        closeFullScreen();
-                    } 
-                }
-            }
-        });
-
         GuiUtils.getMainFrame().setVisible(false);
 
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
