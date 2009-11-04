@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -217,6 +218,10 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     
     private class LockRenderer extends DefaultLimeTableCellRenderer {
 
+        public LockRenderer() {
+            setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 0));
+        }
+        
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
