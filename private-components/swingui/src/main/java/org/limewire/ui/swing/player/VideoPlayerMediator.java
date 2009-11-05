@@ -8,30 +8,30 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.media.Controller;
 import javax.media.ControllerEvent;
 import javax.media.ControllerListener;
 import javax.media.IncompatibleSourceException;
 import javax.media.Player;
+import javax.media.StartEvent;
 import javax.media.StopEvent;
 import javax.media.Time;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import net.sf.fmj.concurrent.ExecutorServiceManager;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavMediator;
-import org.limewire.ui.swing.nav.NavSelectable;
-import org.limewire.ui.swing.nav.NavigationListener;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -41,9 +41,6 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import foxtrot.Job;
-import foxtrot.Worker;
 
 @Singleton
 class VideoPlayerMediator implements PlayerMediator {
@@ -55,31 +52,24 @@ class VideoPlayerMediator implements PlayerMediator {
     private final List<PlayerMediatorListener> listenerList;
     private volatile Timer updateTimer;
     private final CategoryManager categoryManager;
-    private final Navigator navigator;
-    private NavigationListener closeVideoOnNavigation;
     private boolean isSeeking;
+    private final PlayerInitializer playerInitializer = new PlayerInitializer();
 
     @Inject
-    VideoPlayerMediator(VideoDisplayDirector displayDirector, Navigator navigator,
-            CategoryManager categoryManager) {
+    VideoPlayerMediator(VideoDisplayDirector displayDirector, CategoryManager categoryManager) {
         this.displayDirector = displayDirector;
-        this.navigator = navigator;
         this.categoryManager = categoryManager;
         this.listenerList = new ArrayList<PlayerMediatorListener>();
-        ExecutorServiceManager.setExecutorService(ExecutorsHelper.newFixedSizeThreadPool(1, "Video ThreadPool"));
-    }
 
-    private void registerNavigationListener() {
-        if (closeVideoOnNavigation == null) {
-            closeVideoOnNavigation = new CloseVideoOnNavigationListener();
-        }
-
-        navigator.addNavigationListener(closeVideoOnNavigation);
-    }
+        ThreadPoolListeningExecutor tpe =  new ThreadPoolListeningExecutor(1, 1,
+                5L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                ExecutorsHelper.daemonThreadFactory("Video ThreadPool"));
     
-    private void removeNavigationListener(){
-        navigator.removeNavigationListener(closeVideoOnNavigation);
+        ExecutorServiceManager.setExecutorService(ExecutorsHelper.unconfigurableExecutorService(tpe));//ExecutorsHelper.newFixedSizeThreadPool(1, "Video ThreadPool"));
     }
+
+
 
     @Override
     public void addMediatorListener(PlayerMediatorListener listener) {
@@ -168,31 +158,13 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void play(File file) {
-        if (initializePlayerOrNativeLaunch(file, null)) {
-            showVideo(false, true);
-            registerNavigationListener();     
+        if(file.equals(currentVideo)){
+            return;
         }
+        initializePlayerOrNativeLaunch(file, null, false, true);
     }
     
-    private void showVideo(boolean isFullScreen, boolean startVideo) {
-        displayDirector.show(player.getVisualComponent(), isFullScreen);
-        fireSongChanged(currentVideo.getName());
-        if (startVideo) {
-            // Must be SwingUtilities not SwingUtils.  We actually want this invoked later.
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (player != null) {
-                        player.start();
-                    }
-                }
-            });
-        }
 
-        if (isPlaying(currentVideo)) {
-            firePlayerStateChanged(PlayerState.PLAYING);
-        }
-    }
 
     /**
      * Initializes an FMJ player for the video if possible, launches natively if
@@ -205,48 +177,13 @@ class VideoPlayerMediator implements PlayerMediator {
      * @return true if the player is successfully initialized, false if it is
      *         not initialized and the file is natively launched
      */
-    private boolean initializePlayerOrNativeLaunch(final File file, Time time) {
+    private void initializePlayerOrNativeLaunch(final File file, Time time, boolean isFullScreen, boolean autoStart) {
         GuiUtils.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        currentVideo = file;
-        player = (Player) Worker.post(new Job() {
-            @Override
-            public Object run() {
-                try {
-                    return VideoPlayerFactory.createVideoPlayer(file);
-                } catch (IncompatibleSourceException e) {
-                    nativeLaunch(file);
-                    return null;
-                } catch (MalformedURLException e) {
-                    nativeLaunch(file);
-                    return null;
-                } catch (IOException e) {
-                    // TODO: how should this be handled?
-                    nativeLaunch(file);
-                    return null;
-                }
-            }
-        });
+        currentVideo = file;        
         
-         GuiUtils.getMainFrame().setCursor(Cursor.getDefaultCursor());
-        
-        if(player == null){
-            return false;
-        }
-
-        if (time != null) {
-            player.setMediaTime(time);
-        }
-
-        player.addControllerListener(new VideoControllerListener());
-        updateTimer = new Timer(1000, new TimerAction());
-        updateTimer.start();
-
-        return true;
+        playerInitializer.initialize(file, time, isFullScreen, autoStart);
     }
 
-    private void nativeLaunch(File file) {
-        NativeLaunchUtils.safeLaunchFile(file, categoryManager);
-    }
 
     @Override
     public void play(LocalFileItem localFileItem) {
@@ -313,6 +250,10 @@ class VideoPlayerMediator implements PlayerMediator {
             listener.stateChanged(state);
         }
     }
+    
+    private void fireProgressUpdated() {
+        fireProgressUpdated((float) (player.getMediaTime().getSeconds() / player.getDuration().getSeconds()));
+    }
 
     private void fireProgressUpdated(float progress) {
         for (PlayerMediatorListener listener : listenerList) {
@@ -326,15 +267,18 @@ class VideoPlayerMediator implements PlayerMediator {
         }
     }
 
-    public void closeVideoPanel() {
+    public void closeVideo() {
+
+        if(playerInitializer.isInitializing()){
+            playerInitializer.cancel();
+        }
+      
+        displayDirector.close();
+        
         killTimer();
         killPlayer();
 
-        currentVideo = null;
-
-        displayDirector.close();
-        
-        removeNavigationListener();
+        currentVideo = null;        
     }
 
     private void killTimer() {
@@ -347,9 +291,11 @@ class VideoPlayerMediator implements PlayerMediator {
     }
 
     private void killPlayer() {
-        player.close();
-        player.deallocate();
-        player = null;
+        if (player != null) {
+            player.close();
+            player.deallocate();
+            player = null;
+        }
     }
 
     public void setFullScreen(boolean isFullScreen) {
@@ -358,14 +304,18 @@ class VideoPlayerMediator implements PlayerMediator {
             return;
         }
         
+        //task is already running.  user probably hit crtl-f twice quickly.
+        if (playerInitializer.isInitializing()){
+            return;
+        }
+        
         boolean isPlaying = player.getState() == Controller.Started;
 
-        reInitializePlayer();
+        reInitializePlayer(isFullScreen, isPlaying);
 
-        showVideo(isFullScreen, isPlaying);
     }
 
-    private void reInitializePlayer() {
+    private void reInitializePlayer(boolean isFullScreen, boolean isPlaying) {
 
         if (player == null) {
             throw new IllegalStateException("Video player not initialized");
@@ -377,13 +327,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
         killPlayer();
 
-        boolean playerInitialized = initializePlayerOrNativeLaunch(currentVideo, time);
-
-        if (!playerInitialized) {
-            // TODO: how should we handle this?
-            throw new IllegalStateException("Video player initialization failed");
-        }
-
+        initializePlayerOrNativeLaunch(currentVideo, time, isFullScreen, isPlaying);
     }
 
     public boolean isFullScreen() {
@@ -404,7 +348,7 @@ class VideoPlayerMediator implements PlayerMediator {
                 @Override
                 public void run() {
 
-                    if (controllerEvent.getSourceController().getState() == Controller.Started) {
+                    if (controllerEvent instanceof StartEvent || controllerEvent.getSourceController().getState() == Controller.Started) {
                         firePlayerStateChanged(PlayerState.PLAYING);
                         if (updateTimer == null) {
                             updateTimer = new Timer(500, new TimerAction());
@@ -441,39 +385,173 @@ class VideoPlayerMediator implements PlayerMediator {
                 player.setMediaTime(new Time(0));
                 firePlayerStateChanged(PlayerState.EOM);
             } else {
-                fireProgressUpdated((float) (player.getMediaTime().getSeconds() / 
-                        player.getDuration().getSeconds()));
+                fireProgressUpdated();
             }
         }
 
-    }
+    }    
     
-    private class CloseVideoOnNavigationListener implements NavigationListener {
-
-        @Override
-        public void itemSelected(NavCategory category, NavItem navItem,
-                NavSelectable selectable, NavMediator navMediator) {
-            closeVideoPanel();                    
+    
+    /**
+     * Asynchronously initializes new video players.
+     *
+     */
+    private class PlayerInitializer {
+        
+        private PlayerInitalizationWorker initializationWorker;
+        
+        public boolean isInitializing() {
+            return initializationWorker != null;
         }
 
-        @Override
-        public void categoryAdded(NavCategory category) {
-            // do nothing
+        public void initialize(final File file, Time time, boolean isFullScreen, boolean autoStart) {
+            if (isInitializing()) {
+                cancel();
+            }
+
+            initializationWorker = new PlayerInitalizationWorker(currentVideo, time, isFullScreen, autoStart);
+            initializationWorker.execute();
         }
 
-        @Override
-        public void categoryRemoved(NavCategory category, boolean wasSelected) {
-            // do nothing
+        public void cancel() {
+            initializationWorker.cancelInitialization();
+            initializationWorker = null;
+        }
+                
+
+        private void finish(Player newPlayer, Time time, boolean isFullScreen, boolean autoStart) {
+            initializationWorker = null;
+            
+            if(newPlayer == null){
+                //New player creation failed.  The video was launched natively.
+                return;
+            }
+
+            if (time != null) {
+                newPlayer.setMediaTime(time);
+            }
+
+            newPlayer.addControllerListener(new VideoControllerListener());
+
+            if (updateTimer == null) {
+                updateTimer = new Timer(1000, new TimerAction());
+            }
+            updateTimer.start();
+
+            player = newPlayer;
+
+            displayVideo(isFullScreen);
+            
+            startVideo(autoStart);
+
+        }
+        
+        private void displayVideo(boolean isFullScreen) {
+            displayDirector.show(player.getVisualComponent(), isFullScreen);
+            fireSongChanged(currentVideo.getName());           
+        }
+        
+        private void startVideo(final boolean startVideo){
+            // Must be SwingUtilities not SwingUtils. We actually want this
+            // invoked later to avoid the external flash of native video screen.
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (player != null) {
+                        // start the player regardless of startVideo so that
+                        // control panel is correctly updated
+                        player.start();
+                        // force fire these immediately to make sure
+                        // everything updates
+                        firePlayerStateChanged(PlayerState.PLAYING);
+                        if (isDurationMeasurable()) {
+                            fireProgressUpdated();
+                        }
+
+                        if (!startVideo) {
+                            player.stop();
+                        }
+                    }
+                }
+            });
         }
 
-        @Override
-        public void itemAdded(NavCategory category, NavItem navItem) {
-            // do nothing
-        }
+        /**
+         * SwingWorker that initializes the new player off of the EDT.
+         */
+        private class PlayerInitalizationWorker extends SwingWorker<Player, Void> {
+            private final File mediaFile;
 
-        @Override
-        public void itemRemoved(NavCategory category, NavItem navItem, boolean wasSelected) {
-            // do nothing
+            private final Time time;
+
+            private final boolean autoStart;
+
+            private final boolean isFullScreen;
+
+            private boolean canceled = false;
+
+            public PlayerInitalizationWorker(File mediaFile, Time time, boolean isFullScreen,
+                    boolean autoStart) {
+                this.mediaFile = mediaFile;
+                this.time = time;
+                this.autoStart = autoStart;
+                this.isFullScreen = isFullScreen;
+            }
+
+            /**
+             * Cancels the player initialization. We don't want to interrupt the
+             * thread by using cancel(boolean) because we need to properly
+             * dispose of the player.
+             */
+            public void cancelInitialization() {
+                canceled = true;
+            }
+            
+            @Override
+            protected Player doInBackground() throws Exception {
+                try {
+                    return VideoPlayerFactory.createVideoPlayer(mediaFile);
+                } catch (IncompatibleSourceException e) {
+                    nativeLaunch(mediaFile);
+                    return null;
+                } catch (MalformedURLException e) {
+                    nativeLaunch(mediaFile);
+                    return null;
+                } catch (IOException e) {
+                    // TODO: how should this be handled?
+                    nativeLaunch(mediaFile);
+                    return null;
+                }
+            }            
+
+            private void nativeLaunch(File file) {
+                NativeLaunchUtils.safeLaunchFile(file, categoryManager);
+            }
+
+            @Override
+            protected void done() {
+                GuiUtils.getMainFrame().setCursor(Cursor.getDefaultCursor());
+
+                Player newPlayer = null;
+                try {
+                    newPlayer = get();
+                } catch (InterruptedException e) {
+                    // we're already finished so this can't happen
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+
+                if (canceled) {
+                    if (newPlayer != null) {
+                        newPlayer.close();
+                        newPlayer.deallocate();
+                    }
+                    return;
+                }
+
+                finish(newPlayer, time, isFullScreen, autoStart);
+
+            }
         }
     }
 

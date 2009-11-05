@@ -17,6 +17,12 @@ import javax.swing.JLayeredPane;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavMediator;
+import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.nav.NavigationListener;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.OSUtils;
 
@@ -35,17 +41,24 @@ class VideoDisplayDirector {
     private JComponent videoPanel;
     
     private JFrame fullScreenFrame;
+    private NavigationListener closeVideoOnNavigation;
     
     @Resource(key="WireframeTop.preferredSize") private Dimension topPanelPreferredSize;
 
     private final VideoPanelFactory videoPanelFactory;
 
+    private final Navigator navigator;
+    
+    private final Provider<VideoPlayerMediator> videoPlayerMediator;
+
 
     @Inject
     public VideoDisplayDirector(@GlobalLayeredPane JLayeredPane limeWireLayeredPane, Provider<VideoPlayerMediator> videoPlayerMediator,
-            VideoPanelFactory videoPanelFactory){
+            VideoPanelFactory videoPanelFactory, Navigator navigator){
         this.limeWireLayeredPane = limeWireLayeredPane;
+        this.videoPlayerMediator = videoPlayerMediator;
         this.videoPanelFactory = videoPanelFactory;
+        this.navigator = navigator;
         
         GuiUtils.assignResources(this);
         assert(topPanelPreferredSize != null);
@@ -74,7 +87,17 @@ class VideoDisplayDirector {
         resizeVideoContainer();     
         //Make sure the flash of native video window doesn't steal focus
         GuiUtils.getMainFrame().toFront();   
+        registerNavigationListener();
+    }   
+    
+    private void registerNavigationListener() {
+        if (closeVideoOnNavigation == null) {
+            closeVideoOnNavigation = new CloseVideoOnNavigationListener();
+        }
+
+        navigator.addNavigationListener(closeVideoOnNavigation);
     }
+    
     
     private void showFullScreen(){
         fullScreenFrame = new LimeJFrame();
@@ -119,7 +142,7 @@ class VideoDisplayDirector {
         videoPanel = null;
         //Force a repaint on close - gets rid of artifacts (especially noticable on Mac)
         GuiUtils.getMainFrame().repaint();
-    }
+    }    
     
     private void closeFullScreen() {
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -134,6 +157,11 @@ class VideoDisplayDirector {
 
     private void closeInClient(){    
         limeWireLayeredPane.remove(videoPanel); 
+        removeNavigationListener();
+    }
+    
+    private void removeNavigationListener(){
+        navigator.removeNavigationListener(closeVideoOnNavigation);
     }
 
     
@@ -152,6 +180,35 @@ class VideoDisplayDirector {
             videoPanel.setBounds(0, (int)topPanelPreferredSize.getHeight(), (int)parentBounds.getWidth(), 
                     (int)parentBounds.getHeight() - (int)topPanelPreferredSize.getHeight());
             videoPanel.revalidate();
+        }
+    }
+    
+    private class CloseVideoOnNavigationListener implements NavigationListener {
+
+        @Override
+        public void itemSelected(NavCategory category, NavItem navItem,
+                NavSelectable selectable, NavMediator navMediator) {
+            videoPlayerMediator.get().closeVideo();                    
+        }
+
+        @Override
+        public void categoryAdded(NavCategory category) {
+            // do nothing
+        }
+
+        @Override
+        public void categoryRemoved(NavCategory category, boolean wasSelected) {
+            // do nothing
+        }
+
+        @Override
+        public void itemAdded(NavCategory category, NavItem navItem) {
+            // do nothing
+        }
+
+        @Override
+        public void itemRemoved(NavCategory category, NavItem navItem, boolean wasSelected) {
+            // do nothing
         }
     }
 }
