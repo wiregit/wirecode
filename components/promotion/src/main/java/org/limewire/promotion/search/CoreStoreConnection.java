@@ -12,11 +12,13 @@ import javax.swing.ImageIcon;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.util.EntityUtils;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.search.store.StoreConnection;
@@ -24,6 +26,11 @@ import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.io.GUID;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.mozilla.browser.XPCOMUtils;
+import org.mozilla.interfaces.nsICookie;
+import org.mozilla.interfaces.nsICookieManager;
+import org.mozilla.interfaces.nsICookieManager2;
+import org.mozilla.interfaces.nsISimpleEnumerator;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -43,7 +50,6 @@ public class CoreStoreConnection implements StoreConnection {
     private final ClientConnectionManager clientConnectionManager;
     private final ApplicationServices applicationServices;
     private final Application application;
-    private final BasicCookieStore cookieStore;
 
     @Inject
     public CoreStoreConnection(@StoreAPIURL Provider<String> storeAPIURL,
@@ -54,7 +60,6 @@ public class CoreStoreConnection implements StoreConnection {
         this.clientConnectionManager = connectionManager;
         this.applicationServices = applicationServices;
         this.application = application;
-        cookieStore = new BasicCookieStore();   
     }
 
     /**
@@ -71,9 +76,10 @@ public class CoreStoreConnection implements StoreConnection {
     }
 
     private String makeHTTPRequest(String request) throws IOException {
-        HttpClient client = createHttpClient();            
+        DefaultHttpClient client = createHttpClient();            
         LOG.debugf("calling store api: {0} ...", request);
         HttpResponse response = client.execute(new HttpGet(request));
+        updateBrowserCookies(client.getCookieStore());  // TODO only for Set-Cookie headers
         if (response.getEntity() != null) {
             String responseStr = EntityUtils.toString(response.getEntity());
             LOG.debugf(" ... response:\n{0}", responseStr);
@@ -81,6 +87,21 @@ public class CoreStoreConnection implements StoreConnection {
             return responseStr;
         } else {
             return "";
+        }
+    }
+
+    private void updateBrowserCookies(CookieStore cookieStore) {
+        nsICookieManager2 cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookiemanager;1",
+        nsICookieManager2.class);
+        for(Cookie cookie : cookieStore.getCookies()) {
+            cookieService.add(cookie.getDomain(),
+                    cookie.getPath(),
+                    cookie.getName(), 
+                    cookie.getValue(), 
+                    cookie.isSecure(), 
+                    true, 
+                    !cookie.isPersistent(), 
+                    cookie.getExpiryDate().getTime() / 1000);
         }
     }
 
@@ -133,10 +154,39 @@ public class CoreStoreConnection implements StoreConnection {
                 "&guid=" + new GUID(applicationServices.getMyGUID()).toHexString();
     }
 
-    private HttpClient createHttpClient() {
-        DefaultHttpClient httpClient = new DefaultHttpClient(clientConnectionManager, null);
+    private DefaultHttpClient createHttpClient() {
+        DefaultHttpClient httpClient = new DefaultHttpClient(clientConnectionManager, null);        
+        CookieStore cookieStore = loadCookiesFromBrowser();
         httpClient.setCookieStore(cookieStore);
         cookieStore.clearExpired(new Date());
         return httpClient;
+    }
+    
+    private CookieStore loadCookiesFromBrowser() {
+        // TODO share code with FacebookFriendAccountConfigurationImpl
+        BasicCookieStore cookieStore = new BasicCookieStore();
+        nsICookieManager cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookiemanager;1",
+        nsICookieManager.class);
+        nsISimpleEnumerator enumerator = cookieService.getEnumerator();
+        while(enumerator.hasMoreElements()) {                        
+            nsICookie cookie = XPCOMUtils.proxy(enumerator.getNext(), nsICookie.class);
+            if(cookie.getHost() != null && cookie.getHost().endsWith(".store.limewire.com")) {
+                LOG.debugf("adding cookie {0} = {1} for host {2}", cookie.getName(), cookie.getValue(), cookie.getHost());
+                BasicClientCookie copy = new BasicClientCookie(cookie.getName(), cookie.getValue());
+                copy.setDomain(cookie.getHost());
+                double expiry = cookie.getExpires();
+                if(expiry != 0 && expiry != 1) {
+                    long expiryMillis = (long) expiry * 1000;
+                    copy.setExpiryDate(new Date(expiryMillis));
+                }
+                copy.setPath(cookie.getPath());
+                copy.setSecure(cookie.getIsSecure());
+                // TODO copy.setVersion();
+                cookieStore.addCookie(copy);
+            } else {
+                LOG.debugf("dropping cookie {0} = {1} for host {2}", cookie.getName(), cookie.getValue(), cookie.getHost());
+            }
+        }
+        return cookieStore;
     }
 }
