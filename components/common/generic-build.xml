@@ -485,10 +485,7 @@
 	    		<formatter type="plain" usefile="${tests.writetofileonly}"/>
 	    		
 	    		<batchtest todir="${tests.limewire.components.this.xml}">
-	    			<fileset dir="${build.limewire.components.this.tests}">
-	    			    <include name="@{unit}"/>
-	    				<exclude name="@{exclude}"/>
-	    		    </fileset>
+	    			<fileset dir="${build.limewire.components.this.tests}" includes="@{unit}" excludes="@{exclude}" />
 	    		    <testPathLocations/>
 	    		</batchtest>
 			</junit>
