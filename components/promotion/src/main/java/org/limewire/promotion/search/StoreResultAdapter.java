@@ -55,6 +55,8 @@ public class StoreResultAdapter implements StoreResult {
     private final URN urn;
     
     private Icon albumIcon;
+    private String cashPrice;
+    private String creditPrice;
     
     private boolean albumIconRequested;
     private boolean tracksRequested;
@@ -91,6 +93,8 @@ public class StoreResultAdapter implements StoreResult {
             // TODO horribly broken
             urn = com.limegroup.gnutella.URN.createUrnFromString("urn:guid:" + new GUID());
         }
+        cashPrice = jsonObj.optString("cashPrice", "");
+        creditPrice = jsonObj.optString("creditPrice", "");
         
         initProperties(jsonObj);
     }
@@ -174,7 +178,7 @@ public class StoreResultAdapter implements StoreResult {
 
     @Override
     public String getPrice() {
-        return price;
+        return getCashPrice();
     }
 
     @Override
@@ -205,6 +209,14 @@ public class StoreResultAdapter implements StoreResult {
     @Override
     public long getTrackCount() {
         return trackCount;
+    }
+
+    public String getCashPrice() {
+        return cashPrice;
+    }
+
+    public String getCreditPrice() {
+        return creditPrice;
     }
 
     @Override

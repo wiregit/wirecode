@@ -25,6 +25,8 @@ public class TrackResultAdapter implements TrackResult {
     private final long size;
     private final String streamUri;
     private final URN urn;
+    private String cashPrice;
+    private String creditPrice;
     
     /**
      * Constructs a TrackResultAdapter using the specified JSON object.
@@ -39,6 +41,8 @@ public class TrackResultAdapter implements TrackResult {
         size = jsonObj.optLong("fileSize");
         streamUri = jsonObj.optString("file");
         urn = com.limegroup.gnutella.URN.createUrnFromString("urn:" + jsonObj.getString("urn"));
+        cashPrice = jsonObj.optString("cashPrice", "");
+        creditPrice = jsonObj.optString("creditPrice", "");
         
         initProperties(jsonObj);
     }
@@ -80,7 +84,7 @@ public class TrackResultAdapter implements TrackResult {
 
     @Override
     public String getPrice() {
-        return price;
+        return getCashPrice();
     }
 
     @Override
@@ -101,5 +105,13 @@ public class TrackResultAdapter implements TrackResult {
     @Override
     public URN getUrn() {
         return urn;
+    }
+    
+    public String getCashPrice() {
+        return cashPrice;
+    }
+
+    public String getCreditPrice() {
+        return creditPrice;
     }
 }
