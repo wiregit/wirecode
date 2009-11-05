@@ -29,9 +29,5 @@ public class DefaultLimeTableCellRenderer extends DefaultTableCellRenderer {
         return this;
     }
     
-    @Override
-    protected void setValue(Object value) {
-        // stub out to avoid super class from calling toString()
-        // on value which could be expensive
-    }
+    
 }
