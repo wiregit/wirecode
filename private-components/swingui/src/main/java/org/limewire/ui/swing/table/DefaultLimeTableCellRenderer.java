@@ -31,8 +31,7 @@ public class DefaultLimeTableCellRenderer extends DefaultTableCellRenderer {
     
     @Override
     protected void setValue(Object value) {
-        // set value to empty string to avoid super class from calling toString()
+        // stub out to avoid super class from calling toString()
         // on value which could be expensive
-        super.setValue("");
     }
 }
