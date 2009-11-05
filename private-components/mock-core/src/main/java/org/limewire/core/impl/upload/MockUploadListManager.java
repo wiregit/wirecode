@@ -33,7 +33,7 @@ public class MockUploadListManager implements UploadListManager {
         
         addUpload(UploadState.DONE, "File.mp3", 30000, 15000, Category.AUDIO);
         addUpload(UploadState.QUEUED, "File.avi", 3000, 150, Category.VIDEO);
-        addUpload(UploadState.UPLOADING, "File2.mp3", 65536, 0, Category.AUDIO);
+        addUpload(UploadState.UPLOADING, "File2.mp3", 1048576, 0, Category.AUDIO);
         addUpload(UploadState.DONE, "File3.exe", 300, 150, Category.PROGRAM);
         addUpload(UploadState.UNABLE_TO_UPLOAD, "File3.doc", 300, 15, Category.DOCUMENT);
         addUpload(UploadState.BROWSE_HOST, "string", 300, 15, Category.DOCUMENT);
