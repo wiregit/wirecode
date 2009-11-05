@@ -1,6 +1,6 @@
 package org.limewire.core.settings;
 
-import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.inspection.DataCategory;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
@@ -20,31 +20,31 @@ public class ApplicationSettings extends LimeProps {
     /**
      * The Client ID number.
      */
-    @InspectablePrimitive("client id")
+    @InspectionPoint("client id")
     public static final StringSetting CLIENT_ID = 
         FACTORY.createStringSetting("CLIENT_ID", "");
 
     /**
      * The average time this user leaves the application running.
      */
-    @InspectablePrimitive(value = "average application uptime", category = DataCategory.USAGE)
+    @InspectionPoint(value = "average application uptime", category = DataCategory.USAGE)
     public static final LongSetting AVERAGE_UPTIME =
         FACTORY.createExpirableLongSetting("AVERAGE_UPTIME", 0);
     
     /** The length of the last n sessions, in seconds. */
-    @InspectablePrimitive(value = "last n application uptimes", category = DataCategory.USAGE)
+    @InspectionPoint(value = "last n application uptimes", category = DataCategory.USAGE)
     public static final StringArraySetting UPTIME_HISTORY =
         FACTORY.createStringArraySetting("UPTIME_HISTORY", new String[0]);
    
     /** The length of the last n intervals between sessions, in seconds. */
-    @InspectablePrimitive(value = "last n application downtimes", category = DataCategory.USAGE)
+    @InspectionPoint(value = "last n application downtimes", category = DataCategory.USAGE)
     public static final StringArraySetting DOWNTIME_HISTORY =
         FACTORY.createStringArraySetting("DOWNTIME_HISTORY", new String[0]);
     
     /**
 	 * The total time this user has used the application.
 	 */    
-    @InspectablePrimitive(value = "total application uptime", category = DataCategory.USAGE)
+    @InspectionPoint(value = "total application uptime", category = DataCategory.USAGE)
     public static final LongSetting TOTAL_UPTIME =
         FACTORY.createLongSetting("TOTAL_UPTIME", 0);
     
@@ -72,7 +72,7 @@ public class ApplicationSettings extends LimeProps {
 	 * leaves the application on. Initialized to 0 because it will be
      * incremented at the start of each session, after loading settings.
      */
-    @InspectablePrimitive(value = "number of sessions", category = DataCategory.USAGE)
+    @InspectionPoint(value = "number of sessions", category = DataCategory.USAGE)
     public static final IntSetting SESSIONS =
         FACTORY.createIntSetting("SESSIONS", 0);
     
@@ -82,14 +82,14 @@ public class ApplicationSettings extends LimeProps {
      * the program shuts down unexpectedly, so it's only at startup that it
      * represents the previous session's shutdown time. 
      */
-    @InspectablePrimitive(value = "last shutdown time", category = DataCategory.USAGE)
+    @InspectionPoint(value = "last shutdown time", category = DataCategory.USAGE)
     public static final LongSetting LAST_SHUTDOWN_TIME =
         FACTORY.createLongSetting("LAST_SHUTDOWN_TIME", 0);
     
     /**
      * Whether the last shutdown was graceful or not.
      */
-    @InspectablePrimitive("previous shutdown was graceful")
+    @InspectionPoint("previous shutdown was graceful")
     public static final BooleanSetting PREVIOUS_SHUTDOWN_WAS_GRACEFUL =
         FACTORY.createBooleanSetting("PREVIOUS_SHUTDOWN_WAS_GRACEFUL", true);
     
@@ -155,7 +155,7 @@ public class ApplicationSettings extends LimeProps {
      * Returns true if the user has agreed to allow LimeWire to anonymously
      * gather usage statistics.
      */
-    @InspectablePrimitive("anonymous usage statistics")
+    @InspectionPoint("anonymous usage statistics")
     public static final BooleanSetting ALLOW_ANONYMOUS_STATISTICS_GATHERING =
         FACTORY.createBooleanSetting("ALLOW_ANONYMOUS_STATISTICS_GATHERING", true);
     

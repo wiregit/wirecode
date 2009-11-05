@@ -66,4 +66,9 @@ public final class BooleanSettingImpl extends AbstractSetting<Boolean> implement
 	public void invert() {
 		setValue(!getValue());
 	}
+    
+    @Override
+    public Object inspect() {
+        return get();
+    }
 }

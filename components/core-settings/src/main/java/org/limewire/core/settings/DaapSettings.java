@@ -1,4 +1,3 @@
-
 package org.limewire.core.settings;
 
 import org.limewire.setting.BooleanSetting;
@@ -7,7 +6,7 @@ import org.limewire.setting.PasswordSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 import org.limewire.util.OSUtils;
-import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 
 /**
  * Settings for Digital Audio Access Protocol (DAAP).
@@ -19,7 +18,7 @@ public class DaapSettings extends LimeProps {
     /**
      * Whether or not DAAP should be enabled.
      */
-    @InspectablePrimitive("share with itunes")
+    @InspectionPoint("share with itunes")
     public static BooleanSetting DAAP_ENABLED =
 	    FACTORY.createBooleanSetting("DAAP_ENABLED", true);
 	

@@ -4,7 +4,7 @@ package org.limewire.core.settings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
-import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 
 /**
  * Settings for iTunes.
@@ -16,7 +16,7 @@ public class iTunesSettings extends LimeProps {
     /**
      * Whether or not player should be enabled.
      */
-    @InspectablePrimitive("add to itunes")
+    @InspectionPoint("add to itunes")
     public static BooleanSetting ITUNES_SUPPORT_ENABLED =
         FACTORY.createBooleanSetting("ITUNES_SUPPORT_ENABLED", true);
 

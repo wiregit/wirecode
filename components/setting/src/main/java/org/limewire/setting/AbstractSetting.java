@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.setting.evt.SettingEvent.EventType;
+import org.limewire.inspection.Inspectable;
 
 
 /**
@@ -51,7 +52,7 @@ import org.limewire.setting.evt.SettingEvent.EventType;
  * subclass of <code>AbstractSetting</code> . Additionally the
  * example shows how to load and save the setting to disk.
  */
-public abstract class AbstractSetting<T> implements Setting<T> {
+public abstract class AbstractSetting<T> implements Setting<T>, Inspectable {
     
     /**
      * Protected default <tt>Properties</tt> instance for subclasses.
@@ -254,6 +255,11 @@ public abstract class AbstractSetting<T> implements Setting<T> {
         return prop == null ? DEFAULT_VALUE : prop;
     }
     
+    @Override
+    public Object inspect() {
+        return getValueAsString();
+    }
+
     /**
      * Set new property value.
      * <p>

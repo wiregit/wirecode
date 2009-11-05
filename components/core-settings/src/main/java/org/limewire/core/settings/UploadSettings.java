@@ -3,7 +3,7 @@ package org.limewire.core.settings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 
 /**
  * Settings for uploads.
@@ -49,7 +49,7 @@ public final class UploadSettings extends LimeProps {
      * The maximum number of upstream kilobytes per second ever passed by
      * this node.
      */
-    @InspectablePrimitive("upstream bandwidth max")
+    @InspectionPoint("upstream bandwidth max")
     public static final IntSetting MAX_MEASURED_UPLOAD_KBPS =
         FACTORY.createExpirableIntSetting("MAX_UPLOAD_BYTES_PER_SEC", 0);
      

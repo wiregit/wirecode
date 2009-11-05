@@ -1,6 +1,6 @@
 package org.limewire.core.settings;
 
-import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.inspection.DataCategory;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
@@ -197,7 +197,7 @@ public final class ConnectionSettings extends LimeProps {
     /**
      * Whether we should not try to use UPnP to open ports.
      */
-    @InspectablePrimitive(value = "disable upnp setting", category = DataCategory.USAGE)
+    @InspectionPoint(value = "disable upnp setting", category = DataCategory.USAGE)
     public static final BooleanSetting DISABLE_UPNP = FACTORY.createBooleanSetting("DISABLE_UPNP",
             false);
 
@@ -206,7 +206,7 @@ public final class ConnectionSettings extends LimeProps {
      * the mappings on shutdown was definitely not successful. Since the
      * shutdown hooks may fail, this cannot guarantee if it was successful.
      */
-    @InspectablePrimitive("upnp in use setting")
+    @InspectionPoint("upnp in use setting")
     public static final BooleanSetting UPNP_IN_USE = FACTORY.createBooleanSetting("UPNP_IN_USE",
             false);
 

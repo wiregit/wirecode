@@ -8,7 +8,6 @@ import org.limewire.core.settings.LimeProps;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
@@ -143,21 +142,21 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("AUTO_RENAME_DUPLICATE_FILES", true);
 
     /** True if any positions have been set. */
-    @InspectablePrimitive(value = "application positions set", category = DataCategory.USAGE)
+    @InspectionPoint(value = "application positions set", category = DataCategory.USAGE)
     public static final BooleanSetting POSITIONS_SET =
         FACTORY.createBooleanSetting("POSITIONS_SET", false);
 
     /**
      * The width that the application should be.
      */
-    @InspectablePrimitive(value = "application width", category = DataCategory.USAGE)
+    @InspectionPoint(value = "application width", category = DataCategory.USAGE)
     public static final IntSetting APP_WIDTH =
         FACTORY.createIntSetting("APP_WIDTH_V5", 1024);
 
     /**
      * The height that the application should be.
      */
-    @InspectablePrimitive(value = "application height", category = DataCategory.USAGE)
+    @InspectionPoint(value = "application height", category = DataCategory.USAGE)
     public static final IntSetting APP_HEIGHT =
         FACTORY.createIntSetting("APP_HEIGHT_V5", 768);
 
@@ -176,7 +175,7 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createIntSetting("WINDOW_Y_V5", 0).setAlwaysSave(true);
 
     /** Setting for whether or not LW should start maximized. */
-    @InspectablePrimitive(value = "is application maximized", category = DataCategory.USAGE)
+    @InspectionPoint(value = "is application maximized", category = DataCategory.USAGE)
     public static final BooleanSetting MAXIMIZE_WINDOW =
         FACTORY.createBooleanSetting("MAXIMIZE_WINDOW_V5", false);
 
@@ -246,7 +245,7 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("ONLINE_CONTACTS_COLLAPSED", false);
 
     /** If the LimeWire media player is enabled. */
-    @InspectablePrimitive(value = "player enabled", category = DataCategory.USAGE)
+    @InspectionPoint(value = "player enabled", category = DataCategory.USAGE)
     public static final BooleanSetting PLAYER_ENABLED =
         FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
     
@@ -267,7 +266,7 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("SHOW_SHARING_OVERLAY_MESSAGE", true);
     
     /** If the Library filters are displayed or not. */
-    @InspectablePrimitive(value = "library filters showing", category = DataCategory.USAGE)
+    @InspectionPoint(value = "library filters showing", category = DataCategory.USAGE)
     public static final BooleanSetting SHOW_LIBRARY_FILTERS =
         FACTORY.createBooleanSetting("SHOW_LIBRARY_FILTERS", true);
 

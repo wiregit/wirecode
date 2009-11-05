@@ -8,6 +8,7 @@ import org.limewire.core.api.Category;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
@@ -123,7 +124,7 @@ public class SharingSettings extends LimeProps {
      * Specifies whether or not completed downloads should automatically be
      * cleared from the download window.
      */
-    @InspectablePrimitive(value = "clear finished downloads", category = DataCategory.USAGE)
+    @InspectionPoint(value = "clear finished downloads", category = DataCategory.USAGE)
     public static final BooleanSetting CLEAR_DOWNLOAD = FACTORY.createBooleanSetting(
             "CLEAR_DOWNLOAD", false);
 
@@ -273,7 +274,7 @@ public class SharingSettings extends LimeProps {
     /**
      * Whether or not to auto-share files when using 'Download As'.
      */
-    @InspectablePrimitive(value = "auto-sharing enabled", category = DataCategory.USAGE)
+    @InspectionPoint(value = "auto-sharing enabled", category = DataCategory.USAGE)
     public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES = FACTORY
             .createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
 

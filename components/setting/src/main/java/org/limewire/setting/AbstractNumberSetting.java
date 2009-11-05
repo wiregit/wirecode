@@ -89,6 +89,11 @@ public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> ex
         }
         return value;
     }
+    
+    @Override
+    public Object inspect() {
+        return get();            
+    }
 
     /** Converts a String to a Comparable of the same type as MAX_VALUE and MIN_VALUE.     */
     abstract protected Comparable<T> convertToComparable(String value);
