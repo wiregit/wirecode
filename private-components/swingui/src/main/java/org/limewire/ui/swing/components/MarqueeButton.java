@@ -12,6 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.JToolTip;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 public class MarqueeButton extends JButton {
     private JToolTip toolTip = new JToolTip();
@@ -36,6 +38,21 @@ public class MarqueeButton extends JButton {
         setFocusPainted(false);
         setMaxChars(maxCharsShown);
         setToolTipText(getText());
+        addAncestorListener(new AncestorListener() {            
+            @Override
+            public void ancestorRemoved(AncestorEvent event) {
+                if (!event.getAncestor().isAncestorOf(MarqueeButton.this)) {
+                    //we've been removed from the ancestor
+                    stop();
+                }
+            }
+            
+            @Override
+            public void ancestorMoved(AncestorEvent event) {}
+            
+            @Override
+            public void ancestorAdded(AncestorEvent event) {}
+        });
     }
     
     public void start() {
@@ -120,7 +137,6 @@ public class MarqueeButton extends JButton {
         @Override
         public void actionPerformed(ActionEvent e) {
             position += 1;
-            
             repaint();
             
             if (position >= maxPosition){
