@@ -217,35 +217,27 @@ public final class FileChooser {
                                 boolean allowMultiSelect,
                                 final FileFilter filter) {
             if(!OSUtils.isMacOSX()) {
-                JFileChooser fileChooser = getDirectoryChooser(titleKey, approveKey, directory, mode, filter, false);
-                fileChooser.setMultiSelectionEnabled(allowMultiSelect);
-                boolean dispose = false;
-                if(parent == null) {
-	                dispose = true;
-                    parent = FocusJOptionPane.createFocusComponent();
-                }
-                try {
-                    if(fileChooser.showOpenDialog(parent) != option)
-                        return null;
-                } catch(NullPointerException npe) {
-                    // ignore NPE.  can't do anything with it ...
-                    return null;
-                } finally {
-                    if(dispose)
-                        ((JFrame)parent).dispose();
-                }
                 
-                if(allowMultiSelect) {
-                    File[] chosen = fileChooser.getSelectedFiles();
-                    if(chosen.length > 0)
-                        setLastInputDirectory(chosen[0]);
-                    return Arrays.asList(chosen);
+                if(OSUtils.isWindows() && mode == JFileChooser.DIRECTORIES_ONLY && !allowMultiSelect) {
+                   
+                    // attempt to get the folder using the native widget, if jna fails,
+                    // fallback to the Swing FileChooser
+                    try {
+                        WindowsFolderChooser folder = new WindowsFolderChooser(parent, titleKey, false, false, directory.getAbsolutePath());
+                        String path = folder.showWidget();
+                        if(path != null && path.length() > 0) {
+                            File file = new File(path);
+                            setLastInputDirectory(file);
+                            return Collections.singletonList(file);
+                        } else {
+                            return null;
+                        }
+                    } catch(UnsatisfiedLinkError ule) {
+                        return getFileChooser(parent, titleKey, approveKey, directory, mode, option, allowMultiSelect, filter);
+                    }
                 } else {
-                    File chosen = fileChooser.getSelectedFile();
-                    setLastInputDirectory(chosen);
-                    return Collections.singletonList(chosen);
+                    return getFileChooser(parent, titleKey, approveKey, directory, mode, option, allowMultiSelect, filter);
                 }
-                
             } else {
                 // Okay, we're on Mac OS-X...  Let's open up a native file dialog so that we can get the OS-X
                 // navigation features and allow multiple selections of files and directories as well...
@@ -272,6 +264,41 @@ public final class FileChooser {
                     return selectedFiles;                    
                 }
             }       
+    }
+    
+    /**
+     * Uses the Swing FileChooser to return a List of Files.
+     */
+    private static List<File> getFileChooser(Component parent, String titleKey, String approveKey, File directory,
+            int mode, int option, boolean allowMultiSelect, final FileFilter filter) {
+        JFileChooser fileChooser = getDirectoryChooser(titleKey, approveKey, directory, mode, filter, false);
+        fileChooser.setMultiSelectionEnabled(allowMultiSelect);
+        boolean dispose = false;
+        if(parent == null) {
+            dispose = true;
+            parent = FocusJOptionPane.createFocusComponent();
+        }
+        try {
+            if(fileChooser.showOpenDialog(parent) != option)
+                return null;
+        } catch(NullPointerException npe) {
+            // ignore NPE.  can't do anything with it ...
+            return null;
+        } finally {
+            if(dispose)
+                ((JFrame)parent).dispose();
+        }
+        
+        if(allowMultiSelect) {
+            File[] chosen = fileChooser.getSelectedFiles();
+            if(chosen.length > 0)
+                setLastInputDirectory(chosen[0]);
+            return Arrays.asList(chosen);
+        } else {
+            File chosen = fileChooser.getSelectedFile();
+            setLastInputDirectory(chosen);
+            return Collections.singletonList(chosen);
+        }
     }
     
     /** Sets the last directory that was used for the FileChooser. */
