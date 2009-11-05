@@ -145,7 +145,12 @@ public class FileInfoDialog extends LimeJDialog {
                     } else if(tab == Tabs.SHARING) {
                         cards.put(tab, fileInfoFactory.createSharingPanel(type, propertiableFile));
                     } else if(tab == Tabs.TRANSFERS) {
-                        cards.put(tab, fileInfoFactory.createTransferPanel(type, propertiableFile));
+                        if(propertiableFile instanceof DownloadItem) {
+                            cards.put(tab, fileInfoFactory.createTransferPanel(type, (DownloadItem)propertiableFile));    
+                        } 
+                        else {
+                            throw new IllegalStateException("Should not have a transfers tab for a non download");
+                        }
                     } else if(tab == Tabs.BITTORENT) {
                         if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT) != null) {
                             Torrent torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);

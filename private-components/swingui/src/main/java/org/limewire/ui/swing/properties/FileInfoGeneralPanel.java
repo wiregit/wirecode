@@ -156,6 +156,9 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         }
 
         createLocation();
+        
+        component.add(createHeaderLabel(I18n.tr("Hash")), "wrap");
+        component.add(createLabelField(propertiableFile.getUrn().toString()), "span, wrap");
     }
 
     /**
@@ -350,6 +353,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                     component.add(createLabelField(propertiableFile.getFileName()), "span, growx, wrap");
                 }
             }
+            
             break;
         }
     }
