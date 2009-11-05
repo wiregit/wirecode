@@ -279,6 +279,11 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
             return true;
         }
 
+        @Override
+        public String getListenInterface() {
+            return null;
+        }
+
     }
 
 }
