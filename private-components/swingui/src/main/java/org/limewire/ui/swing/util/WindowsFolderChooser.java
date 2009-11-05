@@ -121,14 +121,14 @@ public class WindowsFolderChooser {
         // A Java version of the C++ struct used for this dialog
         // http://msdn.microsoft.com/en-us/library/bb773205(VS.85).aspx
         class BROWSEINFO extends Structure {
-            public Pointer hwndOwner;
-            public Pointer pidlRoot;
-            public Pointer pszDisplayName;
-            public String lpszTitle;
-            public int ulFlags;
-            public BrowseInfoCallback lpfn;
-            public Pointer lParam;
-            public int iImage;
+            @SuppressWarnings("unused") public Pointer hwndOwner;
+            @SuppressWarnings("unused") public Pointer pidlRoot;
+            @SuppressWarnings("unused") public Pointer pszDisplayName;
+            @SuppressWarnings("unused") public String lpszTitle;
+            @SuppressWarnings("unused") public int ulFlags;
+            @SuppressWarnings("unused") public BrowseInfoCallback lpfn;
+            @SuppressWarnings("unused") public Pointer lParam;
+            @SuppressWarnings("unused") public int iImage;
         }
     
         /**
