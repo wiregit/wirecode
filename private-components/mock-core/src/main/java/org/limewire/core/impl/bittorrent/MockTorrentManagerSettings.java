@@ -84,4 +84,9 @@ public class MockTorrentManagerSettings implements TorrentManagerSettings {
     public File getDHTStateFile() {
         return null;
     }
+
+    @Override
+    public String getListenInterface() {
+        return null;
+    }
 }

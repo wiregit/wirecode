@@ -27,8 +27,12 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXTable;
+import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.ui.swing.table.AbstractTableFormat;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -37,6 +41,7 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Network Interface Option View.
@@ -54,12 +59,18 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     
     private EventList<NetworkItem> eventList;
     
+    private final Provider<TorrentManager> torrentManager;
+    private final TorrentManagerSettings torrentSettings;
+    
     @Inject
-    public NetworkInterfaceOptionPanel() {
+    public NetworkInterfaceOptionPanel(Provider<TorrentManager> torrentManager, @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
+        this.torrentManager = torrentManager;
+        
         setLayout(new MigLayout("insets 15, fillx, wrap"));
         setOpaque(false);
         
         add(getNetworkPanel(), "pushx, growx");
+        this.torrentSettings = torrentSettings;
     }
     
     private JPanel getNetworkPanel() {
@@ -102,6 +113,15 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
                 ConnectionSettings.CUSTOM_INETADRESS.set(item.getAddress());
                 break;
             }
+        }
+        
+        if(torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
+            BackgroundExecutorService.execute(new Runnable() {
+               @Override
+                public void run() {
+                   torrentManager.get().setTorrentManagerSettings(torrentSettings);
+                } 
+            });
         }
         return false;
     }

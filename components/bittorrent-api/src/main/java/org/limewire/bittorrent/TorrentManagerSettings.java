@@ -85,4 +85,10 @@ public interface TorrentManagerSettings {
      * Returns a list of bootstrapping routers for the dht.
      */
     public List<TorrentIpPort> getBootStrapDHTRouters();
+
+    /**
+     * Returns the network interface Torrents should. May return null to have
+     * one chosen by the operating system.
+     */
+    public String getListenInterface();
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import org.limewire.bittorrent.TorrentIpPort;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.core.settings.BittorrentSettings;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.InvalidDataException;
@@ -117,8 +118,8 @@ class LimeWireTorrentSettings implements TorrentManagerSettings {
                 try {
                     UnresolvedIpPort unresolvedIpPort = new UnresolvedIpPortImpl(router);
                     unresolvedIpPort.resolve();
-                    dhtRouters.add(new LibTorrentIpPort(unresolvedIpPort.getAddress(), unresolvedIpPort
-                            .getPort()));
+                    dhtRouters.add(new LibTorrentIpPort(unresolvedIpPort.getAddress(),
+                            unresolvedIpPort.getPort()));
                 } catch (UnknownHostException e) {
                     LOG.debugf(e, "Address not valid: {0}", router);
                 } catch (InvalidDataException e) {
@@ -127,5 +128,13 @@ class LimeWireTorrentSettings implements TorrentManagerSettings {
             }
         }
         return dhtRouters;
+    }
+
+    @Override
+    public String getListenInterface() {
+        if (ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue()) {
+            return ConnectionSettings.CUSTOM_INETADRESS.get();
+        }
+        return null;
     }
 }
