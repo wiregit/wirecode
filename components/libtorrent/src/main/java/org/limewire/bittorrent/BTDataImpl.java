@@ -179,25 +179,22 @@ public class BTDataImpl implements BTData {
      */
     @SuppressWarnings("unchecked")
     private URI[] parseWebSeeds(Map<?, ?> torrentFileMap) {
-        List<URI> webSeedsArray = new ArrayList<URI>();
-        URI[] webSeeds = null;
+        List<URI> webSeeds = new ArrayList<URI>();
         Object tmp = torrentFileMap.get("url-list");
         if (tmp != null) {
             if (tmp instanceof List) {
                 List<byte[]> uris = (List<byte[]>) tmp;
                 if (uris.size() > 0) {
-                    webSeeds = new URI[uris.size()];
                     for (byte[] uri : uris) {
-                        addURI(webSeedsArray, StringUtils.getASCIIString(uri));
+                        addURI(webSeeds, StringUtils.getASCIIString(uri));
                     }
                 }
             } else if (tmp instanceof byte[]) {
                 String uri = StringUtils.getASCIIString((byte[]) tmp);
-                addURI(webSeedsArray, uri);
+                addURI(webSeeds, uri);
             }
         }
-        webSeeds = webSeedsArray.toArray(new URI[webSeedsArray.size()]);
-        return webSeeds;
+        return webSeeds.toArray(new URI[webSeeds.size()]);
     }
 
     private void addURI(List<URI> uris, String uriString) {
