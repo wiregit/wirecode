@@ -28,4 +28,11 @@ public class DefaultLimeTableCellRenderer extends DefaultTableCellRenderer {
         
         return this;
     }
+    
+    @Override
+    protected void setValue(Object value) {
+        // set value to empty string to avoid super class from calling toString()
+        // on value which could be expensive
+        super.setValue("");
+    }
 }
