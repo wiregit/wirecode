@@ -244,7 +244,7 @@ class VideoPanel {
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                videoMediator.closeVideoPanel();
+                videoMediator.closeVideo();
             }
         });
         return item;
@@ -254,7 +254,7 @@ class VideoPanel {
     private class CloseAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            videoMediator.closeVideoPanel();
+            videoMediator.closeVideo();
         }
     }
     
@@ -286,7 +286,7 @@ class VideoPanel {
             if (videoMediator.isFullScreen()) {
                 videoMediator.setFullScreen(false);
             } else {
-                videoMediator.closeVideoPanel();
+                videoMediator.closeVideo();
             }
         }
     }
