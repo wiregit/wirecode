@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

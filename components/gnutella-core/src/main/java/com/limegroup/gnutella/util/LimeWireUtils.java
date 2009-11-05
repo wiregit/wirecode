@@ -8,6 +8,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.GUID;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.EncodingUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;

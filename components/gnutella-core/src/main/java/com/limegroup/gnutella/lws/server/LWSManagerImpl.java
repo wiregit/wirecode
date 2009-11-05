@@ -25,10 +25,10 @@ import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
+import org.limewire.util.EncodingUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 

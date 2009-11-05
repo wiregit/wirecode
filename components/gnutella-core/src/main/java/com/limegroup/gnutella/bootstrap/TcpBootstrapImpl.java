@@ -28,6 +28,7 @@ import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.EncodingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -36,7 +37,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

@@ -11,7 +11,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.core.api.Application;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.PanelResizer;
@@ -28,21 +27,19 @@ import com.google.inject.Inject;
 public class ProNagController {
 
     private final boolean isFirstLaunch;
-    private final Application application;
     private final ProNag proNag;
     private final ProStatusPanel proStatusPanel;
     
     private boolean nagShown;
 
-    @Inject ProNagController(Application application, ProNag proNag, ProStatusPanel proStatusPanel) {
+    @Inject ProNagController(ProNag proNag, ProStatusPanel proStatusPanel) {
         isFirstLaunch = !InstallSettings.UPGRADED_TO_5.getValue();
         this.proNag = proNag;
-        this.application = application;
         this.proStatusPanel = proStatusPanel;
     }
 
     public void allowProNag(final JLayeredPane layeredPane)  {
-        if(!application.isProVersion() && !nagShown) {
+        if(!nagShown) {
             assert SwingUtilities.isEventDispatchThread();
             nagShown = true;
            

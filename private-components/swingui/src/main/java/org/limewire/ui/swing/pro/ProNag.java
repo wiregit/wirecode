@@ -25,6 +25,7 @@ import org.limewire.ui.swing.components.HTMLPane.LoadResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.EncodingUtils;
 
 import com.google.inject.Inject;
 
@@ -86,7 +87,7 @@ class ProNag extends JXPanel {
         Document document = editorPane.getDocument();
         if(document instanceof HTMLDocument) {
             HTMLDocument html = (HTMLDocument)document;
-            Element element = html.getElement(html.getDefaultRootElement(), "nonmodal", "true");
+            Element element = html.getElement(html.getDefaultRootElement(), "modal", "false");
             if(element != null && element.getName().equals("body")) {
                 return false;
             }
@@ -126,7 +127,7 @@ class ProNag extends JXPanel {
         Document document = editorPane.getDocument();
         if(document instanceof HTMLDocument) {
             HTMLDocument html = (HTMLDocument)document;
-            Element element = html.getElement(html.getDefaultRootElement(), "undecorated", "true");
+            Element element = html.getElement(html.getDefaultRootElement(), "decorated", "false");
             if(element != null && element.getName().equals("body")) {
                 return true;
             }
@@ -137,7 +138,7 @@ class ProNag extends JXPanel {
     public ListeningFuture<LoadResult> loadContents(boolean firstLaunch) {
         String bgColor = ColorUtil.toHexString(GuiUtils.getMainFrame().getBackground());
         String url = application.addClientInfoToUrl(
-                "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch + "&bgcolor=" + bgColor);
+                "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch + "&bgcolor=" + EncodingUtils.encode(bgColor));
         String backupUrl = createDefaultPage(firstLaunch, bgColor);
         
         ListeningFuture<LoadResult> future = editorPane.setPageAsynchronous(url, backupUrl);
@@ -158,6 +159,11 @@ class ProNag extends JXPanel {
     }
     
     private String createDefaultPage(boolean firstLaunch, String bgColor) {
+        // Pro has no default page.
+        if(application.isProVersion()) {
+            return "";
+        }
+        
         URL bgImage =  ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/update_background.png");
         
         String outgoing = "http://www.limewire.com/download/pro/?rnv=z&fromFirstRun=" + firstLaunch;
