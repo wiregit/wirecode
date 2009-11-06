@@ -144,6 +144,7 @@ public class InspectionsSpec {
         InspectionDataContainer inspectionResults = new InspectionDataContainer();
         
         // inspect individual inspection points
+        List<String> failedInspections = new ArrayList<String>();
         for (String inspectionKey : inspectionPoints) {
             try {
                 inspectionResults.addInspectionResult(inspectionKey,
@@ -153,6 +154,15 @@ public class InspectionsSpec {
                 Map<String, String> errorMap = new HashMap<String, String>();
                 errorMap.put("error", e.getMessage());
                 inspectionResults.addInspectionResult(inspectionKey, errorMap);
+                failedInspections.add(inspectionKey);
+            }
+        }
+        // remove failed inspections from inspection spec.  
+        // cancel inspection spec if no more inspections in the inspections spec
+        if (!failedInspections.isEmpty()) {
+            inspectionPoints.removeAll(failedInspections);
+            if (inspectionPoints.isEmpty()) {
+                ensureCancelled();
             }
         }
         return inspectionResults;
