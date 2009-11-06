@@ -177,11 +177,25 @@ public class UploadPopupMenu extends JPopupMenu {
 
         boolean done = UploadMediator.isRemovable(uploadItem);
         boolean browseItem = UploadMediator.isBrowseHost(uploadItem);
+        boolean pausable = UploadMediator.isPausable(uploadItem);
+        boolean resumable = UploadMediator.isResumable(uploadItem);
         
+        if (pausable) {
+            JMenuItem pauseMenuItem = new JMenuItem(I18n.tr("Pause"));
+            pauseMenuItem.setActionCommand(UploadActionHandler.PAUSE_COMMAND);
+            pauseMenuItem.addActionListener(new PauseMenuListener());
+            add(pauseMenuItem);
+        }
+        if (resumable) {
+            JMenuItem resumeMenuItem = new JMenuItem(I18n.tr("Resume"));
+            resumeMenuItem.setActionCommand(UploadActionHandler.RESUME_COMMAND);
+            resumeMenuItem.addActionListener(new ResumeMenuListener());
+            add(resumeMenuItem);
+        }
         if (done) {
             JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
             removeMenuItem.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
-            removeMenuItem.addActionListener(listener);
+            removeMenuItem.addActionListener(new RemoveMenuListener());
             add(removeMenuItem);
         }
         
