@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Sign Up</title>
+   <style type="text/css">
+      BODY { 
+         margin: 0px; 
+         font-family: sans-serif; 
+         font-size: small;
+      }
+      .header { 
+         background-color: #dddddd; 
+         padding: 6px 6px 6px 6px;
+      }
+      .button {
+         background-color: #c2e986;
+      }
+      .main {
+         height: 390px;
+      }
+      TD { 
+         vertical-align: top; 
+      }
+   </style>
+   <script type="text/javascript">
+      function resizeWindow() {
+         window.resizeTo(640, 480);
+      }
+   </script>
+</head>
+
+<body onLoad="resizeWindow();">
+
+<div class=header>
+<table width="100%">
+   <tr>
+      <td width="33%" align="center"><b>Sign Up</b></td>
+      <td width="33%" align="center">Payment Options</td>
+      <td width="33%" align="center">Review Offer</td>
+   </tr>
+</table>
+</div>
+
+<table align="center">
+   <tr><td>
+   <form id="accountFRM" action="signup2.html">
+      <div class="main"><table cellpadding="3">
+         <tr>
+            <td colspan="2">Sign up for a LimeWire Store account</td>
+         </tr>
+         <tr>
+            <td>
+               <label for=firstname>First Name</label><br />
+               <input type="text" id="firstname"/>
+            </td>
+            <td>
+               <label for=lastname>Last Name</label><br />
+               <input type="text" id="lastname"/>
+            </td>
+         </tr>
+         <tr>
+            <td>
+               <label for=email>E-mail</label><br />
+               <input type="text" id="email"/>
+            </td>
+            <td>
+               <label for=email2>Confirm E-mail</label><br />
+               <input type="text" id="email2"/>
+            </td>
+         </tr>
+         <tr>
+            <td>
+               <label for=passwd>Password</label><br />
+               <input type="password" id="passwd"/>
+            </td>
+            <td>
+               <label for=passwd2>Confirm Password</label><br />
+               <input type="password" id="passwd2"/>
+            </td>
+         </tr>
+         <tr>
+            <td>
+               <label for=secquestion>Security Question</label><br />
+               <input type="text" id="secquestion"/>
+            </td>
+            <td>
+               <label for=secanswer>Answer</label><br />
+               <input type="text" id="secanswer"/>
+            </td>
+         </tr>
+         <tr>
+            <td colspan="2">
+               <br /><b>LimeWire Store Terms of Use</b><br />
+               blah blah blah
+            </td>
+         </tr>
+         <tr>
+            <td colspan="2">
+               <label><input type="checkbox">&nbsp;I agree to the above Terms of Use</label>
+            </td>
+         </tr>
+         <tr>
+            <td colspan="2">
+               <label><input type="checkbox">&nbsp;Send me information about free downloads and new releases!</label>
+            </td>
+         </tr>
+      </table></div>
+      
+      <p align="center">
+         <input class=button type="submit" value="Create account" />&nbsp;
+         <a href="signup1.html#cancel">Cancel</a>
+      </p>
+   </form>
+   </td></tr>
+</table>
+
+</body>
+</html>
