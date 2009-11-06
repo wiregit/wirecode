@@ -181,7 +181,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
-        this.browseFailedPanel = browseFailedMessagePanelFactory.create(searchResultsModel);
+        this.browseFailedPanel = browseFailedMessagePanelFactory.create(headerBarDecorator, searchResultsModel);
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
@@ -289,7 +289,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             this.overlayType = overlayType;
             switch (overlayType) {
             case AWAITING_CONNECTIONS:
-                installOverlay(new AwaitingConnectionsPanel());
+                installOverlay(new AwaitingConnectionsPanel(headerBarDecorator));
                 break;
                 
             case NO_FRIENDS_ON_LIMEWIRE:
@@ -550,7 +550,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         searchResultsComponentsPanel.add(messagePanel, "spanx 1, growx, wrap");
         messagePanelsGap = Box.createVerticalStrut(6);
         searchResultsComponentsPanel.add(messagePanelsGap, "hidemode 3, spanx 1, growx, wrap");
-        searchResultsComponentsPanel.add(scrollPane , "hidemode 3, grow");
+        searchResultsComponentsPanel.add(scrollPane , "hidemode 3, grow, spany");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
 

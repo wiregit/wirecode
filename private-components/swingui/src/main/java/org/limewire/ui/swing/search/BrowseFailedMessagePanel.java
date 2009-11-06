@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,8 +28,10 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HTMLLabel;
+import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.MessageDecorator;
 import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
@@ -54,7 +57,8 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     private ListenerSupport<FriendConnectionEvent> connectionSupport;
     private final RemoteLibraryManager remoteLibraryManager;
     private final Provider<MessageDecorator> messageDecoratorProvider;
-
+    private final HeaderBarDecorator headerBarDecorator;
+    
     private BrowseSearch browseSearch;
     
     private boolean isInitialized = false;
@@ -65,7 +69,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
 
     @Inject
     public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, Provider<ChatMediator> chatMediator, RemoteLibraryManager remoteLibraryManager,
-            Provider<MessageDecorator> messageDecoratorProvider,
+            Provider<MessageDecorator> messageDecoratorProvider, @Assisted HeaderBarDecorator headerBarDecorator,
             @Assisted SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
         this.connectionEventBean = connectionEventBean;
@@ -73,6 +77,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
         this.searchResultsModel = searchResultsModel;
         this.remoteLibraryManager = remoteLibraryManager;
         this.messageDecoratorProvider = messageDecoratorProvider;
+        this.headerBarDecorator = headerBarDecorator;
     }
     
     public void update(BrowseState state, BrowseSearch browseSearch, List<Friend> friends){
@@ -106,7 +111,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
     }
   
     private void initialize() {
-        setLayout(new MigLayout("insets 0, gap 0, fill"));
+        setLayout(new MigLayout("insets 0, gap 0, fill", "[]", "[][grow][grow]"));
     }
     
     private void updateLabel(){
@@ -120,6 +125,13 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
      * as to what state their friend is in when no files are displayed.
      */
     private JComponent createMessageComponent(String text) {
+        
+        HeaderBar header = new HeaderBar(new JLabel(""));
+        header.setLayout(new MigLayout("insets 0, gap 0!, novisualpadding, alignx 100%, aligny 100%"));
+        header.setAlignmentX(Component.CENTER_ALIGNMENT);
+        headerBarDecorator.decorateBasic(header);
+        add(header, "growx, growy, wrap");       
+        
         MessageComponent messageComponent = new MessageComponent();
         messageDecoratorProvider.get().decorateGrayMessage(messageComponent);
 
