@@ -230,7 +230,6 @@ class CoreUploadItem implements UploadItem {
     @Override
     public float getUploadSpeed() {
         try {
-            uploader.measureBandwidth();
             return uploader.getMeasuredBandwidth();
         } catch (InsufficientDataException e) {
             return 0;
