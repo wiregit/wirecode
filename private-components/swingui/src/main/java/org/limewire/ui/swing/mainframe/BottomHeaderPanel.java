@@ -91,6 +91,7 @@ public class BottomHeaderPanel {
     private LimeComboBox downloadOptionsButton;
     private LimeComboBox uploadOptionsButton;
     
+    private int componentHeight;
     private TabId selectedTab;
     
     @Inject
@@ -113,7 +114,7 @@ public class BottomHeaderPanel {
         
         component = new JXPanel(new MigLayout("insets 0 0 0 0, gap 0, novisualpadding, fill"));
         component.setBackgroundPainter(barPainterFactory.createDownloadSummaryBarPainter());
-        ResizeUtils.forceHeight(component, 20);
+        setComponentHeight(20);
         
         // initialize the dock icon since it registers as a Service
         iconFactory.createDockIcon();
@@ -259,6 +260,21 @@ public class BottomHeaderPanel {
     }
     
     /**
+     * Returns the height of the header component.
+     */
+    public int getComponentHeight() {
+        return componentHeight;
+    }
+    
+    /**
+     * Sets the height of the header component.
+     */
+    private void setComponentHeight(int height) {
+        componentHeight = height;
+        ResizeUtils.forceHeight(component, height);
+    }
+    
+    /**
      * Selects the tab for the specified tab id.
      */
     public void selectTab(TabId tabId) {
@@ -312,11 +328,11 @@ public class BottomHeaderPanel {
         if (downloadVisible && uploadVisible) {
             tabList.setVisible(true);
             titleTextLabel.setVisible(false);
-            ResizeUtils.forceHeight(component, 26);
+            setComponentHeight(26);
         } else {
             tabList.setVisible(false);
             titleTextLabel.setVisible(true);
-            ResizeUtils.forceHeight(component, 20);
+            setComponentHeight(20);
         }
     }
     

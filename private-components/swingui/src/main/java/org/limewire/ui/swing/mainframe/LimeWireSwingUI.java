@@ -2,7 +2,6 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -16,6 +15,8 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
@@ -137,23 +138,29 @@ public class LimeWireSwingUI extends JPanel {
                 });
             }
 	    });
-	}
-	
-	private boolean isFirstPainting = true;
-	@Override
-    public void paint(Graphics g){
-	    if(isFirstPainting && splitPane.getHeight() > 0){
-	        isFirstPainting = false;
-            if (UploadSettings.SHOW_UPLOADS_TRAY.getValue()) {
-                handleUploadVisibilityChange(true);
+        
+        // Add listener to display bottom tray when the ancestor is made 
+        // visible.  This occurs when the window is first displayed, and also
+	    // when it is restored from the system tray.
+        addAncestorListener(new AncestorListener() {
+            @Override
+            public void ancestorAdded(AncestorEvent e) {
+                if (UploadSettings.SHOW_UPLOADS_TRAY.getValue()) {
+                    handleUploadVisibilityChange(true);
+                }
+                if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
+                    handleDownloadVisibilityChange(true);
+                }
             }
-	        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
-	            handleDownloadVisibilityChange(true);
-	        }
-	    }
-	    super.paint(g);
-	}
-	
+            
+            @Override
+            public void ancestorMoved(AncestorEvent e) {}
+            
+            @Override
+            public void ancestorRemoved(AncestorEvent e) {}
+        });
+    }
+    
 	void hideMainPanel() {
 	    layeredPane.setVisible(false);
         centerPanel.setVisible(false);
@@ -262,14 +269,14 @@ public class LimeWireSwingUI extends JPanel {
     private void setBottomTrayVisible(boolean visible) {
         assert (SwingUtilities.isEventDispatchThread());
         
-        // Set component visibility.
+        // Get current visibility.
         boolean wasVisible = splitPane.getBottomComponent().isVisible();
+        
+        // Set new visibility and divider size.
         splitPane.getBottomComponent().setVisible(visible);
+        splitPane.setDividerSize(visible ? bottomHeaderPanel.getComponentHeight() : 0);
         
         if (visible) {
-            // Restore divider size.
-            splitPane.setDividerSize(bottomHeaderPanel.getComponent().getPreferredSize().height);
-            
             // Restore divider location if newly visible.  If the last location
             // is not valid, compute perferred position and apply.
             if (!wasVisible) {
@@ -288,10 +295,15 @@ public class LimeWireSwingUI extends JPanel {
             }
             
         } else {
-            // Save divider location and reset divider size.
-            splitPane.setLastDividerLocation(splitPane.getDividerLocation());
-            splitPane.setDividerSize(0);
+            // Save divider location if newly invisible.
+            if (wasVisible) {
+                splitPane.setLastDividerLocation(splitPane.getDividerLocation());
+            }
         }
+        
+        // Update split pane display.
+        splitPane.revalidate();
+        splitPane.repaint();
     }
     
     private static class MainPanelResizer extends ComponentAdapter {
