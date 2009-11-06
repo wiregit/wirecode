@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -489,6 +490,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         mainStyle.addStyleSheet(newStyle); 
         heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
 
+        heading.setBorder(BorderFactory.createLineBorder(new Color(255,255,255,0), 3));
+        
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
 
@@ -648,6 +651,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         public NoDancingHtmlLabel(){
             //prevents strange movement on mouseover
             setVerticalAlignment(JLabel.TOP);
+            setBorder(BorderFactory.createLineBorder(new Color(255,255,255,0), 3));
         }
         
         @Override
