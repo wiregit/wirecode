@@ -27,12 +27,9 @@ class UploadProgressRenderer extends TransferProgressRenderer {
             
             if (UploadItemType.GNUTELLA == item.getUploadItemType()) {
                 // Show progress for Gnutella uploads.
+                progressBar.setValue((int) (100 * item.getTotalAmountUploaded() / item.getFileSize()));
                 progressBar.setVisible((item.getState() == UploadState.UPLOADING) && 
                         (columnWidth > resources.getProgressBarCutoffWidth()));
-                
-                if (progressBar.isVisible()) {
-                    progressBar.setValue((int) (100 * item.getTotalAmountUploaded() / item.getFileSize()));
-                }
                 
             } else {
                 // Progress not shown for torrents.
@@ -42,6 +39,8 @@ class UploadProgressRenderer extends TransferProgressRenderer {
         } else {
             progressBar.setVisible(false);
         }
+        
+        progressBar.setEnabled(true);
     }
     
     @Override
@@ -51,13 +50,14 @@ class UploadProgressRenderer extends TransferProgressRenderer {
             
             if (UploadItemType.GNUTELLA == item.getUploadItemType()) {
                 // Show time left for Gnutella uploads.
-                timeLabel.setVisible((item.getState() == UploadState.UPLOADING) && 
-                        (item.getRemainingUploadTime() <= Long.MAX_VALUE - 1000));
-                
-                if (timeLabel.isVisible()) {
+                if ((item.getState() == UploadState.UPLOADING) && 
+                        (item.getRemainingUploadTime() <= Long.MAX_VALUE - 1000)) {
                     timeLabel.setText(I18n.tr("{0} left", CommonUtils.seconds2time(
                             item.getRemainingUploadTime())));
                     timeLabel.setMinimumSize(timeLabel.getPreferredSize());
+                    timeLabel.setVisible(true);
+                } else {
+                    timeLabel.setVisible(false);
                 }
                 
             } else {
