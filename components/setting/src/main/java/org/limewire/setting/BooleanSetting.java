@@ -1,6 +1,7 @@
 package org.limewire.setting;
 
 import org.limewire.service.Switch;
+import org.limewire.inspection.Inspectable;
 
 /**
  * Provides a boolean setting value. As a subclass of 
@@ -9,7 +10,7 @@ import org.limewire.service.Switch;
  * You can create a <code>BooleanSetting</code> object with a 
  * {@link SettingsFactory#createBooleanSetting(String, boolean)}.
  */
-public interface BooleanSetting extends Setting<Boolean>, Switch {
+public interface BooleanSetting extends Setting<Boolean>, Switch, Inspectable {
 
     /**
      * Returns the value of this setting.
