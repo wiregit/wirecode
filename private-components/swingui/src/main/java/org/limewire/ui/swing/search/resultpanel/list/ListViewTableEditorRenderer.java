@@ -490,7 +490,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         mainStyle.addStyleSheet(newStyle); 
         heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
 
-        heading.setBorder(BorderFactory.createLineBorder(new Color(255,255,255,0), 3));
+        heading.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
@@ -651,7 +651,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         public NoDancingHtmlLabel(){
             //prevents strange movement on mouseover
             setVerticalAlignment(JLabel.TOP);
-            setBorder(BorderFactory.createLineBorder(new Color(255,255,255,0), 3));
+            setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         }
         
         @Override
