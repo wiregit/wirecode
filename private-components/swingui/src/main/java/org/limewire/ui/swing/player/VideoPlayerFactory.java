@@ -43,7 +43,14 @@ public class VideoPlayerFactory {
     private static DataSource createDataSource(File file){
         //FMJ's handling of files is incredibly fragile.  This works with both quicktime and directshow.
         DataSource source = new net.sf.fmj.media.protocol.file.DataSource();
-        source.setLocator(new MediaLocator(URLUtils.createUrlStr(file)));
+        if (OSUtils.isMacOSX()) {
+            // On OS-X escaping characters such as spaces, parenthesis, etc are causing the 
+            // files not to be loaded by FMJ. So let's not escape any characters. 
+            source.setLocator(new MediaLocator("file:///" + file.getAbsolutePath()));
+        } else {
+            source.setLocator(new MediaLocator(URLUtils.createUrlStr(file)));
+        }
         return source;
     }
+
 }
