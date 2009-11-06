@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 @Singleton
 class LibraryManagerImpl implements LibraryManager {
     
-    @InspectableForSize("number of files in library")
+    @InspectableForSize(value = "number of files in library", category = DataCategory.USAGE)
     private final LibraryFileListImpl libraryList;
     private final LibraryData libraryData;
     
