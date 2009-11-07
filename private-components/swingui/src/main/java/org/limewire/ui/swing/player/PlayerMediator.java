@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import java.io.File;
+import java.net.URL;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
@@ -86,6 +87,8 @@ public interface PlayerMediator {
      */
     public void play(File file);
 
+    public void play(URL url);
+    
     /**
      * Starts playing the specified file item in the audio player.
      */

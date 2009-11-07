@@ -31,6 +31,7 @@
         <dependency org="org.limewire" name="promotion" rev="latest.integration" conf="compile,runtime"/>
 		<dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
 		<dependency org="org.limewire" name="libtorrent" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="store" rev="latest.integration" conf="compile,runtime"/>
 
 		<dependency org="none" name="google-collect" rev="${google-collect.version}" conf="compile,runtime"/>        
         <dependency org="none" name="glazedlists" rev="${glazedlists.version}" conf="compile,runtime"/>

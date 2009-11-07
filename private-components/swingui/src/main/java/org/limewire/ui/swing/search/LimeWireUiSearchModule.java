@@ -13,10 +13,14 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncatorImpl;
+import org.limewire.ui.swing.search.resultpanel.classic.NameRendererDelegate;
+import org.limewire.ui.swing.search.resultpanel.classic.NameRendererDelegateFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRuleImpl;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
+import org.limewire.ui.swing.search.store.StoreController;
+import org.limewire.ui.swing.search.store.StoreControllerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -71,7 +75,14 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(SearchResultTruncator.class).toProvider(LazyBinder.newLazyProvider(
                 SearchResultTruncator.class, SearchResultTruncatorImpl.class));
         
+        bind(StoreControllerFactory.class).toProvider(
+                FactoryProvider.newFactory(
+                        StoreControllerFactory.class, StoreController.class));
 
+        bind(NameRendererDelegateFactory.class).toProvider(
+                FactoryProvider.newFactory(
+                        NameRendererDelegateFactory.class, NameRendererDelegate.class));
+        
         bind(BrowseFailedMessagePanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                     BrowseFailedMessagePanelFactory.class, BrowseFailedMessagePanel.class));

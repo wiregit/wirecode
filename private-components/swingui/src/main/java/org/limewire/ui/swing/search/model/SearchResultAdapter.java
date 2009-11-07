@@ -19,6 +19,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.Objects;
@@ -57,6 +58,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     private float relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
+    private RowDisplayResult rowDisplayResult;
     
     private final VisualSearchResultStatusListener changeListener;
 
@@ -79,6 +81,11 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     @Override
     public boolean isAnonymous() {
         return anonymous;
+    }
+    
+    @Override
+    public boolean isStore() {
+        return false;
     }
     
     @Override
@@ -381,14 +388,25 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     public void setPreExistingDownload(boolean preExistingDownload) {
         this.preExistingDownload = preExistingDownload;
     }
+    
+    @Override
+    public RowDisplayResult getRowDisplayResult() {
+        return rowDisplayResult;
+    }
+    
+    @Override
+    public void setRowDisplayResult(RowDisplayResult rowDisplayResult) {
+        this.rowDisplayResult = rowDisplayResult;
+    }
 
     @Override
     public int compareTo(Object o) {
-        if(!(o instanceof SearchResultAdapter)) 
+        if (!(o instanceof VisualSearchResult)) {
             return -1;
+        }
         
-        SearchResultAdapter sra = (SearchResultAdapter) o;
-        return getHeading().compareTo(sra.getHeading());
+        VisualSearchResult vsr = (VisualSearchResult) o;
+        return getHeading().compareTo(vsr.getHeading());
     }
 
     private void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {

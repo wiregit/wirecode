@@ -19,7 +19,7 @@ public class LimeMenuBar extends JMenuBar {
     
     @Inject
     LimeMenuBar(FileMenu fileMenu, FriendsMenu friendMenu, ViewMenu viewMenu, HelpMenu helpMenu,
-            ToolsMenu toolsMenu) {
+            ToolsMenu toolsMenu, StoreMenu storeMenu) {
         
         GuiUtils.assignResources(this);
         
@@ -27,12 +27,14 @@ public class LimeMenuBar extends JMenuBar {
         fileMenu.setBackground(backgroundColor);
         viewMenu.setBackground(backgroundColor);
         friendMenu.setBackground(backgroundColor);
+        storeMenu.setBackground(backgroundColor);
         toolsMenu.setBackground(backgroundColor);
         helpMenu.setBackground(backgroundColor);
         
         add(fileMenu);
         add(viewMenu);
         add(friendMenu);
+        add(storeMenu);
         add(toolsMenu);
         add(helpMenu);
         
@@ -54,6 +56,7 @@ public class LimeMenuBar extends JMenuBar {
         fileMenu.addMenuListener(listener);
         viewMenu.addMenuListener(listener);
         friendMenu.addMenuListener(listener);
+        storeMenu.addMenuListener(listener);
         toolsMenu.addMenuListener(listener);
         helpMenu.addMenuListener(listener);
     }

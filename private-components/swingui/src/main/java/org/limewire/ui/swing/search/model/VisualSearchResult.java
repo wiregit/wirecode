@@ -9,6 +9,7 @@ import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.filter.FilterableItem;
 import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 
 /**
  * Defines an interface for a displayed search result.  The displayed result
@@ -159,4 +160,13 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      */
     boolean isLicensed();
 
+    /**
+     * Returns row display data for the result.
+     */
+    RowDisplayResult getRowDisplayResult();
+    
+    /**
+     * Sets row display data for the result.
+     */
+    void setRowDisplayResult(RowDisplayResult rowDisplayResult);
 }
