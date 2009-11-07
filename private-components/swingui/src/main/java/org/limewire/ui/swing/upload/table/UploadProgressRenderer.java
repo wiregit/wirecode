@@ -27,9 +27,13 @@ class UploadProgressRenderer extends TransferProgressRenderer {
             
             if (UploadItemType.GNUTELLA == item.getUploadItemType()) {
                 // Show progress for Gnutella uploads.
-                progressBar.setValue((int) (100 * item.getTotalAmountUploaded() / item.getFileSize()));
                 progressBar.setVisible((item.getState() == UploadState.UPLOADING) && 
                         (columnWidth > resources.getProgressBarCutoffWidth()));
+                if (progressBar.isVisible()) {
+                    long size = item.getFileSize();
+                    progressBar.setValue((size > 0) ? 
+                            (int) (100 * item.getTotalAmountUploaded() / size) : 0);
+                }
                 
             } else {
                 // Progress not shown for torrents.
