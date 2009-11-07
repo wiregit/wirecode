@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Sign Up</title>
+   <style type="text/css">
+      BODY { 
+         margin: 0px; 
+         font-family: sans-serif; 
+         font-size: small;
+      }
+      .header { 
+         background-color: #dddddd; 
+         padding: 6px 6px 6px 6px;
+      }
+      .button {
+         background-color: #c2e986;
+      }
+      .main {
+         height: 390px;
+      }
+      TD { 
+         vertical-align: top; 
+      }
+   </style>
+   <script type="text/javascript">
+      function resizeWindow() {
+         window.resizeTo(640, 480);
+      }
+   </script>
+</head>
+
+<body onLoad="resizeWindow();">
+
+<div class=header>
+<table width="100%">
+   <tr>
+      <td width="33%" align="center">Sign Up</td>
+      <td width="33%" align="center">Payment Options</td>
+      <td width="33%" align="center"><b>Review Offer</b></td>
+   </tr>
+</table>
+</div>
+
+<table align="center">
+   <tr><td>
+   <form id="accountFRM" action="loginSuccess.html">
+      <div class="main"><table cellpadding="3">
+         <tr>
+            <td>
+               <table width="180px" height="240px" border="0" style="background-color: #dddddd">
+                  <tr><td>Your payment</td></tr>
+               </table>
+            </td>
+            
+            <td>
+               <table>
+               <tr>
+                  <td>Name on Card:</td>
+                  <td>Jane Doe</td>
+               </tr>
+               <tr>
+                  <td>Credit Card Number:</td>
+                  <td>XXXX XXXX XXXX 9999</td>
+               </tr>
+               <tr>
+                  <td>Expiration Date:</td>
+                  <td>03/2010</td>
+               </tr>
+               <tr>
+                  <td>Billing Address:</td>
+                  <td>123 Sherwood Forest</td>
+               </tr>
+               </table>
+            </td>
+         </tr>
+         
+         <tr>
+            <td>
+               <table width="150px" height="180px" border="0">
+                  <tr><td>Your payment will be handled by Acme Money Launderers.
+                  This name may appear on your bank statement.</td></tr>
+               </table>
+            </td>
+            <td>
+               <table border="0">
+                  <tr><td>Purchase Total: <b>$10.00</b></td></tr>
+               </table>
+            </td>
+         </tr>
+      </table></div>
+      
+      <p align="center">
+         <input class=button type="submit" value="Complete purchase" />&nbsp;
+         <a href="signup3.html#cancel">Cancel</a>
+      </p>
+   </form>
+   </td></tr>
+</table>
+
+</body>
+</html>

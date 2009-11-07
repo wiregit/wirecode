@@ -30,6 +30,8 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.api.search.store.StoreResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectableContainer;
@@ -536,6 +538,16 @@ class TopPanel extends JXPanel implements SearchNavigator {
             // do nothing
         }
         
+        @Override
+        public void handleStoreResult(Search search, StoreResult storeResult) {
+            // do nothing
+        }
+        
+        @Override
+        public void handleStoreStyle(Search search, StoreStyle storeStyle) {
+            // do nothing
+        }
+        
         void killBusy() {
             if (busyTimer != null && busyTimer.isRunning()) {
                 busyTimer.stop();
@@ -596,6 +608,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
         public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {}
         @Override
         public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
+        @Override
+        public void handleStoreResult(Search search, StoreResult storeResult) {}
+        @Override
+        public void handleStoreStyle(Search search, StoreStyle storeStyle) {}
     }
 
     /**

@@ -419,4 +419,11 @@ public final class SearchSettings extends LimeProps {
      */
     public static final BooleanSetting DESIRES_NMS1_URNS = 
         FACTORY.createBooleanSetting("DESIRES_NMS1_URNS", false);
+    
+    /**
+     * The store search URL
+     */
+    public static final StringSetting STORE_API_URL = 
+            FACTORY.createRemoteStringSetting("STORE_API_URL",
+                    "http://localhost:8080/", "SearchSettings.StoreAPIURL");
 }
