@@ -37,7 +37,7 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
      */
     private File torrentDir = null;
 
-    private TorrentManagerImpl torrentManager;
+    private LibTorrentSession torrentManager;
 
     private LibTorrentWrapper libTorrentWrapper;
 
@@ -52,7 +52,7 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
 
         libTorrentWrapper = new LibTorrentWrapper();
         scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
-        torrentManager = new TorrentManagerImpl(libTorrentWrapper, scheduledExecutorService,
+        torrentManager = new LibTorrentSession(libTorrentWrapper, scheduledExecutorService,
                 new TestTorrentSettings());
         torrentManager.initialize();
         torrentManager.start();

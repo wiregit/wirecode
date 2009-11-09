@@ -65,12 +65,12 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     @Inject
     public NetworkInterfaceOptionPanel(Provider<TorrentManager> torrentManager, @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.torrentManager = torrentManager;
+        this.torrentSettings = torrentSettings;
         
         setLayout(new MigLayout("insets 15, fillx, wrap"));
         setOpaque(false);
         
         add(getNetworkPanel(), "pushx, growx");
-        this.torrentSettings = torrentSettings;
     }
     
     private JPanel getNetworkPanel() {

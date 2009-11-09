@@ -99,11 +99,11 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.get_alerts(alertCallback));
         LOG.debug("after get_alerts");
     }
-    
+
     public void set_ip_filter(IpFilterCallback ipFilterCallback) {
         LOG.debug("before set_ip_filter");
         catchWrapperException(libTorrent.set_ip_filter(ipFilterCallback));
-        LOG.debug("after set_ip_filter");    
+        LOG.debug("after set_ip_filter");
     }
 
     public void pause_torrent(String id) {
@@ -117,13 +117,13 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.resume_torrent(id));
         LOG.debugf("after resume_torrent: {0}", id);
     }
-    
+
     public void scrape_tracker(String id) {
         LOG.debugf("before scrape_tracker: {0}", id);
         catchWrapperException(libTorrent.scrape_tracker(id));
         LOG.debugf("after scrape_tracker: {0}", id);
     }
-    
+
     public void force_reannounce(String id) {
         LOG.debugf("before force_reannounce: {0}", id);
         catchWrapperException(libTorrent.force_reannounce(id));
@@ -228,9 +228,11 @@ class LibTorrentWrapper {
     public void start_dht() {
         start_dht(null);
     }
+
     public void start_dht(File dhtStateFile) {
         LOG.debugf("before start_dht");
-        WString dhtStateFilePath = dhtStateFile != null ? new WString(dhtStateFile.getAbsolutePath()) : null;
+        WString dhtStateFilePath = dhtStateFile != null ? new WString(dhtStateFile
+                .getAbsolutePath()) : null;
         catchWrapperException(libTorrent.start_dht(dhtStateFilePath));
         LOG.debugf("after start_dht");
     }
@@ -240,23 +242,24 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.stop_dht());
         LOG.debugf("after stop_dht");
     }
-    
+
     public void save_dht_state(File dhtStateFile) {
         LOG.debugf("before save_dht_state");
-        if(dhtStateFile != null) {
+        if (dhtStateFile != null) {
             dhtStateFile.getParentFile().mkdirs();
         }
-        WString dhtStateFilePath = dhtStateFile != null ? new WString(dhtStateFile.getAbsolutePath()) : null;
+        WString dhtStateFilePath = dhtStateFile != null ? new WString(dhtStateFile
+                .getAbsolutePath()) : null;
         catchWrapperException(libTorrent.save_dht_state(dhtStateFilePath));
         LOG.debugf("after save_dht_state");
     }
-    
+
     public void add_dht_router(String address, int port) {
         LOG.debugf("before add_dht_router: address={0}, port={1}", address, port);
         catchWrapperException(libTorrent.add_dht_router(address, port));
         LOG.debugf("after add_dht_router: address={0}, port={1}", address, port);
     }
-    
+
     public void add_dht_node(String address, int port) {
         LOG.debugf("before add_dht_node: address={0}, port={1}", address, port);
         catchWrapperException(libTorrent.add_dht_node(address, port));
@@ -373,7 +376,7 @@ class LibTorrentWrapper {
         LOG.debugf("after has_metadata: {0}", id);
         return has_metadata.getValue() != 0;
     }
-    
+
     public boolean is_valid(String id) {
         LOG.debugf("before is_valid: {0}", id);
         IntByReference is_valid = new IntByReference(0);
@@ -397,7 +400,7 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.free_torrent_info(info.getPointer()));
         LOG.debugf("after free_torrent_info: {0}", info);
     }
-    
+
     /**
      * Saves the fast resume data for the given alert.
      */
@@ -405,5 +408,29 @@ class LibTorrentWrapper {
         LOG.debugf("before save_fast_resume_data: {0} - {1}", alert, filePath);
         catchWrapperException(libTorrent.save_fast_resume_data(alert, new WString(filePath)));
         LOG.debugf("after save_fast_resume_data: {0} - {1}", alert, filePath);
+    }
+
+    public void set_peer_proxy(LibTorrentProxySetting proxySetting) {
+        LOG.debugf("before set_peer_proxy: {0}", proxySetting);
+        catchWrapperException(libTorrent.set_peer_proxy(proxySetting));
+        LOG.debugf("after set_peer_proxy: {0}", proxySetting);
+    }
+
+    public void set_dht_proxy(LibTorrentProxySetting proxySetting) {
+        LOG.debugf("before set_dht_proxy: {0}", proxySetting);
+        catchWrapperException(libTorrent.set_dht_proxy(proxySetting));
+        LOG.debugf("after set_dht_proxy: {0}", proxySetting);
+    }
+
+    public void set_tracker_proxy(LibTorrentProxySetting proxySetting) {
+        LOG.debugf("before set_tracker_proxy: {0}", proxySetting);
+        catchWrapperException(libTorrent.set_tracker_proxy(proxySetting));
+        LOG.debugf("after set_tracker_proxy: {0}", proxySetting);
+    }
+
+    public void set_web_seed_proxy(LibTorrentProxySetting proxySetting) {
+        LOG.debugf("before set_web_seed_proxy: {0}", proxySetting);
+        catchWrapperException(libTorrent.set_web_seed_proxy(proxySetting));
+        LOG.debugf("after set_web_seed_proxy: {0}", proxySetting);
     }
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import org.limewire.bittorrent.ProxySetting;
+import org.limewire.bittorrent.ProxySettingType;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentEventType;
@@ -16,11 +18,12 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.core.settings.BittorrentSettings;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.libtorrent.TorrentManagerImpl;
+import org.limewire.libtorrent.LibTorrentSession;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -43,7 +46,7 @@ import com.limegroup.gnutella.filters.IPFilter;
  */
 @EagerSingleton
 public class LimeWireTorrentManager implements TorrentManager, Service {
-    private final Provider<TorrentManagerImpl> torrentManager;
+    private final Provider<LibTorrentSession> torrentManager;
 
     private final EventListener<TorrentEvent> torrentListener = new EventListener<TorrentEvent>() {
         @Override
@@ -60,8 +63,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     private final Inspectable torrentManagerStatus = new TorrentManagerStatus();
 
     @Inject
-    public LimeWireTorrentManager(Provider<TorrentManagerImpl> torrentManager,
-                                  IPFilter ipFilter) {
+    public LimeWireTorrentManager(Provider<LibTorrentSession> torrentManager, IPFilter ipFilter) {
         this.torrentManager = torrentManager;
         this.ipFilterPredicate = new IpFilterPredicate(ipFilter);
     }
@@ -87,6 +89,8 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
                         this.torrentManager.get().initialize();
 
                         if (torrentManager.get().isValid()) {
+                            updateProxies();
+                            
                             torrentManager.get().setIpFilter(ipFilterPredicate);
                             if (BittorrentSettings.TORRENT_USE_UPNP.getValue()) {
                                 torrentManager.get().startUPnP();
@@ -130,7 +134,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     @Override
     public void setIpFilter(TorrentIpFilter ipFilterPredicate) {
         setupTorrentManager();
-        torrentManager.get().setIpFilter(ipFilterPredicate);    
+        torrentManager.get().setIpFilter(ipFilterPredicate);
     }
 
     @Override
@@ -230,27 +234,84 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     public void setTorrentManagerSettings(TorrentManagerSettings settings) {
         setupTorrentManager();
         torrentManager.get().setTorrentManagerSettings(settings);
+        updateProxies();
         limitSeedingTorrents();
+    }
+
+    private void updateProxies() {
+        ProxySetting proxy = buildProxySetting();
+        torrentManager.get().setPeerProxy(proxy);
+        torrentManager.get().setTrackerProxy(proxy);
+        torrentManager.get().setWebSeedProxy(proxy);
+        torrentManager.get().setDHTProxy(proxy);
+    }
+
+    private ProxySetting buildProxySetting() {
+        return new ProxySetting() {
+            @Override
+            public String getHostname() {
+                return ConnectionSettings.PROXY_HOST.get();
+            }
+
+            @Override
+            public int getPort() {
+                return ConnectionSettings.PROXY_PORT.getValue();
+            }
+
+            @Override
+            public String getUsername() {
+                return ConnectionSettings.PROXY_USERNAME.get();
+            }
+
+            @Override
+            public String getPassword() {
+                return ConnectionSettings.PROXY_PASS.get();
+            }
+
+            @Override
+            public ProxySettingType getType() {
+                boolean authenticate = ConnectionSettings.PROXY_AUTHENTICATE.getValue();
+                switch (ConnectionSettings.CONNECTION_METHOD.getValue()) {
+                case ConnectionSettings.C_SOCKS4_PROXY:
+                    return ProxySettingType.SOCKS4;
+                case ConnectionSettings.C_SOCKS5_PROXY:
+                    if (authenticate) {
+                        return ProxySettingType.SOCKS5_PW;
+                    } else {
+                        return ProxySettingType.SOCKS5;
+                    }
+                case ConnectionSettings.C_HTTP_PROXY:
+                    if (authenticate) {
+                        return ProxySettingType.HTTP_PW;
+                    } else {
+                        return ProxySettingType.HTTP;
+                    }
+                case ConnectionSettings.C_NO_PROXY:
+                default:
+                    return null;
+                }
+            }
+        };
     }
 
     private enum Status {
         NOT_INITIALIZED, LOADED, FAILED
     }
-    
+
     private static class IpFilterPredicate implements TorrentIpFilter {
-        
+
         private final IPFilter ipFilter;
-        
+
         IpFilterPredicate(IPFilter ipFilter) {
-            this.ipFilter = ipFilter;    
+            this.ipFilter = ipFilter;
         }
-        
+
         @Override
         public boolean allow(int ipAddress) {
             return ipFilter.allow(new IP(ipAddress, -1));
         }
     }
-            
+
     private class TorrentManagerStatus implements Inspectable {
 
         @Override
@@ -343,10 +404,10 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
 
         try {
             int seedingTorrents = 0;
-            
+
             int maxSeedingTorrents = BittorrentSettings.TORRENT_SEEDING_LIMIT.getValue();
             if (BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue()) {
-                maxSeedingTorrents =  Integer.MAX_VALUE;
+                maxSeedingTorrents = Integer.MAX_VALUE;
             }
 
             // Cut out early if the limit is infinite
@@ -407,5 +468,29 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         } finally {
             torrentManager.get().getLock().unlock();
         }
+    }
+
+    @Override
+    public void setPeerProxy(ProxySetting proxy) {
+        setupTorrentManager();
+        torrentManager.get().setPeerProxy(proxy);
+    }
+
+    @Override
+    public void setDHTProxy(ProxySetting proxy) {
+        setupTorrentManager();
+        torrentManager.get().setDHTProxy(proxy);
+    }
+
+    @Override
+    public void setTrackerProxy(ProxySetting proxy) {
+        setupTorrentManager();
+        torrentManager.get().setTrackerProxy(proxy);
+    }
+
+    @Override
+    public void setWebSeedProxy(ProxySetting proxy) {
+        setupTorrentManager();
+        torrentManager.get().setWebSeedProxy(proxy);
     }
 }

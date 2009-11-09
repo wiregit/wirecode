@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
+import org.limewire.bittorrent.ProxySetting;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
@@ -129,6 +130,26 @@ public class MockTorrentManager implements TorrentManager {
 
     @Override
     public void stopUPnP() {
+        
+    }
+
+    @Override
+    public void setPeerProxy(ProxySetting proxy) {
+        
+    }
+
+    @Override
+    public void setDHTProxy(ProxySetting proxy) {
+        
+    }
+
+    @Override
+    public void setTrackerProxy(ProxySetting proxy) {
+        
+    }
+
+    @Override
+    public void setWebSeedProxy(ProxySetting proxy) {
         
     }
 }

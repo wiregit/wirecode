@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
-
 /**
  * The torrent manager allows for adding an removing torrents, as well as
  * controlling shared torrent features.
@@ -83,14 +82,13 @@ public interface TorrentManager {
     public void initialize();
 
     /**
-     * Set a way to filter peers based
-     * on IP Address, where IP is represented as
+     * Set a way to filter peers based on IP Address, where IP is represented as
      * network byte order integer
-     *  
+     * 
      * @param ipFilter the filter to apply
      */
     public void setIpFilter(TorrentIpFilter ipFilter);
-    
+
     /**
      * Returns true if the torrent manager is initialized.
      */
@@ -144,4 +142,33 @@ public interface TorrentManager {
      * Saves the current dht state into the given file.
      */
     public void saveDHTState(File dhtStateFile);
+
+    /**
+     * Sets the peer proxy for this torrent manager. Trying to set to an http
+     * proxy will have the same effect as passing in a null proxy. The proxy
+     * will be removed.
+     */
+    public void setPeerProxy(ProxySetting proxy);
+
+    /**
+     * Sets the web seed proxy for this torrent manager. The proxy can be
+     * removed by setting to null.
+     */
+    public void setWebSeedProxy(ProxySetting proxy);
+
+    /**
+     * Sets the dht proxy for this torrent manager. Trying to set to an http
+     * proxy will have the same effect as passing in a null proxy. The proxy
+     * will be removed.
+     */
+    public void setDHTProxy(ProxySetting proxy);
+
+    /**
+     * Sets the tracker proxy for this torrent manager. It only effects http
+     * tracker connections if the proxy is an http proxy. If the proxy supports
+     * udp, udp tracker connections will be effected as well. The proxy can be
+     * removed by setting to null.
+     */
+    public void setTrackerProxy(ProxySetting proxy);
+
 }

@@ -31,7 +31,7 @@ interface LibTorrent extends Library {
      * Pauses the torrent with the given sha1
      */
     public WrapperStatus pause_torrent(String id);
-    
+
     /**
      * Resumes the torrent with the given sha1
      */
@@ -41,12 +41,12 @@ interface LibTorrent extends Library {
      * Forces the torrent to reannounce itself to the tracker.
      */
     public WrapperStatus force_reannounce(String id);
-    
+
     /**
      * Scrapes the tracker to get updated torrent statistics.
      */
     public WrapperStatus scrape_tracker(String id);
-    
+
     /**
      * Used on shutdown to freeze all torrents and wait while saving fast resume
      * data for each.
@@ -60,11 +60,11 @@ interface LibTorrent extends Library {
     public WrapperStatus get_alerts(AlertCallback alertCallback);
 
     /**
-     * Set a callback for the JNA to call back into the java code
-     * in order to filter out bad IP addresses of peers
+     * Set a callback for the JNA to call back into the java code in order to
+     * filter out bad IP addresses of peers
      */
     public WrapperStatus set_ip_filter(IpFilterCallback ipFilterCallback);
-    
+
     /**
      * Fills in the Libtorrent status struct for the torrent with the given sha1
      */
@@ -128,12 +128,12 @@ interface LibTorrent extends Library {
     public WrapperStatus stop_dht();
 
     /**
-     * Adds the given node to the dht. 
+     * Adds the given node to the dht.
      */
     public WrapperStatus add_dht_node(String address, int port);
 
     /**
-     * Adds the given router to the dht. 
+     * Adds the given router to the dht.
      */
     public WrapperStatus add_dht_router(String address, int port);
 
@@ -141,7 +141,7 @@ interface LibTorrent extends Library {
      * Saves the state of the dht in the specified file.
      */
     public WrapperStatus save_dht_state(WString dhtStateFilePath);
-    
+
     /**
      * Starts the upnp service.
      */
@@ -216,7 +216,7 @@ interface LibTorrent extends Library {
     public WrapperStatus set_file_priority(String sha1, int index, int priority);
 
     /**
-     * Checks if the given torrent has metadata yet. 
+     * Checks if the given torrent has metadata yet.
      */
     public WrapperStatus has_metadata(String sha1, IntByReference has_metadata);
 
@@ -239,5 +239,25 @@ interface LibTorrent extends Library {
      * Saves the fast resume data for the given alert.
      */
     public WrapperStatus save_fast_resume_data(LibTorrentAlert alert, WString filePath);
+
+    /**
+     * Sets the peer proxy for the peer connections.
+     */
+    public WrapperStatus set_peer_proxy(LibTorrentProxySetting proxySetting);
+
+    /**
+     * Sets the dht proxy for dht connections.
+     */
+    public WrapperStatus set_dht_proxy(LibTorrentProxySetting proxySetting);
+
+    /**
+     * Sets the webseed proxy for the webseed connections.
+     */
+    public WrapperStatus set_web_seed_proxy(LibTorrentProxySetting proxySetting);
+
+    /**
+     * Sets the tracker proxy for tracker connections.
+     */
+    public WrapperStatus set_tracker_proxy(LibTorrentProxySetting proxySetting);
 
 }

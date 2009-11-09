@@ -14,16 +14,24 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.ui.swing.components.NumericTextField;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Proxy Option View.
  */
 public class ProxyOptionPanel extends OptionPanel {
+
+    private final Provider<TorrentManager> torrentManager;
+    private final TorrentManagerSettings torrentSettings;
     
     private JRadioButton noProxyRadioButton;
     private JRadioButton socksV4RadionButton;
@@ -46,8 +54,11 @@ public class ProxyOptionPanel extends OptionPanel {
     private JLabel passwordLabel;
     
     @Inject
-    public ProxyOptionPanel() {
+    public ProxyOptionPanel(Provider<TorrentManager> torrentManager, @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         super();
+        this.torrentManager = torrentManager;
+        this.torrentSettings = torrentSettings;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         setOpaque(false);
         
@@ -140,6 +151,15 @@ public class ProxyOptionPanel extends OptionPanel {
         ConnectionSettings.PROXY_USERNAME.set(userNameTextField.getText());
         ConnectionSettings.PROXY_PASS.set(passwordField.getPassword().toString());
         ConnectionSettings.PROXY_AUTHENTICATE.setValue(authenticationCheckBox.isSelected());
+        
+        if(torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
+            BackgroundExecutorService.execute(new Runnable() {
+               @Override
+                public void run() {
+                   torrentManager.get().setTorrentManagerSettings(torrentSettings);
+                } 
+            });
+        }
         return false;
     }
 
