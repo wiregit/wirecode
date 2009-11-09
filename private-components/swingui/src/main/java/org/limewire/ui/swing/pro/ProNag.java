@@ -133,7 +133,44 @@ class ProNag extends JXPanel {
             }
         }
         return false;
-    }    
+    }
+    
+    /** Returns the delay, in milliseconds, that are required before showing the nag. */
+    int getDelay() {
+        Document document = editorPane.getDocument();
+        if(document instanceof HTMLDocument) {
+            HTMLDocument html = (HTMLDocument)document;
+            Element element = getElement(html.getDefaultRootElement(), HTML.Tag.BODY);
+            if(element != null) {
+                Object delay = element.getAttributes().getAttribute("delay");
+                if(delay != null) {
+                    try {
+                        int d = Integer.valueOf(delay.toString());
+                        if(d >= 0) {
+                            return d;
+                        }
+                    } catch(NumberFormatException ignored) {}
+                }
+            }
+        }
+        return 0;
+    }
+    
+    /** Returns the first element in a document that has the given tag. */
+    private static Element getElement(Element e, HTML.Tag tag) {
+        if(e.getName() != null && e.getName().equals(tag.toString())) {
+            return e;
+        }
+        
+        for (int counter = 0, maxCounter = e.getElementCount(); counter < maxCounter; counter++) {
+            Element retValue = getElement(e.getElement(counter), tag);
+            if (retValue != null) {
+                return retValue;
+            }
+        }
+        
+        return null;
+    }
     
     public ListeningFuture<LoadResult> loadContents(boolean firstLaunch) {
         String bgColor = ColorUtil.toHexString(GuiUtils.getMainFrame().getBackground());

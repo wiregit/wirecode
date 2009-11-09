@@ -5,10 +5,13 @@ import java.awt.Dimension;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.Dialog.ModalityType;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
@@ -55,10 +58,23 @@ public class ProNagController {
                         // (event.getResult() == LoadResult.SERVER_PAGE means it hit the server,
                         //  event.getResult() == LoadResult.OFFLINE_PAGE means it is using the offline page)
                         if(proNag.hasContent()) {
-                            if(proNag.isModal()) {
-                                loadModalNag();
+                            ActionListener listener = new ActionListener() {                                
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    if(proNag.isModal()) {
+                                        loadModalNag();
+                                    } else {
+                                        loadNonModalNag(layeredPane);
+                                    }                                    
+                                }
+                            };
+                            int delay = proNag.getDelay();
+                            if(delay > 0) {
+                                Timer timer = new Timer(delay, listener);
+                                timer.setRepeats(false);
+                                timer.start();
                             } else {
-                                loadNonModalNag(layeredPane);
+                                listener.actionPerformed(null);
                             }
                         }
                     }
