@@ -489,14 +489,17 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         newStyle.addRule(rules);
         mainStyle.addStyleSheet(newStyle); 
         heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
-
+        // add an empty border around the label to keep it from dancing up and down on OS X
         heading.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
-
+        // add an empty border around the label to keep it from dancing up and down on OS X
+        subheadingLabel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        
         metadataLabel.setForeground(metadataLabelColor);
         metadataLabel.setFont(metadataFont);
+        metadataLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 3, 3));
 
         downloadSourceCount.setForeground(downloadSourceCountColor);
         downloadSourceCount.setFont(downloadSourceCountFont);
@@ -651,7 +654,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         public NoDancingHtmlLabel(){
             //prevents strange movement on mouseover
             setVerticalAlignment(JLabel.TOP);
-            setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         }
         
         @Override
