@@ -56,9 +56,7 @@ public class MarqueeButton extends JButton {
     }
     
     public void start() {
-        if (timer != null) {
-            timer.stop();
-        }
+        stop();
 
 
         StringBuilder marqueeBuilder = new StringBuilder();
@@ -87,6 +85,7 @@ public class MarqueeButton extends JButton {
     public void stop() {
         if (timer != null) {
             timer.stop();
+            timer = null;
             position = 0;
             repaint();
         }
