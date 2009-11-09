@@ -2,6 +2,7 @@ package org.limewire.core.api.upload;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Collection;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -74,6 +75,11 @@ public interface UploadItem extends PropertiableFile {
     float getUploadSpeed();
 
     UploadErrorState getErrorState();
+    
+    /**
+     * Returns a collection of completed files for this upload item.
+     */
+    Collection<File> getCompleteFiles();
 
     /**
      * Returns the file backing this upload item. 

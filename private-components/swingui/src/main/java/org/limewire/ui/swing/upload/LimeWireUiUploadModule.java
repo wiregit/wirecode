@@ -42,7 +42,7 @@ public class LimeWireUiUploadModule extends AbstractModule {
         List<UploadItem> uploadItems = uploadMediator.getSelectedUploads();
         for (UploadItem item : uploadItems) {
             if (item.getState() == UploadState.DONE) {
-                files.add(item.getFile());
+                files.addAll(item.getCompleteFiles());
             }
         }
         

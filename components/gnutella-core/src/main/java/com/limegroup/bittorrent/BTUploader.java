@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.Torrent;
@@ -12,6 +13,7 @@ import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.listener.EventListener;
 
@@ -277,6 +279,14 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     @Override
     public String getAddressDescription() {
         return null;
+    }
+
+    /**
+     * Returns a collection of completed files for this uploader. 
+     */
+    public Collection<File> getCompleteFiles() {
+        return TorrentUtil.buildTorrentFiles(torrent, 
+                torrent.getTorrentDataFile().getParentFile());
     }
 
     @Override

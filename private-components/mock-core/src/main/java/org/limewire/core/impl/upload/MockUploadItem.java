@@ -3,6 +3,8 @@ package org.limewire.core.impl.upload;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -170,6 +172,11 @@ public class MockUploadItem implements UploadItem {
                 return toString().compareTo(o.toString());
             }
         };
+    }
+    
+    @Override
+    public Collection<File> getCompleteFiles() {
+        return Collections.singletonList(new File(fileName));
     }
 
     @Override

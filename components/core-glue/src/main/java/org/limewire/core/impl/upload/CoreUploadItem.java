@@ -3,6 +3,9 @@ package org.limewire.core.impl.upload;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -302,6 +305,20 @@ class CoreUploadItem implements UploadItem {
             return urn;
         }
         return null;
+    }
+    
+    @Override
+    public Collection<File> getCompleteFiles() {
+        List<File> files = new ArrayList<File>();
+        
+        if (uploader instanceof BTUploader) {
+            BTUploader btUploader = (BTUploader) uploader;
+            files.addAll(btUploader.getCompleteFiles());
+        } else {
+            files.add(uploader.getFile());
+        }
+        
+        return files;
     }
 
     @Override
