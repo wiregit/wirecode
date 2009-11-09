@@ -495,7 +495,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
         // add an empty border around the label to keep it from dancing up and down on OS X
-        subheadingLabel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        subheadingLabel.setBorder(BorderFactory.createEmptyBorder(3, 3, 1, 3));
         
         metadataLabel.setForeground(metadataLabelColor);
         metadataLabel.setFont(metadataFont);
