@@ -1,38 +1,48 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import org.limewire.bittorrent.BTData;
+import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.ProxySetting;
 import org.limewire.bittorrent.ProxySettingType;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentEventType;
+import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.bittorrent.TorrentIpFilter;
+import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.io.IP;
 import org.limewire.libtorrent.LibTorrentSession;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
-import org.limewire.io.IP;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
 
 /**
  * Lazy TorrentManager wraps the TorrentManagerImpl and allows holding off
@@ -46,6 +56,9 @@ import com.limegroup.gnutella.filters.IPFilter;
  */
 @EagerSingleton
 public class LimeWireTorrentManager implements TorrentManager, Service {
+    private static final Log LOG = LogFactory.getLog(LimeWireTorrentManager.class);
+    
+    private final FileCollection gnutellaFileList;
     private final Provider<LibTorrentSession> torrentManager;
 
     private final EventListener<TorrentEvent> torrentListener = new EventListener<TorrentEvent>() {
@@ -63,9 +76,10 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     private final Inspectable torrentManagerStatus = new TorrentManagerStatus();
 
     @Inject
-    public LimeWireTorrentManager(Provider<LibTorrentSession> torrentManager, IPFilter ipFilter) {
+    public LimeWireTorrentManager(Provider<LibTorrentSession> torrentManager, @GnutellaFiles FileCollection gnutellaFileList,  IPFilter ipFilter) {
         this.torrentManager = torrentManager;
         this.ipFilterPredicate = new IpFilterPredicate(ipFilter);
+        this.gnutellaFileList = gnutellaFileList;
     }
 
     private void handleTorrentEvent(TorrentEvent event) {
@@ -178,6 +192,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         if (!isValid()) {
             return false;
         }
+        shareTorrent(torrent.getTorrentFile());
         torrent.getLock().lock();
         try {
             File torrentFile = torrent.getTorrentFile();
@@ -492,5 +507,73 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     public void setWebSeedProxy(ProxySetting proxy) {
         setupTorrentManager();
         torrentManager.get().setWebSeedProxy(proxy);
+    }
+    
+    
+    private boolean shareTorrent(File torrentFile) {
+        if (torrentFile == null || !torrentFile.exists() || isDownloadingTorrent(torrentFile)) {
+            return true;
+        }
+
+        if (!SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
+            return true;
+        }
+
+        BTData btData = null;
+        FileInputStream torrentInputStream = null;
+        try {
+            torrentInputStream = new FileInputStream(torrentFile);
+            Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
+            btData = new BTDataImpl(torrentFileMap);
+        } catch (IOException e) {
+            LOG.error("Error reading torrent file: " + torrentFile, e);
+            return false;
+        } finally {
+            FileUtils.close(torrentInputStream);
+        }
+
+        if (btData.isPrivate()) {
+            gnutellaFileList.remove(torrentFile);
+            return true;
+        }
+
+        File saveDir = SharingSettings.getSaveDirectory();
+        File torrentParent = torrentFile.getParentFile();
+        if (torrentParent.equals(saveDir)) {
+            // already in saveDir
+            gnutellaFileList.add(torrentFile);
+            return true;
+        }
+
+        final File tFile = getSharedTorrentMetaDataFile(btData);
+        if (tFile.equals(torrentFile)) {
+            gnutellaFileList.add(tFile);
+            return true;
+        }
+
+        gnutellaFileList.remove(tFile);
+        File backup = null;
+        if (tFile.exists()) {
+            backup = new File(tFile.getParent(), tFile.getName().concat(".bak"));
+            FileUtils.forceRename(tFile, backup);
+        }
+
+        if (FileUtils.copy(torrentFile, tFile)) {
+            gnutellaFileList.add(tFile);
+        } else {
+            if (backup != null) {
+                // restore backup
+                if (FileUtils.forceRename(backup, tFile)) {
+                    gnutellaFileList.add(tFile);
+                }
+            }
+        }
+        return true;
+    }
+
+    private File getSharedTorrentMetaDataFile(BTData btData) {
+        String fileName = btData.getName().concat(".torrent");
+        File f = new File(SharingSettings.getSaveDirectory(), fileName);
+        return f;
     }
 }
