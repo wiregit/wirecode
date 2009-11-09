@@ -150,8 +150,11 @@ public class ITunesOptionPanel extends OptionPanel {
                 }
                 
                 if (shareWithITunesCheckBox.isSelected()) {              
-                    if (!prevEnabled) 
+                    if (prevEnabled) { 
                         daapManager.restart();
+                    } else {
+                        daapManager.start();
+                    }
                 } else if (prevEnabled) {
                     daapManager.stop();
                 }
