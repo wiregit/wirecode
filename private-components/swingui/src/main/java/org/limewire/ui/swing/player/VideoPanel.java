@@ -63,7 +63,7 @@ class VideoPanel extends JPanel implements Disposable{
     /**
      * the panel containing video and controls.
      */
-    private JPanel videoPanel = new JPanel(new BorderLayout());
+    private final JPanel videoPanel = new JPanel(new BorderLayout());
     
     private final JComponent controlPanel;
     
@@ -74,7 +74,7 @@ class VideoPanel extends JPanel implements Disposable{
      * Panel that holds the video panel. This is necessary to control whether or
      * not the video fits to screen.
      */
-    private JPanel fitToScreenContainer = new JPanel(fitToScreenLayout);    
+    private final JPanel fitToScreenContainer = new JPanel(fitToScreenLayout);    
 
     @Inject
     public VideoPanel(@Assisted Component videoRenderer, PlayerControlPanelFactory controlPanelFactory,
