@@ -28,6 +28,7 @@ import org.jdesktop.swingx.painter.Painter;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeSliderBar;
 import org.limewire.ui.swing.components.MarqueeButton;
@@ -45,7 +46,7 @@ import com.google.inject.Provider;
 /**
  * Main UI container for the media player.
  */
-class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
+class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disposable {
     
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -106,6 +107,8 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
     private static final String SHUFFLE = "SHUFFLE";
 
     private final Provider<PlayerMediator> playerProvider;
+    
+    private SettingListener settingListener;
     
     /**
      * Constructs a PlayerPanel with the specified component providers and
@@ -238,7 +241,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
         getPlayerMediator().addMediatorListener(this);
         
         // Stop player if disabled, and show/hide player.
-        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
+        settingListener = new SettingListener(){
             @Override
             public void settingChanged(final SettingEvent evt) {
                 SwingUtilities.invokeLater(new Runnable(){
@@ -246,12 +249,22 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
                         boolean enabled = SwingUiSettings.PLAYER_ENABLED.getValue();
                         if (!enabled) {
                             getPlayerMediator().stop();
+                            titleLabel.stop();
                         }
                         PlayerControlPanel.this.innerPanel.setVisible(enabled);
                     }
                 });
             }
-        });
+        };
+        
+        SwingUiSettings.PLAYER_ENABLED.addSettingListener(settingListener);
+
+    }
+    
+    public void dispose(){
+        getPlayerMediator().removeMediatorListener(this);
+        SwingUiSettings.PLAYER_ENABLED.removeSettingListener(settingListener);
+        titleLabel.stop();
     }
     
     /**
@@ -350,6 +363,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener {
      */
     @Override
     public void stateChanged(PlayerState playerState) {
+        progressSlider.setEnabled(getPlayerMediator().isSeekable());
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
             updateVolumeFromSetting();
         } else if (playerState == PlayerState.GAIN) {

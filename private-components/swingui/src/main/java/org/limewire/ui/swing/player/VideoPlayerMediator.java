@@ -31,7 +31,10 @@ import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -54,6 +57,8 @@ class VideoPlayerMediator implements PlayerMediator {
     private final CategoryManager categoryManager;
     private boolean isSeeking;
     private final PlayerInitializer playerInitializer = new PlayerInitializer();
+    
+    private final ControllerListener controllerListener = new VideoControllerListener();
 
     @Inject
     VideoPlayerMediator(VideoDisplayDirector displayDirector, CategoryManager categoryManager) {
@@ -69,6 +74,23 @@ class VideoPlayerMediator implements PlayerMediator {
         ExecutorServiceManager.setExecutorService(ExecutorsHelper.unconfigurableExecutorService(tpe));//ExecutorsHelper.newFixedSizeThreadPool(1, "Video ThreadPool"));
     }
 
+    @Inject
+    void register(){
+        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
+            @Override
+            public void settingChanged(final SettingEvent evt) {
+                SwingUtilities.invokeLater(new Runnable(){
+                    public void run() {
+                        boolean enabled = SwingUiSettings.PLAYER_ENABLED.getValue();
+                        if (!enabled && player != null) {
+                            closeVideo();
+                        }
+                    }
+                });
+            }
+        });
+        
+    }
 
 
     @Override
@@ -292,6 +314,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
     private void killPlayer() {
         if (player != null) {
+            player.removeControllerListener(controllerListener);
             player.close();
             player.deallocate();
             player = null;
@@ -431,7 +454,7 @@ class VideoPlayerMediator implements PlayerMediator {
                 newPlayer.setMediaTime(time);
             }
 
-            newPlayer.addControllerListener(new VideoControllerListener());
+            newPlayer.addControllerListener(controllerListener);
 
             if (updateTimer == null) {
                 updateTimer = new Timer(1000, new TimerAction());

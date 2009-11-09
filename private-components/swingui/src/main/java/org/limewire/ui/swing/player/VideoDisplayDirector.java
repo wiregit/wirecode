@@ -10,7 +10,6 @@ import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
@@ -38,7 +37,7 @@ class VideoDisplayDirector {
     
     private final Integer videoLayer = new Integer(JLayeredPane.DEFAULT_LAYER + 1);
     
-    private JComponent videoPanel;
+    private VideoPanel videoPanel;
     
     private JFrame fullScreenFrame;
     private NavigationListener closeVideoOnNavigation;
@@ -73,7 +72,7 @@ class VideoDisplayDirector {
             close();
         }
         //Recycling the video panel causes problems with native painting.  We need a new one each time.
-        videoPanel = videoPanelFactory.createVideoPanel(videoRenderer).getComponent();
+        videoPanel = videoPanelFactory.createVideoPanel(videoRenderer);
         
         if(isFullScreen){
             showFullScreen();
@@ -83,7 +82,7 @@ class VideoDisplayDirector {
     }
     
     private void showInClient(){
-        limeWireLayeredPane.add(videoPanel, videoLayer);
+        limeWireLayeredPane.add(videoPanel.getComponent(), videoLayer);
         resizeVideoContainer();     
         //Make sure the flash of native video window doesn't steal focus
         GuiUtils.getMainFrame().toFront();   
@@ -106,10 +105,9 @@ class VideoDisplayDirector {
         // fullScreenFrame.setAlwaysOnTop(true) and
         // SystemUtils.setWindowTopMost(fullScreenFrame) don't play nicely with
         // dialog boxes so we aren't using them here.
-        fullScreenFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
+       
         fullScreenFrame.setUndecorated(true);
-        fullScreenFrame.add(videoPanel, BorderLayout.CENTER);            
+        fullScreenFrame.add(videoPanel.getComponent(), BorderLayout.CENTER);            
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         fullScreenFrame.setBounds(0,0,screenSize.width, screenSize.height);
@@ -139,6 +137,7 @@ class VideoDisplayDirector {
         } else {
             closeInClient();
         }
+        videoPanel.dispose();
         videoPanel = null;
         //Force a repaint on close - gets rid of artifacts (especially noticable on Mac)
         GuiUtils.getMainFrame().repaint();
@@ -151,12 +150,14 @@ class VideoDisplayDirector {
             device.setFullScreenWindow(null);
         }
         fullScreenFrame.setVisible(false);
+        //manually dispose of the frame so that everything gets garbage collected.
+        fullScreenFrame.dispose();
         fullScreenFrame = null;
         GuiUtils.getMainFrame().setVisible(true);
     }
 
     private void closeInClient(){    
-        limeWireLayeredPane.remove(videoPanel); 
+        limeWireLayeredPane.remove(videoPanel.getComponent()); 
         removeNavigationListener();
     }
     
@@ -175,11 +176,11 @@ class VideoDisplayDirector {
 
     private void resizeVideoContainer() {
         if (videoPanel != null) {
-            Rectangle parentBounds = videoPanel.getParent().getBounds();
+            Rectangle parentBounds = videoPanel.getComponent().getParent().getBounds();
             // TODO: this knows too much about the layered pane's layout
-            videoPanel.setBounds(0, (int)topPanelPreferredSize.getHeight(), (int)parentBounds.getWidth(), 
+            videoPanel.getComponent().setBounds(0, (int)topPanelPreferredSize.getHeight(), (int)parentBounds.getWidth(), 
                     (int)parentBounds.getHeight() - (int)topPanelPreferredSize.getHeight());
-            videoPanel.revalidate();
+            videoPanel.getComponent().revalidate();
         }
     }
     
