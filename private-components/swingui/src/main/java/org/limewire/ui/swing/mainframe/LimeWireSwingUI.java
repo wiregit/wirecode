@@ -36,9 +36,7 @@ import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
-import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
 import org.limewire.ui.swing.statusbar.StatusPanel;
@@ -50,6 +48,20 @@ import org.limewire.ui.swing.util.SwingUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+/**
+ * Display panel for the application UI.  This serves as the content pane for
+ * the application window, and contains all UI components, including:
+ * <ul>
+ *   <li>Top panel for the navigation buttons and search bar.</li>
+ *   <li>Main panel to display the selected content - library, search results,
+ *     store browser, etc.</li>
+ *   <li>Bottom panel for the downloads/uploads tables.</li>
+ *   <li>Status panel for status messages.</li>
+ * </ul>
+ * 
+ * <p>All UI components except the status bar are contained within a global
+ * JLayeredPane.</p>
+ */
 public class LimeWireSwingUI extends JPanel {
     
     private final JPanel centerPanel;
@@ -63,9 +75,9 @@ public class LimeWireSwingUI extends JPanel {
     
 	@Inject
     public LimeWireSwingUI(
-            TopPanel topPanel, MainPanel mainPanel,
-            StatusPanel statusPanel, Navigator navigator,
-            SearchHandler searchHandler,
+            TopPanel topPanel,
+            MainPanel mainPanel,
+            StatusPanel statusPanel,
             ProNagController proNagController, 
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
@@ -183,7 +195,7 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-   private LimeSplitPane createSplitPane(final JComponent top, final BottomPanel bottom, 
+    private LimeSplitPane createSplitPane(final JComponent top, final BottomPanel bottom, 
            JComponent divider, JComponent dragComponent) {
         final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
         splitPane.setDividerSize(0);
@@ -306,6 +318,10 @@ public class LimeWireSwingUI extends JPanel {
         splitPane.repaint();
     }
     
+    /**
+     * Listener to resize the main content panel when the layered pane is 
+     * resized.
+     */
     private static class MainPanelResizer extends ComponentAdapter {
         private final JComponent target;
 
@@ -317,6 +333,7 @@ public class LimeWireSwingUI extends JPanel {
         public void componentResized(ComponentEvent e) {
             Rectangle parentBounds = e.getComponent().getBounds();
             target.setBounds(0, 0, (int)parentBounds.getWidth(), (int)parentBounds.getHeight());
+            target.revalidate();
         }
     }
     
