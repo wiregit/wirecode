@@ -57,8 +57,9 @@ import com.limegroup.gnutella.library.GnutellaFiles;
 @EagerSingleton
 public class LimeWireTorrentManager implements TorrentManager, Service {
     private static final Log LOG = LogFactory.getLog(LimeWireTorrentManager.class);
-    
+
     private final FileCollection gnutellaFileList;
+
     private final Provider<LibTorrentSession> torrentManager;
 
     private final EventListener<TorrentEvent> torrentListener = new EventListener<TorrentEvent>() {
@@ -69,6 +70,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     };
 
     private volatile boolean initialized = false;
+
     private final IpFilterPredicate ipFilterPredicate;
 
     @SuppressWarnings("unused")
@@ -76,7 +78,8 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     private final Inspectable torrentManagerStatus = new TorrentManagerStatus();
 
     @Inject
-    public LimeWireTorrentManager(Provider<LibTorrentSession> torrentManager, @GnutellaFiles FileCollection gnutellaFileList,  IPFilter ipFilter) {
+    public LimeWireTorrentManager(Provider<LibTorrentSession> torrentManager,
+            @GnutellaFiles FileCollection gnutellaFileList, IPFilter ipFilter) {
         this.torrentManager = torrentManager;
         this.ipFilterPredicate = new IpFilterPredicate(ipFilter);
         this.gnutellaFileList = gnutellaFileList;
@@ -104,7 +107,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
 
                         if (torrentManager.get().isValid()) {
                             updateProxies();
-                            
+
                             torrentManager.get().setIpFilter(ipFilterPredicate);
                             if (BittorrentSettings.TORRENT_USE_UPNP.getValue()) {
                                 torrentManager.get().startUPnP();
@@ -508,8 +511,7 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         setupTorrentManager();
         torrentManager.get().setWebSeedProxy(proxy);
     }
-    
-    
+
     private boolean shareTorrent(File torrentFile) {
         if (torrentFile == null || !torrentFile.exists() || isDownloadingTorrent(torrentFile)) {
             return true;
@@ -551,23 +553,15 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
             return true;
         }
 
-        gnutellaFileList.remove(tFile);
-        File backup = null;
         if (tFile.exists()) {
-            backup = new File(tFile.getParent(), tFile.getName().concat(".bak"));
-            FileUtils.forceRename(tFile, backup);
+            gnutellaFileList.add(tFile);
+            return true;
         }
 
         if (FileUtils.copy(torrentFile, tFile)) {
             gnutellaFileList.add(tFile);
-        } else {
-            if (backup != null) {
-                // restore backup
-                if (FileUtils.forceRename(backup, tFile)) {
-                    gnutellaFileList.add(tFile);
-                }
-            }
         }
+
         return true;
     }
 
