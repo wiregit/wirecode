@@ -10,7 +10,6 @@ import javax.media.protocol.DataSource;
 
 import org.limewire.util.OSUtils;
 
-import net.sf.fmj.ejmf.toolkit.media.AbstractPlayer;
 import net.sf.fmj.utility.URLUtils;
 
 
@@ -21,7 +20,7 @@ public class VideoPlayerFactory {
             throw new IllegalStateException("Video is only supported on Windows and Mac");
         }
 
-        AbstractPlayer handler;
+        Player handler;
         if (OSUtils.isWindows()) {
             handler = new net.sf.fmj.ds.media.content.unknown.Handler();
         } else { // OSX

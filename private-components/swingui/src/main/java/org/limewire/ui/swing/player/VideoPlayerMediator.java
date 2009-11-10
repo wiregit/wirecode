@@ -314,6 +314,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
     private void killPlayer() {
         if (player != null) {
+            player.stop();
             player.removeControllerListener(controllerListener);
             player.close();
             player.deallocate();
