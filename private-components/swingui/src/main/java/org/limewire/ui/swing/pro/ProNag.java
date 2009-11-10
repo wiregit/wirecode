@@ -203,7 +203,7 @@ class ProNag extends JXPanel {
         
         URL bgImage =  ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/update_background.png");
         
-        String outgoing = "http://www.limewire.com/download/pro/?rnv=z&fromFirstRun=" + firstLaunch;
+        String outgoing = "http://www.limewire.com/download/pro/?rmnv=z&fromFirstRun=" + firstLaunch;
         outgoing = application.addClientInfoToUrl(outgoing); // add common LW info
         
         String yes = (outgoing + "&ref=lwn8").replace("&", "&amp;");
@@ -219,7 +219,7 @@ class ProNag extends JXPanel {
                 + "<tr><td align=\"center\">"
                     + "<table width=\"355\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" background=\"" + bgImage.toExternalForm() + "\">"
                     + "<tr><td height=\"126\">"
-                        + "<table cellpadding=\"0\" cellspacing\"0\" border=\"0\">"
+                        + "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">"
                         + "<tr>" 
                         + "<td>"
                         + "<table width=\"110\" cellpadding=\"0\" cellspacing\"0\" border=\"0\"></table>"
