@@ -60,5 +60,10 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
        return LimeWireUtils.isPro();
     }
     
+    @Override
+    public boolean isBetaVersion() {
+        return LimeWireUtils.isBetaRelease();
+    }
+    
 
 }

@@ -58,6 +58,10 @@ class HelpMenu extends MnemonicMenu {
         add(new UrlAction(I18n.tr("&Using LimeWire"), "http://www.limewire.com/client_redirect/?page=support", application));
         
         add(new UrlAction(I18n.tr("&FAQ"), "http://www.limewire.com/client_redirect/?page=faq", application));
+
+        if(application.isBetaVersion()) {
+            add(new UrlAction(I18n.tr("&Give Feedback"), "http://www.limewire.com/client_redirect/?page=betaTesting", application));
+        }
         
         if(!application.isProVersion()) {
             addSeparator();
