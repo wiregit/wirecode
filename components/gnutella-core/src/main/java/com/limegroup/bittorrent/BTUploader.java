@@ -327,11 +327,17 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     
     @Override
     public void pause() {
+        if(torrent.isFinished()) {
+            torrent.setAutoManaged(false);
+        }
         torrent.pause();
     }
     
     @Override
     public void resume() {
+        if(torrent.isFinished()) {
+            torrent.setAutoManaged(true);
+        }
         torrent.resume();
     }
 }
