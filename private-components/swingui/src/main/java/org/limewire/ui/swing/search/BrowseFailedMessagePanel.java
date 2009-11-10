@@ -69,7 +69,7 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
 
     @Inject
     public BrowseFailedMessagePanel(EventBean<FriendConnectionEvent> connectionEventBean, Provider<ChatMediator> chatMediator, RemoteLibraryManager remoteLibraryManager,
-            Provider<MessageDecorator> messageDecoratorProvider, @Assisted HeaderBarDecorator headerBarDecorator,
+            Provider<MessageDecorator> messageDecoratorProvider, HeaderBarDecorator headerBarDecorator,
             @Assisted SearchResultsModel searchResultsModel) {
         GuiUtils.assignResources(this);
         this.connectionEventBean = connectionEventBean;

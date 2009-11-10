@@ -181,7 +181,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
-        this.browseFailedPanel = browseFailedMessagePanelFactory.create(headerBarDecorator, searchResultsModel);
+        this.browseFailedPanel = browseFailedMessagePanelFactory.create(searchResultsModel);
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
