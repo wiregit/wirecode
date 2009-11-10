@@ -9,11 +9,13 @@ import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
-import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 
+/**
+ * Controller for user-initiated actions on an upload item.
+ */
 class UploadActionHandler {
 
     public final static String PLAY_COMMAND = "play";
@@ -45,10 +47,8 @@ class UploadActionHandler {
     public void performAction(final String actionCommmand, final UploadItem item){
         if (actionCommmand == CANCEL_COMMAND) {
             item.cancel();
-            //canceled upload items end up in the DONE state so they need to be manually removed.
-            if (UploadMediator.isRemovable(item)) {
-                uploadListManager.remove(item);
-            }
+            // User-cancelled items are always removed.
+            uploadListManager.remove(item);
         } else if (actionCommmand == LOCATE_ON_DISK_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
