@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.io.GUID;
 import org.limewire.util.StringUtils;
 
@@ -13,6 +14,8 @@ public class ApplicationServicesImpl implements ApplicationServices {
     
     private final byte[] bittorrentGUID;
     private final byte[] limewireGUID;
+    private final boolean newInstall;
+    private final boolean newJavaVersion;
     
     @Inject
     ApplicationServicesImpl() {
@@ -33,6 +36,14 @@ public class ApplicationServicesImpl implements ApplicationServices {
         mybtguid[7] = 0x2D; // -
         System.arraycopy(limewireGUID,0,mybtguid,8,12);
         bittorrentGUID = mybtguid;
+        
+        String lastRunVersion = InstallSettings.LAST_VERSION_RUN.get();
+        newInstall = lastRunVersion == null || !lastRunVersion.equals(LimeWireUtils.getLimeWireVersion());
+        
+        String lastJavaVersion = InstallSettings.LAST_JAVA_VERSION_RUN.get();
+        String currentJavaVersion = System.getProperty("java.version");
+        newJavaVersion = lastJavaVersion == null || !lastJavaVersion.equals(currentJavaVersion);
+        InstallSettings.LAST_JAVA_VERSION_RUN.set(currentJavaVersion);
     }
 
     /* (non-Javadoc)
@@ -55,6 +66,16 @@ public class ApplicationServicesImpl implements ApplicationServices {
     public void setFullPower(boolean newValue) {
         // does nothing right now.
        // FIXME implement throttle switching for uploads and downloads
+    }
+
+    @Override
+    public boolean isNewInstall() {
+        return newInstall;
+    }
+
+    @Override
+    public boolean isNewJavaVersion() {
+        return newJavaVersion;
     }
 
 }

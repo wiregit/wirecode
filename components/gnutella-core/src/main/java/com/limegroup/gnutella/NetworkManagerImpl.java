@@ -10,7 +10,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatus;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
@@ -92,7 +91,6 @@ public class NetworkManagerImpl implements NetworkManager {
     private volatile Set<Connectable> cachedProxies;
 
     private final ProxySettings proxySettings;
-    private final Application application;
 
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -104,8 +102,7 @@ public class NetworkManagerImpl implements NetworkManager {
             Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
             Provider<ByteBufferCache> bbCache,
             ApplicationServices applicationServices,
-            ProxySettings proxySettings,
-            Application application) {
+            ProxySettings proxySettings) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
@@ -116,7 +113,6 @@ public class NetworkManagerImpl implements NetworkManager {
         this.bbCache = bbCache;
         this.applicationServices = applicationServices;
         this.proxySettings = proxySettings;
-        this.application = application;
     }
     
     @Inject
@@ -152,7 +148,7 @@ public class NetworkManagerImpl implements NetworkManager {
 
     public void start() {
         if(isIncomingTLSEnabled() || isOutgoingTLSEnabled()) {
-            if(application.isNewInstall() || application.isNewJavaVersion() || !SSLSettings.TLS_WORKED_LAST_TIME.getValue()) {
+            if(applicationServices.isNewInstall() || applicationServices.isNewJavaVersion() || !SSLSettings.TLS_WORKED_LAST_TIME.getValue()) {
                 //block if new install or new java version, or tls did not work last time we ran limewire.
                 validateTLS();
             } else {

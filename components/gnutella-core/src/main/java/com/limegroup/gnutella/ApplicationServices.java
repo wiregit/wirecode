@@ -8,5 +8,8 @@ public interface ApplicationServices {
 
     /** Sets full power mode. */
     public void setFullPower(boolean newValue);
+    
+    public boolean isNewInstall();
 
+    public boolean isNewJavaVersion();
 }

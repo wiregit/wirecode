@@ -25,9 +25,6 @@ import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicLineParser;
 import org.apache.http.protocol.HTTP;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.limewire.core.api.Application;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
@@ -129,8 +126,6 @@ public class PushUploadTest extends LimeTestCase {
     @Inject private Injector injector;
     @Inject @GnutellaFiles FileCollection gnutellaFileCollection;
 
-    private Mockery context;
-    
     public PushUploadTest(String name) {
         super(name);
     }
@@ -163,18 +158,10 @@ public class PushUploadTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         doSettings();
-        context = new Mockery();
-        
-        final Application application = context.mock(Application.class);
-        context.checking(new Expectations() {
-            {
-                allowing(application);
-            }
-        });
+
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(Application.class).toInstance(application);
                 bind(NetworkManager.class).to(MyNetworkManager.class);
                 bind(ConnectionManager.class).to(MyConnectionManager.class);
             }
@@ -566,10 +553,10 @@ public class PushUploadTest extends LimeTestCase {
                 Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
                 NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
                 Provider<ByteBufferCache> bbCache, ApplicationServices applicationServices,
-                ProxySettings proxySettings, Application application) {
+                ProxySettings proxySettings) {
             super(udpService, acceptor, dhtManager, connectionManager,
                     outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory, bbCache, applicationServices,
-                    proxySettings, application);
+                    proxySettings);
         }
 
         @Override

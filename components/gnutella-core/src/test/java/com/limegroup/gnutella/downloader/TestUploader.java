@@ -1417,6 +1417,16 @@ public class TestUploader {
             public void setFullPower(boolean newValue) {
                 throw new IllegalStateException();   
             }
+
+            @Override
+            public boolean isNewInstall() {
+                return false;
+            }
+
+            @Override
+            public boolean isNewJavaVersion() {
+                return false;
+            }
             
         }
         
