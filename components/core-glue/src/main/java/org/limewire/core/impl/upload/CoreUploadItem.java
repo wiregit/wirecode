@@ -118,20 +118,17 @@ class CoreUploadItem implements UploadItem {
     }
     
     private UploadStatus getUploaderStatus() {
-        // do not change the status if we are at an intermediary
-        // complete or connecting state.
-        // (meaning that this particular chunk finished, but more will come)
-        // we use isFinished to tell us when it's finished, because that is
-        // set when remove is called, which is only called when the entire
+        // Revert to the prior state if we are at an intermediate "complete"
+        // state.  (This means that a particular chunk finished, but more 
+        // will come.)
+        // We use isFinished to tell us when it's finished, because that is
+        // set when finish() is called, which is only called when the entire
         // upload has finished.
-        // we use getTotalAmountUploaded to know if a byte has been read
-        // (which would mean we're not connecting anymore)
+        // The intermediate connecting state is okay even if bytes have been
+        // read because getState() reports it as an uploading state.
         UploadStatus state = uploader.getState();
         UploadStatus lastState = uploader.getLastTransferState();
-        if ( (state == UploadStatus.COMPLETE && !isFinished) ||
-             (state == UploadStatus.CONNECTING &&
-                 uploader.getTotalAmountUploaded() != 0)
-           ) {
+        if (state == UploadStatus.COMPLETE && !isFinished) {
             state = lastState;
         }
         
