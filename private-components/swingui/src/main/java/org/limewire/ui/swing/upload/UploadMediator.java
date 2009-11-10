@@ -38,6 +38,8 @@ import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
@@ -110,6 +112,20 @@ public class UploadMediator {
                         }
                     }
                 });
+            }
+        });
+        
+        // Add list listener to enable "clear finished" button.
+        EventList<UploadItem> doneList = GlazedListsFactory.filterList(
+                uploadListManager.getSwingThreadSafeUploads(), 
+                new UploadStateMatcher(true, UploadState.DONE, UploadState.CANCELED, 
+                        UploadState.BROWSE_HOST_DONE, UploadState.UNABLE_TO_UPLOAD));
+        doneList.addListEventListener(new ListEventListener<UploadItem>() {
+            @Override
+            public void listChanged(ListEvent<UploadItem> listChanges) {
+                if (clearFinishedButton != null) {
+                    clearFinishedButton.setEnabled(listChanges.getSourceList().size() > 0);
+                }
             }
         });
     }
