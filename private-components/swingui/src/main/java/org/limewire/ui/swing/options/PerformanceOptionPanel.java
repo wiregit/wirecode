@@ -92,6 +92,9 @@ public class PerformanceOptionPanel extends OptionPanel {
         SearchSettings.OOB_ENABLED.setValue(!disableOutOfBandSearchCheckBox.isSelected());
         
         if((tlsServerChanged || (upChanged && disableUltraPeerCheckBox.isSelected()) && isSupernode)) {
+            if(tlsServerChanged && !disableTLS.isSelected()) {
+                networkManager.validateTLS();
+            }
             connectionManager.restart();
         }
         return false;

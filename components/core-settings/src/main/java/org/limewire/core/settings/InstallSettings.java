@@ -1,6 +1,5 @@
-package org.limewire.ui.swing.settings;
+package org.limewire.core.settings;
 
-import org.limewire.core.settings.LimeWireSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.SettingsFactory;
@@ -24,6 +23,7 @@ public final class InstallSettings extends LimeWireSettings {
     private InstallSettings() {
         super("installation.props", "LimeWire installs file");
     }
+    
     /**
      * Whether or not the 'Scan for files' question has been asked.
      */
@@ -84,6 +84,11 @@ public final class InstallSettings extends LimeWireSettings {
      * This setting starts with versions > 5.2.2 
      */
     public static final StringSetting LAST_VERSION_RUN = FACTORY.createStringSetting("LAST_VERSION_RUN", "");
+    
+    /**
+     * Stores the java version that was used to run the last known version of limewire. It msut be read early enough, or it will be overwritten with the current value.
+     */
+    public static final StringSetting LAST_JAVA_VERSION_RUN = FACTORY.createStringSetting("LAST_JAVA_VERSION_RUN", "");
     
     /**
      * Stores an array of all the known versions of limewire that have been run.

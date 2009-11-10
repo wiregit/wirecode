@@ -55,5 +55,15 @@ public class MockApplication implements Application {
     public boolean isBetaVersion() {
         return true;
     }
+
+    @Override
+    public boolean isNewInstall() {
+        return false;
+    }
+
+    @Override
+    public boolean isNewJavaVersion() {
+        return false;
+    }
     
 }

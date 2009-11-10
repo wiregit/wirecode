@@ -9,6 +9,8 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.Set;
 
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatus;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
@@ -90,6 +92,7 @@ public class NetworkManagerImpl implements NetworkManager {
     private volatile Set<Connectable> cachedProxies;
 
     private final ProxySettings proxySettings;
+    private final Application application;
 
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -101,7 +104,8 @@ public class NetworkManagerImpl implements NetworkManager {
             Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
             Provider<ByteBufferCache> bbCache,
             ApplicationServices applicationServices,
-            ProxySettings proxySettings) {
+            ProxySettings proxySettings,
+            Application application) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
@@ -112,6 +116,7 @@ public class NetworkManagerImpl implements NetworkManager {
         this.bbCache = bbCache;
         this.applicationServices = applicationServices;
         this.proxySettings = proxySettings;
+        this.application = application;
     }
     
     @Inject
@@ -145,7 +150,25 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
 
-    public void start() {        
+    public void start() {
+        if(isIncomingTLSEnabled() || isOutgoingTLSEnabled()) {
+            if(application.isNewInstall() || application.isNewJavaVersion() || !SSLSettings.TLS_WORKED_LAST_TIME.getValue()) {
+                //block if new install or new java version, or tls did not work last time we ran limewire.
+                validateTLS();
+            } else {
+                new ManagedThread(new Runnable(){
+                    @Override
+                    public void run() {
+                        validateTLS();
+                    }
+                }, "NetworkManagerImpl.testTLS").start();
+            }
+        }
+        started = true;
+    }
+
+    @Override
+    public void validateTLS() {
         if(isIncomingTLSEnabled() || isOutgoingTLSEnabled()) {
             SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), bbCache.get());
             if(!sslTester.go()) {
@@ -154,10 +177,10 @@ public class NetworkManagerImpl implements NetworkManager {
                 if(!SSLSettings.IGNORE_SSL_EXCEPTIONS.getValue() && !sslTester.isIgnorable(t))
                     ErrorService.error(t);
             }
+            
+            SSLSettings.TLS_WORKED_LAST_TIME.setValue(tlsSupported);
         }
-        started = true;
     }
-
 
     public void stop() {
         started = false;
@@ -504,6 +527,12 @@ public class NetworkManagerImpl implements NetworkManager {
     private static class SSLSettings extends LimeProps {
     
         private SSLSettings() {}
+        
+        /**
+         * Whether or not TLS worked the last time it was tested.
+         */
+        public static final BooleanSetting TLS_WORKED_LAST_TIME =
+            FACTORY.createBooleanSetting("TLS_WORKED_LAST_TIME", false);
         
         /** Whether or not we want to accept incoming TLS connections. */
         public static final BooleanSetting TLS_INCOMING =

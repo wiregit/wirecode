@@ -130,4 +130,9 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
      * Will return the external address whether the peer is firewalled or not.
      */
     public Connectable getPublicAddress();
+
+    /**
+     * Validates that tls will work, and disables it for the session if it will not. 
+     */
+    public void validateTLS();
 }

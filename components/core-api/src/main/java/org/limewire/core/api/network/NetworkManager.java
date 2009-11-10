@@ -17,4 +17,6 @@ public interface NetworkManager {
     public void portChanged();
     
     public boolean addressChanged();
+    
+    public void validateTLS();
 }

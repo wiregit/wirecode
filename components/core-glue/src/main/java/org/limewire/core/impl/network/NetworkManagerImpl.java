@@ -51,4 +51,9 @@ public class NetworkManagerImpl implements NetworkManager {
     public boolean addressChanged() {
         return coreNetworkManager.addressChanged();
     }
+
+    @Override
+    public void validateTLS() {
+        coreNetworkManager.validateTLS();
+    }
 }

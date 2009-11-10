@@ -274,4 +274,9 @@ public class NetworkManagerStub implements NetworkManager {
         }
     }
 
+    @Override
+    public void validateTLS() {
+        
+    }
+
 }

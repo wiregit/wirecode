@@ -1,6 +1,7 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
 
 import com.google.inject.Inject;
@@ -15,11 +16,20 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
     private final ApplicationServices applicationServices;
     private final LifecycleManager lifecycleManager;
     private volatile String flag = null;
+    private final boolean newInstall;
+    private final boolean newJavaVersion;
     
     @Inject
     public ApplicationImpl(ApplicationServices applicationServices, LifecycleManager lifecycleManager) {
         this.applicationServices = applicationServices;
         this.lifecycleManager = lifecycleManager;
+        String lastRunVersion = InstallSettings.LAST_VERSION_RUN.get();
+        newInstall = lastRunVersion == null || !lastRunVersion.equals(getVersion());
+        
+        String lastJavaVersion = InstallSettings.LAST_JAVA_VERSION_RUN.get();
+        String currentJavaVersion = System.getProperty("java.version");
+        newJavaVersion = lastJavaVersion == null || !lastJavaVersion.equals(currentJavaVersion);
+        InstallSettings.LAST_JAVA_VERSION_RUN.set(currentJavaVersion);
     }
     
     @Override
@@ -65,5 +75,13 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
         return LimeWireUtils.isBetaRelease();
     }
     
+    @Override
+    public boolean isNewInstall() {
+       return newInstall;
+    }
 
+    @Override
+    public boolean isNewJavaVersion() {
+        return newJavaVersion;
+    }
 }

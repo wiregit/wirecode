@@ -40,4 +40,15 @@ public interface Application {
      */
     public boolean isBetaVersion();
 
+    /**
+     * Returns true if there was no previously installed version, 
+     * or the current version is differant than the previous version. 
+     */
+    public boolean isNewInstall();
+    
+    /**
+     * Returns true if the java version is differant that the one used to last run limewire. 
+     */
+    public boolean isNewJavaVersion();
+
 }

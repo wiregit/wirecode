@@ -7,7 +7,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ContentSettings;
-import org.limewire.ui.swing.settings.InstallSettings;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.LimeAssociationOption;

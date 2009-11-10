@@ -14,13 +14,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.limewire.concurrent.FutureEvent;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.HTMLPane.LoadResult;
 import org.limewire.ui.swing.pro.ProNag.NagContainer;
-import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.statusbar.ProStatusPanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.GuiUtils;

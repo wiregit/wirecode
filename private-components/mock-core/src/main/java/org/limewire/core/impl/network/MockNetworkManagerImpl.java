@@ -36,4 +36,9 @@ public class MockNetworkManagerImpl implements NetworkManager {
     public boolean addressChanged() {
         return false;
     }
+
+    @Override
+    public void validateTLS() {
+        
+    }
 }

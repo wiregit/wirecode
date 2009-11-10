@@ -28,6 +28,7 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.core.settings.GeocodeSettings;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.LWSSettings;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.geocode.GeocodeInformation.Property;
@@ -50,7 +51,6 @@ import org.limewire.ui.swing.components.PlainWindowsMenuItemUI;
 import org.limewire.ui.swing.components.PlainWindowsMenuUI;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
-import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.ShellAssociationManager;
 import org.limewire.ui.swing.tray.TrayExitListener;
@@ -200,9 +200,8 @@ public class AppFrame extends SingleFrameApplication {
     }
     
     @Override
-    protected void ready() {        
-        String lastRunVersion = InstallSettings.LAST_VERSION_RUN.get();
-        if (lastRunVersion != null && !lastRunVersion.equals(application.getVersion())) {
+    protected void ready() {
+        if (application.isNewInstall()) {
             initializeNewInstall();
         }
         if (SetupWizard.shouldShowWizard()) {
