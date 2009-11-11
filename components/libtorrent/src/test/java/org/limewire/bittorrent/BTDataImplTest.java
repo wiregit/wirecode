@@ -1,6 +1,7 @@
 package org.limewire.bittorrent;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,5 +35,23 @@ public class BTDataImplTest extends BaseTestCase {
         List<URI> uris = BTDataImpl.parseTrackerUris(data);
         assertEquals(ImmutableList.of(URIUtils.toURI("http://1/"), URIUtils.toURI("http://2/")), uris);
     }
-    
+ 
+    @SuppressWarnings("unchecked")
+    public void testParseTrackerUrisOnInvalidData() throws Exception {
+        Map<?,?> data = ImmutableMap.of("announce", ImmutableList.of(ImmutableList.of(StringUtils.toAsciiBytes("http://1/"), StringUtils.toAsciiBytes("http://2/"))));
+        List<URI> uris = BTDataImpl.parseTrackerUris(data);
+        assertEmpty(uris);
+        
+        data = ImmutableMap.of("announce-list", StringUtils.toAsciiBytes("http://1/"));
+        uris = BTDataImpl.parseTrackerUris(data);
+        assertEmpty(uris);
+        
+        data = ImmutableMap.of("announce-list", new ArrayList(ImmutableList.of(StringUtils.toAsciiBytes("http://ignoredurl/"), ImmutableList.of(StringUtils.toAsciiBytes("http://1/"), StringUtils.toAsciiBytes("http://2/")))));
+        uris = BTDataImpl.parseTrackerUris(data);
+        assertEquals(ImmutableList.of(URIUtils.toURI("http://1/"), URIUtils.toURI("http://2/")), uris);
+        
+        data = ImmutableMap.of("announce-list", ImmutableList.of(new ArrayList(ImmutableList.of(StringUtils.toAsciiBytes("http://1/"), "http://2/"))));
+        uris = BTDataImpl.parseTrackerUris(data);
+        assertEquals(ImmutableList.of(URIUtils.toURI("http://1/")), uris);
+    }
 }
