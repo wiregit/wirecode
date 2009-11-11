@@ -149,7 +149,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         HyperlinkButton moreFileInfo = new HyperlinkButton(new BitziLookupAction(propertiableFile));
         moreFileInfo.setFont(smallFont);
       
-        if(type == FileInfoType.LOCAL_FILE) {
+        if(type == FileInfoType.LOCAL_FILE && propertiableFile instanceof LocalFileItem) {
             JButton renameButton = new HyperlinkButton(renameAction);
             renameButton.setFont(smallFont);
             component.add(renameButton, "cell 1 1, alignx right");
