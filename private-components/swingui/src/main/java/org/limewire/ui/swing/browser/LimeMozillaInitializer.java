@@ -13,12 +13,19 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
+import org.limewire.promotion.search.XPComDownloadImpl;
+import org.limewire.promotion.search.XPComDownloadFactory;
 import org.mozilla.browser.IMozillaWindow;
 import org.mozilla.browser.IMozillaWindowFactory;
 import org.mozilla.browser.MozillaConfig;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaWindow;
+import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
+import org.mozilla.xpcom.Mozilla;
+import org.mozilla.interfaces.nsIComponentRegistrar;
+import org.mozilla.interfaces.nsIPrefService;
+import org.mozilla.interfaces.nsIPrefBranch;
 
 public class LimeMozillaInitializer {
 
@@ -83,8 +90,33 @@ public class LimeMozillaInitializer {
         });
         MozillaInitialization.initialize();
 
+        initializeXPCOMComponents();
+
         if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
+    }
+
+    private static void initializeXPCOMComponents() {
+        Mozilla mozilla = Mozilla.getInstance();
+        nsIComponentRegistrar registrar = mozilla.getComponentRegistrar();
+        // Register LimeComponent factory.
+        
+        // TODO registry pattern
+        registrar.registerFactory(XPComDownloadImpl.CID, "XPComDownload",
+               XPComDownloadImpl.CONTRACT_ID, XPComDownloadFactory.getInstance());
+
+        // Get proxy for preferences service.
+        nsIPrefService prefService = XPCOMUtils.getServiceProxy(
+               "@mozilla.org/preferences-service;1", nsIPrefService.class);
+        // Set strict_origin_policy=false for local files - prevents dialog
+        // prompt when local file JavaScript enables UniversalXPConnect.
+        nsIPrefBranch rootBranch = prefService.getBranch("");
+        rootBranch.setBoolPref("security.fileuri.strict_origin_policy", 0);
+        // Grant UniversalXPConnect privileges for local files.
+        nsIPrefBranch prefBranch = prefService.getBranch("capability.principal.codebase.");
+        prefBranch.setCharPref("lime.granted", "UniversalXPConnect");
+        prefBranch.setCharPref("lime.id", "file://");
+        prefBranch.setCharPref("lime.subjectName", "");
     }
 
     private static void installFlashLinux(File xulInstallPath) {

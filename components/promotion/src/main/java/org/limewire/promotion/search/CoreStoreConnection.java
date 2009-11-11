@@ -92,8 +92,22 @@ public class CoreStoreConnection implements StoreConnection {
 
     private void updateBrowserCookies(CookieStore cookieStore) {
         nsICookieManager2 cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookiemanager;1",
-        nsICookieManager2.class);
+            nsICookieManager2.class);
         for(Cookie cookie : cookieStore.getCookies()) {
+            long expiryDate; 
+            if(cookie.getExpiryDate() != null) {
+                if(cookie.getExpiryDate().getTime() == 0) {
+                    // special value representing 
+                    // Jan 1, 1970
+                    expiryDate = 1;
+                } else {
+                    // normal case
+                    expiryDate = cookie.getExpiryDate().getTime() / 1000;
+                }
+            } else {
+                // session cookie
+                expiryDate = 0;
+            }
             cookieService.add(cookie.getDomain(),
                     cookie.getPath(),
                     cookie.getName(), 
@@ -101,7 +115,7 @@ public class CoreStoreConnection implements StoreConnection {
                     cookie.isSecure(), 
                     true, 
                     !cookie.isPersistent(), 
-                    cookie.getExpiryDate().getTime() / 1000);
+                    expiryDate);
         }
     }
 
@@ -166,7 +180,7 @@ public class CoreStoreConnection implements StoreConnection {
         // TODO share code with FacebookFriendAccountConfigurationImpl
         BasicCookieStore cookieStore = new BasicCookieStore();
         nsICookieManager cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookiemanager;1",
-        nsICookieManager.class);
+            nsICookieManager.class);
         nsISimpleEnumerator enumerator = cookieService.getEnumerator();
         while(enumerator.hasMoreElements()) {                        
             nsICookie cookie = XPCOMUtils.proxy(enumerator.getNext(), nsICookie.class);
