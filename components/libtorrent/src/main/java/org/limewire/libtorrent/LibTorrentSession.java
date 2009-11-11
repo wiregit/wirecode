@@ -238,9 +238,14 @@ public class LibTorrentSession implements TorrentManager {
 
     @Override
     public void setIpFilter(TorrentIpFilter ipFilter) {
-        IpFilterCallback ipFilterCallback = new IpFilterCallback(ipFilter);
-        libTorrent.set_ip_filter(ipFilterCallback);
-        this.ipFilterCallback = ipFilterCallback;
+        lock.lock();
+        try {
+            IpFilterCallback ipFilterCallback = new IpFilterCallback(ipFilter);
+            libTorrent.set_ip_filter(ipFilterCallback);
+            this.ipFilterCallback = ipFilterCallback;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void scheduleWithFixedDelay(Runnable command, long initialDelay, long delay,
