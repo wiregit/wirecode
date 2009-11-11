@@ -107,6 +107,12 @@ public class IconLabelRenderer extends DefaultLimeTableCellRenderer {
     }
     
     @Override
+    protected void setValue(Object value) {
+        // make this a noop, so value.toString() is not called
+        // text is set explicitly in this class here
+    }
+    
+    @Override
     public String getToolTipText(){
         return getText();
     }
