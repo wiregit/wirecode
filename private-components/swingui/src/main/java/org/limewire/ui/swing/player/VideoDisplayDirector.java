@@ -15,6 +15,8 @@ import javax.swing.JLayeredPane;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.LimeJFrame;
+import org.limewire.ui.swing.home.HomeMediator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -73,6 +75,14 @@ class VideoDisplayDirector {
         }
         //Recycling the video panel causes problems with native painting.  We need a new one each time.
         videoPanel = videoPanelFactory.createVideoPanel(videoRenderer);
+        
+        // If the start screen is open, then open up the library view before showing the video.
+        // The start screen has a heavy weight component that would cut off the video.
+        NavItem selectedNavItem = navigator.getSelectedNavItem();
+        if (selectedNavItem.getId().equals(HomeMediator.NAME)) {
+            NavItem item = navigator.getNavItem(NavCategory.LIBRARY, LibraryMediator.NAME);
+            item.select();
+        }
         
         if(isFullScreen){
             showFullScreen();

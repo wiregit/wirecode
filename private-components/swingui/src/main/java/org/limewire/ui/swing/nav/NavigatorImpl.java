@@ -84,6 +84,10 @@ class NavigatorImpl implements Navigator {
         }
     }
     
+    public NavItem getSelectedNavItem() { 
+        return selectedItem;
+    }
+    
     @Override
     public void showNothing() {
         if(selectedItem != null) {

@@ -35,6 +35,11 @@ public interface Navigator {
     NavItem getNavItem(NavCategory category, String id);
 
     /**
+     * Returns the currently selected NavItem.
+     */
+    NavItem getSelectedNavItem();
+    
+    /**
      * Adds a listener that is notified when a {@link NavItem} is selected,
      * added or removed. When a new listener is installed, it is notified of all
      * existing NavItems via
