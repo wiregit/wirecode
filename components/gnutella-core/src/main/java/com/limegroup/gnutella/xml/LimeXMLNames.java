@@ -77,6 +77,20 @@ public class LimeXMLNames {
     public static final String VIDEO_STARS = "videos__video__stars__";
     public static final String VIDEO_PRODUCER = "videos__video__producer__";
     public static final String VIDEO_SUBTITLES = "videos__video__subtitles__";
+    
+    
+    public static final String TORRENT_SCHEMA = "http://www.limewire.com/schemas/torrent.xsd";
+    
+    public static final String TORRENT_INFO_HASH = "torrents__torrent__infohash__";
+    public static final String TORRENT_TRACKERS = "torrents__torrent__trackers__";
+    public static final String TORRENT_LENGTH = "torrents__torrent__length__";
+    public static final String TORRENT_NAME = "torrents__torrent__name__";
+    public static final String TORRENT_PRIVATE = "torrents__torrent__private__";
+    public static final String TORRENT_WEBSEEDS = "torrents__torrent__webseeds__";
+    public static final String TORRENT_FILE_PATHS = "torrents__torrent__filepaths__";
+    public static final String TORRENT_FILE_SIZES = "torrents__torrent__filesizes__";
+
+    
 
     private static Map<String, String> displayNameByKey;
     

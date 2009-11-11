@@ -288,8 +288,10 @@ public class LimeXMLReplyCollection {
     
     /** Returns true if a document can be created for this file. */
     boolean canCreateDocument(File file) {
-        return LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI) && metaDataFactory.get().containsAudioReader(file)
-                || LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI) && metaDataFactory.get().containsVideoReader(file);
+        MetaDataFactory factory = metaDataFactory.get();
+        return LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI) && factory.containsAudioReader(file)
+                || LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI) && factory.containsVideoReader(file)
+                || LimeXMLNames.TORRENT_SCHEMA.equals(schemaURI) && factory.containsReader(file);
     }
         
     

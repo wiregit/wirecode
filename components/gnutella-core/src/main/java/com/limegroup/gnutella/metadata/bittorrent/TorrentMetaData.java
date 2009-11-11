@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.metadata.bittorrent;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,35 +11,15 @@ import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.util.Base32;
 import org.limewire.util.NameValue;
 import org.limewire.util.StringUtils;
-import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 /**
  * Allows accessing metadata about the torrent through the MetaData interface. 
  */
 public class TorrentMetaData implements MetaData {
-
-    public static final String TORRENT_SCHEMA = "http://www.limewire.com/schemas/torrent.xsd";
-    
-    public static final String INFO_HASH = "torrents__torrent__infohash__";
-    
-    public static final String ANNOUNCE = "torrents__torrent__announce__";
-    
-    public static final String LENGTH = "torrents__torrent__length__";
-    
-    public static final String NAME = "torrents__torrent__name__";
-    
-    public static final String PRIVATE = "torrents__torrent__private__";
-    
-    public static final String PIECE_LENGTH = "torrents__torrent__piecelength__";
-    
-    public static final String WEBSEEDS = "torrents__torrent__webseeds__";
-    
-    public static final String FILE_PATHS = "torrents__torrent__filepaths__";
-    
-    public static final String FILE_LENGTHS = "torrents__torrent__filelengths__";
 
     private List<NameValue<String>> nameValues;
 
@@ -49,7 +29,7 @@ public class TorrentMetaData implements MetaData {
 
     @Override
     public String getSchemaURI() {
-        return TORRENT_SCHEMA;
+        return LimeXMLNames.TORRENT_SCHEMA;
     }
 
     @Override
@@ -59,41 +39,40 @@ public class TorrentMetaData implements MetaData {
 
     private List<NameValue<String>> buildNameValueList(BTData data) throws IOException {
         NameValueListBuilder builder = new NameValueListBuilder();
-        builder.add(INFO_HASH, Base32.encode(data.getInfoHash()));
-        try {
-            builder.add(ANNOUNCE, URIUtils.toURI(data.getAnnounce()).toASCIIString());
-        } catch (URISyntaxException ie) {
-            throw new IOException(ie);
-        }
+        builder.add(LimeXMLNames.TORRENT_INFO_HASH, Base32.encode(data.getInfoHash()));
+
+        List<URI> trackers = data.getTrackerUris();
+        // only add max of 3 trackers
+        int maxSize = Math.min(trackers.size(), 3);
+        String trackerUris = StringUtils.explode(trackers.subList(0, maxSize), " ");
+        builder.add(LimeXMLNames.TORRENT_TRACKERS, trackerUris);
+        
         Long length = data.getLength();
         if (length != null) {
-            builder.add(LENGTH, length);
+            builder.add(LimeXMLNames.TORRENT_LENGTH, length);
         }
-        builder.add(NAME, data.getName());
-        // unimportant information not parsed and sent for now
-//        builder.add(PIECE_LENGTH, data.getPieceLength());
+        builder.add(LimeXMLNames.TORRENT_NAME, data.getName());
+
         boolean isPrivate = data.isPrivate();
         if (isPrivate) {
-            builder.add(PRIVATE, Boolean.TRUE.toString());
+            builder.add(LimeXMLNames.TORRENT_PRIVATE, Boolean.TRUE.toString());
         }
-        String uris = StringUtils.explode(data.getWebSeeds(), "\t");
+        
+        String uris = StringUtils.explode(data.getWebSeeds(), " ");
         if (uris.length() > 0) {
-            builder.add(WEBSEEDS, uris);
+            builder.add(LimeXMLNames.TORRENT_WEBSEEDS, uris);
         }
+        
         List<BTFileData> files = data.getFiles();
         if (files != null) {
             List<String> filePaths = new ArrayList<String>(files.size());
             List<Long> fileLengths = new ArrayList<Long>(files.size());
             for (BTFileData file : files) {
-                try {
-                    filePaths.add(URIUtils.toURI(file.getPath()).toASCIIString());
-                } catch (URISyntaxException e) {
-                    throw new IOException(e);
-                }
+                filePaths.add(file.getPath());
                 fileLengths.add(file.getLength());
             }
-            builder.add(FILE_PATHS, StringUtils.explode(filePaths, "\t"));
-            builder.add(FILE_LENGTHS, StringUtils.explode(fileLengths, "\t"));
+            builder.add(LimeXMLNames.TORRENT_FILE_PATHS, StringUtils.explode(filePaths, "//"));
+            builder.add(LimeXMLNames.TORRENT_FILE_SIZES, StringUtils.explode(fileLengths, " "));
         }
         return builder.toList();
     }
@@ -103,6 +82,11 @@ public class TorrentMetaData implements MetaData {
         return nameValues;
     }
 
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
+    }
+    
     private static class NameValueListBuilder {
 
         private List<NameValue<String>> values = new ArrayList<NameValue<String>>();

@@ -530,8 +530,10 @@ public class LimeXMLUtils {
                     found = true;
             //We know know that "{" is at 1 because we are in this if block
             headerFragment = StringUtils.getASCIIString(data,1,i-1-1);
+            System.out.println(data.length + " length");
             int comp = getCompressionType(headerFragment);
             if (comp == NONE) {
+                System.out.println("none");
                 retBytes = new byte[data.length-(headerFragment.length()+2)];
                 System.arraycopy(data,
                                  i,
@@ -540,6 +542,7 @@ public class LimeXMLUtils {
                                  data.length-(headerFragment.length()+2));
             }
             else if (comp == GZIP) {
+                System.out.println("gzip");
                 retBytes = new byte[data.length-COMPRESS_HEADER_GZIP.length()];
                 System.arraycopy(data,
                                  COMPRESS_HEADER_GZIP.length(),
@@ -549,6 +552,7 @@ public class LimeXMLUtils {
                 retBytes = uncompressGZIP(retBytes);                
             }
             else if (comp == ZLIB) {
+                System.out.println("zlib");
                 retBytes = new byte[data.length-COMPRESS_HEADER_ZLIB.length()];
                 System.arraycopy(data,
                                  COMPRESS_HEADER_ZLIB.length(),

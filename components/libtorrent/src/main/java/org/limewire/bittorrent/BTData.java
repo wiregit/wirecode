@@ -40,9 +40,9 @@ public interface BTData {
     }
 
     /**
-     * The URL of the tracker.
+     * @return at least one valid tracker uri 
      */
-    public String getAnnounce();
+    public List<URI> getTrackerUris();
     
     /**
      * Returns a list of potential webseed addresses.

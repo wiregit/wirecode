@@ -6,20 +6,25 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
+import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SHA1;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BEncoder;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.GenericsUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.URIUtils;
+import org.limewire.util.GenericsUtils.ScanMode;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Contains type safe representations of all understand information in in a
@@ -34,10 +39,8 @@ public class BTDataImpl implements BTData {
     public static final String UTF_8_ENCODING = "UTF-8";
     private static final Log LOG = LogFactory.getLog(BTDataImpl.class);
 
-    /** The URL of the tracker. */
-    // TODO: add support for UDP & multiple trackers.
-    private final String announce;
-
+    private final List<URI> trackerUris;
+    
     /** The webseed addresses */
     private final URI[] webSeeds;
 
@@ -80,11 +83,10 @@ public class BTDataImpl implements BTData {
     public BTDataImpl(Map<?, ?> torrentFileMap) throws BTDataValueException {
         Object tmp;
 
-        tmp = torrentFileMap.get("announce");
-        if (tmp instanceof byte[])
-            announce = StringUtils.getASCIIString((byte[]) tmp);
-        else
-            throw new BTDataValueException("announce missing or invalid!");
+        trackerUris = parseTrackerUris(torrentFileMap);
+        if (trackerUris.isEmpty()) {
+            throw new BTDataValueException("announces missing or invalid!");
+        }
 
         webSeeds = parseWebSeeds(torrentFileMap);
         tmp = torrentFileMap.get("info");
@@ -172,6 +174,39 @@ public class BTDataImpl implements BTData {
         }
     }
 
+    static List<URI> parseTrackerUris(Map<?, ?> torrentFileMap) {
+        List<URI> trackerUris = new ArrayList<URI>(2);
+        Object value = torrentFileMap.get("announce-list");
+        if (value instanceof List) {
+            List<List> announceLists = GenericsUtils.scanForList(value, List.class, ScanMode.REMOVE);
+            for (List uriList : announceLists) {
+                List<byte[]> list = GenericsUtils.scanForList(uriList, byte[].class, ScanMode.REMOVE);
+                for (byte[] data : list) {
+                    String uriString = StringUtils.getASCIIString(data);
+                    try {
+                        trackerUris.add(URIUtils.toURI(uriString));
+                    } catch (URISyntaxException e) {
+                        LOG.debugf(e, "invalid uri: {0}", uriString);
+                    }
+                }
+            }
+        }
+        // only use announce field if announce list didn't yield valid uris
+        if (trackerUris.isEmpty()) {
+            value = torrentFileMap.get("announce");
+            if (value instanceof byte[]) {
+                String uriString = StringUtils.getASCIIString((byte[]) value);
+                try {
+                    trackerUris.add(URIUtils.toURI(uriString));
+                } catch (URISyntaxException e) {
+                    LOG.debugf(e, "invalid uri: {0}", uriString);
+                }
+            }
+        }
+
+        return trackerUris.isEmpty() ? Collections.<URI>emptyList() : ImmutableList.copyOf(trackerUris);
+    }
+    
     /**
      * Parses the webseed addresses from the torrent file. The web seed
      * addresses should be in a parameter "url-list". url-list can either be a
@@ -309,8 +344,8 @@ public class BTDataImpl implements BTData {
     }
 
     @Override
-    public String getAnnounce() {
-        return announce;
+    public List<URI> getTrackerUris() {
+        return trackerUris;
     }
 
     @Override

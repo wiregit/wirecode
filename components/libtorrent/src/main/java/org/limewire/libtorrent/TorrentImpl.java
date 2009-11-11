@@ -124,7 +124,7 @@ public class TorrentImpl implements Torrent {
                     }
 
                     if (this.trackerURL == null) {
-                        this.trackerURL = btData.getAnnounce();
+                        this.trackerURL = btData.getTrackerUris().get(0).toASCIIString();
                     }
 
                     if (this.sha1 == null) {

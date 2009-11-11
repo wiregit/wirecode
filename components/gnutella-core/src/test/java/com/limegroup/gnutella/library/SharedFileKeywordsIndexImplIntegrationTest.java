@@ -22,6 +22,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -30,6 +31,9 @@ import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactoryImplTest;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
 
@@ -112,6 +116,28 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         responses[0].writeToStream(out);
         Response response = responseFactory.createFromStream(new ByteArrayInputStream(out.toByteArray()));
         assertNotContains(response.getUrns(), nms1Urn);
+    }
+    
+    public void testResponseContainsTorrentMetaData() throws Exception {
+        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", MetaDataFactoryImplTest.class);
+        assertAdds(fileList, torrentFile);
+        responses = keywordIndex.query(queryRequestFactory.createQuery("messages"));
+        assertEquals(1, responses.length);
+        LimeXMLDocument xmlDocument = responses[0].getDocument();
+        assertNotNull(xmlDocument);
+        assertEquals("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ", xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
+        assertEquals("http://localhost/announce", xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
+    }
+    
+    public void testFilesInsideOfTorrentAreIndexed() throws Exception {
+        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", MetaDataFactoryImplTest.class);
+        assertAdds(fileList, torrentFile);
+        responses = keywordIndex.query(queryRequestFactory.createQuery("BTChokeTest"));
+        assertEquals(1, responses.length);
+        LimeXMLDocument xmlDocument = responses[0].getDocument();
+        assertNotNull(xmlDocument);
+        assertEquals("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ", xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
+        assertEquals("http://localhost/announce", xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
     }
     
     public void testAddAnotherSharedFile() throws Exception {

@@ -10,6 +10,7 @@ import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.metadata.bittorrent.TorrentMetaData;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 public class MetaDataFactoryImplTest extends LimeTestCase {
 
@@ -42,13 +43,13 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
         List<NameValue<String>> values = metaData.toNameValueList();
         String filepaths = null;
         for (NameValue<String> value : values) {
-            if (value.getName().equals(TorrentMetaData.FILE_PATHS)) {
+            if (value.getName().equals(LimeXMLNames.TORRENT_FILE_PATHS)) {
                 filepaths = value.getValue();
                 break;
             }
         }
         assertNotNull(filepaths);
-        String[] fileUris = filepaths.split("\t");
+        String[] fileUris = filepaths.split("//");
         assertEquals(9, fileUris.length);
     }
     
@@ -65,12 +66,11 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
         List<NameValue<String>> values = metaData.toNameValueList();
         String name = null;
         for (NameValue<String> value : values) {
-            if (value.getName().equals(TorrentMetaData.NAME)) {
+            if (value.getName().equals(LimeXMLNames.TORRENT_NAME)) {
                 name = value.getValue();
                 break;
             }
         }
         assertEquals("BTHaveTest.class", name);
     }
-
 }

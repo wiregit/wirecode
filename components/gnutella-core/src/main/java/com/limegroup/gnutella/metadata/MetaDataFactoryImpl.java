@@ -176,7 +176,7 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
 
     @Override
     public boolean containsReader(File file) {
-        return containsAudioReader(file) || containsVideoReader(file);
+        return getMetaReader(file) != null;
     }
     
     @Override

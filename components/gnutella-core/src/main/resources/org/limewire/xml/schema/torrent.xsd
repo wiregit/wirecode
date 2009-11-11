@@ -14,14 +14,13 @@
   <complexType name="torrentType">
   	<all>
   	<attribute name="infohash" type="string"></attribute>
-  	<attribute name="announce" type="string"></attribute>	
+  	<attribute name="trackers" type="string"></attribute>	
   	<attribute name="length" type="int"></attribute>
   	<attribute name="name" type="string"></attribute>
   	<attribute name="private" type="boolean"></attribute>
-  	<attribute name="piecelength" type="int"></attribute>
   	<attribute name="webseeds" type="string"></attribute>
   	<attribute name="filepaths" type="string"></attribute>
-  	<attribute name="filelengths" type="string"></attribute>
+  	<attribute name="filesizes" type="string"></attribute>
   	</all>
   </complexType>
 
