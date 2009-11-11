@@ -98,11 +98,10 @@ public class FileInfoSharingPanel implements FileInfoPanel {
         component.setOpaque(false);
         switch(type) {
         case LOCAL_FILE:
-            if(propertiableFile instanceof LocalFileItem) {
+            if(propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).isShareable()) {
                 EventList<SharedFileList> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
                 if(sharedWithList.size() > 0) {
                     component.add(createHeaderLabel(I18n.tr("Sharing from these lists")), "span, wrap");
-
                     
                     JXTable table = new MouseableTable(new DefaultEventTableModel<SharedFileList>(sharedWithList, 
                             new TableFormat<SharedFileList>() {
