@@ -65,7 +65,7 @@ class VideoPanel extends JPanel implements Disposable{
      */
     private final JPanel videoPanel = new JPanel(new BorderLayout());
     
-    private final JComponent controlPanel;
+    private final PlayerControlPanel controlPanel;
     
 
     private final MigLayout fitToScreenLayout = new MigLayout("align 50% 50%, novisualpadding, gap 0, ins 0");
@@ -113,9 +113,7 @@ class VideoPanel extends JPanel implements Disposable{
     
     
     public void dispose() {
-        if (controlPanel instanceof Disposable) {
-            ((Disposable) controlPanel).dispose();
-        }
+        controlPanel.dispose();
     }
  
 
