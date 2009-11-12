@@ -63,7 +63,7 @@ public class WindowsFolderChooser {
              */
             @Override
             public int callback(Pointer wnd, int msg, int param, int lpData) {
-                if(msg == BFFM_INITIALIZED) {
+                if(msg == BFFM_INITIALIZED && currentDirectory != null) {
                     User32.INSTANCE.PostMessage(wnd, BFFM_SETSELECTION, 1, currentDirectory);
                 }
                 return 0;
