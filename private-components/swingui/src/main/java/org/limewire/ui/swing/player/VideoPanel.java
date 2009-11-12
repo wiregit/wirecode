@@ -47,7 +47,7 @@ import com.google.inject.assistedinject.Assisted;
 /**
  * Panel that holds video and video controls.
  */
-class VideoPanel extends JPanel implements Disposable{
+class VideoPanel implements Disposable{
 
     private final HeaderBar headerBar = new HeaderBar();
 
