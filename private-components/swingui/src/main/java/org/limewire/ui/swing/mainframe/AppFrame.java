@@ -333,6 +333,8 @@ public class AppFrame extends SingleFrameApplication {
         
         if (!lastOptionsDialog.isVisible()) {
             lastOptionsDialog.initOptions();
+            // if the main frame is not visible on OS X when preferences is opened, then a zombie window popups up...
+            GuiUtils.getMainFrame().setVisible(true);
             lastOptionsDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
             if(actionEvent.getID() == ActionEvent.ACTION_PERFORMED && actionEvent.getActionCommand() != null){
                 lastOptionsDialog.select(actionEvent.getActionCommand());

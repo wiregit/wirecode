@@ -22,6 +22,8 @@ public class AboutAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        new AboutWindow(GuiUtils.getMainFrame(), application).showDialog();
+        // if the main frame is not visible on OS X when about is opened, then a zombie window popups up...
+        GuiUtils.getMainFrame().setVisible(true);
+        new AboutWindow(null, application).showDialog();
     }
 }
