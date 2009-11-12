@@ -110,67 +110,69 @@ public class ITunesOptionPanel extends OptionPanel {
         
         @Override
         boolean applyOptions() {
-            final boolean prevEnabled = DaapSettings.DAAP_ENABLED.getValue();
-           
-            final boolean prevRequiresPassword = DaapSettings.DAAP_REQUIRES_PASSWORD.getValue();
-            final String prevPassword = DaapSettings.DAAP_PASSWORD.get();
-            
-            final boolean requiresPassword = requirePassWordCheckBox.isSelected();
-            String password = new String(passwordField.getPassword());
-            
-            if (password.equals("") && requiresPassword) { 
-                FocusJOptionPane.showMessageDialog(ITunesOptionPanel.this, 
-                        I18n.tr("Daap Password cannot be null, iTunes settings not saved"),
-                        I18n.tr("iTunes Error"),
-                        JOptionPane.ERROR_MESSAGE);
+            if(hasChanged()) {
+                final boolean prevEnabled = DaapSettings.DAAP_ENABLED.getValue();
+               
+                final boolean prevRequiresPassword = DaapSettings.DAAP_REQUIRES_PASSWORD.getValue();
+                final String prevPassword = DaapSettings.DAAP_PASSWORD.get();
                 
-                initOptions();
-                return false;
-            }
-            
-            //enable daap setting
-            DaapSettings.DAAP_ENABLED.setValue(shareWithITunesCheckBox.isSelected());
-            
-            //save password value
-            if (!DaapSettings.DAAP_PASSWORD.equals(password)) {
-                DaapSettings.DAAP_PASSWORD.set(password);
-            }           
-  
-            try {               
-                if (requiresPassword != prevRequiresPassword || (requiresPassword && !password.equals(prevPassword))) {
-                    DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requiresPassword);
-    
-                    // A password is required now or password has changed, 
-                    // disconnect all users...
-                    if (requiresPassword) { 
-                        daapManager.disconnectAll();
-                    }
-                    daapManager.updateService();
-    
+                final boolean requiresPassword = requirePassWordCheckBox.isSelected();
+                String password = new String(passwordField.getPassword());
+                
+                if (password.equals("") && requiresPassword) { 
+                    FocusJOptionPane.showMessageDialog(ITunesOptionPanel.this, 
+                            I18n.tr("Daap Password cannot be null, iTunes settings not saved"),
+                            I18n.tr("iTunes Error"),
+                            JOptionPane.ERROR_MESSAGE);
+                    
+                    initOptions();
+                    return false;
                 }
                 
-                if (shareWithITunesCheckBox.isSelected()) {              
-                    if (prevEnabled) { 
-                        daapManager.restart();
-                    } else {
-                        daapManager.start();
+                //enable daap setting
+                DaapSettings.DAAP_ENABLED.setValue(shareWithITunesCheckBox.isSelected());
+                
+                //save password value
+                if (!DaapSettings.DAAP_PASSWORD.equals(password)) {
+                    DaapSettings.DAAP_PASSWORD.set(password);
+                }           
+      
+                try {               
+                    if (requiresPassword != prevRequiresPassword || (requiresPassword && !password.equals(prevPassword))) {
+                        DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requiresPassword);
+        
+                        // A password is required now or password has changed, 
+                        // disconnect all users...
+                        if (requiresPassword) { 
+                            daapManager.disconnectAll();
+                        }
+                        daapManager.updateService();
+        
                     }
-                } else if (prevEnabled) {
+                    
+                    if (shareWithITunesCheckBox.isSelected()) {              
+                        if (prevEnabled) { 
+                            daapManager.restart();
+                        } else if(!prevEnabled) {
+                            daapManager.start();
+                        }
+                    } else if (prevEnabled) {
+                        daapManager.stop();
+                    }
+                    
+                } catch (IOException err) {               
+                    DaapSettings.DAAP_ENABLED.setValue(prevEnabled);
+                    DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(prevRequiresPassword);
+                    DaapSettings.DAAP_PASSWORD.set(prevPassword);
+    
                     daapManager.stop();
+                    initOptions();
+    
+                    FocusJOptionPane.showMessageDialog(ITunesOptionPanel.this, 
+                            I18n.tr("Could not restart the Daap connection"),
+                            I18n.tr("Daap Error"),
+                            JOptionPane.ERROR_MESSAGE);
                 }
-                
-            } catch (IOException err) {               
-                DaapSettings.DAAP_ENABLED.setValue(prevEnabled);
-                DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(prevRequiresPassword);
-                DaapSettings.DAAP_PASSWORD.set(prevPassword);
-
-                daapManager.stop();
-                initOptions();
-
-                FocusJOptionPane.showMessageDialog(ITunesOptionPanel.this, 
-                        I18n.tr("Could not restart the Daap connection"),
-                        I18n.tr("Daap Error"),
-                        JOptionPane.ERROR_MESSAGE);
             }
             return false;
         }
@@ -179,7 +181,7 @@ public class ITunesOptionPanel extends OptionPanel {
         boolean hasChanged() {
             return  DaapSettings.DAAP_ENABLED.getValue() != shareWithITunesCheckBox.isSelected() ||
                     DaapSettings.DAAP_REQUIRES_PASSWORD.getValue() != requirePassWordCheckBox.isSelected() ||
-                    DaapSettings.DAAP_PASSWORD.get() != requirePassWordCheckBox.getText();
+                    (requirePassWordCheckBox.isSelected() && DaapSettings.DAAP_PASSWORD.get() != requirePassWordCheckBox.getText());
         }
 
         @Override
