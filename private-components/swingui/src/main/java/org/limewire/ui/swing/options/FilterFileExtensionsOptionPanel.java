@@ -30,6 +30,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.OSUtils;
@@ -138,7 +139,12 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
     boolean applyOptions() {
         String[] values = eventList.toArray(new String[eventList.size()]);
         FilterSettings.BANNED_EXTENSIONS.set(values);
-        spamManager.adjustSpamFilters();
+        BackgroundExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                spamManager.adjustSpamFilters();
+            }
+        });
         return false;
     }
 

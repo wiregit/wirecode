@@ -98,10 +98,10 @@ public class PerformanceOptionPanel extends OptionPanel {
                     @Override
                     public void run() {
                         networkManager.validateTLS();
+                        connectionManager.restart();
                     }
                 });
             }
-            connectionManager.restart();
         }
         return false;
     }

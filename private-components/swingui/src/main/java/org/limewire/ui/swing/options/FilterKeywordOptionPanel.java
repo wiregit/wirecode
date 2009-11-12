@@ -16,6 +16,7 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
@@ -68,7 +69,12 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
     boolean applyOptions() {
         String[] values = eventList.toArray(new String[eventList.size()]);
         FilterSettings.BANNED_WORDS.set(values);
-        spamManager.adjustSpamFilters();
+        BackgroundExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                spamManager.adjustSpamFilters();
+            }
+        });
         return false;
     }
 

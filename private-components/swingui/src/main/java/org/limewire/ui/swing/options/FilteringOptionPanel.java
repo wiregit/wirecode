@@ -31,6 +31,7 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.IP;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -125,7 +126,12 @@ public class FilteringOptionPanel extends OptionPanel {
             
             FilterSettings.USE_NETWORK_FILTER.setValue(backListCheckBox.isSelected());
             FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(list.toArray(new String[list.size()]));
-            spamManager.reloadIPFilter();
+            BackgroundExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    spamManager.reloadIPFilter();
+                }
+            });
             return false;
         }
     
@@ -175,7 +181,12 @@ public class FilteringOptionPanel extends OptionPanel {
             List<String> list = filterTable.getFilterModel().getModel();
             
             FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(list.toArray(new String[list.size()]));
-            spamManager.reloadIPFilter();
+            BackgroundExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    spamManager.reloadIPFilter();
+                }
+            });
             return false;
         }
     

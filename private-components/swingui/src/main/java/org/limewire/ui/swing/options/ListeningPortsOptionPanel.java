@@ -158,8 +158,8 @@ public class ListeningPortsOptionPanel extends OptionPanel {
 
             boolean restart = false;
             boolean oldUPNP = ConnectionSettings.DISABLE_UPNP.getValue();
-            int oldForcedPort = ConnectionSettings.FORCED_PORT.getValue();
-            boolean oldForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
+            final int oldForcedPort = ConnectionSettings.FORCED_PORT.getValue();
+            final boolean oldForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
 
             if (gnutellaPlugAndPlayRadioButton.isSelected()) {
                 if (!ConnectionSettings.UPNP_IN_USE.getValue()) {
@@ -184,14 +184,20 @@ public class ListeningPortsOptionPanel extends OptionPanel {
             // Notify that the address changed if:
             // 1) The 'forced address' status changed.
             // or 2) We're forcing and the ports are different.
-            boolean newForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
-            int newForcedPort = ConnectionSettings.FORCED_PORT.getValue();
-            if (oldForce != newForce) {
-                networkManager.addressChanged();
-            }
-            if (newForce && (oldForcedPort != newForcedPort)) {
-                networkManager.portChanged();
-            }
+            final boolean newForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
+            final int newForcedPort = ConnectionSettings.FORCED_PORT.getValue();
+            
+            BackgroundExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (oldForce != newForce) {
+                        networkManager.addressChanged();
+                    }
+                    if (newForce && (oldForcedPort != newForcedPort)) {
+                        networkManager.portChanged();
+                    }
+                }
+            });
 
             return restart;
         }
