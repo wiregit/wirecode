@@ -30,6 +30,8 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
     private int numBrowseAll;
     @InspectablePrimitive(value = "browse single friend", category = DataCategory.USAGE)
     private int numBrowseFriend;
+    @InspectablePrimitive(value = "browse host", category = DataCategory.USAGE)
+    private int numBrowseHost;
 
 
     private final Provider<ChatMediator> chatMediator;
@@ -83,6 +85,7 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
 
     @Override
     public void viewLibrariesOf(Collection<FriendPresence> people) {
+        numBrowseHost += people.size();
         if(people.size() == 1) {
             FriendPresence person = people.iterator().next();
             if (!navigateIfTabExists(person.getFriend().getId())) {
