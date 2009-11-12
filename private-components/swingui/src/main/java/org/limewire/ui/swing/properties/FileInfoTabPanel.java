@@ -37,7 +37,8 @@ class FileInfoTabPanel {
     enum Tabs {
         GENERAL(I18n.tr("General")), 
         SHARING(I18n.tr("Sharing")), 
-        TRANSFERS(I18n.tr("Transfers")), 
+        TRANSFERS(I18n.tr("Transfers")),
+        PIECES(I18n.tr("Pieces")), 
         BITTORENT(I18n.tr("Files"));
         
         private final String name;

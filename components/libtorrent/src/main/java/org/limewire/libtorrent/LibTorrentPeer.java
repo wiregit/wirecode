@@ -91,7 +91,7 @@ public class LibTorrentPeer extends Structure implements Structure.ByReference, 
     }
 
     @Override 
-    public boolean isEncyrpted() {
+    public boolean isEncrypted() {
         return (rc4_encrypted & status_flags) > 0 
             || (plaintext_encrypted & status_flags) > 0;
     }

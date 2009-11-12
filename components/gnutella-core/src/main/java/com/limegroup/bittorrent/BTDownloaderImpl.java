@@ -24,6 +24,7 @@ import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
+import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
@@ -605,9 +606,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public List<Address> getSourcesAsAddresses() {
 
-        List<Address> list = new ArrayList<Address>();
-
         List<TorrentPeer> peers = torrent.getTorrentPeers();
+        List<Address> list = new ArrayList<Address>(peers.size());
+        
         for (TorrentPeer peer : peers) {
             String ip = peer.getIPAddress();
             if (ip != null) {
@@ -624,13 +625,21 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public List<DownloadSourceInfo> getSourcesDetails() {
-        List<DownloadSourceInfo> sourceInfoList = new ArrayList<DownloadSourceInfo>();
-        for (TorrentPeer peer : torrent.getTorrentPeers()) {
+        
+        List<TorrentPeer> peers = torrent.getTorrentPeers();
+        List<DownloadSourceInfo> sourceInfoList = new ArrayList<DownloadSourceInfo>(peers.size());
+        
+        for (TorrentPeer peer : peers) {
             sourceInfoList.add(new DownloadSourceInfoAdapter(peer));
         }
         return sourceInfoList;
     }
 
+    @Override
+    public DownloadPiecesInfo getPieceInfo() {
+        return new BTDownloadPiecesInfo(torrent.getPieceInfo());
+    }
+    
     @Override
     public void initialize() {
     }
@@ -940,7 +949,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         @Override
         public boolean isEncyrpted() {
-            return source.isEncyrpted();
+            return source.isEncrypted();
         }
     }
 }

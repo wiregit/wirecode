@@ -74,7 +74,7 @@ public class FileInfoDialog extends LimeJDialog {
     public FileInfoDialog(@Assisted PropertiableFile propertiable, @Assisted final FileInfoType type,
                         FileInfoTabPanel fileInfoTabPanel, final FileInfoPanelFactory fileInfoFactory,
                         LibraryManager libraryManager) {
-        super(GuiUtils.getMainFrame());
+     //   super(GuiUtils.getMainFrame());
         
         this.libraryManager = libraryManager;
         
@@ -109,7 +109,7 @@ public class FileInfoDialog extends LimeJDialog {
         //  a minimised modal dialogue can't be restored.  The dialogue
         //  disappears and control can never be restored to the rest of the
         //  app.  Stopping resizability prevents this problem.
-        setModalityType(ModalityType.APPLICATION_MODAL);
+   //     setModalityType(ModalityType.APPLICATION_MODAL);
         
         pack();
 
@@ -161,6 +161,13 @@ public class FileInfoDialog extends LimeJDialog {
                         } else {
                             throw new IllegalStateException("No DownloadItem or Torrent found for BITTORENT tab.");
                         }
+                    } else if (tab == Tabs.PIECES) {
+                        if(propertiableFile instanceof DownloadItem) {
+                            cards.put(tab, fileInfoFactory.createPiecesPanel(type, (DownloadItem)propertiableFile));    
+                        } 
+                        else {
+                            throw new IllegalStateException("Should not have a pieces tab for a non download");
+                        }
                     } else {
                         throw new IllegalStateException("Unknown state:" + tab);
                     }
@@ -208,6 +215,7 @@ public class FileInfoDialog extends LimeJDialog {
                 }
             }
             tabs.add(Tabs.TRANSFERS);
+            tabs.add(Tabs.PIECES);
             break;
         case REMOTE_FILE:
             break;

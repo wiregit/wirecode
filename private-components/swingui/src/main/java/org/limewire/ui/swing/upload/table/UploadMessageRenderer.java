@@ -57,12 +57,12 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
                 String ratio = formatter.format(item.getSeedRatio());
                 return I18n.trn("{0} to {1} person - ratio: {2}",
                         "{0} to {1} people - ratio: {2}",
-                        numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), numConnections, ratio);
+                        numConnections, GuiUtils.formatKilobytesPerSec(item.getUploadSpeed()), numConnections, ratio);
             } else {
                 return I18n.tr("{0} of {1} ({2})", 
-                        GuiUtils.toUnitbytes(item.getTotalAmountUploaded()), 
-                        GuiUtils.toUnitbytes(item.getFileSize()), 
-                        GuiUtils.rate2speed(item.getUploadSpeed()));
+                        GuiUtils.formatUnitFromBytes(item.getTotalAmountUploaded()), 
+                        GuiUtils.formatUnitFromBytes(item.getFileSize()), 
+                        GuiUtils.formatKilobytesPerSec(item.getUploadSpeed()));
             }
             
         case PAUSED:

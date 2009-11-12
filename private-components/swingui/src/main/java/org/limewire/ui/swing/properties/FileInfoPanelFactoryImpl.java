@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.properties;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.MetaDataManager;
@@ -80,8 +81,13 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     }
 
     @Override
-    public FileInfoPanel createTransferPanel(FileInfoType type, PropertiableFile propertiableFile) {
+    public FileInfoPanel createTransferPanel(FileInfoType type, DownloadItem propertiableFile) {
         return new FileInfoTransfersPanel(type, propertiableFile, tableDecorator.get());
     }
 
+    @Override
+    public FileInfoPanel createPiecesPanel(FileInfoType type, DownloadItem propertiableFile) {
+        return new FileInfoPiecesPanel(type, propertiableFile);
+    }
+    
 }

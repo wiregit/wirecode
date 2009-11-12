@@ -15,6 +15,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
@@ -217,7 +218,6 @@ public class MockDownloadItem implements DownloadItem {
  
     @Override
     public int getLocalQueuePriority() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -253,7 +253,6 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public Object getProperty(FilePropertyKey key) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -274,13 +273,11 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public boolean isStoreDownload() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public File getSaveFile() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -303,4 +300,10 @@ public class MockDownloadItem implements DownloadItem {
     public Object getDownloadProperty(DownloadPropertyKey key) {
         return null;
     }
+
+    @Override
+    public DownloadPiecesInfo getPieceInfo() {
+        return null;
+    }
+
 }

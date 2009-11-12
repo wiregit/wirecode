@@ -20,6 +20,9 @@ public interface DownloadItem extends PropertiableFile {
     public static final String DOWNLOAD_ITEM = "limewire.download.glueItem";
     public static final String DOWNLOAD_START_DATE = "limewire.download.startDate";
 
+    /**
+     * The type of downloader attached to this download.
+     */
     public enum DownloadItemType {
         GNUTELLA,
         BITTORRENT
@@ -124,16 +127,39 @@ public interface DownloadItem extends PropertiableFile {
 	 */
 	public void resume();
 
+	/**
+	 * @return The number of sources (usually peers) associated with the download.
+	 * 
+	 * <p>NOTE: May include upload only sources.
+	 */
 	public int getDownloadSourceCount();
 
+	/**
+	 * @return A list of ip addresses of the peers associated with the download.
+	 * 
+	 * <p>NOTE: May include upload only sources.
+	 */
 	public List<Address> getSources();
 	
+	/**
+	 * @return A list of details pertaining to the sources associated with the download.
+	 * 
+     * <p>NOTE: May include upload only sources.
+	 */
 	public List<DownloadSourceInfo> getSourcesDetails();
 	
+	/**
+	 * @return A structure that holds the state of each download piece.
+	 */
+	DownloadPiecesInfo getPieceInfo();
+	
+	/**
+	 * @return The media type of the file being downloaded.
+	 */
 	public Category getCategory();
 
     /**
-     * @return speed in kb/s or 0 if speed could not be measured
+     * @return speed in kb/s or 0 if speed could not be measured.
      */
 	public float getDownloadSpeed();
 	
@@ -149,8 +175,15 @@ public interface DownloadItem extends PropertiableFile {
      */
     public int getRemoteQueuePosition();
   
+    /**
+     * @return The current {@link ErrorState}, {@link ErrorState#NONE} if no error.
+     */
     public ErrorState getErrorState();
     
+    
+    /**
+     * TODO: javadoc?
+     */
     public int getLocalQueuePriority();
     
     /**

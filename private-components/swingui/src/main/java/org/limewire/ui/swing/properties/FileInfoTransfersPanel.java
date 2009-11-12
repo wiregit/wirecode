@@ -57,14 +57,10 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     private final JLabel leechersLabel;
     private final JLabel seedersLabel;
     
-    public FileInfoTransfersPanel(FileInfoType type, PropertiableFile propertiableFile, TableDecorator tableDecorator) {
-        
-        if (!(propertiableFile instanceof DownloadItem)) {
-            throw new UnsupportedOperationException("Can't create a transfers panel on anything other than a Download");
-        }
+    public FileInfoTransfersPanel(FileInfoType type, DownloadItem download, TableDecorator tableDecorator) {
         
         this.type = type;
-        this.download = (DownloadItem) propertiableFile;
+        this.download = download;
         
         GuiUtils.assignResources(this);
         
@@ -75,8 +71,6 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         tableDecorator.decorate(infoTable);
         
         infoTable.setSortable(false);
-        infoTable.setRowSelectionAllowed(false);
-        infoTable.setColumnSelectionAllowed(false);
         infoTable.setCellSelectionEnabled(false);
         infoTable.setShowGrid(false, false);
         
@@ -86,7 +80,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         JLabel percentLabel = createPlainLabel("");
         component.add(percentLabel, "wrap");
         downloadStatus = new DownloadStatusListener(percentLabel);
-        ((DownloadItem)propertiableFile).addPropertyChangeListener(downloadStatus);
+        download.addPropertyChangeListener(downloadStatus);
 
         if (download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) {
             component.add(createBoldLabel(I18n.tr("Total Leechers:")), "split 2");
@@ -159,8 +153,8 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
                 model.addRow(new Object[] {info.getIPAddress(),
                         info.isEncyrpted(), 
                         info.getClientName(),
-                        GuiUtils.rate2UnitSpeed(info.getUploadSpeed()),
-                        GuiUtils.rate2UnitSpeed(info.getDownloadSpeed())});
+                        GuiUtils.formatUnitFromBytesPerSec(Math.round(info.getUploadSpeed())),
+                        GuiUtils.formatUnitFromBytesPerSec(Math.round(info.getDownloadSpeed()))});
             }
                 
             infoTable.setModel(model);

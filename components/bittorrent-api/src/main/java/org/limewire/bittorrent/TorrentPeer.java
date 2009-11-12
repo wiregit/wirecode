@@ -76,7 +76,7 @@ public interface TorrentPeer {
     boolean isFromLSD();
     
     /**
-     * Whether the peer connection is encypted or not.
+     * Whether the peer connection is encrypted or not.
      */
-    boolean isEncyrpted();
+    boolean isEncrypted();
 }

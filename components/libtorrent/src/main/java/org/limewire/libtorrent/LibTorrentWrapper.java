@@ -433,4 +433,22 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.set_web_seed_proxy(proxySetting));
         LOG.debugf("after set_web_seed_proxy: {0}", proxySetting);
     }
+       
+    public String get_pieces_status(String sha1) {
+        
+        LibTorrentPiecesInfo info = new LibTorrentPiecesInfo(); 
+        info.read();
+        
+        LOG.debugf("before get_pieces_status: {0}", sha1);
+        catchWrapperException(libTorrent.get_pieces_status(sha1, info));
+        LOG.debugf("after get_pieces_status: {0}", sha1);
+                
+        String status = new String(info.piecesInfo);
+        
+        LOG.debugf("before free_pieces_info");
+        //catchWrapperException(libTorrent.free_pieces_info(info));
+        LOG.debugf("after free_pieces_info");
+        
+        return status;
+    }
 }

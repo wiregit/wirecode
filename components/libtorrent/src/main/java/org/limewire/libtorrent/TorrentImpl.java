@@ -546,4 +546,9 @@ public class TorrentImpl implements Torrent {
             lock.unlock();
         }
     }
+
+    @Override
+    public String getPieceInfo() {
+        return libTorrent.get_pieces_status(sha1);
+    }
 }

@@ -428,7 +428,7 @@ public class ConnectionTableFormat implements TableFormat<ConnectionItem> {
         public BandwidthValue(float up) {
             this.up = up;
             this.down = 0.0f;
-            this.text = formatter.format(up) + " " + GuiUtils.GENERAL_UNIT_KBPSEC;
+            this.text = I18n.tr(GuiUtils.KBPERSEC_FORMAT, formatter.format(up));
         }
         
         /**
@@ -438,8 +438,7 @@ public class ConnectionTableFormat implements TableFormat<ConnectionItem> {
         public BandwidthValue(float down, float up) {
             this.down = down;
             this.up = up;
-            this.text = formatter.format(down) + " / " + formatter.format(up) + 
-                GuiUtils.GENERAL_UNIT_KBPSEC;
+            this.text = I18n.tr(GuiUtils.KBPERSEC_FORMAT, formatter.format(down) + " / " + formatter.format(up)); 
         }
         
         /**

@@ -38,7 +38,7 @@ public class FileInfoUtils {
     public static String getFileSize(PropertiableFile propertiable) {
         Long fileSize = getFileSizeLong(propertiable);
         if (fileSize != null) {
-            return GuiUtils.toUnitbytes(fileSize);
+            return GuiUtils.formatUnitFromBytes(fileSize);
         }
         return "";
     }
@@ -50,7 +50,7 @@ public class FileInfoUtils {
     public static String getFileSizeBytes(PropertiableFile propertiable) {
         Long fileSize = getFileSizeLong(propertiable);
         if (fileSize != null) {
-            return GuiUtils.toBytes(fileSize);
+            return GuiUtils.formatBytes(fileSize);
         }
         return "";
     }

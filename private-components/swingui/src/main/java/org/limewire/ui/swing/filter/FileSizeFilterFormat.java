@@ -114,7 +114,7 @@ class FileSizeFilterFormat<E extends FilterableItem> implements RangeFilterForma
 
     @Override
     public String getValueText(int valueIndex) {
-        return GuiUtils.toUnitbytes(sizes[valueIndex]);
+        return GuiUtils.formatUnitFromBytes(sizes[valueIndex]);
     }
     
     @Override

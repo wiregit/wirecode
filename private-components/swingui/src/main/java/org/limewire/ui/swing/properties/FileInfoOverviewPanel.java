@@ -229,9 +229,6 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         if (!("".equals(info))) {
             component.add(createLabelField(info), "gapbefore 4, wrap");
         }
-        
-        String urn = propertiableFile.getUrn() == null ? "" : propertiableFile.getUrn().toString();
-        component.add(createLabelField(urn), "gapbefore 4, growx, wrap");
     }
    
     private JTextField createLabelField(String text) {

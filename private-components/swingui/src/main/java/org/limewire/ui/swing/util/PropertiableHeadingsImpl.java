@@ -153,7 +153,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
             if (insertHyphen) {
                 subheading += " - ";
             }
-            subheading += GuiUtils.toUnitbytes(fileSize);
+            subheading += GuiUtils.formatUnitFromBytes(fileSize);
         }
         return subheading;
     }
@@ -162,7 +162,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
     public String getFileSize(PropertiableFile propertiable) {
         Long fileSize = (Long)propertiable.getProperty(FilePropertyKey.FILE_SIZE);
         if (fileSize != null) {
-            return GuiUtils.toUnitbytes(fileSize) + "  (" + GuiUtils.toBytes(fileSize) + ")";
+            return GuiUtils.formatUnitFromBytes(fileSize) + "  (" + GuiUtils.formatBytes(fileSize) + ")";
         }
         return "";
     }

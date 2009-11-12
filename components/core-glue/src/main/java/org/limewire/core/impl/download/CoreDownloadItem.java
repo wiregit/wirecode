@@ -15,8 +15,9 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadSourceInfo;
+import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
@@ -155,6 +156,11 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public List<DownloadSourceInfo> getSourcesDetails() {
         return downloader.getSourcesDetails();
+    }
+    
+    @Override 
+    public DownloadPiecesInfo getPieceInfo() {
+        return downloader.getPieceInfo();
     }
 
     @Override

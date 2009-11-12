@@ -259,5 +259,15 @@ interface LibTorrent extends Library {
      * Sets the tracker proxy for tracker connections.
      */
     public WrapperStatus set_tracker_proxy(LibTorrentProxySetting proxySetting);
-
+    
+    /**
+	 * Passes back the states of each piece in the torrent.
+	 */
+    public WrapperStatus get_pieces_status(String sha1, LibTorrentPiecesInfo info);
+    
+    /**
+	 * Frees the memory consumed by the pieces data memory allocated by
+     * {@link #get_pieces_status()}
+	 */
+    public WrapperStatus free_pieces_info(LibTorrentPiecesInfo info);
 }

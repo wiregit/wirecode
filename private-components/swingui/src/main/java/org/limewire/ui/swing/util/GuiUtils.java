@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -38,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.util.OSUtils;
 
@@ -60,61 +62,102 @@ public class GuiUtils {
      */
     private static DateFormat DATETIME_FORMAT;
       
+    private interface Unit {
+        public String getFormatString();
+        public long getMagnitude();
+        public long getUnitValue();
+    }
+    
     /**
-     * Localizable constants.
+     * Shortcut for accessing the KB/s format string.  Should be avoided.
      */
-    public static String GENERAL_UNIT_BYTES;
-    public static String GENERAL_UNIT_KILOBYTES;
-    public static String GENERAL_UNIT_MEGABYTES;
-    public static String GENERAL_UNIT_GIGABYTES;
-    public static String GENERAL_UNIT_TERABYTES;
-    /* ambiguous name: means kilobytes/second, not kilobits/second! */
-    public static String GENERAL_UNIT_BPSEC;
-    public static String GENERAL_UNIT_KBPSEC;
-    public static String GENERAL_UNIT_MBPSEC;    
-    public static String GENERAL_UNIT_GBPSEC;    
-    public static String GENERAL_UNIT_TBPSEC; // Oh yes, maybe one day...
-   
+    public static String KBPERSEC_FORMAT = SpeedUnit.KBSEC.getFormatString();
+    
+    private enum SizeUnit implements Unit {
+        BYTES(I18nMarker.marktr("{0} bytes"), 1024, 1), // TODO: trn???
+        KILOBYTES(I18nMarker.marktr("{0} KB"), 0x100000, 0x400),
+        MEGABYTES(I18nMarker.marktr("{0} MB"), 0x40000000L, 0x100000),
+        GIGABYTES(I18nMarker.marktr("{0} GB"), 0x10000000000L, 0x40000000),
+        TERABYTES(I18nMarker.marktr("{0} TB"), Long.MAX_VALUE, 0x10000000000L);
 
+        private final String text;
+        private final long magnitude;
+        private final long unitValue;
+        
+        private SizeUnit(String text, long magnitude, long unitValue) {
+            this.text = text;
+            this.magnitude = magnitude;
+            this.unitValue = unitValue;
+        }
+
+        @Override
+        public String getFormatString() {
+            return text;
+        }
+        
+        @Override
+        public long getMagnitude() {
+            return magnitude;
+        }
+
+        @Override 
+        public long getUnitValue() {
+            return unitValue;
+        }
+    }
+    
+    private enum SpeedUnit implements Unit {
+        BPSEC(I18nMarker.marktr("{0} B/s"), 1024, 1), 
+        KBSEC(I18nMarker.marktr("{0} KB/s"), 0x100000, 0x400),
+        MBSEC(I18nMarker.marktr("{0} MB/s"), 0x40000000L, 0x100000),
+        GBSEC(I18nMarker.marktr("{0} GB/s"), 0x10000000000L, 0x40000000),
+        TBSEC(I18nMarker.marktr("{0} TB/s"), Long.MAX_VALUE, 0x10000000000L); // Oh yes, maybe one day...
+
+        private final String text;
+        private final long magnitude;
+        private final long unitValue;
+        
+        private SpeedUnit(String text, long magnitude, long unitValue) {
+            this.text = text;
+            this.magnitude = magnitude;
+            this.unitValue = unitValue;
+        }
+
+        @Override
+        public String getFormatString() {
+            return text;
+        }
+        
+        @Override
+        public long getMagnitude() {
+            return magnitude;
+        }
+
+        @Override 
+        public long getUnitValue() {
+            return unitValue;
+        }
+    }
+    
     static {       
         setLocale(Locale.getDefault());
     }
     
     static void setLocale(Locale locale) {
         NUMBER_FORMAT0 = NumberFormat.getNumberInstance(locale);
-        NUMBER_FORMAT0.setMaximumFractionDigits(0);
+        NUMBER_FORMAT0.setMaximumFractionDigits(1);
         NUMBER_FORMAT0.setMinimumFractionDigits(0);
         NUMBER_FORMAT0.setGroupingUsed(true);
+        NUMBER_FORMAT0.setRoundingMode(RoundingMode.HALF_UP);
         
         NUMBER_FORMAT1 = NumberFormat.getNumberInstance(locale);
         NUMBER_FORMAT1.setMaximumFractionDigits(2);
         NUMBER_FORMAT1.setMinimumFractionDigits(2);
         NUMBER_FORMAT1.setGroupingUsed(true);
+        NUMBER_FORMAT1.setRoundingMode(RoundingMode.HALF_UP);
 
         DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, 
                 DateFormat.DEFAULT, locale);
-        
-        GENERAL_UNIT_BYTES =
-            I18n.tr("bytes");
-        GENERAL_UNIT_KILOBYTES =
-            I18n.tr("KB");
-        GENERAL_UNIT_MEGABYTES =
-            I18n.tr("MB");
-        GENERAL_UNIT_GIGABYTES =
-            I18n.tr("GB");
-        GENERAL_UNIT_TERABYTES =
-            I18n.tr("TB");
-        
-        GENERAL_UNIT_BPSEC =
-            I18n.tr("B/s");
-        GENERAL_UNIT_KBPSEC =
-            I18n.tr("KB/s");
-        GENERAL_UNIT_MBPSEC =
-            I18n.tr("MB/s");
-        GENERAL_UNIT_GBPSEC =
-            I18n.tr("GB/s");
-        GENERAL_UNIT_TBPSEC =
-            I18n.tr("TB/s");
     }
     
     /**
@@ -144,12 +187,12 @@ public class GuiUtils {
      */
     public static String toKilobytes(long bytes) {
         if (bytes < 0)
-            return "? " + GENERAL_UNIT_KILOBYTES;
+            return I18n.tr(SizeUnit.KILOBYTES.getFormatString(), "?");
         long kbytes = bytes / 1024;
          // round to nearest multiple, or round up if size below 1024
         if ((bytes & 512) != 0 || (bytes > 0 && bytes < 1024)) kbytes++;
         // result formating, according to the current locale
-        return NUMBER_FORMAT0.format(kbytes) + GENERAL_UNIT_KILOBYTES;
+        return I18n.tr(SizeUnit.KILOBYTES.getFormatString(), NUMBER_FORMAT0.format(kbytes));
     }
     
     /**
@@ -165,32 +208,33 @@ public class GuiUtils {
      *         "B"/"KB"/"MB"/"GB"/TB" appended at the end. If the input value is
      *         negative, the string returned will be "? KB".
      */
-    public static String toUnitbytes(long bytes) {
-        if (bytes < 0) {
-            return "? " + GENERAL_UNIT_KILOBYTES;
+    public static String formatUnitFromBytes(long bytes) {
+        return toUnit(bytes, SizeUnit.values());
+    }
+    
+    private static boolean isInRange(long value, Unit unit) {
+        return value < unit.getMagnitude();
+    }
+    
+    private static String toUnit(long value, Unit[] unitSet) {
+        if (value < 0) {
+            return I18n.tr(SizeUnit.KILOBYTES.getFormatString(), "?");
         }
-        long   unitValue; // the multiple associated with the unit
-        String unitName;  // one of localizable units
         
-        if (bytes < 1024) {
-            unitName = GENERAL_UNIT_BYTES;
-            unitValue = 1;
-        } else if (bytes < 0x100000) {                // below 1MB, use KB
-            unitValue = 0x400;
-            unitName = GENERAL_UNIT_KILOBYTES;
-        } else if (bytes < 0x40000000L) {     // below 1GB, use MB
-            unitValue = 0x100000;
-            unitName = GENERAL_UNIT_MEGABYTES;
-        } else if (bytes < 0x10000000000L) {   // below 1TB, use GB
-            unitValue = 0x40000000;
-            unitName = GENERAL_UNIT_GIGABYTES;
-        } else {                                // at least 1TB, use TB
-            unitValue = 0x10000000000L;
-            unitName = GENERAL_UNIT_TERABYTES;
+        long   unitValue = 1; // the multiple associated with the unit
+        String unitName = "?";  // one of localizable units
+        
+        for ( Unit unit : unitSet ) {
+            if (isInRange(value, unit)) {
+                unitValue = unit.getUnitValue();
+                unitName = unit.getFormatString();
+                break;
+            }
         }
+        
         NumberFormat numberFormat; // one of localizable formats
         
-        if(bytes <  0x100000) {
+        if(value <  0x100000) {
             numberFormat = NUMBER_FORMAT0;
         } else {
             // return a minimum "100.0xB", and maximum "999.9xB"
@@ -198,28 +242,27 @@ public class GuiUtils {
         }
         
         try {
-            return numberFormat.format((double)bytes / unitValue) + " " + unitName;
+            return I18n.tr(unitName, numberFormat.format((double)value / unitValue));
         } catch(ArithmeticException ae) {
-            return "0 " + unitName;
+            return I18n.tr(unitName, 0);
             // internal java error, just return 0.
         }
     }
-    
     /**
      * Converts the passed in number of bytes into a byte-size string.
      * The returned String is always a locale-dependant thousand separated
      * String of bytes.
      */
-    public static String toBytes(long bytes) {
+    public static String formatBytes(long bytes) {
         if (bytes < 0) {
-            return "? " + GENERAL_UNIT_KILOBYTES;
+            return I18n.tr(SizeUnit.BYTES.getFormatString(), "?");
         }
         
         NumberFormat numberFormat = NUMBER_FORMAT0;
         try {
-            return numberFormat.format(bytes) + " " + GENERAL_UNIT_BYTES;
+            return I18n.tr(SizeUnit.BYTES.getFormatString(), numberFormat.format(bytes));
         } catch(ArithmeticException ae) {
-            return "0 " + GENERAL_UNIT_BYTES;
+            return I18n.tr(SizeUnit.BYTES.getFormatString(), 0);
             // internal java error, just return 0.
         }
     }
@@ -227,48 +270,12 @@ public class GuiUtils {
     /**
      * Converts an rate into a human readable and localized KB/s speed.
      */
-    public static String rate2speed(double rate) {
-        return NUMBER_FORMAT0.format(rate) + " " + GENERAL_UNIT_KBPSEC;
+    public static String formatKilobytesPerSec(double rate) {
+        return I18n.tr(SpeedUnit.KBSEC.getFormatString(), NUMBER_FORMAT0.format(rate));
     }
     
-    public static String rate2UnitSpeed(double rate) {
-        if (rate < 0) {
-            return "? " + GENERAL_UNIT_KBPSEC;
-        }
-        long   unitValue; // the multiple associated with the unit
-        String unitName;  // one of localizable units
-        
-        if (rate < 1024) {
-            unitName = GENERAL_UNIT_BPSEC;
-            unitValue = 1;
-        } else if (rate < 0x100000) {                // below 1MB, use KB
-            unitValue = 0x400;
-            unitName = GENERAL_UNIT_KBPSEC;
-        } else if (rate < 0x40000000L) {     // below 1GB, use MB
-            unitValue = 0x100000;
-            unitName = GENERAL_UNIT_MBPSEC;
-        } else if (rate < 0x10000000000L) {   // below 1TB, use GB
-            unitValue = 0x40000000;
-            unitName = GENERAL_UNIT_GBPSEC;
-        } else {                                // at least 1TB, use TB
-            unitValue = 0x10000000000L;
-            unitName = GENERAL_UNIT_TBPSEC;
-        }
-        NumberFormat numberFormat; // one of localizable formats
-        
-        if(rate <  0x100000) {
-            numberFormat = NUMBER_FORMAT0;
-        } else {
-            // return a minimum "100.0xB", and maximum "999.9xB"
-            numberFormat = NUMBER_FORMAT1; // localized "#,##0.00"
-        }
-        
-        try {
-            return numberFormat.format(rate / unitValue) + " " + unitName;
-        } catch(ArithmeticException ae) {
-            return "0 " + unitName;
-            // internal java error, just return 0.
-        }
+    public static String formatUnitFromBytesPerSec(long bytesPerSec) {
+        return toUnit(bytesPerSec, SpeedUnit.values());
     }
     
     /**

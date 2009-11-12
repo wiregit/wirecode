@@ -73,14 +73,14 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
             // {3}: download source
             if(item.getDownloadSourceCount() == 0){
                 return I18n.tr("{0} of {1} ({2})",
-                        GuiUtils.toUnitbytes(item.getCurrentSize()), 
-                        GuiUtils.toUnitbytes(item.getTotalSize()),
-                        GuiUtils.rate2speed(item.getDownloadSpeed()));
+                        GuiUtils.formatUnitFromBytes(item.getCurrentSize()), 
+                        GuiUtils.formatUnitFromBytes(item.getTotalSize()),
+                        GuiUtils.formatKilobytesPerSec(item.getDownloadSpeed()));
             } else { 
                 return I18n.tr("{0} of {1} ({2}) from {3}",
-                    GuiUtils.toUnitbytes(item.getCurrentSize()), 
-                    GuiUtils.toUnitbytes(item.getTotalSize()),
-                    GuiUtils.rate2speed(item.getDownloadSpeed()), 
+                    GuiUtils.formatUnitFromBytes(item.getCurrentSize()), 
+                    GuiUtils.formatUnitFromBytes(item.getTotalSize()),
+                    GuiUtils.formatKilobytesPerSec(item.getDownloadSpeed()), 
                     getPeopleText(item));
             }
         case TRYING_AGAIN:
@@ -90,15 +90,15 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
                 return I18n.tr("Error downloading torrent");
              } else {
              	return I18n.tr("Stalled - {0} of {1}", 
-                    GuiUtils.toUnitbytes(item.getCurrentSize()),
-                    GuiUtils.toUnitbytes(item.getTotalSize()));
+                    GuiUtils.formatUnitFromBytes(item.getCurrentSize()),
+                    GuiUtils.formatUnitFromBytes(item.getTotalSize()));
              }
         case ERROR:         
             return I18n.tr("Unable to download: ") + I18n.tr(item.getErrorState().getMessage());
         case PAUSED:
             // {0}: current size, {1} total size
             return I18n.tr("Paused - {0} of {1}", 
-                    GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()));
+                    GuiUtils.formatUnitFromBytes(item.getCurrentSize()), GuiUtils.formatUnitFromBytes(item.getTotalSize()));
         case LOCAL_QUEUED:
             return getQueueTimeMessage(item.getRemainingTimeInState());
         case REMOTE_QUEUED:

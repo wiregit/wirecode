@@ -28,6 +28,7 @@ import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
@@ -2815,6 +2816,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
             return sources;
         }
+    }
+    
+    @Override
+    public DownloadPiecesInfo getPieceInfo() {
+    	//TODO: ...
+        return null;
     }
     
     public synchronized List<RemoteFileDesc> getRemoteFileDescs() {

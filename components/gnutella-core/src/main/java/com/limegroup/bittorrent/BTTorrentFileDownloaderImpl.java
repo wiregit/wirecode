@@ -22,6 +22,7 @@ import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
@@ -480,5 +481,10 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Override
     public File getTorrentFile() {
         return torrentFile;
+    }
+
+    @Override
+    public DownloadPiecesInfo getPieceInfo() {
+        return null;
     }
 }

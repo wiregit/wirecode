@@ -22,7 +22,7 @@ public class FileSizeRenderer extends DefaultLimeTableCellRenderer {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
         if (value instanceof Long) {
-            setText(GuiUtils.toUnitbytes((Long)value)); 
+            setText(GuiUtils.formatUnitFromBytes((Long)value)); 
         } else 
             setText("");
         return this;

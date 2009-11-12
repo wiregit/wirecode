@@ -75,7 +75,7 @@ class FileInfoBittorrentOverviewPanel implements FileInfoPanel {
             totalSize += entry.getSize();
         }
         component.add(createLabel(I18n.tr("Size:")), "split 2");
-        component.add(createLabelField(GuiUtils.toUnitbytes(totalSize) + "  (" + GuiUtils.toBytes(totalSize) + ")"), "growx, wrap");
+        component.add(createLabelField(GuiUtils.formatUnitFromBytes(totalSize) + "  (" + GuiUtils.formatBytes(totalSize) + ")"), "growx, wrap");
         component.add(createLabel(I18n.tr("# files:")), "split 2");
         component.add(createLabelField(Integer.toString(torrent.getTorrentFileEntries().size())), "growx, wrap");
     }

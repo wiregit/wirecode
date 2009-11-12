@@ -276,4 +276,6 @@ public interface Torrent {
      */
     public Lock getLock();
 
+    public String getPieceInfo();
+
 }
