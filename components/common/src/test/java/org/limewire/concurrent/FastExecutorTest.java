@@ -29,7 +29,7 @@ public class FastExecutorTest extends BaseTestCase {
      * Make sure that if a task is scheduled in LimeScheduledThreadPoolExecutor,
      * uncaught exceptions are handled by ErrorService. 
      */
-    public void testUncheckedExceptionIsReportedFastExecutor() throws Exception {
+    public void testUncheckedExceptionIsReported() throws Exception {
         ScheduledExecutorService t = new LimeScheduledThreadPoolExecutor(1, 
             ExecutorsHelper.daemonThreadFactory("FastExecutor"));
         t.scheduleWithFixedDelay(new Runnable() {
@@ -45,9 +45,27 @@ public class FastExecutorTest extends BaseTestCase {
     
     /**
      * Make sure that if a task is scheduled in LimeScheduledThreadPoolExecutor,
+     * but has been cancelled, that it is NOT reported to ErrorService. 
+     */
+    public void testCancelledTaskIsNotReported() throws Exception {
+        ScheduledExecutorService t = new LimeScheduledThreadPoolExecutor(1, 
+            ExecutorsHelper.daemonThreadFactory("FastExecutor"));
+        Future future = t.scheduleWithFixedDelay(new Runnable() {
+            @Override public void run() {
+                throw new RuntimeException();    
+            }
+        }, 20, 50, TimeUnit.MILLISECONDS);
+        future.cancel(false);
+        Thread.sleep(30);
+        t.shutdown();
+        assertEquals(0, errorCallback.getExceptionCount());
+    }
+    
+    /**
+     * Make sure that if a task is scheduled in LimeScheduledThreadPoolExecutor,
      * and a checked exception is thrown, it is NOT reported to ErrorService. 
      */
-    public void testCallableCheckedExceptionIsNotReportedFastExecutor() throws Exception {
+    public void testCallableCheckedExceptionIsNotReported() throws Exception {
         ScheduledExecutorService t = new LimeScheduledThreadPoolExecutor(1, 
             ExecutorsHelper.daemonThreadFactory("FastExecutor"));
         Future result = t.schedule(new Callable<Object>() {
