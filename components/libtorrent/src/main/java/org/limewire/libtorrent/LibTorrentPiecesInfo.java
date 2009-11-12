@@ -1,6 +1,6 @@
 package org.limewire.libtorrent;
 
-import org.limewire.core.api.download.DownloadPiecesInfo.PieceState;
+import org.limewire.bittorrent.TorrentPieceState;
 
 import com.sun.jna.Structure;
 
@@ -14,19 +14,19 @@ public class LibTorrentPiecesInfo extends Structure implements Structure.ByRefer
     private static final char PIECE_UNAVAILABLE = 'u';
     private static final char PIECE_QUEUED = 'q';
     
-    public static PieceState getPieceState(char c) {
+    public static TorrentPieceState getPieceState(char c) {
         switch (c) {
             case PIECE_DOWNLOADED :
-                return PieceState.DOWNLOADED;
+                return TorrentPieceState.DOWNLOADED;
             case PIECE_PARTIAL :
-                return PieceState.PARTIAL;
+                return TorrentPieceState.PARTIAL;
             case PIECE_PENDING :
-                return PieceState.PENDING;
+                return TorrentPieceState.PENDING;
             case PIECE_ACTIVE :
             case PIECE_QUEUED :
-                return PieceState.ACTIVE;
+                return TorrentPieceState.ACTIVE;
             case PIECE_UNAVAILABLE :
-                return PieceState.UNAVAILABLE;
+                return TorrentPieceState.UNAVAILABLE;
             default :
                 throw new IllegalArgumentException("Unknown Piece Descriptor: " + c);
         }

@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent;
 
+import org.limewire.bittorrent.TorrentPieceState;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.libtorrent.LibTorrentPiecesInfo;
 
@@ -22,11 +23,28 @@ class BTDownloadPiecesInfo implements DownloadPiecesInfo {
             }
         }
         
-        return LibTorrentPiecesInfo.getPieceState(piecesInfo.charAt(piece));
+        return convertPieceState(LibTorrentPiecesInfo.getPieceState(piecesInfo.charAt(piece)));
     }
 
     @Override
     public int getNumPieces() {
         return piecesInfo.length();
+    }
+    
+    private static PieceState convertPieceState(TorrentPieceState state) {
+        switch(state) {
+            case ACTIVE :
+                return PieceState.ACTIVE;
+            case DOWNLOADED :
+                return PieceState.DOWNLOADED;
+            case PARTIAL :
+                return PieceState.PARTIAL;
+            case PENDING :
+                return PieceState.PENDING;
+            case UNAVAILABLE :
+                return PieceState.UNAVAILABLE;
+            default:
+                throw new IllegalArgumentException("Unknown TorrentPieceState: " + state);
+        }
     }
 }
