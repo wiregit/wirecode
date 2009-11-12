@@ -223,7 +223,7 @@ public final class FileChooser {
                     // attempt to get the folder using the native widget, if jna fails,
                     // fallback to the Swing FileChooser
                     try {
-                        WindowsFolderChooser folder = new WindowsFolderChooser(parent, titleKey, false, false, directory.getAbsolutePath());
+                        WindowsFolderChooser folder = new WindowsFolderChooser(parent, titleKey, false, true, directory.getAbsolutePath());
                         String path = folder.showWidget();
                         if(path != null && path.length() > 0) {
                             File file = new File(path);
