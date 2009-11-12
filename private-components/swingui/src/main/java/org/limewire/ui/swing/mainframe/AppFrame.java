@@ -172,6 +172,22 @@ public class AppFrame extends SingleFrameApplication {
         delayedShutdownHandler.install(this);
         
         addExitListener(new TrayExitListener(trayNotifier));
+        // On OS X clicking the x in a window doesn't normally close an application.  It just closes the 
+        // window while the application sits in the dock with a light under it showing that it's still running.
+        if (OSUtils.isMacOSX()) {
+            addExitListener(new ExitListener() {
+                @Override
+                public boolean canExit(EventObject event) {
+                    hide(getMainView());
+                    return false;
+                }
+
+                @Override
+                public void willExit(EventObject event) {
+                }
+                
+            });
+        }
         addExitListener(new ShutdownListener(getMainFrame(), application));
         
         framePositioner.initialize(getMainFrame());
