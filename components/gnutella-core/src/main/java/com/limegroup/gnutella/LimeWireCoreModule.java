@@ -3,13 +3,13 @@ package com.limegroup.gnutella;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -378,7 +378,7 @@ public class LimeWireCoreModule extends AbstractModule {
     
     private static final String FAST = "fastExecutor";
     @Provides @LazySingleton @Named(FAST) ScheduledExecutorService fastSES() {
-        return new ScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("FastExecutor")); 
+        return new LimeScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("FastExecutor")); 
     }
     @Provides @LazySingleton @Named(FAST) ExecutorService fastES(@Named(FAST) ScheduledExecutorService ses) {
         return ses;
