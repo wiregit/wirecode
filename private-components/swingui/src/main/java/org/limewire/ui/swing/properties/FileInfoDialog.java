@@ -109,7 +109,7 @@ public class FileInfoDialog extends LimeJDialog {
         //  a minimised modal dialogue can't be restored.  The dialogue
         //  disappears and control can never be restored to the rest of the
         //  app.  Stopping resizability prevents this problem.
-   //     setModalityType(ModalityType.APPLICATION_MODAL);
+        setModalityType(ModalityType.APPLICATION_MODAL);
         
         pack();
 
