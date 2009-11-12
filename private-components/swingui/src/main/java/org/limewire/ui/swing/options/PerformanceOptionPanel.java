@@ -12,6 +12,7 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -93,7 +94,12 @@ public class PerformanceOptionPanel extends OptionPanel {
         
         if((tlsServerChanged || (upChanged && disableUltraPeerCheckBox.isSelected()) && isSupernode)) {
             if(tlsServerChanged && !disableTLS.isSelected()) {
-                networkManager.validateTLS();
+                BackgroundExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        networkManager.validateTLS();
+                    }
+                });
             }
             connectionManager.restart();
         }
