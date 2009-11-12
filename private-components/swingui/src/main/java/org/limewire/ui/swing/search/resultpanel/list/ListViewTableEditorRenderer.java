@@ -700,7 +700,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         public NoDancingHtmlLabel(){
             //prevents strange movement on mouseover
             setVerticalAlignment(JLabel.TOP);
-            setBorder(BorderFactory.createLineBorder(new Color(255,255,255,0), 3));
         }
         
         @Override
