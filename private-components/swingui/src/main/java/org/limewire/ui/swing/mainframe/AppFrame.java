@@ -178,8 +178,12 @@ public class AppFrame extends SingleFrameApplication {
             addExitListener(new ExitListener() {
                 @Override
                 public boolean canExit(EventObject event) {
-                    hide(getMainView());
-                    return false;
+                    if (event.getSource() instanceof JFrame) {
+                        hide(getMainView());
+                        return false;
+                    } else {
+                        return true;
+                    }
                 }
 
                 @Override
@@ -344,7 +348,7 @@ public class AppFrame extends SingleFrameApplication {
     }
     
     @Action
-    public void exitApplication(ActionEvent actionEvent) { // DO NOT CHANGE THIS METHOD NAME!  
+    public void exitApplication(ActionEvent actionEvent) { // DO NOT CHANGE THIS METHOD NAME!
         exit(actionEvent);
     }
     
