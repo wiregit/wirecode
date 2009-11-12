@@ -10,7 +10,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -515,7 +514,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         heading.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
         heading.setOpaque(false);
         heading.setFocusable(false);
-        heading.setMargin(new Insets(3, 0, 3, 3));
         StyleSheet mainStyle = ((HTMLDocument)heading.getDocument()).getStyleSheet();
         String rules = "body { font-family: " + headingFont.getFamily() + "; }" +
                 ".title { color: " + headingColor + "; font-size: " + headingFont.getSize() + "; }" +
@@ -524,14 +522,17 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         newStyle.addRule(rules);
         mainStyle.addStyleSheet(newStyle); 
         heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
-
-        heading.setBorder(BorderFactory.createLineBorder(new Color(255,255,255,0), 3));
+        // add an empty border around the label to keep it from dancing up and down on OS X
+        heading.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
+        // add an empty border around the label to keep it from dancing up and down on OS X
+        subheadingLabel.setBorder(BorderFactory.createEmptyBorder(3, 3, 1, 3));
 
         metadataLabel.setForeground(metadataLabelColor);
         metadataLabel.setFont(metadataFont);
+        metadataLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 3, 3));
 
         downloadSourceCount.setForeground(downloadSourceCountColor);
         downloadSourceCount.setFont(downloadSourceCountFont);
