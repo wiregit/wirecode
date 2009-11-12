@@ -32,6 +32,7 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class StorePanel extends JPanel {
+    private static final String LOGIN_COOKIE = "SPRING_SECURITY_REMEMBER_ME_COOKIE";
     private static final String STORE_DOMAIN = ".store.limewire.com";
     
     private final Browser browser;
@@ -117,9 +118,15 @@ public class StorePanel extends JPanel {
                 boolean loginCookieFound = isLoginCookie(cookieList);
                 
                 if (loggedIn) {
-                    // Reload current page.  This updates the page with cookies
-                    // that may have been loaded using the login dialog.
-                    browser.reload();
+                    // Reload current page, or load home page if we're on the
+                    // login page.  This updates the page with the cookies that 
+                    // were obtained using the login dialog.
+                    String url = browser.getUrl();
+                    if ((url != null) && (url.contains("LogIn"))) {
+                        loadDefaultUrl();
+                    } else {
+                        browser.reload();
+                    }
 
                 } else if (!loggedIn && loginCookieFound) {
                     // Remove browser cookies.
@@ -160,9 +167,13 @@ public class StorePanel extends JPanel {
      * Returns true if the specified cookie list contains the login cookie.
      */
     private boolean isLoginCookie(List<Cookie> cookieList) {
-        // TODO determine if login cookie is available
-        return true;
-    }
+        for (Cookie cookie : cookieList) {
+            if (LOGIN_COOKIE.equals(cookie.getName())) {
+                return true;
+            }
+        }
+        return false;
+   }
     
     /**
      * Action to handle cookies on successful login.

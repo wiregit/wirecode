@@ -56,7 +56,7 @@ public class StoreController {
      * Returns the URI text for the login page.
      */
     public String getLoginURI() {
-        return storeManager.getLoginURI();
+        return application.addClientInfoToUrl(storeManager.getLoginURI()) + "&isClient=true";
     }
     
     /**

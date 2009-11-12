@@ -211,7 +211,7 @@ public class StoreBrowserPanel extends Browser {
      */
     public void showLogin() {
         // Load login page into browser.
-        setPreferredSize(new Dimension(480, 480));
+        setPreferredSize(new Dimension(860, 600));
         load(storeController.getLoginURI());
         
         // Display dialog.
@@ -383,22 +383,18 @@ public class StoreBrowserPanel extends Browser {
 
         @Override
         public boolean isUrlValid(String url) {
-            
-            // TODO replace with actual condition
-            
-            return url.contains("loginSuccess");
+            return url.contains("store/app/pages/Home");
         }
 
         @Override
-        public void cookiesLoaded(List<Cookie> cookieList) {
-            // Save cookies.
-            storeController.login(cookieList);
-            
-            // Dismiss login dialog.
+        public void cookiesLoaded(final List<Cookie> cookieList) {
             SwingUtils.invokeNowOrLater(new Runnable() {
                 @Override
                 public void run() {
+                    // Dismiss login dialog.
                     disposeDialog();
+                    // Save cookies.
+                    storeController.login(cookieList);
                 }
             });
         }

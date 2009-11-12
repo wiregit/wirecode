@@ -80,8 +80,7 @@ public class CoreStoreManager implements StoreManager {
 
     @Override
     public String getLoginURI() {
-        // TODO implement
-        return null;
+        return "https://www.store.limewire.com/store/app/pages/account/LogIn/noDest/1/";
     }
 
     @Override
