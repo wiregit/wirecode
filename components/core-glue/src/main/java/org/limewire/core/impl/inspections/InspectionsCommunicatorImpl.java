@@ -245,8 +245,8 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
                 new InspectionSendingErrorHandler());
 
         @Override
-        public void inspectionsPerformed(final InspectionsSpec spec, final InspectionDataContainer insps) {
-            queueExec.submit(new SendToServer(spec, insps));
+        public synchronized void inspectionsPerformed(final InspectionsSpec spec, final InspectionDataContainer insps) {
+            queueExec.execute(new SendToServer(spec, insps));
         }
 
         @Override
