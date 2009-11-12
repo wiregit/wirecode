@@ -15,7 +15,7 @@ public class XPComDownloadImpl implements XPComDownload {
     public static String CONTRACT_ID = "@org.limewire/XPComDownload;1";
     
     @Override
-    public void download(String url) {
+    public void download(String fileName, String url, long size) {
         // TODO
     }
 

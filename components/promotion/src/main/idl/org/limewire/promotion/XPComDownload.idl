@@ -3,5 +3,5 @@
 [scriptable, uuid(5d2c98d5-bb57-41b0-af89-b5073005ef63)]
 interface XPComDownload : nsISupports
 {
-    void download(in AString url);
+    void download(in AString fileName, in AString url, in long size);
 };
