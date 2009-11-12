@@ -21,6 +21,7 @@ import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -125,8 +126,13 @@ public class BitTorrentOptionPanel extends OptionPanel {
         BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(chooseTorrentsCheckBox
                 .isSelected());
 
-        if (torrentManager.get().isValid()) {
-            torrentManager.get().setTorrentManagerSettings(torrentSettings);
+        if (torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
+            BackgroundExecutorService.execute(new Runnable() {
+              @Override
+                public void run() {
+                  torrentManager.get().setTorrentManagerSettings(torrentSettings);
+                }  
+            });
         }
         return false;
     }

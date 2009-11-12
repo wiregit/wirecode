@@ -21,6 +21,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.components.EmbeddedComponentLabel;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -60,7 +61,12 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         restart |= uploadPanel.applyOptions();
 
         if (torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
-            torrentManager.get().setTorrentManagerSettings(torrentSettings);
+            BackgroundExecutorService.execute(new Runnable() {
+               @Override
+                public void run() {
+                   torrentManager.get().setTorrentManagerSettings(torrentSettings);
+                } 
+            });
         }
         return restart;
     }
