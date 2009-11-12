@@ -15,6 +15,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -35,6 +36,8 @@ import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.listener.EventListener;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
@@ -52,6 +55,8 @@ import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<TorrentEvent> {
 
+    @Resource private Font selectFont;
+    
     public static final String TORRENT_FILE_ENTRY_SELECTED = "torrentFileEntrySelected";
     
     private static final int DONT_DOWNLOAD = 0;
@@ -78,6 +83,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     private PropertyChangeSupport support = new PropertyChangeSupport(this);
     
     public FileInfoBittorrentPanel(Torrent torrent) {
+        GuiUtils.assignResources(this);
         this.torrent = torrent;
 
         component = new JPanel(new MigLayout("fill"));
@@ -111,6 +117,19 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         table = new BitTorrentTable(new DefaultEventTableModel<TorrentFileEntryWrapper>(eventList,
                 new BitTorrentTableFormat()));
 
+        JLabel selectLabel = new JLabel(I18n.tr("Select"));
+        selectLabel.setFont(selectFont);
+        
+        HyperlinkButton allButton = new HyperlinkButton(new SelectAll(I18n.tr("all")));
+        allButton.setFont(selectFont);
+        
+        HyperlinkButton noneButton = new HyperlinkButton(new SelectNone(I18n.tr("none")));
+        noneButton.setFont(selectFont);
+        
+        component.add(selectLabel, "gapleft 5, gaptop 2, split 3");
+        component.add(allButton, "gapleft 6, gaptop 2");
+        component.add(noneButton, "gapleft 6, gaptop 2, wrap");
+        
         component.add(new JScrollPane(table), "grow");
 
         torrent.addListener(this);
@@ -130,11 +149,16 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
     @Override
     public void save() {
-        if (hasChanged() && !torrent.isFinished()) {
-            for (TorrentFileEntryWrapper wrapper : eventList) {
-                torrent.setTorrenFileEntryPriority(wrapper.getTorrentFileEntry(), wrapper
-                        .getPriority());
+        torrent.getLock().lock();
+        try {
+            if (hasChanged() && !torrent.isFinished() && torrent.isValid()) {
+                for (TorrentFileEntryWrapper wrapper : eventList) {
+                    torrent.setTorrenFileEntryPriority(wrapper.getTorrentFileEntry(), wrapper
+                            .getPriority());
+                }
             }
+        } finally {
+            torrent.getLock().unlock();
         }
     }
 
@@ -144,6 +168,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     }
 
     private class BitTorrentTable extends MouseableTable {
+        boolean torrentPartSelected = true;
         public BitTorrentTable(final DefaultEventTableModel<TorrentFileEntryWrapper> model) {
             super(model);
             setShowHorizontalLines(false);
@@ -151,8 +176,6 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
             setColumnSelectionAllowed(false);
             final CheckBoxRendererEditor checkBoxEditor = new CheckBoxRendererEditor();
             checkBoxEditor.addActionListener(new ActionListener() {
-                boolean torrentPartSelected = true;
-                
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (checkBoxEditor.getCellEditorValue() != null) {
@@ -161,25 +184,9 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
                         checkBoxEditor.cancelCellEditing();
                     }
                     
-                    if ( isAnyTorrentPartSelected() != torrentPartSelected )
-                    {
-                        torrentPartSelected = !torrentPartSelected;
-                        support.firePropertyChange(TORRENT_FILE_ENTRY_SELECTED, !torrentPartSelected, torrentPartSelected);
-                    }
+                    validateSelection();
                     
                     BitTorrentTable.this.repaint();
-                }
-                
-                private boolean isAnyTorrentPartSelected()
-                {
-                    for (int counter = 0; counter < model.getRowCount(); counter++)
-                    {
-                        TorrentFileEntryWrapper torrentFile = model.getElementAt(counter);
-                        if (torrentFile.getPriority() != 0)
-                            return true;
-                    }
-                    
-                    return false;
                 }
             });
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellRenderer(
@@ -219,6 +226,27 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
             getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setMaxWidth(60);
             getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setMinWidth(60);
+        }
+        
+        private void validateSelection() {
+            if ( isAnyTorrentPartSelected() != torrentPartSelected )
+            {
+                torrentPartSelected = !torrentPartSelected;
+                support.firePropertyChange(TORRENT_FILE_ENTRY_SELECTED, !torrentPartSelected, torrentPartSelected);
+            }
+        }
+        
+        @SuppressWarnings("unchecked")
+        private boolean isAnyTorrentPartSelected()
+        {
+            DefaultEventTableModel<TorrentFileEntryWrapper> model = (DefaultEventTableModel<TorrentFileEntryWrapper>)getModel();
+            for (int counter = 0; counter < model.getRowCount(); counter++)
+            {
+                TorrentFileEntryWrapper torrentFile = model.getElementAt(counter);
+                if (torrentFile.getPriority() != 0)
+                    return true;
+            }
+            return false;
         }
     }
 
@@ -527,6 +555,38 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
                     }
                 }
             });
+        }
+    }
+       
+    private final class SelectNone extends AbstractAction {
+        private SelectNone(String name) {
+            super(name);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            for (TorrentFileEntryWrapper wrapper : eventList) {
+                wrapper.setPriority(DONT_DOWNLOAD);
+            }
+            table.repaint();
+            table.validateSelection();
+        }
+    }
+
+    private final class SelectAll extends AbstractAction {
+        private SelectAll(String name) {
+            super(name);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            for (TorrentFileEntryWrapper wrapper : eventList) {
+                if(wrapper.getPriority() == DONT_DOWNLOAD) {
+                    wrapper.setPriority(LOWEST_PRIORITY);
+                }
+            }
+            table.repaint();
+            table.validateSelection();
         }
     }
 }

@@ -50,7 +50,7 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
         bittorrentPanel.addPropertyChangeListener(this);
         
         component.add(factory.createOverviewPanel(torrent).getComponent(), "growx, wrap");
-        component.add(createHeaderLabel(I18n.tr("Select files to download")), "gapleft 5, wrap");
+        component.add(createHeaderLabel(I18n.tr("Choose files to download")), "gapleft 5, wrap");
         component.add(bittorrentPanel.getComponent(), "grow");
         createFooter();
     }
