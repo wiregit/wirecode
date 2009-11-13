@@ -8,6 +8,7 @@ import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentPiecesInfo;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.inject.LazySingleton;
 import org.limewire.libtorrent.callback.AlertCallback;
@@ -434,21 +435,21 @@ class LibTorrentWrapper {
         LOG.debugf("after set_web_seed_proxy: {0}", proxySetting);
     }
        
-    public String get_pieces_status(String sha1) {
+    public TorrentPiecesInfo get_pieces_status(String sha1) {
         
         LibTorrentPiecesInfo info = new LibTorrentPiecesInfo(); 
-        info.read();
         
         LOG.debugf("before get_pieces_status: {0}", sha1);
         catchWrapperException(libTorrent.get_pieces_status(sha1, info));
         LOG.debugf("after get_pieces_status: {0}", sha1);
                 
-        String status = new String(info.piecesInfo);
+        TorrentPiecesInfo exportInfo = new TorrentPiecesInfo(new String(info.getStateInfo()),
+                info.getNumPiecesCompleted());
         
         LOG.debugf("before free_pieces_info");
-        //catchWrapperException(libTorrent.free_pieces_info(info));
+        catchWrapperException(libTorrent.free_pieces_info(info.getPointer()));
         LOG.debugf("after free_pieces_info");
         
-        return status;
+        return exportInfo;
     }
 }

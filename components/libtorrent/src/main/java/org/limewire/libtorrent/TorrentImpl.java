@@ -26,6 +26,7 @@ import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentPeer;
+import org.limewire.bittorrent.TorrentPiecesInfo;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.IOUtils;
@@ -548,7 +549,7 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public String getPieceInfo() {
+    public TorrentPiecesInfo getPiecesInfo() {
         return libTorrent.get_pieces_status(sha1);
     }
 }

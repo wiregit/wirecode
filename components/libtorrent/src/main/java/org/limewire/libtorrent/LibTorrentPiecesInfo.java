@@ -4,8 +4,9 @@ import org.limewire.bittorrent.TorrentPieceState;
 
 import com.sun.jna.Structure;
 
-public class LibTorrentPiecesInfo extends Structure implements Structure.ByReference {
-    public String piecesInfo;
+public class LibTorrentPiecesInfo extends Structure {
+    public int numPiecesCompleted;
+    public String stateInfo;
     
     private static final char PIECE_DOWNLOADED = 'x';
     private static final char PIECE_PARTIAL = 'p';
@@ -13,6 +14,14 @@ public class LibTorrentPiecesInfo extends Structure implements Structure.ByRefer
     private static final char PIECE_ACTIVE = 'a';
     private static final char PIECE_UNAVAILABLE = 'u';
     private static final char PIECE_QUEUED = 'q';
+
+    public String getStateInfo() {
+        return stateInfo;
+    }
+    
+    public int getNumPiecesCompleted() {
+        return numPiecesCompleted;
+    }
     
     public static TorrentPieceState getPieceState(char c) {
         switch (c) {

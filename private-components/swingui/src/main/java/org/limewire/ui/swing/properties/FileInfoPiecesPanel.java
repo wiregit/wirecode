@@ -4,9 +4,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -19,11 +22,15 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPiecesInfo;
+import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadPiecesInfo.PieceState;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -38,6 +45,8 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
 
     private static final PieceIntensity ACTIVE_INTENSITY = new PieceIntensity(PieceState.ACTIVE);
     private static final PieceIntensity UNAVAILABLE_INTENSITY = new PieceIntensity(PieceState.UNAVAILABLE);
+    
+    private final NumberFormat formatter = new DecimalFormat("0.00");
     
     /**
      * The shorter the cooler, the shorter the more performance intensive.
@@ -56,17 +65,31 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     private final Color partialForegroundInitial;
     private final Color partialForegroundFinal;
     
-    private DownloadPiecesInfo piecesInfo;
-    private int numPieces;
+    private final DownloadItem download;
+    private Torrent torrent = null;
     
     private final JPanel component;
-    private final PiecesGrid grid;
-    private final Timer refresher;
+ 
+    private PiecesGrid grid;
+    private Timer refresher;
+    
+    private DownloadPiecesInfo piecesInfo;
+    private int numPieces;
     private int coalesceFactor;
+    
     private int cachedColumns;
     private int cachedRows;
     
-    public FileInfoPiecesPanel(FileInfoType type, final DownloadItem propertiableFile) {
+    private JLabel numPiecesLabel;
+    private JLabel piecesPerCellLabel;
+    private JLabel piecesSizeLabel;
+    private JLabel ratioLabel;
+    private JLabel uploadedLabel;
+    private JLabel downloadedLabel;
+    private JLabel piecesCompletedLabel;
+    
+    public FileInfoPiecesPanel(FileInfoType type, final DownloadItem download) {
+        this.download = download;
         
         GuiUtils.assignResources(this);
         
@@ -76,20 +99,25 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         component = new JPanel(new MigLayout("insets 6 0 0 0"));
         component.setOpaque(false);
         
-        piecesInfo = propertiableFile.getPieceInfo();
+        piecesInfo = download.getPieceInfo();
         
         if (piecesInfo == null) {
             component.add(new JLabel(I18n.tr("No piece data available.")));
-            refresher = null;
-            grid = null;
             return;
         }
-        
+
         numPieces = piecesInfo.getNumPieces();
+        
+        numPiecesLabel = createLabel("" + numPieces);
+        piecesPerCellLabel = createLabel("");
+        piecesCompletedLabel = createLabel("");
+        piecesSizeLabel = createLabel(GuiUtils.formatUnitFromBytes(piecesInfo.getPieceSize()));
+        downloadedLabel = createLabel("");
+                
         grid = new PiecesGrid(0, 0);
         setupGrid();
 
-        final JPanel infoPanel = new JPanel(new MigLayout("nogrid, insets 0, gap 0"));
+        final JPanel infoPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
         infoPanel.setOpaque(false);
         
         JPanel legendPanel = new JPanel(new MigLayout("insets 8, gap 3"));
@@ -103,40 +131,85 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         legendPanel.add(createLabel(I18n.tr("Done")), "gapright 5");
         legendPanel.add(createLegendBox(unavailableForeground));
         legendPanel.add(createLabel(I18n.tr("Unavailable")), "wrap");
-        legendPanel.add(createLegendBox(partialForegroundInitial));
-        legendPanel.add(createLabel(I18n.tr("Partially Done")));
+        legendPanel.add(createLegendBox(new GradientPaint(0, 0, partialForegroundInitial, 0, 1, partialForegroundFinal)));
+        legendPanel.add(createLabel(I18n.tr("Partially Done")), "wrap");
         
-        // ....
-        infoPanel.add(legendPanel);
+        JPanel bottomLegend = new JPanel(new MigLayout("insets 0, gap 6, fillx"));
+        bottomLegend.setOpaque(false);
+        bottomLegend.add(createLabel(I18n.tr("Pieces per Cell:")), "dock center");
+        bottomLegend.add(piecesPerCellLabel, "dock center");
+        legendPanel.add(bottomLegend, "span");
         
+        JPanel rightPanel = new JPanel(new MigLayout("fillx, gap 0, insets 0"));
+        rightPanel.setOpaque(false);
+        rightPanel.add(legendPanel);
+        infoPanel.add(rightPanel, "dock east");
+        
+        infoPanel.add(createBoldLabel(I18n.tr("Number of Pieces:")), "split 2");
+        infoPanel.add(numPiecesLabel, "wrap");
+                
+        infoPanel.add(createBoldLabel(I18n.tr("Pieces Completed:")), "split 2");
+        infoPanel.add(piecesCompletedLabel, "wrap");
+        
+        infoPanel.add(createBoldLabel(I18n.tr("Piece Size:")), "split 2");
+        infoPanel.add(piecesSizeLabel, "wrap");
+        
+        infoPanel.add(createBoldLabel(I18n.tr("Downloaded:")), "split 2");
+        infoPanel.add(downloadedLabel, "wrap");
+        
+        if (download.getDownloadItemType() == DownloadItemType.BITTORRENT) {
+            torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
+        
+            uploadedLabel = createLabel("");
+            ratioLabel = createLabel("");
+            
+            infoPanel.add(createBoldLabel(I18n.tr("Uploaded:")), "split 2");
+            infoPanel.add(uploadedLabel, "wrap");
+            
+            infoPanel.add(createBoldLabel(I18n.tr("Ratio:")), "split 2");
+            infoPanel.add(ratioLabel, "wrap");
+        }
+                
         component.add(grid, "wrap");
         component.add(infoPanel, "growx");
         
         refresher = new Timer(REFRESH_DELAY, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                piecesInfo = propertiableFile.getPieceInfo();
+                piecesInfo = download.getPieceInfo();
                 int newNum = piecesInfo.getNumPieces();
-                if(newNum != numPieces) {
+                if(newNum != numPieces && newNum != 0) {
                     // if the number of pieces has changed, resize the grid.
                     numPieces = newNum;
+                    numPiecesLabel.setText("" + numPieces);
                     setupGrid();
-                }            
+                }
+                
+                // No pieces in view/finished.
+                // TODO: make less quirky 
+                if (newNum == 0) {
+                    refresher.stop();
+                }
+                
                 updateTable();
                 grid.repaint();
                 
                 // Hack to get the legends margin to line up with the table edge despite
-                //  resizing due to rounding.  NOTE: there will be a lag of refresh cycle. 
+                //  resizing due to rounding.  NOTE: there will be a lag of one refresh cycle. 
                 if (grid.isMarginUpdated()) {
                     int margin = grid.getInnerMargin();
                     if (margin != 0) {
                         infoPanel.setBorder(BorderFactory.createEmptyBorder(0, margin, 0, margin));
                     }
                 }
+                
+                updateDownloadDetails();
             }
         });
+        
         refresher.start();
         updateTable();
+        updateDownloadDetails();
 
     }
     
@@ -148,6 +221,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         if (requiredRows > MAX_NUM_ROWS) {
             coalesceFactor = (int)Math.ceil((double)numPieces / (MAX_NUM_ROWS*NUM_COLUMNS));
             numRows = (int)Math.ceil((double)numPieces / (coalesceFactor*NUM_COLUMNS));
+            piecesPerCellLabel.setText(""+coalesceFactor);
         }
         
         grid.resizeGrid(numRows, NUM_COLUMNS);
@@ -169,12 +243,41 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         return panel;
     }
     
-    private Component createLabel(String text) {
+    private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setOpaque(false);
         label.setForeground(foreground);
         label.setFont(smallFont);
         return label;
+    }
+    
+    private JLabel createBoldLabel(String text) {
+        JLabel label = createLabel(text);
+        FontUtils.bold(label);
+        return label;
+    }
+    
+    private void updateDownloadDetails() {
+        // TODO: remove this logic after cleaning up lib torrent completed state.
+        int completed = piecesInfo.getNumPiecesCompleted();
+        String completedText;
+        if (completed == -2) {
+            completedText = "" + numPieces;  
+        } 
+        else if (completed == -1) {
+            completedText = "unknown!";
+        } 
+        else {
+            completedText = "" + completed;
+        }
+        
+        downloadedLabel.setText(GuiUtils.formatUnitFromBytes(download.getCurrentSize()));
+        piecesCompletedLabel.setText(completedText);        
+        
+        if (torrent != null) {
+            uploadedLabel.setText(GuiUtils.formatUnitFromBytes(torrent.getTotalUploaded()));
+            ratioLabel.setText(formatter.format(torrent.getSeedRatio()));
+        }
     }
     
     private void updateTable() {
@@ -186,9 +289,9 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
             
             int cellsAvailable = grid.getCells();
             coalesceFactor = (int)Math.ceil((double)numPieces / cellsAvailable);
+            piecesPerCellLabel.setText(""+coalesceFactor);
         }
         
-        boolean allDownloaded = true;
         int gridSlot = 0;
         
         for ( int i=0 ; i<numPieces ; i+=coalesceFactor ) {
@@ -200,12 +303,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                 piecesToCoalesce = numPiecesLeft;
             }
             
-            PieceState[] states = new PieceState[piecesToCoalesce];
-            for ( int coalesceIndex=0 ; coalesceIndex < piecesToCoalesce ; coalesceIndex++ ) {
-                states[coalesceIndex] = piecesInfo.getPieceState(i+coalesceIndex);
-            }
-            
-            PieceIntensity cumulativePieceIntensity = coalescePieceStates(states); 
+            PieceIntensity cumulativePieceIntensity = coalescePieceStates(piecesInfo, i, piecesToCoalesce); 
             PieceState cumulativeState = cumulativePieceIntensity.getState();
             
             switch (cumulativeState) {
@@ -229,16 +327,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                     throw new IllegalStateException(cumulativeState.toString());
             }
             
-            // TODO: this might need to get smarter if not all pieces are shown on complete
-            if (cumulativeState != PieceState.DOWNLOADED) {
-                allDownloaded = false;
-            }
-            
             grid.setPaint(gridSlot++, pieceForeground);
-        }
-        
-        if (allDownloaded) {
-            refresher.stop();
         }
     }
     
@@ -265,14 +354,15 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         refresher.stop();
     }
     
-    private static PieceIntensity coalescePieceStates(PieceState ... states) {
+    private static PieceIntensity coalescePieceStates(DownloadPiecesInfo piecesInfo, int startIndex, int piecesToCoalesce) {
         
         // +1 for partial, +2 for done, 0 for available
         int completedScore = 0;
                 
         PieceState workingState = null;
         
-        for ( PieceState state : states ) {
+        for ( int i=startIndex ; i < startIndex+piecesToCoalesce ; i++ ) {
+            PieceState state = piecesInfo.getPieceState(i);
             if (state == PieceState.ACTIVE) {
                 return ACTIVE_INTENSITY;
             }
@@ -298,7 +388,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         }
         
         if (workingState == PieceState.PARTIAL) {
-            int completedScoreMax = states.length*2;
+            int completedScoreMax = piecesToCoalesce*2;
             return new PieceIntensity(workingState, (double)completedScore/completedScoreMax);
         } else {
             return new PieceIntensity(workingState);

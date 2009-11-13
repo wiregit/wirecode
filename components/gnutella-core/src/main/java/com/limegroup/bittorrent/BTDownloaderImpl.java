@@ -637,7 +637,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadPiecesInfo getPieceInfo() {
-        return new BTDownloadPiecesInfo(torrent.getPieceInfo());
+        return new BTDownloadPiecesInfo(torrent);
     }
     
     @Override

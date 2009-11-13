@@ -269,5 +269,5 @@ interface LibTorrent extends Library {
 	 * Frees the memory consumed by the pieces data memory allocated by
      * {@link #get_pieces_status()}
 	 */
-    public WrapperStatus free_pieces_info(LibTorrentPiecesInfo info);
+    public WrapperStatus free_pieces_info(Pointer pointer);
 }

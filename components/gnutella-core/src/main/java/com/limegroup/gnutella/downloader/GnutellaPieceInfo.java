@@ -56,4 +56,15 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
         
     }
 
+    @Override
+    public long getPieceSize() {
+        return pieceSize;
+    }
+
+    @Override
+    public int getNumPiecesCompleted() {
+        // TODO: ...
+        return -1;
+    }
+
 }
