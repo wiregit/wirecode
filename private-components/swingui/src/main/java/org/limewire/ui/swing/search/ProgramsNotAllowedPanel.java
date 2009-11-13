@@ -24,12 +24,12 @@ public class ProgramsNotAllowedPanel extends JPanel {
         if (OSUtils.isMacOSX()) {
             message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
                     " using LimeWire. However, you can enable downloading programs via Preferences > " +
-                    "Search > Search Filtering.")+"</html>");
+                    "Search > Configure...")+"</html>");
         }
         else {
             message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
         		" using LimeWire. However, you can enable downloading programs via Tools > Options > " +
-        		"Search > Search Filtering.")+"</html>");
+        		"Search > Configure...")+"</html>");
         }
         
         messageComponent.decorateHeaderLabel(title);
