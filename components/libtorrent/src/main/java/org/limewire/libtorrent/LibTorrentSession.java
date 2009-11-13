@@ -515,8 +515,7 @@ public class LibTorrentSession implements TorrentManager {
     public void setPeerProxy(ProxySetting proxy) {
         validateLibrary();
         LibTorrentProxySetting proxySetting = null;
-        if (proxy != null && proxy.getType() != null && proxy.getType() != ProxySettingType.HTTP
-                && proxy.getType() != ProxySettingType.HTTP_PW) {
+        if (proxy != null) {
             proxySetting = new LibTorrentProxySetting(proxy);
         } else {
             proxySetting = LibTorrentProxySetting.nullProxy();
@@ -533,8 +532,7 @@ public class LibTorrentSession implements TorrentManager {
     public void setDHTProxy(ProxySetting proxy) {
         validateLibrary();
         LibTorrentProxySetting proxySetting = null;
-        if (proxy != null && proxy.getType() != null && proxy.getType() != ProxySettingType.HTTP
-                && proxy.getType() != ProxySettingType.HTTP_PW) {
+        if (proxy != null) {
             proxySetting = new LibTorrentProxySetting(proxy);
         } else {
             proxySetting = LibTorrentProxySetting.nullProxy();
