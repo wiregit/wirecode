@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.properties;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -8,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EventObject;
 import java.util.List;
 
@@ -23,12 +26,14 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.decorator.SortKey;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentEventType;
@@ -42,15 +47,21 @@ import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
+import org.limewire.ui.swing.util.EventListJXTableSorting;
+import org.limewire.ui.swing.util.EventListTableSortFormat;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<TorrentEvent> {
@@ -72,6 +83,8 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     private final JPanel component;
 
     private BitTorrentTable table;
+    
+    private EventListJXTableSorting tableSorting;
 
     /**
      * Items in the eventList are expected to be in the order that they are
@@ -86,7 +99,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         GuiUtils.assignResources(this);
         this.torrent = torrent;
 
-        component = new JPanel(new MigLayout("fill"));
+        component = new JPanel(new MigLayout("fill", "[grow]", "[][grow]"));
 
         init();
     }
@@ -108,14 +121,21 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
                 .beanConnector(TorrentFileEntryWrapper.class);
         eventList = GlazedListsFactory.observableElementList(
                 new BasicEventList<TorrentFileEntryWrapper>(), torrentFileEntryConnector);
-
+        
         List<TorrentFileEntry> fileEntries = torrent.getTorrentFileEntries();
         for (TorrentFileEntry entry : fileEntries) {
             eventList.add(new TorrentFileEntryWrapper(entry));
         }
+
         
-        table = new BitTorrentTable(new DefaultEventTableModel<TorrentFileEntryWrapper>(eventList,
-                new BitTorrentTableFormat()));
+        // NOTE: this sortedList should never be used for iterating over torrent values, its strictly used to
+        // sort the table
+        SortedList<TorrentFileEntryWrapper> sortedList = GlazedListsFactory.sortedList(eventList, null);
+        
+        BitTorrentTableFormat tableFormat = new BitTorrentTableFormat();
+        table = new BitTorrentTable(new DefaultEventTableModel<TorrentFileEntryWrapper>(sortedList, tableFormat));
+        
+        tableSorting = EventListJXTableSorting.install(table, sortedList, tableFormat);
 
         JLabel selectLabel = new JLabel(I18n.tr("Select"));
         selectLabel.setFont(selectFont);
@@ -130,8 +150,11 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         component.add(allButton, "gapleft 6, gaptop 2");
         component.add(noneButton, "gapleft 6, gaptop 2, wrap");
         
-        component.add(new JScrollPane(table), "grow");
-
+        JScrollPane scrollPane = new JScrollPane(table);
+        configureEnclosingScrollPane(scrollPane);
+        
+        component.add(scrollPane, "grow");
+        
         torrent.addListener(this);
     }
 
@@ -164,7 +187,22 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
     @Override
     public void dispose() {
+        tableSorting.uninstall();
         torrent.removeListener(this);
+    }
+    
+    /**
+     * Fills in the top right corner if a scrollbar appears with an empty table
+     * header.
+     */
+    protected void configureEnclosingScrollPane(JScrollPane scrollPane) {
+        JTableHeader th = new JTableHeader();
+        th.setDefaultRenderer(new TableCellHeaderRenderer());
+        // Put a dummy header in the upper-right corner.
+        final Component renderer = th.getDefaultRenderer().getTableCellRendererComponent(null, "", false, false, -1, -1);
+        JPanel cornerComponent = new JPanel(new BorderLayout());
+        cornerComponent.add(renderer, BorderLayout.CENTER);
+        scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, cornerComponent);
     }
 
     private class BitTorrentTable extends MouseableTable {
@@ -179,8 +217,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (checkBoxEditor.getCellEditorValue() != null) {
-                        checkBoxEditor.getCellEditorValue().setPriority(
-                                checkBoxEditor.isSelected() ? 1 : 0);
+                        checkBoxEditor.getCellEditorValue().setPriority(checkBoxEditor.isSelected() ? 1 : 0);
                         checkBoxEditor.cancelCellEditing();
                     }
                     
@@ -189,15 +226,13 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
                     BitTorrentTable.this.repaint();
                 }
             });
-            getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellRenderer(
-                    new CheckBoxRendererEditor());
+            getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellRenderer(new CheckBoxRendererEditor());
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellEditor(checkBoxEditor);
 
             getColumn(BitTorrentTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
 
             getColumn(BitTorrentTableFormat.PERCENT_INDEX).setCellRenderer(new PercentRenderer());
-            getColumn(BitTorrentTableFormat.NAME_INDEX).setCellRenderer(
-                    new DefaultLimeTableCellRenderer());
+            getColumn(BitTorrentTableFormat.NAME_INDEX).setCellRenderer(new DefaultLimeTableCellRenderer());
 
             final PriorityRendererEditor editor = new PriorityRendererEditor();
             editor.getButton().addActionListener(new ActionListener() {
@@ -229,19 +264,16 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         }
         
         private void validateSelection() {
-            if ( isAnyTorrentPartSelected() != torrentPartSelected )
-            {
+            if ( isAnyTorrentPartSelected() != torrentPartSelected ) {
                 torrentPartSelected = !torrentPartSelected;
                 support.firePropertyChange(TORRENT_FILE_ENTRY_SELECTED, !torrentPartSelected, torrentPartSelected);
             }
         }
         
         @SuppressWarnings("unchecked")
-        private boolean isAnyTorrentPartSelected()
-        {
+        private boolean isAnyTorrentPartSelected() {
             DefaultEventTableModel<TorrentFileEntryWrapper> model = (DefaultEventTableModel<TorrentFileEntryWrapper>)getModel();
-            for (int counter = 0; counter < model.getRowCount(); counter++)
-            {
+            for (int counter = 0; counter < model.getRowCount(); counter++) {
                 TorrentFileEntryWrapper torrentFile = model.getElementAt(counter);
                 if (torrentFile.getPriority() != 0)
                     return true;
@@ -250,21 +282,16 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         }
     }
 
-    private class BitTorrentTableFormat extends AbstractTableFormat<TorrentFileEntryWrapper> {
+    private class BitTorrentTableFormat extends AbstractTableFormat<TorrentFileEntryWrapper> implements EventListTableSortFormat, AdvancedTableFormat<TorrentFileEntryWrapper> {
 
         private static final int DOWNLOAD_INDEX = 0;
-
         private static final int NAME_INDEX = 1;
-
         private static final int SIZE_INDEX = 2;
-
         private static final int PERCENT_INDEX = 3;
-
         private static final int PRIORITY_INDEX = 4;
 
         public BitTorrentTableFormat() {
-            super(I18n.tr("DL"), I18n.tr("Name"), I18n.tr("Size"), I18n.tr("%"), I18n
-                    .tr("Priority"));
+            super(I18n.tr("DL"), I18n.tr("Name"), I18n.tr("Size"), I18n.tr("%"), I18n.tr("Priority"));
         }
 
         @Override
@@ -283,7 +310,134 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
             }
             throw new IllegalStateException("Unknown column:" + column);
         }
+        
+        @Override
+        public Comparator getColumnComparator(int column) {
+            switch(column) {
+            case DOWNLOAD_INDEX:
+                return new SelectedComparator();
+            case NAME_INDEX:
+                return new NameComparator();
+            case SIZE_INDEX:
+                return Objects.getComparator(true);
+            case PERCENT_INDEX:
+                return new PercentComparator();
+            case PRIORITY_INDEX:
+                return new PriorityComparator();
+            }
+            throw new IllegalStateException("Unknown column:" + column);
+        }
 
+        @Override
+        public List<SortKey> getDefaultSortKeys() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<SortKey> getPreSortColumns() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<Integer> getSecondarySortColumns(int column) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Class getColumnClass(int column) {
+            switch(column) {
+            case DOWNLOAD_INDEX:
+                return TorrentFileEntryWrapper.class;
+            case NAME_INDEX:
+                return String.class;
+            case SIZE_INDEX:
+                return Long.class;
+            case PERCENT_INDEX:
+                return TorrentFileEntryWrapper.class;
+            case PRIORITY_INDEX:
+                return TorrentFileEntryWrapper.class;
+            }
+            throw new IllegalStateException("Unknown column:" + column);
+        }
+    }
+    
+    /**
+     * Compares whether two TorrentFileEntries are selected or not. 
+     */
+    private class SelectedComparator implements Comparator<TorrentFileEntryWrapper> {
+        @Override
+        public int compare(TorrentFileEntryWrapper o1, TorrentFileEntryWrapper o2) {
+            boolean o1isSelected = getIsSelected(o1);
+            boolean o2isSelected = getIsSelected(o2);
+            
+            if(o1isSelected && o2isSelected)
+                return 0;
+            else if(o1isSelected)
+                return 1;
+            else 
+                return -1;
+        }
+        
+        private boolean getIsSelected(TorrentFileEntryWrapper wrapper) {
+            if (torrent.isFinished()) {
+                return wrapper.getProgress() == 1.0f && wrapper.getPriority() > DONT_DOWNLOAD;
+            } else if (wrapper.getProgress() == 1.0f) {
+                return true;
+            } else {
+                return wrapper.getPriority() != DONT_DOWNLOAD;
+            }
+        }
+    }
+    
+    /**
+     * Compares the Percent complete of two TorrentFileEntries. If the file is
+     * not being downloaded, any percent completed is ignored.
+     */
+    private class PercentComparator implements Comparator<TorrentFileEntryWrapper> {
+        @Override
+        public int compare(TorrentFileEntryWrapper o1, TorrentFileEntryWrapper o2) {
+            int o1Percent = (int) o1.getProgress() * 100;
+            int o2Percent = (int) o2.getProgress() * 100;
+            
+            if(o1.getPriority() == DONT_DOWNLOAD)
+                o1Percent = -1;
+            if(o2.getPriority() == DONT_DOWNLOAD)
+                o2Percent = -1;
+
+            return o1Percent - o2Percent;
+        }       
+    }
+    
+    /**
+     * Compares the Priority of two TorrentFileEntries. Completed torrents
+     * are considered higher priority than the max priority setting.
+     */
+    private class PriorityComparator implements Comparator<TorrentFileEntryWrapper> {
+        @Override
+        public int compare(TorrentFileEntryWrapper o1, TorrentFileEntryWrapper o2) {
+            int o1Priority = getPriority(o1);
+            int o2Priority = getPriority(o2);
+            
+            return o1Priority - o2Priority;
+        }
+        
+        private int getPriority(TorrentFileEntryWrapper wrapper) {
+            if (wrapper.getProgress() == 1.0f) {
+                return 4;
+            } else {
+                return wrapper.getPriority();
+            }
+        }
+    }
+    
+    /**
+     * Comapares the path/filename of two TorrentFileEntries.
+     */
+    private class NameComparator implements Comparator<String> {
+        @Override
+        public int compare(String o1, String o2) {
+            return o1.compareToIgnoreCase(o2);
+        }
     }
 
     private class CheckBoxRendererEditor extends JCheckBox implements TableCellRenderer,

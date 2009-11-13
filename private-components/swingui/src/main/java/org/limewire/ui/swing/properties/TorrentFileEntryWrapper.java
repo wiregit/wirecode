@@ -16,14 +16,16 @@ public class TorrentFileEntryWrapper {
 
     private TorrentFileEntry entry;
     private int priority;
+    private final String subPath; 
     
     public TorrentFileEntryWrapper(TorrentFileEntry entry) {
         this.entry = entry;
         this.priority = entry.getPriority();
+        this.subPath = getSubPath(entry.getPath());
     }
     
     public String getPath() {
-        return entry.getPath();
+        return subPath;
     }
     
     public long getSize() {
@@ -62,5 +64,18 @@ public class TorrentFileEntryWrapper {
 
     public boolean hasChanged() {
         return getPriority() != getTorrentFileEntry().getPriority();
+    }
+    
+    /**
+	 * Removes the torrent file name from the path to show
+     * only subdirectories and file names.
+	 */
+    private static String getSubPath(String path) {
+        int index = path.indexOf("/");
+        if(index >= 0 && index + 1 < path.length()) {
+            return path.substring(index + 1);
+        } else {
+            return path;
+        }
     }
 }

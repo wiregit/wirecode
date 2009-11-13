@@ -42,14 +42,14 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
     public TorrentSelectorPanel(Torrent torrent, FileInfoPanelFactory factory) {        
         GuiUtils.assignResources(this);
         
-        component = new JPanel(new MigLayout("fill, gap 0, insets 0, "));
+        component = new JPanel(new MigLayout("fill, gap 0, insets 0", "[grow]", "[][][grow][]"));
         component.setPreferredSize(new Dimension(440, 500));
         component.setBackground(backgroundColor);        
         
         bittorrentPanel = factory.createBittorentPanel(torrent);
         bittorrentPanel.addPropertyChangeListener(this);
         
-        component.add(factory.createOverviewPanel(torrent).getComponent(), "growx, wrap");
+        component.add(factory.createOverviewPanel(torrent).getComponent(), "growx, wrap, gapleft 5, gapright 5");
         component.add(createHeaderLabel(I18n.tr("Choose files to download")), "gapleft 5, wrap");
         component.add(bittorrentPanel.getComponent(), "grow");
         createFooter();
@@ -78,7 +78,7 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
         checkBox.setOpaque(false);
         checkBox.setSelected(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
         
-        JPanel footerPanel = new JPanel(new MigLayout("fill, insets 0 15 10 15"));
+        JPanel footerPanel = new JPanel(new MigLayout("fill, insets 0 10 10 15"));
         footerPanel.add(checkBox, "span, wrap");
         footerPanel.add(okButton, "alignx right, aligny bottom, split, tag ok");
         footerPanel.add(new JButton(new CancelAction()), "aligny bottom, tag cancel");
