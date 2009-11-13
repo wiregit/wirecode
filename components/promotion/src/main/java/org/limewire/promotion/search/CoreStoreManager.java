@@ -148,7 +148,8 @@ public class CoreStoreManager implements StoreManager {
                         // Get store results array.
                         StoreResults storeResults = readStoreResults(jsonObj);
                         
-                        StoreStyle style = getStyle(storeResults);
+                        //StoreStyle style = getStyle(storeResults);
+                        StoreStyle style = new StoreStyleAdapter(new JSONObject(storeConnection.loadStyle(storeResults.getRenderStyle())));
                         // Fire event to update style.
                         storeSearchListener.styleUpdated(style);
                         // Fire event to handle results.

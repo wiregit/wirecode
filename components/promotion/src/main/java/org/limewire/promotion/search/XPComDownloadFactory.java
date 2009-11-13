@@ -1,21 +1,27 @@
 package org.limewire.promotion.search;
 
+import org.limewire.core.api.file.CategoryManager;
 import org.mozilla.interfaces.nsIFactory;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.xpcom.IXPCOMError;
 import org.mozilla.xpcom.XPCOMException;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.DownloadServices;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+
+@Singleton
 public class XPComDownloadFactory implements nsISupports, nsIFactory {
-    private static XPComDownloadFactory instance = new XPComDownloadFactory();
-    
-    private XPComDownloadFactory() {
-    }
-    
-    /**
-     * Returns the singleton instance of XPComDownloadFactory.
-     */
-    public static XPComDownloadFactory getInstance() {
-        return instance;
+    private final CategoryManager categoryManager;
+    private final RemoteFileDescFactory remoteFileDescFactory;
+    private final DownloadServices downloadServices;
+
+    @Inject
+    public XPComDownloadFactory(CategoryManager categoryManager, RemoteFileDescFactory remoteFileDescFactory, DownloadServices downloadServices) {
+        this.categoryManager = categoryManager;
+        this.remoteFileDescFactory = remoteFileDescFactory;
+        this.downloadServices = downloadServices;
     }
     
     @Override
@@ -34,7 +40,7 @@ public class XPComDownloadFactory implements nsISupports, nsIFactory {
         if (!iid.equals(XPComDownload.XPCOMDOWNLOAD_IID) && !iid.equals(nsISupports.NS_ISUPPORTS_IID)) {
             throw new XPCOMException(IXPCOMError.NS_ERROR_INVALID_ARG);
         }
-        return new XPComDownloadImpl();
+        return new XPComDownloadImpl(categoryManager, remoteFileDescFactory, downloadServices);
     }
 
     @Override

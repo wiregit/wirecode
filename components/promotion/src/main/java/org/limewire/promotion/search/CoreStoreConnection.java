@@ -163,7 +163,7 @@ public class CoreStoreConnection implements StoreConnection {
     }
     
     private String buildStyleRequestURL(String styleId) throws UnsupportedEncodingException {
-        return storeAPIURL.get() + "/style?styleId=" + styleId + 
+        return storeAPIURL.get() + "/style?id=" + styleId + 
                 "&lv=" + application.getVersion() + 
                 "&guid=" + new GUID(applicationServices.getMyGUID()).toHexString();
     }

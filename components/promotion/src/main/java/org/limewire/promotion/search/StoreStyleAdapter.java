@@ -392,7 +392,7 @@ public class StoreStyleAdapter implements StoreStyle {
      * Retrieves the timestamp from the specified JSON object.
      */
     private long getTimestamp(JSONObject jsonObj) throws JSONException {
-        return getTimestamp(jsonObj.getString("timestamp"));
+        return getTimestamp(jsonObj.optString("timestamp"));
     }
     
     /**
