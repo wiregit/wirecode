@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.LibraryMediator;
@@ -26,11 +28,14 @@ class LibraryFileAdder {
 
     private final Provider<LibraryMediator> libraryMediator;
     private final Provider<LibraryNavigatorTable> libraryNavigatorTable;
+    private final CategoryManager categoryManager;
 
     @Inject
-    public LibraryFileAdder(Provider<LibraryMediator> libraryMediator, Provider<LibraryNavigatorTable> libraryNavigatorTable) {
+    public LibraryFileAdder(Provider<LibraryMediator> libraryMediator, Provider<LibraryNavigatorTable> libraryNavigatorTable,
+            CategoryManager categoryManager) {
         this.libraryMediator = libraryMediator;
         this.libraryNavigatorTable = libraryNavigatorTable;
+        this.categoryManager = categoryManager;
     }
     
     /**
@@ -39,12 +44,11 @@ class LibraryFileAdder {
      * they should be added also.
      */
     void addFilesInner(final LocalFileList fileList, final List<File> files, final FileFilter fileFilter) {
-        
         //only clear the filters if the library has been initialized
         if(libraryMediator.get().isInitialized()) {
             //only clear the filters if we are adding files to the same list that is being shown
             LibraryNavItem libraryNavItem = libraryNavigatorTable.get().getSelectedItem();
-            if(libraryNavItem != null && libraryNavItem.getLocalFileList() == fileList) {
+            if(libraryNavItem != null && libraryNavItem.getLocalFileList() == fileList && shouldClearFilter(files)) {
                 libraryMediator.get().clearFilters();
             }
         }
@@ -68,6 +72,28 @@ class LibraryFileAdder {
             FocusJOptionPane.showMessageDialog(null, getRejectedMessage(rejectedFiles), 
                     I18n.trn("File/Folder not added", "File(s)/Folder(s) not added", rejectedFiles.size()), JOptionPane.INFORMATION_MESSAGE);
         }     
+    }
+    
+    /**
+     * Returns true if this list of files contains directories, one or more files 
+     * that are not part of the selected category.
+     */
+    private boolean shouldClearFilter(List<File> files) {
+        Category category = libraryMediator.get().getComponent().getSelectedCategory();
+        boolean shouldClear = false;
+        for(File file : files) {
+            if(file.isDirectory()) {
+                shouldClear = true;
+                break;
+            }
+            
+            Category fileCategory = categoryManager.getCategoryForFile(file);
+            if(fileCategory != category) {
+                shouldClear = true;
+                break;
+            }
+        }
+        return shouldClear;
     }
     
     /**
