@@ -21,10 +21,8 @@ public class PiecesGrid extends JXPanel {
     private int columns;
     private Paint[] gridFillPaint;
     
-    public PiecesGrid(int rows, int columns) {
-        this.rows = rows;
-        this.columns = columns;
-        gridFillPaint = new Paint[rows*columns];
+    public PiecesGrid(int r, int c) {
+        resizeGrid(r, c);
     
         setBackgroundPainter(new GridPainter());
         
@@ -36,24 +34,32 @@ public class PiecesGrid extends JXPanel {
                     return;
                 }
                 
+                int newRows = rows;
+                int newColumns = columns;
                 if (e.getUnitsToScroll() < 0) {
-                    if (--PiecesGrid.this.columns < 4) {
-                        PiecesGrid.this.columns = 4;
+                    if (columns > 4) {
+                        newColumns = columns - 1;
                     }
-                    if (--PiecesGrid.this.rows < 4) {
-                        PiecesGrid.this.rows = 4;
+                    if (rows > 4) {
+                        newRows = rows - 1;
                     }
                 } else if (e.getUnitsToScroll() > 0) {
-                    if (++PiecesGrid.this.columns > 200) {
-                        PiecesGrid.this.columns = 200;
+                    if (columns < 200) {
+                        newColumns = columns + 1;
                     }
-                    if (++PiecesGrid.this.rows > 200 ) {
-                        PiecesGrid.this.rows = 200;
+                    if (rows < 200 ) {
+                        newRows = rows + 1;
                     }
                 }
-                gridFillPaint = new Paint[PiecesGrid.this.rows*PiecesGrid.this.columns];
+                resizeGrid(newRows, newColumns);
             }
         });
+    }
+    
+    void resizeGrid(int rows, int columns) {
+        this.rows = rows;
+        this.columns = columns;
+        this.gridFillPaint = new Paint[rows*columns];
     }
     
     public int getRows() {

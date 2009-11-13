@@ -3,7 +3,7 @@ package org.limewire.core.api.download;
 public interface DownloadPiecesInfo {
 
   public enum PieceState {
-      DOWNLOADED, PARTIAL, PENDING, ACTIVE, UNAVAILABLE;
+      DOWNLOADED, PARTIAL, AVAILABLE, ACTIVE, UNAVAILABLE;
   }
   
   public PieceState getPieceState(int piece);

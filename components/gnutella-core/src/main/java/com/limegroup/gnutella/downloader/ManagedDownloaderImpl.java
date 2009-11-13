@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
+import org.limewire.collection.IntervalSet;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.Category;
@@ -2818,10 +2819,33 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
     }
     
+    private synchronized IntervalSet getAvailablePieces() {
+        IntervalSet available = new IntervalSet();
+        long length = getContentLength();
+        for(DownloadWorker worker : _workers) {
+            RemoteFileDescContext context = getContext(worker.getRFD());
+            if(context.isPartialSource()) {
+                available.add(context.getAvailableRanges());                
+            } else if(length > 0) {
+                return IntervalSet.createSingletonSet(0, length);
+            }
+        }
+        return available;
+    }
+    
     @Override
     public DownloadPiecesInfo getPieceInfo() {
-    	//TODO: ...
-        return null;
+        IntervalSet written;
+        IntervalSet active;
+        VerifyingFile vfile = commonOutFile;
+        if(vfile == null) {
+            written = IntervalSet.createSingletonSet(0, 0);
+            active = IntervalSet.createSingletonSet(0, 0);
+        } else {
+            written = vfile.getDownloadedBlocks();
+            active = vfile.getLeasedBlocks();
+        }
+        return new GnutellaPieceInfo(written, active, getAvailablePieces(), getChunkSize(), getContentLength());
     }
     
     public synchronized List<RemoteFileDesc> getRemoteFileDescs() {

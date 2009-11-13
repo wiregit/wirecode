@@ -49,7 +49,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     @Resource private Color legendBackground = PainterUtils.TRASPARENT;
     
     @Resource private Color downloadedForeground;
-    @Resource private Color pendingForeground;
+    @Resource private Color availableForeground;
     @Resource private Color activeForeground;
     @Resource private Color unavailableForeground;
     
@@ -70,8 +70,8 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         
         GuiUtils.assignResources(this);
         
-        partialForegroundInitial = createShade(pendingForeground, downloadedForeground, .1);
-        partialForegroundFinal = createShade(downloadedForeground, pendingForeground, .1);
+        partialForegroundInitial = createShade(availableForeground, downloadedForeground, .1);
+        partialForegroundFinal = createShade(downloadedForeground, availableForeground, .1);
         
         component = new JPanel(new MigLayout("insets 6 0 0 0"));
         component.setOpaque(false);
@@ -86,21 +86,8 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         }
         
         numPieces = piecesInfo.getNumPieces();
-        
-        int requiredRows = (int)Math.ceil((double)numPieces / NUM_COLUMNS);
-        int numRows = requiredRows;
-        
-        coalesceFactor = 1;
-        if (requiredRows > MAX_NUM_ROWS) {
-            coalesceFactor = (int)Math.ceil((double)numPieces / (MAX_NUM_ROWS*NUM_COLUMNS));
-            numRows = (int)Math.ceil((double)numPieces / (coalesceFactor*NUM_COLUMNS));
-        }
-        
-        grid = new PiecesGrid(numRows, NUM_COLUMNS);
-        grid.setAlignmentX(Component.CENTER_ALIGNMENT);
-        grid.setAlignmentY(Component.CENTER_ALIGNMENT);
-        ResizeUtils.forceSize(grid, new Dimension(MAX_CELL_WIDTH*NUM_COLUMNS, 
-                                                  MAX_CELL_HEIGHT*numRows));
+        grid = new PiecesGrid(0, 0);
+        setupGrid();
 
         final JPanel infoPanel = new JPanel(new MigLayout("nogrid, insets 0, gap 0"));
         infoPanel.setOpaque(false);
@@ -110,7 +97,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         
         legendPanel.add(createLegendBox(activeForeground));
         legendPanel.add(createLabel(I18n.tr("Active")), "gapright 5");
-        legendPanel.add(createLegendBox(pendingForeground));
+        legendPanel.add(createLegendBox(availableForeground));
         legendPanel.add(createLabel(I18n.tr("Available")), "wrap");
         legendPanel.add(createLegendBox(downloadedForeground));
         legendPanel.add(createLabel(I18n.tr("Done")), "gapright 5");
@@ -129,6 +116,12 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 piecesInfo = propertiableFile.getPieceInfo();
+                int newNum = piecesInfo.getNumPieces();
+                if(newNum != numPieces) {
+                    // if the number of pieces has changed, resize the grid.
+                    numPieces = newNum;
+                    setupGrid();
+                }            
                 updateTable();
                 grid.repaint();
                 
@@ -145,6 +138,23 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         refresher.start();
         updateTable();
 
+    }
+    
+    private void setupGrid() {        
+        int requiredRows = (int)Math.ceil((double)numPieces / NUM_COLUMNS);
+        int numRows = requiredRows;
+        
+        coalesceFactor = 1;
+        if (requiredRows > MAX_NUM_ROWS) {
+            coalesceFactor = (int)Math.ceil((double)numPieces / (MAX_NUM_ROWS*NUM_COLUMNS));
+            numRows = (int)Math.ceil((double)numPieces / (coalesceFactor*NUM_COLUMNS));
+        }
+        
+        grid.resizeGrid(numRows, NUM_COLUMNS);
+        grid.setAlignmentX(Component.CENTER_ALIGNMENT);
+        grid.setAlignmentY(Component.CENTER_ALIGNMENT);
+        ResizeUtils.forceSize(grid, new Dimension(MAX_CELL_WIDTH*NUM_COLUMNS, 
+                                                  MAX_CELL_HEIGHT*numRows));
     }
     
     private static Component createLegendBox(Paint foreground) {
@@ -206,8 +216,8 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                     pieceForeground = createShade(partialForegroundInitial, partialForegroundFinal,
                             cumulativePieceIntensity.getIntensity());
                     break;
-                case PENDING :
-                    pieceForeground = pendingForeground;
+                case AVAILABLE :
+                    pieceForeground = availableForeground;
                     break;
                 case DOWNLOADED :
                     pieceForeground = downloadedForeground;
@@ -215,6 +225,8 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                 case UNAVAILABLE :
                     pieceForeground = unavailableForeground;
                     break;
+                default:
+                    throw new IllegalStateException(cumulativeState.toString());
             }
             
             // TODO: this might need to get smarter if not all pieces are shown on complete
@@ -255,7 +267,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     
     private static PieceIntensity coalescePieceStates(PieceState ... states) {
         
-        // +1 for partial, +2 for done, 0 for pending
+        // +1 for partial, +2 for done, 0 for available
         int completedScore = 0;
                 
         PieceState workingState = null;
@@ -318,7 +330,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     }   
     
     private static Color createShade(Color initialShade, Color finalShade, double intensity) {
-       int redDelta = finalShade.getRed() - initialShade.getRed();
+        int redDelta = finalShade.getRed() - initialShade.getRed();
         int greenDelta = finalShade.getGreen() - initialShade.getGreen();
         int blueDelta = finalShade.getBlue() - initialShade.getBlue();
         

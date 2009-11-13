@@ -538,7 +538,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
      * backed off of is new.
      */
     @Override
-    public IntervalSet clone() throws CloneNotSupportedException {
+    public IntervalSet clone() {
         IntervalSet ret = new IntervalSet();
         for(Range interval : this)
             // access the internal TreeSet directly, - it's faster that way.

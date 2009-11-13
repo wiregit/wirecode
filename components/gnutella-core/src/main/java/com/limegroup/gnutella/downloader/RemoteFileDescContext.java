@@ -98,11 +98,7 @@ public class RemoteFileDescContext {
      * Accessor for the available ranges.
      */
     public IntervalSet getAvailableRanges() {
-        try {
-            return availableRanges.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+        return availableRanges.clone();
     }
 
     /**

@@ -21,7 +21,7 @@ public class LibTorrentPiecesInfo extends Structure implements Structure.ByRefer
             case PIECE_PARTIAL :
                 return TorrentPieceState.PARTIAL;
             case PIECE_PENDING :
-                return TorrentPieceState.PENDING;
+                return TorrentPieceState.AVAILABLE;
             case PIECE_ACTIVE :
             case PIECE_QUEUED :
                 return TorrentPieceState.ACTIVE;

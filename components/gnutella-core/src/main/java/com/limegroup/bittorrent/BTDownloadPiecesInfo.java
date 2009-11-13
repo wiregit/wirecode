@@ -39,8 +39,8 @@ class BTDownloadPiecesInfo implements DownloadPiecesInfo {
                 return PieceState.DOWNLOADED;
             case PARTIAL :
                 return PieceState.PARTIAL;
-            case PENDING :
-                return PieceState.PENDING;
+            case AVAILABLE :
+                return PieceState.AVAILABLE;
             case UNAVAILABLE :
                 return PieceState.UNAVAILABLE;
             default:

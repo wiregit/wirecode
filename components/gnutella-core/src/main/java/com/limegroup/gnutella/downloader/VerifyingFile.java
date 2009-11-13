@@ -773,6 +773,21 @@ public class VerifyingFile {
             }
         }
     }
+    
+    synchronized IntervalSet getDownloadedBlocks() {
+        IntervalSet full = new IntervalSet();
+        full.add(verifiedBlocks);
+        full.add(partialBlocks);
+        full.add(pendingBlocks);
+        if(!discardBad) {
+            full.add(savedCorruptBlocks);
+        }
+        return full;
+    }
+    
+    synchronized IntervalSet getLeasedBlocks() {
+        return leasedBlocks.clone();
+    }
         
     /**
      * iterates through the pending blocks and checks if the recent write has created
@@ -789,12 +804,7 @@ public class VerifyingFile {
         int chunkSize = getChunkSize();
         
         if(fullScan) {
-            IntervalSet temp = null;
-            try {
-                temp = partialBlocks.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
+            IntervalSet temp = partialBlocks.clone();
             temp.add(Range.createRange(0, existingFileSize));
             partial = temp.getAllIntervalsAsList();
         } else {
@@ -828,6 +838,10 @@ public class VerifyingFile {
         }
         
         return verifyable;
+    }
+    
+    long getCompletedSize() {
+        return completedSize;
     }
     
     /**

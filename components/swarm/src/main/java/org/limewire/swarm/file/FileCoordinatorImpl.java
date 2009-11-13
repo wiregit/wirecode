@@ -104,11 +104,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
             SwarmBlockSelector swarmSelector) {
         // Lease modifies, so clone.
         if (availableRanges != null) {
-            try {
-                availableRanges = availableRanges.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
+            availableRanges = availableRanges.clone();
         }
 
         IntervalSet neededBytes = new IntervalSet();
