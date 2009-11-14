@@ -34,7 +34,7 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
     @Override
     public PieceState getPieceState(int piece) {
         long pieceStart = piece * pieceSize;
-        long pieceEnd = Math.min(pieceStart + pieceSize, Math.max(0, length-1));
+        long pieceEnd = Math.max(0, Math.min(pieceStart + pieceSize, length)-1);
         Range range = Range.createRange(pieceStart, pieceEnd);
         PieceState state;
         
