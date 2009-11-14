@@ -74,7 +74,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     private Timer refresher;
     
     private DownloadPiecesInfo piecesInfo;
-    private int numPieces;
+    private int numPieces = -1;
     private int coalesceFactor;
     
     private int cachedColumns;
@@ -105,17 +105,15 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
             component.add(new JLabel(I18n.tr("No piece data available.")));
             return;
         }
-
-        numPieces = piecesInfo.getNumPieces();
         
-        numPiecesLabel = createLabel("" + numPieces);
+        numPiecesLabel = createLabel("");
         piecesPerCellLabel = createLabel("");
         piecesCompletedLabel = createLabel("");
-        piecesSizeLabel = createLabel(GuiUtils.formatUnitFromBytes(piecesInfo.getPieceSize()));
+        piecesSizeLabel = createLabel("");
         downloadedLabel = createLabel("");
                 
         grid = new PiecesGrid(0, 0);
-        setupGrid();
+        calculatePieceData();
 
         final JPanel infoPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
         infoPanel.setOpaque(false);
@@ -176,14 +174,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         refresher = new Timer(REFRESH_DELAY, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                piecesInfo = download.getPieceInfo();
-                int newNum = piecesInfo.getNumPieces();
-                if(newNum != numPieces && newNum != 0) {
-                    // if the number of pieces has changed, resize the grid.
-                    numPieces = newNum;
-                    numPiecesLabel.setText("" + numPieces);
-                    setupGrid();
-                }
+                int newNum = calculatePieceData();
                 
                 // No pieces in view/finished.
                 // TODO: make less quirky 
@@ -210,7 +201,17 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         refresher.start();
         updateTable();
         updateDownloadDetails();
-
+    }
+    
+    private int calculatePieceData() {
+        piecesInfo = download.getPieceInfo();
+        int newNum = piecesInfo.getNumPieces();
+        if(newNum != numPieces && newNum != 0) {
+            // if the number of pieces has changed, resize the grid.
+            numPieces = newNum;
+            setupGrid();
+        }
+        return newNum;
     }
     
     private void setupGrid() {        
@@ -272,7 +273,9 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         }
         
         downloadedLabel.setText(GuiUtils.formatUnitFromBytes(download.getCurrentSize()));
-        piecesCompletedLabel.setText(completedText);        
+        piecesCompletedLabel.setText(completedText);
+        numPiecesLabel.setText("" + numPieces);
+        piecesSizeLabel.setText("" + GuiUtils.formatUnitFromBytes(piecesInfo.getPieceSize()));        
         
         if (torrent != null) {
             uploadedLabel.setText(GuiUtils.formatUnitFromBytes(torrent.getTotalUploaded()));

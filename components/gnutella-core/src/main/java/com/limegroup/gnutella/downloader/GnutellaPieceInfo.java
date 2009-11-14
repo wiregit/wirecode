@@ -11,16 +11,18 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
     private final IntervalSet available;
     private final long pieceSize;
     private final int pieceCount;
+    private final long length;
     
     public GnutellaPieceInfo(IntervalSet written, IntervalSet active, IntervalSet available, long pieceSize, long length) {
         this.written = written;
         this.active = active;
         this.available = available;
         this.pieceSize = pieceSize;
+        this.length = length;
         if(length <= 0) {
             this.pieceCount = 0;
         } else {
-            this.pieceCount = (int)Math.min(Integer.MAX_VALUE, length / pieceSize);
+            this.pieceCount = (int)Math.min(Integer.MAX_VALUE, Math.ceil((double)length / pieceSize));
         }
     }
 
@@ -32,7 +34,7 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
     @Override
     public PieceState getPieceState(int piece) {
         long pieceStart = piece * pieceSize;
-        long pieceEnd = pieceStart + pieceSize;
+        long pieceEnd = Math.min(pieceStart + pieceSize, Math.max(0, length-1));
         Range range = Range.createRange(pieceStart, pieceEnd);
         PieceState state;
         
@@ -49,8 +51,6 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
         } else {
             state = PieceState.UNAVAILABLE;
         }
-        
-//        System.out.println("Getting piece #" + piece + "(" + pieceStart + ", " + pieceEnd + "], pieceSize: " + pieceSize + ", state: " + state + ", available: " + available);
         
         return state;
         
