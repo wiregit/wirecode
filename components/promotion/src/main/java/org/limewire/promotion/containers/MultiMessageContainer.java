@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
@@ -16,6 +17,9 @@ import org.limewire.util.StringUtils;
  */
 public class MultiMessageContainer extends MapMessageContainer {
     private static final String KEY_WRAPPED_BYTES = "W";
+    private final List<MessageContainer> list = new ArrayList<MessageContainer>();
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
+    private final Object parsingLock = new Object();
 
     public byte[] getType() {
         return StringUtils.toUTF8Bytes("MULT");
@@ -48,18 +52,21 @@ public class MultiMessageContainer extends MapMessageContainer {
      *         a new list with new instances of the wrapped messages
      */
     public List<MessageContainer> getWrappedMessages() {
-        final List<MessageContainer> list = new ArrayList<MessageContainer>();
-        final byte[] bytes = getWrappedBytes();
-        if (bytes.length > 0) {
-            final int[] nextOffset = new int[1];
-            int offset = 0;
-            final MessageContainerParser parser = new MessageContainerParser();
-            while (offset < bytes.length) {
-                try {
-                    list.add(parser.parse(new GGEP(bytes, offset, nextOffset)));
-                    offset = nextOffset[0];
-                } catch (BadGGEPBlockException ex) {
-                    throw new RuntimeException("Parsing error: ", ex);
+        synchronized (parsingLock) {
+            if(!initialized.getAndSet(true)) {
+                final byte[] bytes = getWrappedBytes();        
+                if (bytes.length > 0) {
+                    final int[] nextOffset = new int[1];
+                    int offset = 0;
+                    final MessageContainerParser parser = new MessageContainerParser();
+                    while (offset < bytes.length) {
+                        try {
+                            list.add(parser.parse(new GGEP(bytes, offset, nextOffset)));
+                            offset = nextOffset[0];
+                        } catch (BadGGEPBlockException ex) {
+                            throw new RuntimeException("Parsing error: ", ex);
+                        }
+                    }
                 }
             }
         }
