@@ -992,7 +992,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case REMOTE_QUEUED:
             case HASHING:
             case SAVING:
-            case IDENTIFY_CORRUPTION:
                 return true;
         }
         return false;

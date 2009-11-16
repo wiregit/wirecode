@@ -128,12 +128,9 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 put(DownloadState.WAITING_FOR_CONNECTIONS, "Waiting for connections");
                 put(DownloadState.ITERATIVE_GUESSING, "Iterative guessing");
                 put(DownloadState.QUERYING_DHT, "Querying DHT");
-                put(DownloadState.IDENTIFY_CORRUPTION, "Identify corruption");
-                put(DownloadState.RECOVERY_FAILED, "Recovery failed");
                 put(DownloadState.PAUSED, "Paused");
                 put(DownloadState.INVALID, "Invalid");
                 put(DownloadState.RESUMING, "Resuming");
-                put(DownloadState.FETCHING, "Fetching");
                 put(DownloadState.DANGEROUS, "Dangerous file");
                 
                 assert isComplete();

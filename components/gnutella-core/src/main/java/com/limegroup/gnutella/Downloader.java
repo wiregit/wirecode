@@ -291,12 +291,9 @@ public interface Downloader extends BandwidthTracker,
         WAITING_FOR_CONNECTIONS,
         ITERATIVE_GUESSING,
         QUERYING_DHT,
-        IDENTIFY_CORRUPTION,
-        RECOVERY_FAILED,
         PAUSED,
         INVALID,
         RESUMING,
-        FETCHING,
         DANGEROUS,
     }
 }

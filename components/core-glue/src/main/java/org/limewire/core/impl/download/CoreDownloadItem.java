@@ -53,13 +53,6 @@ class CoreDownloadItem implements DownloadItem {
     private volatile long cachedSize;
     private volatile boolean cancelled = false;
 
-    /**
-     * size in bytes. FINISHING state is only shown for files greater than this
-     * size.
-     */
-    // set to 0 to show FINISHING state regardless of size
-    private final long finishingThreshold = 0;
-
     private final QueueTimeCalculator queueTimeCalculator;
     private final FriendManager friendManager;
     private final DownloadItemType downloadItemType;
@@ -271,16 +264,16 @@ class CoreDownloadItem implements DownloadItem {
         switch (state) {
         case RESUMING:
                 return DownloadState.RESUMING;
+
         case SAVING:
         case HASHING:
-            if (getTotalSize() > finishingThreshold) {
+            if (getTotalSize() > 0) {
                 return DownloadState.FINISHING;
             } else {
                 return DownloadState.DONE;
             }
 
         case DOWNLOADING:
-        case FETCHING:// "FETCHING" is downloading .torrent file
             return DownloadState.DOWNLOADING;
 
         
@@ -317,8 +310,6 @@ class CoreDownloadItem implements DownloadItem {
 
         case DISK_PROBLEM:
         case CORRUPT_FILE:
-        case IDENTIFY_CORRUPTION: // or should this be FINISHING?  doesn't seem to be used
-        case RECOVERY_FAILED:
         case INVALID:
             return DownloadState.ERROR;
         default:
@@ -347,7 +338,6 @@ class CoreDownloadItem implements DownloadItem {
     public ErrorState getErrorState() {
         switch (downloader.getState()) {
         case CORRUPT_FILE:
-        case RECOVERY_FAILED:
             return ErrorState.CORRUPT_FILE;
         case DISK_PROBLEM:
             return ErrorState.DISK_PROBLEM;
