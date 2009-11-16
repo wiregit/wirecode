@@ -2,6 +2,8 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.JFrame;
+
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -23,7 +25,8 @@ public class AboutAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         // if the main frame is not visible on OS X when about is opened, then a zombie window popups up...
-        GuiUtils.getMainFrame().setVisible(true);
-        new AboutWindow(null, application).showDialog();
+        JFrame mainFrame = GuiUtils.getMainFrame();
+        mainFrame.setVisible(true);
+        new AboutWindow(mainFrame, application).showDialog();
     }
 }
