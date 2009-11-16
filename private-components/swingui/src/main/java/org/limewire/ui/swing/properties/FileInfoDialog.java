@@ -97,8 +97,10 @@ public class FileInfoDialog extends LimeJDialog {
         getContentPane().setBackground(backgroundColor);
 
         overviewPanel = (FileInfoOverviewPanel) fileInfoFactory.createOverviewPanel(type, propertiableFile);
-        add(overviewPanel.getComponent(), "growx, wrap");
-        add(tabPanel.getComponent(), "growx, wrap");
+        
+        add(overviewPanel.getComponent(), "dock north");
+        add(tabPanel.getComponent(), "dock north");
+        
         add(cardPanel, "gapleft 10, grow, gapright 10");
         createFooter();
     

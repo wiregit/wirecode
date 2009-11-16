@@ -85,7 +85,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         
         GuiUtils.assignResources(this);
         
-        component = new JXPanel(new MigLayout("fillx, gap 0, insets 10 10 16 14"));
+        component = new JXPanel(new MigLayout("fill, gap 0, insets 10 10 16 14"));
         component.setBackgroundPainter(barPainterFactory.createPopUpBarPainter());
         
         init();

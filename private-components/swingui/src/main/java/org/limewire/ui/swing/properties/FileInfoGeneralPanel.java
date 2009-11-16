@@ -33,6 +33,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -157,8 +158,11 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
 
         createLocation();
         
-        component.add(createHeaderLabel(I18n.tr("Hash")), "wrap");
-        component.add(createLabelField(propertiableFile.getUrn().toString()), "span, wrap");
+        URN urn = propertiableFile.getUrn();
+        if (urn != null) {
+            component.add(createHeaderLabel(I18n.tr("Hash")), "wrap");
+            component.add(createLabelField(propertiableFile.getUrn().toString()), "span, wrap");
+        }
     }
 
     /**
