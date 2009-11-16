@@ -218,7 +218,7 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
     /**
      * Adds positive numbers in the list together returning the sum. 
      */
-    public float addPositive(float... values) {
+    private float addPositive(float... values) {
         float sum = 0;
         for (float value : values) {
             if (value > 0) {
