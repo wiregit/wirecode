@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.callback;
 
 import java.awt.event.ActionEvent;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -126,9 +127,15 @@ public class GuiCallbackImpl implements GuiCallback {
     }
 
     @Override
-    public boolean promptTorrentFilePriorities(Torrent torrent) {
-        int result = TorrentDownloadSelector.showBittorrentSelector(torrent, fileInfoPanelFactory
-                .get());
-        return result == JOptionPane.OK_OPTION;
+    public boolean promptTorrentFilePriorities(final Torrent torrent) {
+        final AtomicInteger result = new AtomicInteger(JOptionPane.OK_OPTION);
+        SwingUtils.invokeNowOrWait(new Runnable() {
+            @Override
+            public void run() {
+                result.set(TorrentDownloadSelector.showBittorrentSelector(torrent, fileInfoPanelFactory
+                        .get()));
+            }
+        });
+        return result.get() == JOptionPane.OK_OPTION;
     }
 }
