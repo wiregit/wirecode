@@ -8,6 +8,7 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 
@@ -27,11 +28,11 @@ public class Modules {
                 Key injectorKey = Key.get(Injector.class);
                 Key stageKey = Key.get(Stage.class);
                 
-                for(Map.Entry<Key<?>, Binding<?>> entry : parent.getBindings().entrySet()) {
+                for(Map.Entry<Key<?>, Binding<?>> entry : parent.getAllBindings().entrySet()) {
                     Key key = entry.getKey();
                     Binding<?> binding = entry.getValue();
                     Scope scope = MoreScopes.getLinkedScope(binding);
-                    if(!key.equals(loggerKey) && !key.equals(injectorKey) && !key.equals(stageKey)) {
+                    if(!key.equals(loggerKey) && !key.equals(injectorKey) && !key.equals(stageKey) && !key.getTypeLiteral().getRawType().equals(Provider.class)) {
                         binder.bind(key).toProvider(binding.getProvider()).in(scope) ;
                     }
                 }

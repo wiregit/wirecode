@@ -1,6 +1,7 @@
 package org.limewire.ui;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,8 +27,10 @@ import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Scopes;
 
 public class AnnotationsCheckTest extends BaseTestCase {
@@ -91,7 +94,19 @@ public class AnnotationsCheckTest extends BaseTestCase {
         
         // and run through them all and make sure they work!
         Inspector inspector = injectorRef.get().getInstance(Inspector.class);
+        
+        Map<Key<?>, Binding<?>> preBindings = injectorRef.get().getAllBindings();
         runInspectorTests(inspector, results);
+        Map<Key<?>, Binding<?>> postBindings = injectorRef.get().getAllBindings();
+        
+        // We look at the difference in bindings before & after and fail if any
+        // bindings were added.  The idea here is that only things that were singletons
+        // should have been bound, so no new bindings should have been added.
+        // If a new binding was added, something either wasn't a singleton,
+        // wasn't bound, or was created twice!
+        Map<Key<?>, Binding<?>> diff = new HashMap<Key<?>, Binding<?>>(postBindings);
+        diff.keySet().removeAll(preBindings.keySet());
+        assertTrue("added bindings: " + diff, diff.isEmpty());
     }
     
     // This tests exists because the way LW starts, it uses two injectors --
@@ -134,7 +149,18 @@ public class AnnotationsCheckTest extends BaseTestCase {
         Inspector inspector = injectorRef.get().getInstance(Inspector.class);
         inspector.setInjector(injectorRef.get());
         
+        Map<Key<?>, Binding<?>> preBindings = injectorRef.get().getAllBindings();
         runInspectorTests(inspector, results);
+        Map<Key<?>, Binding<?>> postBindings = injectorRef.get().getAllBindings();
+
+        // We look at the difference in bindings before & after and fail if any
+        // bindings were added.  The idea here is that only things that were singletons
+        // should have been bound, so no new bindings should have been added.
+        // If a new binding was added, something either wasn't a singleton,
+        // wasn't bound, or was created twice!
+        Map<Key<?>, Binding<?>> diff = new HashMap<Key<?>, Binding<?>>(postBindings);
+        diff.keySet().removeAll(preBindings.keySet());
+        assertTrue("added bindings: " + diff, diff.isEmpty());
     }
 }
 
