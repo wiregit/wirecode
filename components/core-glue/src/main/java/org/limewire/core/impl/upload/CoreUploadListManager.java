@@ -186,7 +186,10 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
         //alert item that it really is finished so that getState() will be correct
         item.finish();
          
-        if (item.getState() == UploadState.DONE || item.getState() == UploadState.BROWSE_HOST_DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD || item.getState() == UploadState.CANCELED) {
+        if(item.getState() == UploadState.CANCELED) {
+            //cancelled items should be removed immediately
+            remove(item);
+        } else if (item.getState() == UploadState.DONE || item.getState() == UploadState.BROWSE_HOST_DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD) {
             if (SharingSettings.CLEAR_UPLOAD.getValue()) {
                 //Remove if auto-clear is enabled.
                 remove(item);
