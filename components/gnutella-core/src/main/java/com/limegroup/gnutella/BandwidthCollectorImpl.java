@@ -121,7 +121,7 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
         float torrentUploadBandwidth = calculateTorrentUpstreamBandwidth(torrents);
         float torrentUploadPayloadBandwidth = calculateTorrentUpstreamPayloadBandwidth(torrents);
 
-        int newUpstreamKiloBytesPerSec = (int) addPositive(uploadTrackerBandwidth, connectionManagerUploadBandwidth, torrentUploadBandwidth);
+        int newUpstreamKiloBytesPerSec = (int) addPositive(addPositive(uploadTrackerBandwidth, connectionManagerUploadBandwidth), torrentUploadBandwidth);
         int newUploaderKiloBytesPerSec = (int) addPositive(uploadTrackerBandwidth, torrentUploadPayloadBandwidth);
 
         uploadStat.addData(newUpstreamKiloBytesPerSec);
@@ -130,7 +130,7 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
         // TODO downstream kilobytes per sec is missing non payload torrent
         // bandwidth.
         int newDownstreamKiloBytesPerSec = (int) addPositive(downloadTrackerBandwidth, connectionManagerDownloadBandwidth);
-        int newDownloaderKiloBytesPerSec = (int) addPositive(downloadTrackerBandwidth);
+        int newDownloaderKiloBytesPerSec = (int) addPositive(0, downloadTrackerBandwidth);
 
         downloadStat.addData(newDownstreamKiloBytesPerSec);
         downloadHistogram.count(newDownstreamKiloBytesPerSec);
@@ -218,12 +218,13 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
     /**
      * Adds positive numbers in the list together returning the sum. 
      */
-    private float addPositive(float... values) {
+    private float addPositive(float one, float two) {
         float sum = 0;
-        for (float value : values) {
-            if (value > 0) {
-                sum += value;
-            }
+        if(one > 0) {
+            sum += one;
+        }
+        if(two > 0) {
+            sum += two;
         }
         return sum;
     }
