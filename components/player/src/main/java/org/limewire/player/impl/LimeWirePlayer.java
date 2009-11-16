@@ -1,6 +1,6 @@
 package org.limewire.player.impl;
 
-
+import static org.limewire.player.api.PlayerState.NO_SOUND_DEVICE;
 import static org.limewire.player.api.PlayerState.EOM;
 import static org.limewire.player.api.PlayerState.GAIN;
 import static org.limewire.player.api.PlayerState.PAUSED;
@@ -360,7 +360,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             playerState = PLAYING;
         } catch (IllegalArgumentException e ) {
             playerState = STOPPED;
-            notifyEvent(EOM, -1);
+            notifyEvent(NO_SOUND_DEVICE, -1);
         } catch (UnsupportedAudioFileException e) {
             playerState = STOPPED;
             notifyEvent(EOM, -1);

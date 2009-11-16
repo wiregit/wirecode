@@ -379,7 +379,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             
         } else if (playerState == PlayerState.PAUSED || playerState == PlayerState.SEEKING_PAUSED ||
                 playerState == PlayerState.EOM || playerState == PlayerState.STOPPED ||
-                playerState == PlayerState.UNKNOWN) {
+                playerState == PlayerState.UNKNOWN || playerState == PlayerState.NO_SOUND_DEVICE) {
             playButton.setVisible(true);
             pauseButton.setVisible(false);
             titleLabel.stop();

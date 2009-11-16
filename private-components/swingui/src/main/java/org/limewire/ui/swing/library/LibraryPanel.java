@@ -22,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -51,6 +52,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.player.api.PlayerState;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
@@ -75,6 +77,7 @@ import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingHacks;
+import org.limewire.util.OSUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -283,13 +286,18 @@ public class LibraryPanel extends JPanel {
             }
 
             @Override
-            public void stateChanged(PlayerState state) {
-                if ((state == PlayerState.STOPPED || state == PlayerState.EOM || state == PlayerState.UNKNOWN) 
+            public void stateChanged(final PlayerState state) {
+                if ((state == PlayerState.STOPPED || state == PlayerState.EOM || state == PlayerState.UNKNOWN || state == PlayerState.NO_SOUND_DEVICE) 
                         && libraryTable.isVisible() 
                         && isPlayable(libraryFilterPanel.getSelectedCategory())) {
                     SwingUtilities.invokeLater(new Runnable(){
                         public void run() {
                             libraryTable.repaint();
+                            
+                            // gives feedback to Windows 7 users when headphone/speaker jack is not plugged in.
+                            if(state == PlayerState.NO_SOUND_DEVICE && OSUtils.isWindows7()) {
+                                FocusJOptionPane.showConfirmDialog(null, I18n.tr("LimeWire could not play this file. There may not be a sound device installed on your computer or your speakers may not be plugged in."), I18n.tr("Problem Playing File"), JOptionPane.OK_CANCEL_OPTION); 
+                            }
                         }
                     });
                 }

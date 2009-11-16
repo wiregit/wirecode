@@ -57,5 +57,9 @@ public enum PlayerState {
     
     /** The player has reached the new song location.
      */
-    SEEKED;
+    SEEKED,
+    
+    /** The player cannot find a sound device to play this audio source with.
+    */
+    NO_SOUND_DEVICE;
 }
