@@ -58,13 +58,6 @@ public class BarPainterFactory {
     @Resource private Color downloadSummaryBarBorderBottom1 = PainterUtils.TRASPARENT;
     @Resource private Color downloadSummaryBarBorderBottom2 = PainterUtils.TRASPARENT;
     
-    @Resource private Color friendBarGradientTop = PainterUtils.TRASPARENT;
-    @Resource private Color friendBarGradientBottom = PainterUtils.TRASPARENT;
-    @Resource private Color friendBarBorderTop1 = PainterUtils.TRASPARENT;
-    @Resource private Color friendBarBorderTop2 = PainterUtils.TRASPARENT;
-    @Resource private Color friendBarBorderBottom1 = PainterUtils.TRASPARENT;
-    @Resource private Color friendBarBorderBottom2 = PainterUtils.TRASPARENT;
-    
     @Resource private Color popUpBarGradientTop = PainterUtils.TRASPARENT;
     @Resource private Color popUpBarGradientBottom = PainterUtils.TRASPARENT;
     @Resource private Color popUpBarBorderTop1 = PainterUtils.TRASPARENT;
@@ -89,13 +82,6 @@ public class BarPainterFactory {
                 new GradientPaint(0,0, specialHeaderBarGradientTop,0,1, specialHeaderBarGradientBottom), 
                 specialHeaderBarBorderTop1, specialHeaderBarBorderTop2,
                 specialHeaderBarBorderBottom1, specialHeaderBarBorderBottom2);
-    }
-    
-    public GenericBarPainter<JXPanel> createFriendsBarPainter() {
-        return new GenericBarPainter<JXPanel>(
-            new GradientPaint(0,0,friendBarGradientTop,0,1,friendBarGradientBottom), 
-            friendBarBorderTop1, friendBarBorderTop2, 
-            friendBarBorderBottom1, friendBarBorderBottom2);
     }
     
     public GenericBarPainter<JXPanel> createTopBarPainter() {
