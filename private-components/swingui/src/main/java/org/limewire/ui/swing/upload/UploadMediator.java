@@ -13,6 +13,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -28,9 +29,12 @@ import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.upload.table.UploadTableFactory;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
@@ -363,12 +367,62 @@ public class UploadMediator {
     }
     
     /**
+     * Cancels the specified upload item.  The method prompts the user to 
+     * cancel torrent uploads.  If <code>remove</code> is true, the cancelled 
+     * item is also removed from the list.
+     */
+    public void cancel(UploadItem uploadItem, boolean remove) {
+        boolean approved = true;
+        
+        // For torrents, determine cancel approval based on torrent status and
+        // user prompt.  There are various reasons the user will not want the 
+        // cancel to go through. 
+        // 1) If the torrent is still downloading, the upload cannot be cancelled 
+        //    without cancelling the download.
+        // 2) If the torrent is seeding, but the seed ratio is low, the user may 
+        //    wish to seed to at least 100% to be a good samaritan. 
+        if (uploadItem.getUploadItemType() == UploadItemType.BITTORRENT) {
+            if (!uploadItem.isStarted()) {
+                approved = false;
+            } else if (!uploadItem.isFinished()) {
+                approved = promptUser(I18n.tr("If you stop this upload, the torrent download will stop.  Are you sure you want to do this?"));
+            } else if (uploadItem.getSeedRatio() < 1.0f) {
+                approved = promptUser(I18n.tr("Are you sure you want to stop this upload?"));
+            }
+        }
+        
+        // Cancel upload if approved, and remove from list if specified.
+        if (approved) {
+            uploadItem.cancel();
+            if (remove) {
+                remove(uploadItem);
+            }
+        }
+    }
+    
+    /**
+     * Removes the specified upload item from the upload list.
+     */
+    public void remove(UploadItem uploadItem) {
+        uploadListManager.remove(uploadItem);
+    }
+    
+    /**
+     * Displays a Yes/No prompt to the user with the specified message, and 
+     * returns true if the user presses Yes.
+     */
+    private boolean promptUser(String message) {
+        return FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(), 
+                new MultiLineLabel(message, 400), I18n.tr("Uploads"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
+    
+    /**
      * Cancels all uploads.
      */
     public void cancelAll() {
         List<UploadItem> uploadList = new ArrayList<UploadItem>(getUploadList());
         for (UploadItem item : uploadList) {
-            item.cancel();
+            cancel(item, false);
         }
     }
     
@@ -378,7 +432,7 @@ public class UploadMediator {
     public void cancelAllError() {
         List<UploadItem> uploadList = new ArrayList<UploadItem>(getUploadList());
         for (UploadItem item : uploadList) {
-            if (item.getState() == UploadState.UNABLE_TO_UPLOAD) item.cancel();
+            if (item.getState() == UploadState.UNABLE_TO_UPLOAD) cancel(item, false);
         }
     }
     
@@ -388,7 +442,7 @@ public class UploadMediator {
     public void cancelAllTorrents() {
         List<UploadItem> uploadList = new ArrayList<UploadItem>(getUploadList());
         for (UploadItem item : uploadList) {
-            if (item.getUploadItemType() == UploadItemType.BITTORRENT) item.cancel();
+            if (item.getUploadItemType() == UploadItemType.BITTORRENT) cancel(item, false);
         }
     }
     

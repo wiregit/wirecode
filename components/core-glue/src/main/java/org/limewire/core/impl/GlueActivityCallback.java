@@ -273,24 +273,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public boolean promptTorrentUploadCancel(Torrent torrent) {
-        boolean approve = true;//default to true
-        if(guiCallback != null) {
-            if (!torrent.isStarted()) {
-                return false;
-            }
-            
-            if(!torrent.isFinished()) {
-                approve = guiCallback.promptUserQuestion(I18nMarker.marktr("If you stop this upload, the torrent download will stop. Are you sure you want to do this?"));
-            } else if (torrent.getSeedRatio() < 1.0f) {
-                approve = guiCallback.promptUserQuestion(I18nMarker.marktr("This upload is a torrent and it hasn\'t seeded enough. You should let it upload some more. Are you sure you want to stop it?"));
-            }
-        } 
-        
-        return approve;
-    }
-
-    @Override
     public boolean promptTorrentFilePriorities(Torrent torrent) {
         if(guiCallback != null && torrent.hasMetaData()) {
             return guiCallback.promptTorrentFilePriorities(torrent);

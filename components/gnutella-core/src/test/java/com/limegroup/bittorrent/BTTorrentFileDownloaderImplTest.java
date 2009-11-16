@@ -438,11 +438,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public boolean promptTorrentUploadCancel(Torrent torrent) {
-                return true;
-            }
-
-            @Override
             public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply,
                     Set<? extends IpPort> locs) {
                 

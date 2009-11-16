@@ -8,7 +8,6 @@ import java.util.Set;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
@@ -459,77 +458,5 @@ public class GlueActivityCallbackTest extends BaseTestCase {
         MessageService.setCallback(originalMessageCallback);
         
         context.assertIsSatisfied();
-    }
-    
-    public void testPromptTorrentUploadCancel() {
-        Mockery context = new Mockery() {{
-            setImposteriser(ClassImposteriser.INSTANCE);
-        }};
-
-        final GuiCallback guiCallbackYes = context.mock(GuiCallback.class);
-        final GuiCallback guiCallbackNo = context.mock(GuiCallback.class);
-        
-        final Torrent torrentNotComplete = context.mock(Torrent.class);
-        final Torrent torrentInactive = context.mock(Torrent.class);
-        final Torrent torrentLowRatio = context.mock(Torrent.class);
-        final Torrent torrentHighRatio = context.mock(Torrent.class);
-        
-        final GlueActivityCallback activityCallback = new GlueActivityCallback(null);
-        
-        context.checking(new Expectations() {{
-            allowing(guiCallbackYes).promptUserQuestion(with(any(String.class)));
-            will(returnValue(true));
-            allowing(guiCallbackNo).promptUserQuestion(with(any(String.class)));
-            will(returnValue(false));
-            
-            allowing(torrentInactive).isStarted();
-            will(returnValue(false));
-            
-            allowing(torrentNotComplete).isFinished();
-            will(returnValue(false));
-            allowing(torrentNotComplete).isStarted();
-            will(returnValue(true));
-            
-            allowing(torrentLowRatio).getSeedRatio();
-            will(returnValue(.5f));
-            allowing(torrentLowRatio).isFinished();
-            will(returnValue(true));
-            allowing(torrentLowRatio).isStarted();
-            will(returnValue(true));
-            
-            allowing(torrentHighRatio).getSeedRatio();
-            will(returnValue(1.5f));
-            allowing(torrentHighRatio).isFinished();
-            will(returnValue(true));
-            allowing(torrentHighRatio).isStarted();
-            will(returnValue(true));
-            
-        }});
-        
-        // Selecting yes with a torrent in progress should stop.
-        activityCallback.setGuiCallback(guiCallbackYes);        
-        assertTrue(activityCallback.promptTorrentUploadCancel(torrentNotComplete));
-        
-        // Selecting no with torrent not complete should not result in stop.
-        activityCallback.setGuiCallback(guiCallbackNo);
-        assertFalse(activityCallback.promptTorrentUploadCancel(torrentNotComplete));
-        
-        // Ensure an inactive torrent will not be stopped. 
-        activityCallback.setGuiCallback(guiCallbackYes);        
-        assertFalse(activityCallback.promptTorrentUploadCancel(torrentInactive));
-        
-        // Selecting yes with a torrent with a low ratio should stop.
-        activityCallback.setGuiCallback(guiCallbackYes);        
-        assertTrue(activityCallback.promptTorrentUploadCancel(torrentLowRatio));
-        
-        // Selecting no with torrent and a low ratio should not result in stop.
-        activityCallback.setGuiCallback(guiCallbackNo);
-        assertFalse(activityCallback.promptTorrentUploadCancel(torrentLowRatio));
-        
-        // The user should not be prompted if there is a high ratio the torrent should be stopped
-        activityCallback.setGuiCallback(guiCallbackNo);        
-        assertTrue(activityCallback.promptTorrentUploadCancel(torrentHighRatio));
-
-        context.assertIsSatisfied();        
     }
 }

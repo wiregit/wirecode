@@ -95,16 +95,13 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     @Override
     public void stop() {
-        // TODO refactor to prompt from the gui
-        if (activityCallback.promptTorrentUploadCancel(torrent)) {
-            new ManagedThread(new Runnable() {
-                @Override
-                public void run() {
-                    torrent.stop();
-                }
-            }, "BTUploader Stop Torrent").start();
-            cancel();
-        }
+        new ManagedThread(new Runnable() {
+            @Override
+            public void run() {
+                torrent.stop();
+            }
+        }, "BTUploader Stop Torrent").start();
+        cancel();
     }
 
     @Override
@@ -323,6 +320,13 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     @Override
     public float getSeedRatio() {
         return torrent.getSeedRatio();
+    }
+    
+    /**
+     * Returns the Torrent associated with this uploader. 
+     */
+    public Torrent getTorrent() {
+        return torrent;
     }
     
     @Override

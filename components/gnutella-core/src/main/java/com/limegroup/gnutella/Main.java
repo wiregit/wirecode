@@ -219,11 +219,6 @@ public class Main {
         }
 
         @Override
-        public boolean promptTorrentUploadCancel(Torrent torrent) {
-            return true;
-        }
-
-        @Override
         public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply,
                 Set<? extends IpPort> locs) {
             synchronized(System.out) {

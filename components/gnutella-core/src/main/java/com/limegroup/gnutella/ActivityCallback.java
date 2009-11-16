@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
-import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.i18n.I18nMarker;
@@ -101,15 +100,5 @@ public interface ActivityCallback extends DownloadCallback
      * user for a new save location or whether to overwrite the file. 
      */
     void handleDownloadException(DownloadAction downLoadAction, DownloadException e, boolean supportsNewSaveDir);
-    
-    /**
-     * Validates with the user that the torrent upload should be cancelled. 
-     * There are various reasons the user will not want the cancel to go through. 
-     * 1) If the torrent is still downloading, the upload cannot be cancelled 
-     *    without cancelling the download.
-     * 2) If the torrent is seeding, but the seed ratio is low, the user may 
-     *    wish to seed to at least 100% to be a good samaritan. 
-     */
-    boolean promptTorrentUploadCancel(Torrent torrent);
 
 }
