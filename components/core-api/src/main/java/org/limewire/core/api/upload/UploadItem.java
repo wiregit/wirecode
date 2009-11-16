@@ -112,6 +112,16 @@ public interface UploadItem extends PropertiableFile {
     public float getSeedRatio();
     
     /**
+     * Returns true if the upload is finished.
+     */
+    boolean isFinished();
+    
+    /**
+     * Returns true if the upload has started.
+     */
+    boolean isStarted();
+    
+    /**
      * Pauses the UploadeItem if possible.
      */
     public void pause();

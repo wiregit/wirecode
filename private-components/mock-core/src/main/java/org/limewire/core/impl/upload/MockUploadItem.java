@@ -218,6 +218,17 @@ public class MockUploadItem implements UploadItem {
     }
 
     @Override
+    public boolean isFinished() {
+        UploadState state = getState();
+        return (state == UploadState.DONE || state == UploadState.BROWSE_HOST_DONE);
+    }
+    
+    @Override
+    public boolean isStarted() {
+        return true;
+    }
+    
+    @Override
     public void pause() {
         
     }

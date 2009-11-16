@@ -351,6 +351,46 @@ class CoreUploadItem implements UploadItem {
         isFinished = true;
         fireDataChanged();
     }
+
+    @Override
+    public float getSeedRatio() {
+        return uploader.getSeedRatio();
+    }
+
+    @Override
+    public boolean isFinished() {
+        if (uploader instanceof BTUploader) {
+            // Return torrent indicator.
+            return ((BTUploader) uploader).getTorrent().isFinished();
+            
+        } else {
+            // Determine using state for non-torrents.
+            UploadState state = getState();
+            return (state == UploadState.DONE || state == UploadState.BROWSE_HOST_DONE);
+        }
+    }
+    
+    @Override
+    public boolean isStarted() {
+        if (uploader instanceof BTUploader) {
+            // Return torrent indicator.
+            return ((BTUploader) uploader).getTorrent().isStarted();
+            
+        } else {
+            // Always true for non-torrents.
+            return true;
+        }
+    }
+    
+    @Override
+    public void pause() {
+        uploader.pause();
+    }
+
+    @Override
+    public void resume() {
+        uploader.resume();        
+    }
     
     /**
      * Creates a RemoteHost for this uploader. This allows browses on the 
@@ -392,20 +432,5 @@ class CoreUploadItem implements UploadItem {
                 return friendPresence.hasFeatures(LimewireFeature.ID);
             }
         }
-    }
-
-    @Override
-    public float getSeedRatio() {
-        return uploader.getSeedRatio();
-    }
-
-    @Override
-    public void pause() {
-        uploader.pause();
-    }
-
-    @Override
-    public void resume() {
-        uploader.resume();        
     }
 }
