@@ -74,7 +74,7 @@ public class FileInfoDialog extends LimeJDialog {
     public FileInfoDialog(@Assisted PropertiableFile propertiable, @Assisted final FileInfoType type,
                         FileInfoTabPanel fileInfoTabPanel, final FileInfoPanelFactory fileInfoFactory,
                         LibraryManager libraryManager) {
-     //   super(GuiUtils.getMainFrame());
+        super(GuiUtils.getMainFrame());
         
         this.libraryManager = libraryManager;
         
