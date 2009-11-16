@@ -719,9 +719,19 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            for (TorrentFileEntryWrapper wrapper : eventList) {
-                wrapper.setPriority(DONT_DOWNLOAD);
+            torrent.getLock().lock();
+            try {
+                if(!torrent.isFinished()) {
+                    for (TorrentFileEntryWrapper wrapper : eventList) {
+                        if(!(wrapper.getProgress() == 1.0f)) {
+                            wrapper.setPriority(DONT_DOWNLOAD);
+                        }
+                    }
+                }
+            } finally {
+                torrent.getLock().unlock();
             }
+            
             table.repaint();
             table.validateSelection();
         }
@@ -734,10 +744,17 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            for (TorrentFileEntryWrapper wrapper : eventList) {
-                if(wrapper.getPriority() == DONT_DOWNLOAD) {
-                    wrapper.setPriority(LOWEST_PRIORITY);
+            torrent.getLock().lock();
+            try {
+                if(!torrent.isFinished()) {
+                    for (TorrentFileEntryWrapper wrapper : eventList) {
+                        if(wrapper.getPriority() == DONT_DOWNLOAD) {
+                            wrapper.setPriority(LOWEST_PRIORITY);
+                        }
+                    }
                 }
+            } finally {
+                torrent.getLock().unlock();
             }
             table.repaint();
             table.validateSelection();
