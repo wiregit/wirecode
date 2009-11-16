@@ -41,12 +41,12 @@ final class PromotionServicesImpl implements PromotionServices, Service {
     public void start() {
         try {
             promotionBinderRepository.init(
-                        PromotionSettings.SEARCH_URL.get(),
-                        PromotionSettings.BUCKET_ID_MODULUS.getValue()
+                        PromotionSettings.SEARCH_URL,
+                        PromotionSettings.BUCKET_ID_MODULUS
                     );
             
             promotionSearcher.init(
-                        PromotionSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
+                        PromotionSettings.MAX_NUMBER_OF_SEARCH_RESULTS
                     );
 
             isRunning = true;

@@ -1,5 +1,7 @@
 package org.limewire.promotion;
 
+import com.google.inject.Provider;
+
 /**
  * Provides a mechanism to retrieve {@link PromotionBinder} instances, which may
  * be retrieved from the network, cached on disk, or distributed in some other
@@ -24,6 +26,6 @@ public interface PromotionBinderRepository {
      * @param url the new URL
      * @param mod the modulous with which to send the bucket ID
      */
-    void init(String url, int mod);
+    void init(Provider<String> url, Provider<Integer> mod);
 
 }

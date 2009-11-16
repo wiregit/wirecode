@@ -6,6 +6,7 @@ import org.limewire.promotion.impressions.ImpressionsCollector;
 import org.limewire.promotion.impressions.UserQueryEvent;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -20,10 +21,10 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
     private final PromotionServices promotionServices;
 
     /** The search URL. */
-    private String searchUrl;
+    private Provider<String> searchUrl;
 
     /** The modulus to take with the bucket ID. */
-    private int modulus;
+    private Provider<Integer> modulus;
 
     @Inject
     public PromotionBinderRepositoryImpl(final PromotionBinderRequestor requestor,
@@ -36,7 +37,7 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
 
     public PromotionBinder getBinderForBucket(final long bucketNumber) {
         // See if we have a cached binder...
-        final int bucket = (int) (bucketNumber % modulus);
+        final int bucket = (int) (bucketNumber % modulus.get());
         try {
             searcherDatabase.expungeExpired();
         } catch (DatabaseExecutionException e) {
@@ -50,7 +51,7 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
             return getBinderForBucketOnNetwork(bucket);
     }
 
-    public void init(final String url, final int modulus) {
+    public void init(Provider<String> url, Provider<Integer> modulus) {
         this.searchUrl = url;
         this.modulus = modulus;
     }
@@ -64,7 +65,7 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
      */
     private PromotionBinder getBinderForBucketOnNetwork(final long bucketNumber) {
         final Set<UserQueryEvent> queries = impressionsCollector.getCollectedImpressions();
-        String url = searchUrl;
+        String url = searchUrl.get();
         url += "?now=" + System.currentTimeMillis() / 1000;
         PromotionBinder result = requestor.request(url, bucketNumber, queries);
         

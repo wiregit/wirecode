@@ -3,6 +3,8 @@ package org.limewire.promotion;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 
+import com.google.inject.Provider;
+
 /**
  * Provides methods and callbacks to perform a search of the promotion system.
  * Implementations may pull from network or locally cached data, and customize
@@ -32,7 +34,7 @@ public interface PromotionSearcher {
      * @param maxNumberOfResults the maximum number of results to show in the
      *        client.
      */
-    void init(int maxNumberOfResults) throws InitializeException;
+    void init(Provider<Integer> maxNumberOfResults) throws InitializeException;
 
     /**
      * The recipient of promotion search results. Implementations should be able

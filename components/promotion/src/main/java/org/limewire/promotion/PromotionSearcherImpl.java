@@ -14,7 +14,9 @@ import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestrictio
 import org.limewire.promotion.impressions.ImpressionsCollector;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.util.Providers;
 
 @Singleton
 public class PromotionSearcherImpl implements PromotionSearcher {
@@ -31,7 +33,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     private final ExecutorService exec;
 
-    private volatile int maxNumberOfResults = 5;
+    private volatile Provider<Integer> maxNumberOfResults = Providers.of(5);
 
     @Inject
     public PromotionSearcherImpl(final KeywordUtilImpl keywordUtil,
@@ -72,7 +74,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
         }
     }
 
-    public void init(final int maxNumberOfResults) throws InitializeException {
+    public void init(Provider<Integer> maxNumberOfResults) throws InitializeException {
         this.maxNumberOfResults = maxNumberOfResults;
         searcherDatabase.init();
     }
@@ -172,7 +174,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             for(QueryResult result : visibleResults) {
                 final float probability = result.getPromotionMessageContainer().getProbability();
                 int remainingToIterateThrough = visibleResults.size() - idx;
-                int remainingMaxToShow = maxNumberOfResults - shownResults;
+                int remainingMaxToShow = maxNumberOfResults.get() - shownResults;
                 if (remainingToIterateThrough <= remainingMaxToShow
                         || Math.random() <= probability) {
                     shownResults++;
@@ -188,7 +190,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
                 // Exit early if we're done. Assumes impression-only are sorted
                 // at top.
-                if (shownResults >= maxNumberOfResults)
+                if (shownResults >= maxNumberOfResults.get())
                     break;
             }
         }
