@@ -2567,7 +2567,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     int getSwarmCapacity() {
         //max measured download speed in kilobits.
         int capacity = bandwidthCollector.getMaxMeasuredTotalDownloadBandwidth() * 8;
-        if(capacity == 0) {
+        if(capacity <= 0) {
             //default to cable speed if no measurements taken yet
             //assume larger than modem to get better measurement stats.
             capacity = SpeedConstants.CABLE_SPEED_INT;

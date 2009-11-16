@@ -121,17 +121,16 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
         float torrentUploadBandwidth = calculateTorrentUpstreamBandwidth(torrents);
         float torrentUploadPayloadBandwidth = calculateTorrentUpstreamPayloadBandwidth(torrents);
 
-        int newUpstreamKiloBytesPerSec = (int) (uploadTrackerBandwidth
-                + connectionManagerUploadBandwidth + torrentUploadBandwidth);
-        int newUploaderKiloBytesPerSec = (int) (uploadTrackerBandwidth + torrentUploadPayloadBandwidth);
+        int newUpstreamKiloBytesPerSec = (int) addPositive(uploadTrackerBandwidth, connectionManagerUploadBandwidth, torrentUploadBandwidth);
+        int newUploaderKiloBytesPerSec = (int) addPositive(uploadTrackerBandwidth, torrentUploadPayloadBandwidth);
 
         uploadStat.addData(newUpstreamKiloBytesPerSec);
         uploadHistogram.count(newUpstreamKiloBytesPerSec);
 
         // TODO downstream kilobytes per sec is missing non payload torrent
         // bandwidth.
-        int newDownstreamKiloBytesPerSec = (int) (downloadTrackerBandwidth + connectionManagerDownloadBandwidth);
-        int newDownloaderKiloBytesPerSec = (int) (downloadTrackerBandwidth);
+        int newDownstreamKiloBytesPerSec = (int) addPositive(downloadTrackerBandwidth, connectionManagerDownloadBandwidth);
+        int newDownloaderKiloBytesPerSec = (int) addPositive(downloadTrackerBandwidth);
 
         downloadStat.addData(newDownstreamKiloBytesPerSec);
         downloadHistogram.count(newDownstreamKiloBytesPerSec);
@@ -185,7 +184,7 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
         for (Torrent torrent : torrentManager.get().getTorrents()) {
             TorrentStatus torrentStatus = torrent.getStatus();
             if (torrentStatus != null) {
-                rate += torrentStatus.getUploadRate();
+                rate = addPositive(rate, torrentStatus.getUploadRate());
             }
         }
         return rate / 1024;
@@ -203,7 +202,7 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
                 // ignoring paused torrents because the rate takes a while to
                 // cycle down event though the number should be zero.
                 if (!torrentStatus.isPaused()) {
-                    rate += torrentStatus.getUploadPayloadRate();
+                    rate = addPositive(rate, torrentStatus.getUploadPayloadRate());
                 }
             }
         }
@@ -214,5 +213,18 @@ public class BandwidthCollectorImpl implements BandwidthCollectorDriver {
         public BandwidthStat(StatisticAccumulator statisticAccumulator) {
             super(statisticAccumulator);
         }
+    }
+
+    /**
+     * Adds positive numbers in the list together returning the sum. 
+     */
+    public float addPositive(float... values) {
+        float sum = 0;
+        for (float value : values) {
+            if (value > 0) {
+                sum += value;
+            }
+        }
+        return sum;
     }
 }
