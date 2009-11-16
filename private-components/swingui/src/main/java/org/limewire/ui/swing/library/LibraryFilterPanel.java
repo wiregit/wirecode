@@ -139,6 +139,28 @@ public class LibraryFilterPanel {
     public JTextField getFilterField() {
         return promptTextField;
     }
+
+    /**
+     * Sets the selected category and the filter text on the current table. Note this
+     * does not fire an action changed event. It simply updates the state of this
+     * component.
+     */
+    public void setSelectedCategory(Category category, String filterText) {
+        if(category == null) {
+            allAction.putValue(Action.SELECTED_KEY, true);
+        } else {
+            for(TabActionMap action : categoryActionMaps) {
+                if(action.getMainAction() instanceof LibraryCategoryAction) {
+                    LibraryCategoryAction categoryAction = (LibraryCategoryAction) action.getMainAction();
+                    if(categoryAction.getCategory() == category) {
+                        categoryAction.putValue(Action.SELECTED_KEY, true);
+                        break;
+                    }
+                }
+            }
+        }
+        promptTextField.setText(filterText == null ? "" : filterText);
+    }
     
     public Category getSelectedCategory() {
         return ((LibraryCategoryAction)categoryList.getSelectedTab().getTabActionMap().getMainAction()).getCategory();

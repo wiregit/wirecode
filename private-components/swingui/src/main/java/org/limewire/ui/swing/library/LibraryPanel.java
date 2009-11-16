@@ -233,29 +233,35 @@ public class LibraryPanel extends JPanel {
                         !isPlayable(libraryFilterPanel.getSelectedCategory())) {
                     playerMediator.setPlaylist(libraryTable.getPlayableList());
                 }
-                
                 selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
             }
         });
         libraryNavigatorPanel.addTableSelectionListener(new ListSelectionListener(){
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
-                
-                // If previous navItem was playlist and new navItem not playlist 
-                // and category playable, then save playlist.
-                if (playerMediator.isActivePlaylist(selectedNavItem) &&
-                        !playerMediator.isActivePlaylist(navItem) &&
-                        isPlayable(selectedCategory)) {
-                    playerMediator.setPlaylist(libraryTable.getPlayableList());
+                if(!e.getValueIsAdjusting()) {
+                	// save the state of the filter Text field before we swap out tables.
+                    selectedNavItem.setFilteredText(libraryFilterPanel.getFilterField().getText());
+                    // save the state of the selected category to the NavItem before swapping.
+                    selectedNavItem.setSelectedCategory(libraryFilterPanel.getSelectedCategory());
+                    
+                    LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
+                    
+                    // If previous navItem was playlist and new navItem not playlist 
+                    // and category playable, then save playlist.
+                    if (playerMediator.isActivePlaylist(selectedNavItem) &&
+                            !playerMediator.isActivePlaylist(navItem) &&
+                            isPlayable(selectedCategory)) {
+                        playerMediator.setPlaylist(libraryTable.getPlayableList());
+                    }
+                    selectedNavItem = navItem;
+                    // update the filter Panel to display the saved category/filter text of the new NavItem
+                    libraryFilterPanel.setSelectedCategory(navItem.getSelectedCategory(), navItem.getFilteredText());
+                    setPublicSharedComponentVisible(navItem);
+                    eventList = navItem.getLocalFileList().getSwingModel();
+                    selectSharing(navItem);
+                    selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
                 }
-                selectedNavItem = navItem;
-
-                clearFilters();
-                setPublicSharedComponentVisible(navItem);
-                eventList = navItem.getLocalFileList().getSwingModel();
-                selectSharing(navItem);
-                selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
             }
         });
         
