@@ -11,7 +11,6 @@ import javax.media.protocol.DataSource;
 
 import org.limewire.util.OSUtils;
 
-import net.sf.fmj.utility.URLUtils;
 
 
 
@@ -30,6 +29,8 @@ public class VideoPlayerFactory {
 
         try {
             handler.setSource(createDataSource(file));
+        } catch (MalformedURLException e) {
+            throw new IncompatibleSourceException(e);
         } catch (UnsatisfiedLinkError e) {
             // TODO: this is not the best way to handle unsatisfied links but
             // our native launch fallback will work
@@ -40,7 +41,7 @@ public class VideoPlayerFactory {
         return handler;
     }
     
-    private static DataSource createDataSource(File file){
+    private static DataSource createDataSource(File file) throws MalformedURLException{
         //FMJ's handling of files is incredibly fragile.  This works with both quicktime and directshow.
         DataSource source = new net.sf.fmj.media.protocol.file.DataSource();
         if (OSUtils.isMacOSX()) {
@@ -48,17 +49,10 @@ public class VideoPlayerFactory {
             // files not to be loaded by FMJ. So let's not escape any characters. 
             source.setLocator(new MediaLocator("file:///" + file.getAbsolutePath()));
         } else {
-            try {
-                // This produces a URL with the form file:/path rather than file:///path
-                // This URL form is accepted on Windows but not OS X.
-                String urlString = file.toURI().toURL().toExternalForm();
-                source.setLocator(new MediaLocator(urlString));
-            } catch (MalformedURLException e) {
-                // It's preferable not to use the URLUtils.createUrlStr method,
-                // because it encodes some characters that don't need to be encoded
-                // and throws exceptions when encountering non-ASCII characters.
-                source.setLocator(new MediaLocator(URLUtils.createUrlStr(file)));
-            }                                   
+            // This produces a URL with the form file:/path rather than file:///path
+            // This URL form is accepted on Windows but not OS X.
+            String urlString = file.toURI().toURL().toExternalForm();
+            source.setLocator(new MediaLocator(urlString));
         }
         return source;
     }
