@@ -219,8 +219,9 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void resume() {
-        player.start();
-
+        if (player != null) {
+            player.start();
+        }
     }
 
     @Override
