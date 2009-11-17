@@ -2,6 +2,7 @@ package org.limewire.ui.swing.player;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.media.IncompatibleSourceException;
 import javax.media.MediaLocator;
@@ -47,7 +48,17 @@ public class VideoPlayerFactory {
             // files not to be loaded by FMJ. So let's not escape any characters. 
             source.setLocator(new MediaLocator("file:///" + file.getAbsolutePath()));
         } else {
-            source.setLocator(new MediaLocator(URLUtils.createUrlStr(file)));
+            try {
+                // This produces a URL with the form file:/path rather than file:///path
+                // This URL form is accepted on Windows but not OS X.
+                String urlString = file.toURI().toURL().toExternalForm();
+                source.setLocator(new MediaLocator(urlString));
+            } catch (MalformedURLException e) {
+                // It's preferable not to use the URLUtils.createUrlStr method,
+                // because it encodes some characters that don't need to be encoded
+                // and throws exceptions when encountering non-ASCII characters.
+                source.setLocator(new MediaLocator(URLUtils.createUrlStr(file)));
+            }                                   
         }
         return source;
     }
