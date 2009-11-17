@@ -1509,11 +1509,21 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      * Iterates over all the connections and sends the updated CapabilitiesVM
      * down every one of them.
      */
-    public void sendUpdatedCapabilities() {        
-        for(Connection c : getInitializedConnections())
-            c.sendUpdatedCapabilities();
-        for(Connection c : getInitializedClientConnections())
-            c.sendUpdatedCapabilities();
+    public void sendUpdatedCapabilities() {
+        List<RoutedConnection> allConnections = getAllConnectionsShuffled();
+        for (RoutedConnection connection : allConnections) {
+            connection.sendUpdatedCapabilities();
+        }
+    }
+    
+    private List<RoutedConnection> getAllConnectionsShuffled() {
+        List<RoutedConnection> peers = getInitializedConnections();
+        List<RoutedConnection> leafs = getInitializedClientConnections();
+        List<RoutedConnection> allConnections = new ArrayList<RoutedConnection>(peers.size() + leafs.size());
+        allConnections.addAll(peers);
+        allConnections.addAll(leafs);
+        Collections.shuffle(allConnections);
+        return allConnections;    
     }
 
     /**

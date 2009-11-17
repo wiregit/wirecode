@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.listener.EventBroadcaster;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,10 +26,14 @@ public class MessageDispatcher {
     @InspectionPoint("routed messages")
     private final Message.MessageCounter messageCounter = new Message.MessageCounter(LimeWireUtils.isBetaRelease() ? 300 : 30);
     
+    private final EventBroadcaster<MessageSentEvent> messageSentEventBroadcaster;
+    
     @Inject
-    public MessageDispatcher(MessageRouter messageRouter, @Named("messageExecutor") Executor dispatch) {
+    public MessageDispatcher(MessageRouter messageRouter, @Named("messageExecutor") Executor dispatch,
+            EventBroadcaster<MessageSentEvent> messageSentEventBroadcaster) {
         this.messageRouter = messageRouter;
         this.DISPATCH = dispatch;
+        this.messageSentEventBroadcaster = messageSentEventBroadcaster;
     }
     
     /** Dispatches a runnable, to allow arbitrary runnables to be processed on the message thread. */
@@ -57,6 +62,12 @@ public class MessageDispatcher {
         DISPATCH.execute(new TCPDispatch(messageRouter, m, conn, messageCounter));
     }
     
+    /**
+     * Dispatches the event that <code>message</code> was sent to <code>routedConnection</code>. 
+     */
+    public void dispatchTCPMessageSent(Message message, RoutedConnection routedConnection) {
+        messageSentEventBroadcaster.broadcast(new MessageSentEvent(routedConnection, message));        
+    }
     
     private static abstract class Dispatch implements Runnable {
         protected final MessageRouter messageRouter;
@@ -131,4 +142,5 @@ public class MessageDispatcher {
             messageRouter.handleMessage(m, conn);
         }
     }
+
 }

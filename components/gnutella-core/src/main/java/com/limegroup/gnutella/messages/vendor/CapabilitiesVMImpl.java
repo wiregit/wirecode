@@ -15,6 +15,7 @@ import org.limewire.util.ByteUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.messages.Message;
 
 public class CapabilitiesVMImpl extends AbstractVendorMessage implements CapabilitiesVM {
     
@@ -233,6 +234,11 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
     @Override
     public String toString() {
         return "{CapabilitiesVM:"+super.toString()+"; supporting: " + capabilities + "}";
+    }
+    
+    @Override
+    public Class<? extends Message> getHandlerClass() {
+        return CapabilitiesVM.class;
     }
 
 }

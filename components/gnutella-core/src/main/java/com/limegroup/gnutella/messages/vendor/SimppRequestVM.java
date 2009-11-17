@@ -10,7 +10,10 @@ public final class SimppRequestVM extends AbstractVendorMessage {
 
     SimppRequestVM(byte[] guid, byte ttl, byte hops, int version, 
                                   byte[] payload, Network network) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP_REQ, version, payload, network); 
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP_REQ, version, payload, network);
+        if (version < OLD_KEY_VERSION || version > VERSION || payload.length > 0) {
+            throw new BadPacketException("invalid message: version " + version + ", length " + payload.length); 
+        }
     }
     
     public SimppRequestVM() {

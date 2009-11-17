@@ -61,7 +61,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      */
     private boolean shutdown = false;
     
-    
+    private Message message;
     /**
      * Constructs a new MessageWriter with the given stats, queue & sendHandler.
      * You MUST call setWriteChannel prior to handleWrite.
@@ -121,8 +121,15 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             throw new IllegalStateException("writing with no source.");
             
         // first try to write any leftover data.
-        if(writeRemaining()) //still have data to send.
+        if(writeRemaining()) { //still have data to send.
             return true;
+        } else {
+            if (message != null) {
+                sendHandler.processSentMessage(message);
+                message = null;
+            }
+        }
+        
             
         // then loop through and write to the channel till we can't anymore.
         while(true) {
@@ -137,9 +144,13 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             }
             
             m.writeQuickly(out);
-            sendHandler.processSentMessage(m);
-            if(writeRemaining()) // still have data to send.
+            if(writeRemaining()) {// still have data to send.
+                message = m;
                 return true;
+            } else {
+                sendHandler.processSentMessage(m);
+                message = null;
+            }
         }
     }
     

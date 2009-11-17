@@ -89,6 +89,7 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -101,7 +102,6 @@ import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
@@ -599,13 +599,14 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setMessageHandler(PushProxyRequest.class, new PushProxyRequestHandler());
         setMessageHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
         setMessageHandler(HeadPing.class, new HeadPingHandler());
-        setMessageHandler(SimppRequestVM.class, new SimppRequestVMHandler());
         setMessageHandler(SimppVM.class, new SimppVMHandler());
         setMessageHandler(UpdateRequest.class, new UpdateRequestHandler());
         setMessageHandler(UpdateResponse.class, new UpdateResponseHandler());
         setMessageHandler(HeadPong.class, new HeadPongHandler());
         setMessageHandler(DHTContactsMessage.class, new DHTContactsMessageHandler());
-        setMessageHandler(VendorMessage.class, new VendorMessageHandler());
+        VendorMessageHandler vendorMessageHandler = new VendorMessageHandler();
+        addMessageHandler(VendorMessage.class, vendorMessageHandler);
+        addMessageHandler(CapabilitiesVM.class, vendorMessageHandler);
         setMessageHandler(InspectionRequest.class, inspectionHandler);
         
         setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
@@ -2031,25 +2032,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     }
 
     /**
-     *  If we get and SimppRequest, get the payload we need from the
-     *  SimppManager and send the simpp bytes the the requestor in a SimppVM. 
-     */
-    private void handleSimppRequest(final SimppRequestVM simppReq, 
-                                                  final ReplyHandler handler ) {
-        byte[] data = simppReq.isOldRequest() ? simppManager.get().getOldUpdateResponse() :
-                                                simppManager.get().getSimppBytes();
-        
-        if(data != null && data.length > 0 ) {
-            SimppVM simppVM = SimppVM.createSimppResponse(simppReq, data);
-            try {
-                handler.handleSimppVM(simppVM);
-            } catch(IOException iox) {
-                return;
-            }
-        }
-    }
-
-    /**
      * Passes on the SimppVM to the SimppManager which will verify it and
      * make sure we it's newer than the one we know about, and then make changes
      * to the settings as necessary, and cause new CapabilityVMs to be sent down
@@ -2809,12 +2791,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             //TODO: add the statistics recording code
             handleHeadPing((HeadPing)msg, handler);
-        }
-    }
-    
-    private class SimppRequestVMHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            handleSimppRequest((SimppRequestVM)msg, handler);
         }
     }
     

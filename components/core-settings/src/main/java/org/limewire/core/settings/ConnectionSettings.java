@@ -381,4 +381,11 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final IntSetting MIN_BYTES_SENT = FACTORY.createRemoteIntSetting(
             "MIN_BYTES_SENT", 1024, "ConnectionSettings.minBytesSent", -1, Integer.MAX_VALUE);
+
+    /**
+     * Number of milliseconds to wait for message sent event for a sent simpp message
+     * before sending a simpp message to the next requestor in the queue.
+     */
+    public static final LongSetting SIMPP_SEND_TIMEOUT = FACTORY.createRemoteLongSetting(
+            "SIMPP_SEND_TIMEOUT", 60 * 1000, "ConnectionSettings.simppSendTimeout", 0, Long.MAX_VALUE);
 }

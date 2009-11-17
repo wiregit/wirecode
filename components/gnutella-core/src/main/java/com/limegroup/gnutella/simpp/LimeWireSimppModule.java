@@ -8,6 +8,7 @@ public class LimeWireSimppModule extends AbstractModule {
     protected void configure() {
         bind(SimppManager.class).to(SimppManagerImpl.class);
         bind(SimppDataProvider.class).to(SimppDataProviderImpl.class);
+        bind(SimppSender.class);
     }
     
 }

@@ -916,6 +916,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     public void processSentMessage(Message m) {
         outgoing.countMessage(m);
         processWrittenMessage(m);
+        messageDispatcher.dispatchTCPMessageSent(m, this);
     }
 
     /**

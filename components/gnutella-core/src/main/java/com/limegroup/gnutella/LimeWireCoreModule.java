@@ -6,10 +6,10 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
-import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -27,8 +27,11 @@ import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.listener.AsynchronousCachingEventMulticasterImpl;
 import org.limewire.listener.AsynchronousEventBroadcaster;
+import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.BroadcastPolicy;
 import org.limewire.listener.EventBean;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
@@ -410,6 +413,18 @@ public class LimeWireCoreModule extends AbstractModule {
     }
     @Provides @LazySingleton @Named(MESSAGE) Executor messageE(@Named(MESSAGE) ListeningExecutorService les) {
         return les;
+    }
+    
+    @Provides @Singleton EventMulticaster<MessageSentEvent> messageSentEM(@Named("messageExecutor") Executor executor) { 
+        return new AsynchronousMulticasterImpl<MessageSentEvent>(executor); 
+    } 
+    
+    @Provides @Singleton EventBroadcaster<MessageSentEvent> messageSentEB(EventMulticaster<MessageSentEvent> multicaster) { 
+        return multicaster; 
+    } 
+    
+    @Provides @Singleton ListenerSupport<MessageSentEvent> messageSentLS(EventMulticaster<MessageSentEvent> multicaster) { 
+        return multicaster; 
     }
     
     private static final String DHT = "dhtExecutor";
