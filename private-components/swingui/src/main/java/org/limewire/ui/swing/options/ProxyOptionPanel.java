@@ -149,7 +149,7 @@ public class ProxyOptionPanel extends OptionPanel {
         ConnectionSettings.PROXY_HOST.set(proxy);
         
         ConnectionSettings.PROXY_USERNAME.set(userNameTextField.getText());
-        ConnectionSettings.PROXY_PASS.set(passwordField.getPassword().toString());
+        ConnectionSettings.PROXY_PASS.set(new String(passwordField.getPassword()));
         ConnectionSettings.PROXY_AUTHENTICATE.setValue(authenticationCheckBox.isSelected());
         
         if(torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
