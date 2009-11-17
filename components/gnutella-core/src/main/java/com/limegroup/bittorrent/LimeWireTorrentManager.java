@@ -283,7 +283,12 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
 
             @Override
             public String getPassword() {
-                return ConnectionSettings.PROXY_PASS.get();
+                switch (ConnectionSettings.CONNECTION_METHOD.getValue()) {
+                    case ConnectionSettings.C_SOCKS4_PROXY:
+                        return "";
+                    default :
+                        return ConnectionSettings.PROXY_PASS.get();
+                }
             }
 
             @Override

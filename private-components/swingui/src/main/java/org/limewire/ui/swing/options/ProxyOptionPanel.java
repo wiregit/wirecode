@@ -251,8 +251,13 @@ public class ProxyOptionPanel extends OptionPanel {
             
             userNameLabel.setVisible(value);
             userNameTextField.setVisible(value);
-            passwordLabel.setVisible(value);
-            passwordField.setVisible(value);
+            if(socksV4RadionButton.isSelected()) {
+                passwordLabel.setVisible(false);
+                passwordField.setVisible(false);
+            } else {
+                passwordLabel.setVisible(value);
+                passwordField.setVisible(value);
+            }
         } else {
             userNameTextField.setEnabled(false);
             passwordField.setEnabled(false);
