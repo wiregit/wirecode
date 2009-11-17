@@ -102,7 +102,7 @@ class GnutellaFriend implements Friend {
         if(address instanceof Connectable || address instanceof PushEndpoint) {
             IpPort ipp = (IpPort)address;
             InetAddress inetAddr = ipp.getInetAddress();
-            return inetAddr == null ? null : inetAddr.getHostAddress();
+            return inetAddr == null ? ipp.getAddress() : inetAddr.getHostAddress();
         } else {
             return address.getAddressDescription();
         }
