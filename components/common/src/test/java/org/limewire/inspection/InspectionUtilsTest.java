@@ -51,6 +51,7 @@ public class InspectionUtilsTest extends BaseTestCase {
                 bind(IConcrete.class).to(Concrete.class);
                 bind(UsageData.class).to(UsageDataImpl.class);
                 bind(NetworkData.class).to(NetworkDataImpl.class);
+                bind(Requirements.class);
             }
         };
         modules.add(m);
@@ -138,6 +139,18 @@ public class InspectionUtilsTest extends BaseTestCase {
     public void testAbstractPoints() throws Exception {
         Object ret = InspectionUtils.inspectValue(nameOf(IConcrete.class) + "|" + nameOf(Abstract.class) + ",inspectableA", injector, true);
         assertEquals("qqqq", ret);
+    }
+    
+    public void testNoBindings() throws Exception {
+        assertFalse(NotGuiced.created);
+        try {
+            InspectionUtils.inspectValue(nameOf(NotGuiced.class) + ",x", injector, true);
+            fail("Should not be able to inspect a variable in a " +
+                 "class for which there is no existing guice binding");
+        } catch (InspectionException e) {
+            assertTrue(e.getMessage().contains("no existing binding for class"));
+            assertFalse(NotGuiced.created);
+        }
     }
     
     public void testRequirements() throws Exception {
@@ -408,6 +421,12 @@ public class InspectionUtilsTest extends BaseTestCase {
 
         @InspectionPoint("insp")
         @SuppressWarnings("unused") static Inspectable inspectable;
+        
+        @InspectablePrimitive(value="no bindings")
+        @SuppressWarnings("unused") int x = 9;
+        
+        static boolean created = false;
+        NotGuiced() { created = true; }
     }
     
     private static interface IConcrete {}
