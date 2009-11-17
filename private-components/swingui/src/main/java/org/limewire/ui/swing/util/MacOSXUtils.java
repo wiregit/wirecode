@@ -375,12 +375,14 @@ public class MacOSXUtils {
                                                   final boolean canChooseDirectories, final boolean allowMultipleSelections,
                                                   final FileFilter filter) {
         try {
+            final String directoryAbsolutePath = (directory != null) ? directory.getAbsolutePath() : null;
+
             String[] filePaths = (String[]) Worker.post(new Job()
             {
                 @Override
                 public Object run()
                 {
-                    String[] filePaths = OpenNativeFileDialog(dialogTitle, directory.getAbsolutePath(), canChooseFiles, canChooseDirectories, allowMultipleSelections); 
+                    String[] filePaths = OpenNativeFileDialog(dialogTitle, directoryAbsolutePath, canChooseFiles, canChooseDirectories, allowMultipleSelections); 
                     return filePaths;
                 }
             });

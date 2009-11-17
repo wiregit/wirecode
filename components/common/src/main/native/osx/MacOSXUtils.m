@@ -520,12 +520,14 @@ JNIEXPORT jobjectArray JNICALL OS_NATIVE(OpenNativeFileDialog)
     [runnable setTitle:titleNSString];
 
     // convert the Java string for the directoryPath into an NSString object
-    const jchar *directoryPathChars = (*env)->GetStringChars(env, directoryPath, NULL);
-    NSString* directoryPathNSString = [NSString stringWithCharacters:(UniChar *)directoryPathChars
-                                       length:(*env)->GetStringLength(env, directoryPath)];
-    (*env)->ReleaseStringChars(env, directoryPath, directoryPathChars);
-
-    [runnable setDirectoryPath:directoryPathNSString];
+    if (directoryPath != NULL) {
+        const jchar *directoryPathChars = (*env)->GetStringChars(env, directoryPath, NULL);
+        NSString* directoryPathNSString = [NSString stringWithCharacters:(UniChar *)directoryPathChars
+                                           length:(*env)->GetStringLength(env, directoryPath)];
+        (*env)->ReleaseStringChars(env, directoryPath, directoryPathChars);
+        
+        [runnable setDirectoryPath:directoryPathNSString];
+    }
 
     [runnable setCanChooseFiles:canChooseFiles];
     
