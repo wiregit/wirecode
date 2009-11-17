@@ -192,11 +192,17 @@ public class UploadPopupMenu extends JPopupMenu {
             resumeMenuItem.addActionListener(new ResumeMenuListener());
             add(resumeMenuItem);
         }
+        
         if (done) {
             JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
             removeMenuItem.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
             removeMenuItem.addActionListener(new RemoveMenuListener());
             add(removeMenuItem);
+        } else {
+            JMenuItem cancelMenuItem = new JMenuItem(I18n.tr("Cancel Upload"));
+            cancelMenuItem.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
+            cancelMenuItem.addActionListener(listener);
+            add(cancelMenuItem);
         }
         
         if (!browseItem) {
