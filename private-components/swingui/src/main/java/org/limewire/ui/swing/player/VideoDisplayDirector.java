@@ -79,7 +79,7 @@ class VideoDisplayDirector {
         // If the start screen is open, then open up the library view before showing the video.
         // The start screen has a heavy weight component that would cut off the video.
         NavItem selectedNavItem = navigator.getSelectedNavItem();
-        if (selectedNavItem.getId().equals(HomeMediator.NAME)) {
+        if (selectedNavItem == null || selectedNavItem.getId().equals(HomeMediator.NAME)) {
             NavItem item = navigator.getNavItem(NavCategory.LIBRARY, LibraryMediator.NAME);
             item.select();
         }
