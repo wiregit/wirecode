@@ -52,6 +52,7 @@ class VideoDisplayDirector {
     
     private final Provider<VideoPlayerMediator> videoPlayerMediator;
 
+    private VideoPanelResizer resizerListener;
 
     @Inject
     public VideoDisplayDirector(@GlobalLayeredPane JLayeredPane limeWireLayeredPane, Provider<VideoPlayerMediator> videoPlayerMediator,
@@ -64,8 +65,8 @@ class VideoDisplayDirector {
         GuiUtils.assignResources(this);
         assert(topPanelPreferredSize != null);
         
-        
-        limeWireLayeredPane.addComponentListener(new VideoPanelResizer());
+        resizerListener = new VideoPanelResizer();
+        limeWireLayeredPane.addComponentListener(resizerListener);
     }
     
     public void show(Component videoRenderer, boolean isFullScreen){
@@ -166,7 +167,8 @@ class VideoDisplayDirector {
         GuiUtils.getMainFrame().setVisible(true);
     }
 
-    private void closeInClient(){    
+    private void closeInClient(){   
+        limeWireLayeredPane.removeComponentListener(resizerListener);
         limeWireLayeredPane.remove(videoPanel.getComponent()); 
         removeNavigationListener();
     }
