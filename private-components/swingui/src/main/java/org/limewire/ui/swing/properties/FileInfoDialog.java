@@ -107,12 +107,13 @@ public class FileInfoDialog extends LimeJDialog {
         setPreferredSize(new Dimension(500,565));
         setDefaultCloseOperation(FileInfoDialog.DISPOSE_ON_CLOSE);
 
-        // TODO: In KDE there is a problem where minimise is possible and
-        //  a minimised modal dialogue can't be restored.  The dialogue
-        //  disappears and control can never be restored to the rest of the
-        //  app.  Stopping resizability prevents this problem.
-        setModalityType(ModalityType.APPLICATION_MODAL);
-        
+        if (type == FileInfoType.LOCAL_FILE) {
+            // TODO: In KDE there is a problem where minimise is possible and
+            //  a minimised modal dialogue can't be restored.  The dialogue
+            //  disappears and control can never be restored to the rest of the
+            //  app.  Stopping resizability prevents this problem.
+            setModalityType(ModalityType.APPLICATION_MODAL);
+        }
         pack();
 
         setLocationRelativeTo(GuiUtils.getMainFrame());

@@ -550,6 +550,11 @@ public class TorrentImpl implements Torrent {
 
     @Override
     public TorrentPiecesInfo getPiecesInfo() {
-        return libTorrent.get_pieces_status(sha1);
+        lock.lock();
+        try {
+            return libTorrent.get_pieces_status(sha1);
+        } finally {
+            lock.unlock();
+        }
     }
 }

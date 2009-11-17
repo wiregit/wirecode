@@ -17,13 +17,21 @@ import org.jdesktop.swingx.painter.Painter;
  */
 public class PiecesGrid extends JXPanel {
     
-    private int rows;
-    private int columns;
-    private Paint[] gridFillPaint;
+    private int rows = -1;
+    private int columns = -1;
+    private Paint[] gridFillPaint = null;
+    
+    public PiecesGrid() {
+        init();
+    }
     
     public PiecesGrid(int r, int c) {
         resizeGrid(r, c);
     
+        init();
+    }
+    
+    private void init() {
         setBackgroundPainter(new GridPainter());
         
         // Just for fun
@@ -60,6 +68,10 @@ public class PiecesGrid extends JXPanel {
         this.rows = rows;
         this.columns = columns;
         this.gridFillPaint = new Paint[rows*columns];
+    }
+    
+    boolean hasGrid() {
+        return gridFillPaint != null;
     }
     
     public int getRows() {
@@ -134,6 +146,12 @@ public class PiecesGrid extends JXPanel {
         
         @Override
         protected void doPaint(Graphics2D g, PiecesGrid grid, int width, int height) {
+            if (!grid.hasGrid()) {
+                g.setPaint(Color.BLACK);
+                g.drawRect(0,0, width-1, height-1);
+                return;
+            }
+            
             int columns = grid.getColumns();
             int rows = grid.getRows();
             

@@ -497,6 +497,26 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return status.getTotalWantedDone();
         }
     }
+    
+    @Override
+    public long getAmountVerified() {
+        TorrentStatus status = torrent.getStatus();
+        if (status == null) {
+            return -1;
+        } else {
+            return status.getTotalWantedDone();
+        }
+    }
+
+    @Override
+    public long getAmountLost() {
+        TorrentStatus status = torrent.getStatus();
+        if (status == null) {
+            return -1;
+        } else {
+            return status.getTotalFailedDownload();
+        }
+    }
 
     @Override
     public String getVendor() {
@@ -544,16 +564,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return true;
         }
         return false;
-    }
-
-    @Override
-    public long getAmountVerified() {
-        TorrentStatus status = torrent.getStatus();
-        if (status == null) {
-            return -1;
-        } else {
-            return status.getTotalWantedDone();
-        }
     }
 
     @Override
@@ -883,14 +893,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public int getChunkSize() {
         throw new UnsupportedOperationException("BTDownloaderImpl.getChunkSize() not implemented");
-    }
-
-    /**
-     * No longer relevant in any Downloader.
-     */
-    @Override
-    public long getAmountLost() {
-        throw new UnsupportedOperationException("BTDownloaderImpl.getAmountLost() not implemented");
     }
 
     /**

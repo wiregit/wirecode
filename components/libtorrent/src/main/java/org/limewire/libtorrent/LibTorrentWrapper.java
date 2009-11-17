@@ -437,14 +437,13 @@ class LibTorrentWrapper {
        
     public TorrentPiecesInfo get_pieces_status(String sha1) {
         
-        LibTorrentPiecesInfo info = new LibTorrentPiecesInfo(); 
+        LibTorrentPiecesInfoContainer info = new LibTorrentPiecesInfoContainer(); 
         
         LOG.debugf("before get_pieces_status: {0}", sha1);
         catchWrapperException(libTorrent.get_pieces_status(sha1, info));
         LOG.debugf("after get_pieces_status: {0}", sha1);
                 
-        TorrentPiecesInfo exportInfo = new TorrentPiecesInfo(new String(info.getStateInfo()),
-                info.getNumPiecesCompleted());
+        TorrentPiecesInfo exportInfo = new LibTorrentPiecesInfo(info);
         
         LOG.debugf("before free_pieces_info");
         catchWrapperException(libTorrent.free_pieces_info(info.getPointer()));

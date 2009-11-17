@@ -1,20 +1,23 @@
 package org.limewire.bittorrent;
 
-//TODO: convert to interface
-public class TorrentPiecesInfo {
-    private final String stateInfo;
-    private final int numCompleted;
+/**
+ * A mechanism that can be used to retrieve the state of each piece in a download.
+ */
+public interface TorrentPiecesInfo {
+
+    /**
+     * @return the state of the indexed piece.
+     */
+    public TorrentPieceState getPieceState(int piece);
+
+    /**
+     * @return the total number of pieces in the download.
+     */
+    public int getNumPieces();
     
-    public TorrentPiecesInfo(String stateInfo, int numCompleted) {
-        this.stateInfo = stateInfo;
-        this.numCompleted = numCompleted;
-    }
-    
-    public String getStateInfo() {
-        return stateInfo;
-    }
-    
-    public int getNumCompleted() {
-        return numCompleted;
-    }
+    /**
+     * @return the number of completed (downloaded) pieces in the torrent.
+     */
+    public int getNumPiecesCompleted();
+
 }

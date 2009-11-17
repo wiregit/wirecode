@@ -276,5 +276,8 @@ public interface Torrent {
      */
     public Lock getLock();
 
+    /**
+     * Gets the pieces state data thus far.
+     */
     public TorrentPiecesInfo getPiecesInfo();
 }

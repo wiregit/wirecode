@@ -93,22 +93,32 @@ public interface DownloadItem extends PropertiableFile {
 	public int getPercentComplete();
 
 	/**
-	 * @return size in bytes
+	 * @return size in bytes.
 	 */
 	public long getCurrentSize();
 	
 	/**
-     * @return size in bytes
+	 * @return number of bytes in the download that have been currently verified.
+	 */
+	public long getAmountVerified();
+	
+	/**
+     * @return size in bytes.
      */
 	public long getTotalSize();
 
+	/**
+	 * @return the number of bytes from the download lost to corruption.
+	 */
+	public long getAmountLost();
+	
     /**
-     * @return seconds remaining until the download will complete or <code>UNKNOWN</code> if unknown
+     * @return seconds remaining until the download will complete or <code>UNKNOWN</code> if unknown.
      */
 	public long getRemainingDownloadTime();
 	
     /**
-     * @return seconds remaining until the state will change or <code>UNKNOWN</code> if unknown
+     * @return seconds remaining until the state will change or <code>UNKNOWN</code> if unknown.
      */
     public long getRemainingTimeInState();
 
@@ -151,7 +161,7 @@ public interface DownloadItem extends PropertiableFile {
 	/**
 	 * @return A structure that holds the state of each download piece.
 	 */
-	DownloadPiecesInfo getPieceInfo();
+	DownloadPiecesInfo getPiecesInfo();
 	
 	/**
 	 * @return The media type of the file being downloaded.

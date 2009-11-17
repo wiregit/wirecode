@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
+import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +27,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadPiecesInfo.PieceState;
 import org.limewire.core.api.library.PropertiableFile;
@@ -77,9 +79,11 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     private int numPieces = -1;
     private int coalesceFactor;
     
+    private boolean finishedSuccessfully = false;
     private int cachedColumns;
     private int cachedRows;
     
+    private final JLabel statusLabel;
     private JLabel numPiecesLabel;
     private JLabel piecesPerCellLabel;
     private JLabel piecesSizeLabel;
@@ -87,6 +91,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     private JLabel uploadedLabel;
     private JLabel downloadedLabel;
     private JLabel piecesCompletedLabel;
+    private JLabel failedDownloadLabel;
     
     public FileInfoPiecesPanel(FileInfoType type, final DownloadItem download) {
         this.download = download;
@@ -98,22 +103,22 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         
         component = new JPanel(new MigLayout("insets 6 0 0 0"));
         component.setOpaque(false);
-        
-        piecesInfo = download.getPieceInfo();
-        
-        if (piecesInfo == null) {
-            component.add(new JLabel(I18n.tr("No piece data available.")));
-            return;
-        }
-        
-        numPiecesLabel = createLabel("");
-        piecesPerCellLabel = createLabel("");
-        piecesCompletedLabel = createLabel("");
-        piecesSizeLabel = createLabel("");
-        downloadedLabel = createLabel("");
                 
-        grid = new PiecesGrid(0, 0);
-        calculatePieceData();
+        numPiecesLabel = createLabel("?");
+        piecesPerCellLabel = createLabel("?");
+        piecesCompletedLabel = createLabel("?");
+        piecesSizeLabel = createLabel("?");
+        downloadedLabel = createLabel("?");
+        failedDownloadLabel = createLabel("?");
+                
+        grid = new PiecesGrid();
+        
+        statusLabel = new JLabel(I18n.tr("Preparing View..."));
+        grid.setLayout(new GridBagLayout());
+        grid.add(statusLabel);
+                
+        ResizeUtils.forceSize(grid, new Dimension(MAX_CELL_WIDTH*NUM_COLUMNS, 
+                MAX_CELL_HEIGHT*MAX_NUM_ROWS));
 
         final JPanel infoPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
         infoPanel.setOpaque(false);
@@ -134,9 +139,9 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         
         JPanel bottomLegend = new JPanel(new MigLayout("insets 0, gap 6, fillx"));
         bottomLegend.setOpaque(false);
-        bottomLegend.add(createLabel(I18n.tr("Pieces per Cell:")), "dock center");
-        bottomLegend.add(piecesPerCellLabel, "dock center");
-        legendPanel.add(bottomLegend, "span");
+        bottomLegend.add(createLabel(I18n.tr("Pieces per Cell:")));
+        bottomLegend.add(piecesPerCellLabel);
+        legendPanel.add(bottomLegend, "gaptop 5, span, alignx 50%");
         
         JPanel rightPanel = new JPanel(new MigLayout("fillx, gap 0, insets 0"));
         rightPanel.setOpaque(false);
@@ -155,6 +160,9 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         infoPanel.add(createBoldLabel(I18n.tr("Downloaded:")), "split 2");
         infoPanel.add(downloadedLabel, "wrap");
         
+        infoPanel.add(createBoldLabel(I18n.tr("Failed Download:")), "split 2");
+        infoPanel.add(failedDownloadLabel, "wrap");
+        
         if (download.getDownloadItemType() == DownloadItemType.BITTORRENT) {
             torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
         
@@ -172,17 +180,35 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         component.add(infoPanel, "growx");
         
         refresher = new Timer(REFRESH_DELAY, new ActionListener() {
+
             @Override
             public void actionPerformed(ActionEvent e) {
-                int newNum = calculatePieceData();
-                
-                // No pieces in view/finished.
-                // TODO: make less quirky 
-                if (newNum == 0) {
+
+                if (isFinished()) {
                     refresher.stop();
+                    
+                    if (download.getState() == DownloadState.CANCELLED) {
+                        grid.setAlpha(.5f);
+                        statusLabel.setText(I18n.tr("Download Cancelled!"));
+                        statusLabel.setVisible(true);
+                        grid.repaint();
+                    } else {
+                        finishedSuccessfully = true;
+                        if (numPieces > 0) {
+                            for ( int i=0 ; i<grid.getCells() ; i++ ) {
+                                grid.setPaint(i, downloadedForeground);
+                            }
+                        } else {
+                            statusLabel.setText(I18n.tr("Download Already Finished!"));
+                        }
+                    }
+                } 
+                else {
+                    if (calculatePieceData() > 0) {
+                        updateTable();
+                    }
                 }
                 
-                updateTable();
                 grid.repaint();
                 
                 // Hack to get the legends margin to line up with the table edge despite
@@ -196,18 +222,26 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                 
                 updateDownloadDetails();
             }
+
+            private boolean isFinished() {
+                DownloadState state = download.getState();
+                return state == DownloadState.DONE || state == DownloadState.FINISHING
+                         || state == DownloadState.CANCELLED;
+            }
         });
         
+        refresher.setInitialDelay(0);
         refresher.start();
-        updateTable();
-        updateDownloadDetails();
     }
     
     private int calculatePieceData() {
-        piecesInfo = download.getPieceInfo();
+        piecesInfo = download.getPiecesInfo();
         int newNum = piecesInfo.getNumPieces();
         if(newNum != numPieces && newNum != 0) {
-            // if the number of pieces has changed, resize the grid.
+            // Hide any previous status messages
+            statusLabel.setVisible(false);
+            
+            // If the number of pieces has changed, resize the grid.
             numPieces = newNum;
             setupGrid();
         }
@@ -259,23 +293,42 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     }
     
     private void updateDownloadDetails() {
-        // TODO: remove this logic after cleaning up lib torrent completed state.
-        int completed = piecesInfo.getNumPiecesCompleted();
-        String completedText;
-        if (completed == -2) {
-            completedText = "" + numPieces;  
-        } 
-        else if (completed == -1) {
-            completedText = "unknown!";
-        } 
-        else {
-            completedText = "" + completed;
+        
+        long currentSize = download.getCurrentSize();
+        long verifiedSize = download.getAmountVerified();
+        
+        String downloadString = GuiUtils.formatUnitFromBytes(currentSize);
+        
+        // Don't show verification unless the numbers deviate more than one byte
+        if (currentSize - verifiedSize > 1000) {
+            downloadString += " " + I18n.tr("({0} verified)", GuiUtils.formatUnitFromBytes(verifiedSize));
         }
         
-        downloadedLabel.setText(GuiUtils.formatUnitFromBytes(download.getCurrentSize()));
-        piecesCompletedLabel.setText(completedText);
-        numPiecesLabel.setText("" + numPieces);
-        piecesSizeLabel.setText("" + GuiUtils.formatUnitFromBytes(piecesInfo.getPieceSize()));        
+        downloadedLabel.setText(downloadString);
+        
+        if (numPieces > 0) {
+            numPiecesLabel.setText("" + numPieces);
+        } 
+        
+        if (piecesInfo != null) {
+            int completed = piecesInfo.getNumPiecesCompleted();
+        
+            String completedText;
+            if (finishedSuccessfully) {
+                completedText = "" + numPieces;  
+            } 
+            else if (completed == -1) {
+                completedText = "unknown!";
+            } 
+            else {
+                completedText = "" + completed;
+            }
+            
+            piecesCompletedLabel.setText(completedText);
+            piecesSizeLabel.setText(GuiUtils.formatUnitFromBytes(piecesInfo.getPieceSize()));
+        }
+                
+        failedDownloadLabel.setText(GuiUtils.formatUnitFromBytes(download.getAmountLost()));
         
         if (torrent != null) {
             uploadedLabel.setText(GuiUtils.formatUnitFromBytes(torrent.getTotalUploaded()));
@@ -284,7 +337,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     }
     
     private void updateTable() {
-        
+ 
         // Correction if per chance the number of cells or rows is changed.
         if (cachedRows != grid.getRows() || cachedColumns != grid.getColumns()) {
             cachedRows = grid.getRows();

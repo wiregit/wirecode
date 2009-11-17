@@ -167,6 +167,11 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
      */
     public int num_incomplete;
     
+    /**
+     * Amount of download data that has been discarded due to error.
+     */
+    public long total_failed_bytes;
+    
     @Override
     public float getDownloadPayloadRate() {
         return download_payload_rate;
@@ -217,6 +222,11 @@ public class LibTorrentStatus extends Structure implements TorrentStatus {
         return all_time_payload_upload;
     }
 
+    @Override
+    public long getTotalFailedDownload() {
+        return total_failed_bytes;
+    }
+    
     @Override
     public boolean isPaused() {
         return paused != 0;

@@ -145,7 +145,16 @@ class CoreDownloadItem implements DownloadItem {
         } else {
             return cachedSize;
         }
-
+    }
+    
+    @Override
+    public long getAmountVerified() {
+        return downloader.getAmountVerified();
+    }
+    
+    @Override
+    public long getAmountLost() {
+        return downloader.getAmountLost();
     }
 
     @Override
@@ -159,7 +168,7 @@ class CoreDownloadItem implements DownloadItem {
     }
     
     @Override 
-    public DownloadPiecesInfo getPieceInfo() {
+    public DownloadPiecesInfo getPiecesInfo() {
         return downloader.getPieceInfo();
     }
 

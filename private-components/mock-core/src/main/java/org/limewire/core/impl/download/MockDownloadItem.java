@@ -302,8 +302,18 @@ public class MockDownloadItem implements DownloadItem {
     }
 
     @Override
-    public DownloadPiecesInfo getPieceInfo() {
+    public DownloadPiecesInfo getPiecesInfo() {
         return null;
+    }
+
+    @Override
+    public long getAmountLost() {
+        return 0;
+    }
+
+    @Override
+    public long getAmountVerified() {
+        return 0;
     }
 
 }

@@ -263,7 +263,7 @@ interface LibTorrent extends Library {
     /**
 	 * Passes back the states of each piece in the torrent.
 	 */
-    public WrapperStatus get_pieces_status(String sha1, LibTorrentPiecesInfo info);
+    public WrapperStatus get_pieces_status(String sha1, LibTorrentPiecesInfoContainer info);
     
     /**
 	 * Frees the memory consumed by the pieces data memory allocated by
