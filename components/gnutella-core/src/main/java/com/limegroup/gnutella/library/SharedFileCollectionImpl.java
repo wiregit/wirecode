@@ -21,8 +21,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.hashing.AudioHashingUtils;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent.Type;
-import com.limegroup.gnutella.metadata.audio.MP3HashingUtils;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 
@@ -172,7 +172,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     private void calculateNonMetaDataHash(final FileDesc fileDesc) {
         if(URNSettings.USE_NON_METADATA_HASH.get() && 
             fileDesc.getNMS1Urn() == null &&
-            MP3HashingUtils.canCreateNonMetaDataSHA1(fileDesc.getFile())) {
+            AudioHashingUtils.canCreateNonMetaDataSHA1(fileDesc.getFile())) {
                 ListeningFuture<URN> urnFuture = urnCache.calculateAndCacheNMS1(fileDesc.getFile());
                 urnFuture.addFutureListener(new EventListener<FutureEvent<URN>>(){
                     @Override

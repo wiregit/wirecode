@@ -37,7 +37,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.metadata.audio.MP3HashingUtils;
+import com.limegroup.gnutella.hashing.AudioHashingUtils;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -387,9 +387,9 @@ public final class UrnCache {
             if (UrnSet.getNMS1(urns) == null) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("Hashing nmsa file: " + file);
-                if(MP3HashingUtils.canCreateNonMetaDataSHA1(file)) {
+                if(AudioHashingUtils.canCreateNonMetaDataSHA1(file)) {
                     try {
-                        nms1 = MP3HashingUtils.generateNonMetaDataSHA1FromFile(file);
+                        nms1 = AudioHashingUtils.generateNonMetaDataSHA1FromFile(file);
                         if(nms1 != null) {
                             UrnSet set = new UrnSet();
                             synchronized (UrnCache.this) {

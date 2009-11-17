@@ -15,7 +15,8 @@ import org.limewire.io.GUID;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.gnutella.metadata.audio.MP3HashingUtils;
+import com.limegroup.gnutella.hashing.AudioHashingUtils;
+import com.limegroup.gnutella.hashing.NonMetaDataHasher;
 
 
 /**
@@ -235,11 +236,11 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	}
 	
 	/**
-	 * Tests the same file with different combinations of tags.
+	 * Tests the same MP3 file with different combinations of tags.
 	 * All of the tags should be ignored and only the audio portion
 	 * of the file hashed.
 	 */
-	public void testUrnNonMetaDataHash() throws Exception {
+	public void testMP3UrnNonMetaDataHash() throws Exception {
         File blankFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/BlankMP3.mp3");
         Assert.assertTrue(blankFile.exists());
         File id3V1File = TestUtils.getResourceFile("com/limegroup/gnutella/resources/ID3V1MP3.mp3");
@@ -260,16 +261,16 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
         Assert.assertTrue(aDifferentFile.exists());
         
         URN blankSHA1 = URN.createSHA1Urn(blankFile);
-        URN blankURN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
-        URN id3V1URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(id3V1File);
+        URN blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
+        URN id3V1URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V1File);
         URN id3V2SHA1 = URN.createSHA1Urn(id3V2File);
-        URN id3V2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(id3V2File);
-        URN id3V1_id3V2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(id3V1_id3V2File);
-        URN image_id3V2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(imageTag_id3V2File);
-        URN lyricsV2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2TagFile);
-        URN lyricsV2_id3V1URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2Tag_id3V1File);
-        URN apeV2URN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(apeTagV2File);
-        URN differentURN = MP3HashingUtils.generateNonMetaDataSHA1FromFile(aDifferentFile);
+        URN id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V2File);
+        URN id3V1_id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V1_id3V2File);
+        URN image_id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(imageTag_id3V2File);
+        URN lyricsV2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2TagFile);
+        URN lyricsV2_id3V1URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2Tag_id3V1File);
+        URN apeV2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(apeTagV2File);
+        URN differentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(aDifferentFile);
         
         assertEquals(blankURN.getBytes(), blankSHA1.getBytes());
         assertEquals(blankURN, id3V1URN);
@@ -290,7 +291,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 
         URN modifiedSHA1 = URN.createSHA1Urn(copyId3V2File);
         assertEquals(modifiedSHA1, id3V2SHA1);
-        URN modifiedId3V2URN = createURNModifiedMetaData(copyId3V2File);
+        URN modifiedId3V2URN = createURNModifiedMetaData(AudioHashingUtils.getHasher(copyId3V2File), copyId3V2File);
         assertEquals(modifiedId3V2URN, id3V2URN);
         
         // copies an id3v2 mp3 and modifies the audio portion of the file.
@@ -302,19 +303,56 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
         
         modifiedSHA1 = URN.createSHA1Urn(copyId3V2File);
         assertEquals(modifiedSHA1, id3V2SHA1);
-        modifiedId3V2URN = createURNModifiedAudio(copyId3V2File);
+        modifiedId3V2URN = createURNModifiedAudio(AudioHashingUtils.getHasher(copyId3V2File), copyId3V2File);
         assertNotEquals(modifiedId3V2URN, id3V2URN);
 	}
+	
+	/**
+     * Tests the same FLAC file with different combinations of tags.
+     * All of the Headers should be ignored and only the audio portion
+     * of the file hashed.
+     */
+    public void testFLACUrnNonMetaDataHash() throws Exception {
+        File blankFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/Flac_Blank.flac");
+        Assert.assertTrue(blankFile.exists());
+        File oggComment = TestUtils.getResourceFile("com/limegroup/gnutella/resources/Flac_OggComment.flac");
+        Assert.assertTrue(oggComment.exists());
+        
+        URN blankSHA1 = URN.createSHA1Urn(blankFile);
+        URN blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
+        URN oggCommentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(oggComment);
+        
+        assertNotEquals(blankURN.getBytes(), blankSHA1.getBytes());
+        assertEquals(blankURN, oggCommentURN);
+    }
+    
+    /** Tests the same OGG file with different combinations of tags.
+     *  All of the Headers should be ignored and only the audio portion
+     *  of the file hashed.
+     */
+    public void testOGGUrnNonMetaDataHash() throws Exception {
+        File blankFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/Ogg_Blank.ogg");
+        Assert.assertTrue(blankFile.exists());
+        File oggComment = TestUtils.getResourceFile("com/limegroup/gnutella/resources/Ogg_OggComment.ogg");
+        Assert.assertTrue(oggComment.exists());
+        
+        URN blankSHA1 = URN.createSHA1Urn(blankFile);
+        URN blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
+        URN oggCommentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(oggComment);
+        
+        assertNotEquals(blankURN.getBytes(), blankSHA1.getBytes());
+        assertEquals(blankURN, oggCommentURN);
+    }
 	
 	/**
 	 * Modifies the metadata portion of the file prior to generating the 
 	 * Non-MetaDataSHA1. This is done after the locations are calculated
 	 * to ensure the proper audio/non-audio portion of the file is located.
 	 */
-	private URN createURNModifiedMetaData(File file) throws Exception {
+	private URN createURNModifiedMetaData(NonMetaDataHasher hasher, File file) throws Exception {
 	    
-	    long startPosition = MP3HashingUtils.getAudioStartPosition(file);
-	    long endPosition = MP3HashingUtils.getAudioEndPosition(file);
+	    long startPosition = hasher.getStartPosition();
+	    long endPosition = hasher.getEndPosition();
 	    
 	    writeToFile(file, 100, 8);
 	    return URN.generateNMS1FromFile(file, startPosition, endPosition - startPosition);
@@ -325,10 +363,10 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
      * Non-MetaDataSHA1. This is done after the locations are calculated
      * to ensure the proper audio/non-audio portion of the file is located.
 	 */
-	private URN createURNModifiedAudio(File file) throws Exception {
+	private URN createURNModifiedAudio(NonMetaDataHasher hasher, File file) throws Exception {
         
-        long startPosition = MP3HashingUtils.getAudioStartPosition(file);
-        long endPosition = MP3HashingUtils.getAudioEndPosition(file);
+        long startPosition = hasher.getStartPosition();
+        long endPosition = hasher.getEndPosition();
 
         writeToFile(file, (int)startPosition + 100, 8);
 

@@ -1,11 +1,9 @@
-package com.limegroup.gnutella.metadata.audio;
+package com.limegroup.gnutella.hashing;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -14,21 +12,16 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.TagException;
-import org.limewire.io.IOUtils;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
-import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.URN;
-
 /**
- * Utility methods for locating the start/end of the audio portion of
- * a file and calculating the non-metadata hash. 
+ * Locates the beginning and end of the audio portion of an mp3 file. This 
+ * checks for ID3v1.0-ID3v2.4 tags, LYRICS3 tags, and APE tags. Tags
+ * located at the end of the audio stream are explicitely checked for. As
+ * a result, any padding added to the end of the audio stream is considered
+ * part of the audio portion of the file. 
  */
-public class MP3HashingUtils {
-    
-    private static final Log LOG = LogFactory.getLog(MP3HashingUtils.class);
+class MP3NonMetaDataHasher extends NonMetaDataHasher {
     
     /** Begining String of a LYRICS3 tag. */
     private static final String LYRICSBEGIN = "LYRICSBEGIN";
@@ -42,56 +35,33 @@ public class MP3HashingUtils {
     /** Begining/Ending String of a APE tag. */
     private static final String APETAG = "APETAGEX";
     
+    private final File file;
+    
+    MP3NonMetaDataHasher(File file) { 
+        this.file = file;
+    }
+    
     /**
-     * Attempts to locate the beginning and end of the audio portion of a 
-     * file. If they can be located, returns a URN with a SHA1 of the non-audio
-     * portion of the file, otherwise returns null.
+     * Returns the start position of the audio portion of this mp3. 
      */
-    public static URN generateNonMetaDataSHA1FromFile(File file) throws InterruptedException {
-        if(!canCreateNonMetaDataSHA1(file))
-            return null;
+    @Override
+    public long getStartPosition() throws IOException {
         try {
-            long startPosition = MP3HashingUtils.getAudioStartPosition(file);
-            long length = MP3HashingUtils.getAudioEndPosition(file);
-            length = length - startPosition;
-
-            return URN.generateNMS1FromFile(file, startPosition, length);            
+            AudioFile audioFile = AudioFileIO.read(file);
+            if(!(audioFile instanceof MP3File)) {
+                throw new IOException("Cannot cast to a MP3File");
+            }
+            MP3File mp3File = (MP3File) audioFile;
+            return mp3File.getMP3StartByte(mp3File.getFile());
         } catch (InvalidAudioFrameException e) {
-            LOG.error("Error reading audio frame: " + file.getName(), e);
-        } catch (IOException e) {
-            LOG.error("IOException reading file: " + file.getName(), e);
+            throw new IOException(e);
         } catch (CannotReadException e) {
-            LOG.error("Cannot read: " + file.getName(), e);
+            throw new IOException(e);
         } catch (TagException e) {
-            LOG.error("Error reading tag: " + file.getName(), e);
+            throw new IOException(e);
         } catch (ReadOnlyFileException e) {
-            LOG.error("Read only exception " + file.getName(), e);
-        } catch (NumberFormatException e) {
-            LOG.error("Illegal value while parsing tag size: " + file.getName(), e);
-        }
-        return null;
-    }
-    
-    /**
-     * Returns true if a non-metadata hash can successfully be
-     * created from this file, false otherwise.
-     */
-    public static boolean canCreateNonMetaDataSHA1(File file) {
-        String ext = FileUtils.getFileExtension(file);
-        return ext.equalsIgnoreCase("mp3");
-    }
-    
-    /**
-     * Returns the position within the file where audio starts.
-     */
-    public static long getAudioStartPosition(File file) throws CannotReadException, IOException, 
-                            TagException, ReadOnlyFileException, InvalidAudioFrameException  {
-        AudioFile audioFile = AudioFileIO.read(file);
-        if(!(audioFile instanceof MP3File)) {
-            throw new IOException("Cannot cast to a MP3File");
-        }
-        MP3File mp3File = (MP3File) audioFile;
-        return mp3File.getMP3StartByte(mp3File.getFile());
+            throw new IOException(e);
+        } 
     }
 
     /**
@@ -108,10 +78,20 @@ public class MP3HashingUtils {
      * Returns the position within the file where the audio or padding preceding 
      * any of these tags. If no tags are located, returns the length of the audio file. 
      */
-    public static long getAudioEndPosition(File file) throws CannotReadException, IOException, 
-                                TagException, ReadOnlyFileException, InvalidAudioFrameException,
-                                NumberFormatException {
-        AudioFile audioFile = AudioFileIO.read(file);
+    @Override
+    public long getEndPosition() throws IOException {
+        AudioFile audioFile;
+        try {
+            audioFile = AudioFileIO.read(file);
+        } catch (CannotReadException e) {
+            throw new IOException(e);
+        } catch (TagException e) {
+            throw new IOException(e);
+        } catch (ReadOnlyFileException e) {
+            throw new IOException(e);
+        } catch (InvalidAudioFrameException e) {
+            throw new IOException(e);
+        }
         if(!(audioFile instanceof MP3File)) {
             throw new IOException("Cannot cast to a MP3File");
         }
@@ -162,34 +142,7 @@ public class MP3HashingUtils {
     }
     
     /**
-     * Opens the file and fills the buffer with the contents
-     * located at the end of the file, filling the buffer's capacity.
-     */
-    private static void fillBuffer(ByteBuffer buffer, File file, int rearOffset) throws IOException {
-        FileInputStream fis = null;
-        buffer.rewind();
-        try {
-            // using a FIS because we're reading once to a set
-            // size buffer
-            fis = new FileInputStream(file);
-            FileChannel fc = fis.getChannel();
-            if(fc.size() >= buffer.capacity() + rearOffset) {
-                fc.position(fc.size() - buffer.capacity() - rearOffset);
-            } else {
-                fc.position(0);
-            }
-            int read = 0;
-            while(read < buffer.capacity() && read < fc.size()) {
-                read += fc.read(buffer);
-            }
-            buffer.limit(read);
-        } finally {
-            IOUtils.close(fis);
-        }
-    }
-    
-    /**
-     * LYRICS3 tags is an all text descriptor that contains lyrical debugrmation
+     * LYRICS3 tags is an all text descriptor that contains lyrical information
      * about an mp3. LYRICS3 tags are located at the end of an mp3 or if an
      * ID3v1.x tag exists, immediately preceding the ID3v1.x tag.
      * 
@@ -299,7 +252,7 @@ public class MP3HashingUtils {
     
     /**
      * The APETAG Footer looks like this:
-	 * 8 bytes - "APETAGEX"
+     * 8 bytes - "APETAGEX"
      * 4 bytes - version number
      * 4 bytes - size of tag, including the footer, but NOT including any header
      * 4 bytes - number of items in the tag
