@@ -74,7 +74,6 @@
 	<classpathentry kind="src" path="lib/resources/windows"/>
 	<classpathentry kind="src" path="lib/resources/linux"/>
 	<classpathentry kind="src" path="lib/resources/osx"/>
-	<classpathentry kind="src" output="components/facebook/build/classes" path="components/facebook/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/daap.jar"/>
@@ -141,15 +140,7 @@
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.2.jar" sourcepath="lib/sources/swing-worker-src-1.2.zip"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.0.10.jar" sourcepath="lib/sources/hsqldb-1.8.0.10-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jna-3.1.0.jar" sourcepath="lib/sources/jna-3.1.0-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/activation-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/jars/commons-lang-2.2.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jaxb-api-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jaxb-impl-2.1.9.jar"/>
 	<classpathentry kind="lib" path="lib/jars/json-20070829.jar"/>
-	<classpathentry kind="lib" path="lib/jars/runtime-0.4.1.3.jar"/>
-	<classpathentry kind="lib" path="lib/jars/stax-api-1.0-2.jar"/>
-	<classpathentry kind="lib" path="lib/jars/fb-java-api-2.1.1.jar" sourcepath="lib/sources/facebook-java-api-2.1.1-src.jar"/>
-	<classpathentry kind="lib" path="lib/jars/fb-java-api-schema-2.1.1.jar" sourcepath="lib/sources/facebook-java-api-2.1.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/glazedlists-snapshot20090628_java15.jar" sourcepath="lib/sources/glazedlists-snapshot20090628-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-1.0.jar" sourcepath="lib/sources/swingx-1.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/guice-2.0-snapshot20090814.jar" sourcepath="lib/sources/guice-2.0-snapshot20090814-src.jar"/>

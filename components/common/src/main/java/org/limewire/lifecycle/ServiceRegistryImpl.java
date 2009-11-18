@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.ClassUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.logging.Log;
@@ -219,7 +218,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
                     Stopwatch stopwatch = new Stopwatch(LOG);
                     service.start();
                     if(LOG.isTraceEnabled()) {
-                        stopwatch.resetAndLog("started " + ClassUtils.getShortClassName(service.getClass()));
+                        stopwatch.resetAndLog("started " + service.getClass());
                     }
                 }
             }
@@ -230,7 +229,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
                         Stopwatch stopwatch = new Stopwatch(LOG);
                         service.start();
                         if(LOG.isTraceEnabled()) {
-                            stopwatch.resetAndLog("started " + ClassUtils.getShortClassName(service.getClass()));
+                            stopwatch.resetAndLog("started " + service.getClass());
                         }
                     }
                 }, "ServiceRegistry-start-" + service.getServiceName());
@@ -248,7 +247,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
                     Stopwatch stopwatch = new Stopwatch(LOG);
                     service.stop();
                     if(LOG.isTraceEnabled()) {
-                        stopwatch.resetAndLog("stopped " + ClassUtils.getShortClassName(service.getClass()));
+                        stopwatch.resetAndLog("stopped " + service.getClass());
                     }
                 }
             }
@@ -269,7 +268,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
                         Stopwatch stopwatch = new Stopwatch(LOG);
                         service.stop();
                         if(LOG.isTraceEnabled()) {
-                            stopwatch.resetAndLog("stopped " + ClassUtils.getShortClassName(service.getClass()));
+                            stopwatch.resetAndLog("stopped " + service.getClass());
                         }
                     }
                 }, "ServiceRegistry-stop-" + service.getServiceName());

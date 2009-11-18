@@ -9,7 +9,6 @@
     </publications>
     <dependencies>
         <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
-        <dependency org="none" name="commons-lang" rev="${commons-lang.version}" conf="compile,runtime"/>
         <dependency org="none" name="icu4j" rev="${icu4j.version}" conf="compile,runtime"/>
         <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="none" name="aopalliance" rev="${aopalliance.version}" conf="runtime"/>

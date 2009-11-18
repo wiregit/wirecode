@@ -15,13 +15,13 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.settings.FacebookSettings;
 import org.limewire.friend.api.FriendConnectionFactory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
-import org.limewire.ui.swing.friends.settings.FacebookFriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -30,8 +30,6 @@ import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import net.miginfocom.swing.MigLayout;
 
 public class ServiceSelectionLoginPanel extends JPanel {
     
@@ -53,8 +51,7 @@ public class ServiceSelectionLoginPanel extends JPanel {
     @Inject
     public ServiceSelectionLoginPanel(LoginPopupPanel parent, FriendAccountConfigurationManager accountManager,
             ButtonDecorator buttonDecorator, FriendConnectionFactory friendConnectionFactory,
-            Provider<XMPPUserEntryLoginPanelFactory> xmppLoginPanelFactory,
-            FacebookLoginActionFactory facebookLoginActionFactory) {
+            Provider<XMPPUserEntryLoginPanelFactory> xmppLoginPanelFactory) {
         
         super(new BorderLayout());
         setOpaque(false);
@@ -124,24 +121,10 @@ public class ServiceSelectionLoginPanel extends JPanel {
         JPanel selectionPanel = new JPanel(new MigLayout("nogrid, gap 0, insets 0 0 30 0, alignx center, filly"));
         selectionPanel.setOpaque(false);
         
-        FriendAccountConfiguration config = accountManager.getConfig("Facebook");
-        if (config != null && FacebookSettings.FACEBOOK_ENABLED.getValue()) {
-            loginAction = facebookLoginActionFactory.create((FacebookFriendAccountConfiguration)config);
-            loginActions.put(accountManager.getConfig("Facebook"), loginAction);
-            JXButton facebookButton = new JXButton(loginAction);
-            ResizeUtils.forceSize(facebookButton, new Dimension(180, 58));
-            buttonDecorator.decorateFlatButton(facebookButton);
-            
-            selectionPanel.add(facebookButton, "gaptop 10, gapright 30");
-            selectionPanel.add(gmailButton, "wrap");
-            selectionPanel.add(liveJournalButton, "gapright 30, gaptop 30");
-            selectionPanel.add(otherButton);
-        }
-        else {
-            selectionPanel.add(gmailButton, "gaptop 10, gapright 30");
-            selectionPanel.add(liveJournalButton, "wrap");
-            selectionPanel.add(otherButton, "gaptop 30, alignx center");
-        }
+        selectionPanel.add(gmailButton, "gaptop 10, gapright 30");
+        selectionPanel.add(liveJournalButton, "wrap");
+        selectionPanel.add(otherButton, "gaptop 30, alignx center");
+
         bottomPanel.add(selectionPanel);
         
         add(topPanel, BorderLayout.NORTH);

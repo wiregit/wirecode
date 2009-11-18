@@ -12,7 +12,6 @@ import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
-import org.limewire.core.settings.FacebookSettings;
 import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PasswordManager;
 import org.limewire.inject.LazySingleton;
@@ -20,7 +19,6 @@ import org.limewire.io.UnresolvedIpPort;
 import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
 
@@ -42,8 +40,6 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     @Resource private Icon gmailIconSmall;
     @Resource private Icon ljIconLarge;
     @Resource private Icon ljIconSmall;
-    @Resource private Icon facebookIconLarge;
-    @Resource private Icon facebookIconSmall;
     @Resource private Icon otherIconLarge;
     @Resource private Icon otherIconSmall;
     
@@ -112,11 +108,6 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     }
 
     private void loadWellKnownServers() {
-        if(MozillaInitialization.isInitialized() && FacebookSettings.FACEBOOK_ENABLED.get()) {
-            FriendAccountConfiguration facebook =
-                new FacebookFriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIconSmall, facebookIconLarge, resource, getGTalkServers(), Network.Type.FACEBOOK, this);
-            configs.put(facebook.getLabel(), facebook);
-        }
         FriendAccountConfiguration gmail =
             new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIconSmall, gmailIconLarge, resource, getGTalkServers(), Network.Type.XMPP);
         configs.put(gmail.getLabel(), gmail);
