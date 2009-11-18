@@ -889,6 +889,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         Torrent torrent = ret.getTorrent();
         if(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue() && !downloadCallback.get().promptTorrentFilePriorities(torrent)) {
             torrentManager.get().removeTorrent(torrent);
+            ret.deleteIncompleteFiles();
             throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
         } else {
             initializeDownload(ret, true);
