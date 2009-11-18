@@ -91,7 +91,8 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "Settings Saver", "SettingsSaverService",
         "URNBlacklistManager", "URNBlacklistManagerImpl",
         "GeocodeLocation", "CachedGeoLocationImpl",
-        "UPnPManager", "UPnPManager"
+        "UPnPManager", "UPnPManager",
+        "simpp sender snapshot", "ScheduledService"
         };
         
         List<String> missing = new ArrayList<String>();
