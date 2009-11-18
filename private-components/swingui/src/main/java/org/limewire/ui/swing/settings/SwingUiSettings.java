@@ -127,7 +127,7 @@ public final class SwingUiSettings extends LimeProps {
     @InspectableContainer
     private static class LazyInspectableContainer {
         @InspectionPoint(value = "search view", category = DataCategory.USAGE)
-        private static final Inspectable numberOfLists = new Inspectable() {
+        private static final Inspectable searchViewType = new Inspectable() {
             @Override
             public Object inspect() {
                 return SEARCH_VIEW_TYPE_ID.get() == 1 ? "table" : "list";

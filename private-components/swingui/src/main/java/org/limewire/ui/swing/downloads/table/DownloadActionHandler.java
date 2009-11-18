@@ -16,8 +16,6 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -54,10 +52,6 @@ public class DownloadActionHandler {
     public final static String SHARE_COMMAND = "share";
     public final static String CHANGE_LOCATION_COMMAND = "change location";
     public final static String SEARCH_AGAIN_COMMAND = "search again";
-    
-    //static to keep count for all instances of DownloadActionHandler
-    @InspectablePrimitive(value = "number of completed downloads launched", category = DataCategory.USAGE)
-    private volatile static int downloadsLaunched = 0;
     
    // private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
     
@@ -101,9 +95,6 @@ public class DownloadActionHandler {
         } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND || actionCommmand == PLAY_COMMAND){
             if (item.isLaunchable()) {
                 DownloadItemUtils.launch(item, categoryManager);
-                if(actionCommmand != PREVIEW_COMMAND){
-                    downloadsLaunched++;
-                }
             }
         } else if (actionCommmand == LOCATE_COMMAND){
             if(item.getDownloadingFile() != null) {

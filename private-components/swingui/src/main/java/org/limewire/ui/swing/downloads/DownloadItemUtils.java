@@ -8,13 +8,19 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.DataCategory;
 
 public class DownloadItemUtils {
     
     private DownloadItemUtils() {}
+    
+    @InspectablePrimitive(value = "number of completed downloads launched", category = DataCategory.USAGE)
+    private static volatile int downloadsLaunched = 0;
     
     /**
      * Launches the download, loading the launchable portion in the background
@@ -45,6 +51,10 @@ public class DownloadItemUtils {
                 }
             }
         }.execute();
+        
+        if (downloadItem.getState() == DownloadState.DONE) {
+            downloadsLaunched++;   
+        }
     }
 
 }

@@ -155,10 +155,10 @@ class SharedFileListManagerImpl implements SharedFileListManager {
 
 
     @InspectablePrimitive(value = "number of lists created", category = DataCategory.USAGE)
-    private long listsCreated;
+    private volatile long listsCreated;
     
     @InspectablePrimitive(value = "number of lists shared", category = DataCategory.USAGE)
-    private long listsShared;
+    private volatile long listsShared;
     
     
     @Inject
@@ -258,6 +258,9 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         boolean isEmpty = newFriendIds.isEmpty();
         // if it changed from empty => not empty, or not empty => empty, trigger an update.
         if(wasEmpty != isEmpty) {
+            if (!isEmpty) {
+                listsShared++;    
+            }
             setListInPlace(collection);
         }
     }

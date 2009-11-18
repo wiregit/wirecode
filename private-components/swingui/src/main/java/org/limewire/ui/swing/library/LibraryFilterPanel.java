@@ -7,6 +7,11 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -116,6 +121,11 @@ public class LibraryFilterPanel {
 
         component.add(categoryList, "growy");
         component.add(promptTextField, "alignx right");
+        
+        // track usage of library text filter
+        TextFilterUsageTracker usageTracker = new TextFilterUsageTracker();
+        promptTextField.addFocusListener(usageTracker);
+        promptTextField.addKeyListener(usageTracker);
     }
     
     public JComponent getComponent() {
@@ -232,5 +242,20 @@ public class LibraryFilterPanel {
             setAntialiasing(true);
             setCacheable(true);
         }
+    }
+    
+    private static class TextFilterUsageTracker extends KeyAdapter implements KeyListener, FocusListener {
+
+        private boolean canCountUsageIfKeyIsPressed;
+        
+        @Override
+        public void keyTyped(KeyEvent e) {
+            if (canCountUsageIfKeyIsPressed) {
+                canCountUsageIfKeyIsPressed = false;
+                LibraryInspectionUtils.textFilterUsed();
+            }
+        }
+        @Override public void focusGained(FocusEvent e) { canCountUsageIfKeyIsPressed = true; }
+        @Override public void focusLost(FocusEvent e) { canCountUsageIfKeyIsPressed = false; }
     }
 }
