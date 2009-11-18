@@ -426,7 +426,7 @@ public class InspectionUtilsTest extends BaseTestCase {
         @SuppressWarnings("unused") int x = 9;
         
         static boolean created = false;
-        NotGuiced() { created = true; }
+        @SuppressWarnings("unused") NotGuiced() { created = true; }
     }
     
     private static interface IConcrete {}
