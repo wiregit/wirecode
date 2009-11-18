@@ -142,10 +142,6 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
         initializeComponents();
         initializeTabList();
         layoutComponents();
-        //TODO remove the select tab functionality. 
-        //Right now it is needed to ensure the uploads tab is created when there are no uploads.
-        selectTab(TabId.UPLOADS);
-        selectTab(TabId.DOWNLOADS);
         updateSelection();
     }
 
@@ -308,6 +304,10 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
                 selectionTopBorderColor, selectionBottomBorderColor));
         tabList.setHighlightPainter(new TabPainter(highlightBackground, highlightBackground, 
                 highlightBorderColor, highlightBorderColor));
+        
+        //preselecting tabs so the cardlayout in BottomPanel is setup appropriately. 
+        selectTab(TabId.UPLOADS);
+        selectTab(TabId.DOWNLOADS);
     }
     
     /**
