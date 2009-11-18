@@ -5,10 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import junit.framework.Test;
+
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-
-import junit.framework.Test;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
@@ -114,15 +114,19 @@ public final class MessageWriterTest extends LimeTestCase {
 	    assertEquals(1, STATS.getSent());
 	    assertTrue(WRITER.handleWrite()); // still stuff left to write.
 	    assertTrue(SINK.interested());
-	    assertEquals(1, SENT.size()); // it's sent, even though the other side didn't receive it fully yet.
-	    assertEquals(buffer(m), buffer(SENT.next()));	    
+	    assertEquals(0, SENT.size()); // no sent event yet, since message is not fully sent yet
+	    // getBuffer() flips buffer, so limit should represent current write position
+	    ByteBuffer readBuffer = SINK.getBuffer();
+	    assertEquals(m.getTotalLength() - 20, readBuffer.limit());
     	    
 	    ByteBuffer buffer = ByteBuffer.allocate(m.getTotalLength());
-	    buffer.put(SINK.getBuffer());
+	    buffer.put(readBuffer);
 	    SINK.resize(100000);
 	    
 	    assertFalse(WRITER.handleWrite());
 	    assertFalse(SINK.interested());
+	    // now it's fully read
+	    assertEquals(1, SENT.size());
 	    buffer.put(SINK.getBuffer());
 	    Message in = read((ByteBuffer)buffer.flip());
 	    assertEquals(buffer(m), buffer(in));
@@ -142,12 +146,13 @@ public final class MessageWriterTest extends LimeTestCase {
 	    assertEquals(0, SENT.size());
 	    assertTrue(WRITER.handleWrite());
 	    assertTrue(SINK.interested());
-	    assertEquals(2, SENT.size()); // two were sent, one was received.
+	    assertEquals(1, SENT.size()); // one message was sent fully so far
 	    assertEquals(buffer(out1), buffer(SENT.next()));
-	    assertEquals(buffer(out2), buffer(SENT.next()));
+	    ByteBuffer readBuffer = SINK.getBuffer();
+	    assertEquals(out1.getTotalLength() + 20, readBuffer.limit());
 	    
 	    ByteBuffer buffer = ByteBuffer.allocate(1000);
-	    buffer.put(SINK.getBuffer()).flip();
+	    buffer.put(readBuffer).flip();
 	    SINK.resize(10000);
 	    
 	    read(buffer);
@@ -158,7 +163,9 @@ public final class MessageWriterTest extends LimeTestCase {
 	    WRITER.send(out3);
 	    assertEquals(3, STATS.getSent());
 	    assertFalse(WRITER.handleWrite());
-	    assertEquals(1, SENT.size());
+	    // now the second and last message should have been sent
+	    assertEquals(2, SENT.size());
+	    assertEquals(buffer(out2), buffer(SENT.next()));
 	    assertEquals(buffer(out3), buffer(SENT.next()));
 	    assertFalse(SINK.interested());
 	    buffer.put(SINK.getBuffer()).flip();
