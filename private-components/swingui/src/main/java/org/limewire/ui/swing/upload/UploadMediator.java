@@ -5,9 +5,7 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -122,8 +120,7 @@ public class UploadMediator {
         // Add list listener to enable "clear finished" button.
         EventList<UploadItem> doneList = GlazedListsFactory.filterList(
                 uploadListManager.getSwingThreadSafeUploads(), 
-                new UploadStateMatcher(true, UploadState.DONE, UploadState.CANCELED, 
-                        UploadState.BROWSE_HOST_DONE, UploadState.UNABLE_TO_UPLOAD));
+                new FinishedUploadMatcher(true));
         doneList.addListEventListener(new ListEventListener<UploadItem>() {
             @Override
             public void listChanged(ListEvent<UploadItem> listChanges) {
@@ -168,8 +165,7 @@ public class UploadMediator {
         if (activeList == null) {
             activeList = GlazedListsFactory.filterList(
                     uploadListManager.getSwingThreadSafeUploads(), 
-                    new UploadStateMatcher(false, UploadState.DONE, UploadState.CANCELED, 
-                            UploadState.BROWSE_HOST_DONE, UploadState.UNABLE_TO_UPLOAD));
+                    new FinishedUploadMatcher(false));
         }
         return activeList;
     }
@@ -302,14 +298,14 @@ public class UploadMediator {
     }
     
     /**
-     * Returns true if any uploads are in the specified state.
+     * Returns true if any uploads are in an error state.
      */
-    public boolean hasState(UploadState state) {
+    public boolean hasErrors() {
         EventList<UploadItem> uploadList = getUploadList();
         uploadList.getReadWriteLock().readLock().lock();
         try {
             for (UploadItem item : uploadList) {
-                if (item.getState() == state) return true;
+                if (item.getState().isError()) return true;
             }
         } finally {
             uploadList.getReadWriteLock().readLock().unlock();
@@ -362,8 +358,7 @@ public class UploadMediator {
      */
     public static boolean isRemovable(UploadItem uploadItem) {
         UploadState state = uploadItem.getState();
-        return (state == UploadState.DONE) || (state == UploadState.BROWSE_HOST_DONE) ||
-            (state == UploadState.CANCELED) || (state == UploadState.UNABLE_TO_UPLOAD);
+        return state.isFinished() || state.isError();
     }
     
     /**
@@ -432,7 +427,7 @@ public class UploadMediator {
     public void cancelAllError() {
         List<UploadItem> uploadList = new ArrayList<UploadItem>(getUploadList());
         for (UploadItem item : uploadList) {
-            if (item.getState() == UploadState.UNABLE_TO_UPLOAD) cancel(item, false);
+            if (item.getState().isError()) cancel(item, false);
         }
     }
     
@@ -499,26 +494,25 @@ public class UploadMediator {
     }
     
     /**
-     * Matcher to filter for upload states.
+     * Matcher to filter for finished or unfinished uploads.
      */
-    private static class UploadStateMatcher implements Matcher<UploadItem> {
+    private static class FinishedUploadMatcher implements Matcher<UploadItem> {
         private final boolean inclusive;
-        private final Set<UploadState> uploadStates;
         
         /**
-         * Constructs a matcher that either includes or excludes the specified
-         * upload states.
+         * Constructs a matcher that either includes or excludes finished 
+         * uploads.
          */
-        public UploadStateMatcher(boolean inclusive, UploadState first, UploadState... rest) {
+        public FinishedUploadMatcher(boolean inclusive) {
             this.inclusive = inclusive;
-            this.uploadStates = EnumSet.of(first, rest);
         }
         
         @Override
         public boolean matches(UploadItem item) {
             if (item == null) return false;
             
-            boolean match = uploadStates.contains(item.getState());
+            UploadState state = item.getState();
+            boolean match = state.isFinished() || state.isError();
             return inclusive ? match : !match;
         }
     }
@@ -590,7 +584,8 @@ public class UploadMediator {
             case UPLOADING: return 2;
             case PAUSED: return 3;
             case QUEUED: return 4;
-            case UNABLE_TO_UPLOAD: return 5;       
+            case FILE_ERROR: return 5;    
+            case LIMIT_REACHED: return 5;       
             case CANCELED: return 6;
             case BROWSE_HOST: return 7;
             case BROWSE_HOST_DONE: return 8;

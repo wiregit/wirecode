@@ -7,7 +7,6 @@ import java.text.NumberFormat;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.transfer.TransferRendererResources;
@@ -71,25 +70,14 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
         case QUEUED:
             return I18n.tr("Waiting...");
             
-        case UNABLE_TO_UPLOAD:
-            return getErrorMessage(item.getErrorState());
+        case FILE_ERROR:
+            return I18n.tr("Unable to upload: file error");
+            
+        case LIMIT_REACHED:
+            return I18n.tr("Unable to upload: upload limit reached");
 
         default:
             return "";
-        }
-    }
-    
-    /**
-     * Returns the display message for the specified upload error state.
-     */
-    private String getErrorMessage(UploadErrorState errorState) {
-        switch (errorState) {
-        case FILE_ERROR:
-            return I18n.tr("Unable to upload: file error"); 
-        case LIMIT_REACHED:
-            return I18n.tr("Unable to upload: upload limit reached");
-        default:
-            return I18n.tr("Unable to upload: {0}", errorState);
         }
     }
 }

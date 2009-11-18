@@ -12,7 +12,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.friend.api.Friend;
@@ -573,38 +572,6 @@ public class CoreUploadItemTest extends BaseTestCase {
 
         assertEquals(urn, upload1.getUrn());
         assertEquals(null, upload2.getUrn());
-        
-        context.assertIsSatisfied();
-    }
-    
-    public void testGetErrorState() {
-        Mockery context = new Mockery();
-        
-        final Uploader uploader1 = context.mock(Uploader.class);
-        final Uploader uploader2 = context.mock(Uploader.class);
-        final Uploader uploader3 = context.mock(Uploader.class);
-        final FriendPresence presence = context.mock(FriendPresence.class);
-        
-        CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
-        CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
-        CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
-        
-        context.checking(new Expectations() {
-            { 
-                allowing(uploader1).getState();
-                will(returnValue(UploadStatus.BANNED_GREEDY));
-                
-                allowing(uploader2).getState();
-                will(returnValue(UploadStatus.MALFORMED_REQUEST));
-                
-                allowing(uploader3).getState();
-                will(returnValue(UploadStatus.UPLOADING));
-                
-            }});
-
-        assertEquals(UploadErrorState.LIMIT_REACHED, upload1.getErrorState());
-        assertEquals(UploadErrorState.FILE_ERROR, upload2.getErrorState());
-        assertEquals(UploadErrorState.NO_ERROR, upload3.getErrorState());
         
         context.assertIsSatisfied();
     }

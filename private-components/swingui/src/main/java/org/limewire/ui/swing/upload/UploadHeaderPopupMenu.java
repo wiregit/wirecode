@@ -19,7 +19,6 @@ import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.options.OptionsDialog;
@@ -103,7 +102,7 @@ class UploadHeaderPopupMenu extends JPopupMenu {
                     uploadMediator.cancelAllError();
                 }
             }
-        }).setEnabled(uploadMediator.hasState(UploadState.UNABLE_TO_UPLOAD));
+        }).setEnabled(uploadMediator.hasErrors());
         
         cancelSubMenu.add(new AbstractAction(I18n.tr("All Torrents")) {
             @Override

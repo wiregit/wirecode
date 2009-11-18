@@ -73,8 +73,6 @@ public interface UploadItem extends PropertiableFile {
     public long getRemainingUploadTime();
 
     float getUploadSpeed();
-
-    UploadErrorState getErrorState();
     
     /**
      * Returns a collection of completed files for this upload item.

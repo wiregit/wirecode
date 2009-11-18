@@ -10,7 +10,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.friend.MockFriend;
@@ -145,11 +144,6 @@ public class MockUploadItem implements UploadItem {
     @Override
     public float getUploadSpeed() {
         return 1;
-    }
-
-    @Override
-    public UploadErrorState getErrorState() {
-        return UploadErrorState.FILE_ERROR;
     }
 
     @Override

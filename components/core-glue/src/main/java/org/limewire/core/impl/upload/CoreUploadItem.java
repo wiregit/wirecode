@@ -12,7 +12,6 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
@@ -72,7 +71,7 @@ class CoreUploadItem implements UploadItem {
         return uploader.getFileSize();
     }
     
-    public Uploader getUploader() {
+    Uploader getUploader() {
         return uploader;
     }
 
@@ -81,6 +80,7 @@ class CoreUploadItem implements UploadItem {
         switch (getUploaderStatus()) {
         case CANCELLED:
             return UploadState.CANCELED;
+            
         case COMPLETE:
             if(uploader.getUploadType() == UploadType.BROWSE_HOST){
                 return UploadState.BROWSE_HOST_DONE;
@@ -100,18 +100,19 @@ class CoreUploadItem implements UploadItem {
         case PAUSED:
             return UploadState.PAUSED;
             
-        case LIMIT_REACHED:
         case INTERRUPTED:
         case FILE_NOT_FOUND:
         case UNAVAILABLE_RANGE:
         case MALFORMED_REQUEST:
+            return UploadState.FILE_ERROR;
+            
+        case LIMIT_REACHED:
         case BANNED_GREEDY:
         case FREELOADER:
-            return UploadState.UNABLE_TO_UPLOAD;
+            return UploadState.LIMIT_REACHED;
             
         case BROWSE_HOST:
             return UploadState.BROWSE_HOST;
-
         }
 
         throw new IllegalStateException("Unknown Upload status : " + uploader.getState());
@@ -245,22 +246,6 @@ class CoreUploadItem implements UploadItem {
         } else {
             return UNKNOWN_TIME;
         }
-    }
-    
-    @Override
-    public UploadErrorState getErrorState() {
-        switch (uploader.getState()) {
-        case LIMIT_REACHED:
-        case BANNED_GREEDY:
-        case FREELOADER:
-            return UploadErrorState.LIMIT_REACHED;
-        case INTERRUPTED:
-        case FILE_NOT_FOUND:
-        case MALFORMED_REQUEST:
-        case UNAVAILABLE_RANGE:
-            return UploadErrorState.FILE_ERROR;       
-        }
-        return UploadErrorState.NO_ERROR;
     }
     
     @Override
