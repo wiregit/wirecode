@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
-import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JCheckBoxMenuItem;
 
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.friend.api.FriendConnection;
@@ -63,9 +63,9 @@ class ViewMenu extends MnemonicMenu {
     
     @Override
     public void createMenuItems() {
-        JRadioButtonMenuItem hideTransferTray =  new JRadioButtonMenuItem(hideTransferTrayTrayActionProvider.get());
-        JRadioButtonMenuItem showDownloads =  new JRadioButtonMenuItem(showHideDownloadTrayActionProvider.get());
-        JRadioButtonMenuItem showDownloadsAndUploads =  new JRadioButtonMenuItem(uploadTrayActionProvider.get());
+        JCheckBoxMenuItem hideTransferTray =  new JCheckBoxMenuItem(hideTransferTrayTrayActionProvider.get());
+        JCheckBoxMenuItem showDownloads =  new JCheckBoxMenuItem(showHideDownloadTrayActionProvider.get());
+        JCheckBoxMenuItem showDownloadsAndUploads =  new JCheckBoxMenuItem(uploadTrayActionProvider.get());
         
         boolean showTransfers = SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue();
         boolean showUploads = UploadSettings.SHOW_UPLOADS_IN_TRAY.getValue();
