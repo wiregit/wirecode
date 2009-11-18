@@ -345,4 +345,10 @@ public final class SwingUiSettings extends LimeProps {
      */
     public static final BooleanSetting SHOW_STORE_COMPONENTS = 
         FACTORY.createBooleanSetting("SHOW_STORE_COMPONENTS", false);
+    
+    /**
+     * Whether or not to show the downloads tray. Whether there are any active downloads or not.
+     */
+    public static final BooleanSetting SHOW_TRANSFERS_TRAY = FACTORY.createBooleanSetting(
+            "ALWAYS_SHOW_DOWNLOADS_TRAY", false);
 }

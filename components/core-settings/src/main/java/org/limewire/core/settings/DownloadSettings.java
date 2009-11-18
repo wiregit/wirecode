@@ -137,10 +137,5 @@ public class DownloadSettings extends LimeProps {
      */
     public static final BooleanSetting DELETE_CANCELED_DOWNLOADS = FACTORY.createBooleanSetting(
             "DELETE_CANCELED_DOWNLOADS", true);
-    
-    /**
-     * Whether or not to show the downloads tray. Whether there are any active downloads or not.
-     */
-    public static final BooleanSetting SHOW_DOWNLOADS_TRAY = FACTORY.createBooleanSetting(
-            "ALWAYS_SHOW_DOWNLOADS_TRAY", false);
+  
 }

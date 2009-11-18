@@ -20,8 +20,6 @@ import javax.swing.event.AncestorListener;
 
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
-import org.limewire.core.settings.DownloadSettings;
-import org.limewire.core.settings.UploadSettings;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -31,11 +29,8 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
-import org.limewire.ui.swing.downloads.DownloadVisibilityListener;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.event.DownloadVisibilityEvent;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
-import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
@@ -70,7 +65,6 @@ public class LimeWireSwingUI extends JPanel {
     private final ProNagController proNagController;
     private final LimeSplitPane splitPane;
     private final Provider<SignOnMessageLayer> signOnMessageProvider;
-    private final MainDownloadPanel mainDownloadPanel;
     private final BottomHeaderPanel bottomHeaderPanel;
     
 	@Inject
@@ -85,7 +79,7 @@ public class LimeWireSwingUI extends JPanel {
             MainDownloadPanel mainDownloadPanel,
             @GlobalLayeredPane JLayeredPane limeWireLayeredPane,
             BottomPanel bottomPanel,
-            BottomHeaderFactory bottomHeaderFactory) {
+            BottomHeaderPanel bottomHeaderPanel) {
     	GuiUtils.assignResources(this);
     	
     	this.topPanel = topPanel;  	
@@ -93,10 +87,7 @@ public class LimeWireSwingUI extends JPanel {
     	this.proNagController = proNagController;
     	this.signOnMessageProvider = signOnMessageProvider;
         this.centerPanel = new JPanel(new GridBagLayout());   
-        this.mainDownloadPanel = mainDownloadPanel;
-        
-        // Create bottom header panel.
-        bottomHeaderPanel = bottomHeaderFactory.create(bottomPanel);
+        this.bottomHeaderPanel = bottomHeaderPanel;
     	
         // Create split pane for bottom tray.
     	splitPane = createSplitPane(mainPanel, bottomPanel, 
@@ -136,32 +127,26 @@ public class LimeWireSwingUI extends JPanel {
 	
 	@Inject
 	public void registerListener(){
-	    mainDownloadPanel.addDownloadVisibilityListener(new DownloadVisibilityHandler());
-	    
-	    // Add listener for Uploads setting.
-	    UploadSettings.SHOW_UPLOADS_TRAY.addSettingListener(new SettingListener() {
-            @Override
-            public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeNowOrLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleUploadVisibilityChange(UploadSettings.SHOW_UPLOADS_TRAY.getValue());
-                    }
-                });
-            }
+	    SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener() {
+	       @Override
+	        public void settingChanged(SettingEvent evt) {
+	           SwingUtils.invokeNowOrLater(new Runnable() {
+	                @Override
+    	            public void run() {
+	                    setBottomTrayVisible(SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue());
+    	            } 
+	           });
+	        } 
 	    });
-        
+	    
         // Add listener to display bottom tray when the ancestor is made 
         // visible.  This occurs when the window is first displayed, and also
 	    // when it is restored from the system tray.
         addAncestorListener(new AncestorListener() {
             @Override
             public void ancestorAdded(AncestorEvent e) {
-                if (UploadSettings.SHOW_UPLOADS_TRAY.getValue()) {
-                    handleUploadVisibilityChange(true);
-                }
-                if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
-                    handleDownloadVisibilityChange(true);
+                if (SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue()) {
+                    setBottomTrayVisible(true);
                 }
             }
             
@@ -238,43 +223,6 @@ public class LimeWireSwingUI extends JPanel {
         return splitPane;
     }
 
-    private class DownloadVisibilityHandler implements DownloadVisibilityListener {
-        @Override
-        public void updateVisibility(DownloadVisibilityEvent event) {
-            handleDownloadVisibilityChange(event.getVisibility());
-        }
-    }
-   
-    /**
-     * Handles change in visible state of Downloads tray.
-     */
-    private void handleDownloadVisibilityChange(boolean visible) {
-        boolean uploadVisible = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
-        
-        if (visible) {
-            bottomHeaderPanel.selectTab(TabId.DOWNLOADS);
-        } else if (uploadVisible) {
-            bottomHeaderPanel.selectTab(TabId.UPLOADS);
-        }
-        
-        setBottomTrayVisible(visible || uploadVisible);
-    }
-    
-    /**
-     * Handles change in visible state of Uploads tray.
-     */
-    private void handleUploadVisibilityChange(boolean visible) {
-        boolean downloadVisible = DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue();
-        
-        if (visible) {
-            bottomHeaderPanel.selectTab(TabId.UPLOADS);
-        } else if (downloadVisible) {
-            bottomHeaderPanel.selectTab(TabId.DOWNLOADS);
-        }
-        
-        setBottomTrayVisible(visible || downloadVisible);
-    }
-    
     /**
      * Sets the visibility of the downloads/uploads tray.
      */

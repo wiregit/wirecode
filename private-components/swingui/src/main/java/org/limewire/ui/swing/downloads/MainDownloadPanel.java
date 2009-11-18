@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -19,13 +18,12 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.settings.DownloadSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
-import org.limewire.ui.swing.event.DownloadVisibilityEvent;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -50,7 +48,6 @@ public class MainDownloadPanel extends JPanel {
     private final Provider<DownloadTableFactory> downloadTableFactory;
     private final DownloadListManager downloadListManager;
     private final CategoryManager categoryManager;
-    private final ArrayList<DownloadVisibilityListener> downloadVisibilityListeners = new ArrayList<DownloadVisibilityListener>();
     
     private TrayNotifier notifier;
     private boolean isInitialized = false;
@@ -77,22 +74,19 @@ public class MainDownloadPanel extends JPanel {
     
     public void selectAndScrollTo(URN urn) {
         table.selectAndScrollTo(urn);
-        if(getVisibleRect().height < table.getRowHeight()){
-            alertDownloadVisibilityListeners(true);
-        }
     }
 
     
     @Inject
     public void register() {              
         // Add listener for "show downloads" setting.
-        DownloadSettings.SHOW_DOWNLOADS_TRAY.addSettingListener(new SettingListener() {
+        SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtils.invokeNowOrLater(new Runnable() {
                     @Override
                     public void run() {
-                        updateVisibility();
+                        initialize();
                     }
                 });
             } 
@@ -101,7 +95,7 @@ public class MainDownloadPanel extends JPanel {
         //we have to eagerly initialize the table when the SHOW_DOWNLOAD_TRAY setting
         //is set to true on startup, otherwise the table space will be empty and the lines will
         //be put in the first time a download comes in, which looks a little weird
-        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
+        if (SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue()) {
             initialize();
         }
         
@@ -109,24 +103,18 @@ public class MainDownloadPanel extends JPanel {
         downloadListManager.addPropertyChangeListener(new DownloadPropertyListener());
     }
     
-    public void addDownloadVisibilityListener(DownloadVisibilityListener listener){
-        downloadVisibilityListeners.add(listener);
-    }
-    
-    public void removeDownloadVisibilityListener(DownloadVisibilityListener listener){
-        downloadVisibilityListeners.remove(listener);
-    }
-
     //Lazily initialized - initialize() is called when the first downloadItem is added to the list.  
     private void initialize() {
-        isInitialized = true;
-        setLayout(new BorderLayout());
-
-        table = downloadTableFactory.get().create(downloadMediator.getDownloadList());
-        table.setTableHeader(null);
-        JScrollPane pane = new JScrollPane(table);
-        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        add(pane, BorderLayout.CENTER);
+        if(!isInitialized){
+            isInitialized = true;
+            setLayout(new BorderLayout());
+    
+            table = downloadTableFactory.get().create(downloadMediator.getDownloadList());
+            table.setTableHeader(null);
+            JScrollPane pane = new JScrollPane(table);
+            pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+            add(pane, BorderLayout.CENTER);
+        }
     }
     
     public List<DownloadItem> getSelectedDownloadItems(){
@@ -139,14 +127,7 @@ public class MainDownloadPanel extends JPanel {
      */
     private class DownloadPropertyListener implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
-            if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_ADDED)) {
-                // Display this panel whenever a download is added. 
-                if (!DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
-                    DownloadSettings.SHOW_DOWNLOADS_TRAY.setValue(true);
-                }
-                updateVisibility();
-                
-            } else if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
+            if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
                 final DownloadItem downloadItem = (DownloadItem) event.getNewValue();
                 notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
                         new AbstractAction() {
@@ -172,31 +153,5 @@ public class MainDownloadPanel extends JPanel {
                 }
             }
         }
-    }
-    
-    /**
-     * Updates the visibility of this download panel.  This method is called
-     * when a download is added, or when the "show downloads" setting changes.
-     */
-    private void updateVisibility() {
-        if(!isInitialized){
-            initialize();
-        }
-        
-        if (DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue()) {
-            alertDownloadVisibilityListeners(true);
-        } else {
-            alertDownloadVisibilityListeners(false);
-        }
-    }
-    
-    /**
-     * Ignores DownloadSettings.ALWAYS_SHOW_DOWNLOADS_TRAY
-     */
-    private void alertDownloadVisibilityListeners(boolean isVisible) {
-        for (DownloadVisibilityListener listener : downloadVisibilityListeners) {
-            listener.updateVisibility(new DownloadVisibilityEvent(isVisible));
-        }
-
     }
 }

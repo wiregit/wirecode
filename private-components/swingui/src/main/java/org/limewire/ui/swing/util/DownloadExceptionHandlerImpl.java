@@ -26,6 +26,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -39,15 +40,17 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
 
     private final SaveLocationManager saveLocationManager;
     private final Application application;
+    private final TransferTrayNavigator transferTrayNavigator;
 
     /**
      * Constructs a DownloadExceptionHandler with the specified
      * SaveLocationManager.
      */
     @Inject
-    public DownloadExceptionHandlerImpl(SaveLocationManager saveLocationManager, Application application) {
+    public DownloadExceptionHandlerImpl(SaveLocationManager saveLocationManager, Application application, TransferTrayNavigator transferTrayNavigator) {
         this.saveLocationManager = saveLocationManager;
         this.application = application;
+        this.transferTrayNavigator = transferTrayNavigator;
     }
 
     /**
@@ -144,9 +147,11 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
 
         switch (e.getErrorCode()) {
         case FILE_ALREADY_UPLOADING:
+            transferTrayNavigator.selectUploads();
             message = I18n.tr("Sorry, this file is already being uploaded.");
             break;
         case FILE_ALREADY_DOWNLOADING:
+            transferTrayNavigator.selectDownloads();
             message = I18n.tr("Sorry, this file is already being downloaded.");
             break;
         case DIRECTORY_NOT_WRITEABLE:

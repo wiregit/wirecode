@@ -15,6 +15,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
@@ -31,6 +32,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
@@ -56,6 +58,7 @@ public class DownloadMediator {
 	private final DownloadListManager downloadListManager;
 	private final Provider<MainDownloadPanel> downloadPanelFactory;
 	private final Provider<DownloadHeaderPopupMenu> headerPopupMenuFactory;
+	private final Provider<TransferTrayNavigator> transferTrayNavigator;
 	
 	private EventList<DownloadItem> activeList;
 	private JButton clearFinishedButton;
@@ -84,10 +87,12 @@ public class DownloadMediator {
 	@Inject
 	public DownloadMediator(DownloadListManager downloadManager,
 	        Provider<MainDownloadPanel> downloadPanelFactory,
-	        Provider<DownloadHeaderPopupMenu> headerPopupMenuFactory) {
+	        Provider<DownloadHeaderPopupMenu> headerPopupMenuFactory, 
+	        Provider<TransferTrayNavigator> transferTrayNavigator) {
 	    this.downloadListManager = downloadManager;
 	    this.downloadPanelFactory = downloadPanelFactory;
 	    this.headerPopupMenuFactory = headerPopupMenuFactory;
+	    this.transferTrayNavigator = transferTrayNavigator;
 	    
 	    EventList<DownloadItem> baseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
 	    commonBaseList = GlazedListsFactory.sortedList(baseList, new DescendingComparator(new OrderAddedComparator()));
@@ -535,6 +540,11 @@ public class DownloadMediator {
         public int compare(DownloadItem o1, DownloadItem o2) {
             return -1 * delegate.compare(o1, o2);
         }
+    }
+
+    public void selectAndScrollTo(URN urn) {
+        transferTrayNavigator.get().selectDownloads();
+        downloadPanelFactory.get().selectAndScrollTo(urn);
     }
     
 }

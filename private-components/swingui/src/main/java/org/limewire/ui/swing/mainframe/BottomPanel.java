@@ -8,7 +8,6 @@ import javax.swing.JPanel;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -19,11 +18,13 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * UI container for the tray displayed along the bottom of the application
  * window.  BottomPanel is used to present the Downloads and Uploads tables.
  */
+@Singleton
 public class BottomPanel extends JPanel {
     public enum TabId {
         DOWNLOADS, UPLOADS
@@ -110,15 +111,15 @@ public class BottomPanel extends JPanel {
     private void hideWhenNoTransfers() {
         if (SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.getValue()) {
             // Determine whether downloads/uploads tables should be visible.
-            boolean showDownload = DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue() &&
-                (downloadMediator.getDownloadList().size() > 0);
-            boolean showUpload = UploadSettings.SHOW_UPLOADS_TRAY.getValue() && 
-                (uploadMediator.getUploadList().size() > 0);
+            boolean showDownloads = SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue() &&
+                                    (downloadMediator.getDownloadList().size() > 0);
+            boolean showUploads = SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue() && 
+                                    UploadSettings.SHOW_UPLOADS_IN_TRAY.getValue() && 
+                                    (uploadMediator.getUploadList().size() > 0);
             
             // If both tables empty, clear transfer settings to hide bottom tray.
-            if (!(showDownload || showUpload)) {
-                DownloadSettings.SHOW_DOWNLOADS_TRAY.setValue(false);
-                UploadSettings.SHOW_UPLOADS_TRAY.setValue(false);
+            if (!(showDownloads || showUploads)) {
+                SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(false);
             }
         }
     }

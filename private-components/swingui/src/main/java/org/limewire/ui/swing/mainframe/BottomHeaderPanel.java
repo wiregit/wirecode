@@ -28,8 +28,11 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.LimeComboBox;
@@ -41,23 +44,29 @@ import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.mainframe.BottomPanel.TabId;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import com.google.inject.Singleton;
 
 /**
  * Control panel that is displayed above the downloads/uploads tables.
  */
-public class BottomHeaderPanel {
+@Singleton
+public class BottomHeaderPanel implements TransferTrayNavigator {
 
+    @InspectablePrimitive(value = "upload view", category = DataCategory.USAGE)
+    private static volatile int uploadsViewed = 0;
+    
     @Resource private Icon moreButtonArrow;
     @Resource private Icon scrollPaneNubIcon;
     @Resource private Font hyperlinkFont;
@@ -92,7 +101,6 @@ public class BottomHeaderPanel {
     private LimeComboBox uploadOptionsButton;
     
     private int componentHeight;
-    private TabId selectedTab;
     
     @Inject
     public BottomHeaderPanel(DownloadMediator downloadMediator,
@@ -101,7 +109,7 @@ public class BottomHeaderPanel {
             BarPainterFactory barPainterFactory, 
             DockIconFactory iconFactory,
             BandwidthCollector bandwidthCollector,
-            @Assisted BottomPanel bottomPanel) {
+            BottomPanel bottomPanel) {
         
         this.downloadMediator = downloadMediator;
         this.uploadMediator = uploadMediator;
@@ -133,7 +141,8 @@ public class BottomHeaderPanel {
     private void initialize(){
         initializeComponents();
         initializeTabList();
-        layoutComponents();        
+        layoutComponents();
+        updateSelection();
     }
 
     private void initializeComponents(){        
@@ -170,6 +179,20 @@ public class BottomHeaderPanel {
                 }
             }
         });
+        
+        downloadMediator.getDownloadList().addListEventListener(new ListEventListener<DownloadItem> () {
+           @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+               while(listChanges.next()) {
+                   if(listChanges.getType() == ListEvent.INSERT) {
+                       if (!SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue()) {
+                           SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
+                       }
+                       selectTab(TabId.DOWNLOADS);
+                   }
+               }
+            } 
+        });
     }
     
     private void layoutComponents(){
@@ -205,6 +228,30 @@ public class BottomHeaderPanel {
             public void listChanged(ListEvent<UploadItem> listChanges) {
                 updateUploadTitle();
             }
+        });
+        
+        SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener() {
+           @Override
+            public void settingChanged(SettingEvent evt) {
+               SwingUtils.invokeNowOrLater(new Runnable() {
+                   @Override
+                    public void run() {
+                       updateSelection();
+                    }
+               });
+            } 
+        });
+        
+        UploadSettings.SHOW_UPLOADS_IN_TRAY.addSettingListener(new SettingListener() {
+           @Override
+            public void settingChanged(SettingEvent evt) {
+               SwingUtils.invokeNowOrLater(new Runnable() {
+                   @Override
+                    public void run() {
+                       updateSelection();
+                    }
+               });
+            } 
         });
     }
 
@@ -292,11 +339,8 @@ public class BottomHeaderPanel {
      * Selects the content for the specified tab id.
      */
     private void select(TabId tabId) {
-        selectedTab = tabId;
-        
         bottomPanel.show(tabId);
         updateHeader(tabId);
-        updateLayout();
     }
     
     /**
@@ -322,8 +366,8 @@ public class BottomHeaderPanel {
      * Updates the component layout based on the visible tables.
      */
     private void updateLayout() {
-        boolean downloadVisible = DownloadSettings.SHOW_DOWNLOADS_TRAY.getValue();
-        boolean uploadVisible  = UploadSettings.SHOW_UPLOADS_TRAY.getValue();
+        boolean downloadVisible = SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue();
+        boolean uploadVisible  = UploadSettings.SHOW_UPLOADS_IN_TRAY.getValue();
         
         if (downloadVisible && uploadVisible) {
             tabList.setVisible(true);
@@ -336,6 +380,15 @@ public class BottomHeaderPanel {
         }
     }
     
+    private void updateSelection() {
+        boolean downloadVisible = SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue();
+        boolean uploadVisible  = UploadSettings.SHOW_UPLOADS_IN_TRAY.getValue();
+        if(tabList.getSelectedTab() == null || (downloadVisible && !uploadVisible)) {
+            selectTab(TabId.DOWNLOADS);
+        }
+        updateLayout();
+    }
+    
     /**
      * Updates title for Downloads tray.
      */
@@ -346,14 +399,14 @@ public class BottomHeaderPanel {
         // Create title with size and bandwidth.
         if (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue()) {
             int bandwidth = bandwidthCollector.getCurrentDownloaderBandwidth();
-            title = (size > 0) ? I18n.tr("Downloads ({0} | {1} KB/sec)", size, bandwidth) : I18n.tr("Downloads");
+            title = (size > 0) ? I18n.tr("Downloads ({0} at {1} KB/s)", size, bandwidth) : I18n.tr("Downloads");
         } else {
             title = (size > 0) ? I18n.tr("Downloads ({0})", size) : I18n.tr("Downloads");
         }
 
         // Apply title to tab action and label.
         actionMap.get(TabId.DOWNLOADS).putValue(Action.NAME, title);
-        if (selectedTab == TabId.DOWNLOADS) titleTextLabel.setText(title);
+        titleTextLabel.setText(title);
     }
     
     /**
@@ -366,14 +419,13 @@ public class BottomHeaderPanel {
         // Create title with size and bandwidth.
         if (SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue()) {
             int bandwidth = bandwidthCollector.getCurrentUploaderBandwidth();
-            title = (size > 0) ? I18n.tr("Uploads ({0} | {1} KB/sec)", size, bandwidth) : I18n.tr("Uploads");
+            title = (size > 0) ? I18n.tr("Uploads ({0} at {1} KB/s)", size, bandwidth) : I18n.tr("Uploads");
         } else {
             title = (size > 0) ? I18n.tr("Uploads ({0})", size) : I18n.tr("Uploads");
         }
         
         // Apply title to tab action and label.
         actionMap.get(TabId.UPLOADS).putValue(Action.NAME, title);
-        if (selectedTab == TabId.UPLOADS) titleTextLabel.setText(title);
     }
     
     /**
@@ -401,10 +453,10 @@ public class BottomHeaderPanel {
      * Action to display uploads table.
      */
     private class ShowUploadsAction extends AbstractAction {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             select(TabId.UPLOADS);
+            uploadsViewed++;
         }
     }
     
@@ -427,5 +479,18 @@ public class BottomHeaderPanel {
             setAntialiasing(true);
             setCacheable(true);
         }
+    }
+
+    @Override
+    public void selectDownloads() {
+        SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
+        selectTab(TabId.DOWNLOADS);        
+    }
+
+    @Override
+    public void selectUploads() {
+        SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
+        UploadSettings.SHOW_UPLOADS_IN_TRAY.setValue(true);
+        selectTab(TabId.UPLOADS);
     }
 }

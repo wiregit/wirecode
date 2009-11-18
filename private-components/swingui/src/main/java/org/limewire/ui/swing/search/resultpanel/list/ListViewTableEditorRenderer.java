@@ -54,7 +54,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.RemoteHostWidget;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.nav.Navigator;
@@ -166,7 +166,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private int textPanelWidth;
 
     private final SearchResultMenuFactory searchResultMenuFactory;
-    private final MainDownloadPanel mainDownloadPanel;
+    private final DownloadMediator downloadMediator;
     
     @Inject
     ListViewTableEditorRenderer(
@@ -180,7 +180,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
         SearchResultMenuFactory searchResultMenuFactory,
-        MainDownloadPanel mainDownloadPanel) {
+        DownloadMediator downloadMediator) {
 
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
@@ -190,7 +190,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
-        this.mainDownloadPanel = mainDownloadPanel;
+        this.downloadMediator = downloadMediator;
         
         GuiUtils.assignResources(this);
 
@@ -521,7 +521,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                         downloadHandler.download(vsr);
                         table.editingStopped(new ChangeEvent(table));
                     } else if (e.getDescription().equals("#downloading")) {
-                        mainDownloadPanel.selectAndScrollTo(vsr.getUrn());
+                        downloadMediator.selectAndScrollTo(vsr.getUrn());
                     } else if (e.getDescription().equals("#library")) {
                         libraryMediator.selectInLibrary(vsr.getUrn());
                     }
