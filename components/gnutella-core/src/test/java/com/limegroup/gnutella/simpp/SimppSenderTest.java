@@ -5,14 +5,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.Providers;
-import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 
-public class SimppSenderTest extends BaseTestCase {
+public class SimppSenderTest extends LimeTestCase {
 
     private Mockery context;
     private SimppRequestVM simppRequest;
@@ -34,7 +34,7 @@ public class SimppSenderTest extends BaseTestCase {
             will(returnValue(new byte[] { 1 }));
             allowing(simppManager).getVersion();
             will(returnValue(5));
-            atLeast(1).of(scheduledExecutorService).schedule(with(any(Runnable.class)), with(any(Integer.class)), with(equal(TimeUnit.MINUTES)));
+            atLeast(1).of(scheduledExecutorService).schedule(with(any(Runnable.class)), with(any(Integer.class)), with(equal(TimeUnit.MILLISECONDS)));
         }});
     }
     
