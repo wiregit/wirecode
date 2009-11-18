@@ -86,4 +86,16 @@ public class LimeXMLDocumentTest extends LimeTestCase {
         LimeXMLDocument document = limeXMLDocumentFactory.createLimeXMLDocument(map.entrySet(), schemaURI);
         assertSame(document.getValue("audios__audio__title__"), document.getValue("audios__audio__artist__"));
     }
+    
+    public void testGetKeywordsContainsCorrectTorrentMetaData() throws Exception {
+        LimeXMLDocument xmlDocument = limeXMLDocumentFactory.createLimeXMLDocument("<?xml version=\"1.0\"?><torrents xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/torrent.xsd\"><torrent infohash=\"OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ\" trackers=\"http://localhost/announce\" name=\"messages\" filepaths=\"/BTBitFieldTest.class///BTCancelTest.class///BTChokeTest.class///BTHaveTest.class///BTInterestedTest.class///BTNotInterestedTest.class///BTPieceMessageTest.class///BTRequestTest.class///BTUnChokeTest.class\" filesizes=\"1307 1896 1247 1434 1286 1311 1942 1902 1263\"/></torrents>");
+        
+        assertEquals("http://localhost/announce", xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
+        
+        List<String> keyWords = xmlDocument.getKeyWords();
+        assertNotContains(keyWords, "http://localhost/announce");
+        assertNotContains(keyWords, "OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ");
+        assertNotContains(keyWords, "1307 1896 1247 1434 1286 1311 1942 1902 1263");
+        assertContains(keyWords, "/BTBitFieldTest.class///BTCancelTest.class///BTChokeTest.class///BTHaveTest.class///BTInterestedTest.class///BTNotInterestedTest.class///BTPieceMessageTest.class///BTRequestTest.class///BTUnChokeTest.class");
+    }
 }	

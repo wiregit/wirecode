@@ -140,6 +140,28 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         assertEquals("http://localhost/announce", xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
     }
     
+    public void testFilesizesInsideOfTorrentAreIndexed() throws Exception {
+        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", MetaDataFactoryImplTest.class);
+        assertAdds(fileList, torrentFile);
+        responses = keywordIndex.query(queryRequestFactory.createQuery("1311"));
+        assertEquals(1, responses.length);
+        LimeXMLDocument xmlDocument = responses[0].getDocument();
+        assertNotNull(xmlDocument);
+        assertEquals("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ", xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
+        assertEquals("http://localhost/announce", xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
+    }
+    
+    public void testInfoHashInsideOfTorrentAreIndexed() throws Exception {
+        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", MetaDataFactoryImplTest.class);
+        assertAdds(fileList, torrentFile);
+        responses = keywordIndex.query(queryRequestFactory.createQuery("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ"));
+        assertEquals(1, responses.length);
+        LimeXMLDocument xmlDocument = responses[0].getDocument();
+        assertNotNull(xmlDocument);
+        assertEquals("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ", xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
+        assertEquals("http://localhost/announce", xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
+    }
+    
     public void testAddAnotherSharedFile() throws Exception {
         f1 = createNewTestFile(1, _scratchDir);
         f2 = createNewTestFile(3, _scratchDir);

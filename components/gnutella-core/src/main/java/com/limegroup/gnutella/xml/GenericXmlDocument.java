@@ -84,7 +84,7 @@ class GenericXmlDocument implements StringLookup, LimeXMLDocument {
         for(Map.Entry<String, String> entry : getNameValueSet()) {
             String currKey = entry.getKey();
             String val = entry.getValue();
-            if(val != null && !val.equals("") && !isIndivisible(currKey)) {
+            if(val != null && !val.equals("") && !isIndivisible(currKey) && isIndexableKey(currKey)) {
                 try {
                     Double.parseDouble(val); // will trigger NFE.
                 } catch(NumberFormatException ignored) {
@@ -117,7 +117,11 @@ class GenericXmlDocument implements StringLookup, LimeXMLDocument {
         //is returning a list of only 'WeedInfo.LAINFO'.  the content-id & version-id
         //are essentially lost & ignored.
         return currKey.endsWith(XML_LICENSE_TYPE_ATTRIBUTE);
-    }    
+    }
+    
+    private boolean isIndexableKey(String key) {
+        return !key.equals(LimeXMLNames.TORRENT_FILE_SIZES) && !key.equals(LimeXMLNames.TORRENT_INFO_HASH) && !key.equals(LimeXMLNames.TORRENT_TRACKERS);
+    }
 
     @Override
     public String getSchemaURI() {

@@ -59,7 +59,7 @@ public class QRPUpdaterTest extends LimeTestCase {
         assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
     }
     
-    private class QueryRequestImpl extends QueryRequestStub {
+    static class QueryRequestImpl extends QueryRequestStub {
         
         private String keyWords;
         
