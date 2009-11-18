@@ -130,15 +130,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.downloadCallback = downloadCallback;
     }
 
-    /**
-     * Registers the a listener on the torrent to update internal state of the
-     * downloader, based on updates to the torrent.
-     */
-    @Inject
-    public void registerTorrentListener() {
-        torrent.addListener(this);
-    }
-
     @Override
     public void handleEvent(TorrentEvent event) {
         if (TorrentEventType.COMPLETED == event.getType() && !complete.get()) {
@@ -179,6 +170,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             torrent.removeListener(BTDownloaderImpl.this);
         } else if (TorrentEventType.STOPPED == event.getType()) {
+            System.out.println("BTDownloaderImpl Session stopped received");
             torrent.removeListener(this);
             // Did the dangerous file checker stop the torrent?
             if (lastState.get() != DownloadState.DANGEROUS) {
@@ -303,13 +295,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void init(File torrentFile, File saveDirectory) throws IOException {
-        torrent.init(new TorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(), torrentFile));
+        init(new TorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(), torrentFile));
+    }
+    
+    private void init(TorrentParams params) throws IOException {
+        torrent.init(params);
         setDefaultFileName(torrent.getName());
     }
 
     @Override
     public boolean registerTorrentWithTorrentManager() {
-        return torrentManager.get().addTorrent(torrent);
+        boolean valid = torrentManager.get().addTorrent(torrent);
+        torrent.addListener(this);
+        return valid;
     }
 
     /**
@@ -750,7 +748,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             params.setTorrentDataFile(memento.getIncompleteFile());
             params.setPrivate(memento.isPrivate());
 
-            torrent.init(params);
+            init(params);
         } catch (IOException e) {
             // the .torrent file could be invalid, try to initialize just with
             // the memento contents.
@@ -762,7 +760,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 params.setFastResumeFile(fastResumeFile);
                 params.setTorrentDataFile(memento.getIncompleteFile());
                 params.setPrivate(memento.isPrivate());
-                torrent.init(params);
+                init(params);
             } catch (IOException e1) {
                 throw new InvalidDataException("Could not initialize the BTDownloader", e1);
             }
@@ -807,7 +805,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             params.setTrackerURL(tracker1.toString());
             params.setTorrentDataFile(newIncompleteFile);
             params.setPrivate(isPrivate);
-            torrent.init(params);
+            init(params);
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }

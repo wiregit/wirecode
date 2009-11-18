@@ -214,6 +214,7 @@ public class LibTorrentSession implements TorrentManager {
 
     private void handleTorrentEvent(TorrentEvent event) {
         if (event.getType() == TorrentEventType.STOPPED) {
+            System.out.println("LibTorrent Session stopped received");
             removeTorrent(event.getTorrent());
         }
     }
