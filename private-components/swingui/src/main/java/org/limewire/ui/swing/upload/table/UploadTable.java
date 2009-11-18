@@ -1,13 +1,16 @@
 package org.limewire.ui.swing.upload.table;
 
+import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
+import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.transfer.TransferTable;
 import org.limewire.ui.swing.upload.UploadMediator;
@@ -18,7 +21,6 @@ import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -48,7 +50,7 @@ public class UploadTable extends TransferTable<UploadItem> {
     
     private final CategoryIconManager iconManager;
     private final ProgressBarDecorator progressBarDecorator;
-    private final Provider<UploadActionHandler> uploadActionHandlerFactory;
+    private final UploadActionHandler uploadActionHandler;
     private final DefaultEventSelectionModel<UploadItem> selectionModel;
     
     @Inject
@@ -57,12 +59,12 @@ public class UploadTable extends TransferTable<UploadItem> {
             CategoryIconManager iconManager,
             ProgressBarDecorator progressBarDecorator,
             UploadPopupMenuFactory popupMenuFactory,
-            Provider<UploadActionHandler> uploadActionHandlerFactory) {
+            UploadActionHandler uploadActionHandler) {
         super(uploadMediator.getUploadList(), new UploadTableFormat());
         
         this.iconManager = iconManager;
         this.progressBarDecorator = progressBarDecorator;
-        this.uploadActionHandlerFactory = uploadActionHandlerFactory;
+        this.uploadActionHandler = uploadActionHandler;
         
         GuiUtils.assignResources(this);
         
@@ -73,6 +75,7 @@ public class UploadTable extends TransferTable<UploadItem> {
         
         setRowHeight(rowHeight);
         setPopupHandler(new UploadPopupHandler(this, popupMenuFactory));
+        setEnterKeyAction(new LaunchAction());
         
         initializeColumns();
         initializeRenderers();
@@ -112,8 +115,8 @@ public class UploadTable extends TransferTable<UploadItem> {
         setColumnRenderer(UploadTableFormat.ACTION_GAP, gapRenderer);
         
         // Set column editors.
-        setColumnEditor(UploadTableFormat.ACTION_COL, new UploadActionRendererEditor(uploadActionHandlerFactory.get()));
-        setColumnEditor(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(uploadActionHandlerFactory.get()));
+        setColumnEditor(UploadTableFormat.ACTION_COL, new UploadActionRendererEditor(uploadActionHandler));
+        setColumnEditor(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(uploadActionHandler));
     }
     
     /**
@@ -128,5 +131,22 @@ public class UploadTable extends TransferTable<UploadItem> {
      */
     public UploadItem getUploadItem(int row) {
         return getElementAt(row);
+    }
+    
+    /**
+     * Action to launch the selected upload.
+     */
+    private class LaunchAction extends AbstractAction {
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            List<UploadItem> selectedItems = getSelectedItems();
+            if (selectedItems.size() == 1) {
+                UploadItem item = selectedItems.get(0);
+                if (item.getUploadItemType() == UploadItemType.GNUTELLA && !UploadMediator.isBrowseHost(item)) {
+                    uploadActionHandler.performAction(UploadActionHandler.LAUNCH_COMMAND, item);
+                }
+            }
+        }
     }
 }
