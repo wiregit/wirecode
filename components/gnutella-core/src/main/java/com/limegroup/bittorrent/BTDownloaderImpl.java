@@ -170,7 +170,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             torrent.removeListener(BTDownloaderImpl.this);
         } else if (TorrentEventType.STOPPED == event.getType()) {
-            System.out.println("BTDownloaderImpl Session stopped received");
             torrent.removeListener(this);
             // Did the dangerous file checker stop the torrent?
             if (lastState.get() != DownloadState.DANGEROUS) {
