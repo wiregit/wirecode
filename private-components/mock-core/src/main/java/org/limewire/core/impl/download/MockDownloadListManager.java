@@ -15,6 +15,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
@@ -78,8 +79,9 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 	
 	private void initializeMockData(){
-	    MockDownloadItem item = new MockDownloadItem("Monkey on ice skates", 4416,
-				DownloadState.DOWNLOADING, Category.VIDEO);
+	    MockDownloadItem item = new MockDownloadItem(DownloadItemType.ANTIVIRUS,
+	            "Anti-virus definitions", 4416, DownloadState.DOWNLOADING, 
+	            Category.OTHER);
 		item.addDownloadSource(new MockDownloadSource("134.23.2.7"));
 		addDownload(item);
 

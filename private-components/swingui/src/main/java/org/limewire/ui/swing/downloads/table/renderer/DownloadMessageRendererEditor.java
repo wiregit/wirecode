@@ -1,17 +1,26 @@
 package org.limewire.ui.swing.downloads.table.renderer;
 
-
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.friend.api.Friend;
+import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
+import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.transfer.TransferRendererResources;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -19,25 +28,80 @@ import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 
-public class DownloadMessageRenderer extends DefaultTableCellRenderer {
+/**
+ * Renderer/editor component for the download table to display message. 
+ */
+public class DownloadMessageRendererEditor extends TableRendererEditor {
+
+    @Resource private Icon infoIcon;
     
+    private final DownloadActionHandler actionHandler;
+    
+    private JLabel messageLabel;
+    private JButton infoButton;
+    
+    private DownloadItem downloadItem;
+    
+    /**
+     * Constructs a DownloadMessageRendererEditor that uses the specified 
+     * action handler.
+     */
     @Inject
-    public DownloadMessageRenderer(){
-        new TransferRendererResources().decorateComponent(this);
+    public DownloadMessageRendererEditor(DownloadActionHandler actionHandler) {
+        this.actionHandler = actionHandler;
+        
+        GuiUtils.assignResources(this);
+        
+        setLayout(new MigLayout("insets 0, gap 0, aligny center, nogrid, novisualpadding"));
+        
+        messageLabel = new JLabel();
+        new TransferRendererResources().decorateComponent(messageLabel);
+        
+        infoButton = new IconButton(infoIcon);
+        infoButton.setActionCommand(DownloadActionHandler.INFO_COMMAND);
+        infoButton.setToolTipText(I18n.tr("Info"));
+        infoButton.addActionListener(new ButtonListener());
+        
+        add(messageLabel, "");
+        add(infoButton, "");
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
-        if(value instanceof DownloadItem) {
-            DownloadItem item = (DownloadItem)value;
-            return super.getTableCellRendererComponent(table, getPercentMessage(item) + getMessage(item.getState(), item), isSelected, false, row, column);
+    protected Component doTableCellEditorComponent(JTable table, Object value, 
+            boolean isSelected, int row, int column) {
+        if (value instanceof DownloadItem) {
+            // Save download item for use by button listener.
+            downloadItem = (DownloadItem) value;
+            update(downloadItem);
+            return this;
         } else {
-            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            return emptyPanel;
         }
     }
+
+    @Override
+    protected Component doTableCellRendererComponent(JTable table, Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
+        if (value instanceof DownloadItem) {
+            update((DownloadItem) value);
+            return this;
+        } else {
+            return emptyPanel;
+        }
+    }
+
+    /**
+     * Updates the display components using the specified download item.
+     */
+    private void update(DownloadItem item) {
+        messageLabel.setText(getPercentMessage(item) + getMessage(item));
+        infoButton.setVisible(item.getDownloadItemType() == DownloadItemType.ANTIVIRUS);
+    }
     
-    private String getPercentMessage(DownloadItem item){
+    /**
+     * Returns the percent complete as a string.
+     */
+    private String getPercentMessage(DownloadItem item) {
         int percent = item.getPercentComplete();
         DownloadState state = item.getState();
         if (percent == 0 || state == DownloadState.DONE ||  state == DownloadState.DOWNLOADING ||  state == DownloadState.ERROR){
@@ -49,8 +113,8 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
     /**
      * @return the message displayed after the percentage. Can be null for non-covered states.
      */
-    private String getMessage(DownloadState state, DownloadItem item) {
-        switch (state) {
+    private String getMessage(DownloadItem item) {
+        switch (item.getState()) {
         case RESUMING:
             return I18n.tr("Resuming");
         case CANCELLED:
@@ -180,4 +244,14 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
         //}
     }
 
+    /**
+     * Action listener for editor buttons.
+     */
+    private class ButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            actionHandler.performAction(e.getActionCommand(), downloadItem);
+            cancelCellEditing();
+        }
+    }
 }

@@ -15,7 +15,7 @@ import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadCancelRendererEditor;
-import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRenderer;
+import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRendererEditorFactory;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -59,16 +59,20 @@ public class DownloadTable extends TransferTable<DownloadItem> {
 
     private EventList<DownloadItem> selectedItems;
     
+    private final DownloadActionHandler actionHandler;
     private final CategoryManager categoryManager;
+    private final DownloadMessageRendererEditorFactory messageRendererEditorFactory;
 
     @Inject
 	public DownloadTable(DownloadTitleRenderer downloadTitleRenderer, DownloadProgressRenderer downloadProgressRenderer, 
-	        DownloadMessageRenderer downloadMessageRenderer, DownloadCancelRendererEditor cancelEditor,
+	        DownloadMessageRendererEditorFactory messageRendererEditorFactory, DownloadCancelRendererEditor cancelEditor,
 	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, DownloadPopupHandlerFactory downloadPopupHandlerFactory,
 	        @Assisted EventList<DownloadItem> downloadItems, DownloadableTransferHandler downloadableTransferHandler, CategoryManager categoryManager) {
         super(new DownloadTableModel(downloadItems));
         
+        this.actionHandler = actionHandler;
         this.categoryManager = categoryManager;
+        this.messageRendererEditorFactory = messageRendererEditorFactory;
         
         GuiUtils.assignResources(this);
                 
@@ -80,7 +84,7 @@ public class DownloadTable extends TransferTable<DownloadItem> {
         setUpColumn(DownloadTableFormat.TITLE_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
         setUpColumn(DownloadTableFormat.PROGRESS, downloadProgressRenderer, progressMinWidth, progressPrefWidth, progressMaxWidth);
         setUpColumn(DownloadTableFormat.PROGRESS_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
-        setUpColumn(DownloadTableFormat.MESSAGE, downloadMessageRenderer, messageMinWidth, messagePrefWidth, messageMaxWidth);
+        setUpColumn(DownloadTableFormat.MESSAGE, messageRendererEditorFactory.create(null), messageMinWidth, messagePrefWidth, messageMaxWidth);
         setUpColumn(DownloadTableFormat.MESSAGE_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
         setUpColumn(DownloadTableFormat.ACTION, new DownloadButtonRendererEditor(), actionMinWidth, actionPrefWidth, actionMaxWidth);
         setUpColumn(DownloadTableFormat.ACTION_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
@@ -162,6 +166,7 @@ public class DownloadTable extends TransferTable<DownloadItem> {
 
         setEnterKeyAction(enterAction);
         
+        getColumnModel().getColumn(DownloadTableFormat.MESSAGE).setCellEditor(messageRendererEditorFactory.create(actionHandler));
         getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellEditor(buttonEditor);
         getColumnModel().getColumn(DownloadTableFormat.CANCEL).setCellEditor(cancelEditor);
 

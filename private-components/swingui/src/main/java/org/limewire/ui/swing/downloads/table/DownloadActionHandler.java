@@ -3,6 +3,7 @@ package org.limewire.ui.swing.downloads.table;
 import java.io.File;
 
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -18,6 +19,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -50,6 +52,7 @@ public class DownloadActionHandler {
     public final static String LOCATE_COMMAND = "locate";
     public final static String LIBRARY_COMMAND = "library";
     public final static String PROPERTIES_COMMAND = "properties";
+    public final static String INFO_COMMAND = "info";
     public final static String LINK_COMMAND = "link";
     public final static String SHARE_COMMAND = "share";
     public final static String CHANGE_LOCATION_COMMAND = "change location";
@@ -147,6 +150,11 @@ public class DownloadActionHandler {
             changeSaveLocation(item);
         } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
             searchHandler.doSearch(createSearchInfo(item));
+        } else if (actionCommmand == INFO_COMMAND) {
+            // TODO implement real dialog
+            FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), 
+                    "Powered by AVG Anti-Virus", "AVG Anti-Virus", 
+                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
     

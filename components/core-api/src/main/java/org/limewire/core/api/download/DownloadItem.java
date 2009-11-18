@@ -22,7 +22,8 @@ public interface DownloadItem extends PropertiableFile {
 
     public enum DownloadItemType {
         GNUTELLA,
-        BITTORRENT
+        BITTORRENT,
+        ANTIVIRUS
     }
     
     /**

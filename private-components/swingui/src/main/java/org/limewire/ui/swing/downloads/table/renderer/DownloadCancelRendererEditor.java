@@ -13,6 +13,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
 import org.limewire.ui.swing.table.TableRendererEditor;
@@ -72,9 +73,16 @@ public class DownloadCancelRendererEditor extends TableRendererEditor {
         removeButton.addActionListener(listener);
     }
 
-    public void updateButtons(DownloadState state) {
-        cancelButton.setVisible(state != DownloadState.DONE);
-        removeButton.setVisible(state == DownloadState.DONE);
+    private void updateButtons(DownloadItem item) {
+        if (item.getDownloadItemType() != DownloadItemType.ANTIVIRUS) {
+            DownloadState state = item.getState();
+            cancelButton.setVisible(state != DownloadState.DONE);
+            removeButton.setVisible(state == DownloadState.DONE);
+        } else {
+            // Hide all buttons for anti-virus updates.
+            cancelButton.setVisible(false);
+            removeButton.setVisible(false);
+        }
     }
     
     @Override    
@@ -82,7 +90,7 @@ public class DownloadCancelRendererEditor extends TableRendererEditor {
             int row, int column) {
         if(value instanceof DownloadItem) {
             item = (DownloadItem)value;
-            updateButtons(item.getState());
+            updateButtons(item);
             return this;
         } else {
             return emptyPanel;
@@ -92,7 +100,7 @@ public class DownloadCancelRendererEditor extends TableRendererEditor {
     protected Component doTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
         if(value instanceof DownloadItem) {
-            updateButtons(((DownloadItem)value).getState());
+            updateButtons((DownloadItem) value);
             return this;
         } else {
             return emptyPanel;

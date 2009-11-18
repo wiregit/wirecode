@@ -4,7 +4,6 @@ import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.ui.swing.transfer.TransferTitleRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -19,6 +18,7 @@ import com.google.inject.Inject;
  */
 public class DownloadTitleRenderer extends TransferTitleRenderer {
 
+    @Resource private Icon antiVirusIcon;
     @Resource private Icon warningIcon;
     @Resource private Icon downloadingIcon;
     
@@ -37,9 +37,12 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
             return null;
         }
         DownloadItem item = (DownloadItem) value;
-        DownloadState state = item.getState();
         
-        switch (state) {
+        if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
+            return antiVirusIcon;
+        }
+        
+        switch (item.getState()) {
         case ERROR:
             return warningIcon;
 
@@ -59,9 +62,13 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         }
         DownloadItem item = (DownloadItem) value;
         
-        if (item.getDownloadItemType() == DownloadItemType.BITTORRENT) {
+        switch (item.getDownloadItemType()) {
+        case ANTIVIRUS:
+            return I18n.tr("Updating AVG Anti-Virus definitions...");
+        case BITTORRENT:
             return I18n.tr("{0} (torrent)", PropertiableFileUtils.getNameProperty(item, true));
-        } else {
+        case GNUTELLA:
+        default:
             return PropertiableFileUtils.getNameProperty(item, true);
         }
     }

@@ -14,11 +14,11 @@ import javax.swing.event.SwingPropertyChangeSupport;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadSourceInfo;
-import org.limewire.core.api.download.DownloadPropertyKey;
-import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.DownloadSourceInfo;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.io.Address;
 
@@ -34,23 +34,29 @@ public class MockDownloadItem implements DownloadItem {
 	private volatile DownloadState state = DownloadState.DOWNLOADING;
 	private final List<Address> downloadSources;
 	private final Category category;
+    private final DownloadItemType downloadItemType;
 	
 	private ErrorState errorState = ErrorState.NONE;
 	
 	private final PropertyChangeSupport support = new SwingPropertyChangeSupport(this);
     private int queuePostion = 2;
-
-	//TODO: change constructor
+    
 	public MockDownloadItem(String title, long totalSize, DownloadState state, Category category) {
-		this.title = title;
-		this.category = category;
-		this.totalSize = totalSize;
-		this.state = state;
-		downloadSources = new ArrayList<Address>();
-		if (this.state == DownloadState.DOWNLOADING) {
-			start();
-		}
+	    this(DownloadItemType.GNUTELLA, title, totalSize, state, category);
 	}
+
+    public MockDownloadItem(DownloadItemType type, String title, long totalSize,
+            DownloadState state, Category category) {
+        this.downloadItemType = type;
+        this.title = title;
+        this.category = category;
+        this.totalSize = totalSize;
+        this.state = state;
+        downloadSources = new ArrayList<Address>();
+        if (this.state == DownloadState.DOWNLOADING) {
+            start();
+        }
+    }
 	
 	@Override
 	public boolean isTryAgainEnabled() {
@@ -296,7 +302,7 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public DownloadItemType getDownloadItemType() {
-        return DownloadItemType.GNUTELLA;
+        return downloadItemType;
     }
 
     @Override

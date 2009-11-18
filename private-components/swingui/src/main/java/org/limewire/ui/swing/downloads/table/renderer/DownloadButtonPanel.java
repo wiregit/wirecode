@@ -10,6 +10,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
 import org.limewire.ui.swing.transfer.TransferRendererResources;
@@ -83,13 +84,21 @@ public class DownloadButtonPanel extends JPanel {
 
 
     public void updateButtons(DownloadItem item) {
-        DownloadState state = item.getState();
-        boolean canTryAgain = item.isTryAgainEnabled();
-        
-        pauseButton.setVisible(state == DownloadState.DOWNLOADING);  //used to be connecting also. keeping consistent with tray
-        resumeButton.setVisible(state.isResumable());
-        tryAgainButton.setVisible(state == DownloadState.STALLED && canTryAgain);
-        searchAgainButton.setVisible(state == DownloadState.STALLED && !canTryAgain && !item.isStoreDownload());
-    }
+        if (item.getDownloadItemType() != DownloadItemType.ANTIVIRUS) {
+            DownloadState state = item.getState();
+            boolean canTryAgain = item.isTryAgainEnabled();
 
+            pauseButton.setVisible(state == DownloadState.DOWNLOADING);  //used to be connecting also. keeping consistent with tray
+            resumeButton.setVisible(state.isResumable());
+            tryAgainButton.setVisible(state == DownloadState.STALLED && canTryAgain);
+            searchAgainButton.setVisible(state == DownloadState.STALLED && !canTryAgain && !item.isStoreDownload());
+            
+        } else {
+            // Hide all buttons for anti-virus updates.
+            pauseButton.setVisible(false);
+            resumeButton.setVisible(false);
+            tryAgainButton.setVisible(false);
+            searchAgainButton.setVisible(false);
+        }
+    }
 }
