@@ -142,6 +142,10 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
         initializeComponents();
         initializeTabList();
         layoutComponents();
+        //TODO remove the select tab functionality. 
+        //Right now it is needed to ensure the uploads tab is created when there are no uploads.
+        selectTab(TabId.UPLOADS);
+        selectTab(TabId.DOWNLOADS);
         updateSelection();
     }
 
