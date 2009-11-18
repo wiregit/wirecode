@@ -163,7 +163,7 @@ class VideoPanel implements Disposable{
         headerBarDecorator.decorateBasic(headerBar);
 
         headerBar.setLayout(new MigLayout());
-        headerBar.add(fullScreenButton, "push");
+        headerBar.add(fullScreenButton, "right, push");
         headerBar.add(controlPanel, "pos 0.5al 0.5al");
         headerBar.add(closeButton);
 
