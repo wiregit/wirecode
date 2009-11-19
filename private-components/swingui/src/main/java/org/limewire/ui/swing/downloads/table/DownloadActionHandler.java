@@ -3,15 +3,14 @@ package org.limewire.ui.swing.downloads.table;
 import java.io.File;
 
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -19,7 +18,6 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -28,10 +26,10 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -68,6 +66,7 @@ public class DownloadActionHandler {
     private DownloadListManager downloadListManager;
     private LibraryManager libraryManager;
     private final FileInfoDialogFactory fileInfoFactory;
+    private final Provider<AVInfoPanel> avInfoPanelFactory;
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final SearchHandler searchHandler;
     private final Provider<KeywordAssistedSearchBuilder> searchBuilder;
@@ -76,6 +75,7 @@ public class DownloadActionHandler {
     @Inject
     public DownloadActionHandler(DownloadListManager downloadListManager, 
             LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
+            Provider<AVInfoPanel> avInfoPanelFactory,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
             SearchHandler searchHandler, Provider<KeywordAssistedSearchBuilder> searchBuilder,
             CategoryManager categoryManager){
@@ -83,6 +83,7 @@ public class DownloadActionHandler {
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
+        this.avInfoPanelFactory = avInfoPanelFactory;
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.searchHandler = searchHandler;
         this.searchBuilder = searchBuilder;
@@ -151,10 +152,7 @@ public class DownloadActionHandler {
         } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
             searchHandler.doSearch(createSearchInfo(item));
         } else if (actionCommmand == INFO_COMMAND) {
-            // TODO implement real dialog
-            FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), 
-                    "Powered by AVG Anti-Virus", "AVG Anti-Virus", 
-                    JOptionPane.INFORMATION_MESSAGE);
+            avInfoPanelFactory.get().display(item);
         }
     }
     

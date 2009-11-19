@@ -18,7 +18,7 @@ import com.google.inject.Inject;
  */
 public class DownloadTitleRenderer extends TransferTitleRenderer {
 
-    @Resource private Icon antiVirusIcon;
+    @Resource private Icon antivirusIcon;
     @Resource private Icon warningIcon;
     @Resource private Icon downloadingIcon;
     
@@ -39,7 +39,7 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         DownloadItem item = (DownloadItem) value;
         
         if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
-            return antiVirusIcon;
+            return antivirusIcon;
         }
         
         switch (item.getState()) {

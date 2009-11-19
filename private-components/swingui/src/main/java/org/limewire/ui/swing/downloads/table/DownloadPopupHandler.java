@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.util.List;
 
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
 import com.google.inject.Inject;
@@ -59,6 +60,11 @@ import com.google.inject.assistedinject.Assisted;
     }
     
     private void showMenu(Component component, int x, int y){
+        // Skip menu if only AVG update is selected.
+        List<DownloadItem> selectedItems = table.getSelectedItems();
+        if (selectedItems.size() == 1 && selectedItems.get(0).getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
+            return;
+        }
         menuFactory.create(table).show(component, x, y);
     }
 
