@@ -641,10 +641,20 @@ public class StringUtils {
     }
 
     /**
-     * Returns true if the given string is null or empty.
+     * Returns true if the given string is null or its trimmed representation
+     * is empty.
      */
     public static boolean isEmpty(String s) {
-        return s == null || s.trim().length() == 0;
+        if (s == null || s.length() == 0) {
+            return true;
+        }
+        int length = s.length();
+        for (int i = 0; i < length; i ++) {
+            if (s.charAt(i) != ' ') {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

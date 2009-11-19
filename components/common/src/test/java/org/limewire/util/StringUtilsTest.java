@@ -356,6 +356,18 @@ public class StringUtilsTest extends BaseTestCase {
         }
     }
     
+    public void testIsEmpty() {
+        assertTrue(StringUtils.isEmpty(null));
+        assertTrue(StringUtils.isEmpty("   "));
+        assertTrue(StringUtils.isEmpty(""));
+        assertTrue(StringUtils.isEmpty(" "));
+        
+        assertFalse(StringUtils.isEmpty("f"));
+        assertFalse(StringUtils.isEmpty("f "));
+        assertFalse(StringUtils.isEmpty(" t"));
+        assertFalse(StringUtils.isEmpty(" lkjf "));
+    }
+    
     public void testCountOccurrences() {
         assertEquals(0, StringUtils.countOccurrences("", 'f'));
         assertEquals(0, StringUtils.countOccurrences("fdfdfdfdf", 'e'));
