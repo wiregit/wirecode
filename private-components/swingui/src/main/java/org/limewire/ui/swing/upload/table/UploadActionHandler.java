@@ -57,7 +57,7 @@ class UploadActionHandler {
         } else if (actionCommmand == LIBRARY_COMMAND){
             libraryMediator.selectInLibrary(item.getFile());
         } else if (actionCommmand == LAUNCH_COMMAND){
-            NativeLaunchUtils.safeLaunchFile(item.getFile(), categoryManager);
+            PlayerUtils.playOrLaunch(item.getFile(), categoryManager);
         } else if (actionCommmand == PLAY_COMMAND){
             PlayerUtils.playOrLaunch(item.getFile(), categoryManager);
         } else if (actionCommmand == PAUSE_COMMAND) {
