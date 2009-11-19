@@ -75,27 +75,9 @@ class AVInfoPanel extends JPanel {
     }
     
     /**
-     * Displays the Info dialog for the specified download item.
+     * Displays the AV vendor message.
      */
-    public void display(DownloadItem item) {
-        switch (item.getDownloadItemType()) {
-        case ANTIVIRUS:
-            initUpdateMessage();
-            showDialog(I18n.tr("About AVG Anti-Virus"));
-            break;
-            
-        case GNUTELLA:
-            // TODO only if item.getState() == DownloadItem.THREAT_FOUND
-            initThreatMessage(item);
-            showDialog(I18n.tr("Warning"));
-            break;
-        }
-    }
-    
-    /**
-     * Initializes the components for the AV update message.
-     */
-    private void initUpdateMessage() {
+    public void showVendorMessage() {
         setLayout(new MigLayout("insets 25 15 15 15, gap 0 0"));
         
         headingLabel.setFont(headingFont);
@@ -113,12 +95,15 @@ class AVInfoPanel extends JPanel {
         add(messageLabel, "span, align left, wrap 15");
         add(okButton, "alignx left, aligny bottom, push");
         add(vendorLabel, "alignx right, aligny bottom");
+        
+        // Display as modal dialog.
+        showDialog(I18n.tr("About AVG Anti-Virus"));
     }
     
     /**
-     * Initializes the components for the threat detected message.
+     * Displays the threat detected message.
      */
-    private void initThreatMessage(DownloadItem item) {
+    public void showThreatMessage(DownloadItem item) {
         setLayout(new MigLayout("insets 25 15 15 15, gap 0 0"));
         
         headingLabel.setFont(threatHeadingFont);
@@ -138,14 +123,18 @@ class AVInfoPanel extends JPanel {
         doNotShowCheckBox.setForeground(doNotShowForeground);
         doNotShowCheckBox.setText(I18n.tr("Do not show message again"));
         // TODO add setting for checkbox 
+        doNotShowCheckBox.setSelected(true);
         
         // Add components to container.
         add(iconLabel, "spany, alignx left, aligny top, gapright 15");
         add(headingLabel, "span, align left, wrap");
         add(messageLabel, "span, align left, wrap 15");
         add(okButton, "alignx left, aligny bottom");
-        add(doNotShowCheckBox, "alignx left, aligny bottom, gapleft 6, push");
+        add(doNotShowCheckBox, "alignx left, aligny bottom, gapleft 5, push");
         add(vendorLabel, "alignx right, aligny bottom");
+        
+        // Display as modal dialog.
+        showDialog(I18n.tr("Warning"));
     }
     
     /**

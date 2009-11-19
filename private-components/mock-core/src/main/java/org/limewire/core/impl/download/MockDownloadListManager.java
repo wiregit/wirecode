@@ -95,6 +95,11 @@ public class MockDownloadListManager implements DownloadListManager {
 		item.addDownloadSource(new MockDownloadSource("234.2.3.4"));
 		addDownload(item);
 
+        item = new MockDownloadItem("Funky file.exe", 446,
+                DownloadState.THREAT_FOUND, Category.PROGRAM);
+        item.addDownloadSource(new MockDownloadSource("245.2.7.78"));
+        addDownload(item);
+
 		item = new MockDownloadItem("Psychology 101 Lecture 2.avi", 55,
 				DownloadState.LOCAL_QUEUED, Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("34.2.7.7"));

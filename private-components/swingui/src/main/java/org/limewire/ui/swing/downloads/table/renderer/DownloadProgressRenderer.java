@@ -46,8 +46,15 @@ public class DownloadProgressRenderer extends TransferProgressRenderer {
             DownloadItem item = (DownloadItem) value;
             DownloadState state = item.getState();
 
-            if (state != DownloadState.DOWNLOADING || item.getRemainingDownloadTime() > Long.MAX_VALUE - 1000) {
+            if (state == DownloadState.SCANNING) {
+                timeLabel.setText(I18n.tr("finalizing..."));
+                timeLabel.setMinimumSize(timeLabel.getPreferredSize());
+                timeLabel.setVisible(true);
+                
+            } else if (state != DownloadState.DOWNLOADING || 
+                    item.getRemainingDownloadTime() > Long.MAX_VALUE - 1000) {
                 timeLabel.setVisible(false);
+                
             } else {
                 timeLabel.setText(I18n.tr("{0} left", CommonUtils.seconds2time(item
                         .getRemainingDownloadTime())));

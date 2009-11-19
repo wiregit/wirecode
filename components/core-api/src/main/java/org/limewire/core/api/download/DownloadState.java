@@ -4,7 +4,8 @@ package org.limewire.core.api.download;
  * An enum to describe the various general download states and their capabilities. 
  */
 public enum DownloadState {
-	DONE( false, false), 
+    /** Download finished and scanned. */
+	DONE(false, false), 
 	CONNECTING( true, false), 
 	DOWNLOADING( true, false), 
 	PAUSED( false, true), 
@@ -15,7 +16,15 @@ public enum DownloadState {
 	STALLED( false, false),
 	TRYING_AGAIN( true, false),
 	ERROR( false, false),
-	RESUMING(false, false);
+	RESUMING(false, false),
+	/** Download finished but not yet scanned. */
+	NOT_SCANNED(false, false),
+    /** Anti-virus scan in progress for finished download. */
+    SCANNING(false, false),
+    /** Anti-virus scan in progress for file fragment. */
+    SCANNING_FRAGMENT(false, false),
+    /** Threat detected by anti-virus scan. */
+    THREAT_FOUND(false, false);
 
 	private final boolean pausable;
 	private final boolean resumable;

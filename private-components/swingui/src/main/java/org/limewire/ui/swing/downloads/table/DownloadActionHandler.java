@@ -152,7 +152,7 @@ public class DownloadActionHandler {
         } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
             searchHandler.doSearch(createSearchInfo(item));
         } else if (actionCommmand == INFO_COMMAND) {
-            avInfoPanelFactory.get().display(item);
+            showInfoDialog(item);
         }
     }
     
@@ -195,6 +195,30 @@ public class DownloadActionHandler {
             item.setSaveFile(saveDir, overwrite);
         } catch (DownloadException ex) {
             downloadExceptionHandler.get().handleDownloadException(new ChangeLocationDownloadAction(item), ex, false);
+        }
+    }
+    
+    /**
+     * Displays an Info dialog for the specified download item.
+     */
+    private void showInfoDialog(DownloadItem item) {
+        switch (item.getDownloadItemType()) {
+        case ANTIVIRUS:
+            avInfoPanelFactory.get().showVendorMessage();
+            break;
+            
+        case GNUTELLA:
+            switch (item.getState()) {
+            case SCANNING:
+            case SCANNING_FRAGMENT:
+                avInfoPanelFactory.get().showVendorMessage();
+                break;
+                
+            case THREAT_FOUND:
+                avInfoPanelFactory.get().showThreatMessage(item);
+                break;
+            }
+            break;
         }
     }
     

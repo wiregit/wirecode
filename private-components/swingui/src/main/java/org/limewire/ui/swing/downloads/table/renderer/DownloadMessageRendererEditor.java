@@ -36,6 +36,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
     @Resource private Icon infoIcon;
     
     private final DownloadActionHandler actionHandler;
+    private final TransferRendererResources resources;
     
     private JLabel messageLabel;
     private JButton infoButton;
@@ -49,13 +50,13 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
     @Inject
     public DownloadMessageRendererEditor(DownloadActionHandler actionHandler) {
         this.actionHandler = actionHandler;
+        this.resources = new TransferRendererResources();
         
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("insets 0, gap 0, aligny center, nogrid, novisualpadding"));
         
         messageLabel = new JLabel();
-        new TransferRendererResources().decorateComponent(messageLabel);
         
         infoButton = new IconButton(infoIcon);
         infoButton.setActionCommand(DownloadActionHandler.INFO_COMMAND);
@@ -94,8 +95,17 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
      * Updates the display components using the specified download item.
      */
     private void update(DownloadItem item) {
+        DownloadState state = item.getState();
+        
+        resources.decorateComponent(messageLabel);
         messageLabel.setText(getPercentMessage(item) + getMessage(item));
-        infoButton.setVisible(item.getDownloadItemType() == DownloadItemType.ANTIVIRUS);
+        if (state == DownloadState.THREAT_FOUND) {
+            messageLabel.setForeground(resources.getDisabledForeground());
+        }
+        
+        infoButton.setVisible(item.getDownloadItemType() == DownloadItemType.ANTIVIRUS ||
+                state == DownloadState.SCANNING || state == DownloadState.SCANNING_FRAGMENT || 
+                state == DownloadState.THREAT_FOUND);
     }
     
     /**
@@ -104,7 +114,9 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
     private String getPercentMessage(DownloadItem item) {
         int percent = item.getPercentComplete();
         DownloadState state = item.getState();
-        if (percent == 0 || state == DownloadState.DONE ||  state == DownloadState.DOWNLOADING ||  state == DownloadState.ERROR){
+        if (percent == 0 || state == DownloadState.DONE || state == DownloadState.DOWNLOADING ||
+                state == DownloadState.ERROR || state == DownloadState.NOT_SCANNED || 
+                state == DownloadState.SCANNING || state == DownloadState.THREAT_FOUND) {
             return "";
         }
         return percent + "% - ";    
@@ -172,6 +184,14 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
             return I18n.trn("Waiting - Next in line",
                     "Waiting - {0} in line",
                     item.getRemoteQueuePosition(), item.getRemoteQueuePosition());
+        case NOT_SCANNED:
+            return I18n.tr("Done, but not scanned for viruses");
+        case SCANNING:
+            return I18n.tr("Scanning for viruses - Powered by AVG");
+        case SCANNING_FRAGMENT:
+            return I18n.tr("Scanning preview - Powered by AVG");
+        case THREAT_FOUND:
+            return I18n.tr("File deleted - Threat detected by AVG");
         default:
             return null;
         }
