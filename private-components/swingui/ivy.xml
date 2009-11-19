@@ -38,6 +38,7 @@
         <dependency org="none" name="jdic" rev="${jdic.version}" conf="compile,runtime"/>
         <dependency org="none" name="gettext-commons" rev="${gettext-commons.version}" conf="compile,runtime"/>
         <dependency org="none" name="miglayout" rev="${miglayout.version}" conf="compile,runtime"/>
+        <dependency org="none" name="mp3spi" rev="1.9.4.1" conf="compile,runtime"/>
         <dependency org="none" name="jxlayer" rev="${jxlayer.version}" conf="compile,runtime"/>
         <dependency org="none" name="log4j" rev="${log4j.version}" conf="compile,runtime"/>
         <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
