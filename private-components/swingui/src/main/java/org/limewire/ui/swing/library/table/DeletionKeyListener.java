@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -20,12 +21,15 @@ import com.google.inject.Provider;
 public class DeletionKeyListener implements KeyListener {
     
     private final LibraryManager libraryManager;
+    private final DownloadListManager downloadListManager;
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;    
     
     @Inject
     public DeletionKeyListener(LibraryManager libraryManager, 
+            DownloadListManager downloadListManager,
             @LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems) {
         this.libraryManager = libraryManager;
+        this.downloadListManager = downloadListManager;
         this.selectedLocalFileItems = selectedLocalFileItems;
     }
     
@@ -75,7 +79,7 @@ public class DeletionKeyListener implements KeyListener {
             }
             
             if (options[confirmation] == deleteText) {
-                DeleteAction.deleteSelectedItems(libraryManager, selectedItems);
+                DeleteAction.deleteSelectedItems(libraryManager, downloadListManager, selectedItems);
             } 
             else if (options[confirmation] == removeText) {
                 RemoveFromLibraryAction.removeFromLibrary(libraryManager, selectedItems);

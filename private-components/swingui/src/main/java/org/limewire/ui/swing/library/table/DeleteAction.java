@@ -9,6 +9,9 @@ import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import org.limewire.core.api.URN;
+import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -29,13 +32,16 @@ import com.google.inject.Provider;
  */
 class DeleteAction extends AbstractAction {
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
+    private final DownloadListManager downloadListManager;
     private final LibraryManager libraryManager;
 
     @Inject
     public DeleteAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
+            DownloadListManager downloadListManager,
             LibraryManager libraryManager) {
        
         this.selectedLocalFileItems = selectedLocalFileItems;
+        this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
 
         putValue(Action.NAME, I18n.tr("Delete from Disk"));
@@ -75,11 +81,12 @@ class DeleteAction extends AbstractAction {
                 options, noText);
         
         if (confirmation > -1 && options[confirmation] == yesText) {
-            deleteSelectedItems(libraryManager, selectedItems);
+            deleteSelectedItems(libraryManager, downloadListManager, selectedItems);
         }
     }
     
-    static void deleteSelectedItems(final LibraryManager libraryManager, final List<LocalFileItem> selectedItems) {
+    static void deleteSelectedItems(final LibraryManager libraryManager, final DownloadListManager downloadListManager,
+            final List<LocalFileItem> selectedItems) {
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {                  
                 File currentSong = PlayerUtils.getCurrentSongFile();
@@ -89,12 +96,18 @@ class DeleteAction extends AbstractAction {
                     }
                     if(!item.isIncomplete()) {
                         FileUtils.unlockFile(item.getFile());
+                        removeDownloadItem(item.getUrn(), downloadListManager);
                         libraryManager.getLibraryManagedList().removeFile(item.getFile());
                         FileUtils.delete(item.getFile(), OSUtils.supportsTrash());
                     }
                 }
             }
         });
+    }
+    
+    private static void removeDownloadItem(URN urn, DownloadListManager downloadListManager) {
+        DownloadItem item = downloadListManager.getDownloadItem(urn);
+        downloadListManager.remove(item);
     }
     
     private static void stopAudio() {
