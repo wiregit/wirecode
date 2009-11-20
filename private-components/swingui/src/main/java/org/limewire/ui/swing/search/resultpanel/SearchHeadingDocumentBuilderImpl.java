@@ -14,13 +14,13 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
         } else {
             switch(downloadState) {
             case DOWNLOADING:
-                String downloadMessage = "<a href=\"#downloading\">Downloading</a> {0}...";
+                String downloadMessage = tr("<a href=\"#downloading\">Downloading</a> {0}...");
                 return tr(downloadMessage, wrapHeading(heading.getText(downloadMessage), false));
             case NOT_STARTED:
                 return wrapHeading(heading.getText(), true);
             case DOWNLOADED:
             case LIBRARY:
-                String message = "{0} is in your <a href=\"#library\">Library</a>.";
+                String message = tr("{0} is in your <a href=\"#library\">Library</a>.");
                 return tr(message, wrapHeading(heading.getText(message), false));
             }
         }
