@@ -162,7 +162,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
         try { 
             for(UploadItem item : threadSafeUploadItems) {
                 CoreUploadItem coreUploadItem = (CoreUploadItem) item;
-                if(coreUploadItem.getUploader().getHost().equals(uploader.getHost()) && coreUploadItem.getUploader().isInactive()) {
+                if(coreUploadItem.getUploader().getHost().equals(uploader.getHost())) {
                     // if its a browse host, there's no file to match on
                     if(uploader.getState() == UploadStatus.BROWSE_HOST && uploader.getUploadType() == coreUploadItem.getUploader().getUploadType()) {
                         matchingItem = coreUploadItem;
