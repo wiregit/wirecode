@@ -21,6 +21,8 @@ import org.limewire.ui.swing.components.HTMLPane.LoadResult;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
+import com.limegroup.gnutella.util.LimeWireUtils;
+
 public class UrlAction extends AbstractAction {
     private final LaunchType type;
     private final String url;
@@ -128,13 +130,15 @@ public class UrlAction extends AbstractAction {
                 getContentPane().add(scrollPane);
                 
                 ResizeUtils.forceSize(this, new Dimension(600,400));
+                
+                setTitle("LimeWire " + LimeWireUtils.getLimeWireVersion());
                 setModal(true);
-                setResizable(false);
+                setResizable(true);
                 setAlwaysOnTop(true);
                 getContentPane();
                 pack();
                 setLocationRelativeTo(null);
-                
+                                
                 // If popout browser does not work use the system browser.
                 browser.setPageAsynchronous(urlToShow, null).addFutureListener(new EventListener<FutureEvent<LoadResult>>() {
 					@SwingEDTEvent
