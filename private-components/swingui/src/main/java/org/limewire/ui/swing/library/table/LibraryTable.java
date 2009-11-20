@@ -229,6 +229,8 @@ public class LibraryTable extends MouseableTable {
     }
     
     public void selectAndScrollTo(File file) {
+    	//ensure table has focus to recieve keyboard events
+        requestFocus();
         LibraryTableModel model = getLibraryTableModel();
         for(int y=0; y < model.getRowCount(); y++) {
             FileItem fileItem = model.getElementAt(y);
@@ -243,6 +245,8 @@ public class LibraryTable extends MouseableTable {
     }
     
     public void selectAndScrollTo(URN urn) {
+        //ensure table has focus to recieve keyboard events
+        requestFocus();
         LibraryTableModel model = getLibraryTableModel();
         for(int y=0; y < model.getRowCount(); y++) {
             FileItem fileItem = model.getElementAt(y);

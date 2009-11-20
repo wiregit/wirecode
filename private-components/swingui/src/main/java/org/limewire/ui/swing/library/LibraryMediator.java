@@ -47,12 +47,17 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         return libraryPanel;
     }
 
-    public void selectInLibrary(File file) {
+    public void selectInLibrary(final File file) {
         showLibrary();
         clearFilters();
         getComponent().selectLocalFileList(libraryManager.get().getLibraryManagedList());
-        getComponent().selectAndScrollTo(file);
-        
+        //allow library to show before selecting the file, needed in case library
+        //hasn't been loaded yet.
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                getComponent().selectAndScrollTo(file);     
+            }
+        });       
     }
     
     private void showLibrary(){
@@ -76,11 +81,17 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         });
     }
 
-    public void selectInLibrary(URN urn) {
+    public void selectInLibrary(final URN urn) {
         NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, NAME);
         item.select();
         getComponent().selectLocalFileList(libraryManager.get().getLibraryManagedList());
-        getComponent().selectAndScrollTo(urn);
+        //allow library to show before selecting the file, needed in case library
+        //hasn't been loaded yet.
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                getComponent().selectAndScrollTo(urn);                
+            }
+        });
     }
     
     public void showSharedFileList(SharedFileList list) {
