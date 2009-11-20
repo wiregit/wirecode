@@ -2,6 +2,8 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.text.MessageFormat;
+
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 
@@ -15,13 +17,13 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
             switch(downloadState) {
             case DOWNLOADING:
                 String downloadMessage = tr("<a href=\"#downloading\">Downloading</a> {0}...");
-                return tr(downloadMessage, wrapHeading(heading.getText(downloadMessage), false));
+                return MessageFormat.format(downloadMessage, wrapHeading(heading.getText(downloadMessage), false));
             case NOT_STARTED:
                 return wrapHeading(heading.getText(), true);
             case DOWNLOADED:
             case LIBRARY:
                 String message = tr("{0} is in your <a href=\"#library\">Library</a>.");
-                return tr(message, wrapHeading(heading.getText(message), false));
+                return MessageFormat.format(message, wrapHeading(heading.getText(message), false));
             }
         }
         return "";
