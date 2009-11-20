@@ -24,6 +24,7 @@ import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.settings.MediaPlayerSettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.FileUtils;
 
 import ca.odell.glazedlists.EventList;
 
@@ -528,6 +529,8 @@ class AudioPlayerMediator implements PlayerMediator {
         // Use file item if available.
         if (fileItem != null) {
             return fileItem.getFile().getName();
+        } else if(getCurrentMediaFile() != null) {
+            return FileUtils.getFilenameNoExtension(getCurrentMediaFile().getName());
         } else {
             return I18n.tr("Unknown");
         }
