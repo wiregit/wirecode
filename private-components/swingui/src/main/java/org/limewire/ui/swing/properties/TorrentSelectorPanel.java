@@ -9,6 +9,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -16,6 +17,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -53,6 +56,22 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
         component.add(createHeaderLabel(I18n.tr("Choose files to download")), "gapleft 5, wrap");
         component.add(bittorrentPanel.getComponent(), "grow");
         createFooter();
+        component.addAncestorListener(new AncestorListener() {
+           @Override
+           public void ancestorAdded(AncestorEvent event) {
+               okButton.requestFocusInWindow();
+           }
+           
+           @Override
+           public void ancestorMoved(AncestorEvent event) {
+               
+           };
+           
+           @Override
+           public void ancestorRemoved(AncestorEvent event) {
+               
+           }
+        });
     }
     
     public int getCloseValue() {
@@ -61,6 +80,10 @@ public class TorrentSelectorPanel implements PropertyChangeListener {
     
     public JComponent getComponent() {
         return component;
+    }
+    
+    public JButton getOkButton() {
+        return okButton;
     }
     
     private void close() {

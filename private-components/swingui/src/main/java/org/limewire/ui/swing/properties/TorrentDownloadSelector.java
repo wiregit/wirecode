@@ -16,6 +16,7 @@ public class TorrentDownloadSelector extends LimeJDialog {
         
         JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("Torrent Download"), 
                 null, panel.getComponent());
+        dialog.getRootPane().setDefaultButton(panel.getOkButton());
         dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
         dialog.setResizable(true);
         dialog.setVisible(true);
