@@ -215,7 +215,7 @@ public class DownloadActionHandler {
                 break;
                 
             case THREAT_FOUND:
-                avInfoPanelFactory.get().showThreatMessage(item);
+                avInfoPanelFactory.get().showThreatMessage(item, false);
                 break;
             }
             break;

@@ -18,11 +18,13 @@ import org.jdesktop.application.Application;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.downloads.table.AVInfoPanel;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
@@ -50,6 +52,7 @@ public class MainDownloadPanel extends JPanel {
     private final Provider<DownloadTableFactory> downloadTableFactory;
     private final DownloadListManager downloadListManager;
     private final CategoryManager categoryManager;
+    private final Provider<AVInfoPanel> avInfoPanelFactory;
     private final ArrayList<DownloadVisibilityListener> downloadVisibilityListeners = new ArrayList<DownloadVisibilityListener>();
     
     private TrayNotifier notifier;
@@ -65,11 +68,13 @@ public class MainDownloadPanel extends JPanel {
             DownloadMediator downloadMediator,
             TrayNotifier notifier, 
             DownloadListManager downloadListManager,
-            CategoryManager categoryManager) {
+            CategoryManager categoryManager,
+            Provider<AVInfoPanel> avInfoPanelFactory) {
         this.downloadMediator = downloadMediator;
         this.downloadTableFactory = downloadTableFactory;
         this.downloadListManager = downloadListManager;
         this.categoryManager = categoryManager;
+        this.avInfoPanelFactory = avInfoPanelFactory;
         this.notifier = notifier;
 
         GuiUtils.assignResources(this);
@@ -148,20 +153,24 @@ public class MainDownloadPanel extends JPanel {
                 
             } else if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
                 final DownloadItem downloadItem = (DownloadItem) event.getNewValue();
-                notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
-                        new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        ActionMap map = Application.getInstance().getContext().getActionManager()
-                                .getActionMap();
-                        map.get("restoreView").actionPerformed(e);
-                        
-                        if (downloadItem.isLaunchable()) {
-                            DownloadItemUtils.launch(downloadItem, categoryManager);
+                if (downloadItem.getState() == DownloadState.THREAT_FOUND) {
+                    avInfoPanelFactory.get().showThreatMessage(downloadItem, true);
+                } else {
+                    notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
+                            new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            ActionMap map = Application.getInstance().getContext().getActionManager()
+                            .getActionMap();
+                            map.get("restoreView").actionPerformed(e);
+
+                            if (downloadItem.isLaunchable()) {
+                                DownloadItemUtils.launch(downloadItem, categoryManager);
+                            }
                         }
-                    }
-                }));
-                
+                    }));
+                }
+
                 // the user might be editing one of the cell's while the download completes,
                 // i.e. the user might have the mouse hovering over the pause button. (Bug LWC-4317)
                 // Let's manually cancel cell editing here after the download completes

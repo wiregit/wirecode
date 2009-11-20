@@ -30,7 +30,8 @@ public class DownloadProgressRenderer extends TransferProgressRenderer {
         
             progressBar.setValue(item.getPercentComplete());
             progressBar.setVisible(columnWidth > resources.getProgressBarCutoffWidth() &&
-                    (state == DownloadState.DOWNLOADING || state == DownloadState.PAUSED));
+                    (state == DownloadState.DOWNLOADING || state == DownloadState.PAUSED ||
+                     state == DownloadState.SCANNING || state == DownloadState.SCANNING_FRAGMENT));
             progressBar.setEnabled(state != DownloadState.PAUSED);
         
         } else {

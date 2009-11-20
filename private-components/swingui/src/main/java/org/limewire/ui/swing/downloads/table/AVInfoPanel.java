@@ -34,7 +34,7 @@ import com.google.inject.Inject;
 /**
  * Content panel for the Anti-Virus Info dialog in the downloads table.
  */
-class AVInfoPanel extends JPanel {
+public class AVInfoPanel extends JPanel {
     private static final String AVG_URL = "http://www.avg.com/";
 
     @Resource private Font doNotShowFont;
@@ -93,8 +93,8 @@ class AVInfoPanel extends JPanel {
         // Add components to container.
         add(headingLabel, "span, align left, wrap");
         add(messageLabel, "span, align left, wrap 15");
-        add(okButton, "alignx left, aligny bottom, push");
-        add(vendorLabel, "alignx right, aligny bottom");
+        add(okButton, "alignx left, aligny bottom");
+        add(vendorLabel, "alignx right, aligny bottom, push");
         
         // Display as modal dialog.
         showDialog(I18n.tr("About AVG Anti-Virus"));
@@ -103,8 +103,10 @@ class AVInfoPanel extends JPanel {
     /**
      * Displays the threat detected message.
      */
-    public void showThreatMessage(DownloadItem item) {
-        setLayout(new MigLayout("insets 25 15 15 15, gap 0 0"));
+    public void showThreatMessage(DownloadItem item, boolean autoMode) {
+        // TODO if autoMode and "skip" setting is true, then return without showing 
+        
+        setLayout(new MigLayout("insets 25 15 15 15, gap 0 0, hidemode 3"));
         
         headingLabel.setFont(threatHeadingFont);
         headingLabel.setForeground(threatHeadingForeground);
@@ -122,6 +124,7 @@ class AVInfoPanel extends JPanel {
         doNotShowCheckBox.setFont(doNotShowFont);
         doNotShowCheckBox.setForeground(doNotShowForeground);
         doNotShowCheckBox.setText(I18n.tr("Do not show message again"));
+        doNotShowCheckBox.setVisible(autoMode);
         // TODO add setting for checkbox 
         doNotShowCheckBox.setSelected(true);
         
@@ -130,8 +133,8 @@ class AVInfoPanel extends JPanel {
         add(headingLabel, "span, align left, wrap");
         add(messageLabel, "span, align left, wrap 15");
         add(okButton, "alignx left, aligny bottom");
-        add(doNotShowCheckBox, "alignx left, aligny bottom, gapleft 5, push");
-        add(vendorLabel, "alignx right, aligny bottom");
+        add(doNotShowCheckBox, "alignx left, aligny bottom, gapleft 5");
+        add(vendorLabel, "alignx right, aligny bottom, push");
         
         // Display as modal dialog.
         showDialog(I18n.tr("Warning"));

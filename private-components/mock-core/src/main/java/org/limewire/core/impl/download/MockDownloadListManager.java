@@ -11,10 +11,10 @@ import java.util.List;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.magnet.MagnetLink;
@@ -127,8 +127,11 @@ public class MockDownloadListManager implements DownloadListManager {
 	private class RemoveCancelledListener implements PropertyChangeListener {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (evt.getNewValue() == DownloadState.CANCELLED) {
+            Object newValue = evt.getNewValue();
+            if (newValue == DownloadState.CANCELLED) {
                 threadSafeDownloadItems.remove(evt.getSource());
+            } else if (newValue == DownloadState.DONE || newValue == DownloadState.THREAT_FOUND) {
+                changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, evt.getSource());
             }
         }
     }
