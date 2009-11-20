@@ -10,21 +10,29 @@ import javax.swing.ActionMap;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.upload.UploadMediator.SortOrder;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import com.google.inject.Provider;
 
 /**
  * Options menu for performing actions on the upload table.
@@ -35,12 +43,14 @@ class UploadHeaderPopupMenu extends JPopupMenu {
     @Resource(key="DownloadHeaderPopupMenu.downArrow") private Icon downArrow;
     
     private final UploadMediator uploadMediator;
+    private final Provider<TorrentManager> torrentManager;
     
     /**
      * Constructs an UploadHeaderPopupMenu.
      */
-    public UploadHeaderPopupMenu(UploadMediator uploadMediator) {
+    public UploadHeaderPopupMenu(UploadMediator uploadMediator, Provider<TorrentManager> torrentManager) {
         this.uploadMediator = uploadMediator;
+        this.torrentManager = torrentManager;
         
         GuiUtils.assignResources(this);
         
@@ -107,7 +117,13 @@ class UploadHeaderPopupMenu extends JPopupMenu {
         cancelSubMenu.add(new AbstractAction(I18n.tr("All Torrents")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (confirmCancel(I18n.tr("Cancel uploading all torrents?"))) {
+                JPanel message = new JPanel(new MigLayout("nogrid, fill, gapy 15"));
+                message.setOpaque(false);
+                message.add(new JLabel(I18n.tr("Cancel uploading all torrents?")), "wrap");
+                if(getNumDownloadingTorrents() > 0) {
+                    message.add(new JLabel(I18n.tr("Note: Downloading torrents will be cancelled as well.", "")));
+                }
+                if (confirmCancel(message)) {
                     uploadMediator.cancelAllTorrents();
                 }
             }
@@ -116,13 +132,33 @@ class UploadHeaderPopupMenu extends JPopupMenu {
         cancelSubMenu.add(new AbstractAction(I18n.tr("All Uploads")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (confirmCancel(I18n.tr("Cancel all uploads?"))) {
+                JPanel message = new JPanel(new MigLayout("nogrid, fill, gapy 15"));
+                message.setOpaque(false);
+                message.add(new JLabel(I18n.tr("Cancel all uploads?")), "wrap");
+                if(getNumDownloadingTorrents() > 0) {
+                    message.add(new JLabel(I18n.tr("Note: Downloading torrents will be cancelled as well.", "")));
+                }
+                if (confirmCancel(message)) {
                     uploadMediator.cancelAll();
                 }
             }
         }).setEnabled(uploadMediator.getUploadList().size() > 0);
         
         return cancelSubMenu;
+    }
+    
+    private int getNumDownloadingTorrents() {
+        if(!torrentManager.get().isInitialized() || ! torrentManager.get().isValid()) {
+            return 0;
+        }
+        
+        int numDownloading = 0;
+        for(Torrent torrent : torrentManager.get().getTorrents()) {
+            if(!torrent.isFinished()) {
+                numDownloading++;
+            }
+        }
+        return numDownloading;
     }
     
     /**
@@ -199,7 +235,7 @@ class UploadHeaderPopupMenu extends JPopupMenu {
     /**
      * Prompts the user to confirm an action with the specified message.
      */
-    private boolean confirmCancel(String message) {
+    private boolean confirmCancel(Object message) {
         return (FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
                 message, I18n.tr("Cancel"), JOptionPane.YES_NO_OPTION, 
                 JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION);

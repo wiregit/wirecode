@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.upload.UploadItem;
@@ -45,6 +46,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Mediator to control the interaction between the uploads table and various
@@ -60,6 +62,7 @@ public class UploadMediator {
     public static final String NAME = "UploadPanel";
     
     private final UploadListManager uploadListManager;
+    private final Provider<TorrentManager> torrentManager;
     private final UploadTableFactory uploadTableFactory;
     
     private EventList<UploadItem> activeList;
@@ -75,10 +78,12 @@ public class UploadMediator {
     private List<JButton> headerButtons;
     private JPopupMenu headerPopupMenu;
     
+    
     @Inject
-    public UploadMediator(UploadListManager uploadListManager,
+    public UploadMediator(UploadListManager uploadListManager, Provider<TorrentManager> torrentManager,            
             UploadTableFactory uploadTableFactory) {
         this.uploadListManager = uploadListManager;
+        this.torrentManager = torrentManager;
         this.uploadTableFactory = uploadTableFactory;
         
         sortOrder = SortOrder.ORDER_STARTED;
@@ -190,7 +195,7 @@ public class UploadMediator {
      */
     public JPopupMenu getHeaderPopupMenu() {
         if (headerPopupMenu == null) {
-            headerPopupMenu = new UploadHeaderPopupMenu(this);
+            headerPopupMenu = new UploadHeaderPopupMenu(this, torrentManager);
         }
         return headerPopupMenu;
     }
@@ -367,6 +372,15 @@ public class UploadMediator {
      * item is also removed from the list.
      */
     public void cancel(UploadItem uploadItem, boolean remove) {
+        cancel(uploadItem, remove, true);
+    }
+    
+    /**
+     * Cancels the specified upload item.  If <code>prompt</code> is true the method 
+     * prompts the user to cancel torrent uploads.  If <code>remove</code> is true, the 
+     * cancelled item is also removed from the list.
+     */
+    public void cancel(UploadItem uploadItem, boolean remove, boolean prompt) {
         boolean approved = true;
         
         // For torrents, determine cancel approval based on torrent status and
@@ -379,9 +393,9 @@ public class UploadMediator {
         if (uploadItem.getUploadItemType() == UploadItemType.BITTORRENT) {
             if (!uploadItem.isStarted()) {
                 approved = false;
-            } else if (!uploadItem.isFinished()) {
+            } else if (prompt && !uploadItem.isFinished()) {
                 approved = promptUser(I18n.tr("If you stop this upload, the torrent download will stop.  Are you sure you want to do this?"));
-            } else if (uploadItem.getSeedRatio() < 1.0f) {
+            } else if (prompt && uploadItem.getSeedRatio() < 1.0f) {
                 approved = promptUser(I18n.tr("Are you sure you want to stop this upload?"));
             }
         }
@@ -417,7 +431,7 @@ public class UploadMediator {
     public void cancelAll() {
         List<UploadItem> uploadList = new ArrayList<UploadItem>(getUploadList());
         for (UploadItem item : uploadList) {
-            cancel(item, false);
+            cancel(item, false, false);
         }
     }
     
@@ -427,7 +441,7 @@ public class UploadMediator {
     public void cancelAllError() {
         List<UploadItem> uploadList = new ArrayList<UploadItem>(getUploadList());
         for (UploadItem item : uploadList) {
-            if (item.getState().isError()) cancel(item, false);
+            if (item.getState().isError()) cancel(item, false, false);
         }
     }
     
@@ -437,7 +451,7 @@ public class UploadMediator {
     public void cancelAllTorrents() {
         List<UploadItem> uploadList = new ArrayList<UploadItem>(getUploadList());
         for (UploadItem item : uploadList) {
-            if (item.getUploadItemType() == UploadItemType.BITTORRENT) cancel(item, false);
+            if (item.getUploadItemType() == UploadItemType.BITTORRENT) cancel(item, false, false);
         }
     }
     
