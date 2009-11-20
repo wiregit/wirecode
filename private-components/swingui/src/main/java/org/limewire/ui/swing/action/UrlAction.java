@@ -131,7 +131,7 @@ public class UrlAction extends AbstractAction {
                 
                 ResizeUtils.forceSize(this, new Dimension(600,400));
                 
-                setTitle("LimeWire " + LimeWireUtils.getLimeWireVersion());
+                setTitle("LimeWire");// + LimeWireUtils.getLimeWireVersion());
                 setModal(true);
                 setResizable(true);
                 setAlwaysOnTop(true);
