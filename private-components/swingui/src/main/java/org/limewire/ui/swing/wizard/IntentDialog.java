@@ -28,7 +28,6 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
-import org.limewire.ui.swing.action.UrlAction.LaunchType;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
@@ -79,8 +78,10 @@ public class IntentDialog extends LimeJDialog {
         super();
         
         ResizeUtils.forceSize(this, new Dimension(514,402));
-                
-        setTitle("LimeWire " + version);
+              
+        final String title = "LimeWire " + version; 
+        
+        setTitle(title);
         setModal(true);
         setResizable(false);
         setAlwaysOnTop(true);
@@ -113,12 +114,12 @@ public class IntentDialog extends LimeJDialog {
         agreeLabel = new MultiLineLabel("", 500);
         agreeLabel.setFont(smallFont);
         //FontUtils.bold(agreeLabel);
-        licenseButton = new HyperlinkButton(new UrlAction(licenseURL, LaunchType.POPUP, languageAppender));
+        licenseButton = new HyperlinkButton(new UrlAction(licenseURL, title, languageAppender));
         licenseButton.setFocusPainted(false);
         licenseButton.setFont(smallFont);
         FontUtils.underline(licenseButton);
         licenseButton.setForeground(new Color(0x2152a6));
-        privacyButton = new HyperlinkButton(new UrlAction(privacyURL, LaunchType.POPUP, languageAppender));
+        privacyButton = new HyperlinkButton(new UrlAction(privacyURL, title, languageAppender));
         privacyButton.setFocusPainted(false);
         privacyButton.setFont(smallFont);
         FontUtils.underline(privacyButton);
@@ -129,7 +130,7 @@ public class IntentDialog extends LimeJDialog {
         bodyLabel.setEditable(false);
         bodyLabel.setOpaque(false);
         bodyLabel.addHyperlinkListener(new HyperlinkListener() {
-            private final Action urlAction = new UrlAction(copyrightURL, LaunchType.POPUP, languageAppender);
+            private final Action urlAction = new UrlAction(copyrightURL, title, languageAppender);
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if (e.getEventType() == EventType.ACTIVATED) {

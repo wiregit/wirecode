@@ -21,11 +21,10 @@ import org.limewire.ui.swing.components.HTMLPane.LoadResult;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 public class UrlAction extends AbstractAction {
     private final LaunchType type;
     private final String url;
+    private final String title;
     private final GetParamAppender getParamAppender;
     
     /**
@@ -33,7 +32,14 @@ public class UrlAction extends AbstractAction {
      *  appender passed.
      */
     public UrlAction(String url, LaunchType type, GetParamAppender getParamAppender) {
-        this(url, url, type, getParamAppender);
+        this(url, url, null, type, getParamAppender);
+    }
+    
+    /**
+     * Constructs an action that will spawn the url in an in process popup with the given title.
+     */
+    public UrlAction(String url, String title, GetParamAppender getParamAppender) {
+        this(url, url, title, LaunchType.POPUP, getParamAppender);
     }
     
     /**
@@ -41,7 +47,7 @@ public class UrlAction extends AbstractAction {
      * information added to the URL and the default {@link LaunchType}.
      */
     public UrlAction(String url) {
-        this(url, url, LaunchType.EXTERNAL_BROWSER, null);
+        this(url, url, null, LaunchType.EXTERNAL_BROWSER, null);
     }
     
     
@@ -58,7 +64,7 @@ public class UrlAction extends AbstractAction {
      * information added to the URL.
      */
     public UrlAction(String name, String url, final Application application) {
-        this(name, url, LaunchType.EXTERNAL_BROWSER, new GetParamAppender() {
+        this(name, url, null, LaunchType.EXTERNAL_BROWSER, new GetParamAppender() {
             @Override
             public String appendParams(String original) {
                 return application.addClientInfoToUrl(original);
@@ -71,7 +77,7 @@ public class UrlAction extends AbstractAction {
      * information added to the URL.
      */
     public UrlAction(String name, String url) {
-        this(name, url, LaunchType.EXTERNAL_BROWSER, null);
+        this(name, url, null, LaunchType.EXTERNAL_BROWSER, null);
     }
     
     /**
@@ -79,17 +85,18 @@ public class UrlAction extends AbstractAction {
      *  without any identifying information added to the URL.
      */
     public UrlAction(String name, String url, LaunchType type) {
-        this(name, url, type, null);
+        this(name, url, null, type, null);
     }
     
     /**
      * Constructs an UrlAction with a specific name & url, with identifying
      * information added to the URL, and a specific launch type.
      */
-    public UrlAction(String name, String url, LaunchType type, GetParamAppender getParamAppender) {
+    public UrlAction(String name, String url, String title, LaunchType type, GetParamAppender getParamAppender) {
         super(name);
         this.url = url;
         this.type = type;
+        this.title = title;
         this.getParamAppender = getParamAppender;
         putValue(Action.SHORT_DESCRIPTION, url);
     }
@@ -105,11 +112,11 @@ public class UrlAction extends AbstractAction {
             NativeLaunchUtils.openURL(urlToShow);
         }
         else {
-            showPopup(urlToShow);
+            showPopup(urlToShow, title);
         }
     }
     
-    private static void showPopup(final String urlToShow) {
+    private static void showPopup(final String urlToShow, final String title) {
         new LimeJDialog() {
             {   getContentPane().setLayout(new BorderLayout());
                 HTMLPane browser = new HTMLPane();
@@ -131,7 +138,7 @@ public class UrlAction extends AbstractAction {
                 
                 ResizeUtils.forceSize(this, new Dimension(600,400));
                 
-                setTitle("LimeWire");// + LimeWireUtils.getLimeWireVersion());
+                setTitle(title);
                 setModal(true);
                 setResizable(true);
                 setAlwaysOnTop(true);
