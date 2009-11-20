@@ -192,10 +192,12 @@ class NavigatorImpl implements Navigator {
             }
             selectedItem = item;
             item.fireSelected(true);
-            for(NavigationListener listener : listeners) {
-                listener.itemSelected(item.category, item, selectable, item.navMediator);
-            }
         }
+        //We want the listeners alerted even if the already selected item is re-selected (item == selectedItem)
+        for (NavigationListener listener : listeners) {
+            listener.itemSelected(item.category, item, selectable, item.navMediator);
+        }
+
     }
     
     private class NavItemImpl implements NavItem {
