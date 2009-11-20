@@ -376,7 +376,7 @@ class VideoPlayerMediator implements PlayerMediator {
                     if (controllerEvent instanceof StartEvent || controllerEvent.getSourceController().getState() == Controller.Started) {
                         firePlayerStateChanged(PlayerState.PLAYING);
                         if (updateTimer == null) {
-                            updateTimer = new Timer(500, new TimerAction());
+                            updateTimer = new Timer(100, new TimerAction());
                         }
 
                         if (!updateTimer.isRunning()) {
@@ -409,6 +409,7 @@ class VideoPlayerMediator implements PlayerMediator {
                 updateTimer.stop();
                 player.setMediaTime(new Time(0));
                 firePlayerStateChanged(PlayerState.EOM);
+                fireProgressUpdated(100f);
             } else {
                 fireProgressUpdated();
             }
@@ -459,7 +460,7 @@ class VideoPlayerMediator implements PlayerMediator {
             newPlayer.addControllerListener(controllerListener);
 
             if (updateTimer == null) {
-                updateTimer = new Timer(1000, new TimerAction());
+                updateTimer = new Timer(100, new TimerAction());
             }
             updateTimer.start();
 
