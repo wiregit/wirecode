@@ -46,6 +46,9 @@
 	<target name="publish" depends="publish-dependencies"/>
 	
 	<target name="clean" depends="initialize, clean-local-ivy, clean-aggregate-reports">
+		<delete>
+			<fileset dir="${basedir}" includes="**/build/**/*.class"/>
+		</delete>
 	    <do.multi-ant target="clean"/>
 	</target>
     
