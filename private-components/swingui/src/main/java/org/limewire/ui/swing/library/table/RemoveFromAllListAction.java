@@ -5,8 +5,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Action;
 import javax.swing.JOptionPane;
 
+import org.limewire.core.api.library.LibraryFileList;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -18,14 +21,24 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+/**
+ * Creates an Action to remove the given files from all LocalFileLists
+ * excluding the Library.
+ */
 class RemoveFromAllListAction extends AbstractAction {
+
     private final Provider<List<File>> selectedFiles;
     private final SharedFileListManager manager;
     
     @Inject
     public RemoveFromAllListAction(@LibrarySelected Provider<List<File>> selectedFiles,
-            SharedFileListManager manager) {
-        super(I18n.tr("Remove from All Lists"));
+            @LibrarySelected Provider<LocalFileList> selectedLocalFileList, SharedFileListManager manager) {
+
+        if(selectedLocalFileList == null || selectedLocalFileList.get() instanceof LibraryFileList) {
+            putValue(Action.NAME, I18n.tr("Remove from All Other Lists"));
+        } else {
+            putValue(Action.NAME, I18n.tr("Remove from All Lists"));
+        }
         
         this.selectedFiles = selectedFiles;
         this.manager = manager;
@@ -46,7 +59,6 @@ class RemoveFromAllListAction extends AbstractAction {
                     }
                 }
             });
-            
         }
     }
     

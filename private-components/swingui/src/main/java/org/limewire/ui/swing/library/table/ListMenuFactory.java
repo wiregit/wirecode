@@ -21,6 +21,7 @@ public class ListMenuFactory {
     private final SharedFileListManager sharedFileListManager; 
     private final LibraryManager libraryManager;
     private final LibraryPanel libraryPanel;
+    private final Provider<RemoveFromAllListAction> removeFromAllListAction;
     
     /**
      * Constructs a ListMenuFactory.
@@ -28,10 +29,11 @@ public class ListMenuFactory {
     @Inject
     public ListMenuFactory(SharedFileListManager sharedFileListManager, 
             LibraryManager libraryManager,
-            LibraryPanel libraryPanel) {
+            LibraryPanel libraryPanel, Provider<RemoveFromAllListAction> removeFromAllListAction) {
         this.sharedFileListManager = sharedFileListManager;
         this.libraryManager = libraryManager;
         this.libraryPanel = libraryPanel;
+        this.removeFromAllListAction = removeFromAllListAction;
     }
     
     /**
@@ -71,6 +73,15 @@ public class ListMenuFactory {
             Provider<LocalFileList> selectedLocalFileList) {
         ShowInListMenu menu = new ShowInListMenu(selectedFiles, selectedLocalFileList);
         menu.initialize(sharedFileListManager, libraryManager, libraryPanel);
+        return menu;
+    }
+    
+    /**
+	 * Creates a "Remove from List" menu for the specified list of selected files.
+	 */
+    public JMenu createRemoveInListMenu(Provider<List<File>> selectedFiles) {
+        RemoveFromListMenu menu = new RemoveFromListMenu(selectedFiles);
+        menu.initialize(sharedFileListManager, removeFromAllListAction.get());
         return menu;
     }
 }
