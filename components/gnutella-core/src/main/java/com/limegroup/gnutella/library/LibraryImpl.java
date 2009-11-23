@@ -1185,7 +1185,11 @@ class LibraryImpl implements Library, FileCollection {
             public List<ListeningFuture<FileDesc>> call() throws Exception {
                 if(isDirectoryAllowed(folder)) {
                     File[] files = folder.listFiles(fileFilter);
-                    addFiles(new ArrayList<File>(Arrays.asList(files)));
+                    if(files != null) {
+                        //must null check files because it can return null if there was an error accessing 
+                        //the files the interface is wrong about returning an empty list for all circumstances
+                        addFiles(new ArrayList<File>(Arrays.asList(files)));
+                    }
                 }
                 return futures;
             }
@@ -1195,7 +1199,11 @@ class LibraryImpl implements Library, FileCollection {
                     File folderOrFile = accumulator.remove(0);
                     if(isDirectoryAllowed(folderOrFile)) {
                         File[] files = folderOrFile.listFiles(fileFilter);
-                        accumulator.addAll(Arrays.asList(files));
+                        if(files != null) {
+                            //must null check files because it can return null if there was an error accessing 
+                            //the files the interface is wrong about returning an empty list for all circumstances
+                            accumulator.addAll(Arrays.asList(files));
+                        }
                     } else {
                         futures.add(collection.add(folderOrFile));
                     }
