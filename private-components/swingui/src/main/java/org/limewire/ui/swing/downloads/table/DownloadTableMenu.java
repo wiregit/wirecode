@@ -261,7 +261,7 @@ public class DownloadTableMenu extends JPopupMenu{
     }   
     
     private JMenuItem createLaunchMenuItem(){
-        JMenuItem launchMenuItem = new JMenuItem(I18n.tr("Launch File"));
+        JMenuItem launchMenuItem = new JMenuItem(I18n.tr("Play/Open"));
         launchMenuItem.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
         launchMenuItem.addActionListener(menuListener);
         return launchMenuItem;

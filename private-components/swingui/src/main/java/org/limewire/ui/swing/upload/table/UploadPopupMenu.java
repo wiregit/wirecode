@@ -117,7 +117,7 @@ public class UploadPopupMenu extends JPopupMenu {
                 addSeparator();
             }
 
-            JMenuItem launchMenuItem = new JMenuItem(I18n.tr("Launch File"));
+            JMenuItem launchMenuItem = new JMenuItem(I18n.tr("Play/Open"));
             launchMenuItem.setActionCommand(isPlayable(uploadItem.getCategory()) ?
                     UploadActionHandler.PLAY_COMMAND : UploadActionHandler.LAUNCH_COMMAND);
             launchMenuItem.addActionListener(listener);
