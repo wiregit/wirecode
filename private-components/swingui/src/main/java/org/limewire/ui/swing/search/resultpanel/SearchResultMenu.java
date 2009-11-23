@@ -67,7 +67,7 @@ public class SearchResultMenu extends JPopupMenu {
         }
         
         // Determine indicators to enable menu items.
-        boolean locateInLibraryVisible = firstItem.getDownloadState() == BasicDownloadState.LIBRARY;
+        boolean locateInLibraryVisible = firstItem.getDownloadState() == BasicDownloadState.LIBRARY || firstItem.getDownloadState() == BasicDownloadState.DOWNLOADED;
         boolean showHideSimilarFileVisible = selectedItems.size() == 1 && firstItem.getSimilarResults().size() > 0 && viewType == ViewType.List;
         boolean showHideSimilarFileEnabled = selectedItems.size() == 1 && firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
         boolean viewFileInfoEnabled = selectedItems.size() == 1;

@@ -106,8 +106,10 @@ class DeleteAction extends AbstractAction {
     }
     
     private static void removeDownloadItem(URN urn, DownloadListManager downloadListManager) {
-        DownloadItem item = downloadListManager.getDownloadItem(urn);
-        downloadListManager.remove(item);
+        if(downloadListManager.contains(urn)) {    
+            DownloadItem item = downloadListManager.getDownloadItem(urn);
+            downloadListManager.remove(item);
+        }
     }
     
     private static void stopAudio() {
