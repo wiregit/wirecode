@@ -26,8 +26,11 @@ import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.downloads.ShowUploadsInTrayAction;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.upload.UploadMediator.SortOrder;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -44,14 +47,17 @@ class UploadHeaderPopupMenu extends JPopupMenu {
     
     private final UploadMediator uploadMediator;
     private final Provider<TorrentManager> torrentManager;
+    private final Provider<TransferTrayNavigator> transferTrayNavigator;
+
     
     /**
      * Constructs an UploadHeaderPopupMenu.
      */
-    public UploadHeaderPopupMenu(UploadMediator uploadMediator, Provider<TorrentManager> torrentManager) {
+    public UploadHeaderPopupMenu(UploadMediator uploadMediator, Provider<TorrentManager> torrentManager, 
+            Provider<TransferTrayNavigator> transferTrayNavigator) {
         this.uploadMediator = uploadMediator;
         this.torrentManager = torrentManager;
-        
+        this.transferTrayNavigator = transferTrayNavigator;
         GuiUtils.assignResources(this);
         
         addPopupMenuListener(new PopupMenuListener() {
@@ -95,6 +101,10 @@ class UploadHeaderPopupMenu extends JPopupMenu {
         add(createSortSubMenu());
         addSeparator();
         add(createClearFinishedMenuItem());
+        addSeparator();
+        JCheckBoxMenuItem includeUploads = new JCheckBoxMenuItem(new ShowUploadsInTrayAction(transferTrayNavigator));
+        includeUploads.setSelected(UploadSettings.SHOW_UPLOADS_IN_TRAY.getValue());
+        add(includeUploads);
         addSeparator();
         add(new TransferOptionsAction());
     }

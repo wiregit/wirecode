@@ -484,17 +484,51 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
             setCacheable(true);
         }
     }
+    
+    private boolean isSelectedTab(TabId tabId) {
+        Action mainAction = actionMap.get(tabId);
+        FancyTab tab = tabList.getSelectedTab();
+        if (tab != null && mainAction == tab.getTabActionMap().getMainAction()) {
+           return true;
+        }
+        return false;
+    }
 
     @Override
     public void selectDownloads() {
-        SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
+        showTray();
         selectTab(TabId.DOWNLOADS);        
     }
 
     @Override
     public void selectUploads() {
-        SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
+        showTray();
         UploadSettings.SHOW_UPLOADS_IN_TRAY.setValue(true);
         selectTab(TabId.UPLOADS);
+    }
+
+    @Override
+    public void hideTray() {
+        SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(false);
+    }
+
+    @Override
+    public boolean isDownloadsSelected() {
+        return isSelectedTab(TabId.DOWNLOADS);
+    }
+
+    @Override
+    public boolean isTrayShowing() {
+        return SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue();
+    }
+
+    @Override
+    public boolean isUploadsSelected() {
+        return isSelectedTab(TabId.UPLOADS);
+    }
+
+    @Override
+    public void showTray() {
+        SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
     }
 }

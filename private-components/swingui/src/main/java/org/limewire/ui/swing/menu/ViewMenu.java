@@ -6,7 +6,6 @@ import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 
-import org.limewire.core.settings.UploadSettings;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
@@ -17,73 +16,77 @@ import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.mainframe.ChangeLanguageAction;
-import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 class ViewMenu extends MnemonicMenu {
-    
+
     private static final String visibleText = I18n.tr("Hide &Chat Window");
     private static final String notVisibleText = I18n.tr("Show &Chat Window");
-    
+
     private final Provider<LoginPopupPanel> friendsSignInPanelProvider;
     private final Provider<AutoLoginService> autoLoginServiceProvider;
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
-    
     private final Provider<HideTransferTrayAction> hideTransferTrayTrayActionProvider;
-    private final Provider<ShowDownloadOnlyTrayAction> showHideDownloadTrayActionProvider;
-    private final Provider<ShowDownloadAndUploadTrayAction> uploadTrayActionProvider;
+    private final Provider<ShowDownloadsTrayAction> showDownloadsTrayActionProvider;
+    private final Provider<ShowUploadsTrayAction> showUploadsTrayActionProvider;
     private final Provider<ChatMediator> chatFrameProvider;
     private final Provider<ChangeLanguageAction> changeLanguageActionProvider;
-    
+    private final Provider<TransferTrayNavigator> transferTrayNavigator;
+
     @Inject
     public ViewMenu(Provider<LoginPopupPanel> friendsSignInPanel,
             Provider<AutoLoginService> autoLoginServiceProvider,
             EventBean<FriendConnectionEvent> friendConnectionEventBean,
             Provider<HideTransferTrayAction> hideTransferTrayTrayActionProvider,
-            Provider<ShowDownloadOnlyTrayAction> showHideDownloadTrayAction,
-            Provider<ShowDownloadAndUploadTrayAction> uploadTrayActionProvider,
+            Provider<ShowDownloadsTrayAction> showHideDownloadTrayAction,
+            Provider<ShowUploadsTrayAction> uploadTrayActionProvider,
             Provider<ChatMediator> chatFrameProvider,
-            Provider<ChangeLanguageAction> changeLanguageActionProvider) {
-        
+            Provider<ChangeLanguageAction> changeLanguageActionProvider,
+            Provider<TransferTrayNavigator> transferTrayNavigator) {
+
         super(I18n.tr("&View"));
-        
+
         this.friendsSignInPanelProvider = friendsSignInPanel;
         this.hideTransferTrayTrayActionProvider = hideTransferTrayTrayActionProvider;
         this.autoLoginServiceProvider = autoLoginServiceProvider;
         this.friendConnectionEventBean = friendConnectionEventBean;
-        
-        this.showHideDownloadTrayActionProvider = showHideDownloadTrayAction;
-        this.uploadTrayActionProvider = uploadTrayActionProvider;
+
+        this.showDownloadsTrayActionProvider = showHideDownloadTrayAction;
+        this.showUploadsTrayActionProvider = uploadTrayActionProvider;
         this.chatFrameProvider = chatFrameProvider;
         this.changeLanguageActionProvider = changeLanguageActionProvider;
+        this.transferTrayNavigator = transferTrayNavigator;
     }
-    
+
     @Override
     public void createMenuItems() {
-        JCheckBoxMenuItem hideTransferTray =  new JCheckBoxMenuItem(hideTransferTrayTrayActionProvider.get());
-        JCheckBoxMenuItem showDownloads =  new JCheckBoxMenuItem(showHideDownloadTrayActionProvider.get());
-        JCheckBoxMenuItem showDownloadsAndUploads =  new JCheckBoxMenuItem(uploadTrayActionProvider.get());
-        
-        boolean showTransfers = SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue();
-        boolean showUploads = UploadSettings.SHOW_UPLOADS_IN_TRAY.getValue();
+        JCheckBoxMenuItem hideTransferTray = new JCheckBoxMenuItem(
+                hideTransferTrayTrayActionProvider.get());
+        JCheckBoxMenuItem showDownloads = new JCheckBoxMenuItem(showDownloadsTrayActionProvider
+                .get());
+        JCheckBoxMenuItem showUploads = new JCheckBoxMenuItem(showUploadsTrayActionProvider.get());
+
+        boolean showTransfers = transferTrayNavigator.get().isTrayShowing();
         
         hideTransferTray.setSelected(!showTransfers);
-        showDownloads.setSelected(showTransfers && !showUploads);
-        showDownloadsAndUploads.setSelected(showTransfers && showUploads);
-        
+        showDownloads.setSelected(showTransfers
+                && transferTrayNavigator.get().isDownloadsSelected());
+        showUploads.setSelected(showTransfers && transferTrayNavigator.get().isUploadsSelected());
+
         ButtonGroup group = new ButtonGroup();
         group.add(hideTransferTray);
         group.add(showDownloads);
-        group.add(showDownloadsAndUploads);
-        
+        group.add(showUploads);
+
         add(buildShowHideChatWindowAction(chatFrameProvider));
         addSeparator();
         add(hideTransferTray);
         add(showDownloads);
-        add(showDownloadsAndUploads);
+        add(showUploads);
         addSeparator();
         add(changeLanguageActionProvider.get());
     }

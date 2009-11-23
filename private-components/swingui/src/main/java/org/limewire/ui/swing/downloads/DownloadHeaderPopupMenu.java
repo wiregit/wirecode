@@ -18,6 +18,7 @@ import javax.swing.JToggleButton;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.downloads.DownloadMediator.SortOrder;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -42,6 +43,7 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
     private final Provider<CancelAllStalledDownloadAction> cancelStallAction;
     private final Provider<CancelAllErrorDownloadAction> cancelErrorAction;
     private final Provider<CancelAllDownloadsAction> cancelAllAction;
+    private final Provider<ShowUploadsInTrayAction> showUploadsInTrayAction;
     
     private AbstractButton isDescending;
     
@@ -49,7 +51,8 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
     public DownloadHeaderPopupMenu(Provider<DownloadMediator> downloadMediator, Provider<ShowDownloadOptionsAction> showDownloadOptionsAction,
             Provider<PauseAllDownloadAction> pauseDownloadAction, Provider<ResumeAllDownloadAction> resumeDownloadAction,
             Provider<CancelAllStalledDownloadAction> cancelStallAction,
-            Provider<CancelAllErrorDownloadAction> cancelErrorAction, Provider<CancelAllDownloadsAction> cancelAllAction) {
+            Provider<CancelAllErrorDownloadAction> cancelErrorAction, Provider<CancelAllDownloadsAction> cancelAllAction, 
+            Provider<ShowUploadsInTrayAction> showUploadsInTrayAction) {
         this.downloadMediator = downloadMediator;
         this.showDownloadOptionsAction = showDownloadOptionsAction;
         this.pauseDownloadAction = pauseDownloadAction;
@@ -57,6 +60,7 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
         this.cancelStallAction = cancelStallAction;
         this.cancelErrorAction = cancelErrorAction;
         this.cancelAllAction = cancelAllAction;
+        this.showUploadsInTrayAction = showUploadsInTrayAction;
         
         GuiUtils.assignResources(this);
     }
@@ -80,6 +84,10 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
         add(createSortSubMenu());
         addSeparator();
         add(clearFinishedCheckBox);
+        addSeparator();
+        JCheckBoxMenuItem showUploadsInTray = new JCheckBoxMenuItem(showUploadsInTrayAction.get());
+        showUploadsInTray.setSelected(UploadSettings.SHOW_UPLOADS_IN_TRAY.getValue());
+        add(showUploadsInTray);
         addSeparator();
         add(showDownloadOptionsAction.get());
     }

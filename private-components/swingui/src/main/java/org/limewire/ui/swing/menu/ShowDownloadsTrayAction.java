@@ -10,20 +10,20 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Actions to hide the Downloads/Uploads Tray
+ * Action to show Downloads in the tray.
  */
-class HideTransferTrayAction extends AbstractAction {
+class ShowDownloadsTrayAction extends AbstractAction {
 
     private final Provider<TransferTrayNavigator> transferTrayNavigator;
 
     @Inject
-    public HideTransferTrayAction(Provider<TransferTrayNavigator> transferTrayNavigator) {
-        super(I18n.tr("Hide Transfer Tray"));
+    public ShowDownloadsTrayAction(Provider<TransferTrayNavigator> transferTrayNavigator) {
+        super(I18n.tr("Downloads"));
         this.transferTrayNavigator = transferTrayNavigator;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        transferTrayNavigator.get().hideTray();
+        transferTrayNavigator.get().selectDownloads();
     }
 }

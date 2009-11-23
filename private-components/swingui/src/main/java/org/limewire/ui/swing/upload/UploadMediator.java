@@ -31,6 +31,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.upload.table.UploadTableFactory;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -64,6 +65,7 @@ public class UploadMediator {
     private final UploadListManager uploadListManager;
     private final Provider<TorrentManager> torrentManager;
     private final UploadTableFactory uploadTableFactory;
+    private final Provider<TransferTrayNavigator> transferTrayNavigator;
     
     private EventList<UploadItem> activeList;
     private SortedList<UploadItem> sortedList;
@@ -81,10 +83,11 @@ public class UploadMediator {
     
     @Inject
     public UploadMediator(UploadListManager uploadListManager, Provider<TorrentManager> torrentManager,            
-            UploadTableFactory uploadTableFactory) {
+            UploadTableFactory uploadTableFactory, Provider<TransferTrayNavigator> transferTrayNavigator) {
         this.uploadListManager = uploadListManager;
         this.torrentManager = torrentManager;
         this.uploadTableFactory = uploadTableFactory;
+        this.transferTrayNavigator = transferTrayNavigator;
         
         sortOrder = SortOrder.ORDER_STARTED;
         sortAscending = true;
@@ -195,7 +198,7 @@ public class UploadMediator {
      */
     public JPopupMenu getHeaderPopupMenu() {
         if (headerPopupMenu == null) {
-            headerPopupMenu = new UploadHeaderPopupMenu(this, torrentManager);
+            headerPopupMenu = new UploadHeaderPopupMenu(this, torrentManager, transferTrayNavigator);
         }
         return headerPopupMenu;
     }
