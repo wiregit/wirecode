@@ -229,7 +229,7 @@ class TorrentImpl implements Torrent {
     public void stop() {
         lock.lock();
         try {
-            if (started.get() && !cancelled.getAndSet(true)) {
+            if (!cancelled.getAndSet(true)) {
                 // updating the torrent info object 1 last time.
                 if (isValid() && hasMetaData()) {
                     TorrentInfo ti = libTorrent.get_torrent_info(sha1);
