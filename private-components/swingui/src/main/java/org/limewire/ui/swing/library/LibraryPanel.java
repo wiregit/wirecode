@@ -340,13 +340,17 @@ public class LibraryPanel extends JPanel {
     }
     
     public void selectAndScrollTo(File file) {
-        if(file != null)
+        if(file != null) {
+            libraryFilterPanel.clearFilters();
             libraryTable.selectAndScrollTo(file);
+        }
     }
     
     public void selectAndScrollTo(URN urn) {
-        if(urn != null)
+        if(urn != null) {
+            libraryFilterPanel.clearFilters();
             libraryTable.selectAndScrollTo(urn);
+        }
     }
     
     private void selectSharing(LibraryNavItem navItem) {
