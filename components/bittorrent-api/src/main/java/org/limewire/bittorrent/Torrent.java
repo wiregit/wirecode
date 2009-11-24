@@ -1,7 +1,6 @@
 package org.limewire.bittorrent;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
@@ -20,11 +19,6 @@ import org.limewire.listener.EventListener;
  * occur.
  */
 public interface Torrent {
-
-    /**
-     * Initializes the torrent from the given torrent parameters Object.
-     */
-    public void init(TorrentParams params) throws IOException;
 
     /**
      * Returns the name of this torrent.

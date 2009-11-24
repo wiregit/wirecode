@@ -38,6 +38,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPortImpl;
+import org.limewire.libtorrent.LibTorrentParams;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
@@ -89,7 +90,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private static final AtomicInteger torrentsFinished = new AtomicInteger();
 
     private final DownloadManager downloadManager;
-    private final Torrent torrent;
+    
+    private volatile Torrent torrent;
     private final BTUploaderFactory btUploaderFactory;
     private final AtomicBoolean finishing = new AtomicBoolean(false);
     private final AtomicBoolean complete = new AtomicBoolean(false);
@@ -110,8 +112,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            Library library, @Named("fastExecutor") ScheduledExecutorService fastExecutor,
+            BTUploaderFactory btUploaderFactory, Library library, 
+            @Named("fastExecutor") ScheduledExecutorService fastExecutor,
             @GnutellaFiles FileCollection gnutellaFileCollection,
             Provider<TorrentManager> torrentManager,
             Provider<TorrentUploadManager> torrentUploadManager,
@@ -120,7 +122,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         super(saveLocationManager, categoryManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
-        this.torrent = torrentProvider.get();
         this.library = library;
         this.gnutellaFileCollection = gnutellaFileCollection;
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(fastExecutor);
@@ -290,24 +291,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
     };
 
-    /**
-     * initializes this downloader from the given torrent file.
-     */
     @Override
-    public void init(File torrentFile, File saveDirectory) throws IOException {
-        init(new TorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(), torrentFile));
-    }
-    
-    private void init(TorrentParams params) throws IOException {
-        torrent.init(params);
-        setDefaultFileName(torrent.getName());
-    }
-
-    @Override
-    public boolean registerTorrentWithTorrentManager() {
-        boolean valid = torrentManager.get().addTorrent(torrent);
+    public void init(TorrentParams params) throws IOException {
+        this.torrent = torrentManager.get().addTorrent(params);
+        if(torrent == null) {
+            throw new IOException("Error adding torrent to TorrentManager.");
+        }
         torrent.addListener(this);
-        return valid;
+        //TODO need to eventually support torrents without torrent files. The name will be unknown.
+        setDefaultFileName(torrent.getName());
     }
 
     /**
@@ -740,7 +732,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         File torrentFile = torrentPath != null ? new File(torrentPath) : null;
 
         try {
-            TorrentParams params = new TorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(),
+            TorrentParams params = new LibTorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(),
                     memento.getName(), StringUtils.toHexString(urn.getBytes()));
             params.setTrackerURL(memento.getTrackerURL());
             params.setFastResumeFile(fastResumeFile);
@@ -753,7 +745,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // the .torrent file could be invalid, try to initialize just with
             // the memento contents.
             try {
-                TorrentParams params = new TorrentParams(
+                TorrentParams params = new LibTorrentParams(
                         SharingSettings.INCOMPLETE_DIRECTORY.get(), memento.getName(), StringUtils
                                 .toHexString(urn.getBytes()));
                 params.setTrackerURL(memento.getTrackerURL());
@@ -801,7 +793,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         try {
-            TorrentParams params = new TorrentParams(newIncompleteFile.getParentFile(), name, sha1);
+            TorrentParams params = new LibTorrentParams(newIncompleteFile.getParentFile(), name, sha1);
             params.setTrackerURL(tracker1.toString());
             params.setTorrentDataFile(newIncompleteFile);
             params.setPrivate(isPrivate);
@@ -819,7 +811,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         } else if (LibTorrentBTDownloadMemento.class.isInstance(memento)) {
             initFromCurrentMemento((LibTorrentBTDownloadMemento) memento);
         }
-        if (!registerTorrentWithTorrentManager())
+        if (!torrent.isValid())
             throw new InvalidDataException("Error registering torrent");
     }
 
@@ -845,8 +837,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 FileUtils.forceDeleteRecursive(incompleteFile);
             }
         }
-        if (!torrent.isStarted()) {
+        if(torrent.getTorrentFile().getParentFile().equals(SharingSettings.INCOMPLETE_DIRECTORY.get())) {
             FileUtils.forceDelete(torrent.getTorrentFile());
+        }
+        if(torrent.getFastResumeFile().getParentFile().equals(SharingSettings.INCOMPLETE_DIRECTORY.get())) {
             FileUtils.forceDelete(torrent.getFastResumeFile());
         }
     }

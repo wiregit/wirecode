@@ -1,93 +1,47 @@
 package org.limewire.bittorrent;
 
 import java.io.File;
+import java.io.IOException;
 
-public class TorrentParams {
+/**
+ * Parameters used to create a torrent. Currently sha1 downloadFolder and name
+ * are required field. The other fields are optional.
+ */
+public interface TorrentParams {
 
-    private final File downloadFolder;
-    
-    private String name = null;;
+    public String getName();
 
-    private String sha1 = null;
+    public void setName(String name);
 
-    private String trackerURL = null;
+    public String getSha1();
 
-    private File fastResumeFile = null;
+    public void setSha1(String sha1);
 
-    private File torrentFile = null;
+    public String getTrackerURL();
 
-    private File torrentDataFile = null;
-    
-    private Boolean isPrivate = null;
-    
-    public TorrentParams(File downloadFolder, File torrentFile) {
-        this.downloadFolder = downloadFolder;
-        this.torrentFile = torrentFile;
-    }
-    
-    public TorrentParams(File downloadFolder, String name, String sha1) {
-        this.downloadFolder = downloadFolder;
-        this.name = name;
-        this.sha1 = sha1;
-    }
+    public void setTrackerURL(String trackerURL);
 
-    public String getName() {
-        return name;
-    }
+    public File getFastResumeFile();
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setFastResumeFile(File fastResumeFile);
 
-    public String getSha1() {
-        return sha1;
-    }
+    public File getTorrentFile();
 
-    public void setSha1(String sha1) {
-        this.sha1 = sha1;
-    }
+    public File getDownloadFolder();
 
-    public String getTrackerURL() {
-        return trackerURL;
-    }
+    public void setTorrentFile(File torrentFile);
 
-    public void setTrackerURL(String trackerURL) {
-        this.trackerURL = trackerURL;
-    }
+    public File getTorrentDataFile();
 
-    public File getFastResumeFile() {
-        return fastResumeFile;
-    }
+    public void setTorrentDataFile(File torrentDataFile);
 
-    public void setFastResumeFile(File fastResumeFile) {
-        this.fastResumeFile = fastResumeFile;
-    }
+    public Boolean getPrivate();
 
-    public File getTorrentFile() {
-        return torrentFile;
-    }
-    
-    public File getDownloadFolder() {
-        return downloadFolder;
-    }
+    public void setPrivate(Boolean isPrivate);
 
-    public void setTorrentFile(File torrentFile) {
-        this.torrentFile = torrentFile;
-    }
-
-    public File getTorrentDataFile() {
-        return torrentDataFile;
-    }
-
-    public void setTorrentDataFile(File torrentDataFile) {
-        this.torrentDataFile = torrentDataFile;
-    }
-
-    public Boolean getPrivate() {
-        return isPrivate;
-    }
-
-    public void setPrivate(Boolean isPrivate) {
-        this.isPrivate = isPrivate;
-    }
+    /**
+     * Fills in missing fields from the data in the torrentFile field if it
+     * exists and is valid.
+     */
+    public void fill() throws IOException;
 }

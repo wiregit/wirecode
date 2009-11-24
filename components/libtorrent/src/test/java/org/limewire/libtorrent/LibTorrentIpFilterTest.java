@@ -123,14 +123,10 @@ public class LibTorrentIpFilterTest extends BaseTestCase {
     
     private Torrent initializeTorrent() throws Exception {
         File torrentFile = createFile("test-peer-dl-single-file.torrent");
-        Torrent torrent = new TorrentImpl(libTorrentWrapper, scheduledExecutorService);
         tempDir = createTempDirectory();
-
-        TorrentParams params = new TorrentParams(tempDir, torrentFile);
-        torrent.init(params);
-
-        torrentManager.addTorrent(torrent);
-        return torrent;
+        TorrentParams params = new LibTorrentParams(tempDir, torrentFile);
+        params.fill();
+        return torrentManager.addTorrent(params);
     }
 
     private File createFile(String fileName) {

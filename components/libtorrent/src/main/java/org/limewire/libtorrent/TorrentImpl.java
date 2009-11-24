@@ -1,9 +1,6 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,8 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.limewire.bittorrent.BTData;
-import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentAlert;
 import org.limewire.bittorrent.TorrentEvent;
@@ -28,15 +23,11 @@ import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentPiecesInfo;
 import org.limewire.bittorrent.TorrentStatus;
-import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousEventMulticaster;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
-import org.limewire.util.StringUtils;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 /**
  * Class representing the torrent being downloaded. It is updated periodically
@@ -44,48 +35,56 @@ import com.google.inject.name.Named;
  * functionality to the BTDownloaderImpl. It delegates calls to native methods
  * back to the TorrentManager.
  */
-public class TorrentImpl implements Torrent {
+class TorrentImpl implements Torrent {
+    
+    private static final Log LOG = LogFactory.getLog(TorrentImpl.class);
+    
     private final Map<String, Object> properties = Collections
             .synchronizedMap(new HashMap<String, Object>(2));
 
     private final AsynchronousEventMulticaster<TorrentEvent> listeners;
-
+    private final LibTorrentWrapper libTorrent;
+    
     private final AtomicReference<TorrentStatus> status = new AtomicReference<TorrentStatus>(null);
-
     private final AtomicReference<TorrentInfo> torrentInfo = new AtomicReference<TorrentInfo>(null);
-
     private final AtomicReference<File> torrentDataFile = new AtomicReference<File>(null);
-
     private final AtomicReference<File> torrentFile = new AtomicReference<File>(null);
-
     private final AtomicReference<File> fastResumeFile = new AtomicReference<File>(null);
-
-    private String sha1 = null;
-
-    private String name = null;
-
-    private String trackerURL = null;
-
+    
     private final AtomicLong startTime = new AtomicLong(-1);
-
     private final AtomicBoolean started = new AtomicBoolean(false);
-
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     // used to decide if the torrent was just newly completed or not.
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
-    private final AtomicBoolean isPrivate = new AtomicBoolean(true);
-
     private final Lock lock = new ReentrantLock();
 
-    private final LibTorrentWrapper libTorrent;
+    private final String sha1;
+    private String name = null;
+    private String trackerURL = null;
+    private final AtomicBoolean isPrivate = new AtomicBoolean(true);
 
-    @Inject
-    public TorrentImpl(LibTorrentWrapper libTorrent,
-            @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
+    public TorrentImpl(TorrentParams params, LibTorrentWrapper libTorrent, ScheduledExecutorService fastExecutor) {
         this.libTorrent = libTorrent;
         listeners = new AsynchronousMulticasterImpl<TorrentEvent>(fastExecutor);
+        
+        this.sha1 = params.getSha1();
+        this.trackerURL = params.getTrackerURL();
+        this.name = params.getName();
+
+        Boolean isPrivate = params.getPrivate();
+        this.torrentFile.set(params.getTorrentFile());
+        this.fastResumeFile.set(params.getFastResumeFile());
+        this.torrentDataFile.set(params.getTorrentDataFile());
+        
+        if (isPrivate != null) {
+            this.isPrivate.set(isPrivate);
+        }
+        
+        if(sha1 == null) {
+            throw new NullPointerException("Sha1 torrent parameter cannot be null.");
+        }
     }
 
     @Override
@@ -96,71 +95,6 @@ public class TorrentImpl implements Torrent {
     @Override
     public boolean removeListener(EventListener<TorrentEvent> listener) {
         return listeners.removeListener(listener);
-    }
-
-    @Override
-    public void init(TorrentParams params) throws IOException {
-        lock.lock();
-        try {
-            this.sha1 = params.getSha1();
-            this.trackerURL = params.getTrackerURL();
-            this.name = params.getName();
-
-            Boolean isPrivate = params.getPrivate();
-
-            File torrentFile = params.getTorrentFile();
-            File fastResumeFile = params.getFastResumeFile();
-            File torrentDataFile = params.getTorrentDataFile();
-
-            if (torrentFile != null && torrentFile.exists()) {
-                FileInputStream fis = null;
-                FileChannel fileChannel = null;
-                try {
-                    fis = new FileInputStream(torrentFile);
-                    fileChannel = fis.getChannel();
-                    Map metaInfo = (Map) Token.parse(fileChannel);
-                    BTData btData = new BTDataImpl(metaInfo);
-                    if (this.name == null) {
-                        this.name = btData.getName();
-                    }
-
-                    if (this.trackerURL == null) {
-                        this.trackerURL = btData.getTrackerUris().get(0).toASCIIString();
-                    }
-
-                    if (this.sha1 == null) {
-                        this.sha1 = StringUtils.toHexString(btData.getInfoHash());
-                    }
-
-                    if (isPrivate == null) {
-                        isPrivate = btData.isPrivate();
-                    }
-
-                } finally {
-                    IOUtils.close(fileChannel);
-                    IOUtils.close(fis);
-                }
-            }
-
-            if (isPrivate != null) {
-                this.isPrivate.set(isPrivate);
-            }
-
-            File downloadFolder = params.getDownloadFolder();
-
-            if (this.name == null || downloadFolder == null || this.sha1 == null) {
-                throw new IOException("There was an error initializing the torrent.");
-            }
-
-            this.fastResumeFile.set(fastResumeFile == null ? new File(downloadFolder, this.name
-                    + ".fastresume") : fastResumeFile);
-            this.torrentDataFile.set(torrentDataFile == null ? new File(downloadFolder, this.name)
-                    : torrentDataFile);
-            this.torrentFile.set(torrentFile == null ? new File(downloadFolder, this.name
-                    + ".torrent") : torrentFile);
-        } finally {
-            lock.unlock();
-        }
     }
 
     @Override
@@ -357,6 +291,9 @@ public class TorrentImpl implements Torrent {
     @Override
     public void updateStatus(TorrentStatus torrentStatus) {
         lock.lock();
+        if(LOG.isDebugEnabled()) {
+            LOG.debugf("Updating torrent status: {0} \n {1}", sha1, torrentStatus);
+        }
         try {
             if (!cancelled.get()) {
                 TorrentImpl.this.status.set(torrentStatus);

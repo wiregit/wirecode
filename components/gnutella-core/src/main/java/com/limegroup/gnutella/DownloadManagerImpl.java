@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.download.DownloadException;
@@ -34,6 +35,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.libtorrent.LibTorrentParams;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;
 import org.limewire.listener.EventListener;
@@ -43,7 +45,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
-import org.limewire.util.StringUtils;
 import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
@@ -857,33 +858,36 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             saveDirectory = SharingSettings.getSaveDirectory();
         }
         
-        BTDownloader ret;
+        TorrentParams params = new LibTorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(), torrentFile);
+        BTDownloader ret = null;
         try {
-            ret = coreDownloaderFactory.createBTDownloader(torrentFile, saveDirectory);
+            params.fill();
+            checkIfAlreadyManagedTorrent(params);
+            checkActiveAndWaiting(params, saveDirectory);
+            
+            ret = coreDownloaderFactory.createBTDownloader(params);
+            if(ret == null || ret.getTorrent() == null || !ret.getTorrent().isValid()) {
+                throw new DownloadException(DownloadException.ErrorCode.NO_TORRENT_MANAGER, torrentFile);
+            }
+            ret.setSaveFile(saveDirectory, null, overwrite);
+            if(!overwrite) {
+                File saveFile = ret.getSaveFile();
+                if (saveFile.exists()) {
+                    throw new DownloadException(ErrorCode.FILE_ALREADY_EXISTS, saveFile);
+                }
+            }
         } catch (IOException e) {
             LOG.error("Error creating BTDownloader", e);
+            if(ret != null) {
+                Torrent torrent = ret.getTorrent();
+                torrentManager.get().removeTorrent(torrent);
+                ret.deleteIncompleteFiles();
+            }
             if(e instanceof DownloadException) {
                 throw (DownloadException)e;
             } else {
                 throw new DownloadException(e, torrentFile);
             }
-        }
-
-        checkIfAlreadyManagedTorrent(ret);
-        ret.setSaveFile(saveDirectory, null, overwrite);
-        checkActiveAndWaiting(ret);
-		
-        if(!overwrite) {
-            File saveFile = ret.getSaveFile();
-            if (saveFile.exists()) {
-                throw new DownloadException(ErrorCode.FILE_ALREADY_EXISTS, saveFile);
-            }
-        }
-        
-        if(!ret.registerTorrentWithTorrentManager()) {
-            throw new DownloadException(
-                    DownloadException.ErrorCode.NO_TORRENT_MANAGER,
-                    torrentFile);
         }
 
         Torrent torrent = ret.getTorrent();
@@ -902,37 +906,42 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * Ensures the eventual download location is not already taken by the files
      * of any other download.
      */
-    private void checkActiveAndWaiting(BTDownloader ret) throws DownloadException {
+    private void checkActiveAndWaiting(TorrentParams params, File saveDirectory) throws DownloadException {
+        
+        URN urn = null;
+        try {
+            urn = URN.createSha1UrnFromHex(params.getSha1());
+        } catch (IOException e) {
+           throw new DownloadException(ErrorCode.FILESYSTEM_ERROR, params.getTorrentFile());
+        }
         for (CoreDownloader current : activeAndWaiting) {
-            if (ret.getSha1Urn().equals(current.getSha1Urn())) {
-                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
-                        .getIncompleteFile());
+            if (urn.equals(current.getSha1Urn())) {
+                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, params.getTorrentDataFile());
             }
 
-            if (current.conflictsSaveFile(ret.getSaveFile())) {
-                throw new DownloadException(ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
-                        .getSaveFile());
+            File saveFile = new File(saveDirectory, params.getName());
+            if (current.conflictsSaveFile(saveFile)) {
+                throw new DownloadException(ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO, saveFile);
             }
 
-            if (current.conflictsSaveFile(ret.getIncompleteFile())) {
-                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret
-                        .getIncompleteFile());
+            if (current.conflictsSaveFile(params.getTorrentDataFile())) {
+                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, params
+                        .getTorrentDataFile());
             }
         }
     }
 
-    private void checkIfAlreadyManagedTorrent(BTDownloader ret) throws DownloadException {
-        Torrent torrent = torrentManager.get().getTorrent(ret.getTorrentFile());
+    private void checkIfAlreadyManagedTorrent(TorrentParams params) throws DownloadException {
+        Torrent torrent = torrentManager.get().getTorrent(params.getTorrentFile());
         if(torrent == null) {
-            torrent = torrentManager.get().getTorrent(
-                    StringUtils.toHexString(ret.getSha1Urn().getBytes()));
+            torrent = torrentManager.get().getTorrent(params.getSha1());
         }
         
         if(torrent != null) {
             if(!torrent.isFinished()) {
-                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, ret.getSaveFile());
+                throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, params.getTorrentDataFile());
             } else {
-                throw new DownloadException(ErrorCode.FILE_ALREADY_UPLOADING, ret.getSaveFile());
+                throw new DownloadException(ErrorCode.FILE_ALREADY_UPLOADING, params.getTorrentDataFile());
             }
         }
     }

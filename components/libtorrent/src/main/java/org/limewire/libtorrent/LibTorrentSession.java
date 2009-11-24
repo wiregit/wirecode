@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,12 +25,9 @@ import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.bittorrent.TorrentIpPort;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.inject.LazySingleton;
-import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
@@ -84,40 +82,6 @@ public class LibTorrentSession implements TorrentManager {
 
     private final List<ScheduledFuture<?>> torrentManagerTasks;
 
-    @SuppressWarnings("unused")
-    @InspectableContainer
-    private class LazyInspectableContainer {
-        @InspectionPoint(value = "torrent manager", category = DataCategory.USAGE)
-        private final Inspectable inspectable = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                int active = 0;
-                int seeding = 0;
-                int starting = 0;
-
-                lock.lock();
-                try {
-                    for (Torrent torrent : torrents.values()) {
-                        if (!torrent.isStarted()) {
-                            starting++;
-                        } else if (torrent.isFinished()) {
-                            seeding++;
-                        } else {
-                            active++;
-                        }
-                    }
-                } finally {
-                    lock.unlock();
-                }
-                data.put("active", active);
-                data.put("seeding", seeding);
-                data.put("starting", starting);
-                return data;
-            }
-        };
-    }
-
     @Inject
     public LibTorrentSession(LibTorrentWrapper torrentWrapper,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor,
@@ -145,26 +109,31 @@ public class LibTorrentSession implements TorrentManager {
     }
 
     @Override
-    public boolean addTorrent(Torrent torrent) {
+    public Torrent addTorrent(TorrentParams params) throws IOException {
         assert started.get();
         lock.lock();
         try {
             validateLibrary();
-            File torrentFile = torrent.getTorrentFile();
-            File fastResumefile = torrent.getFastResumeFile();
+            File torrentFile = params.getTorrentFile();
+            File fastResumefile = params.getFastResumeFile();
 
-            String trackerURI = torrent.getTrackerURL();
+            String trackerURI = params.getTrackerURL() != null ? params.getTrackerURL() : "";
             String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath()
                     : null;
-            String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
-            String saveDirectory = torrent.getTorrentDataFile().getParentFile().getAbsolutePath();
-
-            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, saveDirectory,
+            
+            String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : "";
+            String saveDirectory = params.getDownloadFolder().getAbsolutePath();
+            
+            String sha1 = params.getSha1();
+            
+            Torrent torrent = new TorrentImpl(params, libTorrent, fastExecutor);
+            libTorrent.add_torrent(sha1, trackerURI, torrentPath, saveDirectory,
                     fastResumePath);
+            
             updateStatus(torrent);
-            torrents.put(torrent.getSha1(), torrent);
+            torrents.put(sha1, torrent);
             torrent.addListener(torrentListener);
-            return torrent.isValid();
+            return torrent;
         } finally {
             lock.unlock();
         }

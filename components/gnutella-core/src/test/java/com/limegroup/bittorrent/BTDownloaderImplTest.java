@@ -13,6 +13,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.GuiceUtils;
+import org.limewire.libtorrent.LibTorrentParams;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
@@ -21,6 +22,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentEventType;
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.inspection.InspectionUtils;
 
 import com.google.inject.Guice;
@@ -271,20 +273,15 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);
+        TorrentParams params = new LibTorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(), torrentFile);
+        params.fill();
+        
         BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
-                .createBTDownloader(torrentFile, SharingSettings.getSaveDirectory());
-        
-        File incompleteFile = downloader.getIncompleteFile();
-        FileUtils.deleteRecursive(incompleteFile);
-        
-        File completeFile = downloader.getSaveFile();
-        FileUtils.deleteRecursive(completeFile);
-        
-        downloader.registerTorrentWithTorrentManager();
+                .createBTDownloader(params);
         return downloader;
     }
 
-    private void finishDownload(BTDownloader downloader) throws InterruptedException {
+    private void finishDownload(final BTDownloader downloader) throws InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
 
         downloader.addListener(new EventListener<DownloadStateEvent>() {
@@ -292,6 +289,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
             public void handleEvent(DownloadStateEvent event) {
                if(DownloadState.COMPLETE == event.getType()) {
                    countDownLatch.countDown();
+               } else if(downloader.getTorrent().getStatus().isError()) {
+                   fail("Error downloading torrent: " + downloader.getTorrent().getStatus().getError());
                }
             } 
         });

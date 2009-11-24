@@ -64,12 +64,10 @@ public class LibTorrentTest extends TestCase {
      */
     public void testSingleFilePeerDownload() throws Exception {
         File torrentFile = getTorrentFile("test-peer-dl-single-file.torrent");
-        Torrent torrent = new TorrentImpl(libTorrentWrapper, scheduledExecutorService);
-        TorrentParams params = new TorrentParams(tempDir, torrentFile);
-        torrent.init(params);
 
-        libtorrentSession.addTorrent(torrent);
-
+        TorrentParams params = new LibTorrentParams(tempDir, torrentFile);
+        params.fill();
+        Torrent torrent = libtorrentSession.addTorrent(params);
         torrent.start();
         finishTorrentDownload(torrent);
         assertDownload("8055d620ba0c507c1af957b43648c99f", torrent.getTorrentDataFile(), 44425);

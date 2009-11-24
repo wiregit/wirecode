@@ -1,6 +1,7 @@
 package org.limewire.core.impl.bittorrent;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -9,6 +10,7 @@ import org.limewire.bittorrent.ProxySetting;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentIpFilter;
 
@@ -46,11 +48,6 @@ public class MockTorrentManager implements TorrentManager {
     @Override
     public boolean isValid() {
         return true;
-    }
-
-    @Override
-    public boolean addTorrent(Torrent torrent) {
-        return false;
     }
 
     @Override
@@ -151,5 +148,10 @@ public class MockTorrentManager implements TorrentManager {
     @Override
     public void setWebSeedProxy(ProxySetting proxy) {
         
+    }
+
+    @Override
+    public Torrent addTorrent(TorrentParams params) throws IOException {
+        return null;
     }
 }

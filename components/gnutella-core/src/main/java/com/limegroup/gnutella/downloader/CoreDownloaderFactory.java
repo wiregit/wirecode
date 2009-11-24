@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
@@ -48,8 +49,6 @@ public interface CoreDownloaderFactory {
     public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, File saveDirectory,
             String fileName, boolean overwrite) throws DownloadException;
     
-    public BTDownloader createBTDownloader(File torrent, File saveDirectory) throws IOException;
-
     /**
      * Creates the appropriate kind of downloader from a given DownloadMemento.
      */
@@ -58,6 +57,10 @@ public interface CoreDownloaderFactory {
     /**
      * Creates a downloader to get the torrent file at the given url.
      */
-    public BTTorrentFileDownloader createTorrentFileDownloader(URI torrentURI, boolean overwrite); 
+    public BTTorrentFileDownloader createTorrentFileDownloader(URI torrentURI, boolean overwrite);
 
+    /**
+     * Creates a BTDownloader from the provided Torrent Parameters.  
+     */
+    public BTDownloader createBTDownloader(TorrentParams params) throws IOException; 
 }

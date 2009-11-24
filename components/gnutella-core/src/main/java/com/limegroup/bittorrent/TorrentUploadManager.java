@@ -13,6 +13,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.inject.LazySingleton;
+import org.limewire.libtorrent.LibTorrentParams;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
@@ -33,13 +34,10 @@ public class TorrentUploadManager implements BTUploaderFactory {
     private static final Log LOG = LogFactory.getLog(TorrentUploadManager.class);
     private final Provider<ActivityCallback> activityCallback;
     private final Provider<TorrentManager> torrentManager;
-    private final Provider<Torrent> torrentProvider;
 
     @Inject
-    public TorrentUploadManager(Provider<TorrentManager> torrentManager,
-            Provider<Torrent> torrentProvider, Provider<ActivityCallback> activityCallback) {
+    public TorrentUploadManager(Provider<TorrentManager> torrentManager, Provider<ActivityCallback> activityCallback) {
         this.torrentManager = torrentManager;
-        this.torrentProvider = torrentProvider;
         this.activityCallback = activityCallback;
     }
 
@@ -88,17 +86,15 @@ public class TorrentUploadManager implements BTUploaderFactory {
                                 && fastResumeFile.exists()) {
                             if (torrentManager.get().isValid()
                                     && !torrentManager.get().isDownloadingTorrent(mementoFile)) {
-                                torrent = torrentProvider.get();
                                 try {
-                                    TorrentParams params = new TorrentParams(torrentDataFile
+                                    TorrentParams params = new LibTorrentParams(torrentDataFile
                                             .getParentFile(), name, sha1);
                                     params.setTrackerURL(trackerURL);
                                     params.setFastResumeFile(fastResumeFile);
                                     params.setTorrentFile(torrentFile);
                                     params.setTorrentDataFile(torrentDataFile);
-                                    torrent.init(params);
-
-                                    if (torrentManager.get().addTorrent(torrent)) {
+                                    torrent = torrentManager.get().addTorrent(params); 
+                                    if (torrent != null) {
                                         torrentAdded = true;
                                         if (torrent.hasMetaData()) {
                                             TorrentInfo torrentInfo = torrent.getTorrentInfo();
@@ -198,8 +194,12 @@ public class TorrentUploadManager implements BTUploaderFactory {
     public void removeMemento(Torrent torrent) {
         File torrentMomento = getMementoFile(torrent);
         FileUtils.forceDelete(torrentMomento);
-        FileUtils.forceDelete(torrent.getTorrentFile());
-        FileUtils.forceDelete(torrent.getFastResumeFile());
+        if(torrent.getTorrentFile().getParentFile().equals(BittorrentSettings.TORRENT_UPLOADS_FOLDER.get())) {
+            FileUtils.forceDelete(torrent.getTorrentFile());
+        }
+        if(torrent.getFastResumeFile().getParentFile().equals(BittorrentSettings.TORRENT_UPLOADS_FOLDER.get())) {
+            FileUtils.forceDelete(torrent.getFastResumeFile());
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.limewire.bittorrent;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
@@ -29,9 +30,9 @@ public interface TorrentManager {
      * Registers the specified torrent with the TorrentManager. Delegates an add
      * torrent call to the underlying libtorrent wrapper library.
      * 
-     * Returns true if the torrent was successfully added, false otherwise.
+     * Returns the torrent if it was successfully added, null otherwise.
      */
-    public boolean addTorrent(Torrent torrent);
+    public Torrent addTorrent(TorrentParams params) throws IOException;
 
     /**
      * Returns the torrent for the given torrent file if found. null otherwise.

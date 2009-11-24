@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
@@ -105,9 +106,9 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
     }
 
     @Override
-    public BTDownloader createBTDownloader(File torrent, File saveDirectory) throws IOException {
+    public BTDownloader createBTDownloader(TorrentParams params) throws IOException {
         BTDownloader bd = btDownloaderFactory.get();
-        bd.init(torrent, saveDirectory);
+        bd.init(params);
         return bd;
     }
     

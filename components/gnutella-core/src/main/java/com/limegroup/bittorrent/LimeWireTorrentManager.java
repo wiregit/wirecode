@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -21,13 +22,16 @@ import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentIpFilter;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IP;
 import org.limewire.libtorrent.LibTorrentSession;
@@ -72,6 +76,42 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     private volatile boolean initialized = false;
 
     private final IpFilterPredicate ipFilterPredicate;
+
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private class LazyInspectableContainer {
+        @InspectionPoint(value = "torrent manager", category = DataCategory.USAGE)
+        private final Inspectable inspectable = new Inspectable() {
+            @Override
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                int active = 0;
+                int seeding = 0;
+                int starting = 0;
+
+                if (isInitialized() && isValid()) {
+                    getLock().lock();
+                    try {
+                        for (Torrent torrent : getTorrents()) {
+                            if (!torrent.isStarted()) {
+                                starting++;
+                            } else if (torrent.isFinished()) {
+                                seeding++;
+                            } else {
+                                active++;
+                            }
+                        }
+                    } finally {
+                        getLock().unlock();
+                    }
+                }
+                data.put("active", active);
+                data.put("seeding", seeding);
+                data.put("starting", starting);
+                return data;
+            }
+        };
+    }
 
     @SuppressWarnings("unused")
     @InspectionPoint("torrent manager status")
@@ -191,36 +231,32 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
     }
 
     @Override
-    public boolean addTorrent(Torrent torrent) {
+    public Torrent addTorrent(TorrentParams params) throws IOException {
         if (!isValid()) {
-            return false;
+            return null;
         }
-        shareTorrent(torrent.getTorrentFile());
-        torrent.getLock().lock();
-        try {
-            File torrentFile = torrent.getTorrentFile();
-            File torrentParent = torrentFile.getParentFile();
-            File torrentDownloadFolder = SharingSettings.INCOMPLETE_DIRECTORY.get();
-            File torrentUploadFolder = BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
-            if (!torrentParent.equals(torrentDownloadFolder)
-                    && !torrentParent.equals(torrentUploadFolder)) {
-                // if the torrent file is not located in the incomplete or
-                // upload
-                // directories it should be copied to the directory the torrent
-                // is
-                // being downloaded to. This is to prevent the user from
-                // deleting
-                // the torrent which we need to initiate a download properly.
-                torrentDownloadFolder.mkdirs();
-                File newTorrentFile = new File(torrentDownloadFolder, torrent.getName()
-                        + ".torrent");
-                FileUtils.copy(torrentFile, newTorrentFile);
-                torrent.setTorrentFile(newTorrentFile);
-            }
-        } finally {
-            torrent.getLock().unlock();
+        params.fill();
+        shareTorrent(params.getTorrentFile());
+        File torrentFile = params.getTorrentFile();
+        File torrentParent = torrentFile.getParentFile();
+        File torrentDownloadFolder = SharingSettings.INCOMPLETE_DIRECTORY.get();
+        File torrentUploadFolder = BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
+        if (!torrentParent.equals(torrentDownloadFolder)
+                && !torrentParent.equals(torrentUploadFolder)) {
+            // if the torrent file is not located in the incomplete or
+            // upload
+            // directories it should be copied to the directory the torrent
+            // is
+            // being downloaded to. This is to prevent the user from
+            // deleting
+            // the torrent which we need to initiate a download properly.
+            torrentDownloadFolder.mkdirs();
+            File newTorrentFile = new File(torrentDownloadFolder, params.getName() + ".torrent");
+            FileUtils.copy(torrentFile, newTorrentFile);
+            params.setTorrentFile(newTorrentFile);
         }
-        return torrentManager.get().addTorrent(torrent);
+
+        return torrentManager.get().addTorrent(params);
     }
 
     @Override
@@ -284,10 +320,10 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
             @Override
             public String getPassword() {
                 switch (ConnectionSettings.CONNECTION_METHOD.getValue()) {
-                    case ConnectionSettings.C_SOCKS4_PROXY:
-                        return "";
-                    default :
-                        return ConnectionSettings.PROXY_PASS.get();
+                case ConnectionSettings.C_SOCKS4_PROXY:
+                    return "";
+                default:
+                    return ConnectionSettings.PROXY_PASS.get();
                 }
             }
 
