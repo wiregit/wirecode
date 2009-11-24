@@ -2,11 +2,13 @@ package org.limewire.core.impl.download.listener;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
@@ -93,20 +95,34 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
     }
 
     private void handleBTTorrentFileDownloader() {
+        File torrentCopy = null;
         File torrentFile = null;
         final BTTorrentFileDownloader btTorrentFileDownloader = (BTTorrentFileDownloader) downloader;
         try {
             torrentFile = btTorrentFileDownloader.getTorrentFile();
+            torrentCopy = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), UUID.randomUUID()
+                    .toString()
+                    + ".torrent");
+            //copy used to handle certain exception cases where the 
+            //old torrent file may have been removed because of logic to 
+            //clean up the downloaders. This is because downloadTorrent, will
+            //call the deleteIncomplete files method for the downloader and 
+            //the only copy is the one in the incomplete files directory.
+            //by keeping a copy around we can continue the download if needed.
+            FileUtils.copy(torrentFile, torrentCopy);
             downloadManager.downloadTorrent(torrentFile, null, false);
             downloadItems.remove(getDownloadItem(downloader));
         } catch (DownloadException e) {
             final File torrentFileFinal = torrentFile;
+            final File torrentCopyFinal = torrentCopy;
             activityCallback.handleDownloadException(new DownloadAction() {
                 @Override
                 public void download(File saveDirectory, boolean overwrite)
                         throws DownloadException {
+                    FileUtils.copy(torrentCopyFinal, torrentFileFinal);
                     downloadManager.downloadTorrent(torrentFileFinal, saveDirectory, overwrite);
                     downloadItems.remove(getDownloadItem(downloader));
+                    FileUtils.forceDelete(torrentCopyFinal);
                 }
 
                 @Override
@@ -116,6 +132,7 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
                         // incomplete directory
                         FileUtils.forceDelete(torrentFileFinal);
                     }
+                    FileUtils.forceDelete(torrentCopyFinal);
                 }
 
             }, e, false);
