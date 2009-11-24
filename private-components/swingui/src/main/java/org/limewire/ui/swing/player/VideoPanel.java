@@ -134,29 +134,13 @@ class VideoPanel implements Disposable{
     }
 
     private void setUpHeaderBar(JComponent controlPanel,
-            HeaderBarDecorator headerBarDecorator, ButtonPainterFactory buttonPainterFactory) { 
+        HeaderBarDecorator headerBarDecorator, ButtonPainterFactory buttonPainterFactory) { 
         
         final JXButton fullScreenButton = new JXButton(fullScreenUnselected);
-        fullScreenButton.setSelectedIcon(fullScreenSelected);
         fullScreenButton.setBackgroundPainter(buttonPainterFactory.createDarkFullButtonBackgroundPainter(DrawMode.FULLY_ROUNDED, AccentType.SHADOW));
-        fullScreenButton.setModel(new ToggleButtonModel());
-        fullScreenButton.addItemListener(new FullScreenListener());
-
-        videoPanel.addAncestorListener(new AncestorListener() {            
-            @Override
-            public void ancestorAdded(AncestorEvent event) {
-                fullScreenButton.setSelected(VideoPanel.this.videoMediator.isFullScreen());
-                videoPanel.removeAncestorListener(this);
-            }
-            
-            @Override
-            public void ancestorRemoved(AncestorEvent event) {}
-            
-            @Override
-            public void ancestorMoved(AncestorEvent event) {}
-        });
-        
-        JXButton closeButton = new JXButton(close);
+        fullScreenButton.addActionListener(new FullScreenListener());
+       
+        final JXButton closeButton = new JXButton(close);
         closeButton.setBackgroundPainter(buttonPainterFactory.createDarkFullButtonBackgroundPainter(DrawMode.FULLY_ROUNDED, AccentType.SHADOW));
         closeButton.addActionListener(new CloseAction());
 
@@ -167,12 +151,32 @@ class VideoPanel implements Disposable{
         headerBar.add(controlPanel, "pos 0.5al 0.5al");
         headerBar.add(closeButton);
 
+        videoPanel.addAncestorListener(new AncestorListener() {            
+            @Override
+            public void ancestorAdded(AncestorEvent event) {
+                if (videoMediator.isFullScreen()) {
+                    fullScreenButton.setIcon(fullScreenSelected);
+                    closeButton.setVisible(false);
+                } else {
+                    fullScreenButton.setIcon(fullScreenUnselected);
+                    closeButton.setVisible(true);
+                }
+                
+                videoPanel.removeAncestorListener(this);
+            }
+            
+            @Override
+            public void ancestorRemoved(AncestorEvent event) {}
+            
+            @Override
+            public void ancestorMoved(AncestorEvent event) {}
+        });
     }
     
     private JMenuItem createFullScreenMenuItem(){
         JMenuItem item = new JCheckBoxMenuItem(I18n.tr("Full Screen"));
         item.setSelected(videoMediator.isFullScreen());
-        item.addItemListener(new FullScreenListener());
+        item.addActionListener(new FullScreenListener());
         return item;
     }
 
@@ -241,10 +245,10 @@ class VideoPanel implements Disposable{
         }
     }
     
-    private class FullScreenListener implements ItemListener {
+    private class FullScreenListener implements ActionListener {
         @Override
-        public void itemStateChanged(ItemEvent e) {
-            videoMediator.setFullScreen(e.getStateChange() == ItemEvent.SELECTED);
+        public void actionPerformed(ActionEvent e) {
+            videoMediator.setFullScreen(!videoMediator.isFullScreen());
         }
     }
     
