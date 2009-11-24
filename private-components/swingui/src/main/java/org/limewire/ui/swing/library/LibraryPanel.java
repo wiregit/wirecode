@@ -229,14 +229,17 @@ public class LibraryPanel extends JPanel {
 
             @Override
             public void categorySelected(Category category) {
-                // If selected navItem is playlist and old category playable 
-                // and new category not playable, then save playlist.
-                if (playerMediator.isActivePlaylist(selectedNavItem) &&
-                        isPlayable(selectedCategory) &&
-                        !isPlayable(libraryFilterPanel.getSelectedCategory())) {
-                    playerMediator.setPlaylist(libraryTable.getPlayableList());
+            	// only update the table if the category has changed
+                if(category != getSelectedCategory()) {
+                    // If selected navItem is playlist and old category playable 
+                    // and new category not playable, then save playlist.
+                    if (playerMediator.isActivePlaylist(selectedNavItem) &&
+                            isPlayable(selectedCategory) &&
+                            !isPlayable(libraryFilterPanel.getSelectedCategory())) {
+                        playerMediator.setPlaylist(libraryTable.getPlayableList());
+                    }
+                    selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
                 }
-                selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
             }
         });
         libraryNavigatorPanel.addTableSelectionListener(new ListSelectionListener(){
