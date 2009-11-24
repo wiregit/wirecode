@@ -34,9 +34,6 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.html.HTMLDocument;
@@ -54,7 +51,6 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.RemoteHostWidget;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
-import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.nav.Navigator;
@@ -143,6 +139,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private JButton itemIconButton;
     private IconButton similarButton = new IconButton();
     private IconButton propertiesButton = new IconButton();
+    //TODO: convert this to a label
     private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new NoDancingHtmlLabel();
     private JLabel metadataLabel = new NoDancingHtmlLabel();
@@ -166,7 +163,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private int textPanelWidth;
 
     private final SearchResultMenuFactory searchResultMenuFactory;
-    private final DownloadMediator downloadMediator;
     
     @Inject
     ListViewTableEditorRenderer(
@@ -179,8 +175,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
-        SearchResultMenuFactory searchResultMenuFactory,
-        DownloadMediator downloadMediator) {
+        SearchResultMenuFactory searchResultMenuFactory) {
 
         this.categoryIconManager = categoryIconManager;
         this.headingBuilder = headingBuilder;
@@ -190,10 +185,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         this.searchResultMenuFactory = searchResultMenuFactory;
-        this.downloadMediator = downloadMediator;
         
         GuiUtils.assignResources(this);
-
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
        
@@ -203,7 +196,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         layoutEditorComponent();
     }
-    
 
     private void makePanel(Navigator navigator, LibraryMediator libraryMediator) {
         initializeComponents();
@@ -218,7 +210,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         lastRowPanel.add(lastRowMessage);
         emptyPanel.setOpaque(false);
     }
-
 
     private void setupButtons(){
         similarButton.setFocusable(false);
@@ -274,7 +265,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 dialog.setVisible(true);
             }
         });
-        
     }
     
     private void layoutEditorComponent(){
@@ -298,18 +288,14 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
 
     @Override
-    public Component getTableCellRendererComponent(
-        JTable table, Object value,
-        boolean isSelected, boolean hasFocus,
-        int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value,
+        boolean isSelected, boolean hasFocus, int row, int column) {
 
-        return getTableCellEditorComponent(
-            table, value, isSelected, row, column);
+        return getTableCellEditorComponent(table, value, isSelected, row, column);
     }
 
     @Override
-    public Component getTableCellEditorComponent(
-        final JTable table, Object value, boolean isSelected, int row, final int col) {
+    public Component getTableCellEditorComponent(final JTable table, Object value, boolean isSelected, int row, final int col) {
         vsr = (VisualSearchResult) value;
         this.table = table;        
         editorComponent.setBackground(table.getBackground());
@@ -329,8 +315,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         update(vsr);
         return editorComponent;
     }  
-
-
 
     private void update(VisualSearchResult vsr) {
         fromWidget.setPeople(vsr.getSources());
@@ -433,12 +417,10 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
     }
 
-
     private void populateSubheading(RowDisplayResult result) {
         subheadingLabel.setText(result.getSubheading());
     }
-        
-    
+
     private void populateMetadata(RowDisplayResult result) {
         metadataLabel.setText(null);
         RowDisplayConfig config = result.getConfig();
@@ -511,24 +493,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         similarResultIndentation.setBackground(similarResultsBackgroundColor);
     }
 
-    private void setupListeners(final Navigator navigator, final LibraryMediator libraryMediator) {
-        heading.addHyperlinkListener(new HyperlinkListener() {
-
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (EventType.ACTIVATED == e.getEventType()) {
-                    if (e.getDescription().equals("#download")) {
-                        downloadHandler.download(vsr);
-                        table.editingStopped(new ChangeEvent(table));
-                    } else if (e.getDescription().equals("#downloading")) {
-                        downloadMediator.selectAndScrollTo(vsr.getUrn());
-                    } else if (e.getDescription().equals("#library")) {
-                        libraryMediator.selectInLibrary(vsr.getUrn());
-                    }
-                }
-            }
-        });
-        
+    private void setupListeners(final Navigator navigator, final LibraryMediator libraryMediator) {        
         Component[] listenerComponents = new Component[]{editorComponent, heading, subheadingLabel, metadataLabel, 
                 similarResultIndentation, searchResultTextPanel, downloadSourceCount, itemIconButton};
        
@@ -588,7 +553,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
     
     private void addMouseListener(MouseListener listener, Component... components) {    
-        for (Component c : components){
+        for (Component c : components) {
             c.addMouseListener(listener);
         }
     }
@@ -663,5 +628,4 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             setMaximumSize(new Dimension(Integer.MAX_VALUE, getPreferredSize().height));
         }
     }
- 
 }
