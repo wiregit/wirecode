@@ -165,6 +165,11 @@ class VideoPlayerMediator implements PlayerMediator {
     public boolean isShuffle() {
         return false;
     }
+    
+    @Override
+    public boolean hasScrollingTitle() {
+        return false;
+    }
 
     @Override
     public void nextSong() {

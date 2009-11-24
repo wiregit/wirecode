@@ -236,6 +236,11 @@ class AudioPlayerMediator implements PlayerMediator {
         return shuffle;
     }
     
+    @Override
+    public boolean hasScrollingTitle() {
+        return true;
+    }
+    
     /* (non-Javadoc)
      * @see org.limewire.ui.swing.player.IPlayerMediator#setShuffle(boolean)
      */

@@ -249,7 +249,9 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
                         boolean enabled = SwingUiSettings.PLAYER_ENABLED.getValue();
                         if (!enabled) {
                             getPlayerMediator().stop();
-                            titleLabel.stop();
+                            if (getPlayerMediator().hasScrollingTitle()) {
+                                titleLabel.stop();
+                            }
                         }
                         PlayerControlPanel.this.innerPanel.setVisible(enabled);
                     }
@@ -264,7 +266,9 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
     public void dispose(){
         getPlayerMediator().removeMediatorListener(this);
         SwingUiSettings.PLAYER_ENABLED.removeSettingListener(settingListener);
-        titleLabel.stop();
+        if (getPlayerMediator().hasScrollingTitle()) {
+            titleLabel.stop();
+        }
     }
     
     /**
@@ -351,8 +355,10 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         // Set song text.
         titleLabel.setText(name);
         titleLabel.setToolTipText(name);
-        titleLabel.start();
-
+        if (getPlayerMediator().hasScrollingTitle()) {
+            titleLabel.start();
+        }
+        
         if (!innerPanel.isVisible()) {
             innerPanel.setVisible(true);
         }
@@ -375,14 +381,17 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         if ((playerState == PlayerState.PLAYING) || (playerState == PlayerState.SEEKING_PLAY)) {
             playButton.setVisible(false);
             pauseButton.setVisible(true);
-            titleLabel.start();
-            
+            if (getPlayerMediator().hasScrollingTitle()) {
+                titleLabel.start();
+            }
         } else if (playerState == PlayerState.PAUSED || playerState == PlayerState.SEEKING_PAUSED ||
                 playerState == PlayerState.EOM || playerState == PlayerState.STOPPED ||
                 playerState == PlayerState.UNKNOWN || playerState == PlayerState.NO_SOUND_DEVICE) {
             playButton.setVisible(true);
             pauseButton.setVisible(false);
-            titleLabel.stop();
+            if (getPlayerMediator().hasScrollingTitle()) {
+                titleLabel.stop();
+            }
         }        
     }
     

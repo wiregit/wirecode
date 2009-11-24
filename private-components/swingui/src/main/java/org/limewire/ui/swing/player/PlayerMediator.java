@@ -70,6 +70,11 @@ public interface PlayerMediator {
     boolean isVolumeSettable();
 
     /**
+     * @return true if the name of the file playing should scroll above the control buttons
+     */
+    boolean hasScrollingTitle();
+
+    /**
      * Pauses the current song in the audio player. 
      */
     public void pause();
