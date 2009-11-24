@@ -27,24 +27,14 @@ import com.google.inject.Provider;
 class AddToListMenu extends JMenu {
 
     private final Provider<List<File>> selectedFiles;
-    private final Provider<LocalFileList> selectedLocalFileList; 
     private final ShareListIcons icons = new ShareListIcons();
     
     /**
      * Constructs an AddToListMenu with all lists enable..
      */
     public AddToListMenu(Provider<List<File>> selectedFiles) {
-        this(null, selectedFiles);
-    }
-    
-    /**
-     * Constructs an AddToListMenu with all but selectedLocalFileList enabled.
-     */
-    public AddToListMenu(final Provider<LocalFileList> selectedLocalFileList,
-            Provider<List<File>> selectedFiles) {
         super(I18n.tr("Add to List"));  
-        
-        this.selectedLocalFileList = selectedLocalFileList;
+
         this.selectedFiles = selectedFiles;
     }
         
@@ -60,9 +50,9 @@ class AddToListMenu extends JMenu {
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
                         if(selectedFiles.get().size() == 1) {
-                            menu.add(new AddListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList)).setEnabled((selectedLocalFileList == null || fileList != selectedLocalFileList.get()) && !fileList.contains(selectedFiles.get().get(0)));
+                            menu.add(new AddListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList));
                         } else {
-                            menu.add(new AddListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                            menu.add(new AddListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList));
                         }
                     }
                 } finally {
@@ -87,7 +77,7 @@ class AddToListMenu extends JMenu {
             
         });
         // place holder to get the -> on the parent menu
-        add(new JMenuItem(I18n.tr("Public Shared")));
+        add(new JMenuItem(I18n.tr("empty")));
     }
     
     

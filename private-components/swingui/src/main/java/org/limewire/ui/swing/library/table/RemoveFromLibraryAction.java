@@ -32,7 +32,7 @@ class RemoveFromLibraryAction extends AbstractAction {
     @Inject
     public RemoveFromLibraryAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
             LibraryManager libraryManager, SharedFileListManager sharedFileListManager) {
-        super(I18n.tr("Remove from Library"));
+        super(I18n.tr("All Lists and Library"));
         
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryManager = libraryManager;

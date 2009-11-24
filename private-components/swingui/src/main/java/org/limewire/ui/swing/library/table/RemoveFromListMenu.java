@@ -1,13 +1,10 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.event.ChangeEvent;
@@ -15,14 +12,12 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
-import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.ShareListIcons;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
+import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
@@ -31,45 +26,26 @@ import com.google.inject.Provider;
  * list. 
  */
 public class RemoveFromListMenu extends JMenu {
-
-    private final Provider<List<File>> selectedFiles;
-    private final ShareListIcons icons = new ShareListIcons();
-    
+   
     /**
      * Constructs an RemoveFromListMenu with all lists enable..
      */
-    public RemoveFromListMenu(Provider<List<File>> selectedFiles) {
-        super(I18n.tr("Remove from List"));     
+    @Inject
+    public RemoveFromListMenu(final @LibrarySelected Provider<List<File>> selectedFiles, 
+            final RemoveFromLibraryAction removeFromLibraryAction, 
+            final RemoveFromAllListAction removeFromAllAction, final SharedFileListManager manager) {
+        super(I18n.tr("Remove from"));     
         
-        this.selectedFiles = selectedFiles;
-    }
-    
-    public void initialize(final SharedFileListManager manager, final RemoveFromAllListAction removeFromAllAction) {
         addChangeListener(new ChangeListener(){
             @Override
             public void stateChanged(ChangeEvent e) {
                 JMenu menu = RemoveFromListMenu.this;
                 menu.removeAll();
                 
-                boolean allRemoveEnabled = false;
-                // once this is selected, show all the submenus
-                manager.getModel().getReadWriteLock().readLock().lock();
-                try { 
-                    for(SharedFileList fileList : manager.getModel()) {
-                        if(selectedFiles.get().size() == 1) {
-                            boolean isEnabled = fileList.contains(selectedFiles.get().get(0));
-                            menu.add(new RemoveFromListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList)).setEnabled(isEnabled);
-                            allRemoveEnabled |= isEnabled;
-                        } else {
-                            menu.add(new RemoveFromListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList));
-                        }
-                    }
-                } finally {
-                    manager.getModel().getReadWriteLock().readLock().unlock();
-                }
+                removeFromAllAction.putValue(Action.NAME, I18n.tr("All Lists"));
+                menu.add(removeFromAllAction).setEnabled(isAllRemovedEnabled(manager, selectedFiles));
                 menu.addSeparator();
-                removeFromAllAction.putValue(Action.NAME, I18n.tr("Remove from All Lists"));
-                menu.add(removeFromAllAction).setEnabled(allRemoveEnabled);
+                menu.add(removeFromLibraryAction);
             }
             
         });
@@ -89,31 +65,27 @@ public class RemoveFromListMenu extends JMenu {
             
         });
         // place holder to get the -> on the parent menu
-        add(new JMenuItem(I18n.tr("Public Shared")));
+        add(new JMenuItem(I18n.tr("empty")));
     }
     
     /**
-     * Removes the given file from the given FileList.
+     * Returns true if a selected file exists in a playlist, false otherwise.
      */
-    private class RemoveFromListAction extends AbstractAction {
-        private final LocalFileList localFileList;
-        
-        public RemoveFromListAction(String text, Icon icon, LocalFileList localFileList) {
-            super(text);
-            putValue(SMALL_ICON, icon);
-            this.localFileList = localFileList;
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {
-                    List<File> selected = new ArrayList<File>(selectedFiles.get());
-                    for(File file : selected) {
-                        localFileList.removeFile(file);
-                    }                    
+    private boolean isAllRemovedEnabled(SharedFileListManager manager, Provider<List<File>> selectedFiles) {
+        boolean enabled = false;
+        if(selectedFiles.get().size() == 1) {
+            manager.getModel().getReadWriteLock().readLock().lock();
+            try { 
+                for(SharedFileList fileList : manager.getModel()) {
+                    boolean isEnabled = fileList.contains(selectedFiles.get().get(0));
+                    enabled |= isEnabled;
                 }
-            });
-        }
+            } finally {
+                manager.getModel().getReadWriteLock().readLock().unlock();
+            }
+        } else {
+            enabled = true;
+        }        
+        return enabled;
     }
 }

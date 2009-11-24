@@ -42,8 +42,7 @@ class ShowInListMenu extends JMenu {
     /**
      * Constructs a ShowInListMenu with all items but selectedLocalFileList enabled.  Initialize must be called after construction (except for injected subclasses).
      */
-    public ShowInListMenu(Provider<List<File>> selectedFiles,
-            final Provider<LocalFileList> selectedLocalFileList) {
+    public ShowInListMenu(Provider<List<File>> selectedFiles, final Provider<LocalFileList> selectedLocalFileList) {
         super(I18n.tr("Show in List"));        
         
         this.selectedFiles = selectedFiles;
@@ -51,7 +50,7 @@ class ShowInListMenu extends JMenu {
     }
     
     public void initialize(final SharedFileListManager manager, final LibraryManager libraryManager,
-        LibraryPanel libraryPanel){
+        LibraryPanel libraryPanel, final boolean showLibrary){
         
         this.libraryPanel = libraryPanel;
         
@@ -66,17 +65,21 @@ class ShowInListMenu extends JMenu {
                     File selectedFile = selectedFiles.get().get(0);
                     
                     LocalFileList libraryList = libraryManager.getLibraryManagedList();
-                    menu.add(new ShowAction(I18n.tr("Library"), getListIcon(libraryList), libraryList, selectedFile)).setEnabled(selectedLocalFileList == null || libraryManager.getLibraryManagedList() != selectedLocalFileList.get());             
+                    
+                    if(showLibrary) {
+                        menu.add(new ShowAction(I18n.tr("Library"), getListIcon(libraryList), libraryList, selectedFile));//.setEnabled(selectedLocalFileList == null || libraryManager.getLibraryManagedList() != selectedLocalFileList.get());
+                    }
                     manager.getModel().getReadWriteLock().readLock().lock();
                     try {  
                         boolean addSeperator = false;
                         for(SharedFileList fileList : manager.getModel()) {
-                            if(fileList.contains(selectedFile)) {
-                                menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile)).setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                        	// only show lists that contain the file and isn't the currently selected list
+                            if(fileList.contains(selectedFile) && (selectedLocalFileList == null || fileList != selectedLocalFileList.get())) {
+                                menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile));//.setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
                                 addSeperator = true;
                             }
                         }
-                        if(addSeperator)
+                        if(addSeperator && showLibrary)
                             menu.insertSeparator(1);
                     } finally {
                         manager.getModel().getReadWriteLock().readLock().unlock();

@@ -153,7 +153,7 @@ public class UploadPopupMenu extends JPopupMenu {
             JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
             add(addToListMenu);
 
-            JMenu showInListMenu = listMenuFactory.createShowInListMenu(selectedFiles);
+            JMenu showInListMenu = listMenuFactory.createShowInListMenu(selectedFiles, true);
             add(showInListMenu);
         }
             

@@ -85,7 +85,7 @@ public class DownloadTableMenu extends JPopupMenu{
             add(createLocateInLibraryMenuItem());
             addSeparator();
             add(listMenuFactory.createAddToListMenu(selectedFiles));
-            add(listMenuFactory.createShowInListMenu(selectedFiles));
+            add(listMenuFactory.createShowInListMenu(selectedFiles, true));
             addSeparator();
             add(createPropertiesMenuItem());
             

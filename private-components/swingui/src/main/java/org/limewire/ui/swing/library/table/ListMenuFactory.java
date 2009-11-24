@@ -21,19 +21,16 @@ public class ListMenuFactory {
     private final SharedFileListManager sharedFileListManager; 
     private final LibraryManager libraryManager;
     private final LibraryPanel libraryPanel;
-    private final Provider<RemoveFromAllListAction> removeFromAllListAction;
     
     /**
      * Constructs a ListMenuFactory.
      */
     @Inject
     public ListMenuFactory(SharedFileListManager sharedFileListManager, 
-            LibraryManager libraryManager,
-            LibraryPanel libraryPanel, Provider<RemoveFromAllListAction> removeFromAllListAction) {
+            LibraryManager libraryManager, LibraryPanel libraryPanel) {
         this.sharedFileListManager = sharedFileListManager;
         this.libraryManager = libraryManager;
         this.libraryPanel = libraryPanel;
-        this.removeFromAllListAction = removeFromAllListAction;
     }
     
     /**
@@ -46,22 +43,11 @@ public class ListMenuFactory {
     }
     
     /**
-     * Creates an "Add to List" menu for the specified list of selected files
-     * and local file list.
-     */
-    public JMenu createAddToListMenu(Provider<List<File>> selectedFiles, 
-            Provider<LocalFileList> selectedLocalFileList) {
-        AddToListMenu menu = new AddToListMenu(selectedLocalFileList, selectedFiles);
-        menu.initialize(sharedFileListManager);
-        return menu;
-    }
-    
-    /**
      * Creates a "Show in List" menu for the specified list of selected files.
      */
-    public JMenu createShowInListMenu(Provider<List<File>> selectedFiles) {
+    public JMenu createShowInListMenu(Provider<List<File>> selectedFiles, boolean showLibrary) {
         ShowInListMenu menu = new ShowInListMenu(selectedFiles);
-        menu.initialize(sharedFileListManager, libraryManager, libraryPanel);
+        menu.initialize(sharedFileListManager, libraryManager, libraryPanel, showLibrary);
         return menu;
     }
     
@@ -70,18 +56,9 @@ public class ListMenuFactory {
      * and local file list.
      */
     public JMenu createShowInListMenu(Provider<List<File>> selectedFiles,
-            Provider<LocalFileList> selectedLocalFileList) {
+            Provider<LocalFileList> selectedLocalFileList, boolean showLibrary) {
         ShowInListMenu menu = new ShowInListMenu(selectedFiles, selectedLocalFileList);
-        menu.initialize(sharedFileListManager, libraryManager, libraryPanel);
-        return menu;
-    }
-    
-    /**
-	 * Creates a "Remove from List" menu for the specified list of selected files.
-	 */
-    public JMenu createRemoveInListMenu(Provider<List<File>> selectedFiles) {
-        RemoveFromListMenu menu = new RemoveFromListMenu(selectedFiles);
-        menu.initialize(sharedFileListManager, removeFromAllListAction.get());
+        menu.initialize(sharedFileListManager, libraryManager, libraryPanel, showLibrary);
         return menu;
     }
 }
