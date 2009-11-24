@@ -27,26 +27,20 @@ public class SearchHeadingDocumentBuilderImplTest extends TestCase {
 
     public void testNonMouseOverHeadingDocument() {
         String expected = 
-             "<span class=\"title\"><a href=\"#download\">Night life</a></span>";
-        assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.NOT_STARTED, false));
-    }
-    
-    public void testMouseOverHeadingDocument() {
-        String expected = 
-            "<span class=\"title\"><a href=\"#download\">Night life</a></span>";
+             "<span class=\"title\"><u>Night life</u></span>";
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.NOT_STARTED, false));
     }
     
     public void testDownloadingHeadingDocument() {
         String expected = 
-            "<a href=\"#downloading\">Downloading</a> <span class=\"title\">Night life</span>...";
+            "Downloading <span class=\"title\">Night life</span>...";
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.DOWNLOADING, false));
 
     }
     
     public void testFileInLibraryHeadingDocument() {
         String expected = 
-            "<span class=\"title\">Night life</span> is in your <a href=\"#library\">Library</a>.";
+            "<span class=\"title\">Night life</span> is in your Library.";
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.LIBRARY, false));
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.DOWNLOADED, false));
     }
