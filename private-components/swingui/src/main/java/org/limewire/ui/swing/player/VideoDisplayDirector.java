@@ -110,6 +110,9 @@ class VideoDisplayDirector {
     
     
     private void showFullScreen(){
+        //Hide main frame first so that fullScreenFrame gets proper focus.
+        GuiUtils.getMainFrame().setVisible(false);
+        
         fullScreenFrame = new LimeJFrame();
 
         fullScreenFrame.setTitle(GuiUtils.getMainFrame().getTitle());
@@ -121,9 +124,7 @@ class VideoDisplayDirector {
         fullScreenFrame.add(videoPanel.getComponent(), BorderLayout.CENTER);            
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        fullScreenFrame.setBounds(0,0,screenSize.width, screenSize.height);
-        
-        GuiUtils.getMainFrame().setVisible(false);
+        fullScreenFrame.setBounds(0,0,screenSize.width, screenSize.height);        
 
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = environment.getDefaultScreenDevice();
