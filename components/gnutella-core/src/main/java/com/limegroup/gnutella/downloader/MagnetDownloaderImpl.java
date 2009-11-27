@@ -40,6 +40,7 @@ import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
+import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.spam.SpamManager;
@@ -119,8 +120,11 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	        SocketsManager socketsManager, 
 	        @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
 	        DangerousFileChecker dangerousFileChecker,
-            SpamManager spamManager, Library library,
-            CategoryManager categoryManager, BandwidthCollector bandwidthCollector) {
+	        VirusScanner virusScanner,
+            SpamManager spamManager,
+            Library library,
+            CategoryManager categoryManager,
+            BandwidthCollector bandwidthCollector) {
 	    super(saveLocationManager, downloadManager, gnutellaFileCollection,
 	            incompleteFileManager, downloadCallback, networkManager,
 	            alternateLocationFactory, requeryManagerFactory,
@@ -130,7 +134,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	            backgroundExecutor, messageRouter, tigerTreeCache,
 	            applicationServices, remoteFileDescFactory, pushListProvider,
 	            socketsManager, downloadStateProcessingQueue,
-	            dangerousFileChecker, spamManager, library, categoryManager, bandwidthCollector);
+	            dangerousFileChecker, virusScanner, spamManager, library,
+	            categoryManager, bandwidthCollector);
     }
     
     @Override

@@ -30,6 +30,7 @@ public interface DownloadCallback {
     
     /**
      * Shows the user a warning about a file.
+     * FIXME: remove
      */
     public void warnUser(String filename, String message, String moreInfoUrl);
 

@@ -130,7 +130,10 @@ public class MockDownloadListManager implements DownloadListManager {
             Object newValue = evt.getNewValue();
             if (newValue == DownloadState.CANCELLED) {
                 threadSafeDownloadItems.remove(evt.getSource());
-            } else if (newValue == DownloadState.DONE || newValue == DownloadState.THREAT_FOUND) {
+            } else if (newValue == DownloadState.DONE ||
+                    newValue == DownloadState.DANGEROUS ||
+                    newValue == DownloadState.THREAT_FOUND ||
+                    newValue == DownloadState.SCAN_FAILED) {
                 changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, evt.getSource());
             }
         }

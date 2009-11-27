@@ -120,7 +120,10 @@ public class DownloadMediator {
 
         // Add list listeners to enable/show header buttons.
         EventList<DownloadItem> doneList = GlazedListsFactory.filterList(getDownloadList(), 
-                new DownloadStateMatcher(DownloadState.DONE));
+                new DownloadStateMatcher(DownloadState.DONE,
+                        DownloadState.DANGEROUS,
+                        DownloadState.THREAT_FOUND,
+                        DownloadState.SCAN_FAILED));
         EventList<DownloadItem> stalledList = GlazedListsFactory.filterList(getDownloadList(), 
                 new DownloadStateMatcher(DownloadState.STALLED));
 
@@ -230,7 +233,12 @@ public class DownloadMediator {
 	public EventList<DownloadItem> getActiveList() {
 	    if (activeList == null) {
 	        activeList = GlazedListsFactory.filterList(commonBaseList, 
-	                new DownloadStateExcluder(DownloadState.ERROR, DownloadState.DONE, DownloadState.CANCELLED));
+	                new DownloadStateExcluder(DownloadState.ERROR,
+	                        DownloadState.DONE,
+	                        DownloadState.CANCELLED,
+	                        DownloadState.DANGEROUS,
+	                        DownloadState.THREAT_FOUND,
+	                        DownloadState.SCAN_FAILED));
 	    }
 	    return activeList;
 	}
@@ -426,6 +434,11 @@ public class DownloadMediator {
             case STALLED: return 10;
             case ERROR: return 11;       
             case CANCELLED: return 12;
+            case DANGEROUS: return 13;
+            case SCANNING: return 14;
+            case SCANNING_FRAGMENT: return 15;
+            case THREAT_FOUND: return 16;
+            case SCAN_FAILED: return 17;
             }
             
            throw new IllegalArgumentException("Unknown DownloadState: " + state);

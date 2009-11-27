@@ -120,7 +120,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     }
 
     @Override
-    public File getDownloadFragment() {
+    public File getDownloadFragment(ScanListener listener) {
         //not really used for this downloader
         return getIncompleteFile();
     }

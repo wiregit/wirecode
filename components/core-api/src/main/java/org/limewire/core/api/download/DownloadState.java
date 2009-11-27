@@ -17,14 +17,16 @@ public enum DownloadState {
 	TRYING_AGAIN( true, false),
 	ERROR( false, false),
 	RESUMING(false, false),
-	/** Download finished but not yet scanned. */
-	NOT_SCANNED(false, false),
+	/** Threat detected by dangerous file checker. */
+	DANGEROUS(false, false),
     /** Anti-virus scan in progress for finished download. */
     SCANNING(false, false),
     /** Anti-virus scan in progress for file fragment. */
     SCANNING_FRAGMENT(false, false),
     /** Threat detected by anti-virus scan. */
-    THREAT_FOUND(false, false);
+    THREAT_FOUND(false, false),
+	/** Anti-virus scan failed. */
+	SCAN_FAILED(false, false);
 
 	private final boolean pausable;
 	private final boolean resumable;

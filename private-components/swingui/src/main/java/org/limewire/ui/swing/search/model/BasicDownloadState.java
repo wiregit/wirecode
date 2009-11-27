@@ -21,6 +21,7 @@ public enum BasicDownloadState {
         case CANCELLED:
             return BasicDownloadState.NOT_STARTED;
         case DONE:
+        case SCAN_FAILED:
             return BasicDownloadState.DOWNLOADED;
         case ERROR:
         case TRYING_AGAIN:
@@ -32,6 +33,10 @@ public enum BasicDownloadState {
         case FINISHING:
         case RESUMING:
         case DOWNLOADING:
+        case DANGEROUS:
+        case SCANNING:
+        case SCANNING_FRAGMENT:
+        case THREAT_FOUND:
             return BasicDownloadState.DOWNLOADING;
         default:
             return null;

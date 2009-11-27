@@ -114,6 +114,8 @@ class MessageFileOfferImpl extends AbstractMessageImpl implements MessageFileOff
                             tr("{0}Downloaded{1}","<a href=\"" +
                             ChatDocumentBuilder.MY_LIBRARY_LINK + "\">", "</a>");
                     break;
+                // FIXME: DANGEROUS, SCANNING, SCANNING_FRAGMENT,
+                // THREAT_FOUND, SCAN_FAILED?
                 default:
                     fileOfferFormatted = defaultFileOfferFormatted;
             }

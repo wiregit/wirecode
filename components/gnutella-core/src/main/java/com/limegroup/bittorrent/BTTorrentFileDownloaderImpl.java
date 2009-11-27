@@ -209,7 +209,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     @Override
-    public File getDownloadFragment() {
+    public File getDownloadFragment(ScanListener listener) {
         return null;
     }
 

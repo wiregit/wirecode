@@ -44,7 +44,10 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         // Adjust foreground color when threat detected.
         // TODO research why this doesn't work
         if (value instanceof DownloadItem) {
-            if (((DownloadItem) value).getState() == DownloadState.THREAT_FOUND) {
+            DownloadState state = ((DownloadItem) value).getState();
+            if (state == DownloadState.DANGEROUS ||
+                    state == DownloadState.THREAT_FOUND ||
+                    state == DownloadState.SCAN_FAILED) {
                 renderer.setForeground(resources.getDisabledForeground());
             }
         }
@@ -65,10 +68,11 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         
         switch (item.getState()) {
         case ERROR:
+        case DANGEROUS:
         case THREAT_FOUND:
+        case SCAN_FAILED:
             return warningIcon;
 
-        case NOT_SCANNED:
         case FINISHING:
         case DONE:
             return categoryIconManager.getIcon(item.getCategory());

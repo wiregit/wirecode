@@ -131,7 +131,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 put(DownloadState.PAUSED, "Paused");
                 put(DownloadState.INVALID, "Invalid");
                 put(DownloadState.RESUMING, "Resuming");
-                put(DownloadState.DANGEROUS, "Dangerous file");
+                put(DownloadState.DANGEROUS, "Dangerous");
+                put(DownloadState.SCANNING, "Scanning");
+                put(DownloadState.THREAT_FOUND, "Threat found");
+                put(DownloadState.SCAN_FAILED, "Scan failed");
                 
                 assert isComplete();
             }

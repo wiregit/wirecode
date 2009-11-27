@@ -35,6 +35,7 @@ import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
+import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.spam.SpamManager;
@@ -81,6 +82,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             SocketsManager socketsManager, 
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
+            VirusScanner virusScanner,
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager, BandwidthCollector bandwidthCollector) throws DownloadException {
@@ -93,7 +95,8 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
                 backgroundExecutor, messageRouter, tigerTreeCache,
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
-                dangerousFileChecker, spamManager, library, categoryManager, bandwidthCollector);
+                dangerousFileChecker, virusScanner, spamManager, library,
+                categoryManager, bandwidthCollector);
     }
     
     /* (non-Javadoc)

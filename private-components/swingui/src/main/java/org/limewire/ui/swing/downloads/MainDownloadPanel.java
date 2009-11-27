@@ -153,8 +153,13 @@ public class MainDownloadPanel extends JPanel {
                 
             } else if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
                 final DownloadItem downloadItem = (DownloadItem) event.getNewValue();
-                if (downloadItem.getState() == DownloadState.THREAT_FOUND) {
+                DownloadState state = downloadItem.getState();
+                if (state == DownloadState.THREAT_FOUND) {
                     avInfoPanelFactory.get().showThreatMessage(downloadItem, true);
+                } else if (state == DownloadState.DANGEROUS) {
+                    // FIXME: notification?
+                } else if (state == DownloadState.SCAN_FAILED) {
+                    // FIXME: notification?
                 } else {
                     notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
                             new AbstractAction() {

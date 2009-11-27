@@ -697,7 +697,10 @@ public class DownloadWorker {
                     && state != DownloadState.DISK_PROBLEM
                     && state != DownloadState.CORRUPT_FILE
                     && state != DownloadState.HASHING
-                    && state != DownloadState.SAVING) {
+                    && state != DownloadState.SAVING
+                    && state != DownloadState.SCANNING
+                    && state != DownloadState.THREAT_FOUND
+                    && state != DownloadState.SCAN_FAILED) {
                 if (_interrupted.get())
                     return; // we were signalled to stop.
                 _manager.setState(DownloadState.CONNECTING);

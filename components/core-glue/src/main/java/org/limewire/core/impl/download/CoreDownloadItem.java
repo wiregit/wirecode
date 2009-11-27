@@ -41,7 +41,7 @@ import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-class CoreDownloadItem implements DownloadItem {
+class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     
     static interface Factory {
         CoreDownloadItem create(Downloader downloader, QueueTimeCalculator calculator);
@@ -52,12 +52,12 @@ class CoreDownloadItem implements DownloadItem {
     private volatile int hashCode = 0;
     private volatile long cachedSize;
     private volatile boolean cancelled = false;
+    private volatile boolean scanningFragment = false;
 
     private final QueueTimeCalculator queueTimeCalculator;
     private final FriendManager friendManager;
     private final DownloadItemType downloadItemType;
     private final CategoryManager categoryManager;
-    
     
     @Inject
     public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, FriendManager friendManager, CategoryManager categoryManager) {
@@ -132,7 +132,12 @@ class CoreDownloadItem implements DownloadItem {
 
     @Override
     public long getCurrentSize() {
-        if (getState() == DownloadState.DONE) {
+        DownloadState state = getState();
+        if (state == DownloadState.DONE ||
+                state == DownloadState.DANGEROUS ||
+                state == DownloadState.SCANNING ||
+                state == DownloadState.THREAT_FOUND ||
+                state == DownloadState.SCAN_FAILED) {
             return getTotalSize();
         } else {
             return cachedSize;
@@ -191,7 +196,12 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public int getPercentComplete() {
         DownloadState state = getState();
-        if(state == DownloadState.FINISHING || state == DownloadState.DONE){
+        if(state == DownloadState.FINISHING ||
+                state == DownloadState.DONE ||
+                state == DownloadState.DANGEROUS ||
+                state == DownloadState.SCANNING ||
+                state == DownloadState.THREAT_FOUND ||
+                state == DownloadState.SCAN_FAILED){
             return 100;
         }
 
@@ -226,6 +236,9 @@ class CoreDownloadItem implements DownloadItem {
     public DownloadState getState() {
         if(cancelled){
             return DownloadState.CANCELLED;
+        }
+        if(scanningFragment) {
+            return DownloadState.SCANNING_FRAGMENT;
         }
         return convertState(downloader.getState());
     }
@@ -263,7 +276,7 @@ class CoreDownloadItem implements DownloadItem {
     private DownloadState convertState(com.limegroup.gnutella.Downloader.DownloadState state) {
         switch (state) {
         case RESUMING:
-                return DownloadState.RESUMING;
+            return DownloadState.RESUMING;
 
         case SAVING:
         case HASHING:
@@ -276,7 +289,6 @@ class CoreDownloadItem implements DownloadItem {
         case DOWNLOADING:
             return DownloadState.DOWNLOADING;
 
-        
         case CONNECTING:
         case INITIALIZING:
         case WAITING_FOR_CONNECTIONS:
@@ -288,30 +300,42 @@ class CoreDownloadItem implements DownloadItem {
         case REMOTE_QUEUED:
         case BUSY://BUSY should look like locally queued but acts like remotely
             return DownloadState.REMOTE_QUEUED;
-            
+
         case QUEUED:
             return DownloadState.LOCAL_QUEUED;
 
         case PAUSED:
             return DownloadState.PAUSED;
-        
+
         case WAITING_FOR_GNET_RESULTS:
         case ITERATIVE_GUESSING:
         case QUERYING_DHT:
             return DownloadState.TRYING_AGAIN;
-            
+
         case WAITING_FOR_USER:
         case GAVE_UP:
             return DownloadState.STALLED;
 
         case ABORTED:
-        case DANGEROUS:
             return DownloadState.CANCELLED;
 
         case DISK_PROBLEM:
         case CORRUPT_FILE:
         case INVALID:
             return DownloadState.ERROR;
+
+        case DANGEROUS:
+            return DownloadState.DANGEROUS;
+
+        case SCANNING:
+            return DownloadState.SCANNING;
+
+        case THREAT_FOUND:
+            return DownloadState.THREAT_FOUND;
+
+        case SCAN_FAILED:
+            return DownloadState.SCAN_FAILED;
+
         default:
             throw new IllegalStateException("Unknown State: " + state);
         }
@@ -391,7 +415,17 @@ class CoreDownloadItem implements DownloadItem {
     
     @Override
     public File getLaunchableFile() {
-        return downloader.getDownloadFragment();
+        return downloader.getDownloadFragment(this);
+    }
+    
+    @Override
+    public void scanStarted() {
+        scanningFragment = true;
+    }
+    
+    @Override
+    public void scanStopped() {
+        scanningFragment = false;
     }
     
     @Override

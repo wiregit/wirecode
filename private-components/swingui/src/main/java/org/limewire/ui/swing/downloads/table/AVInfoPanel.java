@@ -28,6 +28,7 @@ import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 
@@ -138,6 +139,13 @@ public class AVInfoPanel extends JPanel {
         
         // Display as modal dialog.
         showDialog(I18n.tr("Warning"));
+    }
+    
+    /**
+     * Displays the failure message.
+     */
+    public void showFailureMessage(DownloadItem item) {
+        throw new NotImplementedException("Show failure message");
     }
     
     /**

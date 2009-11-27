@@ -29,7 +29,6 @@ import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Address;
@@ -75,11 +74,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         EventListener<TorrentEvent> {
 
     private static final Log LOG = LogFactory.getLog(BTDownloaderImpl.class);
-
-    private static final String DANGEROUS_TORRENT_WARNING = I18nMarker
-            .marktr("This file contains bad data and may have been designed to damage your computer. LimeWire has cancelled the download for your protection. Please wait for your search to complete before choosing a file to download.");
-
-    private static final String DANGEROUS_TORRENT_INFO_URL = "http://www.limewire.com/client_redirect/?page=dangerousDownloads";
 
     @InspectablePrimitive(value = "number of torrents started", category = DataCategory.USAGE)
     private static final AtomicInteger torrentsStarted = new AtomicInteger();
@@ -233,8 +227,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.DANGEROUS));
             // This will cause TorrentEvent.STOPPED
             torrent.stop();
-            downloadCallback.get().warnUser(getSaveFile().getName(), DANGEROUS_TORRENT_WARNING,
-                    DANGEROUS_TORRENT_INFO_URL);
             return true;
         }
         return false;
@@ -384,7 +376,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public File getDownloadFragment() {
+    public File getDownloadFragment(ScanListener listener) {
         if (isCompleted()) {
             return getSaveFile();
         }
@@ -540,6 +532,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case ABORTED:
         case COMPLETE:
         case DANGEROUS:
+        case THREAT_FOUND:
+        case SCAN_FAILED:
             return true;
         }
         return false;

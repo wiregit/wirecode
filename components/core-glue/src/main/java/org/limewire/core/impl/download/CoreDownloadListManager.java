@@ -302,19 +302,26 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadRemoved(Downloader downloader) {
-            DownloadItem item = getDownloadItem(downloader);
-            
-            DownloadState state = item.getState();
-            if (state == DownloadState.DONE || state == DownloadState.THREAT_FOUND) {
+            DownloadItem item = getDownloadItem(downloader);            
+            DownloadState state = item.getState();            
+            if (state == DownloadState.DONE ||
+                    state == DownloadState.DANGEROUS ||
+                    state == DownloadState.THREAT_FOUND ||
+                    state == DownloadState.SCAN_FAILED) {
                 changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, item);
             }
             
             // Always remove anti-virus update item.  For all others,
-            // don't automatically remove finished downloads or downloads in error states
+            // don't automatically remove finished downloads or downloads in
+            // error states
             if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
                 remove(item);
-            } else if ((state != DownloadState.DONE || SharingSettings.CLEAR_DOWNLOAD.getValue()) && 
-                    (state != DownloadState.ERROR || state != DownloadState.THREAT_FOUND)) {
+            } else if (state == DownloadState.DONE && SharingSettings.CLEAR_DOWNLOAD.getValue()) {
+                    remove(item);
+            } else if (state != DownloadState.ERROR &&
+                    state != DownloadState.DANGEROUS &&
+                    state != DownloadState.THREAT_FOUND &&
+                    state != DownloadState.SCAN_FAILED) {
                 remove(item);
             }
         }
@@ -380,7 +387,11 @@ public class CoreDownloadListManager implements DownloadListManager {
         threadSafeDownloadItems.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : threadSafeDownloadItems) {
-                if (item.getState() == DownloadState.DONE) {
+                DownloadState state = item.getState();
+                if (state == DownloadState.DONE ||
+                        state == DownloadState.DANGEROUS ||
+                        state == DownloadState.THREAT_FOUND ||
+                        state == DownloadState.SCAN_FAILED) {
                     finishedItems.add(item);
                 }
             }

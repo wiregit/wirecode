@@ -36,7 +36,6 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.friend.impl.address.FriendAddress;
-import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Address;
 import org.limewire.io.DiskException;
 import org.limewire.io.GUID;
@@ -88,6 +87,8 @@ import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
+import com.limegroup.gnutella.malware.VirusScanException;
+import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.spam.SpamManager;
@@ -211,10 +212,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     */
 
     private static final Log LOG = LogFactory.getLog(ManagedDownloaderImpl.class);
-    private static final String DANGEROUS_FILE_WARNING = I18nMarker.marktr(
-        "This file contains bad data and may have been designed to damage your computer. LimeWire has cancelled the download for your protection. Please wait for your search to complete before choosing a file to download.");
-    private static final String DANGEROUS_FILE_INFO_URL =
-        "http://www.limewire.com/client_redirect/?page=dangerousDownloads";
 
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
@@ -479,6 +476,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final RemoteFileDescFactory remoteFileDescFactory;
     protected final Provider<PushList> pushListProvider;
     protected final DangerousFileChecker dangerousFileChecker;
+    protected final VirusScanner virusScanner;
     protected final SpamManager spamManager;
     protected final Library library;
     protected final CategoryManager categoryManager;
@@ -500,23 +498,37 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     @Inject
     protected ManagedDownloaderImpl(SaveLocationManager saveLocationManager,
-                                    DownloadManager downloadManager, @GnutellaFiles FileCollection gnutellaFileCollection,
-                                    IncompleteFileManager incompleteFileManager, DownloadCallback downloadCallback,
-                                    NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
-                                    RequeryManagerFactory requeryManagerFactory, QueryRequestFactory queryRequestFactory,
-                                    OnDemandUnicaster onDemandUnicaster, DownloadWorkerFactory downloadWorkerFactory,
-                                    AltLocManager altLocManager, ContentManager contentManager,
-                                    SourceRankerFactory sourceRankerFactory, UrnCache urnCache,
-                                    VerifyingFileFactory verifyingFileFactory,
-                                    DiskController diskController,
-                                    IPFilter ipFilter, @Named("backgroundExecutor")
-    ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
-                                                 Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
-                                                 RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
-                                                 SocketsManager socketsManager,
-                                                 @Named("downloadStateProcessingQueue")ListeningExecutorService downloadStateProcessingQueue,
-                                                 DangerousFileChecker dangerousFileChecker,
-                                                 SpamManager spamManager, Library library, CategoryManager categoryManager, BandwidthCollector bandwidthCollector) {
+            DownloadManager downloadManager,
+            @GnutellaFiles FileCollection gnutellaFileCollection,
+            IncompleteFileManager incompleteFileManager,
+            DownloadCallback downloadCallback,
+            NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory,
+            RequeryManagerFactory requeryManagerFactory,
+            QueryRequestFactory queryRequestFactory,
+            OnDemandUnicaster onDemandUnicaster,
+            DownloadWorkerFactory downloadWorkerFactory,
+            AltLocManager altLocManager,
+            ContentManager contentManager,
+            SourceRankerFactory sourceRankerFactory,
+            UrnCache urnCache,
+            VerifyingFileFactory verifyingFileFactory,
+            DiskController diskController,
+            IPFilter ipFilter,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<HashTreeCache> tigerTreeCache,
+            ApplicationServices applicationServices,
+            RemoteFileDescFactory remoteFileDescFactory,
+            Provider<PushList> pushListProvider,
+            SocketsManager socketsManager,
+            @Named("downloadStateProcessingQueue")ListeningExecutorService downloadStateProcessingQueue,
+            DangerousFileChecker dangerousFileChecker,
+            VirusScanner virusScanner,
+            SpamManager spamManager,
+            Library library,
+            CategoryManager categoryManager,
+            BandwidthCollector bandwidthCollector) {
         super(saveLocationManager, categoryManager);
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
@@ -545,6 +557,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
         this.pushListProvider = pushListProvider;
         this.dangerousFileChecker = dangerousFileChecker;
+        this.virusScanner = virusScanner;
         this.spamManager = spamManager;
         this.library = library;
         this.categoryManager = categoryManager;
@@ -743,12 +756,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 case COMPLETE:
                 case DISK_PROBLEM:
                 case CORRUPT_FILE:
+                case DANGEROUS:
+                case THREAT_FOUND:
+                case SCAN_FAILED:
                     clearingNeeded = true;
                     setState(status);
-                    break;
-                case DANGEROUS:
-                    clearingNeeded = true;
-                    setState(DownloadState.ABORTED);
                     break;
                 case BUSY:
                 case GAVE_UP:
@@ -960,6 +972,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case DISK_PROBLEM:
             case CORRUPT_FILE:
             case INVALID:
+            case DANGEROUS:
+            case THREAT_FOUND:
+            case SCAN_FAILED:
                 return true;
         }
         return false;
@@ -992,6 +1007,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case REMOTE_QUEUED:
             case HASHING:
             case SAVING:
+            case SCANNING:
                 return true;
         }
         return false;
@@ -1550,7 +1566,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     */
     public boolean isPausable() {
         DownloadState state = getState();
-        return !isPaused() && !isCompleted() && state != DownloadState.SAVING && state != DownloadState.HASHING;
+        return !isPaused() && !isCompleted() &&
+                state != DownloadState.SAVING &&
+                state != DownloadState.HASHING &&
+                state != DownloadState.SCANNING;
     }
 
     /* (non-Javadoc)
@@ -1565,7 +1584,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isLaunchable()
     */
     public boolean isLaunchable() {
-        return state == DownloadState.COMPLETE || amountForPreview() > 0;
+        if(state == DownloadState.DANGEROUS ||
+                state == DownloadState.THREAT_FOUND)
+            return false;
+        if(state == DownloadState.COMPLETE ||
+                state == DownloadState.SCAN_FAILED)
+            return true;
+        return amountForPreview() > 0;
     }
 
     /**
@@ -1790,15 +1815,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getDownloadFragment()
     */
-    public File getDownloadFragment() {
-        //W e haven't started yet.
+    @Override
+    public File getDownloadFragment(ScanListener listener) {
+        // We haven't started yet.
         if (incompleteFile == null)
             return null;
 
         if (state == DownloadState.CORRUPT_FILE) {
-            // If the corrupt file exists, return it unless it's dangerous.
+            // If the corrupt file exists, return it unless it's infected or
+            // dangerous.
             final File corrupt = corruptFile;
-            if(corrupt == null || isDangerous(corrupt))
+            if (corrupt == null || isInfectedOrDangerous(corrupt, listener))
                 return null;
             return corrupt;
         } else if (state == DownloadState.COMPLETE) {
@@ -1808,7 +1835,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // Create a copy of the beginning of the incomplete file. The copy
             // is needed because some programs, notably Windows Media Player,
             // attempt to grab exclusive file locks.
-            File file = new File(incompleteFile.getParent(),
+            File copy = new File(incompleteFile.getParent(),
                     IncompleteFileManager.PREVIEW_PREFIX
                     + incompleteFile.getName());
             // Get the size of the first block of the file. (Remember
@@ -1817,15 +1844,34 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (size <= 0)
                 return null;
             // Copy the first block, returning null if nothing was copied.
-            if (FileUtils.copy(incompleteFile, size, file) <= 0)
+            if (FileUtils.copy(incompleteFile, size, copy) <= 0)
                 return null;
-            // Try to determine whether the copy is dangerous.
-            if (isDangerous(file)) {
+            if (isInfectedOrDangerous(copy, listener)) {
                 incompleteFile.delete();
                 return null;
             }
-            return file;
+            return copy;
         }
+    }
+    
+    /**
+     * Checks whether a file fragment is infected or dangerous. If the virus
+     * scan fails, the user will be asked whether to preview the file anyway.
+     * @param fragment the file to check
+     * @param listener a listener to be informed of virus scan progress
+     * @return true if the file cannot be previewed.
+     */
+    private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
+        listener.scanStarted();
+        try {
+            if(isInfected(fragment))
+                return true;                
+        } catch (VirusScanException scanFailed) {
+            // FIXME: ask the user whether to proceed - return true to cancel preview
+        } finally {
+            listener.scanStopped();
+        }
+        return isDangerous(fragment);
     }
 
     /**
@@ -1901,6 +1947,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 // nothing should interrupt except for a stop
                 if (!stopped && !paused)
                     ErrorService.error(e);
+                else if(getState() == DownloadState.DANGEROUS)
+                    status = DownloadState.DANGEROUS; // During preview
+                else if(getState() == DownloadState.THREAT_FOUND)
+                    status = DownloadState.THREAT_FOUND; // During preview
                 else
                     status = DownloadState.GAVE_UP;
 
@@ -1958,16 +2008,26 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *
      * @return {@link DownloadState#COMPLETE} if all went fine,
      *         {@link DownloadState#CORRUPT_FILE} if the hash does not match,
-     *         {@link DownloadState#DANGEROUS} if file may be harmful (e.g. dangerous extension)
+     *         {@link DownloadState#DANGEROUS} if the file is dangerous,
+     *         {@link DownloadState#THREAT_FOUND} if the file is infected,
+     *         {@link DownloadState#SCAN_FAILED} if the virus scan failed, or
      *         {@link DownloadState#DISK_PROBLEM} if there's a problem saving the file.
      * @throws InterruptedException if interrupted while waiting for the user's
      *                              response.
      */
     private DownloadState verifyAndSave() throws InterruptedException {
 
+        // Scan the file for viruses
+        setState(DownloadState.SCANNING);
+        try {
+            if(isInfected(incompleteFile))
+                return DownloadState.THREAT_FOUND;
+        } catch(VirusScanException scanFailed) {
+            return DownloadState.SCAN_FAILED;
+        }
+        
         // Check whether this is a dangerous file
         if(isDangerous(incompleteFile)) {
-            // Remove the download from the UI
             return DownloadState.DANGEROUS;
         }
 
@@ -1986,19 +2046,35 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /**
      * Returns true if the given file is dangerous, after stopping the download,
-     * deleting the file and warning the user.
+     * marking it as spam and deleting the file.
      */
     private boolean isDangerous(File file) {
         if(dangerousFileChecker.isDangerous(file)) {
+            setState(DownloadState.DANGEROUS);
             // Mark the file as spam in future search results
             RemoteFileDesc[] type = new RemoteFileDesc[0];
             spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
             // Stop the download and delete the file
             stop();
             file.delete();
-            // Inform the user that the file was deleted
-            downloadCallback.warnUser(getSaveFile().getName(),
-                    DANGEROUS_FILE_WARNING, DANGEROUS_FILE_INFO_URL);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given file is infected, after stopping the download,
+     * marking it as spam and deleting the file.
+     */
+    private boolean isInfected(File file) throws VirusScanException {
+        if(virusScanner.isInfected(file)) {
+            setState(DownloadState.THREAT_FOUND);
+            // Mark the file as spam in future search results
+            RemoteFileDesc[] type = new RemoteFileDesc[0];
+            spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
+            // Stop the download and delete the file
+            stop();
+            file.delete();
             return true;
         }
         return false;
