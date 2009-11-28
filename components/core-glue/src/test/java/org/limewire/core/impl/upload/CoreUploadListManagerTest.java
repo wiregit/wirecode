@@ -320,7 +320,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
                 ignoring(uploadBrowseHostDone);
                 
                 allowing(uploadUnableToUpload).getState();
-                will(returnValue(UploadState.FILE_ERROR));
+                will(returnValue(UploadState.REQUEST_ERROR));
                 ignoring(uploadUnableToUpload);
                 
                 allowing(uploadUploading1).getState();

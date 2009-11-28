@@ -21,7 +21,7 @@ public enum UploadState {
     UPLOADING(false, false), 
     
     /**
-     * Upload was stopped due to a file error.
+     * Upload was stopped due to an error with the request.
      */
     REQUEST_ERROR(false, true), 
     

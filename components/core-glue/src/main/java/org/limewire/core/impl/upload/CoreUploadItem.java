@@ -104,7 +104,7 @@ class CoreUploadItem implements UploadItem {
         case FILE_NOT_FOUND:
         case UNAVAILABLE_RANGE:
         case MALFORMED_REQUEST:
-            return UploadState.FILE_ERROR;
+            return UploadState.REQUEST_ERROR;
             
         case LIMIT_REACHED:
         case BANNED_GREEDY:

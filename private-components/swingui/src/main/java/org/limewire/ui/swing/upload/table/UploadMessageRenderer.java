@@ -70,8 +70,8 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
         case QUEUED:
             return I18n.tr("Waiting...");
             
-        case FILE_ERROR:
-            return I18n.tr("Unable to upload: file error");
+        case REQUEST_ERROR:
+            return I18n.tr("Unable to upload: invalid request");
             
         case LIMIT_REACHED:
             return I18n.tr("Unable to upload: upload limit reached");

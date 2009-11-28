@@ -601,7 +601,7 @@ public class UploadMediator {
             case UPLOADING: return 2;
             case PAUSED: return 3;
             case QUEUED: return 4;
-            case FILE_ERROR: return 5;    
+            case REQUEST_ERROR: return 5;    
             case LIMIT_REACHED: return 5;       
             case CANCELED: return 6;
             case BROWSE_HOST: return 7;
