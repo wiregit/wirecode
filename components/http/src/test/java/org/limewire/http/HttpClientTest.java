@@ -9,16 +9,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.SimpleTimer;
-import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
 
-public class HttpClientTest extends LimeTestCase {
+public class HttpClientTest extends BaseTestCase {
     
     private LimeHttpClient client;    
 
