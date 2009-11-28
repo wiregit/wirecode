@@ -19,15 +19,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.InspectionsSettings;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.InspectionsServerUrls;
 import org.limewire.inspection.Inspector;
@@ -65,7 +64,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
     private final Inspector inspector;
     
     private InspectionsResultProcessor processor;
-    private final ClientConnectionManager httpConnectionManager;
+    private final Provider<LimeHttpClient> httpClientProvider;
     private final InspectionsParser parser;
     private final Provider<Map<String, StringSetting>> inspectionsServerUrls;
     private final AtomicBoolean started = new AtomicBoolean(false);
@@ -76,13 +75,13 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
     
     @Inject
     public InspectionsCommunicatorImpl(@Named("fastExecutor")ScheduledExecutorService scheduler,
-                                       @Named("sslConnectionManager") ClientConnectionManager httpConnectionManager,
+                                       Provider<LimeHttpClient> httpClientProvider,
                                        @InspectionsServerUrls Provider<Map<String, StringSetting>> inspectionsServerUrls,
                                        Inspector inspector,
                                        HttpClientInstanceUtils httpClientInstanceUtils) {
         this.scheduler = scheduler;
         this.inspector = inspector;
-        this.httpConnectionManager = httpConnectionManager;
+        this.httpClientProvider = httpClientProvider;
         this.inspectionsServerUrls = inspectionsServerUrls;
         this.httpClientInstanceUtils = httpClientInstanceUtils;
         this.processor = null;
@@ -168,7 +167,7 @@ public class InspectionsCommunicatorImpl implements InspectionsCommunicator, Ser
             stop();
             return new byte[0];
         }
-        HttpClient httpClient = new DefaultHttpClient(httpConnectionManager, null);
+        HttpClient httpClient = httpClientProvider.get();
         HttpResponse response = httpClient.execute(request);
         int statusCode = response.getStatusLine().getStatusCode();
         HttpEntity entity = response.getEntity();

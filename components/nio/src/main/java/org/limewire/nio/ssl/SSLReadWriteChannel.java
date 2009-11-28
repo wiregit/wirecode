@@ -152,7 +152,9 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             } else {
                 engine = context.createSSLEngine();
             }
-            engine.setEnabledCipherSuites(cipherSuites);
+            if(cipherSuites != null) {
+                engine.setEnabledCipherSuites(cipherSuites);
+            }
             engine.setUseClientMode(clientMode);
             if(!clientMode) {
                 engine.setWantClientAuth(needClientAuth);

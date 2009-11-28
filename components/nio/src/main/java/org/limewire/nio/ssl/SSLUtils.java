@@ -40,6 +40,21 @@ public class SSLUtils {
                 }
         }        
     };
+    private static final Provider<SSLContext> SSL_CONTEXT = new AbstractLazySingletonProvider<SSLContext>() {
+        @Override
+        protected SSLContext createObject() {
+                try {
+                    SSLContext context = SSLContext.getInstance("SSL");
+                    context.init(null, null, null);
+                    // TODO: Set the SSLSessionContext cache size, or timeout?
+                    return context;
+                } catch (NoSuchAlgorithmException e) {
+                    throw new IllegalStateException(e);
+                } catch (KeyManagementException e) {
+                    throw new IllegalStateException(e);
+                }
+        }        
+    };
     
     /** Returns the TLS cipher suites this generally supports. */
     public static String[] getTLSCipherSuites() {
@@ -49,6 +64,11 @@ public class SSLUtils {
     /** Returns the shared Executor for processing tasks from the SSLEngine. */
     public static Executor getExecutor() {
         return TLS_PROCESSOR;
+    }
+    
+    /** Returns the shared SSL context. */
+    public static SSLContext getSSLContext() {
+        return SSL_CONTEXT.get();
     }
     
     /** Returns the shared TLS context. */
@@ -74,7 +94,7 @@ public class SSLUtils {
      * <p>
      * This currently only works for creating server-side TLS sockets.
      * <p>
-     * You must ensure that <code>isTLSCapable</code> returns true for the socket,
+     * You must ensure that <code>isStartTLSCapable</code> returns true for the socket,
      * otherwise an <code>IllegalArgumentException</code> is thrown.
      */ 
     public static TLSNIOSocket startTLS(Socket socket, ByteBuffer data) throws IOException {

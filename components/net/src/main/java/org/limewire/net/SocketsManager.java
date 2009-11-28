@@ -14,6 +14,7 @@ import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.NIOSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.nio.ssl.SSLSocketFactory;
 import org.limewire.nio.ssl.TLSSocketFactory;
 
 /** Factory for creating Sockets. */
@@ -21,7 +22,7 @@ public interface SocketsManager extends ListenerSupport<ConnectivityChangeEvent>
     
     /** The different ways a connection can be attempted. */
     public static enum ConnectType {    
-        PLAIN(new NIOSocketFactory()), TLS(new TLSSocketFactory());
+        PLAIN(new NIOSocketFactory()), TLS(new TLSSocketFactory()), SSL(new SSLSocketFactory());
         
         private final NBSocketFactory factory;
         
