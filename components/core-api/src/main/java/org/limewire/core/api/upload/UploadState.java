@@ -23,7 +23,7 @@ public enum UploadState {
     /**
      * Upload was stopped due to a file error.
      */
-    FILE_ERROR(false, true), 
+    REQUEST_ERROR(false, true), 
     
     /**
      * Upload was stopped because a limit was reached.
