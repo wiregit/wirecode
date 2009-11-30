@@ -224,7 +224,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void resume() {
-        if (player != null) {
+        if (player != null && player.getState() != Controller.Started) {
             player.start();
         }
     }
