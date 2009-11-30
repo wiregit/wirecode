@@ -163,7 +163,7 @@ public class TextFieldClipboardControl {
         CUT_ACTION.setEnabled(textField.isEnabled() && textField.isEditable() && stuffSelected);
         COPY_ACTION.setEnabled(textField.isEnabled() && stuffSelected);
         PASTE_ACTION.setEnabled(textField.isEnabled() && textField.isEditable() && isPasteAvailable(textField));
-        DELETE_ACTION.setEnabled(textField.isEnabled() && stuffSelected);
+        DELETE_ACTION.setEnabled(textField.isEnabled() && textField.isEditable() && stuffSelected);
         SELECT_ALL_ACTION.setEnabled(textField.isEnabled() && !allSelected);
     }
     

@@ -36,6 +36,7 @@ import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.BitziLookupAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -233,6 +234,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
    
     private JTextField createLabelField(String text) {
         JTextField field = new JTextField(text);
+        TextFieldClipboardControl.install(field);
         field.setCaretPosition(0);
         field.setEditable(false);
         field.setOpaque(false);
@@ -308,7 +310,6 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         public void actionPerformed(ActionEvent e) {
             if(!menu.isVisible()) {
                 setText();
-
                 menu.show(component, nameLabel.getLocation().x-3, nameLabel.getLocation().y-3);
                 textField.requestFocusInWindow();
                 textField.selectAll();

@@ -15,6 +15,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
@@ -44,6 +45,9 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
         
         filterTable = new FilterTable(new DefaultEventTableModel<String>(eventList, new FilterTableFormat(I18n.tr("Keyword"))));
         okButton = new JButton(new OKDialogAction());
+        
+        TextFieldClipboardControl.install(keywordTextField);
+        
         addKeywordButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {

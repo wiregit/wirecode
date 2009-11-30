@@ -195,8 +195,8 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                     } else {
                         finishedSuccessfully = true;
                         if (numPieces > 0) {
-                            for ( int i=0 ; i<grid.getCells() ; i++ ) {
-                                grid.setPaint(i, downloadedForeground);
+                            for ( int i=0 ; i<grid.getCellCount() ; i++ ) {
+                                grid.setCellFillPaint(i, downloadedForeground);
                             }
                         } else {
                             statusLabel.setText(I18n.tr("Download Already Finished!"));
@@ -343,7 +343,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
             cachedRows = grid.getRows();
             cachedColumns = grid.getColumns();
             
-            int cellsAvailable = grid.getCells();
+            int cellsAvailable = grid.getCellCount();
             coalesceFactor = (int)Math.ceil((double)numPieces / cellsAvailable);
             piecesPerCellLabel.setText(""+coalesceFactor);
         }
@@ -383,7 +383,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                     throw new IllegalStateException(cumulativeState.toString());
             }
             
-            grid.setPaint(gridSlot++, pieceForeground);
+            grid.setCellFillPaint(gridSlot++, pieceForeground);
         }
     }
     

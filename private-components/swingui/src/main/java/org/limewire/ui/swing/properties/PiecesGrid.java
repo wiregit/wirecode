@@ -5,6 +5,8 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
@@ -20,6 +22,7 @@ public class PiecesGrid extends JXPanel {
     private int rows = -1;
     private int columns = -1;
     private Paint[] gridFillPaint = null;
+    private final Map<Integer,Paint> borderPaintMap = new HashMap<Integer,Paint>();
     
     public PiecesGrid() {
         init();
@@ -67,7 +70,20 @@ public class PiecesGrid extends JXPanel {
     void resizeGrid(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
-        this.gridFillPaint = new Paint[rows*columns];
+        gridFillPaint = new Paint[rows*columns];
+    }
+    
+    public void clear() {
+        clearFillPaints();
+        clearBorderPaints();
+    }
+    
+    public void clearFillPaints() {
+        gridFillPaint = new Paint[rows*columns];
+    }
+    
+    public void clearBorderPaints() {
+        borderPaintMap.clear();
     }
     
     boolean hasGrid() {
@@ -82,16 +98,24 @@ public class PiecesGrid extends JXPanel {
         return columns;
     }
     
-    public int getCells() {
+    public int getCellCount() {
         return gridFillPaint.length;
     }
     
-    public void setPaint(int cell, Paint paint) {
+    public void setCellFillPaint(int cell, Paint paint) {
         gridFillPaint[cell] = paint;
     }
     
-    public Paint getPaint(int cell) {
+    public void setCellBorderPaint(int cell, Paint paint) {
+        borderPaintMap.put(cell, paint);
+    }
+    
+    public Paint getCellFillPaint(int cell) {
         return gridFillPaint[cell];
+    }
+    
+    public Paint getCellBorderPaint(int cell) {
+        return borderPaintMap.get(cell);
     }
     
     @Override
@@ -170,8 +194,8 @@ public class PiecesGrid extends JXPanel {
             }
             
             int cellRow = 0;
-            for ( int i=0 ; i<grid.getCells() ; i++ ) {
-                Paint cellPaint = grid.getPaint(i);
+            for ( int i=0 ; i<grid.getCellCount() ; i++ ) {
+                Paint cellPaint = grid.getCellFillPaint(i);
                 int cellColumn = i % columns;
                 if (i != 0 && i % columns == 0) {
                     cellRow++;
@@ -182,6 +206,17 @@ public class PiecesGrid extends JXPanel {
                 g.fillRect(cellColumn*cellWidth+1+alignOffsetX,
                         cellRow*cellHeight+1+alignOffsetY,
                         cellWidth, cellHeight);
+                
+                
+                Paint borderPaint = grid.getCellBorderPaint(i);
+                
+                if (borderPaint != null) {
+                    g.setPaint(borderPaint);
+                
+                    g.drawRect(cellColumn*cellWidth+1+alignOffsetX,
+                        cellRow*cellHeight+1+alignOffsetY,
+                        cellWidth-2, cellHeight-2);
+                }
                 
                 g.setPaint(Color.BLACK);
             }

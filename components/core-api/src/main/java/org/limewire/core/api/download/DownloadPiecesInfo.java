@@ -30,9 +30,22 @@ public interface DownloadPiecesInfo {
         ACTIVE, 
         
         /**
-         * Additional data for the piece is currently not available with the given peer set.
+         * The piece is set to be downloaded next and no progress has been made yet.
+         * 
+         * <p>NOTE:Currently does not happen often in BT and unimplemented in Gnutella
+         *          Will consider removal. 
          */
-        UNAVAILABLE;
+        QUEUED,
+        
+        /**
+         * Data for the piece is currently not available with the given peer set.
+         */
+        UNAVAILABLE,
+        
+        /**
+         * Download has started on the piece but there is no additional data available. 
+         */
+        UNAVAILABLE_PARTIAL;
     }
   
     /**

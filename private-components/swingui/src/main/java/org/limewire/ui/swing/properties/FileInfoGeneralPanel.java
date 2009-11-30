@@ -49,6 +49,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
@@ -378,6 +379,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     
     private JTextField createEditableTextField(String text, FilePropertyKey key) {
         JTextField field = new JTextField(text);
+        TextFieldClipboardControl.install(field);
         field.setCaretPosition(0);
         if(type != FileInfoType.LOCAL_FILE)
             field.setEditable(false);
@@ -390,6 +392,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     
     private JTextArea createEditableTextArea(String text, FilePropertyKey key) {
         JTextArea area = new JTextArea(text);
+        TextFieldClipboardControl.install(area);
         if(type != FileInfoType.LOCAL_FILE) {
             area.setEditable(false);
             area.setBackground(UIManager.getLookAndFeel().getDefaults().getColor("TextField.disabledBackground"));
@@ -494,6 +497,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     
     private JTextField createLabelField(String text) {
         JTextField field = new JTextField(text);
+        TextFieldClipboardControl.install(field);
         field.setCaretPosition(0);
         field.setEditable(false);
         field.setOpaque(false);

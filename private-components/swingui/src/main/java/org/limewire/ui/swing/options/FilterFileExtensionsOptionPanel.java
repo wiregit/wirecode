@@ -28,6 +28,7 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.Setting;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -74,6 +75,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
         keywordTextField = new JTextField(30);
         addKeywordButton = new JButton(I18n.tr("Add Extension"));
         
+        TextFieldClipboardControl.install(keywordTextField);
      
         CompositeList<String> allExtensions = new CompositeList<String>(eventList.getPublisher(),
                 eventList.getReadWriteLock());

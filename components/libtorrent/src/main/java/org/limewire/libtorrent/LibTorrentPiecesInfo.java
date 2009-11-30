@@ -13,8 +13,9 @@ class LibTorrentPiecesInfo implements TorrentPiecesInfo {
     private static final char PIECE_PARTIAL = 'p';
     private static final char PIECE_PENDING = '0';
     private static final char PIECE_ACTIVE = 'a';
-    private static final char PIECE_UNAVAILABLE = 'u';
+    private static final char PIECE_UNAVAILABLE = 'U';
     private static final char PIECE_QUEUED = 'q';
+    private static final char PIECE_UNAVAILABLE_PARTIAL = 'u';
     
     private final String stateInfo;
     private final int numPiecesCompleted;
@@ -23,11 +24,9 @@ class LibTorrentPiecesInfo implements TorrentPiecesInfo {
      * Generates a working instance of {@link TorrentPiecesInfo} from a 
      *  {@link LibTorrentPiecesInfoContainer} returned from libtorrent through
      *  JNA.
-     *       
-     * <p> NOTE: Copies the payload from the original container so it may safely be disposed of.  
      */
     LibTorrentPiecesInfo(LibTorrentPiecesInfoContainer piecesInfoContainer) {
-        stateInfo = new String(piecesInfoContainer.getStateInfo());
+        stateInfo = piecesInfoContainer.getStateInfo();
         numPiecesCompleted = piecesInfoContainer.getNumPiecesCompleted();
     }
     
@@ -53,11 +52,12 @@ class LibTorrentPiecesInfo implements TorrentPiecesInfo {
             case PIECE_PARTIAL :
                 return TorrentPieceState.PARTIAL;
             case PIECE_PENDING :
+            case PIECE_QUEUED :
                 return TorrentPieceState.AVAILABLE;
             case PIECE_ACTIVE :
-            case PIECE_QUEUED :
                 return TorrentPieceState.ACTIVE;
             case PIECE_UNAVAILABLE :
+            case PIECE_UNAVAILABLE_PARTIAL :
                 return TorrentPieceState.UNAVAILABLE;
             default :
                 throw new IllegalArgumentException("Unknown Piece Descriptor: " + c);
