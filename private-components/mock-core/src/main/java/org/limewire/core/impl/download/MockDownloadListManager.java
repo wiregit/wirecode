@@ -101,7 +101,7 @@ public class MockDownloadListManager implements DownloadListManager {
         addDownload(item);
 
 		item = new MockDownloadItem("Psychology 101 Lecture 2.avi", 55,
-				DownloadState.LOCAL_QUEUED, Category.VIDEO);
+				DownloadState.SCAN_FAILED, Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("34.2.7.7"));
 		addDownload(item);
 
@@ -192,7 +192,11 @@ public class MockDownloadListManager implements DownloadListManager {
         threadSafeDownloadItems.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : threadSafeDownloadItems) {
-                if (item.getState() == DownloadState.DONE) {
+                DownloadState state = item.getState();
+                if (state == DownloadState.DONE ||
+                        state == DownloadState.DANGEROUS ||
+                        state == DownloadState.THREAT_FOUND ||
+                        state == DownloadState.SCAN_FAILED) {
                     finishedItems.add(item);
                 }
             }

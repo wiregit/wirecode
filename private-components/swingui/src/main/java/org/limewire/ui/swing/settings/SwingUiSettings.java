@@ -345,4 +345,8 @@ public final class SwingUiSettings extends LimeProps {
      */
     public static final BooleanSetting SHOW_STORE_COMPONENTS = 
         FACTORY.createBooleanSetting("SHOW_STORE_COMPONENTS", false);
+    
+    /** Notify user immediately when threat found in downloaded file. */
+    public static final BooleanSetting WARN_DOWNLOAD_THREAT_FOUND = 
+        FACTORY.createBooleanSetting("WARN_DOWNLOAD_THREAT_FOUND", true);
 }

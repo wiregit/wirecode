@@ -26,9 +26,9 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 
@@ -53,6 +53,7 @@ public class AVInfoPanel extends JPanel {
     private HTMLLabel messageLabel;
     
     private JButton okButton;
+    private JCheckBox doNotShowCheckBox;
     private JLabel vendorLabel;
     
     /**
@@ -71,6 +72,11 @@ public class AVInfoPanel extends JPanel {
         
         okButton = new JButton();
         okButton.setAction(new CloseAction());
+        
+        doNotShowCheckBox = new JCheckBox();
+        doNotShowCheckBox.setFont(doNotShowFont);
+        doNotShowCheckBox.setForeground(doNotShowForeground);
+        doNotShowCheckBox.setText(I18n.tr("Do not show message again"));
         
         vendorLabel = new JLabel(vendorIcon);
     }
@@ -91,6 +97,9 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setText(message);
         messageLabel.setPreferredSize(new Dimension(300, messageLabel.getPreferredSize().height));
         
+        // Hide checkbox option.
+        doNotShowCheckBox.setVisible(false);
+        
         // Add components to container.
         add(headingLabel, "span, align left, wrap");
         add(messageLabel, "span, align left, wrap 15");
@@ -104,30 +113,47 @@ public class AVInfoPanel extends JPanel {
     /**
      * Displays the threat detected message.
      */
-    public void showThreatMessage(DownloadItem item, boolean autoMode) {
-        // TODO if autoMode and "skip" setting is true, then return without showing 
+    public void showThreatMessage(DownloadItem item, boolean autoNotify) {
+        String heading = I18n.tr("Threat Detected");
+        String message = I18n.tr("{0} is suspected to contain a virus or spyware and has automatically been deleted for your protection.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
+        showWarningMessage(heading, message, autoNotify);
+    }
+    
+    /**
+     * Displays the failure message.  This is for files that could not be 
+     * scanned due to a problem with the virus scanner.
+     */
+    public void showFailureMessage(DownloadItem item, boolean autoNotify) {
+        String heading = I18n.tr("Scan Failed");
+        String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
+        showWarningMessage(heading, message, autoNotify);
+    }
+    
+    /**
+     * Displays a warning message with the specified heading and message text.
+     */
+    private void showWarningMessage(String heading, String message, boolean autoNotify) {
+        // Skip if message is automatic and setting is false.
+        if (autoNotify && !SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND.getValue()) {
+            return;
+        }
         
         setLayout(new MigLayout("insets 25 15 15 15, gap 0 0, hidemode 3"));
         
+        JLabel iconLabel = new JLabel(threatIcon);
+        
         headingLabel.setFont(threatHeadingFont);
         headingLabel.setForeground(threatHeadingForeground);
-        headingLabel.setText(I18n.tr("Threat Detected"));
+        headingLabel.setText(heading);
         
         // Set message text.  We also set the preferred size to control the
         // message and dialog width.
-        String message = I18n.tr("{0} is suspected to contain a virus or spyware and has automatically been deleted for your protection.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
         messageLabel.setText(message);
         messageLabel.setPreferredSize(new Dimension(330, messageLabel.getPreferredSize().height));
         
-        JLabel iconLabel = new JLabel(threatIcon);
-        
-        JCheckBox doNotShowCheckBox = new JCheckBox();
-        doNotShowCheckBox.setFont(doNotShowFont);
-        doNotShowCheckBox.setForeground(doNotShowForeground);
-        doNotShowCheckBox.setText(I18n.tr("Do not show message again"));
-        doNotShowCheckBox.setVisible(autoMode);
-        // TODO add setting for checkbox 
+        // Set up checkbox option.
         doNotShowCheckBox.setSelected(true);
+        doNotShowCheckBox.setVisible(autoNotify);
         
         // Add components to container.
         add(iconLabel, "spany, alignx left, aligny top, gapright 15");
@@ -139,13 +165,6 @@ public class AVInfoPanel extends JPanel {
         
         // Display as modal dialog.
         showDialog(I18n.tr("Warning"));
-    }
-    
-    /**
-     * Displays the failure message.
-     */
-    public void showFailureMessage(DownloadItem item) {
-        throw new NotImplementedException("Show failure message");
     }
     
     /**
@@ -188,6 +207,12 @@ public class AVInfoPanel extends JPanel {
      * Closes the window containing this panel.
      */
     private void disposeWindow() {
+        // Apply "do not show" option if visible.
+        if (doNotShowCheckBox.isVisible()) {
+            SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND.setValue(!doNotShowCheckBox.isSelected());
+        }
+        
+        // Dispose of parent window.
         Container ancestor = getTopLevelAncestor();
         if (ancestor instanceof Window) {
             ((Window) ancestor).dispose();

@@ -224,7 +224,7 @@ public class DownloadActionHandler {
                 break;
                 
             case SCAN_FAILED:
-                avInfoPanelFactory.get().showFailureMessage(item);
+                avInfoPanelFactory.get().showFailureMessage(item, false);
             }
             break;
         }

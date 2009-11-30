@@ -43,4 +43,11 @@ public enum DownloadState {
 	public boolean isResumable() {
 		return resumable;
 	}
+	
+	/**
+	 * Returns true if the specified state represents a finished state.
+	 */
+	public static boolean isFinished(DownloadState state) {
+	    return (state == DONE || state == DANGEROUS || state == THREAT_FOUND || state == SCAN_FAILED);
+	}
 }

@@ -89,6 +89,10 @@ public class DownloadTableMenu extends JPopupMenu{
             addSeparator();
             add(createPropertiesMenuItem());
             
+        } else if (state == DownloadState.DANGEROUS || 
+                state == DownloadState.THREAT_FOUND) {
+            add(createRemoveMenuItem());
+            
         } else {
             //not DONE
             if(isResumable(state)){
