@@ -860,7 +860,7 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
 	            // this is purposely NOT a BufferedInputStream because we
 	            // read it in the chunks that we want to.
 	            fis = new FileInputStream(file);
-	            long skipped = fis.skip(offset);
+	            long skipped = IOUtils.ensureSkip(fis, offset);
 	            assert(skipped == offset);
 	            while(read != -1 && progress.get() < length) {
 	                if(length - progress.get() > buffer.length) {
