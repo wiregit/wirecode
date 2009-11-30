@@ -66,7 +66,7 @@ public final class SaveDirectoryHandler {
      *  any problems
      */
     private static File showChooser() { 
-        File dir = FileChooser.getInputDirectory(null);
+        File dir = FileChooser.getInputDirectory(GuiUtils.getMainFrame());
         if(dir != null) {
             try {
                 // updates Incomplete directory etc... 

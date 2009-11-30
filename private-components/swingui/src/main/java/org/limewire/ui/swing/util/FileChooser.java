@@ -65,16 +65,7 @@ public final class FileChooser {
                 I18nMarker.marktr("Select"),
                 null,
                 null);
-    }
-    
-    public static File getInputDirectory(Component parent, FileFilter filter) {
-        return getInputDirectory(parent, 
-                I18nMarker.marktr("Select Folder"), 
-                I18nMarker.marktr("Select"),
-                null,
-                filter);
-    }
-    
+    }   
 
     /**
      * Same as <tt>getInputFile</tt> that takes no arguments, except this
@@ -223,7 +214,8 @@ public final class FileChooser {
                     // attempt to get the folder using the native widget, if jna fails,
                     // fallback to the Swing FileChooser
                     try {
-                        WindowsFolderChooser folder = new WindowsFolderChooser(parent, titleKey, false, true, directory.getAbsolutePath());
+                        String oldPath = directory == null ? null : directory.getAbsolutePath();
+                        WindowsFolderChooser folder = new WindowsFolderChooser(parent, titleKey, false, true, oldPath);
                         String path = folder.showWidget();
                         if(path != null && path.length() > 0) {
                             File file = new File(path);
