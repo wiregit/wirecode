@@ -15,6 +15,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.FileProcessingEvent.Type;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -86,12 +87,13 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
             @SwingEDTEvent
             public void handleEvent(final FileProcessingEvent event) {
                 switch (event.getType()) {
+                case QUEUED:
                 case PROCESSING:
                     processingLine.setText(event.getSource().getName());
                     processingLine.setIcon(iconManager.getIconForExtension(FileUtils.getFileExtension(event.getSource().getName())));
-                    stopButton.setVisible(true);
                     break;
                 }
+                stopButton.setVisible(event.getType() == Type.PROCESSING);
             }
         };
         
