@@ -21,7 +21,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
-import javax.swing.JToggleButton.ToggleButtonModel;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
@@ -137,10 +136,14 @@ class VideoPanel implements Disposable{
         HeaderBarDecorator headerBarDecorator, ButtonPainterFactory buttonPainterFactory) { 
         
         final JXButton fullScreenButton = new JXButton(fullScreenUnselected);
+        fullScreenButton.setContentAreaFilled(false);
+        fullScreenButton.setFocusPainted(false);
         fullScreenButton.setBackgroundPainter(buttonPainterFactory.createDarkFullButtonBackgroundPainter(DrawMode.FULLY_ROUNDED, AccentType.SHADOW));
         fullScreenButton.addActionListener(new FullScreenListener());
        
         final JXButton closeButton = new JXButton(close);
+        closeButton.setContentAreaFilled(false);
+        closeButton.setFocusPainted(false);
         closeButton.setBackgroundPainter(buttonPainterFactory.createDarkFullButtonBackgroundPainter(DrawMode.FULLY_ROUNDED, AccentType.SHADOW));
         closeButton.addActionListener(new CloseAction());
 
