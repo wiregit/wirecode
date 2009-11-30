@@ -21,7 +21,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -39,8 +38,7 @@ class FileProcessingPanel extends JXButton {
     private FileProcessingPopupPanel popup;
 
     @Inject
-    FileProcessingPanel(final Provider<FileProcessingPopupPanel> popupProvider, 
-            ButtonDecorator decorator) {
+    FileProcessingPanel(ButtonDecorator decorator) {
 
         GuiUtils.assignResources(this);
         
@@ -53,36 +51,15 @@ class FileProcessingPanel extends JXButton {
                 return popup != null ? popup.isVisible() : false;
             }
         }, activeBackground, activeBorder, DrawMode.NORMAL);
-        
-        addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (popup == null) {
-                    popup = popupProvider.get();
-                    popup.addComponentListener(new ComponentAdapter() {
-                        @Override
-                        public void componentHidden(ComponentEvent e) {
-                            closePopup();
-                        }
-                    });
-                }
-                else {
-                    closePopup();
-                }
-            }
-        });
-        
-        setVisible(false);
-    }
-
-    private void closePopup() {
-        setVisible(total != 0);
-        popup.dispose();
-        popup = null;
     }
     
     @Inject
-    void register(LibraryManager libraryManager) {
+    void registerListeners(LibraryManager libraryManager, final FileProcessingPopupPanel popup) {
+        
+        this.popup = popup;
+        popup.setVisible(false);
+        setVisible(false);
+        
         libraryManager.getLibraryManagedList().addFileProcessingListener(new EventListener<FileProcessingEvent>() {
             @Override
             @SwingEDTEvent
@@ -103,11 +80,29 @@ class FileProcessingPanel extends JXButton {
                 }
             }
         });
+        
+        addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                popup.setVisible(true);
+            }
+        });
+        
+        popup.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                closePopup();
+            }
+        });
     }
 
+    private void closePopup() {
+        setVisible(total != 0);
+    }
+    
     private void update() {
         if (total == 0) {
-            if (popup != null) {
+            if (popup.isVisible()) {
                 setText(I18n.tr("Done"));
                 popup.notifyDone();
             }
