@@ -316,12 +316,12 @@ public class CoreDownloadListManager implements DownloadListManager {
             // error states
             if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
                 remove(item);
-            } else if (state == DownloadState.DONE && SharingSettings.CLEAR_DOWNLOAD.getValue()) {
-                    remove(item);
             } else if (state != DownloadState.ERROR &&
-                    state != DownloadState.DANGEROUS &&
-                    state != DownloadState.THREAT_FOUND &&
-                    state != DownloadState.SCAN_FAILED) {
+                    (SharingSettings.CLEAR_DOWNLOAD.getValue() ||
+                            state != DownloadState.DONE &&
+                            state != DownloadState.DANGEROUS &&
+                            state != DownloadState.THREAT_FOUND &&
+                            state != DownloadState.SCAN_FAILED)) {
                 remove(item);
             }
         }
