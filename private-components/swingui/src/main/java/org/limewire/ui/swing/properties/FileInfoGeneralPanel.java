@@ -162,7 +162,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         URN urn = propertiableFile.getUrn();
         if (urn != null) {
             component.add(createHeaderLabel(I18n.tr("Hash")), "wrap");
-            component.add(createLabelField(propertiableFile.getUrn().toString()), "span, wrap");
+            component.add(createLabelField(propertiableFile.getUrn().toString()), "growx, span, wrap");
         }
     }
 

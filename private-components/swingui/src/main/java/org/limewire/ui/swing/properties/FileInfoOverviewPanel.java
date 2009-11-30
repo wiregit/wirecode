@@ -188,7 +188,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         if (title != null) {
             JTextField fileNameField = createLabelField(propertiableFile.getFileName());
             fileNameField.setFont(headerFont2);
-            component.add(fileNameField, "gapbefore 4, wrap");
+            component.add(fileNameField, "gapbefore 4, growx, wrap");
         }
         
         String info = "";
@@ -228,7 +228,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         }
         
         if (!("".equals(info))) {
-            component.add(createLabelField(info), "gapbefore 4, wrap");
+            component.add(createLabelField(info), "gapbefore 4, growx, wrap");
         }
     }
    
