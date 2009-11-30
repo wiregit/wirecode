@@ -529,8 +529,8 @@ public class UploadMediator {
             if (item == null) return false;
             
             UploadState state = item.getState();
-            boolean match = state.isFinished() || state.isError();
-            return inclusive ? match : !match;
+            boolean isActive = (state == UploadState.QUEUED || state == UploadState.UPLOADING);
+            return inclusive ? !isActive : isActive;
         }
     }
     
