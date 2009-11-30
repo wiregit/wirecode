@@ -185,6 +185,7 @@ public class FileInfoDialog extends LimeJDialog {
     
     @Override
     public void dispose() {
+        overviewPanel.dispose();
         //unregister any listeners used and dispose of dialog when made invisible
         for(FileInfoPanel panel : cards.values()) {
             panel.dispose();
@@ -250,6 +251,8 @@ public class FileInfoDialog extends LimeJDialog {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            overviewPanel.save();
+            
             for(FileInfoPanel panel : cards.values()) {
                 panel.save();
             }

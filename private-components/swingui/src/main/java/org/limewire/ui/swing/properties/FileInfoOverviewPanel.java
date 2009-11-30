@@ -6,8 +6,10 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 
 import javax.swing.BorderFactory;
@@ -16,10 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
@@ -70,7 +69,9 @@ class FileInfoOverviewPanel implements FileInfoPanel {
     private final RenameAction renameAction;
     
     private final JXPanel component;
+    private JButton renameButton;
     private JTextField nameLabel;
+    private JTextField renameTextField;
     
     public FileInfoOverviewPanel(FileInfoType type, PropertiableFile propertiableFile, 
             Provider<IconManager> iconManager, MagnetLinkFactory magnetLinkFactory, 
@@ -103,7 +104,10 @@ class FileInfoOverviewPanel implements FileInfoPanel {
 
     @Override
     public void save() {
-        //component never changes state
+        // if file is currently being renamed, attempt to save the changes
+        // before exiting
+        if(renameTextField != null && renameTextField.isVisible())
+            saveFileName();
     }
     
     @Override
@@ -151,7 +155,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         moreFileInfo.setFont(smallFont);
       
         if(type == FileInfoType.LOCAL_FILE && propertiableFile instanceof LocalFileItem) {
-            JButton renameButton = new HyperlinkButton(renameAction);
+            renameButton = new HyperlinkButton(renameAction);
             renameButton.setFont(smallFont);
             component.add(renameButton, "cell 1 1, alignx right");
             
@@ -184,7 +188,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
         nameLabel.setFont(headerFont);
         nameLabel.setPreferredSize(new Dimension(440, 26));
         component.add(nameLabel, "growx, span, wrap");
-        
+                
         if (title != null) {
             JTextField fileNameField = createLabelField(propertiableFile.getFileName());
             fileNameField.setFont(headerFont2);
@@ -259,117 +263,144 @@ class FileInfoOverviewPanel implements FileInfoPanel {
     }
     
     /**
+     * Creates a textfield used exclusively while renaming the file.
+     */
+    private void createRenameTextField() {
+        renameTextField = new JTextField();
+        renameTextField.setFont(headerFont);
+        renameTextField.setForeground(foreground);
+        renameTextField.setVisible(false);
+
+        TextFieldClipboardControl.install(renameTextField);
+        
+        // close when enter key is typed
+        renameTextField.addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if(e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    enableRenameMode(false);
+                }
+            }
+        });
+        
+        // close when mouse is clicked somewhere else
+        component.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                enableRenameMode(false);
+            }            
+        });
+
+        component.add(renameTextField, "hidemode 3, pos " + (nameLabel.getLocation().x-3) + " " + (nameLabel.getLocation().y-3));
+        component.revalidate();
+    }
+       
+    /**
+     * Updates components and saves states depending on whether 
+     * rename mode is activated or deactivated.
+     */
+    private void enableRenameMode(boolean enable) {
+        if(enable) {
+            setRenameText();
+            setRenameEnabled(true);        
+            renameTextField.requestFocusInWindow();
+            renameTextField.selectAll();
+        } else {
+            saveFileName();
+            setRenameEnabled(false);
+            component.repaint();
+        }
+    }
+    
+    /**
+     * Updates the text of the editable renameTextField. Once the text is updated,
+     * the editable textfield is made visible, allowing the user to change the 
+     * filename.
+     */
+    private void setRenameText() {
+        if(propertiableFile instanceof LocalFileItem) {
+            int maxFileLength = getMaxFileSize(((LocalFileItem)propertiableFile).getFile());
+            renameTextField.setDocument(new FileNameDocument(maxFileLength));
+        }
+        String fileName = FileUtils.getFilenameNoExtension(nameLabel.getText());
+        renameTextField.setText(fileName);
+        ResizeUtils.forceWidth(renameTextField, nameLabel.getWidth());
+    }
+    
+    
+    /**
+     * Updates components that change when in edit mode.
+     * 
+     * @isRenaming is true when the mode will be switched to
+     * edit mode, false when mode is switched out of edit mode.
+     */
+    private void setRenameEnabled(boolean isRenaming) {
+        renameTextField.setVisible(isRenaming);
+        nameLabel.setVisible(!isRenaming);
+        renameButton.setEnabled(!isRenaming);
+    }
+    
+    /**
+     * Attempts to save the filename changes to disk.
+     */
+    private void saveFileName() {
+        String newFileName = renameTextField.getText().trim();
+        LocalFileItem oldFileItem = (LocalFileItem) propertiableFile;
+        // check the new file name is valid
+        if(!isValidFileName(newFileName)) {
+            renameTextField.setText(oldFileItem.getName());
+            return;
+        }
+      
+        // check if the name hasn't changed, just return
+        if(newFileName.equals(oldFileItem.getName())) {
+            return;
+        }
+
+        File oldFile = oldFileItem.getFile();
+      
+        newFileName = newFileName + "." + FileUtils.getFileExtension(oldFile);
+        File newFile = new File(oldFile.getParentFile(), newFileName);
+      
+        // try performing the file rename, if something goes wrong, revert textfield.
+        if(FileUtils.forceRename(oldFile, newFile)) {
+            updateFileNameInLibrary(oldFile, newFile);
+        } else {
+            newFile.delete();
+            renameTextField.setText(oldFileItem.getName());
+        }
+    }
+    
+    /**
+     * Notifies the library that the fileName has been changed.
+     */
+    private void updateFileNameInLibrary(File oldFile, File newFile) {
+        libraryManager.getLibraryManagedList().fileRenamed(oldFile, newFile);
+    }
+    
+    /**
+     * Returns true if the text is a valid file name.
+     */
+    private boolean isValidFileName(String fileName) {
+        return fileName != null && fileName.length() > 0 && CommonUtils.santizeString(fileName).equals(fileName);
+    }
+    
+    /**
      * Handles renaming of the file name. This is handled using
      * a popup menu to get the support of loosing focus and
      * properlly disappearing.
      */
     private class RenameAction extends AbstractAction {
-
-        private final JTextField textField;
-        private final JPopupMenu menu;
-        
         public RenameAction() {
             super(I18n.tr("rename file"));
-            
-            textField = new JTextField();
-            textField.setFont(headerFont);
-            textField.setForeground(foreground);
-            textField.addKeyListener(new KeyListener(){
-                @Override
-                public void keyPressed(KeyEvent e) {}
-                @Override
-                public void keyReleased(KeyEvent e) {}
-
-                @Override
-                public void keyTyped(KeyEvent e) {
-                    if(e.getKeyChar() == KeyEvent.VK_ENTER) {
-                        menu.setVisible(false);
-                    }
-                }
-            });
-
-            menu = new JPopupMenu();
-            menu.add(textField);
-            menu.addPopupMenuListener(new PopupMenuListener(){
-                @Override
-                public void popupMenuCanceled(PopupMenuEvent e) {
-                    saveFileName();
-                }
-
-                @Override
-                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                    saveFileName();
-                }
-
-                @Override
-                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
-            });
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(!menu.isVisible()) {
-                setText();
-                menu.show(component, nameLabel.getLocation().x-3, nameLabel.getLocation().y-3);
-                textField.requestFocusInWindow();
-                textField.selectAll();
-            }
+            if(renameTextField == null)
+                createRenameTextField();
+            enableRenameMode(true);
         }
-        
-        private void setText() {
-            if(propertiableFile instanceof LocalFileItem) {
-                int maxFileLength = getMaxFileSize(((LocalFileItem)propertiableFile).getFile());
-                textField.setDocument(new FileNameDocument(maxFileLength));
-            }
-            String fileName = FileUtils.getFilenameNoExtension(nameLabel.getText());
-            textField.setText(fileName);
-            textField.setFont(headerFont);
-            textField.setForeground(foreground);
-            ResizeUtils.forceWidth(textField, nameLabel.getWidth());
-        }
-        
-        private void saveFileName() {
-            String newFileName = textField.getText().trim();
-            LocalFileItem oldFileItem = (LocalFileItem) propertiableFile;
-            // check the new file name is valid
-            if(!isValidFileName(newFileName)) {
-                textField.setText(oldFileItem.getName());
-                return;
-            }
-            
-            // check if the name hasn't changed, just return
-            if(newFileName.equals(oldFileItem.getName())) {
-                return;
-            }
-
-            File oldFile = oldFileItem.getFile();
-            
-            newFileName = newFileName + "." + FileUtils.getFileExtension(oldFile);
-            File newFile = new File(oldFile.getParentFile(), newFileName);
-            
-            // try performing the file rename, if something goes wrong, revert textfield.
-            if(FileUtils.forceRename(oldFile, newFile)) {
-                updateFileNameInLibrary(oldFile, newFile);
-            } else {
-            	newFile.delete();
-                textField.setText(oldFileItem.getName());
-            }
-        }
-        
-        /**
-         * Notifies the library that the fileName has been changed.
-         */
-        private void updateFileNameInLibrary(File oldFile, File newFile) {
-            libraryManager.getLibraryManagedList().fileRenamed(oldFile, newFile);
-        }
-        
-        /**
-         * Returns true if the text is a valid file name.
-         */
-        private boolean isValidFileName(String fileName) {
-            return fileName != null && fileName.length() > 0 && CommonUtils.santizeString(fileName).equals(fileName);
-        }
-        
     }
     
     /**
