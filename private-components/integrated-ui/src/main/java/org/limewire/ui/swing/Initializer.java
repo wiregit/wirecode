@@ -20,6 +20,7 @@ import javax.swing.plaf.basic.BasicHTML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
+import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -150,7 +151,7 @@ final class Initializer {
 //        showAlphaInfo();
         
         //must agree not to use LW for copyright infringement on first running
-        confirmIntent(awtSplash);
+        confirmIntent(awtSplash, injector);
         
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
@@ -215,7 +216,7 @@ final class Initializer {
      *   the intent dialogue needs to be shown to avoid a troublesome situation
      *   where the splash screen actually covers the shown intent dialogue. 
      */
-    private void confirmIntent(final Frame awtSplash) {
+    private void confirmIntent(final Frame awtSplash, final Injector injector) {
         File versionFile = new File(CommonUtils.getUserSettingsDir(), "versions.props");
         Properties properties = new Properties();        
         FileInputStream inputStream = null;
@@ -239,7 +240,8 @@ final class Initializer {
                     }
                     //must warn users about sharing documents again after an upgrade
                     SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(true);
-                    boolean confirmed = new IntentDialog(LimeWireUtils.getLimeWireVersion()).confirmLegal();
+                    VirusEngine virusEngine = injector.getInstance(VirusEngine.class);
+                    boolean confirmed = new IntentDialog(LimeWireUtils.getLimeWireVersion(), virusEngine).confirmLegal();
                     if (!confirmed) {
                         System.exit(0);
                     }

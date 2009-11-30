@@ -26,6 +26,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.action.UrlAction.LaunchType;
@@ -45,6 +46,7 @@ import org.limewire.util.SystemUtils;
 
 public class IntentDialog extends LimeJDialog {
 
+    private final VirusEngine virusEngine;
     private final Color backgroundColor = Color.WHITE;
     private final Font headingFont = new Font("Dialog", Font.BOLD, 14);
     private final Font smallFont = new Font("Dialog", Font.PLAIN, 12);
@@ -62,6 +64,7 @@ public class IntentDialog extends LimeJDialog {
     private final HTMLLabel bodyLabel;
     private final JLabel agreeLabel;
     private final JButton licenseButton;
+    private final JButton avgLicenseButton;
     private final JButton privacyButton;
     private final JLabel languageLabel;
     private final JXButton agreeButton;
@@ -71,13 +74,14 @@ public class IntentDialog extends LimeJDialog {
     
     private final String copyrightURL = "http://client-data.limewire.com/client_startup/docs/?page=copyright&is_client=true";
     private final String licenseURL = "http://client-data.limewire.com/client_startup/docs/?page=agreement&is_client=true";
+    private final String avgLicenseURL = "http://client-data.limewire.com/client_startup/docs/?page=avg_agreement&is_client=true";
     private final String privacyURL = "http://client-data.limewire.com/client_startup/docs/?page=privacy&is_client=true";
     
     private boolean agreed = false;
     
-    public IntentDialog(String version){
+    public IntentDialog(String version, VirusEngine virusEngine){
         super();
-        
+        this.virusEngine = virusEngine;
         ResizeUtils.forceSize(this, new Dimension(514,402));
                 
         setTitle("LimeWire " + version);
@@ -123,6 +127,13 @@ public class IntentDialog extends LimeJDialog {
         privacyButton.setFont(smallFont);
         FontUtils.underline(privacyButton);
         privacyButton.setForeground(new Color(0x2152a6));
+        
+        avgLicenseButton = new HyperlinkButton(new UrlAction(avgLicenseURL, LaunchType.POPUP, languageAppender));
+        avgLicenseButton.setFocusPainted(false);
+        avgLicenseButton.setFont(smallFont);
+        FontUtils.underline(avgLicenseButton);
+        avgLicenseButton.setForeground(new Color(0x2152a6));
+        
         bodyLabel = new HTMLLabel("");
         bodyLabel.setHtmlFont(smallFont);
         bodyLabel.setHtmlLinkForeground(new Color(0x2152a6));
@@ -172,6 +183,11 @@ public class IntentDialog extends LimeJDialog {
         panel.add(policiesLabel, "gapleft " + indent + ", gaptop 20, wrap");
         panel.add(licenseButton, "gaptop 10, gapleft " + (indent + indent) +  ", wrap");
         panel.add(privacyButton, "gapleft " + (indent + indent) +  ", wrap");
+        
+        if(virusEngine.isSupported()) {
+            panel.add(avgLicenseButton, "gapleft " + (indent + indent) +  ", wrap");
+        }
+        
         panel.add(agreeLabel, "gapleft " + indent +  ", gaptop 30, wrap");
 
         langInnerPanel.add(languageLabel);
@@ -266,13 +282,15 @@ public class IntentDialog extends LimeJDialog {
      *  on the language selected in the combo box.
      */
     private void setTextContents() {
+        //TODO validate new text changes with legal, and nathan.
         String heading  = I18n.tr("Some Legal Stuff");
         String bodyText1
         = I18n.tr("<html><body>LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only. Copyright laws may forbid obtaining or distributing certain copyrighted content. Learn more information about <a href=\"{0}\">Copyright</a></body></html>.", 0);
         String copyInfringementText = I18n.tr("Copyright Infringement");
-        String privacyText = I18n.tr("Privacy Policy");
-        String licenseText = I18n.tr("License");
-        String agreementText = I18n.tr("By clicking \"I Agree\", you agree that you have read, understand and assent to the terms of the License Agreement and Privacy Policy. You also agree that you will not use LimeWire for copyright infringement.");
+        String privacyText = I18n.tr("LimeWire Privacy Policy");
+        String licenseText = I18n.tr("LimeWire License Agreement");
+        String avgLicenseText = I18n.tr("AVG Anti-Virus License Agreement");
+        String agreementText = virusEngine.isSupported() ? I18n.tr("By clicking \"I Agree\", you agree that you have read, understand and assent to the terms of the LimeWire and AVG Anti-Virus License Agreements and LimeWire Privacy Policy. You also agree that you will not use LimeWire for copyright infringement.") : I18n.tr("By clicking \"I Agree\", you agree that you have read, understand and assent to the terms of the LimeWire License Agreement and LimeWire Privacy Policy. You also agree that you will not use LimeWire for copyright infringement.");
         String languageText = I18n.tr("Choose your language");
         String policiesText = I18n.tr("Policies Governing Your Use:");
         
@@ -295,6 +313,7 @@ public class IntentDialog extends LimeJDialog {
         copyrightLabel.setText(copyInfringementText);
         policiesLabel.setText(policiesText);
         licenseButton.setText(licenseText);
+        avgLicenseButton.setText(avgLicenseText);
         privacyButton.setText(privacyText);
         agreeLabel.setText(agreementText);
         languageLabel.setText(languageText);

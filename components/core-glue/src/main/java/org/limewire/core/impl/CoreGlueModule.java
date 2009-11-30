@@ -17,6 +17,7 @@ import org.limewire.core.impl.itunes.ItunesMediatorImpl;
 import org.limewire.core.impl.library.CoreGlueLibraryModule;
 import org.limewire.core.impl.lifecycle.LifeCycleManagerImpl;
 import org.limewire.core.impl.magnet.MagnetFactoryImpl;
+import org.limewire.core.impl.malware.CoreGlueMalwareModule;
 import org.limewire.core.impl.mojito.CoreGlueMojitoModule;
 import org.limewire.core.impl.monitor.CoreGlueMonitorModule;
 import org.limewire.core.impl.monitor.IncomingSearchListenerList;
@@ -76,6 +77,7 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueSupportModule());
         install(new CoreGlueUploadModule());
         install(new CoreGlueUpdatesModule());
+        install(new CoreGlueMalwareModule());
     }
 
 }
