@@ -6,9 +6,12 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -57,18 +60,45 @@ public abstract class AbstractSSLSocket extends NIOSocket {
         super(socket);
     }
     
+    /**
+     * Returns the {@link SSLContext} that should be used to generate new
+     * {@link SSLEngine SSLEngines}.
+     */
     protected abstract SSLContext getSSLContext();
     
-    protected abstract Executor getSSLExecutor();
+    /**
+     * Returns the {@link Executor} that should be used to process long-lived tasks
+     * generated from an {@link SSLEngine}.
+     * 
+     * @see {@link HandshakeStatus#NEED_TASK}
+     */
+    protected Executor getSSLExecutor() {
+        return SSLUtils.getExecutor();
+    }
     
+    /**
+     * Returns the {@link ByteBufferCache} that should be used to retrieve &
+     * return {@link ByteBuffer ByteBuffers} for use reading & writing data.
+     */
     protected ByteBufferCache getByteBufferCache() {
         return NIODispatcher.instance().getBufferCache();
     }
-    
+
+    /**
+     * Returns the {@link Executor} that should be used to write & read data to
+     * & from the network.
+     */
     protected Executor getNetworkExecutor() {
         return NIODispatcher.instance().getScheduledExecutorService();
     }
     
+    /**
+     * Returns the cipher suites that are allowed to be used by the {@link SSLEngine}.
+     * A return value of null means that the default cipher suites are enabled.
+     * 
+     * @see SSLEngine#getEnabledCipherSuites()
+     * @see SSLEngine#getSupportedCipherSuites()
+     */
     protected abstract String[] getCipherSuites();
     
     

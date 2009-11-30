@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
 
@@ -48,10 +47,5 @@ public class TLSNIOSocket extends AbstractSSLSocket {
     @Override
     protected String[] getCipherSuites() {
         return SSLUtils.getTLSCipherSuites();
-    }
-    
-    @Override
-    protected Executor getSSLExecutor() {
-        return SSLUtils.getExecutor();
     }
 }
