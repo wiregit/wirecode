@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
+import java.io.File;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -25,6 +27,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
+import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -34,6 +38,7 @@ import org.limewire.ui.swing.components.LimeSliderBar;
 import org.limewire.ui.swing.components.MarqueeButton;
 import org.limewire.ui.swing.components.VolumeSlider;
 import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -108,6 +113,10 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
 
     private final Provider<PlayerMediator> playerProvider;
     
+    private final LibraryMediator libraryMediator;
+    
+    private final CategoryManager categoryManager;
+    
     private SettingListener settingListener;
     
     /**
@@ -115,10 +124,16 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      * decorators.
      */
     public PlayerControlPanel(Provider<PlayerMediator> playerProvider,
-            SliderBarDecorator sliderBarDecorator) {
+                              LibraryMediator libraryMediator,
+                              CategoryManager categoryManager,
+                              SliderBarDecorator sliderBarDecorator) {
         
         this.playerProvider = playerProvider;
-
+        
+        this.libraryMediator = libraryMediator;
+        
+        this.categoryManager = categoryManager;
+        
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("insets 0, filly, alignx center"));
@@ -429,7 +444,16 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             PlayerInspectionUtils.playerUsed();
             
             if (e.getActionCommand() == PLAY){
-                getPlayerMediator().resume();
+                // If the player already has a file, then let's resume play on that file. 
+                // Otherwise, let's start playing whatever file is selected in the library. 
+                if (getPlayerMediator().getCurrentMediaFile() != null) {
+                    getPlayerMediator().resume();
+                } else {
+                    List<LocalFileItem> selectedItems = libraryMediator.getSelectedItems();
+                    if (selectedItems.size() > 0) {
+                        PlayerUtils.playOrLaunch(selectedItems.get(0).getFile(), categoryManager);
+                    }
+                }
                 
             } else if (e.getActionCommand() == PAUSE){
                 getPlayerMediator().pause();
