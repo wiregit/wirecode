@@ -130,143 +130,241 @@ class AboutWindow {
                 "collaborative <a href=\"http://www.limewire.org/\">open source effort</a> involving " +
                 "programmers and researchers from all over the world.  " +
                 "LimeWire is also, of course, the result of the countless hours of work by LimeWire\'s developers:"));
-        sb.append("<ul>\n" + 
-                "  <li>Felix Berger</li>" +
-                "  <li>Sam Berlin</li>" + 
-                "  <li>Wynne Chan</li>" +
-                "  <li>David Chen</li>" +
-                "  <li>Mike Everett</li>" +              
-                "  <li>Tim Julien</li>" +
-                "  <li>Jorge Mancheno</li>" +                
-                "  <li>Jason Pelzer</li>" +
-                "  <li>Michael Rogers</li>" +
-                "  <li>Anthony Roscoe</li>" +
-                "  <li>Mike Sorvillo</li>" +
-                "  <li>Michael Tiraborrelli</li>" +
-                "  <li>Matt Turkel</li>" +
-                "  <li>Peter Vertenten</li>" +
-                "  <li>Peng Wang</li>" +
-                "  <li>Ernie Yu</li>" +
-                "</ul>");
-        //behind the scenes technical
-        sb.append(I18n.tr("Providing key support:"));
-        sb.append("<ul>\n" +  
-                "  <li>Ari Amanatidis</li>" +
-                "  <li>Bobby Fonacier</li>" +                
-                "  <li>Akshay Kumar</li>" +
-                "  <li>Greg Maggioncalda</li>" +
-                "  <li>Dan Sullivan</li>" +
-                "</ul>");        
-        
+
+        sb.append("<br>");
+
+        sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
+         " <tr> " + 
+         "   <td>Felix Berger</td>" + 
+         "   <td>Sam Berlin</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Wynne Chan</td>" + 
+         "   <td>David Chen</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Mike Everett</td>" + 
+         "   <td>Tim Julien</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Greg Kellum</td>" + 
+         "   <td>Emily Lawrence</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Marc London</td>" + 
+         "   <td>Greg Maggioncalda</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Jorge Mancheno</td>" + 
+         "   <td>Michael Rogers</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Varnali Shah</td>" + 
+         "   <td>Mike Sorvillo</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Dan Sullivan</td>" + 
+         "   <td>Michael Tiraborrelli</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Matt Turkel</td>" + 
+         "   <td>Peter Vertenten</td>" + 
+         " </tr>" + 
+         " <tr>" + 
+         "   <td>Peng Wang</td>" + 
+         "   <td>Kurt Wasserman</td>" + 
+         " </tr>" + 
+         "  <tr>" + 
+         "   <td>Ernie Yu</td>" + 
+         " </tr>" + 
+        " </table>");
         
         //  business developers
         sb.append(I18n.tr("Behind the scenes business strategy and day-to-day affairs are handled by LimeWire\'s business developers:"));
-        sb.append("<ul>\n" +  
-                "  <li>Nathan Lovejoy</li>" +
-                "  <li>George Searle</li>" +
-                "</ul>");        
-        
+        sb.append("<br>");
+        sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
+                "  <tr><td>Nathan Lovejoy</td></tr>" + 
+                "  <tr><td>George Searle</td></tr>" + 
+                "</table>");        
+
         //  previous developers
         sb.append(I18n.tr("In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:"));
-        sb.append("<ul>\n" +  
-        		"  <li>Mario Aquino</li>" + 
-                "  <li>Aubrey Arago</li>\n" +
-                "  <li>Zlatin Balevsky</li>\n" +
-                "  <li>Zenzele Bell</li>\n" +                  
-                "  <li>Anthony Bow</li>\n" +
-                "  <li>Katie Catillaz</li>\n" +                
-                "  <li>Susheel Daswani</li>\n" +
-                "  <li>Luck Dookchitra</li>\n" +                
-                "  <li>Kevin Faaborg</li>" +                
-                "  <li>Adam Fisk</li>\n" +
-                "  <li>Meghan Formel</li>\n" +
-                "  <li>Jay Jeyaratnam</li>\n" +
-                "  <li>Curtis Jones</li>\n" +
-                "  <li>Tarun Kapoor</li>\n" +
-                "  <li>Roger Kapsi</li>\n" +
-                "  <li>Mark Kornfilt</li>\n" +
-                "  <li>Angel Leon</li>\n" +
-                "  <li>Karl Magdsick</li>\n" +
-                "  <li>Yusuke Naito</li>\n" +
-                "  <li>Dave Nicponski</li\n" +
-                "  <li>Christine Nicponski</li>\n" +
-                "  <li>Tim Olsen</li>\n" + 
-                "  <li>Jeff Palm</li>\n" +                 
-                "  <li>Steffen Pingel</li>\n" +
-                "  <li>Christopher Rohrs</li>\n" +
-                "  <li>Justin Schmidt</li>\n" +
-                "  <li>Arthur Shim</li>\n" + 
-                "  <li>Anurag Singla</li>\n" +
-                "  <li>Francesca Slade</li>\n" +
-                "  <li>Robert Soule</li>\n" +
-                "  <li>Rachel Sterne</li>\n" +
-                "  <li>Sumeet Thadani</li>\n" +
-                "  <li>Ron Vogl</li>\n" +
-                "  <li>E.J. Wolborsky</li>\n" +                
-                "</ul>");
+
+        sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
+                " <tr>" +
+                "   <td>Mario Aquino</td>" +
+                "   <td>Aubrey Arago</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Zlatin Balevsky</td>" +
+                "   <td>Zenzele Bell</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Anthony Bow</td>" +
+                "   <td>Katie Catillaz</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Susheel Daswani</td>" +
+                "   <td>Luck Dookchitra</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Kevin Faaborg</td>" +
+                "   <td>Adam Fisk</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Bobby Fonacier</td>" +
+                "   <td>Meghan Formel</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Jay Jeyaratnam</td>" +
+                "   <td>Curtis Jones</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Tarun Kapoor</td>" +
+                "   <td>Roger Kapsi</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Mark Kornfilt</td>" +
+                "   <td>Akshay Kumar</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Angel Leon</td>" +
+                "   <td>Karl Magdsick</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Yusuke Naito</td>" +
+                "   <td>Dave Nicponski</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Christine Nicponski</td>" +
+                "   <td>Tim Olsen</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Jeff Palm</td>" +
+                "   <td>Jason Pelzer</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Steffen Pingel</td>" +
+                "   <td>Christopher Rohrs</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Justin Schmidt</td>" +
+                "   <td>Arthur Shim</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Anurag Singla</td>" +
+                "   <td>Francesca Slade</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Robert Soule</td>" +
+                "   <td>Rachel Sterne</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Sumeet Thadani</td>" +
+                "   <td>Ron Vogl</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>E.J. Wolborsky</td>" +
+                " </tr>" +
+                " </table>");
 
         //  open source contributors
         sb.append(I18n.tr("LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:"));
-        sb.append("<ul>\n" + 
-                "  <li>Richie Bielak</li>\n" +
-                "  <li>Johanenes Blume</li>\n" +
-                "  <li>Jerry Charumilind</li>\n" +
-                "  <li>Marvin Chase</li>\n" +
-                "  <li>Robert Collins</li>\n" +
-                "  <li>Kenneth Corbin</li>\n" +
-                "  <li>Kyle Furlong</li>\n" +
-                "  <li>David Graff</li>\n" +
-                "  <li>Andy Hedges</li>\n" +
-                "  <li>Michael Hirsch</li>\n" +
-                "  <li>Panayiotis Karabassis</li>\n" +
-                "  <li>Jens-Uwe Mager</li>\n" +
-                "  <li>Miguel Munoz</li>\n" +
-                "  <li>Gordon Mohr</li>\n" +
-                "  <li>Chance Moore</li>\n" +
-                "  <li>Marcin Koraszewski</li>\n" +
-                "  <li>Rick T. Piazza</li>\n" +
-                "  <li>Eugene Romanenko</li>\n" +
-                "  <li>Gregorio Roper</li>\n" +
-                "  <li>William Rucklidge</li>\n" +
-                "  <li>Claudio Santini</li>\n" + 
-                "  <li>Phil Schalm</li>\n" + 
-                "  <li>Eric Seidel</li>\n" +
-                "  <li>Philippe Verdy</li>\n" +
-                "  <li>Cameron Walsh</li>\n" +
-                "  <li>Stephan Weber</li>\n" +
-                "  <li>Jason Winzenried</li>\n" +
-                "  <li>'Tobias'</li>\n" +
-                "  <li>'deacon72'</li>\n" +
-                "  <li>'MaTZ'</li>\n" +
-                "  <li>'RickH'</li>\n" +
-                "  <li>'PNomolos'</li>\n" +
-                "  <li>'ultracross'</li>\n" +
-                "</ul>");
+        sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
+                " <tr>" +
+                "   <td>Richie Bielak</td>" +
+                "   <td>Johanenes Blume</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Jerry Charumilind</td>" +
+                "   <td>Marvin Chase</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Robert Collins</td>" +
+                "   <td>Kenneth Corbin</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Kyle Furlong</td>" +
+                "   <td>David Graff</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Andy Hedges</td>" +
+                "   <td>Michael Hirsch</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Panayiotis Karabassis</td>" +
+                "   <td>Jens-Uwe Mager</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Miguel Munoz</td>" +
+                "   <td>Gordon Mohr</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Chance Moore</td>" +
+                "   <td>Marcin Koraszewski</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Rick T. Piazza</td>" +
+                "   <td>Eugene Romanenko</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Gregorio Roper</td>" +
+                "   <td>William Rucklidge</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Claudio Santini</td>" +
+                "   <td>Phil Schalm</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Eric Seidel</td>" +
+                "   <td>Philippe Verdy</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Cameron Walsh</td>" +
+                "   <td>Stephan Weber</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Jason Winzenried</td>" +
+                "   <td>'Tobias'</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>'deacon72'</td>" +
+                "   <td>'MaTZ'</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>'RickH'</td>" +
+                "   <td>'PNomolos'</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>'ultracross'</td>" +
+                " </tr>" + 
+                " </table>");
          
         //  internationalization contributors
         sb.append(I18n.tr("LimeWire would also like to thank the many contributors to the internationalization project, both for the application itself and for the LimeWire web site."));
-        sb.append("<br><br>");
+        sb.append("<p>");
         
         //  community VIPs
         sb.append(I18n.tr("Several colleagues in the Gnutella community merit special thanks. These include:"));
-        sb.append("<ul>\n" + 
-                "  <li>Vincent Falco -- Free Peers, Inc.</li>\n" + 
-                "  <li>Gordon Mohr -- Bitzi, Inc.</li>\n" + 
-                "  <li>John Marshall -- Gnucleus</li>\n" +
-                "  <li>Jason Thomas -- Swapper</li>\n" +
-                "  <li>Brander Lien -- ToadNode</li>\n" +
-                "  <li>Angelo Sotira -- www.gnutella.com</li>\n" +
-                "  <li>Marc Molinaro -- www.gnutelliums.com</li>\n" +
-                "  <li>Simon Bellwood -- www.gnutella.co.uk</li>\n" +
-                "  <li>Serguei Osokine</li>\n" +
-                "  <li>Justin Chapweske</li>\n" +
-                "  <li>Mike Green</li>\n" +
-                "  <li>Raphael Manfredi</li>\n" +
-                "  <li>Tor Klingberg</li>\n" +
-                "  <li>Mickael Prinkey</li>\n" +
-                "  <li>Sean Ediger</li>\n" +
-                "  <li>Kath Whittle</li>\n" +
-                "</ul>");
+
+        sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
+                "<tr><td>Vincent Falco -- Free Peers, Inc.</td></tr>" + 
+                "<tr><td>Gordon Mohr -- Bitzi, Inc.</td></tr>" + 
+                "<tr><td>John Marshall -- Gnucleus</td></tr>" + 
+                "<tr><td>Jason Thomas -- Swapper</td></tr>" + 
+                "<tr><td>Brander Lien -- ToadNode</td></tr>" + 
+                "<tr><td>Angelo Sotira -- www.gnutella.com</td></tr>" + 
+                "<tr><td>Marc Molinaro -- www.gnutelliums.com</td></tr>" + 
+                "<tr><td>Simon Bellwood -- www.gnutella.co.uk</td></tr>" + 
+                "<tr><td>Serguei Osokine</td></tr>" + 
+                "<tr><td>Justin Chapweske</td></tr>" + 
+                "<tr><td>Mike Green</td></tr>" + 
+                "<tr><td>Raphael Manfredi</td></tr>" + 
+                "<tr><td>Tor Klingberg</td></tr>" + 
+                "<tr><td>Mickael Prinkey</td></tr>" + 
+                "<tr><td>Sean Ediger</td></tr>" + 
+                "<tr><td>Kath Whittle</td></tr>" + 
+                "</table>" );
         
         //  conclusion
         sb.append(I18n.tr("Finally, LimeWire would like to extend its sincere thanks to those developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the P2P Network would not exist."));
@@ -274,7 +372,7 @@ class AboutWindow {
         // bt notice
         sb.append("<small>");
         sb.append("<br><br>");
-        sb.append(I18n.tr("BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc. Gmail is a trademark of Google&nbsp;Inc., Facebook is a trademark of Facebook, Inc., Jabber and LiveJournal are the registered trademarks of the XMPP Standards Foundation and LiveJournal, Inc., d/b/a LiveJournal.com, respectively. Neither Google&nbsp;Inc., Facebook&nbsp;Inc., the XMPP Standards Foundation nor LiveJournal.com are sponsors or partners of Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the LimeWire software. Use of these trademarks is merely to refer to the technology or service of the respective owner and not to confuse Lime&nbsp;Wire as the source of the respective Gmail, Facebook, Jabber, and/or LiveJournal service or technology"));
+        sb.append(I18n.tr("BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc. Gmail is a trademark of Google&nbsp;Inc., Jabber and LiveJournal are the registered trademarks of the XMPP Standards Foundation and LiveJournal, Inc., d/b/a LiveJournal.com, respectively. Neither Google&nbsp;Inc., the XMPP Standards Foundation nor LiveJournal.com are sponsors or partners of Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the LimeWire software. Use of these trademarks is merely to refer to the technology or service of the respective owner and not to confuse Lime&nbsp;Wire as the source of the respective Gmail, Jabber, and/or LiveJournal service or technology"));
         sb.append("</small>");
         
         sb.append("</body></html>");
