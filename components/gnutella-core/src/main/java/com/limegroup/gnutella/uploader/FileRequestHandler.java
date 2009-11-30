@@ -337,6 +337,12 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
      * create the correct path for the Thex uri
      */
     private void addThexUriHeader(HttpResponse response, FileDesc fileDesc, String friendId) {
+        // We do not support serving TigerTrees for incomplete files,
+        // so sending the THEX-URI makes no sense for them.
+        if (fileDesc instanceof IncompleteFileDesc) {
+            return;
+        }
+        
         // write X-Thex-URI header with root hash if we have already
         // calculated the tigertree
         HashTree tree = tigerTreeCache.get().getHashTree(fileDesc);

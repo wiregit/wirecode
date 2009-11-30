@@ -320,6 +320,12 @@ public class SharingSettings extends LimeProps {
             "FRIENDLY_HASHING", true);
 
     /**
+     * Minimum idle time before we start to hash at full throttle.
+     */
+    public static final IntSetting MIN_IDLE_TIME_FOR_FULL_HASHING = FACTORY.createIntSetting(
+            "MIN_IDLE_TIME_FOR_FULL_HASHING", 5 * 60 * 1000);
+
+    /**
      * Setting for the threshold of when to warn the user that a lot of files
      * are being shared.
      */

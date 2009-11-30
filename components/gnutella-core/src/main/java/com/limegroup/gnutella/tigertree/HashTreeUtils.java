@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.security.MerkleTree;
 
@@ -22,6 +24,13 @@ public class HashTreeUtils {
     public static final int  BLOCK_SIZE           = 1024;
     public static final byte INTERNAL_HASH_PREFIX = 0x01;
 
+    private static final ThreadLocal<byte[]> BUFFER = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+            return new byte[BLOCK_SIZE * 128];
+        }
+    };
+    
     /*
      * Iterative method to generate the parent nodes of an arbitrary
      * depth.
@@ -75,28 +84,33 @@ public class HashTreeUtils {
             throws IOException {
         List<byte[]> ret = new ArrayList<byte[]>((int) Math.ceil((double) fileSize / nodeSize));
         MessageDigest tt = new MerkleTree(messageDigest);
-        byte[] block = new byte[HashTreeUtils.BLOCK_SIZE * 128];
+        
+        byte[] block = BUFFER.get();
         long offset = 0;
         int read = 0;
         while (offset < fileSize) {
             int nodeOffset = 0;
-            long time = System.currentTimeMillis();
             // reset our TigerTree instance
             tt.reset();
             // hashing nodes independently
             while (nodeOffset < nodeSize && (read = is.read(block)) != -1) {
+                long time = System.currentTimeMillis();
                 tt.update(block, 0, read);
                 // update offsets
                 nodeOffset += read;
                 offset += read;
-                try {
+                if(SystemUtils.getIdleTime() < SharingSettings.MIN_IDLE_TIME_FOR_FULL_HASHING.getValue()
+                        && SharingSettings.FRIENDLY_HASHING.getValue()) {
                     long sleep = (System.currentTimeMillis() - time) * 2;
-                    if(sleep > 0)
-                        Thread.sleep(sleep);
-                } catch (InterruptedException ie) {
-                    throw new IOException("interrupted during hashing operation");
+                    if (sleep > 0)
+                        try {
+                            Thread.sleep(sleep);
+                        } catch (InterruptedException ie) {
+                            throw new IOException("interrupted during hashing operation");
+                        }
+                    else
+                        Thread.yield();
                 }
-                time = System.currentTimeMillis();
             }
             // node hashed, add the hash to our internal List.
             ret.add(tt.digest());

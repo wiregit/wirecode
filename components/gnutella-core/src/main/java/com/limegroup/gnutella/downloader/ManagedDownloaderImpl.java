@@ -399,19 +399,19 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private volatile File corruptFile;
 
     /**
-     * The various states of the ManagedDownloade with respect to the
+     * The various states of the ManagedDownloader with respect to the
      * corruption state of this download.
      */
-    private static final int NOT_CORRUPT_STATE = 0;
-    private static final int CORRUPT_WAITING_STATE = 1;
-    private static final int CORRUPT_STOP_STATE = 2;
-    private static final int CORRUPT_CONTINUE_STATE = 3;
+    private enum CorruptionState {
+        NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, CORRUPT_STOP_STATE, CORRUPT_CONTINUE_STATE;
+        
+    }
     /**
      * The actual state of the ManagedDownloader with respect to corruption
      * LOCKING: obtain corruptStateLock
      * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etc.
      */
-    private volatile int corruptState;
+    private volatile CorruptionState corruptState;
     private Object corruptStateLock;
 
     /**
@@ -615,7 +615,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             stopped = false;
             paused = false;
             pushes = pushListProvider.get();
-            corruptState = NOT_CORRUPT_STATE;
+            corruptState = CorruptionState.NOT_CORRUPT_STATE;
             corruptStateLock = new Object();
             altLock = new Object();
             numMeasures = 0;
@@ -1908,7 +1908,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     status = DownloadState.GAVE_UP;
 
                 // if we were stopped due to corrupt download, cleanup
-                if (corruptState == CORRUPT_STOP_STATE) {
+                if (corruptState == CorruptionState.CORRUPT_STOP_STATE) {
                     // TODO is this really what cleanupCorrupt expects?
                     cleanupCorrupt(incompleteFile, getSaveFile().getName());
                     status = DownloadState.CORRUPT_FILE;
@@ -1944,7 +1944,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return DownloadState.DISK_PROBLEM;
         }
 
-        // Create a new validAlts for this sha1.
         // initialize the HashTree
         if (getSha1Urn() != null)
             initializeHashTree();
@@ -1977,7 +1976,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // Find out the hash of the file and verify that its the same
         // as our hash.
         URN fileHash = scanForCorruption();
-        if (corruptState == CORRUPT_STOP_STATE) {
+        if (corruptState == CorruptionState.CORRUPT_STOP_STATE) {
             // TODO is this what cleanup Corrupt expects?
             cleanupCorrupt(incompleteFile, getSaveFile().getName());
             return DownloadState.CORRUPT_FILE;
@@ -2039,10 +2038,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * such was displayed.
      */
     private void waitForCorruptResponse() {
-        if (corruptState != NOT_CORRUPT_STATE) {
+        if (corruptState != CorruptionState.NOT_CORRUPT_STATE) {
             synchronized (corruptStateLock) {
                 try {
-                    while (corruptState == CORRUPT_WAITING_STATE)
+                    while (corruptState == CorruptionState.CORRUPT_WAITING_STATE)
                         corruptStateLock.wait();
                 } catch (InterruptedException ignored) {
                 }
@@ -2055,7 +2054,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private URN scanForCorruption() throws InterruptedException {
         // if we already were told to stop, then stop.
-        if (corruptState == CORRUPT_STOP_STATE)
+        if (corruptState == CorruptionState.CORRUPT_STOP_STATE)
             return null;
 
         //if the user has not been asked before.               
@@ -2082,10 +2081,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     fileHash + ", ourHash=" + getSha1Urn());
         }
 
-        // unshare the file if we didn't have a tree
-        // otherwise we will have shared only the parts that verified
-        if (commonOutFile.getHashTree() == null)
-            library.remove(incompleteFile);
+        // unshare the file regardless of whether or not we had
+        // a valid HashTree for it -- this way we make sure that
+        // things with invalid trees don't propogate.
+        library.remove(incompleteFile);
 
         // purge the tree
         tigerTreeCache.get().purgeTree(getSha1Urn());
@@ -2225,7 +2224,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected void shareSavedFile(File saveFile) {
         if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()
-                && !isFriendDownload)
+                && !isFriendDownload && corruptState == CorruptionState.NOT_CORRUPT_STATE)
             gnutellaFileCollection.add(saveFile, getXMLDocuments());
     }
 
@@ -2590,8 +2589,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     public void promptAboutCorruptDownload() {
         synchronized (corruptStateLock) {
-            if (corruptState == NOT_CORRUPT_STATE) {
-                corruptState = CORRUPT_WAITING_STATE;
+            if (corruptState == CorruptionState.NOT_CORRUPT_STATE) {
+                corruptState = CorruptionState.CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
                 //when the user has made a decision. Until then the corruptState
                 //is set to waiting. We are not going to move files unless we
@@ -2623,9 +2622,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             public void run() {
                 synchronized (corruptStateLock) {
                     if (delete) {
-                        corruptState = CORRUPT_STOP_STATE;
+                        corruptState = CorruptionState.CORRUPT_STOP_STATE;
                     } else {
-                        corruptState = CORRUPT_CONTINUE_STATE;
+                        corruptState = CorruptionState.CORRUPT_CONTINUE_STATE;
                     }
                 }
 

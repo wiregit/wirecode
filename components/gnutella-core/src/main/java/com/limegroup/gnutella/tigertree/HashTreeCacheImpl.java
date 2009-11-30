@@ -45,7 +45,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
      */
     private final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("TreeHashTread"); 
     
-    /** A copy of thin SHA1 -> Tiger Tree Root */
+    /** A copy of the SHA1 -> Tiger Tree Root */
     private final Map<URN /* sha1 */, Future<URN> /* ttroot */> SHA1_TO_ROOT_MAP = new HashMap<URN, Future<URN>>();
     
     /** TigerTreeCache container. */
@@ -168,11 +168,17 @@ public final class HashTreeCacheImpl implements HashTreeCache {
                     LOG.debug("Returning root from future");
                 return root;
             } else {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Scheduling: " + sha1 + " for tree root");
+                if(!(fd instanceof IncompleteFileDesc)) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Scheduling: " + sha1 + " for tree root");
+                    }
+                    futureRoot = QUEUE.submit(new RootRunner(fd));
+                    SHA1_TO_ROOT_MAP.put(sha1, futureRoot);
+                } else {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Ignoring: " + sha1 + " because FD is incomplete.");
+                    }
                 }
-                futureRoot = QUEUE.submit(new RootRunner(fd));
-                SHA1_TO_ROOT_MAP.put(sha1, futureRoot);
                 return null;
             }
         } else {
@@ -186,7 +192,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     private synchronized Future<HashTree> getOrScheduleHashTreeFuture(FileDesc fd) {
         URN sha1 = fd.getSHA1Urn();
         Future<HashTree> futureTree = TTREE_MAP.get(sha1);
-        if(futureTree == null) {
+        if(futureTree == null && !(fd instanceof IncompleteFileDesc)) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Scheduling: " + sha1 + " for full tree");
             }

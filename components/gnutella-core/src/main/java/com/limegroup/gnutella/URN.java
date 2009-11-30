@@ -160,13 +160,6 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
 	 * A constant invalid URN that classes can use to represent an invalid URN.
 	 */
 	public static final URN INVALID = new URN("bad:bad", Type.INVALID);
-	
-	/**
-	 * The amount of time we must be idle before we start
-	 * devoting all processing time to hashing.
-	 * (Currently 5 minutes).
-	 */
-	public static final int MIN_IDLE_TIME = 5 * 60 * 1000;
 
 	/**
 	 * Cached constant to avoid making unnecessary string allocations
@@ -876,7 +869,8 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
 	                long start = System.nanoTime();
 	                md.update(buffer,0,read);
 	                progress.addAndGet(read);
-	                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
+	                if(SystemUtils.getIdleTime() < SharingSettings.MIN_IDLE_TIME_FOR_FULL_HASHING.getValue()
+	                        && SharingSettings.FRIENDLY_HASHING.getValue()) {
 	                    long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 	                    if (interval > 0) 
 	                        Thread.sleep(interval * 3);

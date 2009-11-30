@@ -14,7 +14,6 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.BasicHttpContext;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.States;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -26,11 +25,14 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.IncompleteFileDesc;
+import com.limegroup.gnutella.library.IncompleteFileDescStub;
 import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -40,7 +42,7 @@ import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileViewProv
 public class FileRequestHandlerTest extends LimeTestCase {
 
     private FileDesc fd = new FileDescStub("filename");
-
+  
     private URN urn1;
 
     private MockHTTPUploadSessionManager sessionManager;
@@ -54,8 +56,6 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
     private HashTreeCache hashTreeCache;
 
-    private States states;
-
     public FileRequestHandlerTest(String name) {
         super(name);
     }
@@ -68,12 +68,6 @@ public class FileRequestHandlerTest extends LimeTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         hashTreeCache = context.mock(HashTreeCache.class);
-        states = context.states("").startsAs("default");
-        context.checking(new Expectations() {{
-            allowing(hashTreeCache).getHashTree(with(any(FileDesc.class)));
-            will(returnValue(null));
-            when(states.is("default"));
-        }});
         sessionManager = new MockHTTPUploadSessionManager();
         LimeTestUtils.createInjectorNonEagerly(new AbstractModule() {
             @Override
@@ -109,6 +103,11 @@ public class FileRequestHandlerTest extends LimeTestCase {
         NetworkManagerStub networkManager = (NetworkManagerStub) injector
                 .getInstance(NetworkManager.class);
         networkManager.setCanDoFWT(true);
+
+        context.checking(new Expectations() {{
+            one(hashTreeCache).getHashTree(with(any(FileDesc.class)));
+            will(returnValue(null));
+        }});
 
         fileRequestHandler.handleAccept(new BasicHttpContext(null), request, response,
                 uploader, fd, null);
@@ -171,6 +170,26 @@ public class FileRequestHandlerTest extends LimeTestCase {
         assertEquals(pushEndpoint, uploader.getPushEndpoint().httpStringValue());
     }
 
+    public void testResponseDoesNotContainThexUriHeaderForIncompleteFile() throws Exception {
+        HttpRequest request = new BasicHttpRequest("GET", "incomplete.file");
+        HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
+        HTTPUploader uploader = new HTTPUploader("incomplete.file", null);
+        final IncompleteFileDesc ifd = new IncompleteFileDescStub("incomplete.file", UrnHelper.SHA1, 0);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
+        uploader.setFileDesc(ifd);
+
+        fileRequestHandler.handleAccept(new BasicHttpContext(null), request, response, uploader,
+                ifd, null);
+
+        // we should never offer this Thex-URI because we cannot possibly know
+        // whether we have the right hash tree
+        Header header = response.getFirstHeader("X-Thex-URI");
+        assertNull(header);
+        
+        context.assertIsSatisfied();
+    }
+
     public void testResponseContainsThexUriHeader() throws Exception {
         HttpRequest request = new BasicHttpRequest("GET", "filename");
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
@@ -186,9 +205,6 @@ public class FileRequestHandlerTest extends LimeTestCase {
             one(hashTree).httpStringValue();
             will(returnValue("/uri-res/N2X?hash-tree-httpstring"));
         }});
-
-        // switch state to allow expectations here to kick in
-        states.is("non-default").activate();
         
         fileRequestHandler.handleAccept(new BasicHttpContext(null), request, response,
                 uploader, fd, null);
@@ -215,9 +231,6 @@ public class FileRequestHandlerTest extends LimeTestCase {
             one(hashTree).httpStringValue();
             will(returnValue("/uri-res/N2X?hash-tree-httpstring"));
         }});
-
-        // switch state to allow expectations here to kick in
-        states.is("non-default").activate();
         
         fileRequestHandler.handleAccept(new BasicHttpContext(null), request, response,
                 uploader, fd, "friend@id");

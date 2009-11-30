@@ -48,6 +48,12 @@ public class VerifyingFile {
      */
     static final float MAX_CORRUPTION = 0.9f;
     
+    /**
+     * If the number of corrupted data for a specific tree exceeds this ratio, 
+     * invalidate the tree and look for a new one
+     */
+    static final float MAX_CORRUPTION_FOR_TREE = 0.1f;
+    
     /** The default chunk size - if we don't have a tree we request chunks this big.
      * <p>
      *  This is a power of two in order to minimize the number of small partial chunk
@@ -78,6 +84,11 @@ public class VerifyingFile {
      * How much data did we lose due to corruption.
      */
     private long lostSize;
+    
+    /**
+     * How much data did we lose using the current tree.
+     */
+    private long lostSizeForTree;
     
     /**
      * The VerifyingFile uses an IntervalSet to keep track of the blocks written
@@ -766,11 +777,14 @@ public class VerifyingFile {
                         if (!fullScan) {
                             if (!discardBad)
                                 savedCorruptBlocks.add(i);
-                            lostSize += (i.getHigh() - i.getLow() + 1);
+                            long intervalSize = i.getLength();
+                            lostSize += intervalSize;
+                            lostSizeForTree += intervalSize;
                         }
-                    }
+                    } 
                 }
             }
+            checkTree();
         }
     }
     
@@ -842,6 +856,13 @@ public class VerifyingFile {
     
     long getCompletedSize() {
         return completedSize;
+    }
+    
+    private synchronized void checkTree() {
+        if (lostSizeForTree > MAX_CORRUPTION_FOR_TREE * completedSize) {
+            hashTree = null;
+            lostSizeForTree = 0;
+        }
     }
     
     /**

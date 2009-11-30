@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.tigertree;
 
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +37,9 @@ public class HashTreeFactoryImpl implements HashTreeFactory {
             LOG.debug("creating hashtree for file " + fd);
         InputStream in = null;
         try {
-            in = new BufferedInputStream(new FileInputStream(fd.getFile()));
+            // not buffered purposely, because the stream is already
+            // read in blocks inside of createHashTree.
+            in = new FileInputStream(fd.getFile());
             return createHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
         } finally {
             IOUtils.close(in);
