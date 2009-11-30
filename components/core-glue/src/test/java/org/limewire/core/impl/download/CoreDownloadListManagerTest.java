@@ -220,7 +220,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
             }
         });
         downloadListener.get().downloadRemoved(finishedItem1);
-        downloadListener.get().downloadRemoved(finishedItem1);
+        downloadListener.get().downloadRemoved(finishedItem2);
 
         assertEquals(4, downloads.size());
 
