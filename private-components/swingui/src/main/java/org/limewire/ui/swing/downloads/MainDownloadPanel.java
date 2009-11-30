@@ -73,6 +73,11 @@ public class MainDownloadPanel extends JPanel {
     }
     
     public void selectAndScrollTo(URN urn) {
+        // its possible the table hasn't been initialized yet
+        // after the first download starts
+        if(table == null) {
+            initialize();
+        }
         table.selectAndScrollTo(urn);
     }
 
