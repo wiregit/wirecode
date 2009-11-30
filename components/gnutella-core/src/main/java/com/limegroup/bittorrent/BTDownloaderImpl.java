@@ -65,6 +65,8 @@ import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
+import com.limegroup.gnutella.malware.VirusScanException;
+import com.limegroup.gnutella.malware.VirusScanner;
 
 /**
  * Wraps the Torrent class in the Downloader interface to enable the gui to
@@ -86,6 +88,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final BTUploaderFactory btUploaderFactory;
     private final AtomicBoolean finishing = new AtomicBoolean(false);
     private final AtomicBoolean complete = new AtomicBoolean(false);
+    // FIXME: this is horrible
+    private final AtomicBoolean scanFailed = new AtomicBoolean(false);
     private final Library library;
     private final EventMulticaster<DownloadStateEvent> listeners;
     private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(
@@ -94,6 +98,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final Provider<TorrentManager> torrentManager;
     private final Provider<TorrentUploadManager> torrentUploadManager;
     private final Provider<DangerousFileChecker> dangerousFileChecker;
+    private final Provider<VirusScanner> virusScanner;
     private final Provider<DownloadCallback> downloadCallback;
 
     /**
@@ -109,7 +114,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             Provider<TorrentManager> torrentManager,
             Provider<TorrentUploadManager> torrentUploadManager,
             Provider<DangerousFileChecker> dangerousFileChecker,
-            Provider<DownloadCallback> downloadCallback, CategoryManager categoryManager) {
+            Provider<VirusScanner> virusScanner,
+            Provider<DownloadCallback> downloadCallback,
+            CategoryManager categoryManager) {
         super(saveLocationManager, categoryManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
@@ -120,6 +127,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.torrentManager = torrentManager;
         this.torrentUploadManager = torrentUploadManager;
         this.dangerousFileChecker = dangerousFileChecker;
+        this.virusScanner = virusScanner;
         this.downloadCallback = downloadCallback;
     }
 
@@ -137,7 +145,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         if (TorrentEventType.COMPLETED == event.getType() && !complete.get()) {
             finishing.set(true);
             torrentsFinished.incrementAndGet();
-            if (checkForDangerousFiles()) {
+            if (isInfectedOrDangerous()) {
+                // FIXME: deleteIncompleteFiles() ?
                 return;
             }
             FileUtils.forceDeleteRecursive(getSaveFile());
@@ -173,8 +182,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             torrent.removeListener(BTDownloaderImpl.this);
         } else if (TorrentEventType.STOPPED == event.getType()) {
             torrent.removeListener(this);
-            // Did the dangerous file checker stop the torrent?
-            if (lastState.get() != DownloadState.DANGEROUS) {
+            // Was the torrent stopped because of a virus or dangerous file?
+            if (lastState.get() != DownloadState.DANGEROUS &&
+                    lastState.get() != DownloadState.THREAT_FOUND) {
                 lastState.set(DownloadState.ABORTED);
                 listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
             }
@@ -203,23 +213,59 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     /**
-     * Returns true if there are any dangerous files in this torrent after
-     * warning the user about them. The download is stopped if any files are
-     * dangerous.
+     * Returns true if there are any infected or dangerous files in this
+     * torrent, after stopping the download.
      */
-    private boolean checkForDangerousFiles() {
-        // If the torrent contains any dangerous files, delete everything
-        // and inform the user that the download has been cancelled.
-        for (File f : getIncompleteFiles()) {
-            if (isDangerous(f))
+    private boolean isInfectedOrDangerous() {
+        for(File f : getIncompleteFiles()) {
+            try {
+                if(isInfected(f))
+                    return true;
+            } catch(VirusScanException x) {
+                scanFailed.set(true);
+            }
+            if(isDangerous(f))
                 return true;
         }
         return false;
     }
 
     /**
-     * Returns true if the given file is dangerous, after warning the user about
-     * it. The download is stopped if a file is dangerous.
+     * Checks whether a file fragment is infected or dangerous. If the virus
+     * scan fails, the user will be asked whether to preview the file anyway.
+     * @param fragment the file to check
+     * @param listener a listener to be informed of virus scan progress
+     * @return true if the file cannot be previewed.
+     */
+    private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
+        listener.scanStarted();
+        try {
+            if(isInfected(fragment))
+                return true;                
+        } catch (VirusScanException x) {
+            // FIXME: ask the user whether to proceed - return true to cancel preview
+        } finally {
+            listener.scanStopped();
+        }
+        return isDangerous(fragment);
+    }
+
+    /**
+     * Returns true if the given file is infected, after stopping the download.
+     */
+    private boolean isInfected(File file) throws VirusScanException {
+        if(virusScanner.get().isInfected(file)) {
+            lastState.set(DownloadState.THREAT_FOUND);
+            listeners.broadcast(new DownloadStateEvent(this, DownloadState.THREAT_FOUND));
+            // This will cause TorrentEvent.STOPPED
+            torrent.stop();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the given file is dangerous, after stopping the download.
      */
     private boolean isDangerous(File file) {
         if (dangerousFileChecker.get().isDangerous(file)) {
@@ -381,12 +427,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return getSaveFile();
         }
 
+        // Can't preview a multi-file download
         TorrentInfo torrentInfo = torrent.getTorrentInfo();
         if (torrentInfo == null || torrentInfo.getTorrentFileEntries().size() > 1) {
             return null;
         }
 
-        File file = new File(getIncompleteFile().getParent(), IncompleteFileManager.PREVIEW_PREFIX
+        // Return a copy of the completed part of the file
+        File copy = new File(getIncompleteFile().getParent(),
+                IncompleteFileManager.PREVIEW_PREFIX
                 + getIncompleteFile().getName());
 
         // TODO come up with correct size for preview, look at old code checking
@@ -394,21 +443,27 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // file downloads randomly, the last verified offset does not tell us
         // much.
         long size = Math.min(getIncompleteFile().length(), 2 * 1024 * 1024);
-        if (FileUtils.copy(getIncompleteFile(), size, file) <= 0) {
+        if (FileUtils.copy(getIncompleteFile(), size, copy) <= 0) {
             return null;
         }
-        if (isDangerous(file)) {
-            file.delete();
+        if (isInfectedOrDangerous(copy, listener)) {
+            copy.delete();
             return null;
         }
-        return file;
-
+        return copy;
     }
-
+    
     @Override
     public DownloadState getState() {
-        if (lastState.get() == DownloadState.DANGEROUS)
+        // FIXME: this is horrible
+        switch(lastState.get()) {
+        case DANGEROUS:
             return DownloadState.DANGEROUS;
+        case THREAT_FOUND:
+            return DownloadState.THREAT_FOUND;
+        }
+        if(scanFailed.get())
+            return DownloadState.SCAN_FAILED;
 
         TorrentStatus status = torrent.getStatus();
         if (!torrent.isStarted() || status == null) {
