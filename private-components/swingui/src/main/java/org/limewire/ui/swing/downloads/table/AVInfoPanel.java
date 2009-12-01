@@ -69,6 +69,7 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setHtmlFont(messageFont);
         messageLabel.setHtmlForeground(messageForeground);
         messageLabel.setMargin(new Insets(0, 0, 0, 0));
+        messageLabel.setOpaque(false);
         
         okButton = new JButton();
         okButton.setAction(new CloseAction());
@@ -76,6 +77,7 @@ public class AVInfoPanel extends JPanel {
         doNotShowCheckBox = new JCheckBox();
         doNotShowCheckBox.setFont(doNotShowFont);
         doNotShowCheckBox.setForeground(doNotShowForeground);
+        doNotShowCheckBox.setOpaque(false);
         doNotShowCheckBox.setText(I18n.tr("Do not show message again"));
         
         vendorLabel = new JLabel(vendorIcon);
@@ -204,6 +206,7 @@ public class AVInfoPanel extends JPanel {
         dialog.setTitle(title);
         
         // Add content to dialog.
+        setBackground(owner.getBackground());
         dialog.add(this, BorderLayout.CENTER);
         
         // Add listener to resize and position dialog after opening.  This is 
