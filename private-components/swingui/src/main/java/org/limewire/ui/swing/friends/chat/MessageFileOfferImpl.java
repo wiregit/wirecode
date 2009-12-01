@@ -134,7 +134,7 @@ class MessageFileOfferImpl extends AbstractMessageImpl implements MessageFileOff
                     
                 case DANGEROUS:
                     fileOfferFormatted = fileOfferReceived + "<br/><br/>" +
-                            tr("File deleted - Threat detected");
+                            tr("File deleted - Dangerous file");
                     break;
                     
                 default:

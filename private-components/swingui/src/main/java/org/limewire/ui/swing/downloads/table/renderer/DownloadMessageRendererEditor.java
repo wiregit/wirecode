@@ -194,7 +194,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
                     "Waiting - {0} in line",
                     item.getRemoteQueuePosition(), item.getRemoteQueuePosition());
         case DANGEROUS:
-            return I18n.tr("File deleted - Threat detected");
+            return I18n.tr("File deleted - Dangerous file");
         case SCANNING:
             return I18n.tr("Scanning for viruses - Powered by AVG");
         case SCANNING_FRAGMENT:
