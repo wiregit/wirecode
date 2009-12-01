@@ -86,7 +86,9 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
             public void handleEvent(final FileProcessingEvent event) {
                 switch (event.getType()) {
                 case PROCESSING:
-                    processingLine.setText(event.getSource().getName());
+                    String fileName = event.getSource().getName();
+                    processingLine.setText(fileName);
+                    processingLine.setToolTipText(fileName);
                     processingLine.setIcon(iconManager.getIconForExtension(FileUtils.getFileExtension(event.getSource().getName())));
                     stopButton.setVisible(true);
                     break;
