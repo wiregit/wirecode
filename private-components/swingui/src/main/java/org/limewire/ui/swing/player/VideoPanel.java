@@ -103,18 +103,15 @@ class VideoPanel implements Disposable{
 
         videoPanel.add(headerBar, BorderLayout.NORTH);
         videoPanel.add(fitToScreenContainer, BorderLayout.CENTER);
-
     }
     
     public JComponent getComponent(){
         return videoPanel;
     }
     
-    
     public void dispose() {
         controlPanel.dispose();
     }
- 
 
     private void setupActionMaps(){
         videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), "fullScreen");
@@ -162,11 +159,12 @@ class VideoPanel implements Disposable{
                     closeButton.setVisible(false);
                     headerBar.setFocusable(true);
                     headerBar.requestFocusInWindow();
+                    setFitToScreen(true);
                 } else {
                     fullScreenButton.setIcon(fullScreenUnselected);
                     closeButton.setVisible(true);
+                    setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
                 }
-                
                 videoPanel.removeAncestorListener(this);
             }
             
@@ -195,7 +193,6 @@ class VideoPanel implements Disposable{
         });
         return item;
     }
-    
 
     private JMenuItem createFitToScreenMenuItem() {
         JMenuItem item = new JCheckBoxMenuItem(I18n.tr("Fit to Screen"));
@@ -205,8 +202,6 @@ class VideoPanel implements Disposable{
     }
     
     private void setFitToScreen(boolean isFitToScreen) {
-        SwingUiSettings.VIDEO_FIT_TO_SCREEN.setValue(isFitToScreen);
-        
         if(isFitToScreen){
             fitToScreenLayout.setComponentConstraints(videoRenderer, "grow, push");   
             videoRenderer.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));   
@@ -218,7 +213,6 @@ class VideoPanel implements Disposable{
         }
         fitToScreenContainer.revalidate();
     }
-    
     
     private JMenuItem createPauseMenuItem(){
         JMenuItem item = new JMenuItem(I18n.tr("Pause"));
@@ -242,7 +236,6 @@ class VideoPanel implements Disposable{
         return item;
     }
     
-
     private class CloseAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -268,9 +261,10 @@ class VideoPanel implements Disposable{
         @Override
         public void itemStateChanged(ItemEvent e) {
             setFitToScreen(e.getStateChange() == ItemEvent.SELECTED);
+            //save the Fit_To_Screen state in settings.
+            SwingUiSettings.VIDEO_FIT_TO_SCREEN.setValue(e.getStateChange() == ItemEvent.SELECTED);
         }
     }
-    
     
     private class EscAction extends AbstractAction {
         @Override
@@ -282,7 +276,6 @@ class VideoPanel implements Disposable{
             }
         }
     }
-    
     
     private class PlayOrPauseAction extends AbstractAction {
         @Override
@@ -316,7 +309,9 @@ class VideoPanel implements Disposable{
                     menu.add(createPlayMenuItem());
                 }
                 menu.addSeparator();
-                menu.add(createFitToScreenMenuItem());
+                if(!videoMediator.isFullScreen()) {
+                    menu.add(createFitToScreenMenuItem());
+                }
                 menu.add(createFullScreenMenuItem());
                 menu.addSeparator();
                 menu.add(createCloseItem());
@@ -324,5 +319,4 @@ class VideoPanel implements Disposable{
             }
         }
     }
-
 }
