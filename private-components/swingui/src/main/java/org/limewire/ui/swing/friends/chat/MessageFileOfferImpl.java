@@ -114,10 +114,32 @@ class MessageFileOfferImpl extends AbstractMessageImpl implements MessageFileOff
                             tr("{0}Downloaded{1}","<a href=\"" +
                             ChatDocumentBuilder.MY_LIBRARY_LINK + "\">", "</a>");
                     break;
-                // FIXME: DANGEROUS, SCANNING, SCANNING_FRAGMENT,
-                // THREAT_FOUND, SCAN_FAILED?
+                    
+                case SCAN_FAILED:
+                    fileOfferFormatted = fileOfferReceived +
+                            tr("{0}Downloaded but not scanned for viruses{1}",
+                                    "<a href=\"" + ChatDocumentBuilder.MY_LIBRARY_LINK + "\">", "</a>");
+                    break;
+                    
+                case SCANNING:
+                case SCANNING_FRAGMENT:
+                    fileOfferFormatted = fileOfferReceived +
+                            tr("Scanning for viruses - Powered by AVG");
+                    break;
+                    
+                case THREAT_FOUND:
+                    fileOfferFormatted = fileOfferReceived + "<br/><br/>" +
+                            tr("File deleted - Threat detected by AVG");
+                    break;
+                    
+                case DANGEROUS:
+                    fileOfferFormatted = fileOfferReceived + "<br/><br/>" +
+                            tr("File deleted - Threat detected");
+                    break;
+                    
                 default:
                     fileOfferFormatted = defaultFileOfferFormatted;
+                    break;
             }
         }
         return fileOfferFormatted;
