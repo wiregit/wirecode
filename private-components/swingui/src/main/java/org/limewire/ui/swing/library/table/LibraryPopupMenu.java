@@ -25,7 +25,6 @@ public class LibraryPopupMenu extends JPopupMenu {
     private final Provider<LocateFileAction> locateAction;
     private final Provider<RemoveFromListMenu> removeFromListMenu;
     private final Provider<RemoveFromListAction> removeFromListAction;
-    private final RemoveFromLibraryAction removeAction;
     private final DeleteAction deleteAction;
     private final Provider<ViewFileInfoAction> fileInfoAction;
     
@@ -37,7 +36,7 @@ public class LibraryPopupMenu extends JPopupMenu {
             ListMenuFactory listMenuFactory, Provider<RemoveFromListMenu> removeFromListMenu,
             Provider<RemoveFromListAction> removeFromListAction,
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
-            RemoveFromLibraryAction removeAction, Provider<RenameFileAction> renameFileAction,
+            Provider<RenameFileAction> renameFileAction,
             DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
         this.selectedFiles = selectedFiles;
         this.selectedLocalFileList = selectedLocalFileList;
@@ -48,7 +47,6 @@ public class LibraryPopupMenu extends JPopupMenu {
         this.locateAction = locateAction;
         this.removeFromListMenu = removeFromListMenu;
         this.removeFromListAction = removeFromListAction;
-        this.removeAction = removeAction;
         this.deleteAction = deleteAction;
         this.fileInfoAction = fileInfoAction;
         
@@ -85,7 +83,6 @@ public class LibraryPopupMenu extends JPopupMenu {
             add(listMenuFactory.createAddToListMenu(selectedFiles));
             add(removeFromListMenu.get());
             addSeparator();
-            add(removeAction);
             add(deleteAction);
         }
     }
@@ -98,7 +95,7 @@ public class LibraryPopupMenu extends JPopupMenu {
             addSeparator();
             
             // add to list, show in list, remove from list
-            add(listMenuFactory.createShowInListMenu(selectedFiles, selectedLocalFileList, false));
+            add(listMenuFactory.createShowInListMenu(selectedFiles, selectedLocalFileList, true));
             add(removeFromListAction.get());
             addSeparator();
             
@@ -110,7 +107,6 @@ public class LibraryPopupMenu extends JPopupMenu {
         } else {
             add(removeFromListAction.get());
             addSeparator();
-            add(removeAction);
             add(deleteAction);
         }
     }
