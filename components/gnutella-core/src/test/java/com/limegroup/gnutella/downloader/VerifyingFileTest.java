@@ -430,15 +430,27 @@ public class VerifyingFileTest extends LimeTestCase {
         vf.leaseWhite((int) completeFile.length());
         byte[] chunk = new byte[hashTree.getNodeSize()];
 
-        int j = 0;
-        while (j * chunk.length < completeFile.length() * VerifyingFile.MAX_CORRUPTION) {
+        long totalWritten = 0;
+        long treeWritten = 0;
+        while (totalWritten < completeFile.length() * VerifyingFile.MAX_CORRUPTION) {
             assertFalse(vf.isHopeless());
             raf.read(chunk);
             for (int i = 0; i < 100; i++)
                 chunk[i] = (byte) i;
             writeImpl((int) (raf.getFilePointer() - chunk.length), chunk);
             vf.waitForPending(1000);
-            j++;
+            totalWritten += chunk.length;
+            treeWritten += chunk.length;
+            // Because the tree is erased every MAX_CORRUPTION_FOR_TREE%,
+            // we need to reset the tree while writing in order to
+            // actually reach a hopeless state.
+            if(treeWritten >= completeFile.length() * VerifyingFile.MAX_CORRUPTION_FOR_TREE) {
+                assertNull(vf.getHashTree());
+                vf.setHashTree(hashTree);
+                treeWritten = 0;
+            } else {
+                assertSame(hashTree, vf.getHashTree());
+            }
         }
         assertTrue(vf.isHopeless());
     }

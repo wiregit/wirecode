@@ -766,7 +766,7 @@ public class VerifyingFile {
         HashTree tree = getHashTree(); // capture the tree.
         // if we have a tree, see if there is a completed chunk in the partial list
         if(tree != null) {
-            for(Range i : findVerifyableBlocks(existingFileSize)) {
+            for(Range i : findVerifyableBlocks(existingFileSize, tree.getNodeSize())) {
                 byte[] tmp = diskController.get().getPowerOf2Chunk(Math.min(VERIFYABLE_CHUNK,tree.getNodeSize()));
                 boolean good = !tree.isCorrupt(i, fos, tmp);
                 synchronized (this) {
@@ -775,8 +775,9 @@ public class VerifyingFile {
                         verifiedBlocks.add(i);
                     else {
                         if (!fullScan) {
-                            if (!discardBad)
+                            if (!discardBad) {
                                 savedCorruptBlocks.add(i);
+                            }
                             long intervalSize = i.getLength();
                             lostSize += intervalSize;
                             lostSizeForTree += intervalSize;
@@ -808,14 +809,13 @@ public class VerifyingFile {
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
      * per method call unless the downloader is being deserialized from disk.
      */
-    private synchronized List<Range> findVerifyableBlocks(long existingFileSize) {
+    private synchronized List<Range> findVerifyableBlocks(long existingFileSize, int chunkSize) {
         if (LOG.isTraceEnabled())
             LOG.trace("trying to find verifyable blocks out of "+partialBlocks);
         
         boolean fullScan = existingFileSize != -1;
         List<Range> verifyable = new ArrayList<Range>(2);
         List<Range> partial;
-        int chunkSize = getChunkSize();
         
         if(fullScan) {
             IntervalSet temp = partialBlocks.clone();
