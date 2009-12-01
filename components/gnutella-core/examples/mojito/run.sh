@@ -2,7 +2,9 @@
 
 ulimit -n 1024
 PATH_SEPARATOR=":"
-ROOT="../../../../"
+ROOT="../../../.."
+MOJITO="mojito-ui"
+
 
 CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}."
 CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${ROOT}/core"
@@ -23,6 +25,10 @@ for COMPONENT in $(ls ${COMPONENTS}); do
 	then
 		CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${COMPONENTS}/${COMPONENT}/build/classes"
 		CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${COMPONENTS}/${COMPONENT}/src/main/resources"
+
+	    if [ ${COMPONENT} = $MOJITO ]; then
+        CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${COMPONENTS}/${COMPONENT}/build/misc"
+    	fi
 	fi
 done
 
@@ -35,9 +41,7 @@ for JAR in $(find ${COMPONENTS}/mojito-ui/misc/lib -name *.jar); do
 done
 
 export CLASSPATH
-
 javac org/limewire/mojito/Main.java
-#java -ea -Djava.nio.preferSelect=true org.limewire.mojito.Main $*
 java -ea org.limewire.mojito.Main $*
 
 exit 0
