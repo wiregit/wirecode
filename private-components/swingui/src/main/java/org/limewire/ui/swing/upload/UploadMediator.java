@@ -128,7 +128,7 @@ public class UploadMediator {
         // Add list listener to enable "clear finished" button.
         EventList<UploadItem> doneList = GlazedListsFactory.filterList(
                 uploadListManager.getSwingThreadSafeUploads(), 
-                new FinishedUploadMatcher(true));
+                new CompleteUploadMatcher());
         doneList.addListEventListener(new ListEventListener<UploadItem>() {
             @Override
             public void listChanged(ListEvent<UploadItem> listChanges) {
@@ -173,7 +173,7 @@ public class UploadMediator {
         if (activeList == null) {
             activeList = GlazedListsFactory.filterList(
                     uploadListManager.getSwingThreadSafeUploads(), 
-                    new FinishedUploadMatcher(false));
+                    new ActiveUploadMatcher());
         }
         return activeList;
     }
@@ -511,26 +511,33 @@ public class UploadMediator {
     }
     
     /**
-     * Matcher to filter for finished or unfinished uploads.
-     */
-    private static class FinishedUploadMatcher implements Matcher<UploadItem> {
-        private final boolean inclusive;
-        
-        /**
-         * Constructs a matcher that either includes or excludes finished 
-         * uploads.
-         */
-        public FinishedUploadMatcher(boolean inclusive) {
-            this.inclusive = inclusive;
-        }
-        
+	 * Returns true if the UploadItem is currently active, false otherwise.
+	 */
+    private class ActiveUploadMatcher implements Matcher<UploadItem> {
         @Override
         public boolean matches(UploadItem item) {
             if (item == null) return false;
             
             UploadState state = item.getState();
-            boolean isActive = (state == UploadState.QUEUED || state == UploadState.UPLOADING);
-            return inclusive ? !isActive : isActive;
+            return state == UploadState.QUEUED || state == UploadState.UPLOADING;
+        }
+    }
+    
+    /**
+	 * Return true if the UploadItem is in a compelte state, false otherwise.
+	 */
+    private class CompleteUploadMatcher implements Matcher<UploadItem> {
+        @Override
+        public boolean matches(UploadItem item) {
+            if (item == null) return false;
+            
+            UploadState state = item.getState();
+            return state == UploadState.DONE 
+                    || state == UploadState.LIMIT_REACHED
+                    || state == UploadState.CANCELED
+                    || state == UploadState.BROWSE_HOST
+                    || state == UploadState.BROWSE_HOST_DONE
+                    || state == UploadState.REQUEST_ERROR;
         }
     }
     
