@@ -14,25 +14,25 @@ import com.google.inject.Inject;
 
 public class FileProcessingPopupPanel extends OverlayPopupPanel {
     
-    private final Component parentButton;
     private final FileProcessingPopupContentPanel childPanel;
+    
+    private Component parentButton;
     
     @Inject
     public FileProcessingPopupPanel(@GlobalLayeredPane JLayeredPane layeredPane,
-            FileProcessingPopupContentPanel childPanel,
-            FileProcessingPanel parent) {
+            FileProcessingPopupContentPanel childPanel) {
         super(layeredPane, childPanel);
 
-        this.parentButton = parent;
         this.childPanel = childPanel;
         
         resize();
         validate();
     }
 
-    @Inject
-    public void register() {
-        parentButton.addComponentListener(new ComponentAdapter() {
+    public void registerParent(Component parent) {
+        parentButton = parent;
+        
+        parent.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentMoved(ComponentEvent e) {
                 resize();
@@ -45,8 +45,7 @@ public class FileProcessingPopupPanel extends OverlayPopupPanel {
         Rectangle parentBounds = layeredPane.getBounds();
         int w = 200;
         int h = 46;
-        
-        int x = 0; 
+        int x = 0;
             
         if (parentButton != null) {
             x = parentButton.getX();

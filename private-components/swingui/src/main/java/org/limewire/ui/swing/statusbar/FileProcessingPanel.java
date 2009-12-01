@@ -38,7 +38,7 @@ class FileProcessingPanel extends JXButton {
     private FileProcessingPopupPanel popup;
 
     @Inject
-    FileProcessingPanel(ButtonDecorator decorator) {
+    FileProcessingPanel(ButtonDecorator decorator, final FileProcessingPopupPanel popup) {
 
         GuiUtils.assignResources(this);
         
@@ -51,15 +51,15 @@ class FileProcessingPanel extends JXButton {
                 return popup != null ? popup.isVisible() : false;
             }
         }, activeBackground, activeBorder, DrawMode.NORMAL);
+        
+        this.popup = popup;
+        popup.registerParent(this);
+        popup.setVisible(false);
+        setVisible(false);
     }
     
     @Inject
-    void registerListeners(LibraryManager libraryManager, final FileProcessingPopupPanel popup) {
-        
-        this.popup = popup;
-        popup.setVisible(false);
-        setVisible(false);
-        
+    void registerListeners(LibraryManager libraryManager) {
         libraryManager.getLibraryManagedList().addFileProcessingListener(new EventListener<FileProcessingEvent>() {
             @Override
             @SwingEDTEvent
@@ -91,6 +91,7 @@ class FileProcessingPanel extends JXButton {
         popup.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentHidden(ComponentEvent e) {
+                repaint();
                 closePopup();
             }
         });

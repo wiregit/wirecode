@@ -42,7 +42,7 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
     private EventListener<FileProcessingEvent> listener;
     
     @Inject
-    public FileProcessingPopupContentPanel(final FileProcessingPanel parent, final LibraryManager libraryManager) {
+    public FileProcessingPopupContentPanel(final LibraryManager libraryManager) {
         super(new BorderLayout());
         
         this.libraryManager = libraryManager;
@@ -53,7 +53,6 @@ public class FileProcessingPopupContentPanel extends JPanel implements Disposabl
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                parent.repaint();
             }
         }), BorderLayout.NORTH);
         
