@@ -10,6 +10,7 @@ import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.Highlighter;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColors;
 
@@ -23,6 +24,7 @@ import ca.odell.glazedlists.swing.DefaultEventTableModel;
 public abstract class TransferTable<E> extends MouseableTable {
 
     private final DefaultEventTableModel<E> model;
+    private final TransferRendererResources resources;
     
     /**
      * Constructs a new TransferTable with the specified event list and table
@@ -37,6 +39,7 @@ public abstract class TransferTable<E> extends MouseableTable {
      */
     public TransferTable(DefaultEventTableModel<E> model) {        
         this.model = model;
+        this.resources = new TransferRendererResources();
         
         setModel(model);
         setShowGrid(true, false);      
@@ -45,13 +48,23 @@ public abstract class TransferTable<E> extends MouseableTable {
         TableColors colors = getTableColors();
         setHighlighters(
                 new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor,
-                        colors.evenForeground, colors.selectionColor,
+                        resources.getForeground(), colors.selectionColor,
                         colors.selectionForeground),
                 new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor,
-                        colors.evenForeground, colors.selectionColor,
+                        resources.getForeground(), colors.selectionColor,
                         colors.selectionForeground));
     }
 
+    /**
+     * Creates a highlighter for a disabled row using the specified predicate.
+     */
+    public Highlighter createDisabledHighlighter(HighlightPredicate predicate) {
+        TableColors colors = getTableColors();
+        return new ColorHighlighter(predicate, colors.evenColor,
+                resources.getDisabledForeground(), colors.selectionColor,
+                colors.selectionForeground);
+    }
+    
     /**
      * Sets the column editor for the specified column index.
      */

@@ -1,13 +1,9 @@
 package org.limewire.ui.swing.downloads.table.renderer;
 
-import java.awt.Component;
-
 import javax.swing.Icon;
-import javax.swing.JTable;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.ui.swing.transfer.TransferTitleRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -33,26 +29,6 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         this.categoryIconManager = categoryIconManager;
         
         GuiUtils.assignResources(this);
-    }
-    
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
-        Component renderer = super.getTableCellRendererComponent(table, value, 
-                isSelected, hasFocus, row, column);
-        
-        // Adjust foreground color when threat detected.
-        // TODO research why this doesn't work
-        if (value instanceof DownloadItem) {
-            DownloadState state = ((DownloadItem) value).getState();
-            if (state == DownloadState.DANGEROUS ||
-                    state == DownloadState.THREAT_FOUND ||
-                    state == DownloadState.SCAN_FAILED) {
-                renderer.setForeground(resources.getDisabledForeground());
-            }
-        }
-        
-        return renderer;
     }
     
     @Override

@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +10,11 @@ import javax.swing.Action;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
@@ -78,8 +82,9 @@ public class DownloadTable extends TransferTable<DownloadItem> {
                 
         initialize(downloadItems, buttonEditor, cancelEditor, downloadPopupHandlerFactory);
         
+        addHighlighter(createDisabledHighlighter(new ThreatHighlightPredicate()));
+        
         TableCellRenderer gapRenderer = new GapRenderer();
-
         setUpColumn(DownloadTableFormat.TITLE, downloadTitleRenderer, titleMinWidth, titlePrefWidth, titleMaxWidth);
         setUpColumn(DownloadTableFormat.TITLE_GAP, gapRenderer, gapMinWidth, gapPrefWidth, gapMaxWidth);
         setUpColumn(DownloadTableFormat.PROGRESS, downloadProgressRenderer, progressMinWidth, progressPrefWidth, progressMaxWidth);
@@ -176,6 +181,21 @@ public class DownloadTable extends TransferTable<DownloadItem> {
         DownloadItem item = getDownloadItem(row);
         if(item != null && item.isLaunchable()) {
             DownloadItemUtils.launch(item, categoryManager);
+        }
+    }
+    
+    /**
+     * Implementation of Predicate that specifies rules to highlight table row
+     * containing download threat.
+     */
+    private class ThreatHighlightPredicate implements HighlightPredicate {
+        @Override
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            DownloadItem item = getDownloadItem(adapter.row);
+            DownloadState state = item.getState();
+            return (state == DownloadState.DANGEROUS ||
+                    state == DownloadState.THREAT_FOUND ||
+                    state == DownloadState.SCAN_FAILED);
         }
     }
 }
