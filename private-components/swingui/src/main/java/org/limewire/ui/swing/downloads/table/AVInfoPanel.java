@@ -111,28 +111,49 @@ public class AVInfoPanel extends JPanel {
     }
     
     /**
-     * Displays the threat detected message.
+     * Displays the dangerous file message.  This applies to files marked as 
+     * hazardous by the internal dangerous file checker.
+     * 
+     * @param item the item representing the downloaded file
+     * @param autoNotify true if this is an automatic message request due to a state change
+     */
+    public void showDangerMessage(DownloadItem item, boolean autoNotify) {
+        String heading = I18n.tr("Dangerous File");
+        String message = I18n.tr("{0} is considered a dangerous file and has automatically been deleted for your protection.", item.getFileName());
+        showWarningMessage(heading, message, autoNotify, false);
+    }
+    
+    /**
+     * Displays the threat detected message.  This applies to infected files
+     * as determined by the virus scanner.
+     * 
+     * @param item the item representing the downloaded file
+     * @param autoNotify true if this is an automatic message request due to a state change
      */
     public void showThreatMessage(DownloadItem item, boolean autoNotify) {
         String heading = I18n.tr("Threat Detected");
         String message = I18n.tr("{0} is suspected to contain a virus or spyware and has automatically been deleted for your protection.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
-        showWarningMessage(heading, message, autoNotify);
+        showWarningMessage(heading, message, autoNotify, true);
     }
     
     /**
-     * Displays the failure message.  This is for files that could not be 
+     * Displays the failure message.  This applies to files that could not be 
      * scanned due to a problem with the virus scanner.
+     * 
+     * @param item the item representing the downloaded file
+     * @param autoNotify true if this is an automatic message request due to a state change
      */
     public void showFailureMessage(DownloadItem item, boolean autoNotify) {
         String heading = I18n.tr("Scan Failed");
         String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
-        showWarningMessage(heading, message, autoNotify);
+        showWarningMessage(heading, message, autoNotify, true);
     }
     
     /**
      * Displays a warning message with the specified heading and message text.
      */
-    private void showWarningMessage(String heading, String message, boolean autoNotify) {
+    private void showWarningMessage(String heading, String message, 
+            boolean autoNotify, boolean showVendor) {
         // Skip if message is automatic and setting is false.
         if (autoNotify && !SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND.getValue()) {
             return;
@@ -156,12 +177,12 @@ public class AVInfoPanel extends JPanel {
         doNotShowCheckBox.setVisible(autoNotify);
         
         // Add components to container.
-        add(iconLabel, "spany, alignx left, aligny top, gapright 15");
+        add(iconLabel, "spany, alignx left, aligny top, gaptop 6, gapright 15"); 
         add(headingLabel, "span, align left, wrap");
         add(messageLabel, "span, align left, wrap 15");
         add(okButton, "alignx left, aligny bottom");
         add(doNotShowCheckBox, "alignx left, aligny bottom, gapleft 5");
-        add(vendorLabel, "alignx right, aligny bottom, push");
+        if (showVendor) add(vendorLabel, "alignx right, aligny bottom, push");
         
         // Display as modal dialog.
         showDialog(I18n.tr("Warning"));

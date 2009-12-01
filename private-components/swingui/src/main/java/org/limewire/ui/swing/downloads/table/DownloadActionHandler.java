@@ -31,7 +31,6 @@ import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -212,7 +211,8 @@ public class DownloadActionHandler {
         case BITTORRENT:
             switch (item.getState()) {
             case DANGEROUS:
-                throw new NotImplementedException("Dangerous download info");
+                avInfoPanelFactory.get().showDangerMessage(item, false);
+                break;
 
             case SCANNING:
             case SCANNING_FRAGMENT:
@@ -225,6 +225,7 @@ public class DownloadActionHandler {
                 
             case SCAN_FAILED:
                 avInfoPanelFactory.get().showFailureMessage(item, false);
+                break;
             }
             break;
         }

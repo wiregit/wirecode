@@ -159,7 +159,7 @@ public class MainDownloadPanel extends JPanel {
                 } else if (state == DownloadState.SCAN_FAILED) {
                     avInfoPanelFactory.get().showFailureMessage(downloadItem, true);
                 } else if (state == DownloadState.DANGEROUS) {
-                    // FIXME: notification?
+                    avInfoPanelFactory.get().showDangerMessage(downloadItem, true);
                 } else {
                     notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
                             new AbstractAction() {
