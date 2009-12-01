@@ -209,7 +209,7 @@ public class DownloadTableMenu extends JPopupMenu{
     }
 
     private boolean isCancelable(DownloadState state) {
-        return state != DownloadState.DONE;
+        return !DownloadState.isFinished(state);
     }
     
     private boolean maybeAddBrowseMenu(Collection<RemoteHost> remoteHosts){
