@@ -66,7 +66,6 @@ class VideoDisplayDirector {
         assert(topPanelPreferredSize != null);
         
         resizerListener = new VideoPanelResizer();
-        limeWireLayeredPane.addComponentListener(resizerListener);
     }
     
     public void show(Component videoRenderer, boolean isFullScreen){
@@ -98,6 +97,7 @@ class VideoDisplayDirector {
         //Make sure the flash of native video window doesn't steal focus
         GuiUtils.getMainFrame().toFront();   
         registerNavigationListener();
+        limeWireLayeredPane.addComponentListener(resizerListener);
     }   
     
     private void registerNavigationListener() {
