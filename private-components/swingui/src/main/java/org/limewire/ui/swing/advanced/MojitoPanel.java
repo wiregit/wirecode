@@ -82,7 +82,7 @@ class MojitoPanel extends TabPanel {
      * parent window is opened. 
      */
     @Override
-    public void start() {
+    public void initData() {
         // Render tab content.
         if (plugin != null) {
             renderPlugin();
@@ -154,7 +154,7 @@ class MojitoPanel extends TabPanel {
      * parent window is closed.
      */
     @Override
-    public void stop() {
+    public void dispose() {
         // Stop Mojito plugin.
         if (plugin != null) {
             plugin.stopPlugin();

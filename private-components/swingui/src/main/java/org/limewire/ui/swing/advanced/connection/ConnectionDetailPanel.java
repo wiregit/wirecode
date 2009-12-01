@@ -21,6 +21,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.connection.ConnectionItem;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.search.FriendPresenceActions;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -38,7 +39,7 @@ import com.google.inject.Inject;
 /**
  * Display panel for the connection details table.
  */
-public class ConnectionDetailPanel extends JPanel {
+public class ConnectionDetailPanel extends JPanel implements Disposable {
 
     /** Manager instance for connection data. */
     private GnutellaConnectionManager gnutellaConnectionManager;
@@ -151,7 +152,8 @@ public class ConnectionDetailPanel extends JPanel {
     /**
      * Clears the data models in the container.
      */
-    public void clearData() {
+    @Override
+    public void dispose() {
         connectionTable.clearEventList();
     }
 

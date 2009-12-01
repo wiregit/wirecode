@@ -1,8 +1,10 @@
 package org.limewire.ui.swing.advanced.connection;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,6 +39,7 @@ import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.advanced.connection.PopupManager.PopupProvider;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -51,21 +54,18 @@ import com.google.inject.Inject;
 /**
  * Display panel for the connection summary. 
  */
-public class ConnectionSummaryPanel extends JPanel {
+public class ConnectionSummaryPanel extends JPanel implements Disposable {
 
-    private static final String IS_ULTRAPEER = I18n.tr("You are an Ultrapeer node");
-    private static final String IS_LEAF = I18n.tr("You are a Leaf node");
-    private static final String IS_NOT_FIREWALLED = I18n.tr("You are not behind a firewall");
-    private static final String IS_FIREWALLED_TRANSFERS = I18n.tr("You are behind a firewall and support firewall transfers");
-    private static final String IS_FIREWALLED_NO_TRANSFERS = I18n.tr("You are behind a firewall and do not support firewall transfers");
-    private static final String CONNECTED_TO = I18n.tr("Connected to:");
-    private static final String RESOLVE = I18n.tr("Show hostnames of connected peers");
+    private static final String DISCONNECTED_PANEL_KEY = "DISCONNECTED_KEY";
+    private static final String CONNECTED_PANEL_KEY = "CONNECTED_KEY";
     
-    private static final String CONNECTING = I18n.tr("Connecting");
-    private static final String LEAVES = I18n.tr("Leaves");
-    private static final String PEERS = I18n.tr("Peers");
-    private static final String STANDARD = I18n.tr("Standard");
-    private static final String ULTRAPEERS = I18n.tr("Ultrapeers");
+    private final String IS_ULTRAPEER = I18n.tr("You are an Ultrapeer node");
+    private final String IS_LEAF = I18n.tr("You are a Leaf node");
+    private final String IS_NOT_FIREWALLED = I18n.tr("You are not behind a firewall");
+    private final String IS_FIREWALLED_TRANSFERS = I18n.tr("You are behind a firewall and support firewall transfers");
+    private final String IS_FIREWALLED_NO_TRANSFERS = I18n.tr("You are behind a firewall and do not support firewall transfers");
+    private final String CONNECTED_TO = I18n.tr("Connected to:");
+    private final String RESOLVE = I18n.tr("Show hostnames of connected peers");
     
     @Resource
     private Icon questionMarkIcon;
@@ -82,13 +82,18 @@ public class ConnectionSummaryPanel extends JPanel {
     /** List of connections. */
     private TransformedList<ConnectionItem, ConnectionItem> connectionList;
 
-    private JLabel nodeLabel = new JLabel();
-    private FirewallPanel firewallLabelPanel;
-    private JLabel summaryLabel = new JLabel();
-    private JTable summaryTable = new JTable();
-    private SummaryTableModel summaryTableModel = new SummaryTableModel();
-    private JCheckBox resolveCheckBox = new JCheckBox(RESOLVE);
-
+    private final JLabel nodeLabel = new JLabel();
+    private final FirewallPanel firewallLabelPanel;
+    private final JLabel summaryLabel = new JLabel();
+    private final JTable summaryTable = new JTable();
+    private final SummaryTableModel summaryTableModel = new SummaryTableModel();
+    private final JCheckBox resolveCheckBox = new JCheckBox(RESOLVE);
+    private final JLabel disconnectedMessageLabel = new JLabel();
+    
+    private final CardLayout switcher;
+    private final JPanel disconnectedPanel;
+    private final JPanel connectedPanel;
+    
     /**
      * Constructs the ConnectionDetailPanel to display connections details.
      */
@@ -96,6 +101,7 @@ public class ConnectionSummaryPanel extends JPanel {
     public ConnectionSummaryPanel(GnutellaConnectionManager gnutellaConnectionManager,
             EventBean<FirewallStatusEvent> firewallStatusBean,
             EventBean<FirewallTransferStatusEvent> firewallTransferBean) {
+        
         GuiUtils.assignResources(this);
         
         this.gnutellaConnectionManager = gnutellaConnectionManager;
@@ -103,9 +109,6 @@ public class ConnectionSummaryPanel extends JPanel {
         this.firewallTransferBean = firewallTransferBean;
         
         setBorder(BorderFactory.createTitledBorder(""));
-        setLayout(new MigLayout("insets 0 0 0 0,fill",
-            "[left]",                          // col constraints
-            "[top][top][bottom][top,fill]"));  // row constraints
         setPreferredSize(new Dimension(120, 120));
         setOpaque(false);
         
@@ -138,11 +141,25 @@ public class ConnectionSummaryPanel extends JPanel {
             }
         });
 
-        add(nodeLabel      , "cell 0 0");
-        add(firewallLabelPanel  , "cell 0 1, growx 100");
-        add(summaryLabel   , "cell 0 2");
-        add(summaryTable   , "cell 0 3");
-        add(resolveCheckBox, "cell 0 4");
+        connectedPanel = new JPanel(new MigLayout("insets 0 0 0 0,fill",
+            "[left]", "[top][top][bottom][top,fill]"));
+        connectedPanel.setOpaque(false);
+        
+        connectedPanel.add(nodeLabel      , "cell 0 0");
+        connectedPanel.add(firewallLabelPanel  , "cell 0 1, growx 100");
+        connectedPanel.add(summaryLabel   , "cell 0 2");
+        connectedPanel.add(summaryTable   , "cell 0 3");
+        connectedPanel.add(resolveCheckBox, "cell 0 4");
+        
+        disconnectedPanel = new JPanel(new GridBagLayout());
+        disconnectedPanel.setOpaque(false);
+        
+        disconnectedPanel.add(disconnectedMessageLabel);
+        
+        switcher = new CardLayout();
+        setLayout(switcher);
+        add(connectedPanel, CONNECTED_PANEL_KEY);
+        add(disconnectedPanel, DISCONNECTED_PANEL_KEY);
     }
 
     @Override
@@ -164,19 +181,16 @@ public class ConnectionSummaryPanel extends JPanel {
             connectionList = GlazedListsFactory.swingThreadProxyEventList(
                     gnutellaConnectionManager.getConnectionList());
 
-            // Set node description.
-            boolean ultrapeer = gnutellaConnectionManager.isUltrapeer();
-            nodeLabel.setText(ultrapeer ? IS_ULTRAPEER : IS_LEAF);
-
-            // Set firewall status.
-            updateFirewallStatus();
+            // Set status.
+            updateStatus();
         }
     }
     
     /**
      * Clears the data models in the container.
      */
-    public void clearData() {
+    @Override
+    public void dispose() {
         if (connectionList != null) {
             connectionList.dispose();
             connectionList = null;
@@ -187,33 +201,52 @@ public class ConnectionSummaryPanel extends JPanel {
      * Triggers a refresh of the data being displayed. 
      */
     public void refresh() {
-        updateFirewallStatus();
+        updateStatus();
         summaryTableModel.update(connectionList);
     }
 
     /**
      * Updates the firewall status fields.
      */
-    private void updateFirewallStatus() {
-        // Get firewall status.
-        FirewallStatus firewallStatus = firewallStatusBean.getLastEvent().getData();
-        
-        if (firewallStatus == FirewallStatus.FIREWALLED) {
-            // Get firewall transfer status and reason.
-            FirewallTransferStatusEvent event = firewallTransferBean.getLastEvent();
-            FirewallTransferStatus transferStatus = event.getData();
-            FWTStatusReason transferReason = event.getType();
-
-            // Set firewall status and reason.
-            if (transferStatus == FirewallTransferStatus.DOES_NOT_SUPPORT_FWT) {
-                firewallLabelPanel.setStatusText(IS_FIREWALLED_NO_TRANSFERS, getReasonText(transferReason));
-            } else {
-                firewallLabelPanel.setStatusText(IS_FIREWALLED_TRANSFERS, null);
-            }
+    private void updateStatus() {
+        if (gnutellaConnectionManager.isConnected()) {
+            switcher.show(this, CONNECTED_PANEL_KEY);
             
-        } else {
-            // Not firewalled so clear transfer status and reason.
-            firewallLabelPanel.setStatusText(IS_NOT_FIREWALLED, null);
+            // Set node description.
+            boolean isUltrapeer = gnutellaConnectionManager.isUltrapeer();
+            nodeLabel.setText(isUltrapeer ? IS_ULTRAPEER : IS_LEAF);
+
+            // Get firewall status.
+            FirewallStatus firewallStatus = firewallStatusBean.getLastEvent().getData();
+        
+            if (firewallStatus == FirewallStatus.FIREWALLED) {
+                // Get firewall transfer status and reason.
+                FirewallTransferStatusEvent event = firewallTransferBean.getLastEvent();
+                FirewallTransferStatus transferStatus = event.getData();
+                FWTStatusReason transferReason = event.getType();
+
+                // Set firewall status and reason.
+                if (transferStatus == FirewallTransferStatus.DOES_NOT_SUPPORT_FWT) {
+                    firewallLabelPanel.setStatusText(IS_FIREWALLED_NO_TRANSFERS, getReasonText(transferReason));
+                } else {
+                    firewallLabelPanel.setStatusText(IS_FIREWALLED_TRANSFERS, null);
+                }
+            
+            } else {
+                // Not firewalled so clear transfer status and reason.
+                firewallLabelPanel.setStatusText(IS_NOT_FIREWALLED, null);
+            }
+        } 
+        else {
+            switcher.show(this, DISCONNECTED_PANEL_KEY);
+            switch (gnutellaConnectionManager.getConnectionStrength()) {
+                case NO_INTERNET :
+                    disconnectedMessageLabel.setText(I18n.tr("No internet connection!"));
+                    break;
+                case DISCONNECTED :
+                    disconnectedMessageLabel.setText("<html>" + I18n.tr("Gnutella is disconnected however internet connection detected!")+"</html>");
+                    break;
+            }
         }
     }
 
@@ -242,6 +275,7 @@ public class ConnectionSummaryPanel extends JPanel {
      * that opens a popup giving further explanation of the transfer status.  
      */
     private class FirewallPanel extends JPanel implements PopupProvider {
+        
         private Point popupLocation;
         private String reasonText;
         private HTMLLabel statusLabel;
@@ -367,6 +401,12 @@ public class ConnectionSummaryPanel extends JPanel {
      */
     private static class SummaryTableModel extends AbstractTableModel {
 
+        private final String CONNECTING = I18n.tr("Connecting");
+        private final String LEAVES = I18n.tr("Leaves");
+        private final String PEERS = I18n.tr("Peers");
+        private final String STANDARD = I18n.tr("Standard");
+        private final String ULTRAPEERS = I18n.tr("Ultrapeers");
+        
         /** A 5-element array containing the number of connections with the
          *  following states: connecting, ultrapeer, peer, leaf, standard.
          */

@@ -23,10 +23,7 @@ import com.google.inject.Inject;
 public class ConnectionsPanel extends TabPanel implements ActionListener {
     /** Default delay between timer events. */
     private static final int DEFAULT_DELAY = 1000;
-    
-    /** Delay time between update events in milliseconds. */
-    private int delay = DEFAULT_DELAY;
-    
+
     /** Timer to refresh connection list. */
     private Timer timer;
     
@@ -92,7 +89,7 @@ public class ConnectionsPanel extends TabPanel implements ActionListener {
      * parent window is opened. 
      */
     @Override
-    public void start() {
+    public void initData() {
         // Initialize data models.
         summaryPanel.initData();
         detailPanel.initData();
@@ -107,15 +104,15 @@ public class ConnectionsPanel extends TabPanel implements ActionListener {
      * parent window is closed.
      */
     @Override
-    public void stop() {
+    public void dispose() {
         // Stop refresh timer.
         stopTimer();
         
         // Clear data models.  This disposes of instances of TransformedList 
         // that are used to handle data.
-        summaryPanel.clearData();
-        detailPanel.clearData();
-        incomingPanel.clearData();
+        summaryPanel.dispose();
+        detailPanel.dispose();
+        incomingPanel.dispose();
     }
 
     /**
@@ -135,7 +132,7 @@ public class ConnectionsPanel extends TabPanel implements ActionListener {
         stopTimer();
         
         // Create new timer, and start.
-        timer = new Timer(delay, this);
+        timer = new Timer(DEFAULT_DELAY, this);
         timer.start();
     }
     

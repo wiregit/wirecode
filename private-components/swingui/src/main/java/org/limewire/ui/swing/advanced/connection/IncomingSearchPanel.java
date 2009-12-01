@@ -16,6 +16,7 @@ import javax.swing.ListModel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.monitor.IncomingSearchManager;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -31,7 +32,7 @@ import com.google.inject.Inject;
 /**
  * Display panel for the incoming search list.
  */
-public class IncomingSearchPanel extends JPanel {
+public class IncomingSearchPanel extends JPanel implements Disposable {
     
     /** Manager instance for incoming search data. */
     private IncomingSearchManager incomingManager;
@@ -109,7 +110,8 @@ public class IncomingSearchPanel extends JPanel {
     /**
      * Clears the data models in the container.
      */
-    public void clearData() {
+    @Override
+    public void dispose() {
         // Get list model and dispose resources.
         ListModel listModel = incomingList.getModel();
         if (listModel instanceof DefaultEventListModel) {

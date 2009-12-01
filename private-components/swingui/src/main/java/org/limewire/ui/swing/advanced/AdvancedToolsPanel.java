@@ -29,6 +29,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.options.TabItemListener;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -45,7 +46,7 @@ import com.google.inject.Provider;
  * instance is displayed by calling the <code>display(WindowListener)</code>
  * method. 
  */
-public class AdvancedToolsPanel extends JPanel {
+public class AdvancedToolsPanel extends JPanel implements Disposable {
     /** Defines the tab identifiers for the window. */
     public enum TabId {
         CONNECTIONS(I18n.tr("Connections"), I18n.tr("View connections to other P2P clients")), 
@@ -232,7 +233,7 @@ public class AdvancedToolsPanel extends JPanel {
             frame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    disposeWindow();
+                    dispose();
                 }
             });
             
@@ -253,7 +254,7 @@ public class AdvancedToolsPanel extends JPanel {
             for (TabId tabId : TabId.values()) {
                 TabPanel tabPanel = tabItemMap.get(tabId).getTabPanel();
                 if (tabPanel != null) {
-                    tabPanel.start();
+                    tabPanel.initData();
                 }
             }
         }
@@ -266,14 +267,14 @@ public class AdvancedToolsPanel extends JPanel {
     /**
      * Closes the window that is displaying this panel.
      */
-    public void disposeWindow() {
+    public void dispose() {
         JFrame frame = getFrame();
         if (frame != null) {
             // Stop tab panels.
             for (TabId tabId : TabId.values()) {
                 TabPanel tabPanel = tabItemMap.get(tabId).getTabPanel();
                 if (tabPanel != null) {
-                    tabPanel.stop();
+                    tabPanel.dispose();
                 }
             }
             
@@ -525,7 +526,7 @@ public class AdvancedToolsPanel extends JPanel {
         
         @Override
         public void windowClosed(WindowEvent e) {
-            disposeWindow();
+            dispose();
         }
         
         @Override

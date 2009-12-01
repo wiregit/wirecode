@@ -2,6 +2,7 @@ package org.limewire.ui.swing.advanced;
 
 import javax.swing.JPanel;
 
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.util.EnabledType;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -9,7 +10,7 @@ import org.limewire.listener.EventListenerList;
 /**
  * A base panel for tab content in the Advanced Tools window.
  */
-public abstract class TabPanel extends JPanel {
+public abstract class TabPanel extends JPanel implements Disposable {
     
     /** List of listeners notified when the tabEnabled state changes. */
     private final EventListenerList<EnabledType> enabledListenerList =
@@ -47,13 +48,7 @@ public abstract class TabPanel extends JPanel {
      * Performs startup tasks for the tab.  This method is called when the 
      * parent window is opened.
      */
-    public abstract void start();
-    
-    /**
-     * Performs clean up tasks for the tab.  This method is called when the
-     * parent window is closed.
-     */
-    public abstract void stop();
+    public abstract void initData();
 
     /**
      * Notifies all registered listeners that the enabled state has changed to

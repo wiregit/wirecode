@@ -75,7 +75,6 @@ class ConnectionStatusPanel extends JXPanel {
         this.add(this.connectionStrengthLabel,BorderLayout.WEST);
         this.add(this.connectionStatusLabel,BorderLayout.CENTER);
         
-                
         gnutellaConnectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {

@@ -66,12 +66,12 @@ public class ConsolePanel extends TabPanel {
     }
 
     @Override
-    public void start() {
+    public void initData() {
         console.attachLogs();
     }
 
     @Override
-    public void stop() {
+    public void dispose() {
         console.removeLogs();
     }
 }
