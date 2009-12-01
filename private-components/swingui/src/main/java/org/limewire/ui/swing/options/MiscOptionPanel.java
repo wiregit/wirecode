@@ -383,6 +383,7 @@ public class MiscOptionPanel extends OptionPanel {
         QuestionsHandler.SKIP_FIRST_DOWNLOAD_WARNING.setValue(skipWarningSettingValue);
         QuestionsHandler.WARN_TORRENT_SEED_MORE.setValue(true);
         QuestionsHandler.CONFIRM_BLOCK_HOST.setValue(true);
+        SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND.revertToDefault();
     }
     
     private static int getLicenseSettingValueFromCheckboxValue(boolean isSelected) {
