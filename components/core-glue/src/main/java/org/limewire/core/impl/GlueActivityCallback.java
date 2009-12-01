@@ -226,9 +226,14 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
     
     @Override
-    public void warnUser(String filename, String warning, String moreInfoUrl) {
-        if(guiCallback != null)
-            guiCallback.warnUser(filename, warning, moreInfoUrl);
+    public void promptAboutUnscannedPreview(Downloader dloader) {
+        if(guiCallback == null) {
+            dloader.discardUnscannedPreview(true);
+        } else {
+            String msg = I18nMarker.marktr("Oh noes! Preview anyway?");
+            boolean previewAnyway = guiCallback.promptUserQuestion(msg);
+            dloader.discardUnscannedPreview(!previewAnyway);
+        }
     }
     
     @Override

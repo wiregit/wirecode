@@ -393,21 +393,20 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private volatile File corruptFile;
 
-    /**
-     * The various states of the ManagedDownloade with respect to the
-     * corruption state of this download.
-     */
-    private static final int NOT_CORRUPT_STATE = 0;
-    private static final int CORRUPT_WAITING_STATE = 1;
-    private static final int CORRUPT_STOP_STATE = 2;
-    private static final int CORRUPT_CONTINUE_STATE = 3;
+    /** The possible corruption states of the download. */
+    private enum CorruptState { NOT_CORRUPT, WAITING, STOP, CONTINUE };
     /**
      * The actual state of the ManagedDownloader with respect to corruption
      * LOCKING: obtain corruptStateLock
-     * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etc.
      */
-    private volatile int corruptState;
+    private volatile CorruptState corruptState;
     private Object corruptStateLock;
+    
+    /**
+     * Whether a preview that could not be scanned for viruses should be
+     * deleted.
+     */
+    private volatile boolean discardUnscannedPreview;
 
     /**
      * Locking object to be used for accessing all alternate locations.
@@ -626,8 +625,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             stopped = false;
             paused = false;
             pushes = pushListProvider.get();
-            corruptState = NOT_CORRUPT_STATE;
+            corruptState = CorruptState.NOT_CORRUPT;
             corruptStateLock = new Object();
+            discardUnscannedPreview = true;
             altLock = new Object();
             numMeasures = 0;
             averageBandwidth = 0f;
@@ -1864,12 +1864,16 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
         listener.scanStarted();
         try {
-            if(isInfected(fragment))
+            boolean infected = isInfected(fragment);
+            listener.scanStopped();
+            if(infected)
                 return true;                
         } catch (VirusScanException scanFailed) {
-            // FIXME: ask the user whether to proceed - return true to cancel preview
-        } finally {
             listener.scanStopped();
+            if(promptAboutUnscannedPreview()) {
+                System.err.println("Cancelling preview");
+                return true;
+            }
         }
         return isDangerous(fragment);
     }
@@ -1955,7 +1959,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     status = DownloadState.GAVE_UP;
 
                 // if we were stopped due to corrupt download, cleanup
-                if (corruptState == CORRUPT_STOP_STATE) {
+                if (corruptState == CorruptState.STOP) {
                     // TODO is this really what cleanupCorrupt expects?
                     cleanupCorrupt(incompleteFile, getSaveFile().getName());
                     status = DownloadState.CORRUPT_FILE;
@@ -2034,7 +2038,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // Find out the hash of the file and verify that its the same
         // as our hash.
         URN fileHash = scanForCorruption();
-        if (corruptState == CORRUPT_STOP_STATE) {
+        if (corruptState == CorruptState.STOP) {
             // TODO is this what cleanup Corrupt expects?
             cleanupCorrupt(incompleteFile, getSaveFile().getName());
             return DownloadState.CORRUPT_FILE;
@@ -2112,10 +2116,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * such was displayed.
      */
     private void waitForCorruptResponse() {
-        if (corruptState != NOT_CORRUPT_STATE) {
+        if (corruptState != CorruptState.NOT_CORRUPT) {
             synchronized (corruptStateLock) {
                 try {
-                    while (corruptState == CORRUPT_WAITING_STATE)
+                    while (corruptState == CorruptState.WAITING)
                         corruptStateLock.wait();
                 } catch (InterruptedException ignored) {
                 }
@@ -2128,7 +2132,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private URN scanForCorruption() throws InterruptedException {
         // if we already were told to stop, then stop.
-        if (corruptState == CORRUPT_STOP_STATE)
+        if (corruptState == CorruptState.STOP)
             return null;
 
         //if the user has not been asked before.               
@@ -2660,32 +2664,32 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return SpeedConstants.T3_SWARM;
     }
 
-
+    @Override
     public void promptAboutCorruptDownload() {
         synchronized (corruptStateLock) {
-            if (corruptState == NOT_CORRUPT_STATE) {
-                corruptState = CORRUPT_WAITING_STATE;
-                //Note:We are going to inform the user. The GUI will notify us
-                //when the user has made a decision. Until then the corruptState
-                //is set to waiting. We are not going to move files unless we
-                //are out of this state
-                sendCorruptCallback();
-                //Note2:ActivityCallback is going to ask a message to be show to
-                //the user asynchronously
+            if (corruptState == CorruptState.NOT_CORRUPT) {
+                corruptState = CorruptState.WAITING;
+                // FIXME: if this is called from DownloadWorker.handleState(),
+                // we don't wait for a response
+                downloadCallback.promptAboutCorruptDownload(this);
             }
         }
     }
+    
+    private boolean promptAboutUnscannedPreview() {
+        downloadCallback.promptAboutUnscannedPreview(this);
+        return discardUnscannedPreview;
+    }
 
-    /**
-     * Hook for sending a corrupt callback.
-     */
-    protected void sendCorruptCallback() {
-        downloadCallback.promptAboutCorruptDownload(this);
+    @Override
+    public void discardUnscannedPreview(boolean delete) {
+        discardUnscannedPreview = delete;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#discardCorruptDownload(boolean)
      */
+    @Override
     public void discardCorruptDownload(final boolean delete) {
         if (LOG.isDebugEnabled())
             LOG.debug("User chose to delete corrupt " + delete);
@@ -2696,9 +2700,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             public void run() {
                 synchronized (corruptStateLock) {
                     if (delete) {
-                        corruptState = CORRUPT_STOP_STATE;
+                        corruptState = CorruptState.STOP;
                     } else {
-                        corruptState = CORRUPT_CONTINUE_STATE;
+                        corruptState = CorruptState.CONTINUE;
                     }
                 }
 

@@ -154,27 +154,6 @@ public class GlueActivityCallbackTest extends BaseTestCase {
     }
     
     /**
-     * Test the warnUser method with and without the callback set.
-     */
-    public void testWarnUser() {
-        Mockery context = new Mockery();
-        
-        final GuiCallback callback = context.mock(GuiCallback.class);
-        
-        GlueActivityCallback activityCallback = new GlueActivityCallback(null);
-        
-        context.checking(new Expectations() {{
-            exactly(1).of(callback).warnUser("file", "oh noes", null);
-        }});
-        
-        activityCallback.warnUser("file", "oh noes", null);
-        activityCallback.setGuiCallback(callback);
-        activityCallback.warnUser("file", "oh noes", null);
-        
-        context.assertIsSatisfied();
-    }
-    
-    /**
      * Signal a save location exception before and after a gui callback is installed.
      *  For before the error should be passed along to {@link ErrorService}, when after it
      *  should go to the set {@link GuiCallback}.

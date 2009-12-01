@@ -172,6 +172,11 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Override
     public void discardCorruptDownload(boolean delete) {
     }
+    
+    @Override
+    public void discardUnscannedPreview(boolean delete) {
+        // No previews for torrent file downloads
+    }
 
     @Override
     public long getAmountLost() {

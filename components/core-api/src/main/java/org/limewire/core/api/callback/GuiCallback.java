@@ -40,11 +40,6 @@ public interface GuiCallback {
     boolean promptUserQuestion(String marktr);
 
     /**
-     * Shows the user a warning about a file.
-     */
-    void warnUser(String filename, String message, String moreInfoUrl);
-
-    /**
      * Prompts the user about what priorities to assign the files in this
      * torrent. Returns true if ok was selected in the end false if cancel.
      */

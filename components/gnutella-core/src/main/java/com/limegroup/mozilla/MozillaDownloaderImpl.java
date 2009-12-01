@@ -74,6 +74,11 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     public void discardCorruptDownload(boolean delete) {
         finish();
     }
+    
+    @Override
+    public void discardUnscannedPreview(boolean delete) {
+        // No previews for Mozilla downloads
+    }
 
     @Override
     public long getAmountLost() {
@@ -121,8 +126,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
 
     @Override
     public File getDownloadFragment(ScanListener listener) {
-        //not really used for this downloader
-        return getIncompleteFile();
+        return null;
     }
 
     @Override

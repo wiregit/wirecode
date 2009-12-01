@@ -102,6 +102,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final Provider<DownloadCallback> downloadCallback;
 
     /**
+     * Whether a preview that could not be scanned for viruses should be
+     * deleted.
+     */
+    private volatile boolean discardUnscannedPreview;
+
+    /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
     private volatile URN urn = null;
@@ -129,6 +135,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.dangerousFileChecker = dangerousFileChecker;
         this.virusScanner = virusScanner;
         this.downloadCallback = downloadCallback;
+        discardUnscannedPreview = true;
     }
 
     /**
@@ -240,12 +247,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
         listener.scanStarted();
         try {
-            if(isInfected(fragment))
+            boolean infected = isInfected(fragment);
+            listener.scanStopped();
+            if(infected)
                 return true;                
         } catch (VirusScanException x) {
-            // FIXME: ask the user whether to proceed - return true to cancel preview
-        } finally {
             listener.scanStopped();
+            if(promptAboutUnscannedPreview()) {
+                return true;
+            }
         }
         return isDangerous(fragment);
     }
@@ -276,6 +286,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return true;
         }
         return false;
+    }
+
+    private boolean promptAboutUnscannedPreview() {
+        downloadCallback.get().promptAboutUnscannedPreview(this);
+        return discardUnscannedPreview;
+    }
+
+    @Override
+    public void discardUnscannedPreview(boolean delete) {
+        discardUnscannedPreview = delete;
     }
 
     /**

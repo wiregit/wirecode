@@ -172,10 +172,18 @@ public interface Downloader extends BandwidthTracker,
 	public boolean isLaunchable();
 
     /**
-     * Either treats a corrupt file as normal file and saves it, or 
-     * discards the corruptFile, depending on the value of delete.
+     * Handles the user's response to
+     * DownloadCallback.promptAboutCorruptDownload().
+     * @param delete whether to discard the corrupt download
      */
     public void discardCorruptDownload(boolean delete);
+    
+    /**
+     * Handles the user's response to
+     * DownloadCallback.promptAboutUnscannedPreview().
+     * @param delete whether to discard the unscanned preview
+     */
+    public void discardUnscannedPreview(boolean delete);
 
     /**
      * Returns a list of all RemoteFileDescs currently
