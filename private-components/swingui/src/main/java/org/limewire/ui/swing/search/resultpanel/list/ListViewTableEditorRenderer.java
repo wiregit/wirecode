@@ -458,12 +458,15 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconButton = new IconButton(); 
         
         heading.setContentType("text/html");
+        HTMLDocument document = new HTMLDocument();
+        heading.setDocument(document);
         heading.setEditable(false);
         heading.setCaretPosition(0);
         heading.setSelectionColor(HTMLLabel.TRANSPARENT_COLOR);       
         heading.setOpaque(false);
         heading.setFocusable(false);
-        StyleSheet mainStyle = ((HTMLDocument)heading.getDocument()).getStyleSheet();
+
+        StyleSheet mainStyle = document.getStyleSheet();
         String rules = "body { font-family: " + headingFont.getFamily() + "; }" +
                 ".title { color: " + headingColor + "; font-size: " + headingFont.getSize() + "; }" +
                 "a { color: " + headingColor + "; }";
