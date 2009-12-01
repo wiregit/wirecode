@@ -1,13 +1,21 @@
 #!/bin/bash
 
-ulimit -n 2048
-
+ulimit -n 1024
 PATH_SEPARATOR=":"
-ROOT="../../.."
+ROOT="../../../../"
 
 CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}."
 CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${ROOT}/core"
 CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${ROOT}/lib/messagebundles"
+
+PLATFORM=`uname`
+case ${PLATFORM} in 
+    CYGWIN*)
+        PATH_SEPARATOR=";"        
+    ;;
+    *)
+esac
+
 
 COMPONENTS="${ROOT}/components"
 for COMPONENT in $(ls ${COMPONENTS}); do
