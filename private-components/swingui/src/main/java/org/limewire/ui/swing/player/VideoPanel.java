@@ -160,6 +160,8 @@ class VideoPanel implements Disposable{
                 if (videoMediator.isFullScreen()) {
                     fullScreenButton.setIcon(fullScreenSelected);
                     closeButton.setVisible(false);
+                    headerBar.setFocusable(true);
+                    headerBar.requestFocusInWindow();
                 } else {
                     fullScreenButton.setIcon(fullScreenUnselected);
                     closeButton.setVisible(true);
