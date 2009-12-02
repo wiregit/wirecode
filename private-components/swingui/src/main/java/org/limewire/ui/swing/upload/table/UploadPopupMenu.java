@@ -106,10 +106,9 @@ public class UploadPopupMenu extends JPopupMenu {
         boolean browseItem = UploadMediator.isBrowseHost(uploadItem);
         
         if (done) {
-            JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
-            removeMenuItem.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
-            removeMenuItem.addActionListener(listener);
-            add(removeMenuItem);
+            add(createRemoveMenuItem());
+        } else {
+            add(createCancelMenuItem(listener));
         }
         
         if (!browseItem) {
@@ -162,10 +161,7 @@ public class UploadPopupMenu extends JPopupMenu {
                 addSeparator();
             }
             
-            JMenuItem fileInfoMenuItem = new JMenuItem(I18n.tr("View File Info..."));
-            fileInfoMenuItem.setActionCommand(UploadActionHandler.PROPERTIES_COMMAND);
-            fileInfoMenuItem.addActionListener(listener);
-            add(fileInfoMenuItem);
+            add(createFileInfoMenuItem(listener));
         }
     }
     
@@ -181,31 +177,23 @@ public class UploadPopupMenu extends JPopupMenu {
         boolean resumable = UploadMediator.isResumable(uploadItem);
         
         if (pausable) {
-            JMenuItem pauseMenuItem = new JMenuItem(I18n.tr("Pause"));
-            pauseMenuItem.setActionCommand(UploadActionHandler.PAUSE_COMMAND);
-            pauseMenuItem.addActionListener(new PauseMenuListener());
-            add(pauseMenuItem);
+            add(createPauseMenuItem());
         }
         if (resumable) {
-            JMenuItem resumeMenuItem = new JMenuItem(I18n.tr("Resume"));
-            resumeMenuItem.setActionCommand(UploadActionHandler.RESUME_COMMAND);
-            resumeMenuItem.addActionListener(new ResumeMenuListener());
-            add(resumeMenuItem);
+            add(createResumeMenuItem());
         }
         
         if (done) {
-            JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
-            removeMenuItem.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
-            removeMenuItem.addActionListener(new RemoveMenuListener());
-            add(removeMenuItem);
+            add(createRemoveMenuItem());
         } else {
-            JMenuItem cancelMenuItem = new JMenuItem(I18n.tr("Cancel Upload"));
-            cancelMenuItem.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
-            cancelMenuItem.addActionListener(listener);
-            add(cancelMenuItem);
+            add(createCancelMenuItem(listener));
         }
         
         if (!browseItem) {
+            if (getComponentCount() > 0) {
+                addSeparator();
+            }
+
             JMenuItem locateOnDiskMenuItem = new JMenuItem(I18n.tr("Locate on Disk"));
             locateOnDiskMenuItem.setActionCommand(UploadActionHandler.LOCATE_ON_DISK_COMMAND);
             locateOnDiskMenuItem.addActionListener(listener);
@@ -226,10 +214,7 @@ public class UploadPopupMenu extends JPopupMenu {
                 addSeparator();
             }
             
-            JMenuItem fileInfoMenuItem = new JMenuItem(I18n.tr("View File Info..."));
-            fileInfoMenuItem.setActionCommand(UploadActionHandler.PROPERTIES_COMMAND);
-            fileInfoMenuItem.addActionListener(listener);
-            add(fileInfoMenuItem);
+            add(createFileInfoMenuItem(listener));
         }
     }
     
@@ -243,24 +228,15 @@ public class UploadPopupMenu extends JPopupMenu {
         
         if (!allDone) {
             if (anyPausable) {
-                JMenuItem pauseMenuItem = new JMenuItem(I18n.tr("Pause"));
-                pauseMenuItem.setActionCommand(UploadActionHandler.PAUSE_COMMAND);
-                pauseMenuItem.addActionListener(new PauseMenuListener());
-                add(pauseMenuItem);
+                add(createPauseMenuItem());
             }
             if (anyResumable) {
-                JMenuItem resumeMenuItem = new JMenuItem(I18n.tr("Resume"));
-                resumeMenuItem.setActionCommand(UploadActionHandler.RESUME_COMMAND);
-                resumeMenuItem.addActionListener(new ResumeMenuListener());
-                add(resumeMenuItem);
+                add(createResumeMenuItem());
             }
         }
         
         if (allDone || isAnyRemovable()) {
-            JMenuItem removeMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
-            removeMenuItem.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
-            removeMenuItem.addActionListener(new RemoveMenuListener());
-            add(removeMenuItem);
+            add(createRemoveMenuItem());
         }
         
         if (!allDone) {
@@ -278,15 +254,62 @@ public class UploadPopupMenu extends JPopupMenu {
 
             addSeparator();
             
-            JMenuItem cancelMenuItem = new JMenuItem(I18n.tr("Cancel"));
-            cancelMenuItem.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
-            cancelMenuItem.addActionListener(new DefaultMenuListener());
-            add(cancelMenuItem);
+            add(createCancelMenuItem(new DefaultMenuListener()));
             
         } else {
             JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
             add(addToListMenu);
         }
+    }
+    
+    /**
+     * Creates a Cancel menu item with the specified action listener.
+     */
+    private JMenuItem createCancelMenuItem(ActionListener listener) {
+        JMenuItem menuItem = new JMenuItem(I18n.tr("Cancel"));
+        menuItem.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
+        menuItem.addActionListener(listener);
+        return menuItem;
+    }
+    
+    /**
+     * Creates a Remove menu item.
+     */
+    private JMenuItem createRemoveMenuItem() {
+        JMenuItem menuItem = new JMenuItem(I18n.tr("Clear from Tray"));
+        menuItem.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
+        menuItem.addActionListener(new RemoveMenuListener());
+        return menuItem;
+    }
+    
+    /**
+     * Creates a Pause menu item.
+     */
+    private JMenuItem createPauseMenuItem() {
+        JMenuItem menuItem = new JMenuItem(I18n.tr("Pause"));
+        menuItem.setActionCommand(UploadActionHandler.PAUSE_COMMAND);
+        menuItem.addActionListener(new PauseMenuListener());
+        return menuItem;
+    }
+    
+    /**
+     * Creates a Resume menu item.
+     */
+    private JMenuItem createResumeMenuItem() {
+        JMenuItem menuItem = new JMenuItem(I18n.tr("Resume"));
+        menuItem.setActionCommand(UploadActionHandler.RESUME_COMMAND);
+        menuItem.addActionListener(new ResumeMenuListener());
+        return menuItem;
+    }
+    
+    /**
+     * Creates a View Info menu item.
+     */
+    private JMenuItem createFileInfoMenuItem(ActionListener listener) {
+        JMenuItem menuItem = new JMenuItem(I18n.tr("View File Info..."));
+        menuItem.setActionCommand(UploadActionHandler.PROPERTIES_COMMAND);
+        menuItem.addActionListener(listener);
+        return menuItem;
     }
     
     /**
