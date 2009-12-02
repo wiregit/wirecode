@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
+import org.limewire.core.api.malware.VirusUpdatesURL;
 import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.facebook.service.settings.FacebookAPIKey;
 import org.limewire.facebook.service.settings.FacebookAppID;
@@ -36,6 +37,7 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<Boolean>(){}).annotatedWith(FacebookReportBugs.class).toProvider(FacebookSettings.REPORT_BUGS);
         bind(new TypeLiteral<Map<String, Provider<String>>>(){}).annotatedWith(FacebookURLs.class).toProvider(FacebookURLsMapProvider.class);
         bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);
+        bind(new TypeLiteral<String>(){}).annotatedWith(VirusUpdatesURL.class).toProvider(DownloadSettings.VIRUS_UPDATES_SERVER);
     }
 
     @Singleton

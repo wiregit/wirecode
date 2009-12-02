@@ -2,13 +2,14 @@ package org.limewire.core.settings;
 
 import java.io.File;
 
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.StringArraySetting;
-import org.limewire.inspection.InspectionPoint;
+import org.limewire.setting.StringSetting;
 
 /**
  * Settings for downloads.
@@ -143,4 +144,7 @@ public class DownloadSettings extends LimeProps {
      */
     public static final BooleanSetting SHOW_DOWNLOADS_TRAY = FACTORY.createBooleanSetting(
             "ALWAYS_SHOW_DOWNLOADS_TRAY", false);
+    
+    public static final StringSetting VIRUS_UPDATES_SERVER = FACTORY.createRemoteStringSetting(
+            "VIRUS_UPDATES_SERVER", "http://af.avg.com/softw/90free/sdklmw/", "DownloadSettings.virusUpdatesServer");
 }
