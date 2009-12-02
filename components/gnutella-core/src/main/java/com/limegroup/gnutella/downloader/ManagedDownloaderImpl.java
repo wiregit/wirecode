@@ -2071,6 +2071,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * marking it as spam and deleting the file.
      */
     private boolean isInfected(File file) throws VirusScanException {
+        if(!virusScanner.isSupported())
+            return false;
         if(virusScanner.isInfected(file)) {
             setState(DownloadState.THREAT_FOUND);
             // Mark the file as spam in future search results
