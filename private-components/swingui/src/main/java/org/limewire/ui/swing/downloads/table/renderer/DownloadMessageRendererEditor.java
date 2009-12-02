@@ -119,13 +119,10 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
     private String getPercentMessage(DownloadItem item) {
         int percent = item.getPercentComplete();
         DownloadState state = item.getState();
-        if (percent == 0 || state == DownloadState.DONE ||
+        if (percent == 0 || state.isFinished() ||
                 state == DownloadState.DOWNLOADING ||
                 state == DownloadState.ERROR ||
-                state == DownloadState.DANGEROUS ||
-                state == DownloadState.SCANNING ||
-                state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED) {
+                state == DownloadState.SCANNING) {
             return "";
         }
         return percent + "% - ";    
@@ -139,7 +136,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         case RESUMING:
             return I18n.tr("Resuming");
         case CANCELLED:
-            return I18n.tr("Canceled");
+            return I18n.tr("Cancelled");
         case FINISHING:
             return I18n.tr("Finishing...");
         case DONE:
@@ -202,7 +199,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         case THREAT_FOUND:
             return I18n.tr("File deleted - Threat detected by AVG");
         case SCAN_FAILED:
-            return I18n.tr("Done, but not scanned for viruses");
+            return I18n.tr("Done, but virus scan aborted");
         default:
             return null;
         }

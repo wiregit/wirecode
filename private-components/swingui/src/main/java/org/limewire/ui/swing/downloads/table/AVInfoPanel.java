@@ -19,16 +19,20 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.Application;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 
@@ -36,7 +40,8 @@ import com.google.inject.Inject;
  * Content panel for the Anti-Virus Info dialog in the downloads table.
  */
 public class AVInfoPanel extends JPanel {
-    private static final String AVG_URL = "http://www.avg.com/";
+    private static final String AVHOME = "#antivirus";
+    private static final String AVHOME_URL = "http://www.limewire.com/client_redirect/?page=antivirus";
 
     @Resource private Font doNotShowFont;
     @Resource private Color doNotShowForeground;
@@ -49,6 +54,8 @@ public class AVInfoPanel extends JPanel {
     @Resource private Icon threatIcon;
     @Resource private Icon vendorIcon;
     
+    private final Application application;
+    
     private JLabel headingLabel;
     private HTMLLabel messageLabel;
     
@@ -60,7 +67,9 @@ public class AVInfoPanel extends JPanel {
      * Constructs an AVInfoPanel.
      */
     @Inject
-    public AVInfoPanel() {
+    public AVInfoPanel(Application application) {
+        this.application = application;
+        
         GuiUtils.assignResources(this);
         
         headingLabel = new JLabel();
@@ -70,9 +79,10 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setHtmlForeground(messageForeground);
         messageLabel.setMargin(new Insets(0, 0, 0, 0));
         messageLabel.setOpaque(false);
+        messageLabel.setOpenUrlsNatively(false);
+        messageLabel.addHyperlinkListener(new MessageListener());
         
-        okButton = new JButton();
-        okButton.setAction(new CloseAction());
+        okButton = new JButton(new CloseAction());
         
         doNotShowCheckBox = new JCheckBox();
         doNotShowCheckBox.setFont(doNotShowFont);
@@ -95,7 +105,7 @@ public class AVInfoPanel extends JPanel {
         
         // Set message text.  We also set the preferred size to control the
         // message and dialog width.
-        String message = I18n.tr("LimeWire PRO Anti-Virus protection is powered by AVG.  AVG scans, detects and deletes files that are suspected to contain viruses or spyware.  <a href=\"{0}\">Learn more</a>", AVG_URL);
+        String message = I18n.tr("LimeWire PRO Anti-Virus protection is powered by AVG.  AVG scans, detects and deletes files that are suspected to contain viruses or spyware.  <a href=\"{0}\">Learn more</a>", AVHOME);
         messageLabel.setText(message);
         messageLabel.setPreferredSize(new Dimension(300, messageLabel.getPreferredSize().height));
         
@@ -196,14 +206,12 @@ public class AVInfoPanel extends JPanel {
     private void showDialog(String title) {
         // Create dialog.
         final JFrame owner = GuiUtils.getMainFrame();
-        final JDialog dialog = new LimeJDialog(owner);
+        final JDialog dialog = new LimeJDialog(owner, title, true);
         
         // Set dialog properties.
         dialog.setLayout(new BorderLayout());
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setModal(true);
         dialog.setResizable(false);
-        dialog.setTitle(title);
         
         // Add content to dialog.
         setBackground(owner.getBackground());
@@ -255,6 +263,20 @@ public class AVInfoPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             disposeWindow();
+        }
+    }
+    
+    /**
+     * Listener to handle hyperlink events in the message.
+     */
+    private class MessageListener implements HyperlinkListener {
+        @Override
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                if (AVHOME.equals(e.getDescription())) {
+                    NativeLaunchUtils.openURL(application.addClientInfoToUrl(AVHOME_URL));
+                }
+            }
         }
     }
 }

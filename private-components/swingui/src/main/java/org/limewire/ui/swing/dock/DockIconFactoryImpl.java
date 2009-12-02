@@ -68,12 +68,8 @@ public class DockIconFactoryImpl implements DockIconFactory
                 return false;
 
             DownloadState state = item.getState();
-            return state != DownloadState.CANCELLED &&
-                    state != DownloadState.ERROR &&
-                    state != DownloadState.DANGEROUS &&
-                    state != DownloadState.THREAT_FOUND &&
-                    state != DownloadState.SCAN_FAILED &&
-                    state != DownloadState.DONE;
+            return state != DownloadState.CANCELLED && 
+                    state != DownloadState.ERROR && !state.isFinished();
         }
     }
 

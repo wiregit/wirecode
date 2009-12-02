@@ -75,9 +75,9 @@ public class DownloadCancelRendererEditor extends TableRendererEditor {
 
     private void updateButtons(DownloadItem item) {
         if (item.getDownloadItemType() != DownloadItemType.ANTIVIRUS) {
-            boolean finished = DownloadState.isFinished(item.getState());
-            cancelButton.setVisible(!finished);
-            removeButton.setVisible(finished);
+            DownloadState state = item.getState();
+            cancelButton.setVisible(!state.isFinished());
+            removeButton.setVisible(state.isFinished());
         } else {
             // Hide all buttons for anti-virus updates.
             cancelButton.setVisible(false);
