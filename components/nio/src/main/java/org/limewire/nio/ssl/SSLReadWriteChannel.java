@@ -181,7 +181,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         // If data was left in readOutgoing, pre-transfer it.
         if(readOutgoing != null && readOutgoing.position() > 0) {
             transferred += BufferUtils.transfer(readOutgoing, dst);
-            if(readOutgoing.hasRemaining()) {
+            if(readOutgoing.position() > 0) {
                 LOG.debug("Transferred less than we have left!");
                 return transferred;
             }
