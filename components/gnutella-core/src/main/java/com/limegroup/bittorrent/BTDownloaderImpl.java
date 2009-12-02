@@ -227,7 +227,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // FIXME: pass in the directory as a single file
         for(File f : getIncompleteFiles()) {
             try {
-                if(isInfected(f))
+                if(f.exists() && isInfected(f))
                     return true;
             } catch(VirusScanException x) {
                 scanFailed.set(true);
