@@ -23,6 +23,7 @@ import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
+import org.limewire.nio.channel.ThrottleReader;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.ReadObserver;
 import org.limewire.nio.observer.ReadWriteObserver;
@@ -52,7 +53,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     private final Object LOCK = new Object();
 
     /** The reader. */
-    private volatile ReadObserver reader;
+    private volatile ChannelReadObserver reader;
+    
+    /** The throttle read channel. */
+    private volatile ThrottleReader throttleReader;
 
     /** The writer. */
     private volatile WriteObserver writer;
@@ -131,6 +135,45 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     public final void setShutdownObserver(Shutdownable observer) {
         shutdownObserver = observer;
     }
+
+    /** Sets the new throttle for reading. */
+    public final void setReadThrottleChannel(final ThrottleReader newThrottle) {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+            @Override
+            public void run() {
+                synchronized(LOCK) {
+                    if(shutdown) {
+                        return;
+                    }
+                }
+                
+                assert throttleReader == null;
+                assert newThrottle != null;
+                throttleReader = newThrottle;                
+                throttleReader.setAttachment(AbstractNBSocket.this);                
+                installThrottle(throttleReader, reader);
+            }
+        });
+    }
+
+    /**
+     * Inserts the ThrottleReader into the reader chain. This will find the
+     * lowest source of the chain & set the ThrottleReader to the read channel
+     * of that source, and then set the read channel of the throttle to be the
+     * {@link #getBaseReadChannel() base read channel}.
+     */
+    protected void installThrottle(ThrottleReader throttle, ChannelReader reader) {
+        ChannelReader lastChannel = reader;
+        // go down the chain of ChannelReaders and find the last one to set our source
+        while(lastChannel.getReadChannel() instanceof ChannelReader) {
+            lastChannel = (ChannelReader)lastChannel.getReadChannel();
+        }
+        
+        if(throttle != lastChannel) {
+            lastChannel.setReadChannel(throttle);
+            throttle.setReadChannel(getBaseReadChannel());
+        }
+    }
     
     /**
      * Sets the new <code>ReadObserver</code>.
@@ -173,6 +216,11 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     InterestReadableByteChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
+                    
+                    // Insert the throttle, if one has been set.
+                    if(throttleReader != null) {
+                        installThrottle(throttleReader, reader);
+                    }
 
                     source.interestRead(true);
                     
@@ -531,6 +579,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 nioOutputStream = null;
                 reader = new NoOpReader();
                 writer = new NoOpWriter();
+                throttleReader = null;
                 connecter = null;
                 shutdownObserver = null;
             }

@@ -37,6 +37,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
@@ -439,8 +440,8 @@ public class HTTPDownloader implements BandwidthTracker {
             LOG.warn("couldn't set keepalive");
         }
         observerHandler = new Observer();
+        ((AbstractNBSocket)_socket).setReadThrottleChannel(new ThrottleReader(bandwidthManager.getReadThrottle()));
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList<IOState>(), BUF_LENGTH);
-        _stateMachine.setReadChannel(new ThrottleReader(bandwidthManager.getReadThrottle()));
         ((NIOMultiplexor) _socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor) _socket).setWriteObserver(_stateMachine);
 

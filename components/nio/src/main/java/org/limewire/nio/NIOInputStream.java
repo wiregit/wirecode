@@ -218,9 +218,12 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
     }
     
     public void setReadChannel(InterestReadableByteChannel newChannel) {
-        synchronized(bufferLock) {
-            this.channel = newChannel;
-            source.setReadChannel(newChannel);
+        this.channel = newChannel;
+        synchronized(this) {
+            // If we have a source already created, set its read channel.
+            if(source != null) {
+                source.setReadChannel(newChannel);
+            }
         }
     }
 

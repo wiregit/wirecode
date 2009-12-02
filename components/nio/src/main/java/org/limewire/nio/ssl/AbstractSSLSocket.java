@@ -18,8 +18,10 @@ import org.limewire.logging.LogFactory;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.NIOSocket;
+import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
+import org.limewire.nio.channel.ThrottleReader;
 import org.limewire.nio.observer.ConnectObserver;
 
 /**
@@ -123,6 +125,26 @@ public abstract class AbstractSSLSocket extends NIOSocket {
             baseWriter = sslLayer;
         }
         return baseWriter;
+    }
+    
+    @Override
+    protected void installThrottle(ThrottleReader throttle, ChannelReader reader) {
+        // The goal is to insert the throttle such that
+        // READER -> READER -> SSL LAYER -> THROTTLE -> SOCKET
+        // so... do everything the same as the super, except when connecting
+        // the throttle to the socket we don't connect it to the SSL layer,
+        // instead we connect it to the real socket.
+        
+        ChannelReader lastChannel = reader;
+        // go down the chain of ChannelReaders and find the last one to set our source
+        while(lastChannel.getReadChannel() instanceof ChannelReader) {
+            lastChannel = (ChannelReader)lastChannel.getReadChannel();
+        }
+        
+        if(throttle != lastChannel) {
+            lastChannel.setReadChannel(throttle);
+            throttle.setReadChannel(super.getBaseReadChannel());
+        }
     }
     
     @Override
