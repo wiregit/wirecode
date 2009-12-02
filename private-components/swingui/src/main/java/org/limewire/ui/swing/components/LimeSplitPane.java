@@ -11,6 +11,8 @@ import javax.swing.JSplitPane;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
+import org.limewire.util.OSUtils;
+
 /**
  * SplitPane where the divider component can be specified.
  *
@@ -37,6 +39,13 @@ public class LimeSplitPane extends JSplitPane{
         divider.add(dividerComponent);
         
         setDividerSize(dividerComponent.getPreferredSize().height);
+        
+        // The upper panel was flickering on OS X due to some strange interactions with the browser.
+        // As a temporary solution to the flickering problem, we're turned off automatic repainting
+        // until we can solve the underlying problem.
+        if (OSUtils.isMacOSX()) {
+            setContinuousLayout(false);
+        }
     }
     
     /**
