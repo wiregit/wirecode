@@ -19,6 +19,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.inject.EagerSingleton;
@@ -154,7 +155,9 @@ public class MainDownloadPanel extends JPanel {
             } else if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
                 final DownloadItem downloadItem = (DownloadItem) event.getNewValue();
                 DownloadState state = downloadItem.getState();
-                if (state == DownloadState.THREAT_FOUND) {
+                if(downloadItem.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
+                    // Don't show a popup when an antivirus download completes
+                } else if (state == DownloadState.THREAT_FOUND) {
                     avInfoPanelFactory.get().showThreatMessage(downloadItem, true);
                 } else if (state == DownloadState.SCAN_FAILED) {
                     avInfoPanelFactory.get().showFailureMessage(downloadItem, true);

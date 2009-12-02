@@ -39,6 +39,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
@@ -65,7 +66,12 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         this.queueTimeCalculator = queueTimeCalculator;
         this.friendManager = friendManager;
         this.categoryManager = categoryManager;
-        this.downloadItemType = downloader instanceof BTDownloader ? DownloadItemType.BITTORRENT : DownloadItemType.GNUTELLA;
+        if(downloader instanceof BTDownloader)
+            downloadItemType = DownloadItemType.BITTORRENT;
+        else if(downloader instanceof VirusDefinitionDownloader)
+            downloadItemType = DownloadItemType.ANTIVIRUS;
+        else
+            downloadItemType = DownloadItemType.GNUTELLA;
         
         downloader.addListener(new EventListener<DownloadStateEvent>() {
             @Override
