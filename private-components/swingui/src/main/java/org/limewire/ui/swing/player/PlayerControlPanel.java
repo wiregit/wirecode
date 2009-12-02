@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.Icon;
@@ -358,11 +357,8 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      */
     @Override
     public void songChanged(String name) {
-        // Update volume.
-        updateVolumeFromSetting();
-        
-        //enable volume control
-        volumeButton.setEnabled(getPlayerMediator().isVolumeSettable());
+
+        initializeVolumeSettings();
         
         // Enable progress slider.
         progressSlider.setEnabled(getPlayerMediator().isSeekable());
@@ -379,6 +375,14 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         }
     }
     
+    private void initializeVolumeSettings() {
+        // Update volume.
+        updateVolumeFromSetting();
+        
+        //enable volume control
+        volumeButton.setEnabled(getPlayerMediator().isVolumeSettable());
+    }
+
     /**
      * Handles state change in the player to the specified state.
      */
@@ -386,7 +390,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
     public void stateChanged(PlayerState playerState) {
         progressSlider.setEnabled(getPlayerMediator().isSeekable());
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
-            updateVolumeFromSetting();
+            initializeVolumeSettings();
         } else if (playerState == PlayerState.GAIN) {
             // Exit on volume change.
             return;

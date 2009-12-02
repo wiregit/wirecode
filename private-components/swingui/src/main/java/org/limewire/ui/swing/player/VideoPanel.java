@@ -39,6 +39,7 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingHacks;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -202,7 +203,8 @@ class VideoPanel implements Disposable{
     }
     
     private void setFitToScreen(boolean isFitToScreen) {
-        if(isFitToScreen){
+        //TODO: Remove isWin7 check.  At the moment win7 video only works with fit to screen selected.
+        if(OSUtils.isWindows7() || isFitToScreen){
             fitToScreenLayout.setComponentConstraints(videoRenderer, "grow, push");   
             videoRenderer.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));   
             videoRenderer.setMinimumSize(new Dimension(0, 0)); 

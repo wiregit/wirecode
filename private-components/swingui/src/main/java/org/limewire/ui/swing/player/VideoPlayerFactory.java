@@ -15,30 +15,44 @@ import org.limewire.util.OSUtils;
 
 
 public class VideoPlayerFactory {
-    public static Player createVideoPlayer(File file) throws IncompatibleSourceException, IOException {
+    public static Player createVideoPlayer(File file) throws IncompatibleSourceException {
         if (!OSUtils.isWindows() && !OSUtils.isMacOSX()) {
             throw new IllegalStateException("Video is only supported on Windows and Mac");
         }
 
         Player handler;
         if (OSUtils.isWindows()) {
+            if(OSUtils.isWindows7()){
+                handler = new net.sf.fmj.mf.media.content.unknown.Handler();    
+                try {
+                    //we need to setup the player here so we can fall back to ds if it fails
+                    setupPlayer(handler, file);
+                    return handler;
+                } catch (IncompatibleSourceException e) {
+                    //mf can't play it.  try ds.
+                }
+            }
             handler = new net.sf.fmj.ds.media.content.unknown.Handler();
         } else { // OSX
             handler = new net.sf.fmj.qt.media.content.unknown.Handler();
         }
 
+       setupPlayer(handler, file);
+       return handler;
+    }
+    
+    private static void setupPlayer(Player player, File file) throws IncompatibleSourceException {
         try {
-            handler.setSource(createDataSource(file));
-        } catch (MalformedURLException e) {
+            player.setSource(createDataSource(file));
+
+        } catch (IOException e) {
             throw new IncompatibleSourceException(e);
         } catch (UnsatisfiedLinkError e) {
             // TODO: this is not the best way to handle unsatisfied links but
             // our native launch fallback will work
             throw new IncompatibleSourceException(e);
         }
-
-        handler.realize();
-        return handler;
+        player.realize();
     }
     
     private static DataSource createDataSource(File file) throws MalformedURLException{

@@ -4,8 +4,6 @@ import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -379,6 +377,7 @@ class VideoPlayerMediator implements PlayerMediator {
                 public void run() {
 
                     if (controllerEvent instanceof StartEvent || controllerEvent.getSourceController().getState() == Controller.Started) {
+                        firePlayerStateChanged(PlayerState.OPENED);
                         firePlayerStateChanged(PlayerState.PLAYING);
                         if (updateTimer == null) {
                             updateTimer = new Timer(100, new TimerAction());
@@ -543,13 +542,6 @@ class VideoPlayerMediator implements PlayerMediator {
                 try {
                     return VideoPlayerFactory.createVideoPlayer(mediaFile);
                 } catch (IncompatibleSourceException e) {
-                    nativeLaunch(mediaFile);
-                    return null;
-                } catch (MalformedURLException e) {
-                    nativeLaunch(mediaFile);
-                    return null;
-                } catch (IOException e) {
-                    // TODO: how should this be handled?
                     nativeLaunch(mediaFile);
                     return null;
                 }
