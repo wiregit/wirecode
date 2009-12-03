@@ -2024,11 +2024,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // Scan the file for viruses
         setState(DownloadState.SCANNING);
+        boolean scanFailed = false;
         try {
             if(isInfected(incompleteFile))
                 return DownloadState.THREAT_FOUND;
-        } catch(VirusScanException scanFailed) {
-            return DownloadState.SCAN_FAILED;
+        } catch(VirusScanException e) {
+            scanFailed = true;
         }
         
         // Check whether this is a dangerous file
@@ -2046,7 +2047,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
 
         // Save the file to disk.
-        return saveFile(fileHash);
+        DownloadState saveState = saveFile(fileHash);
+        if(saveState == DownloadState.COMPLETE && scanFailed)
+            return DownloadState.SCAN_FAILED;
+        return saveState;
     }
 
     /**
