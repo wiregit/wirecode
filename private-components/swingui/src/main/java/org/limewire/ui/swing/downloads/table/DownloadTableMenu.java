@@ -77,7 +77,8 @@ public class DownloadTableMenu extends JPopupMenu{
         
         DownloadState state = downloadItem.getState();
         
-        if (state == DownloadState.DONE){
+        if (state == DownloadState.DONE ||
+                state == DownloadState.SCAN_FAILED){
             add(createLaunchMenuItem()).setEnabled(downloadItem.isLaunchable());
             add(createRemoveMenuItem());
             addSeparator();
@@ -150,7 +151,8 @@ public class DownloadTableMenu extends JPopupMenu{
                 //if all four booleans are true, we are done checking
                 break;
             }
-            if(item.getState() != DownloadState.DONE){
+            if(item.getState() != DownloadState.DONE &&
+                    item.getState() != DownloadState.SCAN_FAILED){
                 allDone = false;
             }
             if(isResumable(item.getState())){
