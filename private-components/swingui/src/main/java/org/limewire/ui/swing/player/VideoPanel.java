@@ -21,6 +21,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
+import javax.swing.Timer;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
@@ -28,6 +29,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXCollapsiblePane;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
@@ -50,6 +52,12 @@ import com.google.inject.assistedinject.Assisted;
 class VideoPanel implements Disposable{
 
     private final HeaderBar headerBar = new HeaderBar();
+    private final JXCollapsiblePane headerBarCollapsiblePane = new JXCollapsiblePane();
+    private final Timer collapsePlayerControlsTimer = new Timer(2000, new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            headerBarCollapsiblePane.setCollapsed(true);
+        }
+    });
 
     @Resource private Icon fullScreenSelected;
     @Resource private Icon fullScreenUnselected;
@@ -102,7 +110,10 @@ class VideoPanel implements Disposable{
         fitToScreenContainer.add(this.videoRenderer);
         setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());        
 
-        videoPanel.add(headerBar, BorderLayout.NORTH);
+        collapsePlayerControlsTimer.setRepeats(false);
+
+        headerBarCollapsiblePane.setContentPane(headerBar);
+        videoPanel.add(headerBarCollapsiblePane, BorderLayout.NORTH);
         videoPanel.add(fitToScreenContainer, BorderLayout.CENTER);
     }
     
@@ -127,7 +138,9 @@ class VideoPanel implements Disposable{
     }
 
     private void setUpMouseListener(Component videoComponent) {
-        videoComponent.addMouseListener(new VideoPanelMouseListener());
+        VideoPanelMouseListener listener = new VideoPanelMouseListener();
+        videoComponent.addMouseListener(listener);
+        videoComponent.addMouseMotionListener(listener);
     }
 
     private void setUpHeaderBar(JComponent controlPanel,
@@ -157,13 +170,12 @@ class VideoPanel implements Disposable{
             public void ancestorAdded(AncestorEvent event) {
                 if (videoMediator.isFullScreen()) {
                     fullScreenButton.setIcon(fullScreenSelected);
-                    closeButton.setVisible(false);
                     headerBar.setFocusable(true);
                     headerBar.requestFocusInWindow();
                     setFitToScreen(true);
+                    collapsePlayerControlsTimer.restart();
                 } else {
                     fullScreenButton.setIcon(fullScreenUnselected);
-                    closeButton.setVisible(true);
                     setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
                 }
                 videoPanel.removeAncestorListener(this);
@@ -291,6 +303,14 @@ class VideoPanel implements Disposable{
     }
 
     private class VideoPanelMouseListener extends MouseAdapter {
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            if (videoMediator.isFullScreen()) {
+                headerBarCollapsiblePane.setCollapsed(false);
+                collapsePlayerControlsTimer.restart();
+            }
+        }
+
         @Override
         public void mousePressed(MouseEvent e) {
             maybeShowPopup(e);
