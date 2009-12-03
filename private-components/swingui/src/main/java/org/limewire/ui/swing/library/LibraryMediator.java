@@ -65,7 +65,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
     
     /**
      * Returns the given file if it is a file, otherwise if it is a directory, 
-     * it will find the first file in its subdirectories to return, if not file
+     * it will find the first file in its subdirectories, if no file
      * can be found in the subdirectories, the original file is returned.
      */
     private File findFile(File file) {
