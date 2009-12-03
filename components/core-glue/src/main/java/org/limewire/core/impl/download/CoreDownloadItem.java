@@ -139,11 +139,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     @Override
     public long getCurrentSize() {
         DownloadState state = getState();
-        if (state == DownloadState.DONE ||
-                state == DownloadState.DANGEROUS ||
-                state == DownloadState.SCANNING ||
-                state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED) {
+        if (state == DownloadState.SCANNING || state.isFinished()) {
             return getTotalSize();
         } else {
             return cachedSize;
@@ -203,11 +199,8 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     public int getPercentComplete() {
         DownloadState state = getState();
         if(state == DownloadState.FINISHING ||
-                state == DownloadState.DONE ||
-                state == DownloadState.DANGEROUS ||
                 state == DownloadState.SCANNING ||
-                state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED){
+                state.isFinished()){
             return 100;
         }
 

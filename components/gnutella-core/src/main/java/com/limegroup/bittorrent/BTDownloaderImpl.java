@@ -229,7 +229,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             try {
                 if(f.exists() && isInfected(f))
                     return true;
-            } catch(VirusScanException x) {
+            } catch(VirusScanException e) {
                 scanFailed.set(true);
             }
             if(isDangerous(f))
@@ -252,9 +252,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             listener.scanStopped();
             if(infected)
                 return true;                
-        } catch (VirusScanException x) {
+        } catch (VirusScanException e) {
             listener.scanStopped();
             if(promptAboutUnscannedPreview()) {
+                // The user chose to cancel the preview
                 return true;
             }
         }
