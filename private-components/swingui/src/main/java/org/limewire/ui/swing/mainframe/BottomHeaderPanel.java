@@ -260,6 +260,7 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
         downloadOptionsButton = new LimeComboBox();
         downloadOptionsButton.setText(I18n.tr("Options"));
         comboBoxDecorator.decorateMiniComboBox(downloadOptionsButton);
+        downloadOptionsButton.setFocusable(false);
         
         downloadOptionsButton.setFont(hyperlinkFont);
         downloadOptionsButton.setIcon(moreButtonArrow);
@@ -272,6 +273,7 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
         uploadOptionsButton = new LimeComboBox();
         uploadOptionsButton.setText(I18n.tr("Options"));
         comboBoxDecorator.decorateMiniComboBox(uploadOptionsButton);
+        uploadOptionsButton.setFocusable(false);
         
         uploadOptionsButton.setFont(hyperlinkFont);
         uploadOptionsButton.setIcon(moreButtonArrow);
