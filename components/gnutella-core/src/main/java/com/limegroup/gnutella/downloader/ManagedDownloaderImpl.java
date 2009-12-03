@@ -1869,10 +1869,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             listener.scanStopped();
             if(infected)
                 return true;                
-        } catch (VirusScanException scanFailed) {
+        } catch (VirusScanException e) {
             listener.scanStopped();
             if(promptAboutUnscannedPreview()) {
-                System.err.println("Cancelling preview");
+                // The user chose to cancel the preview
                 return true;
             }
         }
