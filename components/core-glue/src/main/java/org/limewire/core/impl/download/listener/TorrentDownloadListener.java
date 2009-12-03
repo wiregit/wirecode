@@ -1,15 +1,16 @@
 package org.limewire.core.impl.download.listener;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
@@ -29,6 +30,8 @@ import com.limegroup.gnutella.downloader.DownloadStateEvent;
  */
 public class TorrentDownloadListener implements EventListener<DownloadStateEvent> {
 
+    private static final Log LOG = LogFactory.getLog(TorrentDownloadListener.class);
+    
     private final Downloader downloader;
     private final DownloadManager downloadManager;
     private final ActivityCallback activityCallback;
@@ -100,9 +103,16 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         final BTTorrentFileDownloader btTorrentFileDownloader = (BTTorrentFileDownloader) downloader;
         try {
             torrentFile = btTorrentFileDownloader.getTorrentFile();
-            torrentCopy = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), UUID.randomUUID()
-                    .toString()
-                    + ".torrent");
+            try {
+                torrentCopy = FileUtils.createTempFile("tmp-torrent", "");
+                torrentCopy.deleteOnExit();
+            } catch (IOException e) {
+                //If the copy does not succeed the download can still continue. 
+                //It is just recovering from an error that will not be possible
+                //When this happens.
+                LOG.error("Error copying the torrentFile", e);
+            }
+
             //copy used to handle certain exception cases where the 
             //old torrent file may have been removed because of logic to 
             //clean up the downloaders. This is because downloadTorrent, will
