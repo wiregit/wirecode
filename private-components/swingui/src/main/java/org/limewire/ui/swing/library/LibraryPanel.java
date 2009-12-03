@@ -396,7 +396,7 @@ public class LibraryPanel extends JPanel {
      * Returns the selected library item.
      */
     public LibraryNavItem getSelectedNavItem() {
-        return selectedNavItem;
+        return libraryNavigatorPanel.getSelectedNavItem();
     }
     
     List<File> getSelectedFiles() {

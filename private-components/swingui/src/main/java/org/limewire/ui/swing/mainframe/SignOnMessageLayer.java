@@ -153,6 +153,7 @@ class SignOnMessageLayer {
             @Override
             public void itemSelected(NavCategory category, NavItem navItem,
                     NavSelectable selectable, NavMediator navMediator) {
+                //TODO: all this logic is extremely brittle
                 switch (messageType) {
                 case LIBRARY:
                     // If library message showing and Library selected, close message.
@@ -181,6 +182,7 @@ class SignOnMessageLayer {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 NavType navType = getSelectedNavType();
+                //TODO: all this logic is extremely brittle
                 switch (messageType) {
                 case LIBRARY:
                     // If library message showing and Private Shared selected, close message.
