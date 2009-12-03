@@ -9,7 +9,10 @@ import java.lang.reflect.Method;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
 import javax.swing.Timer;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -74,6 +77,27 @@ public class SwingHacks {
         menu.addPopupMenuListener(menuHackListener);
     }
     
+    /**
+     * LWC-3622 : Text field scrolling problem when using large insets
+     * 
+     * <p> Hack to mitigate the problem where when using a text field with
+     *  large horizontal insets you can't properly scroll back to the start
+     *  with the cursor on certain input lengths.  This hack does not completely
+     *  correct the problem but will ensure the text field is still usuable in those
+     *  strange cases.  In the case where two characters are rendered unviewable (ie. skinny 
+     *  like i,l...) the first scroll back will remain stuck but the second will fix the problem.  
+     */
+    public static void fixTextFieldScrollClippingWithNonDefaultInsets(JTextField textComponent) {
+        textComponent.addCaretListener(new CaretListener()  {
+            @Override
+            public void caretUpdate(CaretEvent e) {
+                JTextField component = (JTextField)e.getSource();
+                if (component.getScrollOffset() > 0 && component.getCaretPosition() == 0) {
+                    component.setScrollOffset(0);
+                }
+            }
+        });
+    }
     
     /**
      * LWC-3706 : DnD on KDE broken (KDE wm)

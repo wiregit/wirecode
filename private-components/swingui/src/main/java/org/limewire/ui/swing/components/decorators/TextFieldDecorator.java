@@ -10,6 +10,7 @@ import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.factories.TextFieldPainterFactory;
+import org.limewire.ui.swing.util.SwingHacks;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -91,6 +92,7 @@ public class TextFieldDecorator {
     private void decorateGeneral(JTextField field) {
         field.setOpaque(false);
         field.setBorder(BorderFactory.createEmptyBorder(2,10,2,12));
+        SwingHacks.fixTextFieldScrollClippingWithNonDefaultInsets(field);
     }
     
     private TextFieldPainterFactory getTextFieldFactory() {
