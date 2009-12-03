@@ -1828,7 +1828,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (corrupt == null || isInfectedOrDangerous(corrupt, listener))
                 return null;
             return corrupt;
-        } else if (state == DownloadState.COMPLETE) {
+        } else if (state == DownloadState.COMPLETE ||
+                state == DownloadState.SCAN_FAILED) {
             // If the download is complete, return the whole file.
             return getSaveFile();
         } else {
