@@ -114,7 +114,8 @@ public class DownloadActionHandler {
                 NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
             }
         } else if (actionCommmand == PROPERTIES_COMMAND){
-            if(item.getState() != DownloadState.DONE) {
+            if(item.getState() != DownloadState.DONE &&
+                    item.getState() != DownloadState.SCAN_FAILED) {
                 JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
                 dialog.setVisible(true);
             } else if(item.getLaunchableFile() != null) {
@@ -139,7 +140,13 @@ public class DownloadActionHandler {
 //            shareWidget.setShareable(item.getDownloadingFile());
 //            shareWidget.show(null);
         } else if( actionCommmand == LIBRARY_COMMAND) {
-            File file = item.getState() == DownloadState.DONE ? item.getLaunchableFile() : item.getDownloadingFile();
+            File file;
+            if(item.getState() == DownloadState.DONE ||
+                    item.getState() == DownloadState.SCAN_FAILED) {
+                file = item.getLaunchableFile();
+            } else {
+                file = item.getDownloadingFile();
+            }
             URN urn = item.getUrn();
             
             if(file != null) {
