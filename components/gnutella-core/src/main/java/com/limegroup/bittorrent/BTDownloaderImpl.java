@@ -153,7 +153,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             finishing.set(true);
             torrentsFinished.incrementAndGet();
             if (isInfectedOrDangerous()) {
-                complete.set(true);
+                // FIXME: deleteIncompleteFiles() ?
                 return;
             }
             FileUtils.forceDeleteRecursive(getSaveFile());
