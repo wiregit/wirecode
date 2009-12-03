@@ -1,16 +1,19 @@
 package org.limewire.ui.swing.downloads.table;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JDialog;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -24,10 +27,10 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -130,7 +133,8 @@ public class DownloadActionHandler {
             URN urn = item.getUrn();
             
             if(file != null) {
-                libraryMediator.selectInLibrary(file);
+                File firstFile = findFile(file);
+                libraryMediator.selectInLibrary(firstFile);
             } else if (urn != null){
                 libraryMediator.selectInLibrary(urn);
             }
@@ -140,7 +144,32 @@ public class DownloadActionHandler {
             searchHandler.doSearch(createSearchInfo(item));
         }
     }
-    
+
+    /**
+     * Returns the given file if it is a file, otherwise if it is a directory, 
+     * it will find the first file in its subdirectories to return.
+     */
+    private File findFile(File file) {
+        File firstFile = file;
+        if(firstFile.isDirectory()) {
+            List<File> accumulator = new ArrayList<File>(Arrays.asList(firstFile));
+            while(accumulator.size() > 0) {
+                File folderOrFile = accumulator.remove(0);
+                if(folderOrFile.isDirectory()) {
+                    File[] files = folderOrFile.listFiles();
+                    if(files != null) {
+                        //must null check files because it can return null if there was an error accessing 
+                        //the files the interface is wrong about returning an empty list for all circumstances
+                        accumulator.addAll(Arrays.asList(files));
+                    }
+                } else {
+                    return folderOrFile;
+                }
+            }
+        }
+        return firstFile;
+    }
+
     private SearchInfo createSearchInfo(DownloadItem item) {
         String title = item.getPropertyString(FilePropertyKey.TITLE);
         if(title == null) {
