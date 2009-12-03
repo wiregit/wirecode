@@ -1,9 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.JDialog;
 
@@ -133,8 +130,7 @@ public class DownloadActionHandler {
             URN urn = item.getUrn();
             
             if(file != null) {
-                File firstFile = findFile(file);
-                libraryMediator.selectInLibrary(firstFile);
+                libraryMediator.selectInLibrary(file);
             } else if (urn != null){
                 libraryMediator.selectInLibrary(urn);
             }
@@ -143,32 +139,6 @@ public class DownloadActionHandler {
         } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
             searchHandler.doSearch(createSearchInfo(item));
         }
-    }
-
-    /**
-     * Returns the given file if it is a file, otherwise if it is a directory, 
-     * it will find the first file in its subdirectories to return, if not file
-     * can be found in the subdirectories, the original file is returned.
-     */
-    private File findFile(File file) {
-        File firstFile = file;
-        if(firstFile.isDirectory()) {
-            List<File> accumulator = new ArrayList<File>(Arrays.asList(firstFile));
-            while(accumulator.size() > 0) {
-                File folderOrFile = accumulator.remove(0);
-                if(folderOrFile.isDirectory()) {
-                    File[] files = folderOrFile.listFiles();
-                    if(files != null) {
-                        //must null check files because it can return null if there was an error accessing 
-                        //the files the interface is wrong about returning an empty list for all circumstances
-                        accumulator.addAll(Arrays.asList(files));
-                    }
-                } else {
-                    return folderOrFile;
-                }
-            }
-        }
-        return firstFile;
     }
 
     private SearchInfo createSearchInfo(DownloadItem item) {
