@@ -230,6 +230,13 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         return torrentManager.get().isValid();
     }
 
+    /**
+     * Shares the torrent with gnutella, then registers the specified torrent
+     * with the TorrentManager. Delegates an add torrent call to the underlying
+     * torrentManager implementation.
+     * 
+     * @return the torrent if it was successfully added, null otherwise.
+     */
     @Override
     public Torrent addTorrent(TorrentParams params) throws IOException {
         if (!isValid()) {
@@ -237,6 +244,10 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         }
         params.fill();
         shareTorrent(params.getTorrentFile());
+        return addTorrentInternal(params);
+    }
+
+    private Torrent addTorrentInternal(TorrentParams params) throws IOException {
         File torrentFile = params.getTorrentFile();
         File torrentParent = torrentFile.getParentFile();
         File torrentDownloadFolder = SharingSettings.INCOMPLETE_DIRECTORY.get();
@@ -257,6 +268,21 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         }
 
         return torrentManager.get().addTorrent(params);
+    }
+
+    /**
+     * Same as addTorrent but the torrent file will not be shared with gnutella.
+     * Additionally in the future we will probably change some settings for the
+     * individual torrent, like max uploads/download speeds.
+     * 
+     * @return the torrent if it was successfully added, null otherwise.
+     */
+    public Torrent seedTorrent(TorrentParams params) throws IOException {
+        if (!isValid()) {
+            return null;
+        }
+        params.fill();
+        return addTorrentInternal(params);
     }
 
     @Override

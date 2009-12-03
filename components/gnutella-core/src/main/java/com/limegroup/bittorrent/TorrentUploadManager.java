@@ -9,7 +9,6 @@ import java.util.Map;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentInfo;
-import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.inject.LazySingleton;
@@ -33,10 +32,10 @@ public class TorrentUploadManager implements BTUploaderFactory {
 
     private static final Log LOG = LogFactory.getLog(TorrentUploadManager.class);
     private final Provider<ActivityCallback> activityCallback;
-    private final Provider<TorrentManager> torrentManager;
+    private final Provider<LimeWireTorrentManager> torrentManager;
 
     @Inject
-    public TorrentUploadManager(Provider<TorrentManager> torrentManager, Provider<ActivityCallback> activityCallback) {
+    public TorrentUploadManager(Provider<LimeWireTorrentManager> torrentManager, Provider<ActivityCallback> activityCallback) {
         this.torrentManager = torrentManager;
         this.activityCallback = activityCallback;
     }
@@ -93,7 +92,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                                     params.setFastResumeFile(fastResumeFile);
                                     params.setTorrentFile(torrentFile);
                                     params.setTorrentDataFile(torrentDataFile);
-                                    torrent = torrentManager.get().addTorrent(params); 
+                                    torrent = torrentManager.get().seedTorrent(params); 
                                     if (torrent != null) {
                                         torrentAdded = true;
                                         if (torrent.hasMetaData()) {
