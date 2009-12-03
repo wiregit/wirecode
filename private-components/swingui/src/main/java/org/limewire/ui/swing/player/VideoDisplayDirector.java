@@ -93,6 +93,7 @@ class VideoDisplayDirector {
     
     private void showInClient(){
         limeWireLayeredPane.add(videoPanel.getComponent(), videoLayer);
+        videoPanel.requestFocus();
         resizeVideoContainer();     
         //Make sure the flash of native video window doesn't steal focus
         GuiUtils.getMainFrame().toFront();   

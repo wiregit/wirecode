@@ -125,6 +125,10 @@ class VideoPanel implements Disposable{
         controlPanel.dispose();
     }
 
+    public void requestFocus() {
+        videoPanel.requestFocus();
+    }
+    
     private void setupActionMaps(){
         videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), "fullScreen");
         videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "fullScreen");
@@ -165,7 +169,7 @@ class VideoPanel implements Disposable{
         headerBar.add(controlPanel, "pos 0.5al 0.5al");
         headerBar.add(closeButton);
 
-        videoPanel.addAncestorListener(new AncestorListener() {            
+        videoPanel.addAncestorListener(new AncestorListener() {
             @Override
             public void ancestorAdded(AncestorEvent event) {
                 if (videoMediator.isFullScreen()) {
