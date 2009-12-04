@@ -59,11 +59,13 @@ class DownloadHandlerImpl implements DownloadHandler {
     }
     
     private boolean maybeNavigate(VisualSearchResult vsr) {
-        if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED
-                || vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+        BasicDownloadState state = vsr.getDownloadState();
+        if (state == BasicDownloadState.DOWNLOADED
+                || state == BasicDownloadState.DOWNLOADING
+                || state == BasicDownloadState.REMOVED) {
             mainDownloadPanel.selectAndScrollTo(vsr.getUrn());
             return true;
-        } else if (vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
+        } else if (state == BasicDownloadState.LIBRARY) {
             libraryMediator.selectInLibrary(vsr.getUrn());
             return true;
         }

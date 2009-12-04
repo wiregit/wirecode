@@ -22,6 +22,9 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
             case LIBRARY:
                 String message = "{0} is in your <a href=\"#library\">Library</a>.";
                 return tr(message, wrapHeading(heading.getText(message), false));
+            case REMOVED:
+                String removeMessage = "{0} was <a href=\"#downloading\">removed</a> for your protection.";
+                return tr(removeMessage, wrapHeading(heading.getText(removeMessage), false));
             }
         }
         return "";
