@@ -15,6 +15,7 @@ import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
+import org.limewire.util.OSUtils;
 
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
@@ -40,10 +41,12 @@ class LibTorrentWrapper {
      * then loading the libtorrent library as a jna lib.
      */
     void initialize(TorrentManagerSettings torrentSettings) {
+        
+        String torrentWrapperLibName = getLibraryName();
+        
         try {
-
-            this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
-            NativeLibrary lib = NativeLibrary.getInstance("torrent-wrapper");
+            this.libTorrent = (LibTorrent) Native.loadLibrary(torrentWrapperLibName, LibTorrent.class);
+            NativeLibrary lib = NativeLibrary.getInstance(torrentWrapperLibName);
             validate(lib);
             init(torrentSettings);
             // TODO add get_version method to the wrapper that can be checked
@@ -57,6 +60,21 @@ class LibTorrentWrapper {
         }
     }
 
+    /**
+     * @return the name of the shared library containing the libtorrentwrapper code.
+     *          Should match the file name of the library on disk. 
+     */
+    private static String getLibraryName() {
+        if (OSUtils.isLinux()) {
+            String arch = OSUtils.getOSArch();
+            // Linux requires binaries for every arch.
+            if (arch.equals("x86_64") || arch.equals("amd64")) {
+                return "torrent-wrapper64";
+            } 
+        } 
+        return "torrent-wrapper";
+    }
+    
     /**
      * Validates that all of the expected functions exist in the library.
      */
