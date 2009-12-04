@@ -165,6 +165,6 @@
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger-1.0.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/foxtrot-core-3.0.jar" sourcepath="lib/sources/foxtrot-3.0.zip"/>
 	<classpathentry kind="lib" path="lib/jars/fmj-20091008-6.jar" sourcepath="lib/sources/fmj-source.zip"/>
-	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.15-M1-lw.jar"/>
+	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.15-M1-lw.jar" sourcepath="lib/sources/jacob-1.15-M1-lw_src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
