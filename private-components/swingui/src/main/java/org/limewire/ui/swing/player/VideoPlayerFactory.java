@@ -9,6 +9,7 @@ import javax.media.MediaLocator;
 import javax.media.Player;
 import javax.media.protocol.DataSource;
 
+import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
 
 
@@ -46,11 +47,11 @@ public class VideoPlayerFactory {
             player.setSource(createDataSource(file));
 
         } catch (IOException e) {
-            throw new IncompatibleSourceException(e);
+            throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
         } catch (UnsatisfiedLinkError e) {
             // TODO: this is not the best way to handle unsatisfied links but
             // our native launch fallback will work
-            throw new IncompatibleSourceException(e);
+            throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
         }
         player.realize();
     }

@@ -1,5 +1,8 @@
 package org.limewire.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.UndeclaredThrowableException;
 
@@ -8,6 +11,13 @@ public class ExceptionUtils {
     private ExceptionUtils() {
     }
 
+    public static String getStackTrace(Throwable aThrowable) {
+        final Writer result = new StringWriter();
+        final PrintWriter printWriter = new PrintWriter(result);
+        aThrowable.printStackTrace(printWriter);
+        return result.toString();
+    }
+    
     /**
      * Rethrows a Throwable as either a {@link RuntimeException}, {@link Error},
      * or an {@link UndeclaredThrowableException}.
