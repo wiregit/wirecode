@@ -9,19 +9,18 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.event.SwingPropertyChangeSupport;
-
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPiecesInfo;
-import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.DownloadSourceInfo;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.io.Address;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 
 public class MockDownloadItem implements DownloadItem {
@@ -38,8 +37,9 @@ public class MockDownloadItem implements DownloadItem {
 	
 	private ErrorState errorState = ErrorState.NONE;
 	
-	private final PropertyChangeSupport support = new SwingPropertyChangeSupport(this);
+	private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
     private int queuePostion = 2;
+    private URN urn;
 
 	//TODO: change constructor
 	public MockDownloadItem(String title, long totalSize, DownloadState state, Category category) {
@@ -238,7 +238,11 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public URN getUrn() {
-        return null;
+        return urn;
+    }
+    
+    void setUrn(URN urn) {
+        this.urn = urn;
     }
     
     @Override

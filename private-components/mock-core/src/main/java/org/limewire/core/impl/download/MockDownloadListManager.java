@@ -66,7 +66,8 @@ public class MockDownloadListManager implements DownloadListManager {
         Category category = coreSearchResults.get(0).getCategory();
         final MockDownloadItem mdi =
             new MockDownloadItem(title, totalSize, state, category);
-
+        mdi.setUrn(coreSearchResults.get(0).getUrn());
+        
         addDownload(mdi);
 	    return mdi;
 	}
