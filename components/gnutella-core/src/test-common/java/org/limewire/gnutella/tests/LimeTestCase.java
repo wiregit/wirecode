@@ -205,6 +205,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
         DaapSettings.DAAP_ENABLED.setValue(false);
         BittorrentSettings.LIBTORRENT_ENABLED.setValue(false);
+        FilterSettings.VIRUS_SCANNER_ENABLED.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.get();
     }
     
