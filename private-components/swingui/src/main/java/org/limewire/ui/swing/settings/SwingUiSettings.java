@@ -351,4 +351,20 @@ public final class SwingUiSettings extends LimeProps {
      */
     public static final BooleanSetting SHOW_TRANSFERS_TRAY = FACTORY.createBooleanSetting(
             "ALWAYS_SHOW_DOWNLOADS_TRAY", false);
+    
+    /** Setting for the Download table sort direction. */
+    public static final BooleanSetting DOWNLOAD_SORT_ASCENDING =
+        FACTORY.createBooleanSetting("DOWNLOAD_SORT_ASCENDING", false);
+    
+    /** Setting for the Download table sort key. */
+    public static final StringSetting DOWNLOAD_SORT_KEY =
+        FACTORY.createStringSetting("DOWNLOAD_SORT_KEY", "ORDER_ADDED");
+    
+    /** Setting for the Upload table sort direction. */
+    public static final BooleanSetting UPLOAD_SORT_ASCENDING =
+        FACTORY.createBooleanSetting("UPLOAD_SORT_ASCENDING", true);
+    
+    /** Setting for the Upload table sort key. */
+    public static final StringSetting UPLOAD_SORT_KEY =
+        FACTORY.createStringSetting("UPLOAD_SORT_KEY", "ORDER_STARTED");
 }

@@ -7,13 +7,11 @@ import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JToggleButton;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadState;
@@ -44,8 +42,6 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
     private final Provider<CancelAllErrorDownloadAction> cancelErrorAction;
     private final Provider<CancelAllDownloadsAction> cancelAllAction;
     private final Provider<ShowUploadsInTrayAction> showUploadsInTrayAction;
-    
-    private AbstractButton isDescending;
     
     @Inject
     public DownloadHeaderPopupMenu(Provider<DownloadMediator> downloadMediator, Provider<ShowDownloadOptionsAction> showDownloadOptionsAction,
@@ -114,7 +110,7 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
         JCheckBoxMenuItem fileType = new JCheckBoxMenuItem(new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE));
         JCheckBoxMenuItem extension = new JCheckBoxMenuItem(new SortAction(I18n.tr("File Extension"), SortOrder.EXTENSION));        
 
-        final UsefulButtonGroup sortButtonGroup = new UsefulButtonGroup();
+        ButtonGroup sortButtonGroup = new ButtonGroup();
         sortButtonGroup.add(orderAdded);
         sortButtonGroup.add(name);
         sortButtonGroup.add(progress);
@@ -124,23 +120,18 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
         sortButtonGroup.add(fileType);
         sortButtonGroup.add(extension);
         
-        isDescending = new JMenuItem(new AbstractAction(I18n.tr("Reverse Order")){
+        AbstractButton reverseButton = new JMenuItem(new AbstractAction(I18n.tr("Reverse Order")) {
             {
                 putValue(Action.SELECTED_KEY, downloadMediator.get().isSortAscending());
                 putValue(Action.SMALL_ICON, downloadMediator.get().isSortAscending() ? downArrow : upArrow);
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                putValue(Action.NAME, isDescending.isSelected()? I18n.tr("Reverse Order") : I18n.tr("Reverse Order"));
-                putValue(Action.SMALL_ICON, isDescending.isSelected()? downArrow : upArrow);
-                sortButtonGroup.getSelectedButton().getAction().actionPerformed(null);
-            }            
+                boolean direction = !downloadMediator.get().isSortAscending();
+                putValue(Action.SMALL_ICON, direction ? downArrow : upArrow);
+                downloadMediator.get().setSortOrder(downloadMediator.get().getSortOrder(), direction);
+            }
         });
-        isDescending.setModel(new JToggleButton.ToggleButtonModel());
-        isDescending.setBorderPainted(false);
-        isDescending.setContentAreaFilled(false);
-        isDescending.setOpaque(false);
-        isDescending.setSelected(true);
         
         sortSubMenu.add(orderAdded);
         sortSubMenu.add(name);
@@ -151,7 +142,7 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
         sortSubMenu.add(fileType);
         sortSubMenu.add(extension);
         sortSubMenu.addSeparator();
-        sortSubMenu.add(isDescending);
+        sortSubMenu.add(reverseButton);
         
         return sortSubMenu;
     }
@@ -169,20 +160,7 @@ class DownloadHeaderPopupMenu extends JPopupMenu {
       
         @Override
         public void actionPerformed(ActionEvent e) {
-            downloadMediator.get().setSortOrder(order, !isDescending.isSelected());
+            downloadMediator.get().setSortOrder(order, downloadMediator.get().isSortAscending());
         }
     }; 
-    
-    private static class UsefulButtonGroup extends ButtonGroup {
-        public AbstractButton getSelectedButton(){
-            ButtonModel selectedModel = getSelection();
-            for (AbstractButton button : buttons){
-                if(button.getModel() == selectedModel){
-                    return button;
-                }
-            }
-            //nothing found
-            return null;
-        }
-    }      
 }

@@ -31,6 +31,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.upload.table.UploadTableFactory;
@@ -70,9 +71,6 @@ public class UploadMediator {
     private EventList<UploadItem> activeList;
     private SortedList<UploadItem> sortedList;
     
-    private boolean sortAscending;
-    private SortOrder sortOrder;
-    
     private JPanel uploadPanel;
     private UploadTable uploadTable;
     
@@ -89,11 +87,8 @@ public class UploadMediator {
         this.uploadTableFactory = uploadTableFactory;
         this.transferTrayNavigator = transferTrayNavigator;
         
-        sortOrder = SortOrder.ORDER_STARTED;
-        sortAscending = true;
-        
         sortedList = GlazedListsFactory.sortedList(uploadListManager.getSwingThreadSafeUploads(),
-                new OrderedComparator<UploadItem>(getSortComparator(sortOrder), sortAscending));
+                new OrderedComparator<UploadItem>(getSortComparator(getSortOrder()), isSortAscending()));
     }
     
     /**
@@ -225,22 +220,29 @@ public class UploadMediator {
      * Returns true if the uploads list is sorted in ascending order.
      */
     public boolean isSortAscending() {
-        return sortAscending;
+        return SwingUiSettings.UPLOAD_SORT_ASCENDING.getValue();
     }
     
     /**
      * Returns the sort key for the uploads list.
      */
     public SortOrder getSortOrder() {
-        return sortOrder;
+        try {
+            String sortKey = SwingUiSettings.UPLOAD_SORT_KEY.get();
+            return SortOrder.valueOf(sortKey);
+        } catch (IllegalArgumentException ex) {
+            // Return default order if setting is invalid.
+            return SortOrder.ORDER_STARTED;
+        }
     }
     
     /**
      * Sets the sort key and direction on the uploads list.
      */
     public void setSortOrder(SortOrder sortOrder, boolean ascending) {
-        this.sortOrder = sortOrder;
-        this.sortAscending = ascending;
+        // Save sort settings.
+        SwingUiSettings.UPLOAD_SORT_KEY.set(sortOrder.toString());
+        SwingUiSettings.UPLOAD_SORT_ASCENDING.setValue(ascending);
         
         // Apply sort order.
         sortedList.setComparator(new OrderedComparator<UploadItem>(

@@ -32,6 +32,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -66,9 +67,6 @@ public class DownloadMediator {
 	private List<JButton> headerButtons;
 	private DownloadHeaderPopupMenu headerPopupMenu;
 	
-	private boolean isAscending = true;
-	private SortOrder sortOrder = SortOrder.ORDER_ADDED;
-	
     @InspectablePrimitive(value = "download sorts", category = DataCategory.USAGE)
     private final Set<SortOrder> sortInspection = new HashSet<SortOrder>();
     
@@ -95,7 +93,7 @@ public class DownloadMediator {
 	    this.transferTrayNavigator = transferTrayNavigator;
 	    
 	    EventList<DownloadItem> baseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
-	    commonBaseList = GlazedListsFactory.sortedList(baseList, new DescendingComparator(new OrderAddedComparator()));
+	    commonBaseList = GlazedListsFactory.sortedList(baseList, getSortComparator(getSortOrder(), isSortAscending()));
 	}
     
 	/**
@@ -153,19 +151,36 @@ public class DownloadMediator {
 	}
 	
 	public boolean isSortAscending() {
-	    return isAscending;
+	    return SwingUiSettings.DOWNLOAD_SORT_ASCENDING.getValue();
 	}
 	
 	public SortOrder getSortOrder() {
-	    return sortOrder;
+	    try {
+	        String sortKey = SwingUiSettings.DOWNLOAD_SORT_KEY.get();
+	        return SortOrder.valueOf(sortKey);
+	    } catch (IllegalArgumentException ex) {
+            // Return default order if setting is invalid.
+	        return SortOrder.ORDER_ADDED;
+	    }
 	}
 	
 	public void setSortOrder(SortOrder order, boolean isAscending){
-	    this.isAscending = isAscending;
-	    this.sortOrder = order;
+        // Save sort settings.
+	    SwingUiSettings.DOWNLOAD_SORT_KEY.set(order.toString());
+	    SwingUiSettings.DOWNLOAD_SORT_ASCENDING.setValue(isAscending);
 	    
-	    Comparator<DownloadItem> comparator;
-	    switch (order) {
+        // Apply sort order.
+	    commonBaseList.setComparator(getSortComparator(order, isAscending));
+	    
+	    sortInspection.add(order);
+	}
+	
+    /**
+     * Returns a comparator for the specified sort key and direction.
+     */
+	private Comparator<DownloadItem> getSortComparator(SortOrder sortOrder, boolean ascending) {
+        Comparator<DownloadItem> comparator;
+        switch (sortOrder) {
         case ORDER_ADDED:
             comparator = new OrderAddedComparator();
             break;
@@ -191,16 +206,14 @@ public class DownloadMediator {
             comparator = new FileExtensionComparator();
             break;
         default:
-            throw new IllegalArgumentException("Unknown SortOrder: " + order);
+            throw new IllegalArgumentException("Unknown SortOrder: " + sortOrder);
         }
-	    
-	    if(isAscending){
-	        commonBaseList.setComparator(comparator);
-	    } else {
-            commonBaseList.setComparator(new DescendingComparator(comparator));
+        
+        if (ascending) {
+            return comparator;
+        } else {
+            return new DescendingComparator(comparator);
         }
-	    
-	    sortInspection.add(order);
 	}
 
 	public void pauseAll() {
