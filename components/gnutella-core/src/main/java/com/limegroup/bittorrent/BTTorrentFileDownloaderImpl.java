@@ -49,26 +49,23 @@ import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.malware.VirusScanException;
+import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implements
         BTTorrentFileDownloader, EventListener<DownloadStateEvent> {
 
     private static Log LOG = LogFactory.getLog(BTTorrentFileDownloaderImpl.class);
-
     private static final int TIMEOUT = 5000;
 
     private final DownloadManager downloadManager;
-
     private final HttpExecutor httpExecutor;
-
     private final EventListenerList<DownloadStateEvent> eventListenerList;
-
     private DownloadState downloadStatus = DownloadState.QUEUED;
-
     private File torrentFile = null;
-
     private final File incompleteTorrentFile;
+    private final VirusScanner virusScanner;
 
     /**
      * Something to shutdown if the user cancels the fetching
@@ -80,15 +77,15 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
             SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
-            ActivityCallback activityCallback, CategoryManager categoryManager) {
+            ActivityCallback activityCallback, CategoryManager categoryManager,
+            VirusScanner virusScanner) {
         super(saveLocationManager, categoryManager);
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.httpExecutor = Objects.nonNull(httpExecutor, "httpExecutor");
-
-        this.eventListenerList = new EventListenerList<DownloadStateEvent>();
-        this.incompleteTorrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), UUID
-                .randomUUID().toString()
-                + ".torrent");
+        this.virusScanner = virusScanner;
+        eventListenerList = new EventListenerList<DownloadStateEvent>();
+        incompleteTorrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(),
+                UUID.randomUUID().toString() + ".torrent");
         addListener(this);
     }
 
@@ -128,13 +125,22 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                 torrentOutputStream.close();
                 Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
                 BTData btData = new BTDataImpl(torrentFileMap);
-
-                downloadStatus = DownloadState.COMPLETE;
-
+                try {
+                    if(virusScanner.isSupported() &&
+                            virusScanner.isInfected(incompleteTorrentFile)) {
+                        downloadStatus = DownloadState.THREAT_FOUND;
+                        return false;
+                    } else {
+                        downloadStatus = DownloadState.COMPLETE;
+                    }
+                } catch(VirusScanException e) {
+                    downloadStatus = DownloadState.SCAN_FAILED;
+                    return false;
+                }
                 // The torrent file is copied into the incomplete file
                 // directory.
-                torrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), btData.getName()
-                        + ".torrent");
+                torrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(),
+                        btData.getName() + ".torrent");
                 if (torrentFile.exists()) {
                     // pass through, when trying to start the BTDownloader a
                     // savelocation exception will occur
