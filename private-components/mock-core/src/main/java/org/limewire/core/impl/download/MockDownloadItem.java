@@ -38,7 +38,7 @@ public class MockDownloadItem implements DownloadItem {
 	
 	private ErrorState errorState = ErrorState.NONE;
 	
-	private final PropertyChangeSupport support = new SwingPropertyChangeSupport(this);
+	private final PropertyChangeSupport support = new SwingPropertyChangeSupport(this, true);
     private int queuePostion = 2;
     
 	public MockDownloadItem(String title, long totalSize, DownloadState state, Category category) {
