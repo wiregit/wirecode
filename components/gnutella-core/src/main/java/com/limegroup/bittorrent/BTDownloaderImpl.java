@@ -153,7 +153,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             finishing.set(true);
             torrentsFinished.incrementAndGet();
             if (isInfectedOrDangerous()) {
-                // FIXME: deleteIncompleteFiles() ?
                 return;
             }
             FileUtils.forceDeleteRecursive(getSaveFile());
@@ -227,7 +226,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // FIXME: pass in the directory as a single file
         for(File f : getIncompleteFiles()) {
             try {
-                if(f.exists() && isInfected(f))
+                if(isInfected(f))
                     return true;
             } catch(VirusScanException e) {
                 scanFailed.set(true);
@@ -266,9 +265,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * Returns true if the given file is infected, after stopping the download.
      */
     private boolean isInfected(File file) throws VirusScanException {
-        if(!virusScanner.get().isSupported())
-            return false;
-        if(virusScanner.get().isInfected(file)) {
+        if(!virusScanner.get().isSupported() &&
+                virusScanner.get().isInfected(file)) {
             lastState.set(DownloadState.THREAT_FOUND);
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.THREAT_FOUND));
             // This will cause TorrentEvent.STOPPED
@@ -571,12 +569,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public String getVendor() {
         return BITTORRENT_DOWNLOAD;
-    }
-
-    @Override
-    public void discardCorruptDownload(boolean delete) {
-        // we never give up because of corruption (because this can never be
-        // called)
     }
 
     @Override

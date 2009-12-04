@@ -38,12 +38,6 @@ public class InNetworkCallback implements DownloadCallback {
     public void downloadsComplete() {
     }
 
-    // always discard corruption.
-    @Override
-    public void promptAboutCorruptDownload(Downloader dloader) {
-        dloader.discardCorruptDownload(true);
-    }
-    
     @Override
     public void promptAboutUnscannedPreview(Downloader dloader) {
         dloader.discardUnscannedPreview(true);

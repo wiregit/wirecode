@@ -418,12 +418,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             public void downloadsComplete() {
             }
 
-
-            @Override
-            public void promptAboutCorruptDownload(Downloader dloader) {
-                dloader.discardCorruptDownload(false);
-            }
-            
             @Override
             public void promptAboutUnscannedPreview(Downloader dloader) {
                 dloader.discardUnscannedPreview(false);

@@ -173,13 +173,6 @@ public interface Downloader extends BandwidthTracker,
 
     /**
      * Handles the user's response to
-     * DownloadCallback.promptAboutCorruptDownload().
-     * @param delete whether to discard the corrupt download
-     */
-    public void discardCorruptDownload(boolean delete);
-    
-    /**
-     * Handles the user's response to
      * DownloadCallback.promptAboutUnscannedPreview().
      * @param delete whether to discard the unscanned preview
      */

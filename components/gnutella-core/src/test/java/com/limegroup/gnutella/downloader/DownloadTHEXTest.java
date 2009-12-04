@@ -255,47 +255,11 @@ public class DownloadTHEXTest extends DownloadTestCase {
         assertEquals(1, testUploaders[0].getConnections());
     }    
     
-    public void testKeepCorrupt() throws Exception {
-        LOG.info("-Testing that if the user chooses to keep a corrupt download the download" +
-                "will eventually finish");
-        final int RATE = 100;
-        testUploaders[0].setCorruption(true);
-        testUploaders[0].setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
-        testUploaders[0].setSendThexTreeHeader(true);
-        testUploaders[0].setSendThexTree(true);
-        testUploaders[0].setRate(RATE);
-        
-        testUploaders[1].setCorruption(true);
-        testUploaders[1].setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
-        testUploaders[1].setRate(RATE);
-        
-        RemoteFileDesc rfd1=newRFDWithURN(PORTS[0], false);
-        RemoteFileDesc rfd2=newRFDWithURN(PORTS[1], false);
-        
-        downloadServices.download(new RemoteFileDesc[]{rfd1, rfd2}, RemoteFileDesc.EMPTY_LIST, null, false);
-        waitForComplete();
-
-        
-        HashTree tree = tigerTreeCache.getHashTree(TestFile.hash());
-        assertNull(tree);
-        assertTrue(activityCallback.corruptChecked);
-        
-        // tried once or if twice then failed the second time.
-        assertLessThanOrEquals(2, testUploaders[0].getConnections());
-        // tried once or twice.
-        assertLessThanOrEquals(2, testUploaders[1].getConnections());
-        
-        assertGreaterThanOrEquals(TestFile.length(), 
-                testUploaders[0].getAmountUploaded()+testUploaders[1].getAmountUploaded());
-    }
-    
     public void testDiscardCorrupt() throws Exception {
         LOG.info("-Testing that if the user chooses to discard a corrupt download it will terminate" +
                 "immediately");
         
         final int RATE = 100;
-        activityCallback.delCorrupt = true;
-        activityCallback.corruptChecked = false;
         testUploaders[0].setCorruption(true);
         testUploaders[0].setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
         testUploaders[0].setSendThexTreeHeader(true);
@@ -312,7 +276,6 @@ public class DownloadTHEXTest extends DownloadTestCase {
         tGenericCorrupt( new RemoteFileDesc[] { rfd1}, new RemoteFileDesc[] {rfd2} );
         HashTree tree = tigerTreeCache.getHashTree(TestFile.hash());
         assertNull(tree);
-        assertTrue(activityCallback.corruptChecked);
         
         // tried once or if twice then failed the second time.
         assertLessThanOrEquals(2, testUploaders[0].getConnections());
@@ -323,34 +286,21 @@ public class DownloadTHEXTest extends DownloadTestCase {
                 testUploaders[0].getAmountUploaded()+testUploaders[1].getAmountUploaded());
     }
     
-    
-    public void testMismatchedVerifyHashNoStopOnCorrupt() throws Exception {
-        tMismatchedVerifyHash(false, false);
-    }
-    
     public void testMismatchedVerifyHashStopOnCorrupt() throws Exception {
-        activityCallback.delCorrupt = true;        
-        tMismatchedVerifyHash(true, false);
-    }
-    
-    public void testMismatchedVerifyHashWithThexNoStopOnCorrupt()
-      throws Exception {
-        tMismatchedVerifyHash(false, true);
+        tMismatchedVerifyHash(false);
     }
     
     public void testMismatchedVerifyHashWithThexStopOnCorrupt() throws Exception{
-        activityCallback.delCorrupt = true;
-        tMismatchedVerifyHash(true, true);
+        tMismatchedVerifyHash(true);
     }
 
     // note that this test ONLY works because the TestUploader does NOT SEND
     // a Content-Urn header.  if it did, the download would immediately fail
     // when reading the header. 
-    private void tMismatchedVerifyHash(boolean deleteCorrupt, boolean getThex )
+    private void tMismatchedVerifyHash(boolean getThex)
       throws Exception {
         LOG.info("-Testing file declared corrupt, when hash of "+
-                         "downloaded file mismatches bucket hash" +
-                         "stop when corrupt "+ deleteCorrupt+" ");
+                         "downloaded file mismatches bucket hash");
         String badSha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
 
         final int RATE=100;
@@ -369,8 +319,7 @@ public class DownloadTHEXTest extends DownloadTestCase {
         assertNull(tigerTreeCache.getHashTree(TestFile.hash()));
         assertNull(tigerTreeCache.getHashTree(badURN));
 
-        waitForComplete(deleteCorrupt);
-        assertTrue(activityCallback.corruptChecked);
+        waitForCorrupt();
         assertEquals(getThex, testUploaders[0].thexWasRequested());
         assertEquals(1, testUploaders[0].getConnections());
     }

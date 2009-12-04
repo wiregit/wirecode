@@ -363,28 +363,6 @@ public class GlueActivityCallbackTest extends BaseTestCase {
     }
     
     /**
-     * Test the promptAboutCurruptDownload() method.  The method does not actually
-     *  do any prompting, it just stops the downloader.  Test will confirm that the
-     *  correct call is made, if the method is changed in the future then this 
-     *  test will need updating.
-     */
-    public void testPromptAboutCorruptDownload() {
-        Mockery context = new Mockery();
-        
-        final Downloader downloader = context.mock(Downloader.class);
-        
-        GlueActivityCallback activityCallback = new GlueActivityCallback(null);
-        
-        context.checking(new Expectations() {{
-            exactly(1).of(downloader).discardCorruptDownload(with(any(boolean.class)));
-        }});
-        
-        activityCallback.promptAboutCorruptDownload(downloader);
-        
-        context.assertIsSatisfied();
-    }
-    
-    /**
      * Tests the translate method.  Ensures that it returns the untranslated string if there 
      *  is no {@link GuiCallback} instance otherwise delegate to it for the translation.
      */

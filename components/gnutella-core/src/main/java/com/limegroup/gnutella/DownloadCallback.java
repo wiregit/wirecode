@@ -20,14 +20,6 @@ public interface DownloadCallback {
     public void downloadsComplete();
 
     /**
-     * Warns the user that a file being downloaded is corrupt.
-     * <p>
-     * This method MUST call dloader.discardCorruptDownload(boolean b) to
-     * discard or keep the corrupt file.
-     */
-    public void promptAboutCorruptDownload(Downloader dloader);
-    
-    /**
      * Warns the user that a file being previewed could not be scanned for
      * viruses.
      * <p>

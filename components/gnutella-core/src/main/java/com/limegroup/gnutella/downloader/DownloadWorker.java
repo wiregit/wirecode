@@ -474,9 +474,9 @@ public class DownloadWorker {
                         _manager.workerFailed(DownloadWorker.this);
                     }
 
-                    // if we got too corrupted, notify the user
+                    // if we got too corrupted, cancel the download
                     if (_commonOutFile.isHopeless())
-                        _manager.promptAboutCorruptDownload();
+                        _manager.cancelCorruptDownload();
 
                     long stop = _downloader.getInitialReadingPoint()
                             + _downloader.getAmountRead();

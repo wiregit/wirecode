@@ -217,14 +217,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         }
     }
     
-    // TODO: if no prompt is ever intended then this should be renamed
-    @Override
-    public void promptAboutCorruptDownload(Downloader dloader) {
-        //just kill the download if it is corrupt
-        dloader.discardCorruptDownload(true);
-
-    }
-    
     @Override
     public void promptAboutUnscannedPreview(Downloader dloader) {
         if(guiCallback == null) {

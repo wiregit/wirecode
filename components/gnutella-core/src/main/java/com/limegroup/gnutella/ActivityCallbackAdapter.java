@@ -89,11 +89,6 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     }
 
     @Override
-    public void promptAboutCorruptDownload(Downloader dloader) {
-       dloader.discardCorruptDownload(false);
-    }
-    
-    @Override
     public void promptAboutUnscannedPreview(Downloader dloader) {
         dloader.discardUnscannedPreview(false);
     }

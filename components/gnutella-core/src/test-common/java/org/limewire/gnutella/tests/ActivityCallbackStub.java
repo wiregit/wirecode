@@ -23,11 +23,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 @Singleton
 public class ActivityCallbackStub implements ActivityCallback {
 
-    //don't delete corrupt file on detection
-    public boolean delCorrupt = false;
-    //if corruptness was queried
-    public boolean corruptChecked = false;
-
     @Override
     public void installationCorrupted() {}
 
@@ -56,12 +51,6 @@ public class ActivityCallbackStub implements ActivityCallback {
 
     @Override
     public void uploadsComplete() { }
-
-    @Override
-    public void promptAboutCorruptDownload(Downloader dloader) {
-        corruptChecked = true;
-        dloader.discardCorruptDownload(delCorrupt);
-    }
 
     @Override
     public void promptAboutUnscannedPreview(Downloader dloader) {
