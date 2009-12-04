@@ -251,7 +251,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public boolean isVolumeSettable() {
-        return player.getGainControl() != null;
+        return player != null && player.getGainControl() != null;
     }
 
     @Override
@@ -327,7 +327,10 @@ class VideoPlayerMediator implements PlayerMediator {
     }
 
     public void setFullScreen(boolean isFullScreen) {
-
+        if (player == null) {
+            return;
+        }
+        
         if (displayDirector.isFullScreen() == isFullScreen) {
             return;
         }
