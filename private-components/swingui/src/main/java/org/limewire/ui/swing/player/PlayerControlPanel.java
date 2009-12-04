@@ -494,8 +494,8 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
        
         @Override
         public void stateChanged(ChangeEvent e) {
-            
-            if (progressSlider.getMaximum() != 0 && progressSlider.getValueIsAdjusting()) {
+
+            if (progressSlider.getMaximum() != 0 && getPlayerMediator().isSeekable() && progressSlider.getValueIsAdjusting()) {
                 if (!waiting) {
                     waiting = true;
                 }
@@ -505,7 +505,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
                 double percent = (double)progressSlider.getValue() / (double)progressSlider.getMaximum();
                 getPlayerMediator().skip(percent);
                 progressSlider.setValue((int)(percent * progressSlider.getMaximum()));
-            }
+            } 
         }
     }
 
