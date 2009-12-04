@@ -409,9 +409,9 @@ class VideoPlayerMediator implements PlayerMediator {
             if (player.getMediaTime().getSeconds() >= player.getDuration().getSeconds()) {
                 // FMJ doesn't seem to fire EndOfMediaEvents so we need to do
                 // this manually
+                player.setMediaTime(new Time(0));
                 player.stop();
                 updateTimer.stop();
-                player.setMediaTime(new Time(0));
                 firePlayerStateChanged(PlayerState.EOM);
                 fireProgressUpdated(100f);
             } else {
