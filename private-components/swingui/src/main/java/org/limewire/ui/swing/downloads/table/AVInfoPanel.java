@@ -27,6 +27,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -82,7 +83,7 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setOpenUrlsNatively(false);
         messageLabel.addHyperlinkListener(new MessageListener());
         
-        okButton = new JButton(new CloseAction());
+        okButton = new JButton();
         
         doNotShowCheckBox = new JCheckBox();
         doNotShowCheckBox.setFont(doNotShowFont);
@@ -127,12 +128,13 @@ public class AVInfoPanel extends JPanel {
      * hazardous by the internal dangerous file checker.
      * 
      * @param item the item representing the downloaded file
-     * @param autoNotify true if this is an automatic message request due to a state change
+     * @param showOption true to show option to turn off warning
      */
-    public void showDangerMessage(DownloadItem item, boolean autoNotify) {
+    public void showDangerMessage(DownloadItem item, boolean showOption) {
         String heading = I18n.tr("Dangerous File");
         String message = I18n.tr("{0} is considered a dangerous file and has automatically been deleted for your protection.", item.getFileName());
-        showWarningMessage(heading, message, autoNotify, false);
+        showWarningMessage(heading, message, showOption, false,
+                SwingUiSettings.WARN_DOWNLOAD_DANGEROUS);
     }
     
     /**
@@ -140,12 +142,13 @@ public class AVInfoPanel extends JPanel {
      * as determined by the virus scanner.
      * 
      * @param item the item representing the downloaded file
-     * @param autoNotify true if this is an automatic message request due to a state change
+     * @param showOption true to show option to turn off warning
      */
-    public void showThreatMessage(DownloadItem item, boolean autoNotify) {
+    public void showThreatMessage(DownloadItem item, boolean showOption) {
         String heading = I18n.tr("Threat Detected");
         String message = I18n.tr("{0} is suspected to contain a virus or spyware and has automatically been deleted for your protection.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
-        showWarningMessage(heading, message, autoNotify, true);
+        showWarningMessage(heading, message, showOption, true, 
+                SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND);
     }
     
     /**
@@ -153,21 +156,22 @@ public class AVInfoPanel extends JPanel {
      * scanned due to a problem with the virus scanner.
      * 
      * @param item the item representing the downloaded file
-     * @param autoNotify true if this is an automatic message request due to a state change
+     * @param showOption true to show option to turn off warning
      */
-    public void showFailureMessage(DownloadItem item, boolean autoNotify) {
-        String heading = I18n.tr("Scan Failed");
+    public void showFailureMessage(DownloadItem item, boolean showOption) {
+        String heading = I18n.tr("Unable to Scan");
         String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
-        showWarningMessage(heading, message, autoNotify, true);
+        showWarningMessage(heading, message, showOption, true, 
+                SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED);
     }
     
     /**
      * Displays a warning message with the specified heading and message text.
      */
     private void showWarningMessage(String heading, String message, 
-            boolean autoNotify, boolean showVendor) {
-        // Skip if message is automatic and setting is false.
-        if (autoNotify && !SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND.getValue()) {
+            boolean showOption, boolean showVendor, BooleanSetting warningSetting) {
+        // Skip if do-not-show option is visible and the warning is turned off.
+        if (showOption && !warningSetting.getValue()) {
             return;
         }
         
@@ -184,9 +188,12 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setText(message);
         messageLabel.setPreferredSize(new Dimension(330, messageLabel.getPreferredSize().height));
         
+        // Set OK button action.
+        okButton.setAction(new CloseAction(warningSetting));
+        
         // Set up checkbox option.
         doNotShowCheckBox.setSelected(true);
-        doNotShowCheckBox.setVisible(autoNotify);
+        doNotShowCheckBox.setVisible(showOption);
         
         // Add components to container.
         add(iconLabel, "spany, alignx left, aligny top, gaptop 6, gapright 15"); 
@@ -239,12 +246,6 @@ public class AVInfoPanel extends JPanel {
      * Closes the window containing this panel.
      */
     private void disposeWindow() {
-        // Apply "do not show" option if visible.
-        if (doNotShowCheckBox.isVisible()) {
-            SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND.setValue(!doNotShowCheckBox.isSelected());
-        }
-        
-        // Dispose of parent window.
         Container ancestor = getTopLevelAncestor();
         if (ancestor instanceof Window) {
             ((Window) ancestor).dispose();
@@ -252,16 +253,26 @@ public class AVInfoPanel extends JPanel {
     }
     
     /**
-     * Action to close window.
+     * Action to close window.  If the do-not-show option is visible, it is
+     * applied to the appropriate setting.
      */
     private class CloseAction extends AbstractAction {
+        private final BooleanSetting warningSetting;
 
-        public CloseAction() {
+        public CloseAction(BooleanSetting warningSetting) {
             super(I18n.tr("OK"));
+            
+            this.warningSetting = warningSetting;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Apply "do not show" option if visible.
+            if (doNotShowCheckBox.isVisible()) {
+                warningSetting.setValue(!doNotShowCheckBox.isSelected());
+            }
+            
+            // Dispose of parent window.
             disposeWindow();
         }
     }

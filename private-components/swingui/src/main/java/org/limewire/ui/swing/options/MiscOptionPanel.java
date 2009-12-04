@@ -383,6 +383,8 @@ public class MiscOptionPanel extends OptionPanel {
         QuestionsHandler.SKIP_FIRST_DOWNLOAD_WARNING.setValue(skipWarningSettingValue);
         QuestionsHandler.WARN_TORRENT_SEED_MORE.revertToDefault();
         QuestionsHandler.CONFIRM_BLOCK_HOST.revertToDefault();
+        SwingUiSettings.WARN_DOWNLOAD_DANGEROUS.revertToDefault();
+        SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED.revertToDefault();
         SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND.revertToDefault();
     }
     

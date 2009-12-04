@@ -199,7 +199,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         case THREAT_FOUND:
             return I18n.tr("File deleted - Threat detected by AVG");
         case SCAN_FAILED:
-            return I18n.tr("Done, but virus scan aborted");
+            return I18n.tr("Done, but unable to scan for viruses");
         default:
             return null;
         }
