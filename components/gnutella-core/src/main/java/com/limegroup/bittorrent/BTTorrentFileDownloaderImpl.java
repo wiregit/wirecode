@@ -147,7 +147,8 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                     downloadStatus = DownloadState.COMPLETE;
                 }
             } catch(VirusScanException e) {
-                downloadStatus = DownloadState.SCAN_FAILED;
+                downloadStatus = e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS ?
+                        DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS : DownloadState.SCAN_FAILED;
                 return false;
             }
             // The torrent file is copied into the incomplete file

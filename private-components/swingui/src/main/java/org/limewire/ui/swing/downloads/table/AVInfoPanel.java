@@ -22,8 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.download.DownloadItem;
@@ -36,6 +34,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Content panel for the Anti-Virus Info dialog in the downloads table.
@@ -165,6 +165,20 @@ public class AVInfoPanel extends JPanel {
         String heading = I18n.tr("Unable to Scan");
         String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, showOption, true, 
+                SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED);
+    }
+    
+    /**
+     * Displays the failure message.  This applies to files that could not be 
+     * scanned due the initial set of definitions still being downloaded.
+     * 
+     * @param item the item representing the downloaded file
+     * @param autoNotify true if this is an automatic message request due to a state change
+     */
+    public void showFailureMessageDefsDownloading(DownloadItem item, boolean autoNotify) {
+        String heading = I18n.tr("Scan Failed");
+        String message = I18n.tr("{0} could not be inspected due to the virus scanner still downloading first set of virus definitions.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
+        showWarningMessage(heading, message, autoNotify, true,
                 SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED);
     }
     

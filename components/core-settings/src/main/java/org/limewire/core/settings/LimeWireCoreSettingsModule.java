@@ -24,6 +24,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ImmutableMap;
+import com.limegroup.gnutella.malware.InfectedExtensions;
+import com.limegroup.gnutella.malware.NumScannedClean;
+import com.limegroup.gnutella.malware.NumScannedInfected;
 
 public class LimeWireCoreSettingsModule extends AbstractModule {
     @Override
@@ -38,6 +41,9 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<Map<String, Provider<String>>>(){}).annotatedWith(FacebookURLs.class).toProvider(FacebookURLsMapProvider.class);
         bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);
         bind(new TypeLiteral<String>(){}).annotatedWith(VirusUpdatesURL.class).toProvider(DownloadSettings.VIRUS_UPDATES_SERVER);
+        bind(new TypeLiteral<MutableProvider<Integer>>(){}).annotatedWith(NumScannedClean.class).toInstance(DownloadSettings.NUM_SCANNED_CLEAN);
+        bind(new TypeLiteral<MutableProvider<Integer>>(){}).annotatedWith(NumScannedInfected.class).toInstance(DownloadSettings.NUM_SCANNED_INFECTED);
+        bind(new TypeLiteral<MutableProvider<Properties>>(){}).annotatedWith(InfectedExtensions.class).toInstance(DownloadSettings.INFECTED_EXTENSIONS);
     }
 
     @Singleton

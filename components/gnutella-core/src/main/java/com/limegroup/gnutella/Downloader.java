@@ -301,7 +301,8 @@ public interface Downloader extends BandwidthTracker,
         DANGEROUS,
         SCANNING,
         THREAT_FOUND,
-        SCAN_FAILED
+        SCAN_FAILED,
+        SCAN_FAILED_DOWNLOADING_DEFINITIONS
     }
     
     // FIXME: this seems like a clumsy way to track preview state

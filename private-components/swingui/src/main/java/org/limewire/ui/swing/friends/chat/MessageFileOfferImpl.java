@@ -116,6 +116,7 @@ class MessageFileOfferImpl extends AbstractMessageImpl implements MessageFileOff
                     break;
                     
                 case SCAN_FAILED:
+                case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
                     fileOfferFormatted = fileOfferReceived +
                             tr("{0}Downloaded but not scanned for viruses{1}",
                                     "<a href=\"" + ChatDocumentBuilder.MY_LIBRARY_LINK + "\">", "</a>");

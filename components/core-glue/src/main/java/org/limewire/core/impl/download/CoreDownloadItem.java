@@ -335,7 +335,10 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
 
         case SCAN_FAILED:
             return DownloadState.SCAN_FAILED;
-
+        
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
+            return DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS;
+            
         default:
             throw new IllegalStateException("Unknown State: " + state);
         }

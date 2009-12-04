@@ -115,7 +115,8 @@ public class DownloadActionHandler {
             }
         } else if (actionCommmand == PROPERTIES_COMMAND){
             if(item.getState() != DownloadState.DONE &&
-                    item.getState() != DownloadState.SCAN_FAILED) {
+                    item.getState() != DownloadState.SCAN_FAILED &&
+                    item.getState() != DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
                 JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
                 dialog.setVisible(true);
             } else if(item.getLaunchableFile() != null) {
@@ -142,7 +143,8 @@ public class DownloadActionHandler {
         } else if( actionCommmand == LIBRARY_COMMAND) {
             File file;
             if(item.getState() == DownloadState.DONE ||
-                    item.getState() == DownloadState.SCAN_FAILED) {
+                    item.getState() == DownloadState.SCAN_FAILED &&
+                    item.getState() == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
                 file = item.getLaunchableFile();
             } else {
                 file = item.getDownloadingFile();
@@ -232,6 +234,10 @@ public class DownloadActionHandler {
                 
             case SCAN_FAILED:
                 avInfoPanelFactory.get().showFailureMessage(item, false);
+                break;
+            
+            case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
+                avInfoPanelFactory.get().showFailureMessageDefsDownloading(item, false);
                 break;
             }
             break;

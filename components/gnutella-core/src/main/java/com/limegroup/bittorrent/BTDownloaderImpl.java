@@ -89,7 +89,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final AtomicBoolean finishing = new AtomicBoolean(false);
     private final AtomicBoolean complete = new AtomicBoolean(false);
     // FIXME: this is horrible
-    private final AtomicBoolean scanFailed = new AtomicBoolean(false);
+    private final AtomicReference<DownloadState> scanFailed = new AtomicReference<DownloadState>();
     private final Library library;
     private final EventMulticaster<DownloadStateEvent> listeners;
     private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(
@@ -229,7 +229,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 if(isInfected(f))
                     return true;
             } catch(VirusScanException e) {
-                scanFailed.set(true);
+                scanFailed.set(e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS ?
+                        DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS : DownloadState.SCAN_FAILED);
             }
             if(isDangerous(f))
                 return true;
@@ -484,8 +485,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case THREAT_FOUND:
             return DownloadState.THREAT_FOUND;
         }
-        if(scanFailed.get())
-            return DownloadState.SCAN_FAILED;
+        DownloadState scanFailedState = scanFailed.get();
+        if(scanFailedState != null)
+            return scanFailedState;
 
         TorrentStatus status = torrent.getStatus();
         if (!torrent.isStarted() || status == null) {
@@ -605,6 +607,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case DANGEROUS:
         case THREAT_FOUND:
         case SCAN_FAILED:
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return true;
         }
         return false;

@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -55,6 +53,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -748,6 +747,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 case DANGEROUS:
                 case THREAT_FOUND:
                 case SCAN_FAILED:
+                case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
                     clearingNeeded = true;
                     setState(status);
                     break;
@@ -964,6 +964,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case DANGEROUS:
             case THREAT_FOUND:
             case SCAN_FAILED:
+            case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
                 return true;
         }
         return false;
@@ -1577,7 +1578,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 state == DownloadState.THREAT_FOUND)
             return false;
         if(state == DownloadState.COMPLETE ||
-                state == DownloadState.SCAN_FAILED)
+                state == DownloadState.SCAN_FAILED ||
+                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS)
             return true;
         return amountForPreview() > 0;
     }
@@ -1822,7 +1824,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
             return corrupt;
         } else if (state == DownloadState.COMPLETE ||
-                state == DownloadState.SCAN_FAILED) {
+                state == DownloadState.SCAN_FAILED ||
+                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
             // If the download is complete, return the whole file.
             return getSaveFile();
         } else {
@@ -2019,12 +2022,16 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // Scan the file for viruses
         setState(DownloadState.SCANNING);
-        boolean scanFailed = false;
+        DownloadState scanFailed = null;
         try {
             if(isInfected(incompleteFile))
                 return DownloadState.THREAT_FOUND;
         } catch(VirusScanException e) {
-            scanFailed = true;
+            if(e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS) {
+                scanFailed = DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS;    
+            } else {
+                scanFailed = DownloadState.SCAN_FAILED;
+            }
         }
         
         // Check whether this is a dangerous file
@@ -2042,8 +2049,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // Save the file to disk.
         DownloadState saveState = saveFile(fileHash);
-        if(saveState == DownloadState.COMPLETE && scanFailed)
-            return DownloadState.SCAN_FAILED;
+        if(saveState == DownloadState.COMPLETE && scanFailed != null)
+            return scanFailed;
         return saveState;
     }
 

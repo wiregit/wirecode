@@ -27,12 +27,12 @@ import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.transfer.TransferTable;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
-
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
 /**
  * Table showing DownloadItems. Provides popup menus and double click handling.
@@ -195,7 +195,8 @@ public class DownloadTable extends TransferTable<DownloadItem> {
             DownloadState state = item.getState();
             return (state == DownloadState.DANGEROUS ||
                     state == DownloadState.THREAT_FOUND ||
-                    state == DownloadState.SCAN_FAILED);
+                    state == DownloadState.SCAN_FAILED ||
+                    state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS);
         }
     }
 }

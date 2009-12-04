@@ -35,13 +35,13 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 @LazySingleton
 public class DownloadMediator {
@@ -123,7 +123,8 @@ public class DownloadMediator {
                 new DownloadStateMatcher(DownloadState.DONE,
                         DownloadState.DANGEROUS,
                         DownloadState.THREAT_FOUND,
-                        DownloadState.SCAN_FAILED));
+                        DownloadState.SCAN_FAILED,
+                        DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS));
         EventList<DownloadItem> stalledList = GlazedListsFactory.filterList(getDownloadList(), 
                 new DownloadStateMatcher(DownloadState.STALLED));
 
@@ -238,7 +239,8 @@ public class DownloadMediator {
 	                        DownloadState.CANCELLED,
 	                        DownloadState.DANGEROUS,
 	                        DownloadState.THREAT_FOUND,
-	                        DownloadState.SCAN_FAILED));
+	                        DownloadState.SCAN_FAILED,
+                            DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS));
 	    }
 	    return activeList;
 	}
@@ -439,6 +441,7 @@ public class DownloadMediator {
             case SCANNING_FRAGMENT: return 15;
             case THREAT_FOUND: return 16;
             case SCAN_FAILED: return 17;
+            case SCAN_FAILED_DOWNLOADING_DEFINITIONS: return 18;
             }
             
            throw new IllegalArgumentException("Unknown DownloadState: " + state);

@@ -47,6 +47,7 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         case DANGEROUS:
         case THREAT_FOUND:
         case SCAN_FAILED:
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return warningIcon;
 
         case FINISHING:

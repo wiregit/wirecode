@@ -10,12 +10,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.IconButton;
@@ -27,6 +25,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Renderer/editor component for the download table to display message. 
@@ -101,7 +101,8 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         messageLabel.setText(getPercentMessage(item) + getMessage(item));
         if (state == DownloadState.DANGEROUS ||
                 state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED) {
+                state == DownloadState.SCAN_FAILED ||
+                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
             messageLabel.setForeground(resources.getDisabledForeground());
         }
         
@@ -110,7 +111,8 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
                 state == DownloadState.SCANNING ||
                 state == DownloadState.SCANNING_FRAGMENT || 
                 state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED);
+                state == DownloadState.SCAN_FAILED ||
+                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS);
     }
     
     /**
@@ -199,6 +201,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         case THREAT_FOUND:
             return I18n.tr("File deleted - Threat detected by AVG");
         case SCAN_FAILED:
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return I18n.tr("Done, but unable to scan for viruses");
         default:
             return null;
