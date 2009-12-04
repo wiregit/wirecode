@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -110,45 +111,54 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         InputStream torrentDownloadStream = null;
         FileOutputStream torrentOutputStream = null;
         FileInputStream torrentInputStream = null;
+        int status = response.getStatusLine().getStatusCode();
+        if (status < 200 || status >= 300) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Bad status code: " + status);
+            downloadStatus = DownloadState.UNABLE_TO_CONNECT;
+            httpExecutor.releaseResources(response);
+            eventListenerList.broadcast(new DownloadStateEvent(this, downloadStatus));
+            return false;
+        }
+        HttpEntity entity = response.getEntity();
+        if (entity == null) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Invalid response: no entity");
+            downloadStatus = DownloadState.INVALID;
+            httpExecutor.releaseResources(response);
+            eventListenerList.broadcast(new DownloadStateEvent(this, downloadStatus));
+            return false;
+        }
+        incompleteTorrentFile.getParentFile().mkdirs();
         try {
-            if (response.getStatusLine().getStatusCode() < 200
-                    || response.getStatusLine().getStatusCode() >= 300) {
-                throw new IOException("bad status code, downloading .torrent file "
-                        + response.getStatusLine().getStatusCode());
-            }
-
-            if (response.getEntity() != null) {
-                torrentDownloadStream = response.getEntity().getContent();
-                torrentOutputStream = new FileOutputStream(incompleteTorrentFile);
-                FileUtils.write(torrentDownloadStream, torrentOutputStream);
-                torrentInputStream = new FileInputStream(incompleteTorrentFile);
-                torrentOutputStream.close();
-                Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
-                BTData btData = new BTDataImpl(torrentFileMap);
-                try {
-                    if(virusScanner.isSupported() &&
-                            virusScanner.isInfected(incompleteTorrentFile)) {
-                        downloadStatus = DownloadState.THREAT_FOUND;
-                        return false;
-                    } else {
-                        downloadStatus = DownloadState.COMPLETE;
-                    }
-                } catch(VirusScanException e) {
-                    downloadStatus = DownloadState.SCAN_FAILED;
+            torrentDownloadStream = response.getEntity().getContent();
+            torrentOutputStream = new FileOutputStream(incompleteTorrentFile);
+            FileUtils.write(torrentDownloadStream, torrentOutputStream);
+            torrentInputStream = new FileInputStream(incompleteTorrentFile);
+            torrentOutputStream.close();
+            Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
+            BTData btData = new BTDataImpl(torrentFileMap);
+            try {
+                if (virusScanner.isSupported() &&
+                        virusScanner.isInfected(incompleteTorrentFile)) {
+                    downloadStatus = DownloadState.THREAT_FOUND;
                     return false;
-                }
-                // The torrent file is copied into the incomplete file
-                // directory.
-                torrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(),
-                        btData.getName() + ".torrent");
-                if (torrentFile.exists()) {
-                    // pass through, when trying to start the BTDownloader a
-                    // savelocation exception will occur
                 } else {
-                    FileUtils.forceRename(incompleteTorrentFile, torrentFile);
+                    downloadStatus = DownloadState.COMPLETE;
                 }
+            } catch(VirusScanException e) {
+                downloadStatus = DownloadState.SCAN_FAILED;
+                return false;
+            }
+            // The torrent file is copied into the incomplete file
+            // directory.
+            torrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(),
+                    btData.getName() + ".torrent");
+            if (torrentFile.exists()) {
+                // pass through, when trying to start the BTDownloader a
+                // savelocation exception will occur
             } else {
-                throw new IOException("invalid response");
+                FileUtils.forceRename(incompleteTorrentFile, torrentFile);
             }
         } catch (IOException iox) {
             downloadStatus = DownloadState.INVALID;
@@ -169,9 +179,9 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public boolean requestFailed(HttpUriRequest method, HttpResponse response, IOException exc) {
-        downloadStatus = DownloadState.INVALID;
+        downloadStatus = DownloadState.UNABLE_TO_CONNECT;
         downloadManager.remove(this, true);
-        eventListenerList.broadcast(new DownloadStateEvent(this, DownloadState.INVALID));
+        eventListenerList.broadcast(new DownloadStateEvent(this, DownloadState.UNABLE_TO_CONNECT));
         return false;
     }
 
@@ -412,8 +422,10 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public boolean shouldBeRemoved() {
-        return isCompleted() || downloadStatus == DownloadState.ABORTED
-                || downloadStatus == DownloadState.INVALID;
+        return isCompleted() ||
+        downloadStatus == DownloadState.ABORTED ||
+        downloadStatus == DownloadState.INVALID ||
+        downloadStatus == DownloadState.UNABLE_TO_CONNECT;
     }
 
     @Override

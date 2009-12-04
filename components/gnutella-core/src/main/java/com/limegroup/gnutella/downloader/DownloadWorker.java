@@ -694,6 +694,7 @@ public class DownloadWorker {
                     && state != DownloadState.COMPLETE
                     && state != DownloadState.ABORTED
                     && state != DownloadState.GAVE_UP
+                    && state != DownloadState.UNABLE_TO_CONNECT
                     && state != DownloadState.DISK_PROBLEM
                     && state != DownloadState.CORRUPT_FILE
                     && state != DownloadState.HASHING

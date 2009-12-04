@@ -118,6 +118,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 put(DownloadState.COMPLETE, "Complete");
                 put(DownloadState.ABORTED, "Aborted"); // JS depends on this string
                 put(DownloadState.GAVE_UP, "Gave up");
+                put(DownloadState.UNABLE_TO_CONNECT, "Could not connect");
                 put(DownloadState.DISK_PROBLEM, "Disk problem");
                 put(DownloadState.WAITING_FOR_GNET_RESULTS, "Waiting for gnet results");
                 put(DownloadState.CORRUPT_FILE, "Corrupt file");

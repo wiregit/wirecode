@@ -484,6 +484,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         case BUSY:
         case ABORTED:
         case GAVE_UP:
+        case UNABLE_TO_CONNECT:
         case DISK_PROBLEM:
         case CORRUPT_FILE:
         case REMOTE_QUEUED:

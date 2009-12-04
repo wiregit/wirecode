@@ -659,11 +659,11 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
 
-        assertEquals(ErrorState.FILE_NOT_SHARABLE, coreDownloadItem.getErrorState());
+        assertEquals(ErrorState.INVALID, coreDownloadItem.getErrorState());
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.GAVE_UP));
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.UNABLE_TO_CONNECT));
             }
         });
 

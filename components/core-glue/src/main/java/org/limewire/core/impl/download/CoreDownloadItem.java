@@ -321,6 +321,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         case DISK_PROBLEM:
         case CORRUPT_FILE:
         case INVALID:
+        case UNABLE_TO_CONNECT:
             return DownloadState.ERROR;
 
         case DANGEROUS:
@@ -365,8 +366,8 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         case DISK_PROBLEM:
             return ErrorState.DISK_PROBLEM;
         case INVALID:
-            return ErrorState.FILE_NOT_SHARABLE;
-        case GAVE_UP://TODO: not using this because GAVE_UP is STALLED, not ERROR
+            return ErrorState.INVALID;
+        case UNABLE_TO_CONNECT:
             return ErrorState.UNABLE_TO_CONNECT;
         default:
             return ErrorState.NONE;
