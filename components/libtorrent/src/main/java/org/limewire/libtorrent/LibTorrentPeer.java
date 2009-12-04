@@ -3,6 +3,7 @@ package org.limewire.libtorrent;
 import org.limewire.bittorrent.TorrentPeer;
 
 import com.sun.jna.Structure;
+import com.sun.jna.WString;
 
 public class LibTorrentPeer extends Structure implements Structure.ByReference, TorrentPeer {
     public static final short source_tracker = 0x1;
@@ -23,7 +24,7 @@ public class LibTorrentPeer extends Structure implements Structure.ByReference, 
     public float payload_down_speed;
     public float progress;
     public String country;
-    public String clientName;
+    public WString clientName;
 
     @Override
     public String getCountry() {
@@ -32,7 +33,13 @@ public class LibTorrentPeer extends Structure implements Structure.ByReference, 
 
     @Override
     public String getClientName() {
-        return clientName;
+        if (clientName != null) {
+            return clientName.toString();
+        } 
+        else {
+            return "";
+        }
+        
     }
     
     @Override
