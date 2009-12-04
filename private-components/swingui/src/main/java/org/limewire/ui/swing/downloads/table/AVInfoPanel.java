@@ -110,6 +110,9 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setText(message);
         messageLabel.setPreferredSize(new Dimension(300, messageLabel.getPreferredSize().height));
         
+        // Set OK button action.
+        okButton.setAction(new CloseAction(null));
+        
         // Hide checkbox option.
         doNotShowCheckBox.setVisible(false);
         
@@ -268,7 +271,7 @@ public class AVInfoPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             // Apply "do not show" option if visible.
-            if (doNotShowCheckBox.isVisible()) {
+            if (doNotShowCheckBox.isVisible() && (warningSetting != null)) {
                 warningSetting.setValue(!doNotShowCheckBox.isSelected());
             }
             
