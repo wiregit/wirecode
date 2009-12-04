@@ -2633,7 +2633,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     @Override
     public void cancelCorruptDownload() {
-        System.err.println("Cancel corrupt download");
         setState(DownloadState.CORRUPT_FILE);
 
         // unshare the file if we didn't have a tree
