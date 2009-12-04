@@ -46,6 +46,7 @@ import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -484,6 +485,16 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             @Override
             public Category getCategoryForFilename(String filename) {
                 return null;
+            }
+        }, new VirusScanner() {
+            @Override
+            public boolean isSupported() {
+                return false;
+            }
+            
+            @Override
+            public boolean isInfected(File file) {
+                return false;
             }
         });
         

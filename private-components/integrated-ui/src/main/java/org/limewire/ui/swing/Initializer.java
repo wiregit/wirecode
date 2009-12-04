@@ -98,6 +98,7 @@ final class Initializer {
     @Inject private Provider<NIODispatcher> nioDispatcher;
     @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
     @Inject private Provider<ConnectionReporter> connectionReporter;
+    @Inject private Provider<VirusEngine> virusEngine;
     
     Initializer() {
         // If Log4J is available then remove the NoOpLog
@@ -151,7 +152,7 @@ final class Initializer {
 //        showAlphaInfo();
         
         //must agree not to use LW for copyright infringement on first running
-        confirmIntent(awtSplash, injector);
+        confirmIntent(awtSplash);
         
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
@@ -216,7 +217,7 @@ final class Initializer {
      *   the intent dialogue needs to be shown to avoid a troublesome situation
      *   where the splash screen actually covers the shown intent dialogue. 
      */
-    private void confirmIntent(final Frame awtSplash, final Injector injector) {
+    private void confirmIntent(final Frame awtSplash) {
         File versionFile = new File(CommonUtils.getUserSettingsDir(), "versions.props");
         Properties properties = new Properties();        
         FileInputStream inputStream = null;
@@ -240,8 +241,9 @@ final class Initializer {
                     }
                     //must warn users about sharing documents again after an upgrade
                     SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(true);
-                    VirusEngine virusEngine = injector.getInstance(VirusEngine.class);
-                    boolean confirmed = new IntentDialog(LimeWireUtils.getLimeWireVersion(), virusEngine).confirmLegal();
+                    boolean confirmed =
+                        new IntentDialog(LimeWireUtils.getLimeWireVersion(),
+                                virusEngine.get()).confirmLegal();
                     if (!confirmed) {
                         System.exit(0);
                     }
