@@ -23,12 +23,12 @@ import com.limegroup.gnutella.messages.QueryRequest;
  */
 public class KeywordFilterTest extends BaseTestCase {
 
-    KeywordFilter filter;
-    QueryRequest queryRequestMock = null;
-    QueryReply queryReplyMock = null;
-    PingRequest pingRequestMock = null;
-    Mockery context;
-    List<String> banned;
+    private KeywordFilter filter;
+    private QueryRequest queryRequestMock = null;
+    private QueryReply queryReplyMock = null;
+    private PingRequest pingRequestMock = null;
+    private Mockery context;
+    private List<String> banned;
 
     private ResponseFactory responseFactory;
 

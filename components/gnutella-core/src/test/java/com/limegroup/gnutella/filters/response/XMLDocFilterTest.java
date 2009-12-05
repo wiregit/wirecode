@@ -95,8 +95,9 @@ public class XMLDocFilterTest extends LimeTestCase {
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "NR");
         assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
         
+        // handled by KeywordFilter, not XMLDocFilter
         qr = createReply("Adult Film", responseFactory);
-        assertFalse(filter.allow(qr, qr.getResultsArray()[0]));
+        assertTrue(filter.allow(qr, qr.getResultsArray()[0]));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "Adults Only");
         assertFalse(filter.allow(qr, qr.getResultsArray()[0]));

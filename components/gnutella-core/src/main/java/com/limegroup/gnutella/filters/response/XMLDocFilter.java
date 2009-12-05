@@ -46,9 +46,7 @@ public class XMLDocFilter extends KeywordFilter {
 
     @Override
     public boolean allow(QueryReply qr, Response response) {
-        if(!super.allow(qr, response)) {
-            return false;
-        }
+        // don't check the super -- that's done by the separate KeywordFilter
         LimeXMLDocument doc = response.getDocument();
         return doc == null || allowDoc(doc);
     }
@@ -60,7 +58,7 @@ public class XMLDocFilter extends KeywordFilter {
         for(Entry<String, String> entry : doc.getNameValueSet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            if(super.matches(value))
+            if(matches(value))
                 return false;
             value = value.toLowerCase(Locale.US);
             String dis = disallowedFieldValues.get(key);

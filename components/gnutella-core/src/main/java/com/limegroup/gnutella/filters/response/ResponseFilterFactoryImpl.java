@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.KeywordFilter;
+import com.limegroup.gnutella.filters.PhraseFilter;
 import com.limegroup.gnutella.filters.URNFilter;
 
 @Singleton
@@ -26,6 +27,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     private final Provider<KeywordFilter> keywordFilter;
     private final Provider<URNFilter> urnFilter;
     private final Provider<AltLocFilter> altLocFilter;
+    private final Provider<PhraseFilter> phraseFilter;
 
     @Inject
     public ResponseFilterFactoryImpl(Provider<XMLDocFilter> xmlDocFilter,
@@ -38,7 +40,8 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
             Provider<MutableGUIDFilter> mutableGUIDFilter,
             Provider<KeywordFilter> keywordFilter,
             Provider<URNFilter> urnFilter,
-            Provider<AltLocFilter> altLocFilter) {
+            Provider<AltLocFilter> altLocFilter,
+            Provider<PhraseFilter> phraseFilter) {
         this.xmlDocFilter = xmlDocFilter;
         this.wormFilter = wormFilter;
         this.queryFilter = queryFilter;
@@ -50,6 +53,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         this.keywordFilter = keywordFilter;
         this.urnFilter = urnFilter;
         this.altLocFilter = altLocFilter;
+        this.phraseFilter = phraseFilter;
     }
 
     @Override
@@ -67,6 +71,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         filters.add(secureResultFilter.get());
         filters.add(programsFilter.get());
         filters.add(xmlDocFilter.get());
+        filters.add(phraseFilter.get());
 
         return new CompoundResponseFilter(filters,
                 Collections.singletonList(whiteListUpdateUrnFilter.get()));

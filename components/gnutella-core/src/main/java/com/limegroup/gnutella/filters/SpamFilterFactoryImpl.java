@@ -40,6 +40,7 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
         //   ResponseFilter pipeline to avoid dropping messages with a mixture
         //   of matching and non-matching responses).
         buf.add(new KeywordFilter());
+        buf.add(new PhraseFilter());
 
         //3. Spammy replies. (TODO: do these still exist?)
         buf.add(new SpamReplyFilter());
