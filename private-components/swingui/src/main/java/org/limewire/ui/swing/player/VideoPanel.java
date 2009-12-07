@@ -54,7 +54,7 @@ class VideoPanel implements Disposable{
     private final HeaderBar headerBar = new HeaderBar();
     
     private final JXCollapsiblePane headerBarCollapsiblePane = new JXCollapsiblePane();
-    private final ActionListener collapsingActionListener = new ActionListener() {
+    private ActionListener collapsingActionListener = new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
             headerBarCollapsiblePane.setCollapsed(true);
         }
@@ -125,6 +125,7 @@ class VideoPanel implements Disposable{
     
     public void dispose() {
         collapsePlayerControlsTimer.removeActionListener(collapsingActionListener);
+        collapsingActionListener = null;
         collapsePlayerControlsTimer = null;
         controlPanel.dispose();
     }
