@@ -313,13 +313,26 @@ public final class NativeLaunchUtils {
      * "open" command that opens files in their associated applications
      * on OSX.
      *
-     * @param file the <tt>File</tt> instance denoting the abstract pathname
+     * @param filename the <tt>File</tt> instance denoting the abstract pathname
      *  of the file to launch
      * @throws IOException if an I/O error occurs in making the runtime.exec()
      *  call or in getting the canonical path of the file
      */
-    private static Process launchFileMacOSX(final String file) throws IOException {
-        return exec(new String[]{"open", file});
+    private static Process launchFileMacOSX(final String filename) throws IOException {
+        Process process = exec(new String[]{"open", filename});
+        try {
+            process.waitFor();
+            // If the exit value is 1, then no handler could be found for the given file.
+            // Let's show a pop-up explaining that the file could not be opened.
+            if (process.exitValue() == 1) {
+                String message = I18n.tr("The file ") + new File(filename).getName() + I18n.tr(" could not be opened! There are no registered applications on your system for this file type.");
+                String title = I18n.tr("File cannot be opened");
+                JOptionPane.showMessageDialog(GuiUtils.getMainFrame(), message, title, JOptionPane.ERROR_MESSAGE); 
+            }
+        } catch (InterruptedException e) {
+        }
+
+        return process;
     }
     
     /**
