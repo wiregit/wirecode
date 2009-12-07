@@ -73,6 +73,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         infoTable.setSortable(false);
         infoTable.setCellSelectionEnabled(false);
         infoTable.setShowGrid(false, false);
+        infoTable.setEditable(false);
         
         component.add(new JScrollPane(infoTable), "gaptop 10, span, grow, wrap");
         
@@ -155,6 +156,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
                         info.getClientName(),
                         GuiUtils.formatUnitFromBytesPerSec(Math.round(info.getUploadSpeed())),
                         GuiUtils.formatUnitFromBytesPerSec(Math.round(info.getDownloadSpeed()))});
+                
             }
                 
             infoTable.setModel(model);

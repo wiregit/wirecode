@@ -2,6 +2,8 @@ package org.limewire.libtorrent;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.TorrentException;
@@ -186,13 +188,20 @@ class LibTorrentWrapper {
         catchWrapperException(libTorrent.get_peers(id, torrentPeersPointers,
                 torrentPeersPointers.length));
 
+        // Trim any empty peers if the list was not filled
+        List<LibTorrentPeer> remainingTorrentPeers = new ArrayList<LibTorrentPeer>(torrentPeers.length);
+
         for (int i = 0; i < torrentPeers.length; i++) {
             torrentPeers[i].read();
+            if (torrentPeers[i].getIPAddress() != null && !torrentPeers[i].getIPAddress().isEmpty()) {
+                remainingTorrentPeers.add(torrentPeers[i]);
+            }
         }
-
+        
         free_peers(id, torrentPeersPointers, torrentPeersPointers.length);
         LOG.debugf("after get_peers: {0}", id);
-        return torrentPeers;
+        
+        return remainingTorrentPeers.toArray(new LibTorrentPeer[remainingTorrentPeers.size()]);
     }
 
     private void free_peers(String id, Pointer[] torrentPeersPointers, int length) {
