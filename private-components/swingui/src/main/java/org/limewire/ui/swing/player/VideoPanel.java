@@ -307,31 +307,23 @@ class VideoPanel implements Disposable{
     }
 
     private class VideoPanelMouseListener extends MouseAdapter {
-        // We initialize these to the largest pixel positions of some monitors by default
-        // to avoid divide by zero errors.
-        private int mouseX = 1600;
-        private int mouseY = 1600;
+        private int mouseX;
+        private int mouseY;
         
         @Override
         public void mouseMoved(MouseEvent e) {
-            if (videoMediator.isFullScreen() && mouseMovedSignificantly(e)) {
+            /*
+             * On Windows the resizing control panel is causing mouse moved events to occur even when the
+             * mouse is not really moving. (It's only moving relative to the growing video panel.)
+             * So, let's try to separate this sort of motion from real user input by checking whether
+             * the mouse has actually moved with regard to its location on the screen.
+             */
+            if (videoMediator.isFullScreen() && (e.getLocationOnScreen().x != mouseX || e.getLocationOnScreen().y != mouseY)) {
                 headerBarCollapsiblePane.setCollapsed(false);
                 collapsePlayerControlsTimer.restart();
-                if (e.getX() != 0)
-                    mouseX = e.getX();
-                if (e.getY() != 0)
-                    mouseY = e.getY();
+                mouseX = e.getLocationOnScreen().x;
+                mouseY = e.getLocationOnScreen().y;
             }
-        }
-
-        /*
-         * On Windows the resizing control panel is causing mouse moved events to occur even when the
-         * mouse is not really moving. (It's only moving relative to the growing video panel.)
-         * So, let's try to separate this sort of motion from real user input by creating
-         * a high threshold for movement along the y-axis and a very low threshold on the x-axis.
-         */
-        private boolean mouseMovedSignificantly(MouseEvent e) {
-            return Math.abs(1.0 * (mouseX - e.getX()) / mouseX) > 0.05 || Math.abs(1.0 * (mouseY - e.getY()) / mouseY) > 0.25;
         }
         
         @Override
