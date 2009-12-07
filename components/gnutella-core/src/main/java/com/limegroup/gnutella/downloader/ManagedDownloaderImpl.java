@@ -1859,17 +1859,19 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @return true if the file cannot be previewed.
      */
     private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
-        listener.scanStarted();
-        try {
-            boolean infected = isInfected(fragment);
-            listener.scanStopped();
-            if(infected)
-                return true;                
-        } catch (VirusScanException e) {
-            listener.scanStopped();
-            if(promptAboutUnscannedPreview()) {
-                // The user chose to cancel the preview
-                return true;
+        if(virusScanner.isSupported()) {
+            listener.scanStarted();
+            try {
+                boolean infected = isInfected(fragment);
+                listener.scanStopped();
+                if(infected)
+                    return true;                
+            } catch (VirusScanException e) {
+                listener.scanStopped();
+                if(promptAboutUnscannedPreview()) {
+                    // The user chose to cancel the preview
+                    return true;
+                }
             }
         }
         return isDangerous(fragment);
