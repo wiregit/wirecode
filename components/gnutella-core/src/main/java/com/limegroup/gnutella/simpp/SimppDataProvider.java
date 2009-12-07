@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.simpp;
 
-interface SimppDataProvider {
+public interface SimppDataProvider {
 
     byte[] getDefaultData();
 
