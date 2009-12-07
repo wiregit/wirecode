@@ -2021,7 +2021,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private DownloadState verifyAndSave() throws InterruptedException {
 
         // Scan the file for viruses
-        setState(DownloadState.SCANNING);
+        if(virusScanner.isSupported())
+            setState(DownloadState.SCANNING);
         DownloadState scanFailed = null;
         try {
             if(isInfected(incompleteFile))
