@@ -59,11 +59,11 @@ class DownloadHandlerImpl implements DownloadHandler {
     
     private boolean maybeNavigate(VisualSearchResult vsr) {
         switch (vsr.getDownloadState()) {
-        case DOWNLOADED:
         case DOWNLOADING:
         case REMOVED:
             mainDownloadPanel.selectAndScrollTo(vsr.getUrn());
             return true;
+        case DOWNLOADED:
         case LIBRARY:
             libraryMediator.selectInLibrary(vsr.getUrn());
             return true;

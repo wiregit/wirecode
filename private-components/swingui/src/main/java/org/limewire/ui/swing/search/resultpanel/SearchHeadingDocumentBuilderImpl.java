@@ -1,44 +1,41 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.ui.swing.util.I18n.tr;
+import java.text.MessageFormat;
 
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
+import org.limewire.ui.swing.util.I18n;
 
 @LazySingleton
 public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBuilder {
 
     public String getHeadingDocument(SearchHeading heading, BasicDownloadState downloadState, boolean isSpam) {
         if (isSpam) {
-            return tr("{0} is marked as spam.", wrapHeading(heading.getText(), false));
+            return I18n.tr("{0} is marked as spam.", wrapHeading(heading.getText()));
         } else {
             switch(downloadState) {
             case DOWNLOADING:
-                String downloadMessage = "<a href=\"#downloading\">Downloading</a> {0}...";
-                return tr(downloadMessage, wrapHeading(heading.getText(downloadMessage), false));
+                String downloadMessage = I18n.tr("Downloading {0}...");
+                return MessageFormat.format(downloadMessage, wrapHeading(heading.getText(downloadMessage)));
             case NOT_STARTED:
-                return wrapHeading(heading.getText(), true);
+                return wrapHeading(underLine(heading.getText()));
             case DOWNLOADED:
             case LIBRARY:
-                String message = "{0} is in your <a href=\"#library\">Library</a>.";
-                return tr(message, wrapHeading(heading.getText(message), false));
+                String message = I18n.tr("{0} is in your Library.");
+                return MessageFormat.format(message, wrapHeading(heading.getText(message)));
             case REMOVED:
-                String removeMessage = "{0} was <a href=\"#downloading\">removed</a> for your protection.";
-                return tr(removeMessage, wrapHeading(heading.getText(removeMessage), false));
+                String removeMessage = I18n.tr("{0} was removed for your protection.");
+                return MessageFormat.format(removeMessage, wrapHeading(heading.getText(removeMessage)));
             }
         }
         return "";
     }
 
-    private String wrapHeading(String heading, boolean underline) {
-        return "<span class=\"title\">" + downloadLink(heading, underline) + "</span>";
+    private String wrapHeading(String heading) {
+        return "<span class=\"title\">" + heading + "</span>";
     }
 
-    private String downloadLink(String heading, boolean underline) {
-        if (underline) {
-            return "<a href=\"#download\">" + heading + "</a>";
-        } else {
-            return heading;
-        }
+    private String underLine(String heading) {
+        return "<u>" + heading + "</u>";
     }
 }
