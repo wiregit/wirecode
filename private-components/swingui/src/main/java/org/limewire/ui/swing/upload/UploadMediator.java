@@ -571,6 +571,9 @@ public class UploadMediator {
         }
         
         private int getProgressPct(UploadItem item) {
+            // browses have no file size so sort them together below file uploads
+            if(item.getFileSize() <= 0)
+                return -1;
             return (int) (100 * item.getTotalAmountUploaded() / item.getFileSize());
         }
     }
