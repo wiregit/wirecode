@@ -52,12 +52,14 @@ import com.google.inject.assistedinject.Assisted;
 class VideoPanel implements Disposable{
 
     private final HeaderBar headerBar = new HeaderBar();
+    
     private final JXCollapsiblePane headerBarCollapsiblePane = new JXCollapsiblePane();
-    private final Timer collapsePlayerControlsTimer = new Timer(2000, new ActionListener() {
+    private final ActionListener collapsingActionListener = new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
             headerBarCollapsiblePane.setCollapsed(true);
         }
-    });
+    };
+    private Timer collapsePlayerControlsTimer = new Timer(2000, collapsingActionListener);
 
     @Resource private Icon fullScreenSelected;
     @Resource private Icon fullScreenUnselected;
@@ -122,6 +124,8 @@ class VideoPanel implements Disposable{
     }
     
     public void dispose() {
+        collapsePlayerControlsTimer.removeActionListener(collapsingActionListener);
+        collapsePlayerControlsTimer = null;
         controlPanel.dispose();
     }
 
