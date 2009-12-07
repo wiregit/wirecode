@@ -2642,10 +2642,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     public void cancelCorruptDownload() {
         setState(DownloadState.CORRUPT_FILE);
 
-        // unshare the file if we didn't have a tree
-        // otherwise we will have shared only the parts that verified
-        if(commonOutFile.getHashTree() == null)
-            library.remove(incompleteFile);
+        // unshare the file
+        library.remove(incompleteFile);
 
         // purge the tree
         if(getSha1Urn() != null)
