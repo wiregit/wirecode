@@ -90,8 +90,7 @@ public class LimeWireSwingUI extends JPanel {
         this.bottomHeaderPanel = bottomHeaderPanel;
     	
         // Create split pane for bottom tray.
-    	splitPane = createSplitPane(mainPanel, bottomPanel, 
-    	        bottomHeaderPanel.getComponent(), bottomHeaderPanel.getDragComponent());
+    	splitPane = createSplitPane(mainPanel, bottomPanel, bottomHeaderPanel);
 
         setLayout(new BorderLayout());
 
@@ -181,11 +180,15 @@ public class LimeWireSwingUI extends JPanel {
     }
     
     private LimeSplitPane createSplitPane(final JComponent top, final BottomPanel bottom, 
-           JComponent divider, JComponent dragComponent) {
-        final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
+            BottomHeaderPanel bottomHeaderPanel) {
+        // Create split pane.
+        final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, bottomHeaderPanel.getComponent());
         splitPane.setDividerSize(0);
         bottom.setVisible(false);
         splitPane.setBorder(BorderFactory.createEmptyBorder());
+        
+        // Set header parent.
+        bottomHeaderPanel.setParentSplitPane(splitPane);
 
         // Allow bottom panel to be minimized
         bottom.setMinimumSize(new Dimension(0, 0));
@@ -195,7 +198,7 @@ public class LimeWireSwingUI extends JPanel {
         
         // Move dragability from the entire divider to a single component
         splitPane.setDividerDraggable(false);
-        splitPane.setDragComponent(dragComponent);
+        splitPane.setDragComponent(bottomHeaderPanel.getDragComponent());
         
         //set top panel's minimum height to half of split pane height 
         //(this fires when the app is initialized)

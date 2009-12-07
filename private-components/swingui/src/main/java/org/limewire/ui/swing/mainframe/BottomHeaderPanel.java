@@ -19,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSplitPane;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -101,6 +102,7 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
     private LimeComboBox uploadOptionsButton;
     
     private int componentHeight;
+    private JSplitPane parentSplitPane;
     
     @Inject
     public BottomHeaderPanel(DownloadMediator downloadMediator,
@@ -329,6 +331,18 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
     private void setComponentHeight(int height) {
         componentHeight = height;
         ResizeUtils.forceHeight(component, height);
+        
+        // Set the divider size of the split pane.
+        if (parentSplitPane != null) {
+            parentSplitPane.setDividerSize(height);
+        }
+    }
+    
+    /**
+     * Sets the split pane for which the header serves as the divider.
+     */
+    public void setParentSplitPane(JSplitPane splitPane) {
+        this.parentSplitPane = splitPane;
     }
     
     /**
