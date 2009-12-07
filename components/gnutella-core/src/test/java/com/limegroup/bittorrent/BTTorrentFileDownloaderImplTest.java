@@ -47,6 +47,7 @@ import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.malware.VirusScanner;
+import com.limegroup.gnutella.malware.VirusScanException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -493,8 +494,13 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
 
             @Override
             public void stop() {
-                
             }
+
+            @Override
+            public void loadIncrementalUpdate(File f) throws VirusScanException {
+            }
+
+
         });
         
         torrentFileDownloaderImpl.initDownloadInformation(uri, true);
