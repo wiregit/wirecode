@@ -71,14 +71,7 @@ public final class InstallSettings extends LimeWireSettings {
     /** Whether the setup wizard has been completed on 5. */
     public static final BooleanSetting UPGRADED_TO_5 =
         FACTORY.createBooleanSetting("UPGRADED_TO_5", false);
-    
-    /**
-     * True if the geolocation has been located for a new install,
-     * false otherwise.
-     */
-    public static final BooleanSetting HAS_LOADED_LWS_GEO =
-        FACTORY.createBooleanSetting("HAS_LOADED_LWS_GEO", false);
-    
+        
     /**
      * Stores the value of the last known version of limewire that has been run. Will be null on a clean install until the program is run and a value is set for it.
      * This setting starts with versions > 5.2.2 

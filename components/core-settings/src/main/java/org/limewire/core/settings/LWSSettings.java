@@ -71,5 +71,12 @@ public final class LWSSettings extends LimeProps {
      */
     public static final StringArraySetting LWS_VALID_COUNTRY_CODES = FACTORY.createRemoteStringArraySetting(
             "LWS_VALID_COUNTRY_CODES", new String[]{"US"}, "LWSSettings.lwsValidCountryCodes");
+
+    /**
+     * True if the geolocation has been located for a new install,
+     * false otherwise.
+     */
+    public static final BooleanSetting HAS_LOADED_LWS_GEO =
+        FACTORY.createBooleanSetting("HAS_LOADED_LWS_GEO", false);
    
 }

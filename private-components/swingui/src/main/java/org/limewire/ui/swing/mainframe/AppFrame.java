@@ -229,7 +229,7 @@ public class AppFrame extends SingleFrameApplication {
         }
 
         // if still no geo-location found, register listener for geo update
-        if(!InstallSettings.HAS_LOADED_LWS_GEO.getValue()) {
+        if(!LWSSettings.HAS_LOADED_LWS_GEO.getValue()) {
             // check if the geo locates, otherwise register a listener for when it
             // is calculated. 
             if(geoLocation.get().isEmpty()) {
@@ -271,7 +271,7 @@ public class AppFrame extends SingleFrameApplication {
     private void initializeNewInstall() {
         // reset the geo setting so we properlly reassociate this LW install
         // with the the LWS.
-        InstallSettings.HAS_LOADED_LWS_GEO.set(false);
+        LWSSettings.HAS_LOADED_LWS_GEO.set(false);
         SwingUiSettings.SHOW_STORE_COMPONENTS.set(false);
 
         // check if the geolocation already exists, this will ensure the 
@@ -314,7 +314,7 @@ public class AppFrame extends SingleFrameApplication {
      * their visibility till the next install.
 	 */
     private synchronized void updateGeoLocation() {
-    	if(!InstallSettings.HAS_LOADED_LWS_GEO.getValue()) {
+    	if(!LWSSettings.HAS_LOADED_LWS_GEO.getValue()) {
         	String[] validCountryCodes = LWSSettings.LWS_VALID_COUNTRY_CODES.get();
        		boolean showStoreComponents = false;
         
@@ -324,7 +324,7 @@ public class AppFrame extends SingleFrameApplication {
                 	break;
             	}
         	}
-        	InstallSettings.HAS_LOADED_LWS_GEO.set(true);
+        	LWSSettings.HAS_LOADED_LWS_GEO.set(true);
         	SwingUiSettings.SHOW_STORE_COMPONENTS.set(showStoreComponents);
         }
     }
