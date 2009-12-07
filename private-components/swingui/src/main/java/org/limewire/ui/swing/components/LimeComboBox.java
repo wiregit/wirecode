@@ -560,12 +560,16 @@ public class LimeComboBox extends JXButton {
             public void popupMenuCanceled(PopupMenuEvent e) {
                 menuVisible = false;
                 menuInvizTime = System.currentTimeMillis();
+                
+                LimeComboBox.this.repaint();
             }
             
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 menuVisible = false;
                 menuInvizTime = System.currentTimeMillis();
+                
+                LimeComboBox.this.repaint();
             }
             
             @Override
