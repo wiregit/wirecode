@@ -11,6 +11,6 @@ public class LimeWireCoreConnectionModule extends AbstractModule {
         bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
         bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
         bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
-        bind(ConnectionReporter.class);
+        bind(ConnectionInspections.class);
     }
 }

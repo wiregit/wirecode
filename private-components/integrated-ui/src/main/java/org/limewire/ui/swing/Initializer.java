@@ -66,7 +66,7 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
 import com.limegroup.gnutella.browser.ExternalControl;
-import com.limegroup.gnutella.connection.ConnectionReporter;
+import com.limegroup.gnutella.connection.ConnectionInspections;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
 import com.sun.jna.Native;
@@ -96,7 +96,7 @@ final class Initializer {
     @Inject private Provider<LimeCoreGlue> limeCoreGlue;
     @Inject private Provider<NIODispatcher> nioDispatcher;
     @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
-    @Inject private Provider<ConnectionReporter> connectionReporter;
+    @Inject private Provider<ConnectionInspections> connectionReporter;
     
     Initializer() {
         // If Log4J is available then remove the NoOpLog
