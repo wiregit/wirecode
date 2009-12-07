@@ -182,15 +182,19 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
         
         downloadMediator.getDownloadList().addListEventListener(new ListEventListener<DownloadItem> () {
            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-               while(listChanges.next()) {
-                   if(listChanges.getType() == ListEvent.INSERT) {
-                       if (!SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue()) {
-                           SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
+            public void listChanged(final ListEvent<DownloadItem> listChanges) {
+               SwingUtils.invokeNowOrLater(new Runnable() {
+                   public void run() {
+                       while(listChanges.next()) {
+                           if(listChanges.getType() == ListEvent.INSERT) {
+                               if (!SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue()) {
+                                   SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
+                               }
+                               selectTab(TabId.DOWNLOADS);
+                           }
                        }
-                       selectTab(TabId.DOWNLOADS);
                    }
-               }
+               });
             } 
         });
     }
