@@ -4,7 +4,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JPanel;
 
@@ -23,24 +22,7 @@ public class StorePanel extends JPanel {
     private final Browser browser;
 
     private final Application application;
-
-    /**
-     * Used to ignore the first component hidden event coming through to the
-     * ComponentListener. The load and hidden events are coming out of order because
-     * of the usage of card layout, and loading StorePanel lazily. When adding a component
-     * to CardLayout, card layout calls setVisible false on it. The main issue is that we have
-     * started loading components lazily as they are selected. So we can't force that componsnts
-     * are added to the card layout before we use them.
-     */
-    private final AtomicBoolean firstHiddenIgnored = new AtomicBoolean(false);
-
-    /**
-     * Saves the current state of the store page. We load a blank page to
-     * stop any playing media when navigating away, this saves that state
-     * and reloads it when the store is brought back up.
-     */
-    private String currentURL;
-    
+   
     @Inject
     public StorePanel(Application application, final Navigator navigator) {
         this.application = application;
@@ -54,13 +36,22 @@ public class StorePanel extends JPanel {
         gbc.weighty = 1;
         add(browser, gbc);
         
-        // Hide the page when the browser goes away.
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentHidden(ComponentEvent e) {
-                if (firstHiddenIgnored.getAndSet(true) && MozillaInitialization.isInitialized()) {
-                    currentURL = browser.getUrl();
-                    browser.load("about:blank");
+                // execute store js when the store is hidden, this stops anything not 
+                // needed while the store is not visible
+                if(MozillaInitialization.isInitialized()) {
+                    MozillaAutomation.executeJavascript(browser, "clientNavigateAway();"); 
+                }
+            }
+            
+            @Override
+            public void componentShown(ComponentEvent e) {
+                // execute store js when the store becomes visible again, this restarts
+                // anything that may have been disabled on navigate away
+                if(MozillaInitialization.isInitialized()) {
+                    MozillaAutomation.executeJavascript(browser, "clientNavigateTo();"); 
                 }
             }
         });     
@@ -72,9 +63,8 @@ public class StorePanel extends JPanel {
      * home default page.
      */
     public void loadCurrentUrl() {
-        if(currentURL != null) {
-            browser.load(currentURL);
-        } else {
+        String url = browser.getUrl();
+        if(url == null || url.length() == 0) {
             loadDefaultUrl();
         }
     }
