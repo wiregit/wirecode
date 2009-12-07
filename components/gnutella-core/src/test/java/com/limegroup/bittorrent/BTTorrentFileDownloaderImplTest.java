@@ -490,6 +490,11 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             public boolean isInfected(File file) {
                 return false;
             }
+
+            @Override
+            public void stop() {
+                
+            }
         });
         
         torrentFileDownloaderImpl.initDownloadInformation(uri, true);
