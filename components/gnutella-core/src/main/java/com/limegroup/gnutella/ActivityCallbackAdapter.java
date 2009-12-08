@@ -11,10 +11,8 @@ import org.limewire.io.IpPort;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * Provides a default implementation of <code>ActivityCallback</code> where
@@ -24,105 +22,86 @@ import com.limegroup.gnutella.version.UpdateInformation;
 @Singleton
 public class ActivityCallbackAdapter implements ActivityCallback {
 
+    @Override
     public void addUpload(Uploader u) {
         
     }
 
-    public void browseHostFailed(GUID guid) {
-        
-    }
-
-    public void componentLoading(String state, String component) {
-        
-    }
-
-    public void handleAddressStateChanged() {
-        
-    }
-
-    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        
-    }
-
+    @Override
     public void handleMagnets(MagnetOptions[] magnets) {
 
     }
 
+    @Override
     public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply,
             Set<? extends IpPort> locs) {
         
     }
 
+    @Override
     public void handleQuery(QueryRequest query, String address, int port) {
         
     }
 
+    @Override
     public void handleSharedFileUpdate(File file) {
         
     }
 
+    @Override
     public void handleTorrent(File torrentFile) {
         
     }
 
+    @Override
     public void installationCorrupted() {
         
     }
 
+    @Override
     public boolean isQueryAlive(GUID guid) {
         return false;
     }
 
+    @Override
     public void uploadComplete(Uploader u) {
         
     }
 
+    @Override
     public void restoreApplication() {
         
     }
 
-    public void updateAvailable(UpdateInformation info) {
-        
-    }
-
+    @Override
     public void uploadsComplete() {
         
     }
 
-    public boolean warnAboutSharingSensitiveDirectory(File dir) {
-        return false;
-    }
-
+    @Override
     public void addDownload(Downloader d) {
         
     }
 
+    @Override
     public void downloadsComplete() {
         
     }
 
-    public String getHostValue(String key) {
-        return null;
-    }
-
-    public void promptAboutCorruptDownload(Downloader dloader) {
-       
+    @Override
+    public void promptAboutUnscannedPreview(Downloader dloader) {
+        dloader.discardUnscannedPreview(false);
     }
     
-    public void warnUser(String filename, String warning, String moreInfoUrl) {
-        
-    }
-
+    @Override
     public void removeDownload(Downloader d) {
         
     }
 
-    public void showDownloads() {
-        
+    @Override
+    public String translate(String s) {
+        return s;
     }
-    
-    public void handleDAAPConnectionError(Throwable t) {  }
-    public String translate(String s) { return s;}
 
     @Override
     public void handleDownloadException(DownloadAction downLoadAction,
@@ -133,5 +112,4 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     public boolean promptTorrentFilePriorities(Torrent torrent) {
         return true;
     }
-
 }

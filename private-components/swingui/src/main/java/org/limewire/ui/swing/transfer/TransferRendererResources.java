@@ -17,6 +17,7 @@ public class TransferRendererResources {
 
     @Resource private Font font;
     @Resource private Color foreground;
+    @Resource private Color disabledForeground;
 
     @Resource private int progressBarHeight;
     @Resource private int progressBarWidth;
@@ -58,6 +59,10 @@ public class TransferRendererResources {
     
     public Color getForeground() {
         return foreground;
+    }
+    
+    public Color getDisabledForeground() {
+        return disabledForeground;
     }
     
     public int getProgressBarHeight() {

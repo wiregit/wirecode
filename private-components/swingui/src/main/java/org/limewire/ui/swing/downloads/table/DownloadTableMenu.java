@@ -77,7 +77,9 @@ public class DownloadTableMenu extends JPopupMenu{
         
         DownloadState state = downloadItem.getState();
         
-        if (state == DownloadState.DONE){
+        if (state == DownloadState.DONE ||
+                state == DownloadState.SCAN_FAILED ||
+                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS){
             add(createLaunchMenuItem()).setEnabled(downloadItem.isLaunchable());
             add(createRemoveMenuItem());
             addSeparator();
@@ -88,6 +90,10 @@ public class DownloadTableMenu extends JPopupMenu{
             add(listMenuFactory.createShowInListMenu(selectedFiles, true));
             addSeparator();
             add(createPropertiesMenuItem());
+            
+        } else if (state == DownloadState.DANGEROUS || 
+                state == DownloadState.THREAT_FOUND) {
+            add(createRemoveMenuItem());
             
         } else {
             //not DONE
@@ -146,7 +152,9 @@ public class DownloadTableMenu extends JPopupMenu{
                 //if all four booleans are true, we are done checking
                 break;
             }
-            if(item.getState() != DownloadState.DONE){
+            if(item.getState() != DownloadState.DONE &&
+                    item.getState() != DownloadState.SCAN_FAILED &&
+                    item.getState() != DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS){
                 allDone = false;
             }
             if(isResumable(item.getState())){
@@ -205,7 +213,7 @@ public class DownloadTableMenu extends JPopupMenu{
     }
 
     private boolean isCancelable(DownloadState state) {
-        return state != DownloadState.DONE;
+        return !state.isFinished();
     }
     
     private boolean maybeAddBrowseMenu(Collection<RemoteHost> remoteHosts){

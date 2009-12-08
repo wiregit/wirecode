@@ -23,6 +23,7 @@ import org.limewire.core.impl.download.MockDownloadModule;
 import org.limewire.core.impl.file.MockFileModule;
 import org.limewire.core.impl.friend.MockFriendModule;
 import org.limewire.core.impl.library.MockLibraryModule;
+import org.limewire.core.impl.malware.MockMalwareModule;
 import org.limewire.core.impl.mojito.MockMojitoModule;
 import org.limewire.core.impl.monitor.MockMonitorModule;
 import org.limewire.core.impl.network.MockNetworkModule;
@@ -83,6 +84,7 @@ public class MockModule extends AbstractModule {
         install(new MockUpdatesModule());
         install(new MockBittorrentModule());
         install(new MockFileModule());
+        install(new MockMalwareModule());
                        
         EventMulticaster<XmppActivityEvent> activityMulticaster = new EventMulticasterImpl<XmppActivityEvent>(); 
         bind(new TypeLiteral<EventBroadcaster<XmppActivityEvent>>(){}).toInstance(activityMulticaster);

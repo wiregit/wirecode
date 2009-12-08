@@ -22,9 +22,11 @@ public class InNetworkCallback implements DownloadCallback {
         this.updateHandler = updateHandler;
     }
     
+    @Override
     public void addDownload(Downloader d) {
     }
 
+    @Override
     public void removeDownload(Downloader d) {
         InNetworkDownloader downloader = (InNetworkDownloader) d;
         updateHandler.inNetworkDownloadFinished(
@@ -32,24 +34,15 @@ public class InNetworkCallback implements DownloadCallback {
                 downloader.getState() == DownloadState.COMPLETE);
     }
 
+    @Override
     public void downloadsComplete() {
     }
 
-    public void showDownloads() {
+    @Override
+    public void promptAboutUnscannedPreview(Downloader dloader) {
+        dloader.discardUnscannedPreview(true);
     }
 
-    // always discard corruption.
-    public void promptAboutCorruptDownload(Downloader dloader) {
-        dloader.discardCorruptDownload(true);
-    }
-    
-    public void warnUser(String filename, String message, String moreInfoUrl) {
-    }
-
-    public String getHostValue(String key) {
-        return null;
-    }
-    
     @Override
     public boolean promptTorrentFilePriorities(Torrent torrent) {
         return true;

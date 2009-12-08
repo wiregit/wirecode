@@ -503,15 +503,6 @@ public class CoreDownloadItemTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.FETCHING));
-            }
-        });
-
-        assertEquals(DownloadState.DOWNLOADING, coreDownloadItem.getState());
-
-        context.checking(new Expectations() {
-            {
-                one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.GAVE_UP));
             }
         });
@@ -548,15 +539,6 @@ public class CoreDownloadItemTest extends BaseTestCase {
         });
 
         assertEquals(DownloadState.FINISHING, coreDownloadItem.getState());
-
-        context.checking(new Expectations() {
-            {
-                one(downloader).getState();
-                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.IDENTIFY_CORRUPTION));
-            }
-        });
-
-        assertEquals(DownloadState.ERROR, coreDownloadItem.getState());
 
         context.checking(new Expectations() {
             {
@@ -615,15 +597,6 @@ public class CoreDownloadItemTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.RECOVERY_FAILED));
-            }
-        });
-
-        assertEquals(DownloadState.ERROR, coreDownloadItem.getState());
-
-        context.checking(new Expectations() {
-            {
-                one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.REMOTE_QUEUED));
             }
         });
@@ -674,15 +647,6 @@ public class CoreDownloadItemTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.RECOVERY_FAILED));
-            }
-        });
-
-        assertEquals(ErrorState.CORRUPT_FILE, coreDownloadItem.getErrorState());
-
-        context.checking(new Expectations() {
-            {
-                one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DISK_PROBLEM));
             }
         });
@@ -695,11 +659,11 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
 
-        assertEquals(ErrorState.FILE_NOT_SHARABLE, coreDownloadItem.getErrorState());
+        assertEquals(ErrorState.INVALID, coreDownloadItem.getErrorState());
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.GAVE_UP));
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.UNABLE_TO_CONNECT));
             }
         });
 

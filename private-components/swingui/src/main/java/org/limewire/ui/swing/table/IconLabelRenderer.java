@@ -33,6 +33,7 @@ public class IconLabelRenderer extends DefaultLimeTableCellRenderer {
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
     @Resource private Icon libraryIcon;
+    @Resource private Icon warningIcon;
     @Resource private Color disabledForegroundColor;
     @Resource private Font font;
     
@@ -127,6 +128,8 @@ public class IconLabelRenderer extends DefaultLimeTableCellRenderer {
         case DOWNLOADED:
         case LIBRARY:
             return libraryIcon;
+        case REMOVED:
+            return warningIcon;
         }
         return categoryIconManager.getIcon(vsr);
     }

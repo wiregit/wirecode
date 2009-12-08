@@ -118,6 +118,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 put(DownloadState.COMPLETE, "Complete");
                 put(DownloadState.ABORTED, "Aborted"); // JS depends on this string
                 put(DownloadState.GAVE_UP, "Gave up");
+                put(DownloadState.UNABLE_TO_CONNECT, "Could not connect");
                 put(DownloadState.DISK_PROBLEM, "Disk problem");
                 put(DownloadState.WAITING_FOR_GNET_RESULTS, "Waiting for gnet results");
                 put(DownloadState.CORRUPT_FILE, "Corrupt file");
@@ -128,14 +129,15 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 put(DownloadState.WAITING_FOR_CONNECTIONS, "Waiting for connections");
                 put(DownloadState.ITERATIVE_GUESSING, "Iterative guessing");
                 put(DownloadState.QUERYING_DHT, "Querying DHT");
-                put(DownloadState.IDENTIFY_CORRUPTION, "Identify corruption");
-                put(DownloadState.RECOVERY_FAILED, "Recovery failed");
                 put(DownloadState.PAUSED, "Paused");
                 put(DownloadState.INVALID, "Invalid");
                 put(DownloadState.RESUMING, "Resuming");
-                put(DownloadState.FETCHING, "Fetching");
-                put(DownloadState.DANGEROUS, "Dangerous file");
-                
+                put(DownloadState.DANGEROUS, "Dangerous");
+                put(DownloadState.SCANNING, "Scanning");
+                put(DownloadState.THREAT_FOUND, "Threat found");
+                put(DownloadState.SCAN_FAILED, "Scan failed");
+                put(DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS, "Scan failed");    
+            
                 assert isComplete();
             }
         

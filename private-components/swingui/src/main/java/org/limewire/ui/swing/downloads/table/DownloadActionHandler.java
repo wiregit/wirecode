@@ -48,6 +48,7 @@ public class DownloadActionHandler {
     public final static String LOCATE_COMMAND = "locate";
     public final static String LIBRARY_COMMAND = "library";
     public final static String PROPERTIES_COMMAND = "properties";
+    public final static String INFO_COMMAND = "info";
     public final static String LINK_COMMAND = "link";
     public final static String SHARE_COMMAND = "share";
     public final static String CHANGE_LOCATION_COMMAND = "change location";
@@ -59,6 +60,7 @@ public class DownloadActionHandler {
     private DownloadListManager downloadListManager;
     private LibraryManager libraryManager;
     private final FileInfoDialogFactory fileInfoFactory;
+    private final Provider<AVInfoPanel> avInfoPanelFactory;
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final SearchHandler searchHandler;
     private final Provider<KeywordAssistedSearchBuilder> searchBuilder;
@@ -67,6 +69,7 @@ public class DownloadActionHandler {
     @Inject
     public DownloadActionHandler(DownloadListManager downloadListManager, 
             LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
+            Provider<AVInfoPanel> avInfoPanelFactory,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
             SearchHandler searchHandler, Provider<KeywordAssistedSearchBuilder> searchBuilder,
             CategoryManager categoryManager){
@@ -74,6 +77,7 @@ public class DownloadActionHandler {
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
+        this.avInfoPanelFactory = avInfoPanelFactory;
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.searchHandler = searchHandler;
         this.searchBuilder = searchBuilder;
@@ -101,7 +105,9 @@ public class DownloadActionHandler {
                 NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
             }
         } else if (actionCommmand == PROPERTIES_COMMAND){
-            if(item.getState() != DownloadState.DONE) {
+            if(item.getState() != DownloadState.DONE &&
+                    item.getState() != DownloadState.SCAN_FAILED &&
+                    item.getState() != DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
                 JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
                 dialog.setVisible(true);
             } else if(item.getLaunchableFile() != null) {
@@ -126,7 +132,14 @@ public class DownloadActionHandler {
 //            shareWidget.setShareable(item.getDownloadingFile());
 //            shareWidget.show(null);
         } else if( actionCommmand == LIBRARY_COMMAND) {
-            File file = item.getState() == DownloadState.DONE ? item.getLaunchableFile() : item.getDownloadingFile();
+            File file;
+            if(item.getState() == DownloadState.DONE ||
+                    item.getState() == DownloadState.SCAN_FAILED &&
+                    item.getState() == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+                file = item.getLaunchableFile();
+            } else {
+                file = item.getDownloadingFile();
+            }
             URN urn = item.getUrn();
             
             if(file != null) {
@@ -138,6 +151,8 @@ public class DownloadActionHandler {
             changeSaveLocation(item);
         } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
             searchHandler.doSearch(createSearchInfo(item));
+        } else if (actionCommmand == INFO_COMMAND) {
+            showInfoDialog(item);
         }
     }
 
@@ -180,6 +195,43 @@ public class DownloadActionHandler {
             item.setSaveFile(saveDir, overwrite);
         } catch (DownloadException ex) {
             downloadExceptionHandler.get().handleDownloadException(new ChangeLocationDownloadAction(item), ex, false);
+        }
+    }
+    
+    /**
+     * Displays an Info dialog for the specified download item.
+     */
+    private void showInfoDialog(DownloadItem item) {
+        switch (item.getDownloadItemType()) {
+        case ANTIVIRUS:
+            avInfoPanelFactory.get().showVendorMessage();
+            break;
+            
+        case GNUTELLA:
+        case BITTORRENT:
+            switch (item.getState()) {
+            case DANGEROUS:
+                avInfoPanelFactory.get().showDangerMessage(item, false);
+                break;
+
+            case SCANNING:
+            case SCANNING_FRAGMENT:
+                avInfoPanelFactory.get().showVendorMessage();
+                break;
+                
+            case THREAT_FOUND:
+                avInfoPanelFactory.get().showThreatMessage(item, false);
+                break;
+                
+            case SCAN_FAILED:
+                avInfoPanelFactory.get().showFailureMessage(item, false);
+                break;
+            
+            case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
+                avInfoPanelFactory.get().showFailureMessageDefsDownloading(item, false);
+                break;
+            }
+            break;
         }
     }
     

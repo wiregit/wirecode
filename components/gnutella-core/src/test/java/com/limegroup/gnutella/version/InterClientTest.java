@@ -38,7 +38,7 @@ public class InterClientTest extends PeerTestCase {
     
     private BlockingConnection PEER;
     
-    private MyActivityCallback myActivityCallback;
+    private ActivityCallback myActivityCallback;
     
     public InterClientTest(String name) {
         super(name);
@@ -56,7 +56,7 @@ public class InterClientTest extends PeerTestCase {
     
     @Override
     public void setUp() throws Exception {
-        myActivityCallback = new MyActivityCallback();
+        myActivityCallback = new ActivityCallbackStub();
         Module m = new AbstractModule() {
             @Override
             public void configure() {
@@ -434,19 +434,9 @@ public class InterClientTest extends PeerTestCase {
     /* Required for PeerTestCase. */
     @Override
     protected ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
+        return new ActivityCallbackStub();
     }
 
-    /* Required for PeerTestCase. */
-    private static class MyActivityCallback extends ActivityCallbackStub {
-        @SuppressWarnings("unused") UpdateInformation lastUpdate;
-        
-        @Override
-        public void updateAvailable(UpdateInformation info) {
-            lastUpdate = info;
-        }
-    }
-    
     private static byte[] derivePayload(boolean hasGGEP, boolean requestsCompressed) throws Exception {
         if (!hasGGEP)
             return DataUtils.EMPTY_BYTE_ARRAY;

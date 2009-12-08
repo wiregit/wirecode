@@ -110,6 +110,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
     @Resource private Icon libraryIcon;
+    @Resource private Icon warningIcon;
     
     @Resource private Icon propertiesPressedIcon;
     @Resource private Icon propertiesHoverIcon;
@@ -348,6 +349,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         case DOWNLOADED:
         case LIBRARY:
             return libraryIcon;
+        case REMOVED:
+            return warningIcon;
         }
         return categoryIconManager.getIcon(vsr);
     }

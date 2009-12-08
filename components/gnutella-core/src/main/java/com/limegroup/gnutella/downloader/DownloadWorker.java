@@ -474,9 +474,9 @@ public class DownloadWorker {
                         _manager.workerFailed(DownloadWorker.this);
                     }
 
-                    // if we got too corrupted, notify the user
+                    // if we got too corrupted, cancel the download
                     if (_commonOutFile.isHopeless())
-                        _manager.promptAboutCorruptDownload();
+                        _manager.cancelCorruptDownload();
 
                     long stop = _downloader.getInitialReadingPoint()
                             + _downloader.getAmountRead();
@@ -694,10 +694,15 @@ public class DownloadWorker {
                     && state != DownloadState.COMPLETE
                     && state != DownloadState.ABORTED
                     && state != DownloadState.GAVE_UP
+                    && state != DownloadState.UNABLE_TO_CONNECT
                     && state != DownloadState.DISK_PROBLEM
                     && state != DownloadState.CORRUPT_FILE
                     && state != DownloadState.HASHING
-                    && state != DownloadState.SAVING) {
+                    && state != DownloadState.SAVING
+                    && state != DownloadState.SCANNING
+                    && state != DownloadState.THREAT_FOUND
+                    && state != DownloadState.SCAN_FAILED
+                    && state != DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
                 if (_interrupted.get())
                     return; // we were signalled to stop.
                 _manager.setState(DownloadState.CONNECTING);

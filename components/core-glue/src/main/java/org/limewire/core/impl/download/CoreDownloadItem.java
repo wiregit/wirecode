@@ -40,9 +40,10 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-class CoreDownloadItem implements DownloadItem {
+class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     
     static interface Factory {
         CoreDownloadItem create(Downloader downloader, QueueTimeCalculator calculator);
@@ -53,19 +54,12 @@ class CoreDownloadItem implements DownloadItem {
     private volatile int hashCode = 0;
     private volatile long cachedSize;
     private volatile boolean cancelled = false;
-
-    /**
-     * size in bytes. FINISHING state is only shown for files greater than this
-     * size.
-     */
-    // set to 0 to show FINISHING state regardless of size
-    private final long finishingThreshold = 0;
+    private volatile boolean scanningFragment = false;
 
     private final QueueTimeCalculator queueTimeCalculator;
     private final FriendManager friendManager;
     private final DownloadItemType downloadItemType;
     private final CategoryManager categoryManager;
-    
     
     @Inject
     public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, FriendManager friendManager, CategoryManager categoryManager) {
@@ -73,7 +67,12 @@ class CoreDownloadItem implements DownloadItem {
         this.queueTimeCalculator = queueTimeCalculator;
         this.friendManager = friendManager;
         this.categoryManager = categoryManager;
-        this.downloadItemType = downloader instanceof BTDownloader ? DownloadItemType.BITTORRENT : DownloadItemType.GNUTELLA;
+        if(downloader instanceof BTDownloader)
+            downloadItemType = DownloadItemType.BITTORRENT;
+        else if(downloader instanceof VirusDefinitionDownloader)
+            downloadItemType = DownloadItemType.ANTIVIRUS;
+        else
+            downloadItemType = DownloadItemType.GNUTELLA;
         
         downloader.addListener(new EventListener<DownloadStateEvent>() {
             @Override
@@ -140,7 +139,8 @@ class CoreDownloadItem implements DownloadItem {
 
     @Override
     public long getCurrentSize() {
-        if (getState() == DownloadState.DONE) {
+        DownloadState state = getState();
+        if (state == DownloadState.SCANNING || state.isFinished()) {
             return getTotalSize();
         } else {
             return cachedSize;
@@ -213,7 +213,9 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public int getPercentComplete() {
         DownloadState state = getState();
-        if(state == DownloadState.FINISHING || state == DownloadState.DONE){
+        if(state == DownloadState.FINISHING ||
+                state == DownloadState.SCANNING ||
+                state.isFinished()){
             return 100;
         }
 
@@ -248,6 +250,9 @@ class CoreDownloadItem implements DownloadItem {
     public DownloadState getState() {
         if(cancelled){
             return DownloadState.CANCELLED;
+        }
+        if(scanningFragment) {
+            return DownloadState.SCANNING_FRAGMENT;
         }
         return convertState(downloader.getState());
     }
@@ -285,20 +290,19 @@ class CoreDownloadItem implements DownloadItem {
     private DownloadState convertState(com.limegroup.gnutella.Downloader.DownloadState state) {
         switch (state) {
         case RESUMING:
-                return DownloadState.RESUMING;
+            return DownloadState.RESUMING;
+
         case SAVING:
         case HASHING:
-            if (getTotalSize() > finishingThreshold) {
+            if (getTotalSize() > 0) {
                 return DownloadState.FINISHING;
             } else {
                 return DownloadState.DONE;
             }
 
         case DOWNLOADING:
-        case FETCHING:// "FETCHING" is downloading .torrent file
             return DownloadState.DOWNLOADING;
 
-        
         case CONNECTING:
         case INITIALIZING:
         case WAITING_FOR_CONNECTIONS:
@@ -310,32 +314,46 @@ class CoreDownloadItem implements DownloadItem {
         case REMOTE_QUEUED:
         case BUSY://BUSY should look like locally queued but acts like remotely
             return DownloadState.REMOTE_QUEUED;
-            
+
         case QUEUED:
             return DownloadState.LOCAL_QUEUED;
 
         case PAUSED:
             return DownloadState.PAUSED;
-        
+
         case WAITING_FOR_GNET_RESULTS:
         case ITERATIVE_GUESSING:
         case QUERYING_DHT:
             return DownloadState.TRYING_AGAIN;
-            
+
         case WAITING_FOR_USER:
         case GAVE_UP:
             return DownloadState.STALLED;
 
         case ABORTED:
-        case DANGEROUS:
             return DownloadState.CANCELLED;
 
         case DISK_PROBLEM:
         case CORRUPT_FILE:
-        case IDENTIFY_CORRUPTION: // or should this be FINISHING?  doesn't seem to be used
-        case RECOVERY_FAILED:
         case INVALID:
+        case UNABLE_TO_CONNECT:
             return DownloadState.ERROR;
+
+        case DANGEROUS:
+            return DownloadState.DANGEROUS;
+
+        case SCANNING:
+            return DownloadState.SCANNING;
+
+        case THREAT_FOUND:
+            return DownloadState.THREAT_FOUND;
+
+        case SCAN_FAILED:
+            return DownloadState.SCAN_FAILED;
+        
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
+            return DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS;
+            
         default:
             throw new IllegalStateException("Unknown State: " + state);
         }
@@ -362,13 +380,12 @@ class CoreDownloadItem implements DownloadItem {
     public ErrorState getErrorState() {
         switch (downloader.getState()) {
         case CORRUPT_FILE:
-        case RECOVERY_FAILED:
             return ErrorState.CORRUPT_FILE;
         case DISK_PROBLEM:
             return ErrorState.DISK_PROBLEM;
         case INVALID:
-            return ErrorState.FILE_NOT_SHARABLE;
-        case GAVE_UP://TODO: not using this because GAVE_UP is STALLED, not ERROR
+            return ErrorState.INVALID;
+        case UNABLE_TO_CONNECT:
             return ErrorState.UNABLE_TO_CONNECT;
         default:
             return ErrorState.NONE;
@@ -416,7 +433,17 @@ class CoreDownloadItem implements DownloadItem {
     
     @Override
     public File getLaunchableFile() {
-        return downloader.getDownloadFragment();
+        return downloader.getDownloadFragment(this);
+    }
+    
+    @Override
+    public void scanStarted() {
+        scanningFragment = true;
+    }
+    
+    @Override
+    public void scanStopped() {
+        scanningFragment = false;
     }
     
     @Override

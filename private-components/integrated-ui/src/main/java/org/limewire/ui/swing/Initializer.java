@@ -20,6 +20,7 @@ import javax.swing.plaf.basic.BasicHTML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
+import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -97,6 +98,7 @@ final class Initializer {
     @Inject private Provider<NIODispatcher> nioDispatcher;
     @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
     @Inject private Provider<ConnectionInspections> connectionReporter;
+    @Inject private Provider<VirusEngine> virusEngine;
     
     Initializer() {
         // If Log4J is available then remove the NoOpLog
@@ -239,7 +241,9 @@ final class Initializer {
                     }
                     //must warn users about sharing documents again after an upgrade
                     SharingSettings.WARN_SHARING_DOCUMENTS_WITH_WORLD.setValue(true);
-                    boolean confirmed = new IntentDialog(LimeWireUtils.getLimeWireVersion()).confirmLegal();
+                    boolean confirmed =
+                        new IntentDialog(LimeWireUtils.getLimeWireVersion(),
+                                virusEngine.get()).confirmLegal();
                     if (!confirmed) {
                         System.exit(0);
                     }

@@ -13,14 +13,16 @@ public enum BasicDownloadState {
     DOWNLOADING,
     DOWNLOADED,
     LIBRARY,
-    
-    ;
+    /** Download removed because threat found or dangerous file */
+    REMOVED;
     
     public static BasicDownloadState fromState(DownloadState state) {
         switch (state) {
         case CANCELLED:
             return BasicDownloadState.NOT_STARTED;
         case DONE:
+        case SCAN_FAILED:
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return BasicDownloadState.DOWNLOADED;
         case ERROR:
         case TRYING_AGAIN:
@@ -32,7 +34,12 @@ public enum BasicDownloadState {
         case FINISHING:
         case RESUMING:
         case DOWNLOADING:
+        case SCANNING:
+        case SCANNING_FRAGMENT:
             return BasicDownloadState.DOWNLOADING;
+        case DANGEROUS:
+        case THREAT_FOUND:
+            return BasicDownloadState.REMOVED;
         default:
             return null;
         }

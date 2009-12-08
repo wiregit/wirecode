@@ -34,24 +34,30 @@ public class MockDownloadItem implements DownloadItem {
 	private volatile DownloadState state = DownloadState.DOWNLOADING;
 	private final List<Address> downloadSources;
 	private final Category category;
+    private final DownloadItemType downloadItemType;
 	
 	private ErrorState errorState = ErrorState.NONE;
 	
 	private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
     private int queuePostion = 2;
     private URN urn;
-
-	//TODO: change constructor
+    
 	public MockDownloadItem(String title, long totalSize, DownloadState state, Category category) {
-		this.title = title;
-		this.category = category;
-		this.totalSize = totalSize;
-		this.state = state;
-		downloadSources = new ArrayList<Address>();
-		if (this.state == DownloadState.DOWNLOADING) {
-			start();
-		}
+	    this(DownloadItemType.GNUTELLA, title, totalSize, state, category);
 	}
+
+    public MockDownloadItem(DownloadItemType type, String title, long totalSize,
+            DownloadState state, Category category) {
+        this.downloadItemType = type;
+        this.title = title;
+        this.category = category;
+        this.totalSize = totalSize;
+        this.state = state;
+        downloadSources = new ArrayList<Address>();
+        if (this.state == DownloadState.DOWNLOADING) {
+            start();
+        }
+    }
 	
 	@Override
 	public boolean isTryAgainEnabled() {
@@ -297,7 +303,7 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public DownloadItemType getDownloadItemType() {
-        return DownloadItemType.GNUTELLA;
+        return downloadItemType;
     }
 
     @Override

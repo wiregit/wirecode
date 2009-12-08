@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
-import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -58,16 +57,19 @@ class DownloadHandlerImpl implements DownloadHandler {
         searchResultsModel.download(vsr, saveFile);
     }
     
-    private boolean maybeNavigate(VisualSearchResult vsr) {
-        if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+   private boolean maybeNavigate(VisualSearchResult vsr) {
+        switch (vsr.getDownloadState()) {
+        case DOWNLOADING:
+        case REMOVED:
             downloadMediator.selectAndScrollTo(vsr.getUrn());
             return true;
-        } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED
-                || vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
+        case DOWNLOADED:
+        case LIBRARY:
             libraryMediator.selectInLibrary(vsr.getUrn());
             return true;
+        default:
+            return false;
         }
-        return false;
     }
 
 }

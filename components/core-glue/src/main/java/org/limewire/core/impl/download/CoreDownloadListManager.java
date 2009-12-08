@@ -22,6 +22,7 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -122,7 +123,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         try {
             // TODO use TransactionList for these for performance (requires using GlazedLists from head)
             for (DownloadItem item : observableDownloadItems) {
-                if (item.getState() != DownloadState.DONE &&  item instanceof CoreDownloadItem)
+                if ((!item.getState().isFinished()) && item instanceof CoreDownloadItem)
                     ((CoreDownloadItem) item).fireDataChanged();
             }
         } finally {
@@ -301,15 +302,19 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadRemoved(Downloader downloader) {
-            DownloadItem item = getDownloadItem(downloader);
-
-            if (item.getState() == DownloadState.DONE) {
+            DownloadItem item = getDownloadItem(downloader);            
+            DownloadState state = item.getState();            
+            if (state.isFinished()) {
                 changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, item);
             }
             
-            //don't automatically remove finished downloads or downloads in error states
-            if ((item.getState() != DownloadState.DONE || SharingSettings.CLEAR_DOWNLOAD.getValue()) && 
-                    item.getState() != DownloadState.ERROR) {
+            // Always remove anti-virus update item.  For all others,
+            // don't automatically remove finished downloads or downloads in
+            // error states
+            if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
+                remove(item);
+            } else if (state != DownloadState.ERROR &&
+                    (SharingSettings.CLEAR_DOWNLOAD.getValue() || !state.isFinished())) {
                 remove(item);
             }
         }
@@ -375,7 +380,8 @@ public class CoreDownloadListManager implements DownloadListManager {
         threadSafeDownloadItems.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : threadSafeDownloadItems) {
-                if (item.getState() == DownloadState.DONE) {
+                DownloadState state = item.getState();
+                if (state.isFinished()) {
                     finishedItems.add(item);
                 }
             }

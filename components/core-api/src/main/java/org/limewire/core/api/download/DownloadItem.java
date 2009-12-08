@@ -25,7 +25,8 @@ public interface DownloadItem extends PropertiableFile {
      */
     public enum DownloadItemType {
         GNUTELLA,
-        BITTORRENT
+        BITTORRENT,
+        ANTIVIRUS
     }
     
     /**
@@ -35,7 +36,7 @@ public interface DownloadItem extends PropertiableFile {
 	public static enum ErrorState {
 	    DISK_PROBLEM(I18nMarker.marktr("There is a disk problem")),
 	    CORRUPT_FILE(I18nMarker.marktr("The file is corrupted")),
-	    FILE_NOT_SHARABLE(I18nMarker.marktr("This file is not shareable")),
+	    INVALID(I18nMarker.marktr("The file is invalid")),
 	    UNABLE_TO_CONNECT(I18nMarker.marktr("Trouble connecting to people")),
 	    
 	    /**

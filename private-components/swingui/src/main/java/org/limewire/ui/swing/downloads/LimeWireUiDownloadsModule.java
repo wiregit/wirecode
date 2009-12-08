@@ -25,7 +25,10 @@ public class LimeWireUiDownloadsModule extends AbstractModule {
         List<File> files = new ArrayList<File>();
         
         for(DownloadItem item : items){
-            if(item.getState() == DownloadState.DONE){
+            DownloadState state = item.getState();
+            if(state == DownloadState.DONE ||
+                    state == DownloadState.SCAN_FAILED ||
+                    state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS){
                 files.addAll(item.getCompleteFiles());
             }
         }

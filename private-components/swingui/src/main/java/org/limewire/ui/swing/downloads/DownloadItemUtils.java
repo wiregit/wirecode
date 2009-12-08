@@ -5,15 +5,19 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.DataCategory;
+import org.limewire.ui.swing.util.I18n;
 
 public class DownloadItemUtils {
     
@@ -29,6 +33,19 @@ public class DownloadItemUtils {
     public static void launch(final DownloadItem downloadItem, final CategoryManager categoryManager) {
         assert EventQueue.isDispatchThread();
         assert downloadItem.isLaunchable();
+        
+        // Warn user that the file has not been scanned for viruses.
+        if (downloadItem.getState() == DownloadState.SCAN_FAILED ||
+                downloadItem.getState() == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+            String message = I18n.tr("This file has not been scanned for viruses.  Do you want to launch anyway?");
+            int answer = FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
+                    new MultiLineLabel(message, 400), I18n.tr("Message"), 
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (answer != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+        
         GuiUtils.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         new SwingWorker<File, Void>() {
             @Override

@@ -485,10 +485,15 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         case BUSY:
         case ABORTED:
         case GAVE_UP:
+        case UNABLE_TO_CONNECT:
         case DISK_PROBLEM:
         case CORRUPT_FILE:
         case REMOTE_QUEUED:
         case WAITING_FOR_USER:
+        case DANGEROUS:
+        case THREAT_FOUND:
+        case SCAN_FAILED:
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return false;
         default:
             return true;

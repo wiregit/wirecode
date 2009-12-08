@@ -440,10 +440,6 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     protected final int INVALID = 3;
 
-    protected void waitForComplete(boolean corrupt) {
-        waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);
-    }
-
     protected void waitForCorrupt() {
         waitForCompleteImpl(CORRUPT);
     }

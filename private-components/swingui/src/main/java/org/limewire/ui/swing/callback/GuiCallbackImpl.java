@@ -5,11 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Application;
 import org.limewire.bittorrent.Torrent;
@@ -19,9 +15,7 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.inject.EagerSingleton;
-import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.properties.FileInfoPanelFactory;
 import org.limewire.ui.swing.properties.TorrentDownloadSelector;
@@ -92,38 +86,6 @@ public class GuiCallbackImpl implements GuiCallback {
     @Override
     public boolean promptUserQuestion(String marktr) {
         return yesNoQuestion(I18n.tr(marktr));
-    }
-
-    @Override
-    public void warnUser(String filename, final String warning,
-            final String moreInfoUrl) {
-        final String truncated;
-        if (filename.length() < 70)
-            truncated = filename;
-        else
-            truncated = filename.substring(0, 70) + "...";
-        SwingUtils.invokeNowOrLater(new Runnable() {
-            @Override
-            public void run() {
-                JLabel file = new JLabel(truncated);
-                MultiLineLabel label =
-                    new MultiLineLabel(warning);
-                label.setMaxLineSpan(400);
-                HyperlinkButton help =
-                    new HyperlinkButton(I18n.tr("More information"));
-                help.addActionListener(new UrlAction(moreInfoUrl));
-                JPanel panel = new JPanel();
-                panel.setOpaque(false);
-                panel.setLayout(new MigLayout());
-                panel.add(file, "wrap");
-                panel.add(label, "wrap");
-                panel.add(help, "wrap");
-                panel.validate();
-                FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(),
-                        panel, I18n.tr("Warning"),
-                        JOptionPane.WARNING_MESSAGE);
-            }
-        });
     }
 
     @Override

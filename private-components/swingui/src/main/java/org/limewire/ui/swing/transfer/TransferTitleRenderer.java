@@ -12,7 +12,7 @@ import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
  */
 public class TransferTitleRenderer extends DefaultLimeTableCellRenderer {
 
-    private final TransferRendererResources resources;
+    protected final TransferRendererResources resources;
     
     /**
      * Constructs an TransferTitleRenderer.

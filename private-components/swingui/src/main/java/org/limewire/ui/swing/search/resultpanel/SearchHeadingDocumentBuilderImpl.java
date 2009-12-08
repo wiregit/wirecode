@@ -23,6 +23,9 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
             case LIBRARY:
                 String message = I18n.tr("{0} is in your Library.");
                 return MessageFormat.format(message, wrapHeading(heading.getText(message)));
+            case REMOVED:
+                String removeMessage = I18n.tr("{0} was removed for your protection.");
+                return MessageFormat.format(removeMessage, wrapHeading(heading.getText(removeMessage)));
             }
         }
         return "";

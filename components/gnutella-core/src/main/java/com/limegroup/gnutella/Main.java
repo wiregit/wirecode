@@ -189,13 +189,11 @@ public class Main {
         @Override
         public void uploadsComplete() {}
     
-        @Override 
-        public void promptAboutCorruptDownload(Downloader dloader) {
-            dloader.discardCorruptDownload(false);
+        @Override
+        public void promptAboutUnscannedPreview(Downloader dloader) {
+            dloader.discardUnscannedPreview(false);
         }
         
-        @Override public void warnUser(String filename, String message, String moreInfoUrl) {}
-    
         @Override public void restoreApplication() {}
     
         @Override public boolean isQueryAlive(GUID guid) {

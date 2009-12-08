@@ -121,9 +121,11 @@ public interface Downloader extends BandwidthTracker,
      * file locking problems.)  Returns null if the download hasn't started or
      * the copy failed.  If the download is complete, returns the saved file.
      *
+     * @param listener a listener to be notified when the download fragment is
+     * being scanned for viruses - may be null
      * @return the copied file fragment, saved file, or null 
      */
-    public File getDownloadFragment();
+    public File getDownloadFragment(ScanListener listener);
 
     /**
      * Sets the directory where the file will be saved. If <code>saveDirectory</code> 
@@ -171,10 +173,11 @@ public interface Downloader extends BandwidthTracker,
 	public boolean isLaunchable();
 
     /**
-     * Either treats a corrupt file as normal file and saves it, or 
-     * discards the corruptFile, depending on the value of delete.
+     * Handles the user's response to
+     * DownloadCallback.promptAboutUnscannedPreview().
+     * @param delete whether to discard the unscanned preview
      */
-    public void discardCorruptDownload(boolean delete);
+    public void discardUnscannedPreview(boolean delete);
 
     /**
      * Returns a list of all RemoteFileDescs currently
@@ -285,6 +288,7 @@ public interface Downloader extends BandwidthTracker,
         COMPLETE,
         ABORTED,
         GAVE_UP,
+        UNABLE_TO_CONNECT,
         DISK_PROBLEM,
         WAITING_FOR_GNET_RESULTS,
         CORRUPT_FILE,
@@ -295,13 +299,20 @@ public interface Downloader extends BandwidthTracker,
         WAITING_FOR_CONNECTIONS,
         ITERATIVE_GUESSING,
         QUERYING_DHT,
-        IDENTIFY_CORRUPTION,
-        RECOVERY_FAILED,
         PAUSED,
         INVALID,
         RESUMING,
-        FETCHING,
         DANGEROUS,
+        SCANNING,
+        THREAT_FOUND,
+        SCAN_FAILED,
+        SCAN_FAILED_DOWNLOADING_DEFINITIONS
+    }
+    
+    // FIXME: this seems like a clumsy way to track preview state
+    interface ScanListener {
+        public void scanStarted();
+        public void scanStopped();
     }
 }
 

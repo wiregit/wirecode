@@ -20,19 +20,14 @@ public interface DownloadCallback {
     public void downloadsComplete();
 
     /**
-     * Shows the user a message informing her that a file being downloaded 
-     * is corrupt.
+     * Warns the user that a file being previewed could not be scanned for
+     * viruses.
      * <p>
-     * This method MUST call dloader.discardCorruptDownload(boolean b) 
-     * otherwise there will be threads piling up waiting for a notification
+     * This method MUST call dloader.discardUnscannedPreview(boolean)
+     * to cancel or continue with the preview.
      */
-    public void promptAboutCorruptDownload(Downloader dloader);
+    public void promptAboutUnscannedPreview(Downloader dloader);
     
-    /**
-     * Shows the user a warning about a file.
-     */
-    public void warnUser(String filename, String message, String moreInfoUrl);
-
     /**
      * Prompts the user about what priorities to assign the files in this
      * torrent. Returns true if ok was selected in the end false if cancel.

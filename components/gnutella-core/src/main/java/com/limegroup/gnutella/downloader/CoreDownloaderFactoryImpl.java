@@ -19,33 +19,31 @@ import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
+import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 @Singleton
 public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
 
     private final Provider<ManagedDownloader> managedDownloaderFactory;
-
     private final Provider<MagnetDownloader> magnetDownloaderFactory;
-
     private final Provider<InNetworkDownloader> inNetworkDownloaderFactory;
-
     private final Provider<ResumeDownloader> resumeDownloaderFactory;
-
     private final Provider<StoreDownloader> storeDownloaderFactory;
-
     private final Provider<BTDownloader> btDownloaderFactory;
-    
     private final Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory;
+    private final Provider<VirusDefinitionDownloader> virusDefDownloaderFactory;
 
     @Inject
-    public CoreDownloaderFactoryImpl(Provider<ManagedDownloader> managedDownloaderFactory,
+    public CoreDownloaderFactoryImpl(
+            Provider<ManagedDownloader> managedDownloaderFactory,
             Provider<MagnetDownloader> magnetDownloaderFactory,
             Provider<InNetworkDownloader> inNetworkDownloaderFactory,
             Provider<ResumeDownloader> resumeDownloaderFactory,
             Provider<StoreDownloader> storeDownloaderFactory,
             Provider<BTDownloader> btDownloaderFactory,
-            Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory) {
+            Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory,
+            Provider<VirusDefinitionDownloader> virusDefDownloaderFactory) {
         this.managedDownloaderFactory = managedDownloaderFactory;
         this.magnetDownloaderFactory = magnetDownloaderFactory;
         this.inNetworkDownloaderFactory = inNetworkDownloaderFactory;
@@ -53,8 +51,10 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         this.storeDownloaderFactory = storeDownloaderFactory;
         this.btDownloaderFactory = btDownloaderFactory;
         this.torrentFileDownloaderFactory = torrentFileDownloaderFactory;
+        this.virusDefDownloaderFactory = virusDefDownloaderFactory;
     }
 
+    @Override
     public ManagedDownloader createManagedDownloader(RemoteFileDesc[] files,
             GUID originalQueryGUID, File saveDirectory, String fileName, boolean overwrite)
             throws DownloadException {
@@ -65,6 +65,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return md;
     }
 
+    @Override
     public MagnetDownloader createMagnetDownloader(MagnetOptions magnet, boolean overwrite,
             File saveDirectory, String fileName) throws DownloadException {
         if (!magnet.isDownloadable())
@@ -79,6 +80,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return md;
     }
 
+    @Override
     public InNetworkDownloader createInNetworkDownloader(DownloadInformation info, File dir,
             long startTime) throws DownloadException {
         InNetworkDownloader id = inNetworkDownloaderFactory.get();
@@ -88,6 +90,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return id;
     }
 
+    @Override
     public ResumeDownloader createResumeDownloader(File incompleteFile, String name, long size)
             throws DownloadException {
         ResumeDownloader rd = resumeDownloaderFactory.get();
@@ -97,6 +100,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return rd;
     }
 
+    @Override
     public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, File saveDirectory,
             String fileName, boolean overwrite) throws DownloadException {
         StoreDownloader sd = storeDownloaderFactory.get();
@@ -144,12 +148,12 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
             return managedDownloaderFactory;
         case STORE:
             return storeDownloaderFactory;
+        case ANTIVIRUS:
+            return virusDefDownloaderFactory;
         case TORRENTFETCHER:
         case MOZILLA:
         default:
             throw new InvalidDataException("invalid memento type: " + memento.getDownloadType());
         }
-
     }
-
 }

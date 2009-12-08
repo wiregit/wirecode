@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -50,26 +51,23 @@ import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.malware.VirusScanException;
+import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implements
         BTTorrentFileDownloader, EventListener<DownloadStateEvent> {
 
     private static Log LOG = LogFactory.getLog(BTTorrentFileDownloaderImpl.class);
-
     private static final int TIMEOUT = 5000;
 
     private final DownloadManager downloadManager;
-
     private final HttpExecutor httpExecutor;
-
     private final EventListenerList<DownloadStateEvent> eventListenerList;
-
     private DownloadState downloadStatus = DownloadState.QUEUED;
-
     private File torrentFile = null;
-
     private final File incompleteTorrentFile;
+    private final VirusScanner virusScanner;
 
     /**
      * Something to shutdown if the user cancels the fetching
@@ -81,15 +79,15 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
             SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
-            ActivityCallback activityCallback, CategoryManager categoryManager) {
+            ActivityCallback activityCallback, CategoryManager categoryManager,
+            VirusScanner virusScanner) {
         super(saveLocationManager, categoryManager);
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.httpExecutor = Objects.nonNull(httpExecutor, "httpExecutor");
-
-        this.eventListenerList = new EventListenerList<DownloadStateEvent>();
-        this.incompleteTorrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), UUID
-                .randomUUID().toString()
-                + ".torrent");
+        this.virusScanner = virusScanner;
+        eventListenerList = new EventListenerList<DownloadStateEvent>();
+        incompleteTorrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(),
+                UUID.randomUUID().toString() + ".torrent");
         addListener(this);
     }
 
@@ -114,36 +112,55 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         InputStream torrentDownloadStream = null;
         FileOutputStream torrentOutputStream = null;
         FileInputStream torrentInputStream = null;
+        int status = response.getStatusLine().getStatusCode();
+        if (status < 200 || status >= 300) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Bad status code: " + status);
+            downloadStatus = DownloadState.UNABLE_TO_CONNECT;
+            httpExecutor.releaseResources(response);
+            eventListenerList.broadcast(new DownloadStateEvent(this, downloadStatus));
+            return false;
+        }
+        HttpEntity entity = response.getEntity();
+        if (entity == null) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Invalid response: no entity");
+            downloadStatus = DownloadState.INVALID;
+            httpExecutor.releaseResources(response);
+            eventListenerList.broadcast(new DownloadStateEvent(this, downloadStatus));
+            return false;
+        }
+        incompleteTorrentFile.getParentFile().mkdirs();
         try {
-            if (response.getStatusLine().getStatusCode() < 200
-                    || response.getStatusLine().getStatusCode() >= 300) {
-                throw new IOException("bad status code, downloading .torrent file "
-                        + response.getStatusLine().getStatusCode());
-            }
-
-            if (response.getEntity() != null) {
-                torrentDownloadStream = response.getEntity().getContent();
-                torrentOutputStream = new FileOutputStream(incompleteTorrentFile);
-                FileUtils.write(torrentDownloadStream, torrentOutputStream);
-                torrentInputStream = new FileInputStream(incompleteTorrentFile);
-                torrentOutputStream.close();
-                Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
-                BTData btData = new BTDataImpl(torrentFileMap);
-
-                downloadStatus = DownloadState.COMPLETE;
-
-                // The torrent file is copied into the incomplete file
-                // directory.
-                torrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), btData.getName()
-                        + ".torrent");
-                if (torrentFile.exists()) {
-                    // pass through, when trying to start the BTDownloader a
-                    // savelocation exception will occur
+            torrentDownloadStream = response.getEntity().getContent();
+            torrentOutputStream = new FileOutputStream(incompleteTorrentFile);
+            FileUtils.write(torrentDownloadStream, torrentOutputStream);
+            torrentInputStream = new FileInputStream(incompleteTorrentFile);
+            torrentOutputStream.close();
+            Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
+            BTData btData = new BTDataImpl(torrentFileMap);
+            try {
+                if (virusScanner.isSupported() &&
+                        virusScanner.isInfected(incompleteTorrentFile)) {
+                    downloadStatus = DownloadState.THREAT_FOUND;
+                    return false;
                 } else {
-                    FileUtils.forceRename(incompleteTorrentFile, torrentFile);
+                    downloadStatus = DownloadState.COMPLETE;
                 }
+            } catch(VirusScanException e) {
+                downloadStatus = e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS ?
+                        DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS : DownloadState.SCAN_FAILED;
+                return false;
+            }
+            // The torrent file is copied into the incomplete file
+            // directory.
+            torrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(),
+                    btData.getName() + ".torrent");
+            if (torrentFile.exists()) {
+                // pass through, when trying to start the BTDownloader a
+                // savelocation exception will occur
             } else {
-                throw new IOException("invalid response");
+                FileUtils.forceRename(incompleteTorrentFile, torrentFile);
             }
         } catch (IOException iox) {
             downloadStatus = DownloadState.INVALID;
@@ -164,14 +181,15 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public boolean requestFailed(HttpUriRequest method, HttpResponse response, IOException exc) {
-        downloadStatus = DownloadState.INVALID;
+        downloadStatus = DownloadState.UNABLE_TO_CONNECT;
         downloadManager.remove(this, true);
-        eventListenerList.broadcast(new DownloadStateEvent(this, DownloadState.INVALID));
+        eventListenerList.broadcast(new DownloadStateEvent(this, DownloadState.UNABLE_TO_CONNECT));
         return false;
     }
 
     @Override
-    public void discardCorruptDownload(boolean delete) {
+    public void discardUnscannedPreview(boolean delete) {
+        // No previews for torrent file downloads
     }
 
     @Override
@@ -210,7 +228,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     @Override
-    public File getDownloadFragment() {
+    public File getDownloadFragment(ScanListener listener) {
         return null;
     }
 
@@ -402,8 +420,10 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public boolean shouldBeRemoved() {
-        return isCompleted() || downloadStatus == DownloadState.ABORTED
-                || downloadStatus == DownloadState.INVALID;
+        return isCompleted() ||
+        downloadStatus == DownloadState.ABORTED ||
+        downloadStatus == DownloadState.INVALID ||
+        downloadStatus == DownloadState.UNABLE_TO_CONNECT;
     }
 
     @Override

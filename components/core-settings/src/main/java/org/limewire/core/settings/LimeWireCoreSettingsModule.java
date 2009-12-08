@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
+import org.limewire.core.api.malware.VirusUpdatesURL;
 import org.limewire.geocode.GeoLocation;
 import org.limewire.geocode.GeocodeUrl;
 import org.limewire.inject.AbstractModule;
@@ -21,6 +22,7 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(String.class).annotatedWith(GeocodeUrl.class).toProvider(GeocodeSettings.GEOCODE_URL);
         bind(new TypeLiteral<MutableProvider<Properties>>(){}).annotatedWith(GeoLocation.class).toInstance(GeocodeSettings.GEO_LOCATION);
         bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);
+        bind(new TypeLiteral<String>(){}).annotatedWith(VirusUpdatesURL.class).toProvider(DownloadSettings.VIRUS_UPDATES_SERVER);
     }
 
     @Singleton

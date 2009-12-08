@@ -46,10 +46,7 @@ interface DownloadWorkerSupport extends ManagedDownloader {
 
     boolean killQueuedIfNecessary(DownloadWorker downloadWorker, int i);
 
-    /**
-     * Asks the user if we should continue or discard this download.
-     */
-    void promptAboutCorruptDownload();
+    void cancelCorruptDownload();
 
     QueryRequest newRequery() throws CantResumeException;
     

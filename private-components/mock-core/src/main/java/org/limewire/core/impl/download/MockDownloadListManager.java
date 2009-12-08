@@ -11,10 +11,11 @@ import java.util.List;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
@@ -79,8 +80,9 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 	
 	private void initializeMockData(){
-	    MockDownloadItem item = new MockDownloadItem("Monkey on ice skates", 4416,
-				DownloadState.DOWNLOADING, Category.VIDEO);
+	    MockDownloadItem item = new MockDownloadItem(DownloadItemType.ANTIVIRUS,
+	            "Anti-virus definitions", 4416, DownloadState.DOWNLOADING, 
+	            Category.OTHER);
 		item.addDownloadSource(new MockDownloadSource("134.23.2.7"));
 		addDownload(item);
 
@@ -94,8 +96,13 @@ public class MockDownloadListManager implements DownloadListManager {
 		item.addDownloadSource(new MockDownloadSource("234.2.3.4"));
 		addDownload(item);
 
+        item = new MockDownloadItem("Funky file.exe", 446,
+                DownloadState.THREAT_FOUND, Category.PROGRAM);
+        item.addDownloadSource(new MockDownloadSource("245.2.7.78"));
+        addDownload(item);
+
 		item = new MockDownloadItem("Psychology 101 Lecture 2.avi", 55,
-				DownloadState.LOCAL_QUEUED, Category.VIDEO);
+				DownloadState.SCAN_FAILED, Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("34.2.7.7"));
 		addDownload(item);
 
@@ -121,8 +128,14 @@ public class MockDownloadListManager implements DownloadListManager {
 	private class RemoveCancelledListener implements PropertyChangeListener {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (evt.getNewValue() == DownloadState.CANCELLED) {
+            Object newValue = evt.getNewValue();
+            if (newValue == DownloadState.CANCELLED) {
                 threadSafeDownloadItems.remove(evt.getSource());
+            } else if (newValue == DownloadState.DONE ||
+                    newValue == DownloadState.DANGEROUS ||
+                    newValue == DownloadState.THREAT_FOUND ||
+                    newValue == DownloadState.SCAN_FAILED) {
+                changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, evt.getSource());
             }
         }
     }
@@ -180,7 +193,11 @@ public class MockDownloadListManager implements DownloadListManager {
         threadSafeDownloadItems.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : threadSafeDownloadItems) {
-                if (item.getState() == DownloadState.DONE) {
+                DownloadState state = item.getState();
+                if (state == DownloadState.DONE ||
+                        state == DownloadState.DANGEROUS ||
+                        state == DownloadState.THREAT_FOUND ||
+                        state == DownloadState.SCAN_FAILED) {
                     finishedItems.add(item);
                 }
             }

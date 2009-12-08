@@ -68,6 +68,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         case DOWNLOADING:
         case DOWNLOADED:
         case LIBRARY:
+        case REMOVED:
             return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState());
         case NOT_STARTED:
             String heading = vsr.getHeading();

@@ -46,6 +46,8 @@ import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.malware.VirusScanner;
+import com.limegroup.gnutella.malware.VirusScanException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -417,16 +419,11 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             public void downloadsComplete() {
             }
 
-
             @Override
-            public void promptAboutCorruptDownload(Downloader dloader) {
-                dloader.discardCorruptDownload(false);
+            public void promptAboutUnscannedPreview(Downloader dloader) {
+                dloader.discardUnscannedPreview(false);
             }
             
-            @Override
-            public void warnUser(String filename, String message, String moreInfoUrl) {
-            }
-
             @Override
             public void removeDownload(Downloader d) {
             }
@@ -479,6 +476,26 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             public Category getCategoryForFilename(String filename) {
                 return null;
             }
+        }, new VirusScanner() {
+            @Override
+            public boolean isSupported() {
+                return false;
+            }
+            
+            @Override
+            public boolean isInfected(File file) {
+                return false;
+            }
+
+            @Override
+            public void stop() {
+            }
+
+            @Override
+            public void loadIncrementalUpdate(File f) throws VirusScanException {
+            }
+
+
         });
         
         torrentFileDownloaderImpl.initDownloadInformation(uri, true);
