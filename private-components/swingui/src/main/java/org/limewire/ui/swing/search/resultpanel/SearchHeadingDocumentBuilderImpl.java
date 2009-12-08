@@ -18,7 +18,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                 String downloadMessage = I18n.tr("Downloading {0}...");
                 return MessageFormat.format(downloadMessage, wrapHeading(heading.getText(downloadMessage)));
             case NOT_STARTED:
-                return wrapHeading(underLine(heading.getText()));
+                return wrapHeading(underLine(wrapForDownload(heading.getText())));
             case DOWNLOADED:
             case LIBRARY:
                 String message = I18n.tr("{0} is in your Library.");
@@ -33,6 +33,10 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
 
     private String wrapHeading(String heading) {
         return "<span class=\"title\">" + heading + "</span>";
+    }
+    
+    private String wrapForDownload(String heading) {
+        return "<a href=\"#download\">" + heading + "</a>";
     }
 
     private String underLine(String heading) {

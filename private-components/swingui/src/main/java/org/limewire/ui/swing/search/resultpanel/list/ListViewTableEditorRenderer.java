@@ -34,6 +34,9 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.html.HTMLDocument;
@@ -499,7 +502,17 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         similarResultIndentation.setBackground(similarResultsBackgroundColor);
     }
 
-    private void setupListeners(final Navigator navigator, final LibraryMediator libraryMediator) {        
+    private void setupListeners(final Navigator navigator, final LibraryMediator libraryMediator) {   
+        heading.addHyperlinkListener(new HyperlinkListener(){
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (EventType.ACTIVATED == e.getEventType()) {
+                    if (e.getDescription().equals("#download")) {
+                        downloadHandler.download(vsr);
+                        table.editingStopped(new ChangeEvent(table));
+                    }
+                }
+            }
+        });
         Component[] listenerComponents = new Component[]{editorComponent, heading, subheadingLabel, metadataLabel, 
                 similarResultIndentation, searchResultTextPanel, downloadSourceCount, itemIconButton};
        
