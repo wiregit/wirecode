@@ -32,6 +32,12 @@ public final class LWSSettings extends LimeProps {
             10000);
     
     /**
+     * The path to the home page.
+     */
+    public static final StringSetting LWS_AUTHENTICATION_PATH = FACTORY.createRemoteStringSetting(
+            "LWS_AUTHENTICATION_PATH", "/", "LWSSettings.lwsAuthenticationPath");
+    
+    /**
      * Allow us to turn on/off SSL messages to the Server.
      */
     public static final BooleanSetting LWS_USE_SSL = FACTORY.createRemoteBooleanSetting(

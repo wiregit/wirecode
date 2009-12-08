@@ -8,6 +8,7 @@ import java.awt.event.ComponentEvent;
 import javax.swing.JPanel;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.settings.LWSSettings;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.nav.Navigator;
 import org.mozilla.browser.MozillaAutomation;
@@ -70,7 +71,12 @@ public class StorePanel extends JPanel {
     }
     
     public void loadDefaultUrl() {
-        load("http://store.limewire.com/");
+        String url = "http://" + LWSSettings.LWS_AUTHENTICATION_HOSTNAME.get();
+        if(LWSSettings.LWS_AUTHENTICATION_PORT.get() != 80) {
+            url += ":" + LWSSettings.LWS_AUTHENTICATION_PORT.get();    
+        }
+        url += LWSSettings.LWS_AUTHENTICATION_PATH.get();
+        load(url);
     }
 
     public void load(String url) {
