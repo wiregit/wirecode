@@ -88,8 +88,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final BTUploaderFactory btUploaderFactory;
     private final AtomicBoolean finishing = new AtomicBoolean(false);
     private final AtomicBoolean complete = new AtomicBoolean(false);
-    // FIXME: this is horrible
-    private final AtomicReference<DownloadState> scanFailed = new AtomicReference<DownloadState>();
     private final Library library;
     private final EventMulticaster<DownloadStateEvent> listeners;
     private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(
@@ -182,8 +180,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             addFileToCollections(completeFile);
             complete.set(true);
             deleteIncompleteFiles();
-            lastState.set(DownloadState.COMPLETE);
-            listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
+            if(lastState.get() != DownloadState.SCAN_FAILED &&
+                    lastState.get() != DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+                lastState.set(DownloadState.COMPLETE);
+                listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
+            }
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             torrent.removeListener(BTDownloaderImpl.this);
         } else if (TorrentEventType.STOPPED == event.getType()) {
@@ -230,8 +231,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 if(isInfected(getIncompleteFile()))
                     return true;
             } catch(VirusScanException e) {
-                scanFailed.set(e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS ?
-                        DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS : DownloadState.SCAN_FAILED);
+                if(e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS)
+                    lastState.set(DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS);
+                else
+                    lastState.set(DownloadState.SCAN_FAILED);
+                listeners.broadcast(new DownloadStateEvent(this, lastState.get()));
             }
         }
         for(File f : getIncompleteFiles()) {
@@ -483,18 +487,18 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     
     @Override
     public DownloadState getState() {
-        // FIXME: this is horrible
         switch(lastState.get()) {
         case DANGEROUS:
             return DownloadState.DANGEROUS;
         case THREAT_FOUND:
             return DownloadState.THREAT_FOUND;
-        }
-        DownloadState scanFailedState = scanFailed.get();
-        if(scanFailedState != null)
-            return scanFailedState;
-        if(lastState.get() == DownloadState.SCANNING)
+        case SCAN_FAILED:
+            return DownloadState.SCAN_FAILED;
+        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
+            return DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS;
+        case SCANNING:
             return DownloadState.SCANNING;
+        }
 
         TorrentStatus status = torrent.getStatus();
         if (!torrent.isStarted() || status == null) {
