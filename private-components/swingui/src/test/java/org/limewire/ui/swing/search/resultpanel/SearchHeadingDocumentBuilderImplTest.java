@@ -27,7 +27,7 @@ public class SearchHeadingDocumentBuilderImplTest extends TestCase {
 
     public void testNonMouseOverHeadingDocument() {
         String expected = 
-             "<span class=\"title\"><u>Night life</u></span>";
+             "<span class=\"title\"><u><a href=\"#download\">Night life</a></u></span>";
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.NOT_STARTED, false));
     }
     
