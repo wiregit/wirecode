@@ -8,6 +8,7 @@ import java.awt.Window;
 import javax.swing.JDialog;
 
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 
 /**
@@ -108,5 +109,13 @@ public class LimeJDialog extends JDialog {
     public void addNotify() {
         super.addNotify();
         SystemUtils.setWindowIcon(this, iconInfo.getIconFile());
+        
+        // The native call to setWindowIcon is causing issues on Windows 7. It appears
+        // the OS is grabbing the wrong image from the ico or can't find the correct image
+        // at times and uses the JDialog icon on occasions instead. Calling setIconImages
+        // is similar to the native call in that we give the window a set of different size
+        // icons and the OS can choose which is most appropriate to use.
+        if(OSUtils.isWindows7())
+            setIconImages(iconInfo.getIconImages());
     }
 }
