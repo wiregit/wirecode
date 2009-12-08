@@ -83,7 +83,6 @@ public class MockDownloadListManager implements DownloadListManager {
 	    MockDownloadItem item = new MockDownloadItem(DownloadItemType.ANTIVIRUS,
 	            "Anti-virus definitions", 4416, DownloadState.DOWNLOADING, 
 	            Category.OTHER);
-		item.addDownloadSource(new MockDownloadSource("134.23.2.7"));
 		addDownload(item);
 
 		item = new MockDownloadItem("Psychology 101 Lecture 3", 446,
