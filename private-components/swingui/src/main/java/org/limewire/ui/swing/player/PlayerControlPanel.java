@@ -292,11 +292,12 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         // The progress slider UI has been offsetting the value of the slider to account for
         // the size of the position knob, but since we're overriding the foreground painter to not
         // paint a knob, this is causing the slider to be positioned incorrectly.
-        // So, let's override the BasicSliderUI to return a thumbsize of 0.
+        // So, let's override the BasicSliderUI to make the position knob small enough to not
+        // distort the mapping but bit enough to still be dragable.
         progressSlider.setUI(new BasicSliderUI(progressSlider) {
             @Override
             protected Dimension getThumbSize() {
-                return new Dimension(0,0);
+                return new Dimension(5,8);
             }
         });
         progressSlider.addChangeListener(new ProgressListener());
