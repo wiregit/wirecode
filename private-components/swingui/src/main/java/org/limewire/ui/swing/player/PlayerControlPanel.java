@@ -289,22 +289,12 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      * Initializes the progress component.
      */
     private void initProgressControl() {
-        //ÊThe progress slider UI has been offsetting the value of the slider to account for
-        // the size of the position knob, but since we're overriding the foreground painter to not
-        // paint a knob, this is causing the slider to be positioned incorrectly.
-        // So, let's override the BasicSliderUI to return a thumbsize of 0.
-        progressSlider.setUI(new BasicSliderUI(progressSlider) {
-            @Override
-            protected Dimension getThumbSize() {
-                return new Dimension(0,0);
-            }
-        });
         progressSlider.addChangeListener(new ProgressListener());
         progressSlider.setMaximum(Integer.MAX_VALUE);
-        progressSlider.setMaximumSize(new Dimension(206, 8));
-        progressSlider.setMinimumSize(new Dimension(206, 8));
-        progressSlider.setPreferredSize(new Dimension(206, 8));
-        progressSlider.setSize(new Dimension(206, 6));
+        progressSlider.setMaximumSize(new Dimension(206, 6));
+        progressSlider.setMinimumSize(new Dimension(206, 6));
+        progressSlider.setPreferredSize(new Dimension(206, 6));
+        progressSlider.setSize(new Dimension(206, 4));
         progressSlider.setEnabled(false);
         progressSlider.setMinorTickSpacing(1);
         progressSlider.addMouseListener(new MouseAdapter() {
