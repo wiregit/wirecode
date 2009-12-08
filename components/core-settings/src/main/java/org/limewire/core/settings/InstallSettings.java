@@ -89,11 +89,4 @@ public final class InstallSettings extends LimeWireSettings {
      */
     public static final StringSetSetting PREVIOUS_RAN_VERSIONS = FACTORY.createStringSetSetting("PREVIOUS_RAN_VERSIONS", "");
     
-    /**
-     * Adds the capability to remove avg from the free 5.4 beta.
-     *
-     * TODO we can remove this field after the beta release. We will still be able to remotely alter it if needed.
-     */
-    public static final BooleanSetting AVG_REMOVE_FROM_FREE_VERSION_5_4 = FACTORY.createRemoteBooleanSetting("AVG_REMOVE_FROM_FREE_VERSION_5_4", false, "avg.remove.from.free.version.5.4");
-    
 }
