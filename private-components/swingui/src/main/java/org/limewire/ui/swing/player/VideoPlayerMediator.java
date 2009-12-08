@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.player;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,6 +20,7 @@ import javax.media.Player;
 import javax.media.StartEvent;
 import javax.media.StopEvent;
 import javax.media.Time;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
@@ -366,8 +369,11 @@ class VideoPlayerMediator implements PlayerMediator {
     }
 
     private boolean isDurationMeasurable() {
-        return player != null && player.getDuration() != Player.DURATION_UNBOUNDED
-                && player.getDuration() != Player.DURATION_UNKNOWN;
+        if (player == null){
+            return false;
+        }
+        Time time = player.getDuration();        
+        return time != Player.DURATION_UNBOUNDED && time != Player.DURATION_UNKNOWN;
     }
 
     private class VideoControllerListener implements ControllerListener {
@@ -405,7 +411,7 @@ class VideoPlayerMediator implements PlayerMediator {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (!isDurationMeasurable()) {
-                updateTimer.stop();
+               // updateTimer.stop();
                 return;
             }
 
@@ -457,6 +463,7 @@ class VideoPlayerMediator implements PlayerMediator {
             
             if(newPlayer == null){
                 //New player creation failed.  The video was launched natively.
+                displayDirector.close();
                 return;
             }
 
@@ -464,23 +471,23 @@ class VideoPlayerMediator implements PlayerMediator {
                 newPlayer.setMediaTime(time);
             }
 
-            newPlayer.addControllerListener(controllerListener);
-
-            if (updateTimer == null) {
-                updateTimer = new Timer(100, new TimerAction());
-            }
-            updateTimer.start();
+            newPlayer.addControllerListener(controllerListener);           
 
             player = newPlayer;
 
             displayVideo(isFullScreen);
             
-            startVideo(autoStart);
+            startVideo(autoStart); 
+            
+            if (updateTimer == null) {
+                updateTimer = new Timer(100, new TimerAction());
+            }
+            updateTimer.start();
 
         }
         
         private void displayVideo(boolean isFullScreen) {
-            displayDirector.show(player.getVisualComponent(), isFullScreen);
+            displayDirector.show();
             fireSongChanged(currentVideo.getName());           
         }
         
@@ -521,7 +528,9 @@ class VideoPlayerMediator implements PlayerMediator {
 
             private final boolean isFullScreen;
 
-            private boolean canceled = false;
+            private boolean canceled = false;   
+            
+            private final Container renderPanel = new JPanel(new BorderLayout());   
 
             public PlayerInitalizationWorker(File mediaFile, Time time, boolean isFullScreen,
                     boolean autoStart) {
@@ -529,6 +538,9 @@ class VideoPlayerMediator implements PlayerMediator {
                 this.time = time;
                 this.autoStart = autoStart;
                 this.isFullScreen = isFullScreen;
+                displayDirector.initialize(renderPanel, isFullScreen);
+                renderPanel.addNotify();
+                
             }
 
             /**
@@ -543,7 +555,7 @@ class VideoPlayerMediator implements PlayerMediator {
             @Override
             protected Player doInBackground() throws Exception {
                 try {
-                    return VideoPlayerFactory.createVideoPlayer(mediaFile);
+                    return new VideoPlayerFactory().createVideoPlayer(mediaFile, renderPanel);
                 } catch (IncompatibleSourceException e) {
                     nativeLaunch(mediaFile);
                     return null;

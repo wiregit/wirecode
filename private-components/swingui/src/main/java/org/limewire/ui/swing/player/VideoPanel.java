@@ -3,9 +3,12 @@ package org.limewire.ui.swing.player;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ContainerAdapter;
+import java.awt.event.ContainerEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -108,6 +111,14 @@ class VideoPanel implements Disposable{
         setUpMouseListener(videoPanel);
         setUpMouseListener(fitToScreenContainer);
         setUpMouseListener(videoRenderer);
+        if (videoRenderer instanceof Container) {
+            ((Container) videoRenderer).addContainerListener(new ContainerAdapter() {
+                @Override
+                public void componentAdded(ContainerEvent e) {
+                    setUpMouseListener(e.getChild());
+                }
+            });
+        }
 
         fitToScreenContainer.add(this.videoRenderer);
         setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());        

@@ -68,9 +68,11 @@ class VideoDisplayDirector {
         resizerListener = new VideoPanelResizer();
     }
     
-    public void show(Component videoRenderer, boolean isFullScreen){
+    public void initialize(Component videoRenderer, boolean isFullScreen){
+        boolean isReinitializing = false;
         
         if(this.videoPanel != null){
+            isReinitializing = true;
             close();
         }
         //Recycling the video panel causes problems with native painting.  We need a new one each time.
@@ -85,20 +87,22 @@ class VideoDisplayDirector {
         }
         
         if(isFullScreen){
-            showFullScreen();
+            initializeFullScreen();
         } else {
-            showInClient();
-        }           
+            initializeInClient(isReinitializing);
+        }            
     }
     
-    private void showInClient(){
+    private void initializeInClient(boolean isReinitializing){
         limeWireLayeredPane.add(videoPanel.getComponent(), videoLayer);
-        videoPanel.requestFocus();
-        resizeVideoContainer();     
-        //Make sure the flash of native video window doesn't steal focus
-        GuiUtils.getMainFrame().toFront();   
         registerNavigationListener();
         limeWireLayeredPane.addComponentListener(resizerListener);
+        //If we are reinitializing (for example returning from full screen) we want to show the panel immediately
+        if (isReinitializing) {
+            showInClient();
+        } else {
+            videoPanel.getComponent().setVisible(false);
+        }
     }   
     
     private void registerNavigationListener() {
@@ -110,7 +114,7 @@ class VideoDisplayDirector {
     }
     
     
-    private void showFullScreen(){
+    private void initializeFullScreen(){
         //Hide main frame first so that fullScreenFrame gets proper focus.
         GuiUtils.getMainFrame().setVisible(false);
         
@@ -127,6 +131,30 @@ class VideoDisplayDirector {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         fullScreenFrame.setBounds(0,0,screenSize.width, screenSize.height);        
 
+        //addNotify is necessary here so that a null pointer doesn't happen in sun's awt code 
+        //when a canvas is added to videoRenderer
+        fullScreenFrame.addNotify();
+      
+    }
+    
+    public void show(){
+        if(isFullScreen()){
+            showFullScreen();
+        } else {
+            showInClient();
+        }
+    }
+
+
+    private void showInClient() {
+        videoPanel.getComponent().setVisible(true);
+        resizeVideoContainer();     
+        //Make sure the flash of native video window doesn't steal focus
+        GuiUtils.getMainFrame().toFront();   
+        videoPanel.requestFocus();
+    }
+
+    private void showFullScreen() {
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = environment.getDefaultScreenDevice();
         
@@ -138,7 +166,6 @@ class VideoDisplayDirector {
             fullScreenFrame.toFront();
         }        
     }
-
 
     public boolean isFullScreen() {
         return fullScreenFrame != null;

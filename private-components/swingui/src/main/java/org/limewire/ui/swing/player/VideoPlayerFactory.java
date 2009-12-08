@@ -1,40 +1,64 @@
 package org.limewire.ui.swing.player;
 
+import java.awt.Canvas;
+import java.awt.Container;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
 import javax.media.IncompatibleSourceException;
 import javax.media.MediaLocator;
 import javax.media.Player;
 import javax.media.protocol.DataSource;
+import javax.swing.SwingUtilities;
 
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
 
 
 
-
 public class VideoPlayerFactory {
-    public static Player createVideoPlayer(File file) throws IncompatibleSourceException {
+    private Canvas mfCanvas;
+    
+    public Player createVideoPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
         if (!OSUtils.isWindows() && !OSUtils.isMacOSX()) {
             throw new IllegalStateException("Video is only supported on Windows and Mac");
         }
-
+        
         if (OSUtils.isMacOSX()) {
             if (file.getName().toLowerCase().endsWith("avi")) {
                 throw new IncompatibleSourceException("AVI files are not supported by LimeWire's built in video player on OS X.");
             }
         }
 
-        Player handler;
+        final Player handler;
+        
         if (OSUtils.isWindows()) {
+            //TODO: we are prefering mf in beta for testing but may want to prefer ds when we release
             if(OSUtils.isWindows7()){
-                handler = new net.sf.fmj.mf.media.content.unknown.Handler();    
+                try {
+                    SwingUtilities.invokeAndWait(new Runnable() {
+                        @Override
+                        public void run() {
+                            mfCanvas = new Canvas();
+                            parentComponent.add(mfCanvas);
+                            parentComponent.addNotify();
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
+                }
+
+                Player mfPlayer = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas);    
                 try {
                     //we need to setup the player here so we can fall back to ds if it fails
-                    setupPlayer(handler, file);
-                    return handler;
+                    setupPlayer(mfPlayer, file);
+                    return mfPlayer;
                 } catch (IncompatibleSourceException e) {
                     //mf can't play it.  try ds.
                 }
@@ -44,11 +68,18 @@ public class VideoPlayerFactory {
             handler = new net.sf.fmj.qt.media.content.unknown.Handler();
         }
 
-       setupPlayer(handler, file);
+        setupPlayer(handler, file);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                //remove all in case the mfCanvas was added.
+                parentComponent.removeAll();
+                parentComponent.add(handler.getVisualComponent());
+            }
+        });
        return handler;
     }
     
-    private static void setupPlayer(Player player, File file) throws IncompatibleSourceException {
+    private void setupPlayer(Player player, File file) throws IncompatibleSourceException {
         try {
             
             player.setSource(createDataSource(file));
@@ -63,7 +94,7 @@ public class VideoPlayerFactory {
         player.realize();
     }
     
-    private static DataSource createDataSource(File file) throws MalformedURLException{
+    private DataSource createDataSource(File file) throws MalformedURLException{
         //FMJ's handling of files is incredibly fragile.  This works with both quicktime and directshow.
         DataSource source = new net.sf.fmj.media.protocol.file.DataSource();
         if (OSUtils.isMacOSX()) {
