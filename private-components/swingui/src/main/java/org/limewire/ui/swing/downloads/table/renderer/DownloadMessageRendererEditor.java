@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.downloads.table.renderer;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -281,6 +282,13 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
     private class ButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Reset cursor if source component is IconButton.  If the action
+            // displays a modal dialog, then IconButton will not receive the
+            // mouseExited event to reset the default cursor.
+            if (e.getSource() instanceof IconButton) {
+                ((IconButton) e.getSource()).getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+            }
+            
             actionHandler.performAction(e.getActionCommand(), downloadItem);
             cancelCellEditing();
         }
