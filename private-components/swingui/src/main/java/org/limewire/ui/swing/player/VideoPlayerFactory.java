@@ -21,6 +21,12 @@ public class VideoPlayerFactory {
             throw new IllegalStateException("Video is only supported on Windows and Mac");
         }
 
+        if (OSUtils.isMacOSX()) {
+            if (file.getName().toLowerCase().endsWith("avi")) {
+                throw new IncompatibleSourceException("AVI files are not supported by LimeWire's built in video player on OS X.");
+            }
+        }
+
         Player handler;
         if (OSUtils.isWindows()) {
             if(OSUtils.isWindows7()){
@@ -44,6 +50,7 @@ public class VideoPlayerFactory {
     
     private static void setupPlayer(Player player, File file) throws IncompatibleSourceException {
         try {
+            
             player.setSource(createDataSource(file));
 
         } catch (IOException e) {
