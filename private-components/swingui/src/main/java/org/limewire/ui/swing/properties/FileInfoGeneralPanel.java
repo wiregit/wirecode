@@ -47,6 +47,7 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
+import org.limewire.ui.swing.components.FilteredDocument;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
@@ -380,6 +381,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     private JTextField createEditableTextField(String text, FilePropertyKey key) {
         JTextField field = new JTextField(text);
         TextFieldClipboardControl.install(field);
+        FilteredDocument.configure(field, key);
         field.setCaretPosition(0);
         if(type != FileInfoType.LOCAL_FILE)
             field.setEditable(false);
