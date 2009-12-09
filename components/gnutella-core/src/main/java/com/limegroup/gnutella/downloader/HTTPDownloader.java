@@ -435,7 +435,7 @@ public class HTTPDownloader implements BandwidthTracker {
         try {
             _socket.setKeepAlive(true);
         } catch (IOException iox) {
-            if (!OSUtils.isWindowsVista())
+            if (!OSUtils.isWindowsVista() && !OSUtils.isWindows7())
                 throw iox;
             LOG.warn("couldn't set keepalive");
         }
