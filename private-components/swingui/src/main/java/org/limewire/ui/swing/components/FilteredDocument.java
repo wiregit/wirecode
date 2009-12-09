@@ -121,11 +121,12 @@ public class FilteredDocument extends PlainDocument {
      * Sets a minimum bound for number input and makes the field accept integers by defacto.
      * 
      * <p> NOTE: only makes sense with values less than 2 since it will otherwise entry
-     *            will be impossible (ie. if max is 33 and min can only type numbers starting with 1)
+     *            will be impossible (ie. if max is 33 and min 2 can only type numbers starting with 2)
      */
     public void setMinBound(int min) {
-        // Having a minimum bound that is more than 1 would make things impossible to use.
-        assert min < 2;
+        if (min > 1) {
+            throw new IllegalArgumentException("Using a minimum bound that is more than 1 would make things impossible to use.");
+        }
         
         minBound = min;
     }
@@ -137,8 +138,9 @@ public class FilteredDocument extends PlainDocument {
      *            will be impossible (ie. if minimum is -33 and max -11 can only type numbers starting with -1) 
      */
     public void setMaxBound(int max) {
-        // Having a maximum bound that is more than negative 1 would make things impossible to use.
-        assert max > -2;
+        if (max < 1) {
+            throw new IllegalArgumentException("Using a maximum bound that is less than -1 would make things impossible to use.");
+        }
         
         maxBound = max;
     }
