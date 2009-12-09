@@ -1732,6 +1732,7 @@ public class DownloadWorker {
                                     // matter.
                 statsTracker.successfulDirectConnect();
             } catch (IOException iox) {
+                LOG.debug("error initializing tcp", iox);
                 shutdown(); // if it immediately IOX's, try a push instead.
                 return;
             }
