@@ -483,19 +483,26 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
             
             @Override
+            public int getDefinitionsVersion() {
+                return 0;
+            }
+            
+            @Override
             public boolean isInfected(File file) {
                 return false;
             }
 
             @Override
-            public void stop() {
+            public void stopScanner() {
+            }
+            
+            @Override
+            public void loadFullUpdate(File updateDir) throws VirusScanException {
             }
 
             @Override
-            public void loadIncrementalUpdate(File f) throws VirusScanException {
+            public void loadIncrementalUpdate(File updateDir) throws VirusScanException {
             }
-
-
         });
         
         torrentFileDownloaderImpl.initDownloadInformation(uri, true);
