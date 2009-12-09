@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -68,7 +68,7 @@ class VideoDisplayDirector {
         resizerListener = new VideoPanelResizer();
     }
     
-    public void initialize(Component videoRenderer, boolean isFullScreen){
+    public void initialize(Container videoRenderer, boolean isFullScreen){
         boolean isReinitializing = false;
         
         if(this.videoPanel != null){

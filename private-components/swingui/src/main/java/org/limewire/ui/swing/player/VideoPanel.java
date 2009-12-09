@@ -71,7 +71,7 @@ class VideoPanel implements Disposable{
 
     private final VideoPlayerMediator videoMediator;
     
-    private final Component videoRenderer;
+    private final Container videoRenderer;
     
     /**
      * the panel containing video and controls.
@@ -90,7 +90,7 @@ class VideoPanel implements Disposable{
     private final JPanel fitToScreenContainer = new JPanel(fitToScreenLayout);    
 
     @Inject
-    public VideoPanel(@Assisted Component videoRenderer, PlayerControlPanelFactory controlPanelFactory,
+    public VideoPanel(@Assisted Container videoRenderer, PlayerControlPanelFactory controlPanelFactory,
             HeaderBarDecorator headerBarDecorator, VideoPlayerMediator videoMediator, 
             ButtonPainterFactory buttonPainterFactory) {
 
@@ -111,14 +111,12 @@ class VideoPanel implements Disposable{
         setUpMouseListener(videoPanel);
         setUpMouseListener(fitToScreenContainer);
         setUpMouseListener(videoRenderer);
-        if (videoRenderer instanceof Container) {
-            ((Container) videoRenderer).addContainerListener(new ContainerAdapter() {
-                @Override
-                public void componentAdded(ContainerEvent e) {
-                    setUpMouseListener(e.getChild());
-                }
-            });
-        }
+        videoRenderer.addContainerListener(new ContainerAdapter() {
+            @Override
+            public void componentAdded(ContainerEvent e) {
+                setUpMouseListener(e.getChild());
+            }
+        });
 
         fitToScreenContainer.add(this.videoRenderer);
         setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());        

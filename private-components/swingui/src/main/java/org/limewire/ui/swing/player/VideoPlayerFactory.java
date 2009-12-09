@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.IncompatibleSourceException;
 import javax.media.MediaLocator;
@@ -19,7 +20,6 @@ import org.limewire.util.OSUtils;
 
 
 public class VideoPlayerFactory {
-    private Canvas mfCanvas;
     
     public Player createVideoPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
         if (!OSUtils.isWindows() && !OSUtils.isMacOSX()) {
@@ -37,13 +37,15 @@ public class VideoPlayerFactory {
         if (OSUtils.isWindows()) {
             //TODO: we are prefering mf in beta for testing but may want to prefer ds when we release
             if(OSUtils.isWindows7()){
+                final AtomicReference<Canvas> mfCanvas = new AtomicReference<Canvas>(); 
                 try {
                     SwingUtilities.invokeAndWait(new Runnable() {
                         @Override
                         public void run() {
-                            mfCanvas = new Canvas();
-                            parentComponent.add(mfCanvas);
+                            Canvas canvas = new Canvas();
+                            parentComponent.add(canvas);
                             parentComponent.addNotify();
+                            mfCanvas.set(canvas);
                         }
                     });
                 } catch (InterruptedException e) {
@@ -52,7 +54,7 @@ public class VideoPlayerFactory {
                     throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
                 }
 
-                Player mfPlayer = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas);    
+                Player mfPlayer = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas.get());    
                 try {
                     //we need to setup the player here so we can fall back to ds if it fails
                     setupPlayer(mfPlayer, file);
