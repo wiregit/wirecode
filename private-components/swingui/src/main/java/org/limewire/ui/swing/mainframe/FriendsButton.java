@@ -16,6 +16,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.event.PopupMenuEvent;
@@ -49,6 +50,7 @@ import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -310,7 +312,12 @@ public class FriendsButton extends LimeComboBox {
                 if (status == BrowseRefreshStatus.ADDED || status == BrowseRefreshStatus.CHANGED){
                     newResultsAvailable = true;
                     updateIcons(FriendConnectionEvent.Type.CONNECTED);
-                    refreshMenu();
+                    SwingUtils.invokeNowOrLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshMenu();                        
+                        }
+                    });
                 } else if (status == BrowseRefreshStatus.REFRESHED){  
                     newResultsAvailable = false;
                     if (connectBean.getLastEvent().getType() == FriendConnectionEvent.Type.CONNECTED) {
