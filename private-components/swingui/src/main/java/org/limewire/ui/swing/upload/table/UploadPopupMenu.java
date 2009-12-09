@@ -133,20 +133,7 @@ public class UploadPopupMenu extends JPopupMenu {
             add(showInLibraryMenuItem).setEnabled(libraryManager.getLibraryManagedList().contains(uploadItem.getUrn()));
         }
         
-        if (!done || browseItem) {
-            if (getComponentCount() > 0) {
-                addSeparator();
-            }
-
-            JMenu browseMenu = browseMenuFactory.createBrowseMenu(getRemoteHosts());
-            add(browseMenu);
-            
-            JMenu blockMenu = blockUserMenuFactory.createDownloadBlockMenu(getRemoteHosts());
-            if (blockMenu != null) {
-                add(blockMenu);
-            }
-            
-        } else if (done) {
+        if (done) {
             addSeparator();
 
             JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
@@ -155,11 +142,19 @@ public class UploadPopupMenu extends JPopupMenu {
             JMenu showInListMenu = listMenuFactory.createShowInListMenu(selectedFiles, true);
             add(showInListMenu);
         }
-            
+        
+        addSeparator();
+
+        JMenu browseMenu = browseMenuFactory.createBrowseMenu(getRemoteHosts());
+        add(browseMenu);
+        
+        JMenu blockMenu = blockUserMenuFactory.createDownloadBlockMenu(getRemoteHosts());
+        if (blockMenu != null) {
+            add(blockMenu);
+        }
+        
         if (!browseItem) {
-            if (getComponentCount() > 0) {
-                addSeparator();
-            }
+            addSeparator();
             
             add(createFileInfoMenuItem(listener));
         }
