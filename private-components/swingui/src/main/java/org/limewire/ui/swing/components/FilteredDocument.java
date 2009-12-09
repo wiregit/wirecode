@@ -25,7 +25,7 @@ public class FilteredDocument extends PlainDocument {
      * <p> NOTE: If no filtering is required then no document is added.
      */
     public static void configure(JTextField textField, FilePropertyKey key) {
-        if (FilePropertyKey.isLong(key)) {
+        if (key != null && FilePropertyKey.isLong(key)) {
             FilteredDocument document = new FilteredDocument();
             document.setAcceptsAlphabetic(false);
             document.setAcceptsNumeric(true);

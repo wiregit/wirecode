@@ -381,12 +381,13 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     private JTextField createEditableTextField(String text, FilePropertyKey key) {
         JTextField field = new JTextField(text);
         TextFieldClipboardControl.install(field);
-        FilteredDocument.configure(field, key);
-        field.setCaretPosition(0);
         if(type != FileInfoType.LOCAL_FILE)
             field.setEditable(false);
-        else
+        else {
             changedProps.put(key, field);
+            FilteredDocument.configure(field, key);
+        }
+        field.setCaretPosition(0);
         field.setFont(mediumFont);
         field.setForeground(foreground);
         return field;
