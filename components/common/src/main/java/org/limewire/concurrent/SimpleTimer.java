@@ -35,6 +35,15 @@ public class SimpleTimer extends AbstractListeningExecutorService implements
      * 
      * @param isDaemon true if this' thread should be a daemon.
      */
+    public SimpleTimer(String name, boolean isDaemon) {
+        TIMER = new Timer(name, isDaemon);
+    }
+    
+    /**
+     * Creates a new active SimpleTimer.
+     * 
+     * @param isDaemon true if this' thread should be a daemon.
+     */
     public SimpleTimer(boolean isDaemon) {
         TIMER = new Timer(isDaemon);
     }

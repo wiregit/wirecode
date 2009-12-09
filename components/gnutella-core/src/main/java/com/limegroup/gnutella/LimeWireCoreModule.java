@@ -392,7 +392,7 @@ public class LimeWireCoreModule extends AbstractModule {
     
     private static final String BACKGROUND = "backgroundExecutor";
     @Provides @LazySingleton @Named(BACKGROUND) ScheduledListeningExecutorService backgroundSLES() {
-        return new SimpleTimer(true);
+        return new SimpleTimer("backgroundExecutor", true);
     }    
     @Provides @LazySingleton @Named(BACKGROUND) ScheduledExecutorService backgroundSES(@Named(BACKGROUND) ScheduledListeningExecutorService lses) {
         return lses;
