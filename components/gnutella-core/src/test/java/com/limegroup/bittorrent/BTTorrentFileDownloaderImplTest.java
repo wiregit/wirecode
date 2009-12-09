@@ -488,6 +488,11 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
             
             @Override
+            public String getLibraryVersion() {
+                return "0.0.0";
+            }
+            
+            @Override
             public boolean isInfected(File file) {
                 return false;
             }
