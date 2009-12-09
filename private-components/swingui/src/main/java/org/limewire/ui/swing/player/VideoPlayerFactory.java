@@ -47,10 +47,8 @@ public class VideoPlayerFactory {
                         }
                     });
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
                     throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
                 } catch (InvocationTargetException e) {
-                    e.printStackTrace();
                     throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
                 }
 

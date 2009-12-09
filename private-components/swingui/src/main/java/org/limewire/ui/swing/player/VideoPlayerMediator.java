@@ -373,7 +373,7 @@ class VideoPlayerMediator implements PlayerMediator {
             return false;
         }
         Time time = player.getDuration();        
-        return time != Player.DURATION_UNBOUNDED && time != Player.DURATION_UNKNOWN;
+        return !Player.DURATION_UNBOUNDED.equals(time) && !Player.DURATION_UNKNOWN.equals(time) && !Time.TIME_UNKNOWN.equals(time);
     }
 
     private class VideoControllerListener implements ControllerListener {
@@ -411,7 +411,7 @@ class VideoPlayerMediator implements PlayerMediator {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (!isDurationMeasurable()) {
-               // updateTimer.stop();
+                updateTimer.stop();
                 return;
             }
 
@@ -538,9 +538,7 @@ class VideoPlayerMediator implements PlayerMediator {
                 this.time = time;
                 this.autoStart = autoStart;
                 this.isFullScreen = isFullScreen;
-                displayDirector.initialize(renderPanel, isFullScreen);
-                renderPanel.addNotify();
-                
+                displayDirector.initialize(renderPanel, isFullScreen);                
             }
 
             /**

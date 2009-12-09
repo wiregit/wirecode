@@ -402,8 +402,6 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         progressSlider.setEnabled(getPlayerMediator().isSeekable());
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
             initializeVolumeSettings();
-         // Enable progress slider.
-            progressSlider.setEnabled(getPlayerMediator().isSeekable());
         } else if (playerState == PlayerState.GAIN) {
             // Exit on volume change.
             return;
