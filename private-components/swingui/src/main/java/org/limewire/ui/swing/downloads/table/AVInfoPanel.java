@@ -176,8 +176,8 @@ public class AVInfoPanel extends JPanel {
      * @param autoNotify true if this is an automatic message request due to a state change
      */
     public void showFailureMessageDefsDownloading(DownloadItem item, boolean autoNotify) {
-        String heading = I18n.tr("Scan Failed");
-        String message = I18n.tr("{0} could not be inspected due to the virus scanner still downloading first set of virus definitions.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
+        String heading = I18n.tr("Can't Scan Yet");
+        String message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, autoNotify, true,
                 SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED);
     }
