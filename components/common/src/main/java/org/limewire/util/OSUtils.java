@@ -1,7 +1,5 @@
 package org.limewire.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
@@ -162,38 +160,19 @@ public class OSUtils {
         // If this is Windows Vista, try to find out whether SP2 (or higher)
         // is installed, which removes the half-open TCP connection limit.
     	if(_isWindowsVista) {
-            BufferedReader br = null;
     	    try {
-                // Execute reg.exe to query a registry key
-    	        Process p = Runtime.getRuntime().exec(new String[] {
-    	                "reg",
-    	                "query",
-    	                "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion",
-    	                "/v",
-    	                "CSDVersion"
-    	        });
-                // Parse the output
-    	        br = new BufferedReader(
-                    new InputStreamReader(p.getInputStream()));
-    	        String line = null;
-    	        while((line = br.readLine()) != null) {
-    	            if(line.matches(".*CSDVersion.*"))
-    	                break;
-    	        }
-                // Assume there won't be more than 9 service packs for Vista
-    	        if(line != null && line.matches(".*Service Pack [2-9]")) {
-                    LOG.debug("Slightly less broken version of Windows Vista");
+    	        String ver = SystemUtils.registryReadText(
+    	                "HKEY_LOCAL_MACHINE",
+    	                "Software\\Microsoft\\Windows NT\\CurrentVersion",
+    	                "CSDVersion");
+    	        // Assume there won't be more than 9 service packs for Vista
+    	        if(ver != null && ver.matches(".*Service Pack [2-9]")) {
+    	            LOG.debug("Slightly less broken version of Windows Vista");
     	            _isSlightlyLessBrokenVersionOfWindowsVista = true;
-                }
-    	    } catch(Throwable t) {
-    	        LOG.debug("Failed to determine Windows version", t);
-    	    } finally {
-                if(br != null) {
-                    try {
-                        br.close();
-                    } catch(IOException ignored) {}
-                }
-            }
+    	        }
+    	    } catch(IOException e) {
+    	        LOG.debug("Failed to determine Windows version", e);
+    	    }
     	}
     }    
 
