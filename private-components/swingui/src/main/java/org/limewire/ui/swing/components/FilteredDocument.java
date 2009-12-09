@@ -32,10 +32,8 @@ public class FilteredDocument extends PlainDocument {
             document.setAcceptsNonAlphanumeric(false);
             switch (key) {
                 case YEAR :
-                    document.setMaxChars(4);
-                    break;
                 case BITRATE :
-                    document.setMaxChars(3);
+                    document.setMaxChars(4);
                     break;
             }
             textField.setDocument(document);

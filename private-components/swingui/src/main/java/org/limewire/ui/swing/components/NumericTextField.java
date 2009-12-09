@@ -1,12 +1,6 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Toolkit;
-
 import javax.swing.JTextField;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
 
 /**
  * A JTextField component that only accepts integer values as input. Any other
@@ -54,64 +48,10 @@ public class NumericTextField extends JTextField {
     }
 
     private void addIntegerWithMaxValueFilter(int minValue, int maxValue) {
-        ((AbstractDocument) this.getDocument()).setDocumentFilter(new NumericDocumentFilter(minValue, maxValue));
+        FilteredDocument document = new FilteredDocument();
+        document.setMinBound(minValue);
+        document.setMaxBound(maxValue);
+        setDocument(document);
     }
 
-
-    class NumericDocumentFilter extends DocumentFilter {
-
-        private final int maxValue;
-        private final int minValue;
-
-        NumericDocumentFilter(int minValue, int maxValue) {
-            this.minValue = minValue;
-            this.maxValue = maxValue;    
-        }
-
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
-                throws BadLocationException {
-
-            if (string == null)
-                return;
-            if (isValidValue(string, offset, 0)) {
-                super.insertString(fb, offset, string, attr);
-            } else {
-                Toolkit.getDefaultToolkit().beep();
-            }
-        }
-
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
-                throws BadLocationException {
-            if (text == null)
-                return;
-            if (isValidValue(text, offset, length)) {
-                super.replace(fb, offset, length, text, attrs);
-            } else {
-                Toolkit.getDefaultToolkit().beep();
-            }
-        }
-
-        private boolean isStringNumeric(String string) {
-            try {
-                Integer.parseInt(string);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            return true;
-        }
-
-        private boolean isValidValue(String text, int offset, int length) {
-            String currentValue = getText();
-            String newValue = currentValue.substring(0, offset) + text + currentValue.substring(offset+length);
-
-            if (isStringNumeric(newValue) &&
-                    Integer.parseInt(newValue) >= minValue &&
-                    Integer.parseInt(newValue) <= maxValue) {
-                return true;
-            }
-            return false;
-        }
-    }
 }

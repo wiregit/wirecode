@@ -1,15 +1,22 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.text.ParseException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -87,7 +94,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         private static final int MIN_DOWNLOADS = 1;
         private static final int MAX_DOWNLOADS = 999;
         private final JSpinner maxDownloadSpinner;
-        private final JSpinner maxDownloadSpeed;
+        private final JSpinner maxDownloadSpeedSpinner;
         private final JCheckBox limitBandWidthCheckBox;
         private final EmbeddedComponentLabel maxDownloadSpeedController;
 
@@ -98,13 +105,20 @@ public class TransferLimitsOptionPanel extends OptionPanel {
             maxDownloadSpinner = new JSpinner(new SpinnerNumberModel(MIN_DOWNLOADS, MIN_DOWNLOADS,
                     MAX_DOWNLOADS, 1));
 
-            maxDownloadSpeed = new JSpinner(new SpinnerNumberModel(
+            JFormattedTextField maxDownloadField = ((JSpinner.DefaultEditor)maxDownloadSpinner.getEditor()).getTextField();
+            maxDownloadField.addKeyListener(new PeriodicFieldValidator(maxDownloadField));
+            
+            maxDownloadSpeedSpinner = new JSpinner(new SpinnerNumberModel(
                     DownloadSettings.MAX_DOWNLOAD_SPEED.getValue() / 1024,
                     DownloadSettings.MAX_DOWNLOAD_SPEED.getMinValue().intValue() / 1024,
-                    DownloadSettings.MAX_DOWNLOAD_SPEED.getMaxValue().intValue() / 1024, 5));
+                    DownloadSettings.MAX_DOWNLOAD_SPEED.getMaxValue().intValue() / 1024, 1));
+            
+            JFormattedTextField maxDownloadSpeedField = ((JSpinner.DefaultEditor)maxDownloadSpeedSpinner.getEditor()).getTextField();
+            maxDownloadSpeedField.addKeyListener(new PeriodicFieldValidator(maxDownloadSpeedField));
+            
             limitBandWidthCheckBox = new JCheckBox(I18n.tr("Limit your download bandwidth"));
             limitBandWidthCheckBox.setContentAreaFilled(false);
-            maxDownloadSpeedController = new EmbeddedComponentLabel("{c} KB/s", maxDownloadSpeed);
+            maxDownloadSpeedController = new EmbeddedComponentLabel("{c} KB/s", maxDownloadSpeedSpinner);
             maxDownloadSpeedController.setVisible(false);
 
             limitBandWidthCheckBox.addItemListener(new CheckBoxListener(maxDownloadSpeedController,
@@ -121,7 +135,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
             DownloadSettings.MAX_SIM_DOWNLOAD.setValue((Integer) maxDownloadSpinner.getModel()
                     .getValue());
             DownloadSettings.MAX_DOWNLOAD_SPEED
-                    .setValue((Integer) maxDownloadSpeed.getValue() * 1024);
+                    .setValue((Integer) maxDownloadSpeedSpinner.getValue() * 1024);
             DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.setValue(limitBandWidthCheckBox.isSelected());
             return false;
         }
@@ -130,7 +144,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         boolean hasChanged() {
             return DownloadSettings.MAX_SIM_DOWNLOAD.getValue() != (Integer) maxDownloadSpinner
                     .getModel().getValue()
-                    || DownloadSettings.MAX_DOWNLOAD_SPEED.getValue() != ((Integer) maxDownloadSpeed
+                    || DownloadSettings.MAX_DOWNLOAD_SPEED.getValue() != ((Integer) maxDownloadSpeedSpinner
                             .getValue() * 1024)
                     || DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.getValue() != limitBandWidthCheckBox
                             .isSelected();
@@ -138,7 +152,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            maxDownloadSpeed.setValue(DownloadSettings.MAX_DOWNLOAD_SPEED.getValue() / 1024);
+            maxDownloadSpeedSpinner.setValue(DownloadSettings.MAX_DOWNLOAD_SPEED.getValue() / 1024);
             limitBandWidthCheckBox
                     .setSelected(DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.getValue());
             maxDownloadSpinner.getModel().setValue(DownloadSettings.MAX_SIM_DOWNLOAD.getValue());
@@ -152,7 +166,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
 
         private JSpinner maxUploadSpinner;
         private JCheckBox limitBandwidthCheckBox;
-        private JSpinner maxUploadSpeed;
+        private JSpinner maxUploadSpeedSpinner;
         private final EmbeddedComponentLabel maxUploadSpeedController;
 
         public UploadsPanel() {
@@ -161,13 +175,21 @@ public class TransferLimitsOptionPanel extends OptionPanel {
 
             maxUploadSpinner = new JSpinner(new SpinnerNumberModel(MIN_UPLOADS, MIN_UPLOADS,
                     MAX_UPLOADS, 1));
+            
+            JFormattedTextField maxUploadField = ((JSpinner.DefaultEditor)maxUploadSpinner.getEditor()).getTextField();
+            maxUploadField.addKeyListener(new PeriodicFieldValidator(maxUploadField));
+            
             limitBandwidthCheckBox = new JCheckBox(I18n.tr("Limit your upload bandwidth"));
             limitBandwidthCheckBox.setContentAreaFilled(false);
 
-            maxUploadSpeed = new JSpinner(new SpinnerNumberModel(UploadSettings.MAX_UPLOAD_SPEED
+            maxUploadSpeedSpinner = new JSpinner(new SpinnerNumberModel(UploadSettings.MAX_UPLOAD_SPEED
                     .getValue()/1024, UploadSettings.MAX_UPLOAD_SPEED.getMinValue().intValue()/1024,
-                    UploadSettings.MAX_UPLOAD_SPEED.getMaxValue().intValue()/1024, 5));
-            maxUploadSpeedController = new EmbeddedComponentLabel("{c} KB/s", maxUploadSpeed);
+                    UploadSettings.MAX_UPLOAD_SPEED.getMaxValue().intValue()/1024, 1));
+            
+            JFormattedTextField maxUploadSpeedField = ((JSpinner.DefaultEditor)maxUploadSpeedSpinner.getEditor()).getTextField();
+            maxUploadSpeedField.addKeyListener(new PeriodicFieldValidator(maxUploadSpeedField));
+            
+            maxUploadSpeedController = new EmbeddedComponentLabel("{c} KB/s", maxUploadSpeedSpinner);
             maxUploadSpeedController.setVisible(false);
 
             limitBandwidthCheckBox.addItemListener(new CheckBoxListener(maxUploadSpeedController,
@@ -184,7 +206,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
             UploadSettings.HARD_MAX_UPLOADS.setValue((Integer) maxUploadSpinner.getModel()
                     .getValue());
 
-            UploadSettings.MAX_UPLOAD_SPEED.setValue((Integer) maxUploadSpeed.getValue() * 1024);
+            UploadSettings.MAX_UPLOAD_SPEED.setValue((Integer) maxUploadSpeedSpinner.getValue() * 1024);
             UploadSettings.LIMIT_MAX_UPLOAD_SPEED.setValue(limitBandwidthCheckBox.isSelected());
 
             return false;
@@ -194,7 +216,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         boolean hasChanged() {
             return UploadSettings.HARD_MAX_UPLOADS.getValue() != (Integer) maxUploadSpinner
                     .getModel().getValue()
-                    || (UploadSettings.MAX_UPLOAD_SPEED.getValue() != (Integer) maxUploadSpeed
+                    || (UploadSettings.MAX_UPLOAD_SPEED.getValue() != (Integer) maxUploadSpeedSpinner
                             .getValue() * 1024)
                     || UploadSettings.LIMIT_MAX_UPLOAD_SPEED.getValue() != limitBandwidthCheckBox
                             .isSelected();
@@ -202,7 +224,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            maxUploadSpeed.setValue(UploadSettings.MAX_UPLOAD_SPEED.getValue() / 1024);
+            maxUploadSpeedSpinner.setValue(UploadSettings.MAX_UPLOAD_SPEED.getValue() / 1024);
             maxUploadSpinner.getModel().setValue(UploadSettings.HARD_MAX_UPLOADS.getValue());
             limitBandwidthCheckBox.setSelected(UploadSettings.LIMIT_MAX_UPLOAD_SPEED.getValue());
         }
@@ -221,6 +243,52 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         @Override
         public void itemStateChanged(ItemEvent e) {
             component.setVisible(checkBox.isSelected());
+        }
+    }
+    
+    /**
+     * An implementation of {@link KeyListener} that will attempt to validate, and if needed,
+     *  reset invalid input of a {@link JSpinner} between pauses in typing.
+     */
+    private static class PeriodicFieldValidator implements KeyListener {
+
+        private final Timer timer = new Timer(600, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int position = field.getCaretPosition();
+                String orignalString = field.getText();
+                
+                if (!"".equals(field.getText())) {
+                    try {
+                        field.commitEdit();
+                        field.setText(orignalString);
+                        field.setCaretPosition(position);
+                    } catch (ParseException e1) {
+                        field.setValue(field.getValue());
+                        field.setCaretPosition(field.getText().length());
+                    }
+                }
+            }
+        });
+        
+        private final JFormattedTextField field;
+        
+        public PeriodicFieldValidator(JFormattedTextField field) {
+            this.field = field;
+            
+            timer.setRepeats(false);
+        }
+        
+        @Override
+        public void keyTyped(KeyEvent e) {
+            timer.stop();
+            timer.start();
+        }
+        @Override
+        public void keyPressed(KeyEvent e) {
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
         }
     }
 }

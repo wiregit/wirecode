@@ -25,6 +25,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.BasicAutoCompleter;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
 import org.limewire.ui.swing.components.DropDownListAutoCompleteControl;
+import org.limewire.ui.swing.components.FilteredDocument;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.util.FilePropertyKeyUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -83,7 +84,7 @@ abstract class AdvancedPanel extends JPanel {
         add(label);
         JTextField textField = new JTextField();
         TextFieldClipboardControl.install(textField);
-        
+        FilteredDocument.configure(textField, key);
         addEnterAction(textField);
         
         textField.setFont(resources.font);
