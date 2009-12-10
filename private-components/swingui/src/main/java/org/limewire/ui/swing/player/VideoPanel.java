@@ -25,8 +25,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -44,7 +42,6 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingHacks;
-import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -77,6 +74,7 @@ class VideoPanel implements Disposable{
      * the panel containing video and controls.
      */
     private final JPanel videoPanel = new JPanel(new BorderLayout());
+    private JXButton fullScreenButton;
     
     private final PlayerControlPanel controlPanel;
     
@@ -145,6 +143,23 @@ class VideoPanel implements Disposable{
         videoPanel.requestFocus();
     }
     
+    /**
+     * Guarantees that everything displays correctly. Call this after the player
+     * has been loaded and VideoPanel and any renderer components have been
+     * added to the GUI and shown.
+     */
+    public void playerLoaded(){
+        setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
+        headerBar.requestFocusInWindow();
+        
+        if (videoMediator.isFullScreen()) {
+            fullScreenButton.setIcon(fullScreenSelected);
+            collapsePlayerControlsTimer.restart();
+        } else {
+            fullScreenButton.setIcon(fullScreenUnselected);
+        }
+    }
+    
     private void setupActionMaps(){
         videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), "fullScreen");
         videoPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "fullScreen");
@@ -165,8 +180,10 @@ class VideoPanel implements Disposable{
 
     private void setUpHeaderBar(JComponent controlPanel,
         HeaderBarDecorator headerBarDecorator, ButtonPainterFactory buttonPainterFactory) { 
+
+        headerBar.setFocusable(true);
         
-        final JXButton fullScreenButton = new JXButton(fullScreenUnselected);
+        fullScreenButton = new JXButton(fullScreenUnselected);
         fullScreenButton.setContentAreaFilled(false);
         fullScreenButton.setFocusPainted(false);
         fullScreenButton.setBackgroundPainter(buttonPainterFactory.createDarkFullButtonBackgroundPainter(DrawMode.FULLY_ROUNDED, AccentType.SHADOW));
@@ -184,29 +201,6 @@ class VideoPanel implements Disposable{
         headerBar.add(fullScreenButton, "right, push");
         headerBar.add(controlPanel, "pos 0.5al 0.5al");
         headerBar.add(closeButton);
-
-        videoPanel.addAncestorListener(new AncestorListener() {
-            @Override
-            public void ancestorAdded(AncestorEvent event) {
-                if (videoMediator.isFullScreen()) {
-                    fullScreenButton.setIcon(fullScreenSelected);
-                    headerBar.setFocusable(true);
-                    headerBar.requestFocusInWindow();
-                    setFitToScreen(true);
-                    collapsePlayerControlsTimer.restart();
-                } else {
-                    fullScreenButton.setIcon(fullScreenUnselected);
-                    setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
-                }
-                videoPanel.removeAncestorListener(this);
-            }
-            
-            @Override
-            public void ancestorRemoved(AncestorEvent event) {}
-            
-            @Override
-            public void ancestorMoved(AncestorEvent event) {}
-        });
     }
     
     private JMenuItem createFullScreenMenuItem(){
@@ -235,8 +229,7 @@ class VideoPanel implements Disposable{
     }
     
     private void setFitToScreen(boolean isFitToScreen) {
-        //TODO: Remove isWin7 check.  At the moment win7 video only works with fit to screen selected.
-        if(OSUtils.isWindows7() || isFitToScreen){
+        if(isFitToScreen){
             fitToScreenLayout.setComponentConstraints(videoRenderer, "grow, push");   
             videoRenderer.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));   
             videoRenderer.setMinimumSize(new Dimension(0, 0)); 

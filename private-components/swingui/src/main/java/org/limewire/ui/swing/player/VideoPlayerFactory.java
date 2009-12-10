@@ -19,7 +19,7 @@ import org.limewire.util.OSUtils;
 
 
 
-public class VideoPlayerFactory {
+class VideoPlayerFactory {
     
     public Player createVideoPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
         if (!OSUtils.isWindows() && !OSUtils.isMacOSX()) {
@@ -44,6 +44,7 @@ public class VideoPlayerFactory {
                         public void run() {
                             Canvas canvas = new Canvas();
                             parentComponent.add(canvas);
+                            //addNotify to make sure we have a working hwnd
                             parentComponent.addNotify();
                             mfCanvas.set(canvas);
                         }
@@ -58,6 +59,12 @@ public class VideoPlayerFactory {
                 try {
                     //we need to setup the player here so we can fall back to ds if it fails
                     setupPlayer(mfPlayer, file);
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                           parentComponent.setPreferredSize(mfCanvas.get().getPreferredSize());                 
+                        }
+                    });
                     return mfPlayer;
                 } catch (IncompatibleSourceException e) {
                     //mf can't play it.  try ds.

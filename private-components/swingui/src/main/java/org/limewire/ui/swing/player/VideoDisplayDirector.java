@@ -143,6 +143,7 @@ class VideoDisplayDirector {
         } else {
             showInClient();
         }
+        videoPanel.playerLoaded();
     }
 
 
