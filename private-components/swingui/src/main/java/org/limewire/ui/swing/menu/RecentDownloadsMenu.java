@@ -66,11 +66,11 @@ class RecentDownloadsMenu extends MnemonicMenu {
                 Category category = categoryManager.getCategoryForFile(file);
                 switch (category) {
                 case AUDIO:
+                case VIDEO:
                     PlayerUtils.playOrLaunch(file, categoryManager);
                     break;
                 case DOCUMENT:
                 case IMAGE:
-                case VIDEO:
                     NativeLaunchUtils.safeLaunchFile(file, categoryManager);
                     break;
                 case PROGRAM:
