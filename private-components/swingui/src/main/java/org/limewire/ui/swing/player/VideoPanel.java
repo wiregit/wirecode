@@ -115,6 +115,8 @@ class VideoPanel implements Disposable{
             @Override
             public void componentAdded(ContainerEvent e) {
                 setUpMouseListener(e.getChild());
+                //ensure everything is sized properly and video is embedded
+                setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue()); 
             }
         });
 
