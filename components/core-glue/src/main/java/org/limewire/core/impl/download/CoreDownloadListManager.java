@@ -308,12 +308,15 @@ public class CoreDownloadListManager implements DownloadListManager {
                 changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, item);
             }
             
-            // Always remove anti-virus update item.  For all others,
-            // don't automatically remove finished downloads or downloads in
-            // error states
+            // Always remove anti-virus update item.  For all others, remove
+            // from list UNLESS (a) download is in error state, (b) download
+            // is removed for protection, or (c) download is finished and 
+            // auto-clear is not set.
             if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
                 remove(item);
-            } else if (state != DownloadState.ERROR &&
+            } else if (state != DownloadState.ERROR && 
+                    state != DownloadState.DANGEROUS &&
+                    state != DownloadState.THREAT_FOUND &&
                     (SharingSettings.CLEAR_DOWNLOAD.getValue() || !state.isFinished())) {
                 remove(item);
             }
