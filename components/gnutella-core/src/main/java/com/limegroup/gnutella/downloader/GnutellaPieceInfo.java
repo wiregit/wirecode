@@ -11,6 +11,7 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
     private final IntervalSet available;
     private final long pieceSize;
     private final int pieceCount;
+    private final int piecesCompletedCount;
     private final long length;
     
     public GnutellaPieceInfo(IntervalSet written, IntervalSet active, IntervalSet available, long pieceSize, long length) {
@@ -19,6 +20,8 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
         this.available = available;
         this.pieceSize = pieceSize;
         this.length = length;
+        this.piecesCompletedCount = aproximatePiecesCompleted();
+        
         if(length <= 0) {
             this.pieceCount = 0;
         } else {
@@ -63,8 +66,15 @@ class GnutellaPieceInfo implements DownloadPiecesInfo {
 
     @Override
     public int getNumPiecesCompleted() {
-        // TODO: ...
-        return -1;
+        return piecesCompletedCount;
+    }
+    
+    /**
+     * @return an approximation of the pieces currently completed.  Calculated
+     *  by the number of bytes completed over the number of bytes in a piece.
+     */
+    private int aproximatePiecesCompleted() {
+        return (int)Math.floor((double)written.getSize() / pieceSize);
     }
 
 }
