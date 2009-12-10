@@ -159,7 +159,7 @@ public class OSUtils {
         
         // If this is Windows XP or Vista, try to find out which service pack
     	// is installed.
-    	if(_isWindowsVista) {
+    	if(_isWindowsXP || _isWindowsVista) {
     	    try {
     	        String ver = SystemUtils.registryReadText(
     	                "HKEY_LOCAL_MACHINE",
