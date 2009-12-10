@@ -63,9 +63,9 @@ public class OSUtils {
     private static boolean _isWindowsVista;
     
     /**
-     * Variable for whether or not we're on Windows Vista SP2 or higher.
+     * The Windows service pack version - only applicable to XP and Vista.
      */
-    private static boolean _isSlightlyLessBrokenVersionOfWindowsVista;
+    private static int _windowsServicePack;
 
     /** 
      * Variable for whether or not the operating system allows the 
@@ -102,8 +102,8 @@ public class OSUtils {
      */
     public static void setOperatingSystems() {
     	_isWindows = false;
+    	_windowsServicePack = 0;
     	_isWindowsVista = false;
-        _isSlightlyLessBrokenVersionOfWindowsVista = false;
     	_isWindowsNT = false;
     	_isWindowsXP = false;
     	_isWindows7 = false;
@@ -157,24 +157,25 @@ public class OSUtils {
     		}
     	}
         
-        // If this is Windows Vista, try to find out whether SP2 (or higher)
-        // is installed, which removes the half-open TCP connection limit.
+        // If this is Windows XP or Vista, try to find out which service pack
+    	// is installed.
     	if(_isWindowsVista) {
     	    try {
     	        String ver = SystemUtils.registryReadText(
     	                "HKEY_LOCAL_MACHINE",
     	                "Software\\Microsoft\\Windows NT\\CurrentVersion",
-    	                "CSDVersion");
-    	        // Assume there won't be more than 9 service packs for Vista
-    	        if(ver != null && ver.matches(".*Service Pack [2-9]")) {
-    	            LOG.debug("Slightly less broken version of Windows Vista");
-    	            _isSlightlyLessBrokenVersionOfWindowsVista = true;
-    	        }
+    	        "CSDVersion");
+    	        ver = ver.replaceAll("[^0-9]", "");
+    	        _windowsServicePack = Integer.parseInt(ver);
+    	        if(LOG.isDebugEnabled())
+    	            LOG.debug("Windows service pack " + _windowsServicePack);
     	    } catch(IOException e) {
-    	        LOG.debug("Failed to determine Windows version", e);
+    	        LOG.debug("Failed to determine Windows service pack", e);
+    	    } catch(NumberFormatException e) {
+    	        LOG.debug("Failed to determine Windows service pack", e);
     	    }
     	}
-    }    
+    }
 
     /**
      * Returns the operating system.
@@ -275,7 +276,14 @@ public class OSUtils {
      * the 10 socket limit.
      */
     public static boolean isSocketChallengedWindows() {
-        return _isWindowsXP || (_isWindowsVista && !_isSlightlyLessBrokenVersionOfWindowsVista);
+        return _isWindowsXP || (_isWindowsVista && _windowsServicePack < 3);
+    }
+    
+    /**
+     * Returns true if the application is compatible with the AVG SDK.
+     */
+    public static boolean isAVGCompatibleWindows() {
+        return _isWindows7 || _isWindowsVista || (_isWindowsXP && _windowsServicePack >= 2);
     }
 
     /**
