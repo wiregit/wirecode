@@ -194,6 +194,8 @@ class UploadHeaderPopupMenu extends JPopupMenu {
                 new SortAction(I18n.tr("File Type"), SortOrder.FILE_TYPE));
         JCheckBoxMenuItem extension = new JCheckBoxMenuItem(
                 new SortAction(I18n.tr("File Extension"), SortOrder.FILE_EXTENSION));        
+        JCheckBoxMenuItem userName = new JCheckBoxMenuItem(
+                new SortAction(I18n.tr("User Name"), SortOrder.USER_NAME));        
 
         // Create button group.
         ButtonGroup sortButtonGroup = new ButtonGroup();
@@ -205,6 +207,7 @@ class UploadHeaderPopupMenu extends JPopupMenu {
         sortButtonGroup.add(status);
         sortButtonGroup.add(fileType);
         sortButtonGroup.add(extension);
+        sortButtonGroup.add(userName);
         
         // Add menu items to menu.
         sortSubMenu.add(orderStarted);
@@ -215,6 +218,7 @@ class UploadHeaderPopupMenu extends JPopupMenu {
         sortSubMenu.add(status);
         sortSubMenu.add(fileType);
         sortSubMenu.add(extension);
+        sortSubMenu.add(userName);
         
         sortSubMenu.addSeparator();
         

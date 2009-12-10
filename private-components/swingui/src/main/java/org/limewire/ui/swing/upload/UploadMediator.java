@@ -58,7 +58,7 @@ import com.google.inject.Provider;
 public class UploadMediator {
     public enum SortOrder {
         ORDER_STARTED, NAME, PROGRESS, TIME_REMAINING, SPEED, STATUS, 
-        FILE_TYPE, FILE_EXTENSION
+        FILE_TYPE, FILE_EXTENSION, USER_NAME
     }
     
     public static final String NAME = "UploadPanel";
@@ -270,6 +270,8 @@ public class UploadMediator {
             return new CategoryComparator();
         case FILE_EXTENSION:
             return new FileExtensionComparator();
+        case USER_NAME:
+            return new HostNameComparator();
         default:
             throw new IllegalArgumentException("Unknown SortOrder: " + sortOrder);
         }
@@ -650,6 +652,16 @@ public class UploadMediator {
             String ext1 = FileUtils.getFileExtension(name1);
             String ext2 = FileUtils.getFileExtension(name2);
             return Objects.compareToNullIgnoreCase(ext1, ext2, false);
+        }
+    }
+    
+    private static class HostNameComparator implements Comparator<UploadItem> {
+        @Override
+        public int compare(UploadItem o1, UploadItem o2) {
+            if (o1 == o2) return 0;
+            String name1 = o1.getRenderName();
+            String name2 = o2.getRenderName();
+            return Objects.compareToNullIgnoreCase(name1, name2, false);
         }
     }
     
