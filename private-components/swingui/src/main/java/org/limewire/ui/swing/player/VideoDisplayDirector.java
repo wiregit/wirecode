@@ -159,7 +159,6 @@ class VideoDisplayDirector {
         GraphicsDevice device = environment.getDefaultScreenDevice();
         
         if (OSUtils.isMacOSX() && device.isFullScreenSupported()) {
-            fullScreenFrame.setUndecorated(true);
             device.setFullScreenWindow(fullScreenFrame);
         } else {
             fullScreenFrame.setVisible(true);
