@@ -236,6 +236,11 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     
     private int calculatePieceData() {
         piecesInfo = download.getPiecesInfo();
+        
+        if (piecesInfo == null) {
+            return -1;
+        }
+        
         int newNum = piecesInfo.getNumPieces();
         if(newNum != numPieces && newNum != 0) {
             // Hide any previous status messages
@@ -317,8 +322,8 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
             if (finishedSuccessfully) {
                 completedText = "" + numPieces;  
             } 
-            else if (completed == -1) {
-                completedText = "unknown!";
+            else if (completed < 0) {
+                completedText = "?";
             } 
             else {
                 completedText = "" + completed;
