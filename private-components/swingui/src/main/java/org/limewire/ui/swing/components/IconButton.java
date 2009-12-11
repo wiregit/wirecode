@@ -99,6 +99,10 @@ public class IconButton extends JButton {
         removeMouseListener(actionHandListener);
     }
     
+    public void resetDefaultCursor() {
+        ActionHandListener.resetDefaultCursor(this);
+    }
+    
     @Override
     protected void configurePropertiesFromAction(Action a) {
         super.configurePropertiesFromAction(a);

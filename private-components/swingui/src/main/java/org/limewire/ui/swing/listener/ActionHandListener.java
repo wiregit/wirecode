@@ -30,6 +30,11 @@ public class ActionHandListener extends MouseActionListener {
         comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
     }
     
+    /** Resets cursor to default for specified component. */
+    public static void resetDefaultCursor(JComponent comp) {
+        comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+    }   
+    
     /** Disables or re-enables the action hand from drawing. */
     public static void setActionHandDrawingDisabled(JComponent component, boolean disabled) {
         component.putClientProperty("limewire.actionHand.disabled", disabled);

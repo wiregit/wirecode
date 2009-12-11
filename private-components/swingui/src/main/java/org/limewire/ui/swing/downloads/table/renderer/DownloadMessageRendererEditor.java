@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.downloads.table.renderer;
 
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -11,10 +10,12 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.IconButton;
@@ -26,8 +27,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
-
-import net.miginfocom.swing.MigLayout;
 
 /**
  * Renderer/editor component for the download table to display message. 
@@ -283,10 +282,10 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         @Override
         public void actionPerformed(ActionEvent e) {
             // Reset cursor if source component is IconButton.  If the action
-            // displays a modal dialog, then IconButton will not receive the
+            // displays a modal dialog, then IconButton does not receive the
             // mouseExited event to reset the default cursor.
             if (e.getSource() instanceof IconButton) {
-                ((IconButton) e.getSource()).getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+                ((IconButton) e.getSource()).resetDefaultCursor();
             }
             
             actionHandler.performAction(e.getActionCommand(), downloadItem);

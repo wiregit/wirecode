@@ -65,6 +65,10 @@ public class DownloadCancelRendererEditor extends TableRendererEditor {
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Reset cursor if source component is IconButton.
+                if (e.getSource() instanceof IconButton) {
+                    ((IconButton) e.getSource()).resetDefaultCursor();
+                }
                 actionHandler.performAction(e.getActionCommand(), item);
                 cancelCellEditing();
             }
