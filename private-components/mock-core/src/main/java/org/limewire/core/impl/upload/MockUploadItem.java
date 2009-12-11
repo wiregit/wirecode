@@ -27,16 +27,16 @@ public class MockUploadItem implements UploadItem {
     private Category category;
     private RemoteHost uploadRemoteHost;
     private final long startTime;
-    
+    private String hostname;
     private volatile boolean running = true;
     
-    public MockUploadItem(UploadState state, String fileName, long fileSize, long amtUploaded, Category category){
+    public MockUploadItem(UploadState state, String fileName, long fileSize, long amtUploaded, Category category, String hostname){
         this.state = state;
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.amtUploaded = amtUploaded;
         this.category = category;
-        
+        this.hostname = hostname;
         startTime = System.currentTimeMillis();
         
         if (this.state == UploadState.UPLOADING) {
@@ -257,6 +257,6 @@ public class MockUploadItem implements UploadItem {
 
     @Override
     public String getRenderName() {
-        return "";
+        return hostname;
     }
 }

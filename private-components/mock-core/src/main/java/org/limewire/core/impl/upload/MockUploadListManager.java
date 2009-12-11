@@ -11,13 +11,13 @@ import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
 
-import com.google.inject.Singleton;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.impl.ThreadSafeList;
+
+import com.google.inject.Singleton;
 
 @Singleton
 public class MockUploadListManager implements UploadListManager {
@@ -30,18 +30,24 @@ public class MockUploadListManager implements UploadListManager {
         threadSafeUploadItems = GlazedListsFactory.threadSafeList(new BasicEventList<UploadItem>());
         Connector<UploadItem> uploadConnector = GlazedLists.beanConnector(UploadItem.class);
         uploadItems = GlazedListsFactory.observableElementList(threadSafeUploadItems, uploadConnector);
+                 
+  
+        addUpload(UploadState.UPLOADING, "Weely_Address.mp3", 1048576, 0, Category.AUDIO, "DenseHedgehog-198-123");
+        addUpload(UploadState.QUEUED, "Monkey_Laughing.mov", 54000, 150, Category.VIDEO, "GreenCat-98-53");
+
+        addUpload(UploadState.BROWSE_HOST, "FastSnail32.213", 300, 15, Category.DOCUMENT, "TriteApple-18-133");
+        addUpload(UploadState.BROWSE_HOST_DONE, "FastSnail12.33", 300, 15, Category.DOCUMENT, "HappyFrog-98-123");
         
-        addUpload(UploadState.DONE, "File.mp3", 30000, 15000, Category.AUDIO);
-        addUpload(UploadState.QUEUED, "File.avi", 3000, 150, Category.VIDEO);
-        addUpload(UploadState.UPLOADING, "File2.mp3", 1048576, 0, Category.AUDIO);
-        addUpload(UploadState.DONE, "File3.exe", 300, 150, Category.PROGRAM);
-        addUpload(UploadState.REQUEST_ERROR, "File3.doc", 300, 15, Category.DOCUMENT);
-        addUpload(UploadState.BROWSE_HOST, "string", 300, 15, Category.DOCUMENT);
+        addUpload(UploadState.LIMIT_REACHED, "Monkey_on_a_Skateboard.bmp", 5500, 15, Category.IMAGE, "EasySnake-3-123");
+        
+        addUpload(UploadState.PAUSED, "DewDrops.avi", 522300, 15, Category.VIDEO, "FastFlounder-8-133");
+        addUpload(UploadState.REQUEST_ERROR, "Twelfth_Night.txt", 3000, 15, Category.DOCUMENT, "FatRabbit-198-123");
+        addUpload(UploadState.DONE, "LimeWire.exe", 5200, 15, Category.PROGRAM, "SkinnyCow-18-123");
         
     }
     
-    private void addUpload(UploadState state, String fileName, long fileSize, long amtUploaded, Category category) {
-        UploadItem item = new MockUploadItem(state, fileName, fileSize, amtUploaded, category);
+    private void addUpload(UploadState state, String fileName, long fileSize, long amtUploaded, Category category, String hostName) {
+        UploadItem item = new MockUploadItem(state, fileName, fileSize, amtUploaded, category, hostName);
         threadSafeUploadItems.add(item);
         item.addPropertyChangeListener(new UploadPropertyListener(item));
     }
