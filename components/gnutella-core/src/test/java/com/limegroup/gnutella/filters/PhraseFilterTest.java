@@ -115,21 +115,29 @@ public class PhraseFilterTest extends BaseTestCase {
         assertFalse(filter.allow(queryReplyMock, responseMock));
         
         keywordContextValue(queryRequestMock, "free falling high");
-        assertTrue(filter.allow(queryRequestMock));
+        assertFalse(filter.allow(queryRequestMock));
         
-        keywordContextValue(responseMock, "free floating low", true);
-        assertTrue(filter.allow(queryReplyMock, responseMock));
+        keywordContextValue(responseMock, "free floating low", false);
+        assertFalse(filter.allow(queryReplyMock, responseMock));
         
         keywordContextValue(queryRequestMock, "i'm free falling high");
-        assertTrue(filter.allow(queryRequestMock));
+        assertFalse(filter.allow(queryRequestMock));
         
-        keywordContextValue(responseMock, "i'm free floating low", true);
-        assertTrue(filter.allow(queryReplyMock, responseMock));
+        keywordContextValue(responseMock, "i'm free floating low", false);
+        assertFalse(filter.allow(queryReplyMock, responseMock));
         
         keywordContextValue(queryRequestMock, "fall");
         assertFalse(filter.allow(queryRequestMock));
         
         keywordContextValue(responseMock, "fall", false);
+        assertFalse(filter.allow(queryReplyMock, responseMock));
+        
+        // single space after should work too.
+        keywordContextValue(queryRequestMock, "fall ");
+        assertFalse(filter.allow(queryRequestMock));
+
+        // single space after should work too.
+        keywordContextValue(responseMock, "fall ", false);
         assertFalse(filter.allow(queryReplyMock, responseMock));
         
         context.assertIsSatisfied();
@@ -151,13 +159,16 @@ public class PhraseFilterTest extends BaseTestCase {
         assertFalse(filter.allow(queryReplyMock, responseMock));
         
         xmlContextValue(responseMock, "fluffy bunnies in dirt");
-        assertTrue(filter.allow(queryReplyMock, responseMock));
+        assertFalse(filter.allow(queryReplyMock, responseMock));
         
         xmlContextValue(responseMock, "happy fluffy bunnies in dirt");
-        assertTrue(filter.allow(queryReplyMock, responseMock));
+        assertFalse(filter.allow(queryReplyMock, responseMock));
         
         xmlContextValue(responseMock, "bun");
         assertFalse(filter.allow(queryReplyMock, responseMock));
+        
+        xmlContextValue(responseMock, "bun ");
+        assertFalse(filter.allow(queryReplyMock, responseMock));        
         
         context.assertIsSatisfied();
     }

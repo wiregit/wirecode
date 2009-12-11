@@ -59,7 +59,7 @@ public class PhraseFilter implements SpamFilter, ResponseFilter {
             int idx = canonical.indexOf(word);
             if(idx != -1
               && (idx == 0 || canonical.charAt(idx - 1) == ' ') // start of word boundary
-              && (word.length() + idx == canonical.length() || canonical.charAt(word.length() + idx + 1) == ' ')) // end of word boundary
+              && (word.length() + idx == canonical.length() || canonical.charAt(word.length() + idx) == ' ')) // end of word boundary
             {
                 return true;
             }
