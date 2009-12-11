@@ -70,7 +70,6 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         if (connection != null) {
             try {
                 executeUpdate("SHUTDOWN");
-                org.hsqldb.DatabaseManager.closeDatabases(0);
             } catch (DatabaseExecutionException ignore) {
                 // ignore
             }
