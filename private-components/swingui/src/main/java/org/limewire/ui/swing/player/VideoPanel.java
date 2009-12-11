@@ -140,7 +140,7 @@ class VideoPanel implements Disposable{
     }
 
     public void requestFocus() {
-        videoPanel.requestFocus();
+        headerBar.requestFocusInWindow();
     }
     
     /**
@@ -149,13 +149,14 @@ class VideoPanel implements Disposable{
      * added to the GUI and shown.
      */
     public void playerLoaded(){
-        setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
         headerBar.requestFocusInWindow();
         
         if (videoMediator.isFullScreen()) {
+            setFitToScreen(true);
             fullScreenButton.setIcon(fullScreenSelected);
             collapsePlayerControlsTimer.restart();
         } else {
+            setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
             fullScreenButton.setIcon(fullScreenUnselected);
         }
     }
@@ -181,6 +182,7 @@ class VideoPanel implements Disposable{
     private void setUpHeaderBar(JComponent controlPanel,
         HeaderBarDecorator headerBarDecorator, ButtonPainterFactory buttonPainterFactory) { 
 
+        //It's definitely on the strange side but making the header bar focusable makes the keyboard shortcuts work in full screen.
         headerBar.setFocusable(true);
         
         fullScreenButton = new JXButton(fullScreenUnselected);
