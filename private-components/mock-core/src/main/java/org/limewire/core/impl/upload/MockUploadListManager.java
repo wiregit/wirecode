@@ -32,11 +32,10 @@ public class MockUploadListManager implements UploadListManager {
         uploadItems = GlazedListsFactory.observableElementList(threadSafeUploadItems, uploadConnector);
                  
   
-        addUpload(UploadState.UPLOADING, "Weely_Address.mp3", 1048576, 0, Category.AUDIO, "DenseHedgehog-198-123");
+        addUpload(UploadState.UPLOADING, "Weekly_Address.mp3", 1048576, 0, Category.AUDIO, "DenseHedgehog-198-123");
         addUpload(UploadState.QUEUED, "Monkey_Laughing.mov", 54000, 150, Category.VIDEO, "GreenCat-98-53");
 
-        addUpload(UploadState.BROWSE_HOST, "FastSnail32.213", 300, 15, Category.DOCUMENT, "TriteApple-18-133");
-        addUpload(UploadState.BROWSE_HOST_DONE, "FastSnail12.33", 300, 15, Category.DOCUMENT, "HappyFrog-98-123");
+        addUpload(UploadState.BROWSE_HOST, "LimeWire.exe", 30440, 15, Category.DOCUMENT, "TriteApple-18-133");
         
         addUpload(UploadState.LIMIT_REACHED, "Monkey_on_a_Skateboard.bmp", 5500, 15, Category.IMAGE, "EasySnake-3-123");
         
