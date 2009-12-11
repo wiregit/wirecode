@@ -98,58 +98,62 @@ public class FileInfoSharingPanel implements FileInfoPanel {
         component.setOpaque(false);
         switch(type) {
         case LOCAL_FILE:
-            if(propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).isShareable()) {
-                EventList<SharedFileList> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
-                if(sharedWithList.size() > 0) {
-                    component.add(createHeaderLabel(I18n.tr("Sharing from these lists")), "span, wrap");
-                    
-                    JXTable table = new MouseableTable(new DefaultEventTableModel<SharedFileList>(sharedWithList, 
-                            new TableFormat<SharedFileList>() {
-                                @Override
-                                public int getColumnCount() {
-                                    return 3;
-                                }
-                                @Override
-                                public String getColumnName(int column) {
-                                    return null;
-                                }
-                                @Override
-                                public Object getColumnValue(SharedFileList baseObject, int column) {
-                                    switch (column) {
-                                    
-                                    case 0 :
-                                        return baseObject.isPublic() ? publicIcon : listSharedIcon;
-                                    case 2 :
-                                        return baseObject;
-                                    default :
-                                        return baseObject.getCollectionName();
-                                    
+            if(propertiableFile instanceof LocalFileItem) {
+                if(((LocalFileItem)propertiableFile).isShareable()) {
+                    EventList<SharedFileList> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
+                    if(sharedWithList.size() > 0) {
+                        component.add(createHeaderLabel(I18n.tr("Sharing from these lists")), "span, wrap");
+                        
+                        JXTable table = new MouseableTable(new DefaultEventTableModel<SharedFileList>(sharedWithList, 
+                                new TableFormat<SharedFileList>() {
+                                    @Override
+                                    public int getColumnCount() {
+                                        return 3;
+                                    }
+                                    @Override
+                                    public String getColumnName(int column) {
+                                        return null;
+                                    }
+                                    @Override
+                                    public Object getColumnValue(SharedFileList baseObject, int column) {
+                                        switch (column) {
+                                        
+                                        case 0 :
+                                            return baseObject.isPublic() ? publicIcon : listSharedIcon;
+                                        case 2 :
+                                            return baseObject;
+                                        default :
+                                            return baseObject.getCollectionName();
+                                        
+                                        }
                                     }
                                 }
-                            }
-                    ));
-                    table.setShowGrid(false, false);
-                    table.setTableHeader(null);
-                    
-                    table.getColumn(0).setCellRenderer(new IconRenderer());
-                    table.getColumn(0).setMinWidth(16);
-                    table.getColumn(0).setMaxWidth(16);
-                    table.getColumn(0).setWidth(16);
-                    
-                    JScrollPane scroll = new JScrollPane(table);
-                    scroll.setOpaque(false);
-                    scroll.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                    
-                    TableColumn column = table.getColumn(2);
-                    column.setCellRenderer(new RemoveRenderer());
-                    column.setCellEditor(new RemoveEditor());
-                    column.setMinWidth(16);
-                    column.setMaxWidth(16);
-                    column.setWidth(16);
-                     
-                    component.add(scroll, "grow, wrap");
+                        ));
+                        table.setShowGrid(false, false);
+                        table.setTableHeader(null);
+                        
+                        table.getColumn(0).setCellRenderer(new IconRenderer());
+                        table.getColumn(0).setMinWidth(16);
+                        table.getColumn(0).setMaxWidth(16);
+                        table.getColumn(0).setWidth(16);
+                        
+                        JScrollPane scroll = new JScrollPane(table);
+                        scroll.setOpaque(false);
+                        scroll.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        
+                        TableColumn column = table.getColumn(2);
+                        column.setCellRenderer(new RemoveRenderer());
+                        column.setCellEditor(new RemoveEditor());
+                        column.setMinWidth(16);
+                        column.setMaxWidth(16);
+                        column.setWidth(16);
+                         
+                        component.add(scroll, "grow, wrap");
+                    } else {
+                        component.add(createHeaderLabel(I18n.tr("This file is not shared")), "span, wrap");
+                    }
                 } else {
-                    component.add(createHeaderLabel(I18n.tr("This file is not shared")), "span, wrap");
+                    component.add(createHeaderLabel(I18n.tr("This file cannot be shared")), "span, wrap");
                 }
             }
             break;
