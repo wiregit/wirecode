@@ -230,6 +230,7 @@ public class MiscOptionPanel extends OptionPanel {
 
             TextFieldClipboardControl.install(serviceField);
             TextFieldClipboardControl.install(usernameField);
+            TextFieldClipboardControl.install(passwordField);
             
             add(autoLoginCheckBox, "wrap");
             

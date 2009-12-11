@@ -23,6 +23,7 @@ public class NumericTextField extends JTextField {
     public NumericTextField(int columns, int minValue, int maxValue) {
         super(columns);
         addIntegerWithMaxValueFilter(minValue, maxValue);
+        TextFieldClipboardControl.install(this);
     }
 
     /**

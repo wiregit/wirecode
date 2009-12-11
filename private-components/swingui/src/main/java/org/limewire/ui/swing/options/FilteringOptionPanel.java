@@ -31,6 +31,7 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.IP;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -106,6 +107,7 @@ public class FilteringOptionPanel extends OptionPanel {
             setLayout(new MigLayout("gapy 10", "[sg 1][sg 1][]", ""));
             
             addressTextField = new JTextField(26);
+            TextFieldClipboardControl.install(addressTextField);
             addButton = new JButton(I18n.tr("Add Address"));
             filterTable = new FilteringTable();
             backListCheckBox = new JCheckBox();
@@ -166,6 +168,7 @@ public class FilteringOptionPanel extends OptionPanel {
             setLayout(new MigLayout("gapy 10", "[sg 1][sg 1][]", ""));
             
             addressTextField = new JTextField(26);
+            TextFieldClipboardControl.install(addressTextField);
             addButton = new JButton(I18n.tr("Add Address"));
             filterTable = new FilteringTable();
             addButton.addActionListener(new AddAction(addressTextField, filterTable));

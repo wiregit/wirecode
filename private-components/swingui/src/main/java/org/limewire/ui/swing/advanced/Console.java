@@ -151,6 +151,7 @@ public class Console extends JPanel {
         
         output = new JTextArea();
         output.setEditable(false);
+        TextFieldClipboardControl.install(output);
 
         scrollPane = new JScrollPane(output);
         scrollPane.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.black));

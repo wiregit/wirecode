@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.URIUtils;
@@ -36,6 +37,7 @@ class LocationDialog extends LimeJDialog {
         JPanel urlPanel = new JPanel();
         urlField = new JTextField(30);
         urlField.setText("");
+        TextFieldClipboardControl.install(urlField);
 
         final JLabel errorLabel = new JLabel(I18n.tr("Invalid Link"));
         errorLabel.setForeground(Color.RED);

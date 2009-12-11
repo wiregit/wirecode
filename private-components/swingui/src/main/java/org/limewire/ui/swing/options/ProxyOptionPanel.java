@@ -19,6 +19,7 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.ui.swing.components.NumericTextField;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
@@ -92,12 +93,15 @@ public class ProxyOptionPanel extends OptionPanel {
         buttonGroup.add(httpRadioButton);
         
         proxyTextField = new JTextField(15);
+        TextFieldClipboardControl.install(proxyTextField);
         portTextField = new NumericTextField(5, 0, 0xFFFF);
         authenticationCheckBox = new JCheckBox();
         authenticationCheckBox.setOpaque(false);
         authenticationCheckBox.addItemListener(new ProxyButtonListener());
         userNameTextField = new JTextField(15);
+        TextFieldClipboardControl.install(userNameTextField);
         passwordField = new JPasswordField(15);
+        TextFieldClipboardControl.install(passwordField);
         
         proxyLabel = new JLabel(I18n.tr("Proxy:"));
         portLabel = new JLabel(I18n.tr("Port:"));
