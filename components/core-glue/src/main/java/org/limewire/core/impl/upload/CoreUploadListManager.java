@@ -216,7 +216,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
             // TODO use TransactionList for these for performance (requires using GlazedLists from head)
             for (UploadItem item : uploadItems) {
                 if (item.getState() != UploadState.DONE && item.getState() != UploadState.BROWSE_HOST_DONE && item instanceof CoreUploadItem)
-                    ((CoreUploadItem) item).fireDataChanged();
+                    ((CoreUploadItem) item).refresh();
             }
         } finally {
             uploadItems.getReadWriteLock().writeLock().unlock();

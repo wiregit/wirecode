@@ -46,6 +46,9 @@ class CoreUploadItem implements UploadItem {
     private UploadRemoteHost uploadRemoteHost;
     private final long startTime;
     
+    private volatile long totalAmountUploaded;
+    private volatile float uploadSpeed;
+    
     @Inject
     CoreUploadItem(@Assisted Uploader uploader, @Assisted FriendPresence friendPresence, CategoryManager categoryManager) {
         this.categoryManager = categoryManager;
@@ -148,7 +151,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public long getTotalAmountUploaded() {
-        return uploader.getTotalAmountUploaded();
+        return totalAmountUploaded;
     }
 
     @Override
@@ -192,6 +195,24 @@ class CoreUploadItem implements UploadItem {
     void fireDataChanged() {
         support.firePropertyChange("state", null, getState());
     }
+    
+    /**
+     * Updates amount uploaded and upload speed.
+     */
+    void refresh() {
+        // Refresh amount uploaded.
+        totalAmountUploaded = uploader.getTotalAmountUploaded();
+        
+        // Refresh upload speed.
+        try {
+            uploadSpeed = uploader.getMeasuredBandwidth();
+        } catch (InsufficientDataException e) {
+            uploadSpeed = 0;
+        }
+        
+        // Fire event to update UI.
+        fireDataChanged();
+    }
 
     @Override
     public Category getCategory() {
@@ -230,11 +251,7 @@ class CoreUploadItem implements UploadItem {
     
     @Override
     public float getUploadSpeed() {
-        try {
-            return uploader.getMeasuredBandwidth();
-        } catch (InsufficientDataException e) {
-            return 0;
-        }
+        return uploadSpeed;
     }
     
     @Override
