@@ -173,14 +173,6 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
     }
 
     /**
-     * Can only connect to LWS
-     */
-    @Override
-    public int getNumberOfInvalidAlternateLocations() {
-        return 0;
-    }
-
-    /**
      * Use the file ID3 info to perform a lookup with the template to determine the
      * folder substructure for saving the file
      * 

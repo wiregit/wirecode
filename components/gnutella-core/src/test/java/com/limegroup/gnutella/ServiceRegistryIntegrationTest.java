@@ -92,7 +92,9 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "URNBlacklistManager", "URNBlacklistManagerImpl",
         "GeocodeLocation", "CachedGeoLocationImpl",
         "UPnPManager", "UPnPManager",
-        "simpp sender snapshot", "ScheduledService"
+        "simpp sender snapshot", "ScheduledService",
+        "Virus Definition Service", "VirusDefinitionManagerImpl",
+        // WINDOWS ONLY: [AntiVirusService/VirusScannerImpl]]
         };
         
         List<String> missing = new ArrayList<String>();

@@ -300,27 +300,12 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     @Override
-    public String getVendor() {
-        return null;
-    }
-
-    @Override
     public boolean isCompleted() {
         return downloadStatus == DownloadState.COMPLETE;
     }
 
     @Override
-    public boolean isInactive() {
-        return false;
-    }
-
-    @Override
     public boolean isLaunchable() {
-        return false;
-    }
-
-    @Override
-    public boolean isPausable() {
         return false;
     }
 
@@ -331,11 +316,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public boolean isRelocatable() {
-        return false;
-    }
-
-    @Override
-    public boolean isResumable() {
         return false;
     }
 
@@ -367,16 +347,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public void measureBandwidth() {
-    }
-
-    @Override
-    public int getTriedHostCount() {
-        return -1;
-    }
-
-    @Override
-    public String getCustomIconDescriptor() {
-        return null;
     }
 
     @Override

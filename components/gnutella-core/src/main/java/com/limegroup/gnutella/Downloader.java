@@ -21,11 +21,6 @@ public interface Downloader extends BandwidthTracker,
                                     ListenerSupport<DownloadStateEvent> {
     
     /**
-     * Marker string for BitTorrent downloads.
-     */
-    public static final String BITTORRENT_DOWNLOAD = "";
-    
-    /**
      * Key for custom description of the inactivity state.
      */
     public static final String CUSTOM_INACTIVITY_KEY = "CIK";
@@ -68,21 +63,6 @@ public interface Downloader extends BandwidthTracker,
      * Determines if this download is paused or not.
      */
     public boolean isPaused();
-    
-    /**
-     * @return if this downloader can be paused.
-     */
-    public boolean isPausable();
-    
-    /**
-     * @return if this downloader can be resumed.
-     */
-    public boolean isResumable();
-    
-    /**
-     * Determines if this downloader is in an inactive state 
-     */
-    public boolean isInactive();
 	
 	/**
      * Determines if this can have its saveLocation changed.
@@ -161,11 +141,6 @@ public interface Downloader extends BandwidthTracker,
      * {@link DownloadState#DOWNLOADING} state.
      */
     public int getNumHosts();
-    
-    /**
-     * Returns the vendor of the last downloading host.
-     */
-    public String getVendor();
 	
 	/**
 	 * @return if this downloader can be launched.
@@ -195,15 +170,6 @@ public interface Downloader extends BandwidthTracker,
      * @return the number of hosts we are remotely queued on. 
      */
     public int getQueuedHostCount();
-    
-    /**
-     * Returns the number of hosts that were attempted to connect to. 
-     * Should be reset whenever the downloader returns to the 
-     * {@link DownloadState#CONNECTING} state.
-     * 
-     * @return -1 if downloader does not support it
-     */
-    public int getTriedHostCount();
 	
 	/**
 	 * @return the amount of data that has been verified
@@ -256,12 +222,6 @@ public interface Downloader extends BandwidthTracker,
      *         attribute was not set.
      */
     public Object removeAttribute( String key );
-    
-    /**
-     * @return a custom icon descriptor, null if the file icon should be
-     * used.
-     */
-    public String getCustomIconDescriptor();
     
     /** @return All sources as addresses. */
     public List<Address> getSourcesAsAddresses();

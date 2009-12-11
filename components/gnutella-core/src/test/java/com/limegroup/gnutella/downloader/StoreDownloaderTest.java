@@ -99,8 +99,6 @@ public class StoreDownloaderTest extends LimeTestCase{
         assertFalse(downloader.canSendRequeryNow());
         
         assertEquals(0, downloader.getNumberOfAlternateLocations());
-        
-        assertEquals(0, downloader.getNumberOfInvalidAlternateLocations());
     }
 
     

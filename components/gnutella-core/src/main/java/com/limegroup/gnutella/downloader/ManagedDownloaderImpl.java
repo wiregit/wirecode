@@ -378,10 +378,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * The position of the downloader in the uploadQueue
      */
     private int queuePosition;
-    /**
-     * The vendor the of downloader we're queued from.
-     */
-    private String queuedVendor;
 
     /**
      * If in CORRUPT_FILE state, the number of bytes downloaded.  Note that
@@ -555,6 +551,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.bandwidthCollector = bandwidthCollector;
     }
 
+    @Override
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
         if (rfds == null) {
             LOG.debug("rfds are null");
@@ -590,6 +587,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return true;
     }
 
+    @Override
     public void setQueryGuid(GUID queryGuid) {
         this.originalQueryGUID = queryGuid;
     }
@@ -605,6 +603,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#initialize()
      */
+    @Override
     public void initialize() {
         setState(DownloadState.INITIALIZING);
 
@@ -622,7 +621,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             numMeasures = 0;
             averageBandwidth = 0f;
             queuePosition = Integer.MAX_VALUE;
-            queuedVendor = "";
             triedLocatingSources = false;
             ranker = getSourceRanker(null);
             ranker.setMeshHandler(this);
@@ -699,6 +697,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#startDownload()
     */
+    @Override
     public synchronized void startDownload() {
         assert dloaderManagerThread == null : "already started";
         ThreadExecutor.startThread(new Runnable() {
@@ -871,6 +870,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#handleInactivity()
     */
+    @Override
     public synchronized void handleInactivity() {
 //        if(LOG.isTraceEnabled())
         //LOG.trace("handling inactivity. state: " +
@@ -949,6 +949,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isAlive()
     */
+    @Override
     public boolean isAlive() {
         return dloaderManagerThread != null;
     }
@@ -956,6 +957,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isCompleted()
     */
+    @Override
     public boolean isCompleted() {
         switch (getState()) {
             case COMPLETE:
@@ -975,6 +977,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isRelocatable()
     */
+    @Override
     public boolean isRelocatable() {
         if (isInactive())
             return true;
@@ -992,6 +995,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isActive()
     */
+    @Override
     public boolean isActive() {
         switch (getState()) {
             case CONNECTING:
@@ -1005,10 +1009,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return false;
     }
 
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#isInactive()
-    */
-    public boolean isInactive() {
+    boolean isInactive() {
         switch (getState()) {
             case INITIALIZING:
             case QUEUED:
@@ -1085,6 +1086,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#conflictsWithIncompleteFile(java.io.File)
      */
+    @Override
     public boolean conflictsWithIncompleteFile(File incFile) {
         File iFile = incompleteFile;
         if (iFile != null) {
@@ -1119,6 +1121,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#conflicts(com.limegroup.gnutella.URN, long, java.io.File)
     */
+    @Override
     public boolean conflicts(URN urn, long fileSize, File... fileName) {
         if (urn != null && getSha1Urn() != null) {
             return urn.equals(getSha1Urn());
@@ -1142,6 +1145,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @return a new <tt>QueryRequest</tt> for making the requery
      * @throws CantResumeException if this doesn't know what to search for
      */
+    @Override
     public synchronized QueryRequest newRequery()
             throws CantResumeException {
 
@@ -1275,6 +1279,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#locationAdded(com.limegroup.gnutella.altlocs.AlternateLocation)
      */
+    @Override
     public synchronized void locationAdded(AlternateLocation loc) {
         assert (loc.getSHA1Urn().equals(getSha1Urn()));
 
@@ -1338,6 +1343,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#addDownload(com.limegroup.gnutella.RemoteFileDesc, boolean)
     */
+    @Override
     public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
         return addDownload(Collections.singleton(rfd), cache);
     }
@@ -1345,6 +1351,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#addDownload(java.util.Collection, boolean)
     */
+    @Override
     public synchronized boolean addDownload(Collection<? extends RemoteFileDesc> c, boolean cache) {
         if (stopped || isCompleted())
             return false;
@@ -1457,6 +1464,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#hasNewSources()
     */
+    @Override
     public boolean hasNewSources() {
         return (!paused && receivedNewSources);
     }
@@ -1476,6 +1484,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#shouldBeRestarted()
      */
+    @Override
     public boolean shouldBeRestarted() {
         DownloadState status = getState();
         return hasNewSources() ||
@@ -1487,6 +1496,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#shouldBeRemoved()
     */
+    @Override
     public boolean shouldBeRemoved() {
         return isCancelled() || isCompleted();
     }
@@ -1494,6 +1504,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isQueuable()
     */
+    @Override
     public boolean isQueuable() {
         return !isPaused();
     }
@@ -1503,7 +1514,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#acceptDownload(java.lang.String, java.net.Socket, int, byte[])
      */
-
+    @Override
     public boolean acceptDownload(String file, Socket socket, int index, byte[] clientGUID) {
         if (stopped)
             return false;
@@ -1514,10 +1525,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return observer != null;
     }
 
+    @Override
     public void registerPushObserver(HTTPConnectObserver observer, PushDetails details) {
         pushes.addPushHost(details, observer);
     }
 
+    @Override
     public void unregisterPushObserver(PushDetails details, boolean shutdown) {
         HTTPConnectObserver observer = pushes.getExactHostFor(details);
         if (observer != null && shutdown)
@@ -1527,6 +1540,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isCancelled()
     */
+    @Override
     public boolean isCancelled() {
         return stopped;
     }
@@ -1534,6 +1548,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#pause()
     */
+    @Override
     public synchronized void pause() {
         // do not pause if already stopped.
         if (!stopped && !isCompleted()) {
@@ -1549,32 +1564,16 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isPaused()
     */
+    @Override
     public boolean isPaused() {
         return paused == true;
     }
 
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#isPausable()
-    */
-    public boolean isPausable() {
-        DownloadState state = getState();
-        return !isPaused() && !isCompleted() &&
-                state != DownloadState.SAVING &&
-                state != DownloadState.HASHING &&
-                state != DownloadState.SCANNING;
-    }
-
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#isResumable()
-    */
-    public boolean isResumable() {
-        // inactive but not queued
-        return isInactive() && state != DownloadState.QUEUED;
-    }
 
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#isLaunchable()
     */
+    @Override
     public boolean isLaunchable() {
         if(state == DownloadState.DANGEROUS ||
                 state == DownloadState.THREAT_FOUND)
@@ -1591,6 +1590,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#stop()
      */
+    @Override
     public void stop() {
 
         if (paused) {
@@ -1643,6 +1643,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#informMesh(com.limegroup.gnutella.RemoteFileDesc, boolean)
     */
+    @Override
     public synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         if (LOG.isDebugEnabled())
             LOG.debug("informing mesh that " + rfd + " is " + good);
@@ -1729,6 +1730,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#addPossibleSources(java.util.Collection)
      */
+    @Override
     public synchronized void addPossibleSources(Collection<? extends RemoteFileDesc> c) {
         addDownload(c, false);
     }
@@ -1743,6 +1745,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#resume()
     */
+    @Override
     public synchronized boolean resume() {
         //Ignore request if already in the download cycle.
         if (!isInactive())
@@ -1780,6 +1783,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getFile()
     */
+    @Override
     public File getFile() {
         if (incompleteFile == null)
             return null;
@@ -1793,6 +1797,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getSHA1Urn()
     */
+    @Override
     public URN getSha1Urn() {
         return downloadSHA1;
     }
@@ -1909,7 +1914,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#finish()
      */
-
+    @Override
     public synchronized void finish() {
         if (getSha1Urn() != null)
             altLocManager.removeListener(getSha1Urn(), this);
@@ -2101,6 +2106,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (shouldValidate()) {
             if (getSha1Urn() != null) {
                 contentManager.request(getSha1Urn(), new ContentResponseObserver() {
+                    @Override
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if (response != null && !response.isOK()) {
                             invalidated = true;
@@ -2336,8 +2342,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         worker.start();
     }
-
-
+    
+    @Override
     public synchronized void workerFinished(DownloadWorker finished) {
         if (LOG.isDebugEnabled())
             LOG.debug("worker " + finished + " finished.");
@@ -2345,6 +2351,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         notify();
     }
 
+    @Override
     public synchronized void workerStarted(DownloadWorker worker) {
         if (LOG.isDebugEnabled())
             LOG.debug("worker " + worker + " started.");
@@ -2355,6 +2362,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         addActiveWorker(worker);
     }
 
+    @Override
     public void workerFailed(DownloadWorker failed) {
     }
 
@@ -2366,6 +2374,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             throw new IllegalStateException("active removed but not in workers");
     }
 
+    @Override
     public synchronized boolean removeActiveWorker(DownloadWorker worker) {
         currentRFDs.remove(worker.getRFD());
         List<DownloadWorker> l = new ArrayList<DownloadWorker>(getActiveWorkers());
@@ -2390,6 +2399,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return workerState;
     }
 
+    @Override
     public Set<AlternateLocation> getValidAlts() {
         synchronized (altLock) {
             Set<AlternateLocation> ret;
@@ -2404,6 +2414,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
 
 
+    @Override
     public Set<AlternateLocation> getInvalidAlts() {
         synchronized (altLock) {
             Set<AlternateLocation> ret;
@@ -2572,11 +2583,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return false;
     }
 
+    @Override
     public synchronized void addToRanker(RemoteFileDescContext rfd) {
         if (ranker != null)
             ranker.addToPool(rfd);
     }
 
+    @Override
     public synchronized void forgetRFD(RemoteFileDesc rfd) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("remove rfd: " + rfd);
@@ -2603,18 +2616,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getNumberOfInvalidAlternateLocations()
-     */
-    public int getNumberOfInvalidAlternateLocations() {
-        synchronized (altLock) {
-            if (invalidAlts == null) return 0;
-            return invalidAlts.size();
-        }
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getQueuedHostCount()
      */
+    @Override
     public synchronized int getQueuedHostCount() {
         return _queuedWorkers.size();
     }
@@ -2688,6 +2692,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /////////////////////////////Display Variables////////////////////////////
 
+    @Override
     public void setState(DownloadState newState) {
         setState(newState, Long.MAX_VALUE);
     }
@@ -2729,6 +2734,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getQueryGUID()
     */
+    @Override
     public GUID getQueryGUID() {
         return this.originalQueryGUID;
     }
@@ -2736,6 +2742,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getState()
      */
+    @Override
     public synchronized DownloadState getState() {
         return state;
     }
@@ -2743,6 +2750,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getRemainingStateTime()
      */
+    @Override
     public synchronized int getRemainingStateTime() {
         long remaining;
         switch (state) {
@@ -2773,6 +2781,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getContentLength()
     */
+    @Override
     public synchronized long getContentLength() {
         return contentLength;
     }
@@ -2784,6 +2793,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getAmountRead()
      */
+    @Override
     public long getAmountRead() {
         VerifyingFile ourFile;
         synchronized (this) {
@@ -2805,6 +2815,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getAmountPending()
     */
+    @Override
     public int getAmountPending() {
         VerifyingFile ourFile;
         synchronized (this) {
@@ -2817,6 +2828,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getNumHosts()
     */
+    @Override
     public int getNumHosts() {
         return _activeWorkers.size();
     }
@@ -2869,7 +2881,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         return new GnutellaPieceInfo(written, active, getAvailablePieces(), getChunkSize(), getContentLength());
     }
-    
+
+    @Override
     public synchronized List<RemoteFileDesc> getRemoteFileDescs() {
         return new ArrayList<RemoteFileDesc>(currentRFDs);
     }
@@ -2877,6 +2890,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getQueuePosition()
     */
+    @Override
     public synchronized int getQueuePosition() {
         return queuePosition;
     }
@@ -2884,6 +2898,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getNumDownloaders()
     */
+    @Override
     public int getNumDownloaders() {
         return getActiveWorkers().size() + getQueuedWorkers().size();
     }
@@ -2891,6 +2906,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Returns the list of all active workers.
      */
+    @Override
     public List<DownloadWorker> getActiveWorkers() {
         return _activeWorkers;
     }
@@ -2898,10 +2914,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Returns a copy of the list of all workers.
      */
+    @Override
     public synchronized List<DownloadWorker> getAllWorkers() {
         return new ArrayList<DownloadWorker>(_workers);
     }
 
+    @Override
     public void removeQueuedWorker(DownloadWorker unQueued) {
         if (getQueuedWorkers().containsKey(unQueued)) {
             synchronized (this) {
@@ -2922,13 +2940,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         if (position < queuePosition) {
             queuePosition = position;
-            queuedVendor = queued.getDownloader().getVendor();
         }
         Map<DownloadWorker, Integer> m = new HashMap<DownloadWorker, Integer>(getQueuedWorkers());
         m.put(queued, new Integer(position));
         _queuedWorkers = Collections.unmodifiableMap(m);
     }
 
+    @Override
     public Map<DownloadWorker, Integer> getQueuedWorkers() {
         return _queuedWorkers;
     }
@@ -2948,6 +2966,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *         is already in the queuedWorkers, or if we did kill a worker whose position is
      *         worse than this worker.
      */
+    @Override
     public synchronized boolean killQueuedIfNecessary(DownloadWorker worker, int queuePos) {
         if (LOG.isDebugEnabled())
             LOG.debug("deciding whether to kill a queued host for (" + queuePos + ") worker " + worker);
@@ -3000,6 +3019,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     }
 
+    @Override
     public void hashTreeRead(HashTree tree) {
         boolean set = false;
         synchronized (commonOutFile) {
@@ -3027,23 +3047,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
 
     /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#getVendor()
-    */
-    public synchronized String getVendor() {
-        List<DownloadWorker> active = getActiveWorkers();
-        if (active.size() > 0) {
-            HTTPDownloader dl = active.get(0).getDownloader();
-            return dl.getVendor();
-        } else if (getState() == DownloadState.REMOTE_QUEUED) {
-            return queuedVendor;
-        } else {
-            return "";
-        }
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#measureBandwidth()
      */
+    @Override
     public void measureBandwidth() {
         float currentTotal = 0f;
         boolean c = false;
@@ -3064,6 +3070,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getMeasuredBandwidth()
     */
+    @Override
     public float getMeasuredBandwidth() {
         float retVal = 0f;
         for (DownloadWorker worker : getActiveWorkers()) {
@@ -3082,6 +3089,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getAverageBandwidth()
     */
+    @Override
     public synchronized float getAverageBandwidth() {
         return averageBandwidth;
     }
@@ -3089,6 +3097,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getAmountVerified()
     */
+    @Override
     public long getAmountVerified() {
         VerifyingFile ourFile;
         synchronized (this) {
@@ -3100,6 +3109,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getAmountLost()
     */
+    @Override
     public long getAmountLost() {
         VerifyingFile ourFile;
         synchronized (this) {
@@ -3111,6 +3121,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getChunkSize()
     */
+    @Override
     public int getChunkSize() {
         VerifyingFile ourFile;
         synchronized (this) {
@@ -3142,27 +3153,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Increments the count of tried hosts
      */
+    @Override
     public synchronized void incrementTriedHostsCount() {
         ++triedHosts;
     }
 
     /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#getTriedHostCount()
-    */
-    public int getTriedHostCount() {
-        return triedHosts;
-    }
-
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.downloader.ManagedDownloader#getCustomIconDescriptor()
-    */
-    public String getCustomIconDescriptor() {
-        return null; // always use the file icon
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getDownloadType()
      */
+    @Override
     public DownloaderType getDownloadType() {
         return DownloaderType.MANAGED;
     }
@@ -3288,10 +3287,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return rfds;
     }
 
+    @Override
     public void addListener(EventListener<DownloadStateEvent> listener) {
         listeners.addListener(listener);
     }
 
+    @Override
     public boolean removeListener(EventListener<DownloadStateEvent> listener) {
         return listeners.removeListener(listener);
     }

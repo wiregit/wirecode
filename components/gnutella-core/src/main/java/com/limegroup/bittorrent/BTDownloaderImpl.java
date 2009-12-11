@@ -398,16 +398,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public boolean isPausable() {
-        return !isPaused();
-    }
-
-    @Override
-    public boolean isInactive() {
-        return isResumable() || getState() == DownloadState.QUEUED;
-    }
-
-    @Override
     public boolean isLaunchable() {
         if (isCompleted())
             return true;
@@ -417,11 +407,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return false;
 
         return true;
-    }
-
-    @Override
-    public boolean isResumable() {
-        return isPaused();
     }
 
     @Override
@@ -591,11 +576,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public String getVendor() {
-        return BITTORRENT_DOWNLOAD;
-    }
-
-    @Override
     public List<RemoteFileDesc> getRemoteFileDescs() {
         return Collections.emptyList();
     }
@@ -752,11 +732,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public synchronized void finish() {
         deleteIncompleteFiles();
-    }
-
-    @Override
-    public String getCustomIconDescriptor() {
-        return BITTORRENT_DOWNLOAD;
     }
 
     @Override
@@ -973,15 +948,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public int getAmountPending() {
         throw new UnsupportedOperationException(
                 "BTDownloaderImpl.getAmountPending() not implemented");
-    }
-
-    /**
-     * No longer relevant in any Downloader.
-     */
-    @Override
-    public int getTriedHostCount() {
-        throw new UnsupportedOperationException(
-                "BTDownloaderImpl.getTriedHostCount() not implemented");
     }
 
     @Override

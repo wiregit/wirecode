@@ -116,11 +116,6 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     }
 
     @Override
-    public String getCustomIconDescriptor() {
-        return "";
-    }
-
-    @Override
     public File getDownloadFragment(ScanListener listener) {
         return null;
     }
@@ -187,33 +182,17 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     }
 
     @Override
-    public int getTriedHostCount() {
-        return 1;
-    }
-
-    @Override
-    public String getVendor() {
-        return "";
-    }
-
-    @Override
     public boolean isCompleted() {
         return download.isCompleted();
     }
 
-    @Override
-    public boolean isInactive() {
+    boolean isInactive() {
         return download.isInactive();
     }
 
     @Override
     public boolean isLaunchable() {
         return false;
-    }
-
-    @Override
-    public boolean isPausable() {
-        return !isPaused() && !isQueued();
     }
 
     @Override
@@ -224,11 +203,6 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     @Override
     public boolean isRelocatable() {
         return false;
-    }
-
-    @Override
-    public boolean isResumable() {
-        return isPaused();
     }
 
     @Override

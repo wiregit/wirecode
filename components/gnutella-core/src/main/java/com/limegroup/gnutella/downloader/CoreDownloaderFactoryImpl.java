@@ -19,7 +19,6 @@ import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
-import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 @Singleton
@@ -32,7 +31,6 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
     private final Provider<StoreDownloader> storeDownloaderFactory;
     private final Provider<BTDownloader> btDownloaderFactory;
     private final Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory;
-    private final Provider<VirusDefinitionDownloader> virusDefDownloaderFactory;
 
     @Inject
     public CoreDownloaderFactoryImpl(
@@ -42,8 +40,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
             Provider<ResumeDownloader> resumeDownloaderFactory,
             Provider<StoreDownloader> storeDownloaderFactory,
             Provider<BTDownloader> btDownloaderFactory,
-            Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory,
-            Provider<VirusDefinitionDownloader> virusDefDownloaderFactory) {
+            Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory) {
         this.managedDownloaderFactory = managedDownloaderFactory;
         this.magnetDownloaderFactory = magnetDownloaderFactory;
         this.inNetworkDownloaderFactory = inNetworkDownloaderFactory;
@@ -51,7 +48,6 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         this.storeDownloaderFactory = storeDownloaderFactory;
         this.btDownloaderFactory = btDownloaderFactory;
         this.torrentFileDownloaderFactory = torrentFileDownloaderFactory;
-        this.virusDefDownloaderFactory = virusDefDownloaderFactory;
     }
 
     @Override
@@ -148,8 +144,6 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
             return managedDownloaderFactory;
         case STORE:
             return storeDownloaderFactory;
-        case ANTIVIRUS:
-            return virusDefDownloaderFactory;
         case TORRENTFETCHER:
         case MOZILLA:
         default:

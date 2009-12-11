@@ -71,7 +71,6 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.library.LibraryUtils;
-import com.limegroup.gnutella.malware.VirusDefinitionManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -156,7 +155,6 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     private final PushEndpointFactory pushEndpointFactory;
     private final Provider<TorrentManager> torrentManager;
     private final Provider<TorrentUploadManager> torrentUploadManager;
-    private final VirusDefinitionManager virusDefinitionManager;
 
     @Inject
     public DownloadManagerImpl(
@@ -172,8 +170,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             PushEndpointFactory pushEndpointFactory,
             Provider<TorrentManager> torrentManager,
             Provider<TorrentUploadManager> torrentUploadManager,
-            CategoryManager categoryManager,
-            VirusDefinitionManager virusDefinitionManager) {
+            CategoryManager categoryManager) {
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
@@ -187,7 +184,6 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         this.torrentManager = torrentManager;
         this.torrentUploadManager = torrentUploadManager;
         this.categoryManager = categoryManager;
-        this.virusDefinitionManager = virusDefinitionManager;
     }
 
     /* (non-Javadoc)
@@ -284,7 +280,6 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         
         loadResumeDownloaders();
         downloadsReadFromDisk = true;
-        virusDefinitionManager.checkForDefinitions();
         
         if(failedAll) {
             MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));

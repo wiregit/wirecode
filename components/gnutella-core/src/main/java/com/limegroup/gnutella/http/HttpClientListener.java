@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpUriRequest;
  */
 public interface HttpClientListener {
     
+    /** Returns true if HttpExecutor is allowed to execute this request, false if it should skip to the next. */
     public boolean allowRequest(HttpUriRequest request);
     
     /**

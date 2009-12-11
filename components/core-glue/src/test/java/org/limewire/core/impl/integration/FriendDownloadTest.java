@@ -215,7 +215,6 @@ public class FriendDownloadTest extends LimeTestCase {
         // in a terminal state
         Thread.sleep(5000);
         assertFalse(dl.isCompleted());
-        assertTrue(dl.isResumable());
         setSharingFriendSignedIn(false);
 
         // tell the http server request handler to upload the entire range of the file
