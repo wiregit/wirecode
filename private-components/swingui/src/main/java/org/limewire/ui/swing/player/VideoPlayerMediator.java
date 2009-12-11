@@ -372,8 +372,8 @@ class VideoPlayerMediator implements PlayerMediator {
         if (player == null){
             return false;
         }
-        Time time = player.getDuration();        
-        return !Player.DURATION_UNBOUNDED.equals(time) && !Player.DURATION_UNKNOWN.equals(time) && !Time.TIME_UNKNOWN.equals(time);
+        long time = player.getDuration().getNanoseconds();        
+        return Player.DURATION_UNBOUNDED.getNanoseconds() != time && Player.DURATION_UNKNOWN.getNanoseconds() != time && Time.TIME_UNKNOWN.getNanoseconds() != time;
     }
 
     private class VideoControllerListener implements ControllerListener {
