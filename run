@@ -97,5 +97,5 @@ case ${PLATFORM} in
 
         java ${OPTS} -Xdock:name="LimeWire CVS" org.limewire.ui.swing.Main $* ;;
     *)
-        java ${OPTS} -Dcom.jacob.debug=true org.limewire.ui.swing.Main $* ;;
+        java ${OPTS} org.limewire.ui.swing.Main $* ;;
 esac
