@@ -474,29 +474,25 @@ class VideoPlayerMediator implements PlayerMediator {
             newPlayer.addControllerListener(controllerListener);           
 
             player = newPlayer;
-
-            displayVideo(isFullScreen);
+       
+            displayDirector.show();   
             
-            startVideo(autoStart); 
+            fireSongChanged(currentVideo.getName()); 
             
             if (updateTimer == null) {
                 updateTimer = new Timer(100, new TimerAction());
             }
             updateTimer.start();
+              
+            startVideo(autoStart); 
 
         }
         
-        private void displayVideo(boolean isFullScreen) {
-            displayDirector.show();
-            fireSongChanged(currentVideo.getName());           
-        }
-        
         private void startVideo(final boolean startVideo){
-            // Must be SwingUtilities not SwingUtils. We actually want this
-            // invoked later to avoid the external flash of native video screen.
-            SwingUtilities.invokeLater(new Runnable() {
+          
+            ActionListener listener = new ActionListener() {                
                 @Override
-                public void run() {
+                public void actionPerformed(ActionEvent e) {
                     if (player != null) {
                         // start the player regardless of startVideo so that
                         // control panel is correctly updated
@@ -513,7 +509,14 @@ class VideoPlayerMediator implements PlayerMediator {
                         }
                     }
                 }
-            });
+            };
+            
+            // Prevents the flash of native video window by delaying 
+            // video playback so that the video can be fully embedded first.
+            Timer timer = new Timer(100, listener);
+            timer.setRepeats(false);
+            timer.start();
+
         }
 
         /**
