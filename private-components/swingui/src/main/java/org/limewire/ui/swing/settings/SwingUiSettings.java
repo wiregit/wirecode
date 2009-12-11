@@ -367,7 +367,19 @@ public final class SwingUiSettings extends LimeProps {
     /** Setting for the Upload table sort key. */
     public static final StringSetting UPLOAD_SORT_KEY =
         FACTORY.createStringSetting("UPLOAD_SORT_KEY", "ORDER_STARTED");
-        
+    
+    /** Setting for do-not-show checkbox for download dangerous warning. */
+    public static final BooleanSetting HIDE_DOWNLOAD_DANGEROUS = 
+        FACTORY.createBooleanSetting("HIDE_DOWNLOAD_DANGEROUS", true);
+    
+    /** Setting for do-not-show checkbox for download scan failed warning. */
+    public static final BooleanSetting HIDE_DOWNLOAD_SCAN_FAILED = 
+        FACTORY.createBooleanSetting("HIDE_DOWNLOAD_SCAN_FAILED", true);
+    
+    /** Setting for do-not-show checkbox for download threat found warning. */
+    public static final BooleanSetting HIDE_DOWNLOAD_THREAT_FOUND = 
+        FACTORY.createBooleanSetting("HIDE_DOWNLOAD_THREAT_FOUND", true);        
+    
     /** Notify user immediately when downloaded file is dangerous. */
     public static final BooleanSetting WARN_DOWNLOAD_DANGEROUS = 
         FACTORY.createBooleanSetting("WARN_DOWNLOAD_DANGEROUS", true);

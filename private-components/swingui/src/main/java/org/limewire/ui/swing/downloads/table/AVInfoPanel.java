@@ -111,7 +111,12 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setPreferredSize(new Dimension(300, messageLabel.getPreferredSize().height));
         
         // Set OK button action.
-        okButton.setAction(new CloseAction(null));
+        okButton.setAction(new AbstractAction(I18n.tr("OK")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                disposeWindow();
+            }
+        });
         
         // Hide checkbox option.
         doNotShowCheckBox.setVisible(false);
@@ -137,7 +142,7 @@ public class AVInfoPanel extends JPanel {
         String heading = I18n.tr("Dangerous File");
         String message = I18n.tr("{0} is considered a dangerous file and has automatically been deleted for your protection.", item.getFileName());
         showWarningMessage(heading, message, showOption, false,
-                SwingUiSettings.WARN_DOWNLOAD_DANGEROUS);
+                SwingUiSettings.WARN_DOWNLOAD_DANGEROUS, SwingUiSettings.HIDE_DOWNLOAD_DANGEROUS);
     }
     
     /**
@@ -151,7 +156,7 @@ public class AVInfoPanel extends JPanel {
         String heading = I18n.tr("Threat Detected");
         String message = I18n.tr("{0} is suspected to contain a virus or spyware and has automatically been deleted for your protection.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, showOption, true, 
-                SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND);
+                SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND, SwingUiSettings.HIDE_DOWNLOAD_THREAT_FOUND);
     }
     
     /**
@@ -165,7 +170,7 @@ public class AVInfoPanel extends JPanel {
         String heading = I18n.tr("Unable to Scan");
         String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, showOption, true, 
-                SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED);
+                SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED, SwingUiSettings.HIDE_DOWNLOAD_SCAN_FAILED);
     }
     
     /**
@@ -179,14 +184,15 @@ public class AVInfoPanel extends JPanel {
         String heading = I18n.tr("Can't Scan Yet");
         String message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, autoNotify, true,
-                SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED);
+                SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED, SwingUiSettings.HIDE_DOWNLOAD_SCAN_FAILED);
     }
     
     /**
      * Displays a warning message with the specified heading and message text.
      */
     private void showWarningMessage(String heading, String message, 
-            boolean showOption, boolean showVendor, BooleanSetting warningSetting) {
+            boolean showOption, boolean showVendor, BooleanSetting warningSetting,
+            BooleanSetting hideSetting) {
         // Skip if do-not-show option is visible and the warning is turned off.
         if (showOption && !warningSetting.getValue()) {
             return;
@@ -206,10 +212,10 @@ public class AVInfoPanel extends JPanel {
         messageLabel.setPreferredSize(new Dimension(330, messageLabel.getPreferredSize().height));
         
         // Set OK button action.
-        okButton.setAction(new CloseAction(warningSetting));
+        okButton.setAction(new CloseAction(warningSetting, hideSetting));
         
         // Set up checkbox option.
-        doNotShowCheckBox.setSelected(true);
+        doNotShowCheckBox.setSelected(hideSetting.getValue());
         doNotShowCheckBox.setVisible(showOption);
         
         // Add components to container.
@@ -275,18 +281,21 @@ public class AVInfoPanel extends JPanel {
      */
     private class CloseAction extends AbstractAction {
         private final BooleanSetting warningSetting;
+        private final BooleanSetting hideSetting;
 
-        public CloseAction(BooleanSetting warningSetting) {
+        public CloseAction(BooleanSetting warningSetting, BooleanSetting hideSetting) {
             super(I18n.tr("OK"));
             
             this.warningSetting = warningSetting;
+            this.hideSetting = hideSetting;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
             // Apply "do not show" option if visible.
-            if (doNotShowCheckBox.isVisible() && (warningSetting != null)) {
+            if (doNotShowCheckBox.isVisible()) {
                 warningSetting.setValue(!doNotShowCheckBox.isSelected());
+                hideSetting.setValue(doNotShowCheckBox.isSelected());
             }
             
             // Dispose of parent window.
