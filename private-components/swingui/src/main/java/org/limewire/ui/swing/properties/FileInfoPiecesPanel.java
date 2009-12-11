@@ -225,8 +225,14 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
 
             private boolean isFinished() {
                 DownloadState state = download.getState();
+                
+                // TODO: use DownloadState.isFinished() ?  doesn't match properly right now though.
+                
                 return state == DownloadState.DONE || state == DownloadState.FINISHING
-                         || state == DownloadState.CANCELLED;
+                         || state == DownloadState.CANCELLED || state == DownloadState.DANGEROUS
+                         || state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS
+                         || state == DownloadState.SCAN_FAILED 
+                         || state == DownloadState.THREAT_FOUND;
             }
         });
         
