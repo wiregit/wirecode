@@ -5,7 +5,6 @@ import java.io.File;
 import javax.swing.JDialog;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
@@ -132,21 +131,7 @@ public class DownloadActionHandler {
 //            shareWidget.setShareable(item.getDownloadingFile());
 //            shareWidget.show(null);
         } else if( actionCommmand == LIBRARY_COMMAND) {
-            File file;
-            if(item.getState() == DownloadState.DONE ||
-                    item.getState() == DownloadState.SCAN_FAILED &&
-                    item.getState() == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
-                file = item.getLaunchableFile();
-            } else {
-                file = item.getDownloadingFile();
-            }
-            URN urn = item.getUrn();
-            
-            if(file != null) {
-                libraryMediator.selectInLibrary(file);
-            } else if (urn != null){
-                libraryMediator.selectInLibrary(urn);
-            }
+            libraryMediator.locateInLibrary(item);
         } else if (actionCommmand == CHANGE_LOCATION_COMMAND){
             changeSaveLocation(item);
         } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            

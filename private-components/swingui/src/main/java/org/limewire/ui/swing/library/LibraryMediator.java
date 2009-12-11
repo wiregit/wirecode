@@ -9,6 +9,8 @@ import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
@@ -188,5 +190,23 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
      */
     public List<LocalFileItem> getSelectedItems() {
         return getComponent().getSelectedItems();
+    }
+
+    public void locateInLibrary(DownloadItem item) {
+        File file;
+        if(item.getState() == DownloadState.DONE ||
+                item.getState() == DownloadState.SCAN_FAILED &&
+                item.getState() == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+            file = item.getLaunchableFile();
+        } else {
+            file = item.getDownloadingFile();
+        }
+        URN urn = item.getUrn();
+        
+        if(file != null) {
+            selectInLibrary(file);
+        } else if (urn != null){
+            selectInLibrary(urn);
+        }
     }
 }

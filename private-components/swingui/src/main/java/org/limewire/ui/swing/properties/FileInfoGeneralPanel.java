@@ -343,7 +343,9 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             component.getRootPane().getParent().setVisible(false);
-                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getUrn());
+                            
+                            DownloadItem item = (DownloadItem)propertiableFile;
+                            libraryMediator.locateInLibrary(item);
                         }
                     });
 
