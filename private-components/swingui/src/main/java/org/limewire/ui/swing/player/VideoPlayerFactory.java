@@ -34,42 +34,9 @@ class VideoPlayerFactory {
 
         final Player handler;
         
-        if (OSUtils.isWindows()) {
-            //TODO: we are prefering mf in beta for testing but may want to prefer ds when we release
-            if(OSUtils.isWindows7()){
-                final AtomicReference<Canvas> mfCanvas = new AtomicReference<Canvas>(); 
-                try {
-                    SwingUtilities.invokeAndWait(new Runnable() {
-                        @Override
-                        public void run() {
-                            Canvas canvas = new Canvas();
-                            parentComponent.add(canvas);
-                            //addNotify to make sure we have a working hwnd
-                            parentComponent.addNotify();
-                            mfCanvas.set(canvas);
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
-                } catch (InvocationTargetException e) {
-                    throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
-                }
-
-                Player mfPlayer = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas.get());    
-                try {
-                    //we need to setup the player here so we can fall back to ds if it fails
-                    setupPlayer(mfPlayer, file);
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                           parentComponent.setPreferredSize(mfCanvas.get().getPreferredSize());                 
-                        }
-                    });
-                    return mfPlayer;
-                } catch (IncompatibleSourceException e) {
-                    //mf can't play it.  try ds.
-                }
-            }
+        if(OSUtils.isWindows7()){
+            return createWindows7Player(file, parentComponent);            
+        } else if (OSUtils.isWindows()) {           
             handler = new net.sf.fmj.ds.media.content.unknown.Handler();
         } else { // OSX
             handler = new net.sf.fmj.qt.media.content.unknown.Handler();
@@ -78,12 +45,62 @@ class VideoPlayerFactory {
         setupPlayer(handler, file);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                //remove all in case the mfCanvas was added.
-                parentComponent.removeAll();
                 parentComponent.add(handler.getVisualComponent());
             }
         });
        return handler;
+    }
+    
+    private Player createWindows7Player(File file, final Container parentComponent) throws IncompatibleSourceException {
+
+        //Since the DS player supports 3rd party codecs and has a chance of supporting more files, we will try it before MF
+         final Player dsPlayer = new net.sf.fmj.ds.media.content.unknown.Handler();    
+         try {
+             //we need to setup the player here so we can fall back to ds if it fails
+             setupPlayer(dsPlayer, file);
+             SwingUtilities.invokeLater(new Runnable() {
+                 @Override
+                 public void run() {
+                     parentComponent.add(dsPlayer.getVisualComponent());                
+                 }
+             });
+             return dsPlayer;
+         } catch (IncompatibleSourceException e) {
+             //ds can't play it.  try mf.
+         }
+         
+         //DS failed.  Now we try MF.
+         final AtomicReference<Canvas> mfCanvas = new AtomicReference<Canvas>(); 
+         try {
+             //create new canvas and add to parentComponent so we can get an hwnd
+             SwingUtilities.invokeAndWait(new Runnable() {
+                 @Override
+                 public void run() {
+                     Canvas canvas = new Canvas();
+                     parentComponent.add(canvas);
+                     //addNotify to make sure we have a working hwnd
+                     parentComponent.addNotify();
+                     mfCanvas.set(canvas);
+                 }
+             });
+         } catch (InterruptedException e) {
+             throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
+         } catch (InvocationTargetException e) {
+             throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
+         }
+         
+         final Player mfPlayer = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas.get());
+         
+         //let this throw the exception if it fails.  
+         setupPlayer(mfPlayer, file);
+         
+         SwingUtilities.invokeLater(new Runnable() {
+             public void run() {
+                 parentComponent.setPreferredSize(mfCanvas.get().getPreferredSize());
+             }
+         });
+        return mfPlayer;
+     
     }
     
     private void setupPlayer(Player player, File file) throws IncompatibleSourceException {
