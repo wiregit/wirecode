@@ -1063,7 +1063,7 @@ public class UploadQueueingTest extends LimeTestCase {
         Thread.sleep(HTTPUploadSession.MIN_POLL_TIME
                 + HTTPUploadSession.MAX_POLL_TIME / 2);
         try {
-            connectDloader(d2, true, rfd2, true);
+            connectDloader(d2, false, rfd2, true);
             fail("should have been queued");
         } catch (QueuedException expected) {
         }
