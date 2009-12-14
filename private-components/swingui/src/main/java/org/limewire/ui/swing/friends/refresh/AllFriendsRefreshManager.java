@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.limewire.core.api.library.RemoteLibraryEvent;
@@ -125,11 +126,15 @@ public class AllFriendsRefreshManager implements SearchRepeater{
         fireRefreshStatusChange(BrowseRefreshStatus.REFRESHED);
     }
     
-    private void fireRefreshStatusChange(BrowseRefreshStatus status){
+    private void fireRefreshStatusChange(final BrowseRefreshStatus status){
         earliestPossibleFiringTime = System.currentTimeMillis() + DELAY;
-        for(BrowseRefreshStatusListener listener : statusListeners){
-            listener.statusChanged(status);
-        }
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                for(BrowseRefreshStatusListener listener : statusListeners){
+                    listener.statusChanged(status);                    
+                }
+            }
+        });
     }
 
     public boolean needsRefresh() {

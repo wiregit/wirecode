@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -84,8 +85,12 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
     private void initializeAllFriendsListener(){
         browseRefreshStatusListener = new BrowseRefreshStatusListener(){
             @Override
-            public void statusChanged(BrowseRefreshStatus status) {
-                refreshPanel.setVisible(status != BrowseRefreshStatus.REFRESHED);
+            public void statusChanged(final BrowseRefreshStatus status) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        refreshPanel.setVisible(status != BrowseRefreshStatus.REFRESHED);                              
+                    }
+                });
             }            
         };
         allFriendsRefreshManager.addBrowseRefreshStatusListener(browseRefreshStatusListener);        
