@@ -191,8 +191,8 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
                            if(listChanges.getType() == ListEvent.INSERT) {
                                if (!SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue()) {
                                    SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(true);
-                                   selectTab(TabId.DOWNLOADS);
                                }
+                               selectTab(TabId.DOWNLOADS);
                            }
                        }
                    }
