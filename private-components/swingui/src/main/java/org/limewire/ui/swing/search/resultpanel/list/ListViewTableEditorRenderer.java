@@ -618,9 +618,19 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         @Override
         public int getPixelWidth(String text) {
-            HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
-            StyleSheet css = editorKit.getStyleSheet();
-            FontMetrics fontMetrics = css.getFontMetrics(headingFont);
+            FontMetrics fontMetrics;
+            if (heading.getEditorKit() instanceof HTMLEditorKit) {
+                // If the EditorKit is an HTMLEditorKit, then let's get the font metrics from its style sheet.
+                HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
+                StyleSheet css = editorKit.getStyleSheet();
+                fontMetrics = css.getFontMetrics(headingFont);
+            } else { 
+                // On OS X the EditorKit might be a PlainEditorKit. So, in this case
+                // get a graphics context and the accompanying font metrics from the heading component
+                Graphics graphics = heading.getGraphics(); 
+                fontMetrics = graphics.getFontMetrics(headingFont);
+            }
+            
             matcher.reset(text);
             text = matcher.replaceAll(EMPTY_STRING);
             return fontMetrics.stringWidth(text);
