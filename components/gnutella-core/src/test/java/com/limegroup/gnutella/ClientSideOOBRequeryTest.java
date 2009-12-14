@@ -738,7 +738,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         TestUploader uploader = new TestUploader(networkManagerStub);
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
-        URN urn = TestFile.hash();
+        // Get the URN of the part of the file we're going to request
+        URN urn = TestFile.hashPartOfFile(10);
         RemoteFileDesc rfd = makeRFD(urn);
 
         // wait for processing

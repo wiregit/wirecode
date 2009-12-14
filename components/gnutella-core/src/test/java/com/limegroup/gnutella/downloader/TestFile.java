@@ -34,12 +34,22 @@ public class TestFile {
         return 1000000; //1MB;
         //return 100000;    //100 KB;
     }
+    
+    public static URN hashPartOfFile(int length) {
+        try {
+            File tmpFile = File.createTempFile("testPart", "tmp");
+            writeFile(tmpFile, length);
+            return URN.createSHA1Urn(tmpFile);
+        } catch(Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }       
 
     public static synchronized URN hash() {
         if( myHash == null ) {
             try {
                 File tmpFile = File.createTempFile("tst", "tmp");
-                writeFile(tmpFile);
+                writeFile(tmpFile, length());
                 myHash = URN.createSHA1Urn(tmpFile);
             } catch(Throwable e ) {
                 throw new RuntimeException(e);
@@ -53,7 +63,7 @@ public class TestFile {
             try {
                 URN hash = hash();
                 File tmpFile = File.createTempFile("tst2", "tmp");
-                writeFile(tmpFile);
+                writeFile(tmpFile, length());
                 myTree = createHashTree(tmpFile, hash);
             } catch(Throwable t) {
                 throw new RuntimeException(t);
@@ -62,10 +72,10 @@ public class TestFile {
         return myTree;
     }
     
-    private static void writeFile(File tmpFile) throws IOException {
+    private static void writeFile(File tmpFile, int length) throws IOException {
         tmpFile.deleteOnExit();
         BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(tmpFile));
-        for(int i=0; i<TestFile.length(); i++)
+        for(int i = 0; i < length; i++)
             os.write(TestFile.getByte(i));
         os.flush();
         os.close();
