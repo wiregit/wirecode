@@ -876,7 +876,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // should be discarded
         Thread.sleep(10000);
         assertEquals(DownloadState.COMPLETE, downloader.getState());
-
+        // Make sure we got what we were expecting (this is a regression test)
+        assertEquals(URN.createSHA1Urn(downloader.getFile()), rfd.getSHA1Urn());
         {
             // now we should make sure MessageRouter clears the map
             assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
