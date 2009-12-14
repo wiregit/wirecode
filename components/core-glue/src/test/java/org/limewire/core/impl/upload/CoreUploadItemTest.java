@@ -414,12 +414,40 @@ public class CoreUploadItemTest extends BaseTestCase {
                 will(returnValue(speed2));
                 allowing(uploader3).getMeasuredBandwidth();
                 will(returnValue(speed3));
+                
+                allowing(uploaderException).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                allowing(uploader1).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                allowing(uploader2).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                allowing(uploader3).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                
+                allowing(uploaderException).getTotalAmountUploaded();
+                allowing(uploader1).getTotalAmountUploaded();
+                allowing(uploader2).getTotalAmountUploaded();
+                allowing(uploader3).getTotalAmountUploaded();
+                
+                allowing(uploaderException).getLastTransferState();
+                allowing(uploader1).getLastTransferState();
+                allowing(uploader2).getLastTransferState();
+                allowing(uploader3).getLastTransferState();
+                
+                allowing(uploaderException).getUploadType();
+                allowing(uploader1).getUploadType();
+                allowing(uploader2).getUploadType();
+                allowing(uploader3).getUploadType();
             }});
         
         CoreUploadItem uploadException = new CoreUploadItem(uploaderException, presence, null);
         CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
         CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
         CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
+        
+        upload1.refresh();
+        upload2.refresh();
+        upload3.refresh();
         
         assertEquals(0f, uploadException.getUploadSpeed());
         assertEquals(speed1, upload1.getUploadSpeed());
@@ -491,6 +519,25 @@ public class CoreUploadItemTest extends BaseTestCase {
                 will(returnValue(progress3));
                 allowing(uploader4).getTotalAmountUploaded();
                 will(returnValue(progress4));
+                
+                allowing(uploader1).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                allowing(uploader2).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                allowing(uploader3).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                allowing(uploader4).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+                
+                allowing(uploader1).getLastTransferState();
+                allowing(uploader2).getLastTransferState();
+                allowing(uploader3).getLastTransferState();
+                allowing(uploader4).getLastTransferState();
+                
+                allowing(uploader1).getUploadType();
+                allowing(uploader2).getUploadType();
+                allowing(uploader3).getUploadType();
+                allowing(uploader4).getUploadType();
              }});
          
         CoreUploadItem uploadException = new CoreUploadItem(uploaderException, presence, null);
@@ -498,6 +545,11 @@ public class CoreUploadItemTest extends BaseTestCase {
         CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);
         CoreUploadItem upload3 = new CoreUploadItem(uploader3, presence, null);
         CoreUploadItem upload4 = new CoreUploadItem(uploader4, presence, null);
+        
+        upload1.refresh();
+        upload2.refresh();
+        upload3.refresh();
+        upload4.refresh();
          
         assertEquals(CoreUploadItem.UNKNOWN_TIME, uploadException.getRemainingUploadTime());
         assertEquals(CoreUploadItem.UNKNOWN_TIME, upload1.getRemainingUploadTime());
