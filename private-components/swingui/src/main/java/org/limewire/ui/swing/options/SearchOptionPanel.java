@@ -30,6 +30,7 @@ import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SearchSettingListener;
 
@@ -290,7 +291,15 @@ public class SearchOptionPanel extends OptionPanel {
         boolean applyOptions() {
             ContentSettings.USER_WANTS_MANAGEMENTS.setValue(copyrightContentCheckBox.isSelected());
             
-            FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
+            if (FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()) {
+                FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
+                BackgroundExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        spamManager.adjustSpamFilters();
+                    }
+                });
+            }
             return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions() ||
                     unsafeOptionPanel.applyOptions();
         }

@@ -37,6 +37,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
     private ResponseFactory responseFactory;
     private QueryReplyFactory queryReplyFactory;
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private SpamServices spamServices;
         
     public ClientSideWhatIsNewSearchTest(String name) {
         super(name);
@@ -56,6 +57,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         responseFactory = injector.getInstance(ResponseFactory.class);
         queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+        spamServices = injector.getInstance(SpamServices.class);
     }
     
     @Override
@@ -79,7 +81,8 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
     }
     
     public void testAdultFilter(boolean enabled) throws Exception {
-        FilterSettings.FILTER_WHATS_NEW_ADULT.setValue(enabled);
+        FilterSettings.FILTER_ADULT.setValue(enabled);
+        spamServices.adjustSpamFilters();
         
         drainAll();
         

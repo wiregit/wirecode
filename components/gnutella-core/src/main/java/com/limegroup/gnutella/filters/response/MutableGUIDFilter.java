@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.limewire.io.GUID;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Response;
@@ -16,6 +18,8 @@ import com.limegroup.gnutella.messages.QueryReply;
  */
 @Singleton
 public final class MutableGUIDFilter implements ResponseFilter {
+
+    private static Log LOG = LogFactory.getLog(MutableGUIDFilter.class);
     
     /**
      * The Set of GUIDs to compare.
@@ -42,6 +46,8 @@ public final class MutableGUIDFilter implements ResponseFilter {
      * Adds a guid to be scanned for keyword filters.
      */
     public synchronized void addGUID(byte[] guid) {
+        if (LOG.isDebugEnabled())
+            LOG.debugf("adding guid: {0}", new GUID(guid));
         Set<byte[]> guids = new TreeSet<byte[]>(new GUID.GUIDByteComparator());
         guids.addAll(_guids);
         guids.add(guid);
@@ -52,6 +58,8 @@ public final class MutableGUIDFilter implements ResponseFilter {
      * Removes a guid from the list of those scanned.
      */
     public void removeGUID(byte[] guid) {
+        if (LOG.isDebugEnabled())
+            LOG.debugf("removing guid: {0}", new GUID(guid));
         if(_guids.size() == 0) {
             return;
         } else {
@@ -69,8 +77,15 @@ public final class MutableGUIDFilter implements ResponseFilter {
     @Override
     public boolean allow(QueryReply qr, Response response) {
         if(_guids.contains(qr.getGUID())) {
-            return keywordFilter.allow(qr, response);
+            if (LOG.isDebugEnabled())
+                LOG.debugf("filtering for guid: {0}", new GUID(qr.getGUID()));
+            boolean allowed = keywordFilter.allow(qr, response);
+            if (LOG.isDebugEnabled())
+                LOG.debugf("{0} allowed {1}", allowed, response);
+            return allowed;
         } else {
+            if (LOG.isDebugEnabled()) 
+                LOG.debugf("not filtering for guid: {0}", new GUID(qr.getGUID()));
             return true;
         }
     }
