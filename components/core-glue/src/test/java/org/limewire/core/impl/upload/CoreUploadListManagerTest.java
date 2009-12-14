@@ -114,6 +114,8 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         manager.uploadAdded(uploader);
         assertEquals(testSize, items.get(0).getFileSize());
+        
+        SharingSettings.CLEAR_UPLOAD.setValue(true);
         manager.uploadComplete(uploader);
         assertEmpty(items);
         
@@ -470,11 +472,11 @@ public class CoreUploadListManagerTest extends BaseTestCase {
                 exactly(1).of(item2).addPropertyChangeListener(with(any(PropertyChangeListener.class)));
                 exactly(1).of(item3).addPropertyChangeListener(with(any(PropertyChangeListener.class)));
                 
-                never(itemDone).fireDataChanged();
-                never(itemBrowseHostDone).fireDataChanged();
-                exactly(1).of(item1).fireDataChanged();
-                exactly(1).of(item2).fireDataChanged();
-                exactly(1).of(item3).fireDataChanged();
+                never(itemDone).refresh();
+                never(itemBrowseHostDone).refresh();
+                exactly(1).of(item1).refresh();
+                exactly(1).of(item2).refresh();
+                exactly(1).of(item3).refresh();
             }});
         
         List<UploadItem> items = manager.getUploadItems();
