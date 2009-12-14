@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -101,6 +103,16 @@ public class DownloadMediator {
 	 */
     @Inject
     void register() {
+        // Add listener to display download table when download added.
+        downloadListManager.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (DownloadListManager.DOWNLOAD_ADDED.equals(evt.getPropertyName())) {
+                    transferTrayNavigator.get().selectDownloads();
+                }
+            }
+        });
+        
         // Add setting listener to clear finished downloads.  When set, we
         // clear finished downloads and hide the "clear finished" button.
         SharingSettings.CLEAR_DOWNLOAD.addSettingListener(new SettingListener() {
