@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import javax.media.Controller;
 import javax.media.ControllerEvent;
 import javax.media.ControllerListener;
+import javax.media.EndOfMediaEvent;
 import javax.media.IncompatibleSourceException;
 import javax.media.Player;
 import javax.media.StartEvent;
@@ -385,7 +386,9 @@ class VideoPlayerMediator implements PlayerMediator {
                 @Override
                 public void run() {
 
-                    if (controllerEvent instanceof StartEvent || controllerEvent.getSourceController().getState() == Controller.Started) {
+                    if (controllerEvent instanceof EndOfMediaEvent) {
+                        setEndOfMedia();
+                    } else if (controllerEvent instanceof StartEvent || controllerEvent.getSourceController().getState() == Controller.Started) {
                         firePlayerStateChanged(PlayerState.OPENED);
                         firePlayerStateChanged(PlayerState.PLAYING);
                         if (updateTimer == null) {
@@ -416,19 +419,24 @@ class VideoPlayerMediator implements PlayerMediator {
             }
 
             if (player.getMediaTime().getSeconds() >= player.getDuration().getSeconds()) {
-                // FMJ doesn't seem to fire EndOfMediaEvents so we need to do
+                // some FMJ players don't seem to fire EndOfMediaEvents so we need to do
                 // this manually
-                player.setMediaTime(new Time(0));
-                player.stop();
-                updateTimer.stop();
-                firePlayerStateChanged(PlayerState.EOM);
-                fireProgressUpdated(100f);
+                setEndOfMedia();
             } else {
                 fireProgressUpdated();
             }
         }
 
     }    
+    
+    private void setEndOfMedia() {
+        player.stop();
+        player.setMediaTime(new Time(0));
+        updateTimer.stop();
+        firePlayerStateChanged(PlayerState.EOM);
+        fireProgressUpdated(100f);
+
+    }
     
     
     /**
