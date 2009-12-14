@@ -63,7 +63,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         filters.add(altLocFilter.get());
         filters.add(urnFilter.get());
         filters.add(keywordFilter.get());
-        if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
+        if(FilterSettings.FILTER_ADULT.getValue())
             filters.add(mutableGUIDFilter.get());
         filters.add(wormFilter.get());
         filters.add(queryFilter.get());

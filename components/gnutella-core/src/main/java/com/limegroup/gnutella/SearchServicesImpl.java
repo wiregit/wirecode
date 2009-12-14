@@ -145,7 +145,7 @@ public class SearchServicesImpl implements SearchServices {
                 qr = queryRequestFactory.get().createWhatIsNewQuery(guid, (byte)2, type);
             }
     
-            if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue() && FilterSettings.FILTER_ADULT.getValue())
+            if(FilterSettings.FILTER_ADULT.getValue())
                 mutableGUIDFilter.get().addGUID(guid);
     
             recordAndSendQuery(qr, type);
