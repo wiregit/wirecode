@@ -78,14 +78,12 @@ public class ActiveLimeWireCheck {
      * Checks if the client is already running, and if so, tries to pass it the
      * argument, which may be null.
      * 
-     * @param handoffLink String representing the torrent/magnet link to hand of to
-     * existing LW instance if necessary
      * @return true if another instance is running, in which case this instance
      * must quit.
      * @throws ActiveLimeWireException if another instance appears to be
      * running but it can't be contacted.
      */
-    private boolean testForLimeWire(String handoffLink) throws ActiveLimeWireException {
+    private boolean testForLimeWire(String arg) throws ActiveLimeWireException {
         // Try to lock a file in the settings dir; if the lock can't be
         // acquired, another instance of LW is running.
         try {
@@ -106,7 +104,7 @@ public class ActiveLimeWireCheck {
             LOG.trace("Could not acquire lock");
             long start = System.currentTimeMillis();
             while(System.currentTimeMillis() - start < 5 * 60 * 1000) {
-                if(tryToContactRunningLimeWire(handoffLink)) {
+                if(tryToContactRunningLimeWire(arg)) {
                     LOG.trace("Contacted existing instance");
                     return true;
                 }
@@ -118,15 +116,9 @@ public class ActiveLimeWireCheck {
             throw new ActiveLimeWireException();
         }
         LOG.trace("Acquired lock");
-        
-        // We acquired the lock.  If we are not handing off a torrent/magnet link
-        // we are done.
-        if (handoffLink == null) {
-            return false;
-        }
-        
-        // Pass torrent/magnet link to existing LW instance
-        if(tryToContactRunningLimeWire(handoffLink)) {
+        // We acquired the lock, but an older instance that doesn't know about
+        // the lock might be running - try the port just in case.
+        if(tryToContactRunningLimeWire(arg)) {
             LOG.trace("Contacted existing instance");
             releaseLock(); // This isn't strictly necessary
             return true;
@@ -137,12 +129,12 @@ public class ActiveLimeWireCheck {
 
     /**
      * Tries to contact an existing instance of LimeWire on the configured port
-     * and pass it the argument (to hand off a torrent or magnet link), which may be null.
+     * and pass it the argument, which may be null.
      * 
-     * @param handoffLink the argument to pass to the running instance, if contacted.
+     * @param arg the argument to pass to the running instance, if contacted.
      * @return true if another instance was successfully contacted on the port.
      */
-    private boolean tryToContactRunningLimeWire(String handoffLink) {
+    private boolean tryToContactRunningLimeWire(String arg) {
         Socket socket = null;
         boolean contacted = false;
         int port = NetworkSettings.PORT.getValue();
@@ -150,7 +142,7 @@ public class ActiveLimeWireCheck {
             LOG.trace("Invalid port");
             return false;
         }
-        String type = ExternalControl.isTorrentRequest(handoffLink) ? "TORRENT" : "MAGNET";
+        String type = ExternalControl.isTorrentRequest(arg) ? "TORRENT" : "MAGNET";
         try {
             if(LOG.isTraceEnabled())
                 LOG.trace("Connecting to port " + port);
@@ -166,7 +158,7 @@ public class ActiveLimeWireCheck {
             OutputStream os = socket.getOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(os);
             BufferedWriter out = new BufferedWriter(osw);
-            out.write(type + " " + handoffLink + " ");
+            out.write(type + " " + arg + " ");
             out.write("\r\n");
             out.flush();
             String str = byteReader.readLine();
