@@ -495,6 +495,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             } else if (e.getActionCommand() == VOLUME) {
                 if (System.currentTimeMillis() - menuInvizTime > 250f) {
                     volumeControlPopup.show(volumeButton, 0, 14);
+                    volumeControlPopup.requestFocus();
                 }
                 
             } else if (e.getActionCommand() == SHUFFLE) {

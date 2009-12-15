@@ -61,7 +61,12 @@ public class VolumeSlider extends JSlider {
      */
     public JPopupMenu createPopup() {
         // Create popup.
-        JPopupMenu popup = new JPopupMenu();
+        JPopupMenu popup = new JPopupMenu() {
+            @Override
+            public void requestFocus() {
+                VolumeSlider.this.requestFocus();
+            }
+        };
         
         // Set attributes and add slider.
         popup.setBorder(BorderFactory.createLineBorder(borderForeground));
