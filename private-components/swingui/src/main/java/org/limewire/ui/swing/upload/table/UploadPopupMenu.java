@@ -133,7 +133,7 @@ public class UploadPopupMenu extends JPopupMenu {
             add(showInLibraryMenuItem).setEnabled(libraryManager.getLibraryManagedList().contains(uploadItem.getUrn()));
         }
         
-        if (done) {
+        if (done && !browseItem) {
             addSeparator();
 
             JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
@@ -217,6 +217,7 @@ public class UploadPopupMenu extends JPopupMenu {
      * Builds the menu for multiple upload items.
      */
     private void createMultipleItemMenu() {
+        boolean allBrowse = isAllBrowse();
         boolean allDone = isAllDone();
         boolean anyPausable = isAnyPausable();
         boolean anyResumable = isAnyResumable();
@@ -251,7 +252,11 @@ public class UploadPopupMenu extends JPopupMenu {
             
             add(createCancelMenuItem(new DefaultMenuListener()));
             
-        } else {
+        } else if (!allBrowse) {
+            if (getComponentCount() > 0) {
+                addSeparator();
+            }
+            
             JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
             add(addToListMenu);
         }
@@ -321,6 +326,18 @@ public class UploadPopupMenu extends JPopupMenu {
             }
         }
         return remoteHosts;
+    }
+    
+    /**
+     * Returns true if all upload items are browse items.
+     */
+    private boolean isAllBrowse() {
+        for (UploadItem item : uploadItems) {
+            if (!UploadMediator.isBrowseHost(item)) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
