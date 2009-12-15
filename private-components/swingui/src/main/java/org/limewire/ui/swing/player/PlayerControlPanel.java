@@ -432,9 +432,6 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             if (getPlayerMediator().hasScrollingTitle()) {
                 titleLabel.stop();
             }
-            if(playerState == PlayerState.STOPPED) {
-                resetPlayer();
-            }
         }        
     }
     
