@@ -263,9 +263,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
                         boolean enabled = SwingUiSettings.PLAYER_ENABLED.getValue();
                         if (!enabled) {
                             getPlayerMediator().stop();
-                            if (getPlayerMediator().hasScrollingTitle()) {
-                                titleLabel.stop();
-                            }
+                            resetPlayer();
                         }
                         PlayerControlPanel.this.innerPanel.setVisible(enabled);
                     }
@@ -274,7 +272,19 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         };
         
         SwingUiSettings.PLAYER_ENABLED.addSettingListener(settingListener);
+    }
 
+	/**
+	 * Clears all of the progress/song fields.
+	 */
+    private void resetPlayer() {
+        if (getPlayerMediator().hasScrollingTitle()) {
+            titleLabel.stop();
+        }
+        progressSlider.setValue(0);
+        progressSlider.setEnabled(false);
+        titleLabel.setText("");
+        titleLabel.setToolTipText("");     
     }
     
     public void dispose(){
@@ -421,6 +431,9 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             pauseButton.setVisible(false);
             if (getPlayerMediator().hasScrollingTitle()) {
                 titleLabel.stop();
+            }
+            if(playerState == PlayerState.STOPPED) {
+                resetPlayer();
             }
         }        
     }
