@@ -166,6 +166,14 @@ public class MainDownloadPanel extends JPanel {
                         }
                     }));
                 }
+                
+                // For LWC-4733. It is possible with extremely small file
+                // downloads that the download can complete before initialize()
+                // is called. We are planning to refactor so that this won't
+                // happen but this null check will prevent the NPE in the release.
+                if(table == null) {
+                    initialize();
+                }
 
                 // the user might be editing one of the cell's while the download completes,
                 // i.e. the user might have the mouse hovering over the pause button. (Bug LWC-4317)
