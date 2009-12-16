@@ -317,10 +317,14 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             return false;
 
         // sanitize data to remove any illegal chars for file names/directories
-        artist = CommonUtils.santizeString(artist);
-        album = CommonUtils.santizeString(album);
-        track = sanitizeTrack(track);
-        title = CommonUtils.santizeString(title);
+        try {
+            artist = CommonUtils.sanitizeFolderName(artist);
+            album = CommonUtils.sanitizeFolderName(album);
+            track = sanitizeTrack(track);
+            title = CommonUtils.sanitizeFolderName(title);
+        } catch(IOException e) {
+            return false;
+        }
 
         subs.put(LWSConstants.ARTIST_LABEL, artist);
         subs.put(LWSConstants.ALBUM_LABEL, album);
