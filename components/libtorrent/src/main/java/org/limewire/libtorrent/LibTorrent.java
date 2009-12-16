@@ -270,4 +270,29 @@ interface LibTorrent extends Library {
      * {@link #get_pieces_status()}
 	 */
     public WrapperStatus free_pieces_info(Pointer pointer);
+    
+    /**
+     * Adds a tracker to a torrent at a given priority.
+     */
+    public WrapperStatus add_tracker(String sha1, String url, int tier);
+    
+    /**
+     * Removes any tracker with the matching name and tier. 
+     */
+    public WrapperStatus remove_tracker(String sha1, String url, int tier);
+   
+    /**
+     * Gets the current list of trackers being used by a torrent.
+     */
+    public WrapperStatus get_trackers(String sha1, Pointer[] trackers, int numTrackers);
+    
+    /**
+     * Gets the current number of trackers being used by a torrent.
+     */
+    public WrapperStatus get_num_trackers(String sha1, IntByReference numTrackers);
+    
+    /**
+     * Frees the data consumed for tracker data.
+     */
+    public WrapperStatus free_trackers(Pointer[] trackers, int numTrackers);
 }

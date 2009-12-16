@@ -197,18 +197,19 @@ class LibTorrentWrapper {
                 remainingTorrentPeers.add(torrentPeers[i]);
             }
         }
+     
+        LOG.debugf("before free_peers: {0}", id);
+        free_peers(torrentPeersPointers);
+        LOG.debugf("after free_peers: {0}", id);
         
-        free_peers(id, torrentPeersPointers, torrentPeersPointers.length);
         LOG.debugf("after get_peers: {0}", id);
         
         return remainingTorrentPeers.toArray(new LibTorrentPeer[remainingTorrentPeers.size()]);
     }
 
-    private void free_peers(String id, Pointer[] torrentPeersPointers, int length) {
-        LOG.debugf("before free_peers: {0}", id);
+    private void free_peers(Pointer[] torrentPeersPointers) {
         catchWrapperException(libTorrent.free_peers(torrentPeersPointers,
                 torrentPeersPointers.length));
-        LOG.debugf("after free_peers: {0}", id);
     }
 
     public void signal_fast_resume_data_request(String id) {
@@ -472,10 +473,69 @@ class LibTorrentWrapper {
                 
         TorrentPiecesInfo exportInfo = new LibTorrentPiecesInfo(info);
         
-        LOG.debugf("before free_pieces_info");
+        LOG.debugf("before free_pieces_info: {0}", sha1);
         catchWrapperException(libTorrent.free_pieces_info(info.getPointer()));
-        LOG.debugf("after free_pieces_info");
+        LOG.debugf("after free_pieces_info: {0}", sha1);
         
         return exportInfo;
     }
+    
+    public void add_tracker(String sha1, String url, int tier) {
+        LOG.debugf("before add_tracker: {0}", sha1);
+        catchWrapperException(libTorrent.add_tracker(sha1, url, tier));
+        LOG.debugf("after add_tracker: {0}", sha1);
+    }
+    
+    public void remove_tracker(String sha1, String url, int tier) {
+        LOG.debugf("before remove_tracker: {0}", sha1);
+        catchWrapperException(libTorrent.remove_tracker(sha1, url, tier));
+        LOG.debugf("after remove_tracker: {0}", sha1);
+    }
+        
+    public LibTorrentAnnounceEntry[] get_trackers(String sha1) {
+        
+        int numTrackers = get_num_trackers(sha1);
+        
+        if (numTrackers == 0) {
+            return new LibTorrentAnnounceEntry[0];
+        }
+        
+        LibTorrentAnnounceEntry[] torrentTrackers = new LibTorrentAnnounceEntry[numTrackers];
+        Pointer[] torrentTrackersPointers = new Pointer[numTrackers];
+        for ( int i=0 ; i < torrentTrackersPointers.length ; i++ ) {
+            LibTorrentAnnounceEntry torrentTracker = new LibTorrentAnnounceEntry();
+            torrentTrackers[i] = torrentTracker;
+            torrentTrackersPointers[i] = torrentTracker.getPointer();
+        }
+        
+        LOG.debugf("before get_trackers: {0}", sha1);
+        catchWrapperException(libTorrent.get_trackers(sha1, torrentTrackersPointers, numTrackers));
+        LOG.debugf("after get_trackers: {0}", sha1);
+        
+        for ( LibTorrentAnnounceEntry tracker : torrentTrackers ) {
+            tracker.read();
+        }
+        
+        LOG.debugf("before free_trackers: {0}", sha1);
+        free_trackers(torrentTrackersPointers);
+        LOG.debugf("after free_trackers: {0}", sha1);
+        
+        return torrentTrackers;
+    }
+    
+    private int get_num_trackers(String sha1) {
+        IntByReference numTrackersReference = new IntByReference();
+        
+        LOG.debugf("before get_num_trackers: {0}", sha1);
+        catchWrapperException(libTorrent.get_num_trackers(sha1, numTrackersReference));
+        LOG.debugf("after get_num_trackers: {0}", sha1);
+        
+        return numTrackersReference.getValue();
+    }
+        
+    private void free_trackers(Pointer[] torrentTrackerPointers) {
+        catchWrapperException(libTorrent.free_trackers(torrentTrackerPointers,
+                torrentTrackerPointers.length));
+    }
+
 }

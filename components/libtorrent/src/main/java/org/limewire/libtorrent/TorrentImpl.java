@@ -23,6 +23,7 @@ import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentPiecesInfo;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.bittorrent.TorrentTracker;
 import org.limewire.listener.AsynchronousEventMulticaster;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
@@ -493,5 +494,36 @@ class TorrentImpl implements Torrent {
         } finally {
             lock.unlock();
         }
+    }
+    
+    @Override
+    public List<TorrentTracker> getTrackers() {
+        lock.lock();
+        try {
+            TorrentTracker[] peers = libTorrent.get_trackers(sha1);
+            return Arrays.asList(peers);
+        } finally {
+            lock.unlock();
+        }        
+    }
+    
+    @Override
+    public void addTracker(String tracker, int tier) {
+        lock.lock();
+        try {
+            libTorrent.add_tracker(sha1, tracker, tier);
+        } finally {
+            lock.unlock();
+        }        
+    }
+    
+    @Override
+    public void removeTracker(String tracker, int tier) {
+        lock.lock();
+        try {
+            libTorrent.add_tracker(sha1, tracker, tier);
+        } finally {
+            lock.unlock();
+        }        
     }
 }

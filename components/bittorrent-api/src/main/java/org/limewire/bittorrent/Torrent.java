@@ -274,4 +274,21 @@ public interface Torrent {
      * Gets the pieces state data thus far.
      */
     public TorrentPiecesInfo getPiecesInfo();
+
+    /**
+     * Returns the list of trackers being used for this torrent.
+     */
+    public List<TorrentTracker> getTrackers();
+    
+    /**
+     * Adds a tracker to a torrent at a given priority.
+     */
+    public void addTracker(String url, int tier);
+    
+    
+    /**
+     * Removes any tracker matching the url and tier. 
+     */
+    public void removeTracker(String url, int tier);
+
 }
