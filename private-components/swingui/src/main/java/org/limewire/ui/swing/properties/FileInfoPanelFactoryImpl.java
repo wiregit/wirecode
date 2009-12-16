@@ -81,6 +81,11 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     }
 
     @Override
+    public FileInfoPanel createTrackersPanel(FileInfoType type, PropertiableFile propertiableFile) {
+        return new FileInfoTrackersPanel(type, propertiableFile, tableDecorator.get());
+    }
+    
+    @Override
     public FileInfoPanel createTransferPanel(FileInfoType type, DownloadItem propertiableFile) {
         return new FileInfoTransfersPanel(type, propertiableFile, tableDecorator.get());
     }

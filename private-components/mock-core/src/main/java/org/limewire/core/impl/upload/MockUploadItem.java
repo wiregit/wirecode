@@ -9,6 +9,7 @@ import java.util.Collections;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.UploadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
@@ -258,5 +259,10 @@ public class MockUploadItem implements UploadItem {
     @Override
     public String getRenderName() {
         return hostname;
+    }
+
+    @Override
+    public Object getUploadProperty(UploadPropertyKey key) {
+        return null;
     }
 }

@@ -16,6 +16,8 @@ public interface FileInfoPanelFactory {
     
     public FileInfoPanel createOverviewPanel(FileInfoType type, PropertiableFile propertiableFile);
     
+    public FileInfoPanel createTrackersPanel(FileInfoType type, PropertiableFile propertiableFile);
+    
     public FileInfoPanel createTransferPanel(FileInfoType type, DownloadItem propertiableFile);
     
     public FileInfoPanel createSharingPanel(FileInfoType type, PropertiableFile propertiableFile);

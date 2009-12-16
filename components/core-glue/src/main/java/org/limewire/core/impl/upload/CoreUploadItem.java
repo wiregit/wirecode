@@ -10,6 +10,7 @@ import java.util.List;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.UploadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.upload.UploadItem;
@@ -392,6 +393,15 @@ class CoreUploadItem implements UploadItem {
     @Override
     public void resume() {
         uploader.resume();        
+    }
+    
+    @Override
+    public Object getUploadProperty(UploadPropertyKey key) {
+        if(key == UploadPropertyKey.TORRENT && UploadItemType.BITTORRENT == uploadItemType) {
+            BTUploader btUploader = (BTUploader)uploader;
+            return btUploader.getTorrent();
+        }
+        return null;
     }
     
     /**

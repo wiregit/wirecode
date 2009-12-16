@@ -147,6 +147,8 @@ public class FileInfoDialog extends LimeJDialog {
                         cards.put(tab, fileInfoFactory.createGeneralPanel(type, propertiableFile));
                     } else if(tab == Tabs.SHARING) {
                         cards.put(tab, fileInfoFactory.createSharingPanel(type, propertiableFile));
+                    } else if (tab == Tabs.TRACKERS) {
+                        cards.put(tab, fileInfoFactory.createTrackersPanel(type, propertiableFile));
                     } else if(tab == Tabs.TRANSFERS) {
                         if(propertiableFile instanceof DownloadItem) {
                             cards.put(tab, fileInfoFactory.createTransferPanel(type, (DownloadItem)propertiableFile));    
@@ -218,6 +220,7 @@ public class FileInfoDialog extends LimeJDialog {
                     tabs.add(Tabs.BITTORENT);
                 }
             }
+            tabs.add(Tabs.TRACKERS);
             tabs.add(Tabs.TRANSFERS);
             tabs.add(Tabs.PIECES);
             break;

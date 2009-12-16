@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Collection;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.UploadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 
@@ -128,4 +129,10 @@ public interface UploadItem extends PropertiableFile {
      * Resumes the UploadItem if possible.
      */
     public void resume();
+    
+    /**
+     * Returns the given Upload property that matches the UploadPropertyKey, null is returned if the 
+     * property does not exist for this UploadItem. 
+     */
+    public Object getUploadProperty(UploadPropertyKey key);
 }
