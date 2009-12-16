@@ -521,7 +521,7 @@ class TorrentImpl implements Torrent {
     public void removeTracker(String tracker, int tier) {
         lock.lock();
         try {
-            libTorrent.add_tracker(sha1, tracker, tier);
+            libTorrent.remove_tracker(sha1, tracker, tier);
         } finally {
             lock.unlock();
         }        
