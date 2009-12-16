@@ -68,6 +68,12 @@ class VideoDisplayDirector {
         resizerListener = new VideoPanelResizer();
     }
     
+    /**
+     * Prepares a new videoRenderer to be displayed.
+     * 
+     * @param videoRenderer the Container that will be displayed in a PlayerPanel.
+     * @param isFullScreen true for fullscreen, false to embed in the client frame
+     */
     public void initialize(Container videoRenderer, boolean isFullScreen){
         boolean isReinitializing = false;
         
@@ -137,6 +143,9 @@ class VideoDisplayDirector {
       
     }
     
+    /**
+     * Displays the video as {@link #initialize(Container, boolean) initialized}.
+     */
     public void show(){
         if(isFullScreen()){
             showFullScreen();
