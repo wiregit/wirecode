@@ -76,6 +76,10 @@ class AudioPlayerMediator implements PlayerMediator {
     @InspectionPoint(value = "media-player")
     private final PlayerInspector inspectable;
     
+    
+    private long playingWindowStartTime = -1;
+    private int playingSwitches = -1;
+    
     /**
      * Constructs a PlayerMediator using the specified services.
      */
@@ -571,7 +575,23 @@ class AudioPlayerMediator implements PlayerMediator {
         public void stateChange(AudioPlayerEvent event) {
             // Go to next song when finished.
             if (event.getState() == PlayerState.EOM) {
-                nextSong();
+                
+                // Sanity check before switching to the next song,
+                //  the last 5 songs that switched must have taken over
+                //  a second to play or else there is a problem.
+                playingSwitches = (playingSwitches+1) % 5;
+                if (playingSwitches == 0) {
+                    if (System.currentTimeMillis()-playingWindowStartTime > 1000) {
+                        nextSong();
+                        playingWindowStartTime = System.currentTimeMillis();
+                    } else {
+                        playingSwitches = -1;
+                        playingWindowStartTime = -1;    
+                    }
+                } 
+                else {
+                    nextSong();
+                }
             } else if (event.getState() == PlayerState.STOPPED) {
                 inspectable.stopped();
             }
