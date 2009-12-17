@@ -14,38 +14,49 @@ import javax.media.Player;
 import javax.media.protocol.DataSource;
 import javax.swing.SwingUtilities;
 
+import org.limewire.service.ErrorService;
+import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
 
-
-
 class VideoPlayerFactory {
+    // Flag indicating whether the native library that provides the bridge between Java and Cocoa could be loaded.
+    private static boolean initializationOfJavaToCocoaBridgeFailed = false;
     
     public Player createVideoPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
         if (!OSUtils.isWindows() && !OSUtils.isMacOSX()) {
             throw new IllegalStateException("Video is only supported on Windows and Mac");
         }
-        
-        if (OSUtils.isMacOSX()) {
-            if (file.getName().toLowerCase().endsWith("avi")) {
-                throw new IncompatibleSourceException("AVI files are not supported by LimeWire's built in video player on OS X.");
-            }
-        }
 
-        final Player handler;
+        Player handler;
         
         if(OSUtils.isWindows7()){
             return createWindows7Player(file, parentComponent);            
         } else if (OSUtils.isWindows()) {           
             handler = new net.sf.fmj.ds.media.content.unknown.Handler();
         } else { // OSX
-            handler = new net.sf.fmj.qt.media.content.unknown.Handler();
+            try {
+                if (!initializationOfJavaToCocoaBridgeFailed)
+                    handler = new net.sf.fmj.qt.media.content.unknown.JavaToCocoaHandler();
+                else
+                    handler = new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
+            } catch (ExceptionInInitializerError error) {
+                // if the native cocoa wrapper library can't be loaded, then let's use the QuickTime for Java library instead
+                ErrorService.error(error, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("rococoa.jnilib"));
+                initializationOfJavaToCocoaBridgeFailed = true;
+                handler = new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
+            }
         }
 
         setupPlayer(handler, file);
+
+        final Player finalHandler = handler;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                parentComponent.add(handler.getVisualComponent());
+                //remove all in case the mfCanvas was added.
+                parentComponent.removeAll();
+                parentComponent.add(finalHandler.getVisualComponent());
+                parentComponent.add(finalHandler.getVisualComponent());
             }
         });
        return handler;

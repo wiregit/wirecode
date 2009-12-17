@@ -137,7 +137,6 @@
 	<classpathentry kind="lib" path="lib/jars/miglayout-3.7-swing.jar" sourcepath="lib/sources/miglayout-3.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.2.jar" sourcepath="lib/sources/swing-worker-src-1.2.zip"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.0.10.jar" sourcepath="lib/sources/hsqldb-1.8.0.10-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/jna-3.1.0.jar" sourcepath="lib/sources/jna-3.1.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/json-20070829.jar"/>
 	<classpathentry kind="lib" path="lib/jars/glazedlists-snapshot20090628_java15.jar" sourcepath="lib/sources/glazedlists-snapshot20090628-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-1.0.jar" sourcepath="lib/sources/swingx-1.0-src.zip"/>
@@ -156,6 +155,13 @@
 	<classpathentry kind="lib" path="lib/jars/foxtrot-core-3.0.jar" sourcepath="lib/sources/foxtrot-3.0.zip"/>
 	<classpathentry kind="lib" path="lib/jars/mp3spi-1.9.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.15-M1-lw.jar" sourcepath="lib/sources/jacob-1.15-M1-lw_src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/fmj-20091008-18.jar" sourcepath="lib/sources/fmj-source.zip"/>
+	<classpathentry kind="lib" path="lib/jars/osx/asm-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/jars/osx/cglib-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/jars/osx/slf4j-api-1.5.8.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jna-3.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/jars/osx/slf4j-jdk14-1.5.8.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/fmj"/>
+	<classpathentry kind="lib" path="lib/jars/osx/rococoa-cocoa-20091217-1.jar"/>
+	<classpathentry kind="lib" path="lib/jars/osx/rococoa-core-20091217-1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
