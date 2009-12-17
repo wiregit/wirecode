@@ -392,6 +392,31 @@ public class CommonUtils {
     }
 
     /**
+     * Sanitizes a folder name. Folder names can contain illegal characters that
+     * are valid within a filename. 
+     * http://msdn.microsoft.com/en-us/library/aa365247(VS.85).aspx
+     * 
+     * @param name String to sanitize
+     * @return sanitized String
+     * @throws IOException if no valid characters remain within this file name.
+     */
+    public static String sanitizeFolderName(String name) throws IOException {
+        String result = santizeString(name).trim();
+        
+        int index = result.length();
+        while(result.charAt(index-1) == '.') {
+            index -= 1;
+            if(index <= 0)
+                throw new IOException("folder does not contain valid characters");
+        }
+        
+        if(index == result.length())
+            return result;
+        else                
+            return result.substring(0, index);
+    }
+    
+    /**
      * Sanitizes a String for use in a directory and file name and removes any
      * illegal characters from it.
      * 
