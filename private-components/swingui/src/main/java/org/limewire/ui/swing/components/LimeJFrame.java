@@ -37,7 +37,10 @@ public class LimeJFrame extends JFrame {
     }
 
     private void initialize() {
-        setIconImage(iconInfo.getImage());
+        // We set the icon image on every OS except Mac OS X, because on Mac setting this doesn't actually place an icon
+        // in a corner of the frame; it's used instead as an icon for the minimized application. (LWC-4726)
+        if(!OSUtils.isMacOSX())
+            setIconImage(iconInfo.getImage());
     }
 
     // Overrides addNotify() to change to a platform specific icon right afterwards.
