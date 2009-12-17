@@ -261,7 +261,12 @@ class VideoPlayerMediator implements PlayerMediator {
     @Override
     public void skip(double percent) {
         if (!isDurationMeasurable()) {
-            throw new IllegalStateException("Can not skip when duration is unmeasurable");
+            //Hmm... this shouldn't be happening.  We don't want to disturb the user by throwing an exception so we'll just
+            //fireSongChanged to update everything (disabling the progress bar) and return.
+            if (currentVideo != null) {
+                fireSongChanged(currentVideo.getName());
+            }
+            return;
         }
         isSeeking = true;
         player.setMediaTime(new Time(percent * player.getDuration().getSeconds()));
