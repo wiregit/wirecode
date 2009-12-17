@@ -119,20 +119,9 @@ public class ActiveLimeWireCheck {
         }
         LOG.trace("Acquired lock");
         
-        // We acquired the lock.  If we are not handing off a torrent/magnet link
-        // we are done.
-        if (handoffLink == null) {
-            return false;
-        }
-        
-        // Pass torrent/magnet link to existing LW instance
-        if(tryToContactRunningLimeWire(handoffLink)) {
-            LOG.trace("Contacted existing instance");
-            releaseLock(); // This isn't strictly necessary
-            return true;
-        } else {
-            return false;
-        }
+        // We acquired the lock.  
+        // Assuming no other version of LW, no other version of LW running.
+        return false;
     }
 
     /**
