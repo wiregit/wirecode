@@ -4,6 +4,7 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.magnet.MagnetFactory;
+import org.limewire.core.impl.activation.CoreGlueActivationModule;
 import org.limewire.core.impl.browse.CoreGlueBrowseModule;
 import org.limewire.core.impl.connection.CoreGlueConnectionModule;
 import org.limewire.core.impl.daap.CoreGlueDaapModule;
@@ -57,6 +58,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(InspectionsCommunicator.class).to(InspectionsCommunicatorImpl.class);
         
         install(new CoreGlueSpamModule());
+        install(new CoreGlueActivationModule());
         install(new CoreGlueConnectionModule());
         install(new CoreGlueDaapModule());
         install(new CoreGlueSearchModule());

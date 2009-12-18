@@ -25,6 +25,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -32,6 +33,8 @@ import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import com.google.inject.Inject;
 
 public class ActivationPanel {
 
@@ -74,7 +77,8 @@ public class ActivationPanel {
     
     Map<String, JComponent> cardMap = new HashMap<String, JComponent>();
     
-    public ActivationPanel() {
+    @Inject
+    public ActivationPanel(ActivationManager activationManager) {
         
         activationPanel = new JPanel(new MigLayout("fill, insets 20 20 20 20"));
         
@@ -322,6 +326,7 @@ public class ActivationPanel {
             //TODO: key check to avoid hitting the server unnecessarily
             //TODO: what state is this??
 //            setActivationState(ActivationState.ACTIVATED);
+            setActivationState(ActivationState.ACTIVATING);
         }
     }
     
@@ -336,17 +341,7 @@ public class ActivationPanel {
             //TODO: try contacting the server
             //TODO: key check to avoid hitting the server unnecessarily
             //TODO: what state is this??
-//            setActivationState(ActivationState.ACTIVATED);
+            setActivationState(ActivationState.ACTIVATING);
         }
     }
-    
-    public static void main(String args[]) {
-        SwingUtilities.invokeLater(new Runnable(){
-            public void run() {
-                ActivationPanel panel = new ActivationPanel();
-                panel.show();                
-            }
-        });
-    }
-    
 }

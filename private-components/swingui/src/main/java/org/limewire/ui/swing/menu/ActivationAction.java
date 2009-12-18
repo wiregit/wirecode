@@ -7,17 +7,22 @@ import org.limewire.ui.swing.activation.ActivationPanel;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class ActivationAction extends AbstractAction {
 
+    private Provider<ActivationPanel> activationPanelProvider;
+    
     @Inject
-    public ActivationAction() {
+    public ActivationAction(Provider<ActivationPanel> activationPanelProvider) {
         super(I18n.tr("&Activate..."));
+        
+        this.activationPanelProvider = activationPanelProvider;
     }
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        ActivationPanel activationPanel = new ActivationPanel();
+        ActivationPanel activationPanel = activationPanelProvider.get();
         activationPanel.show();
     }
 }
