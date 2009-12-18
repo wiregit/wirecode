@@ -56,7 +56,6 @@ class VideoPlayerFactory {
                 //remove all in case the mfCanvas was added.
                 parentComponent.removeAll();
                 parentComponent.add(finalHandler.getVisualComponent());
-                parentComponent.add(finalHandler.getVisualComponent());
             }
         });
        return handler;
