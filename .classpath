@@ -162,6 +162,6 @@
 	<classpathentry kind="lib" path="lib/jars/osx/slf4j-jdk14-1.5.8.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/rococoa-cocoa-20091217-1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/rococoa-core-20091217-1.jar"/>
-	<classpathentry kind="lib" path="lib/jars/fmj-20091008-19.jar" sourcepath="lib/sources/fmj-source.zip" />
+	<classpathentry kind="lib" path="lib/jars/fmj-20091008-20.jar" sourcepath="lib/sources/fmj-source.zip" />
 	<classpathentry kind="output" path="bin"/>
 </classpath>
