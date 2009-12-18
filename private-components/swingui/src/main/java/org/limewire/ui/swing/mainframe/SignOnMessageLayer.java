@@ -325,13 +325,16 @@ class SignOnMessageLayer {
      */
     public void hideMessage() {
         // Hide message and validate layered pane.
-        messageComponent.setVisible(false);
-        layeredPane.removeComponentListener(panelResizer);
-        layeredPane.remove(messageComponent);
+        if(panelResizer != null) {
+            layeredPane.removeComponentListener(panelResizer);
+            panelResizer = null;
+        }
+        if(messageComponent != null) {
+            messageComponent.setVisible(false);
+            layeredPane.remove(messageComponent);
+            messageComponent = null;
+        }
         layeredPane.validate();
-        
-        messageComponent = null;
-        panelResizer = null;
 
         // Remove library listener.
         if (libraryListener != null) {
