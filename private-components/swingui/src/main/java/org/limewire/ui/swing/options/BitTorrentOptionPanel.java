@@ -7,6 +7,7 @@ import java.awt.event.ItemListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -19,6 +20,7 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.PeriodicFieldValidator;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -38,11 +40,11 @@ public class BitTorrentOptionPanel extends OptionPanel {
     private final JRadioButton uploadTorrentsForeverButton;
     private final JRadioButton uploadTorrentsControlButton;
     private final SpinnerNumberModel seedRatioModel;
-    private final JLabel seedRatioLabel;
     private final JSpinner seedRatioSpinner;
-    private final SpinnerNumberModel seedTimeModel;
-    private final JLabel seedTimeLabel;
-    private final JSpinner seedTimeSpinner;
+    private final SpinnerNumberModel seedDaysModel;
+    private final SpinnerNumberModel seedHoursModel;
+    private final JSpinner seedDaysSpinner;
+    private final JSpinner seedHoursSpinner;
     private final JCheckBox chooseTorrentsCheckBox;
 
     @Inject
@@ -84,27 +86,43 @@ public class BitTorrentOptionPanel extends OptionPanel {
         seedRatioSpinner.setPreferredSize(new Dimension(50, 20));
         seedRatioSpinner.setMaximumSize(new Dimension(60, 20));
 
-        seedTimeModel = new SpinnerNumberModel(
-                getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()),
-                getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getMinValue()),
-                getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getMaxValue()), .05);
+        
+        int wholeDays = getWholeDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get());
+        seedDaysModel = new SpinnerNumberModel(
+                wholeDays,
+                getWholeDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getMinValue()),
+                getWholeDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getMaxValue()), 1);
 
-        seedTimeSpinner = new JSpinner(seedTimeModel);
-        seedTimeSpinner.setPreferredSize(new Dimension(50, 20));
-        seedTimeSpinner.setMaximumSize(new Dimension(60, 20));
+        seedHoursModel = new SpinnerNumberModel(
+                getRemainderHours(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get(), wholeDays),
+                0,
+                24, 1);
+        
+        seedDaysSpinner = new JSpinner(seedDaysModel);
+        seedDaysSpinner.setPreferredSize(new Dimension(50, 20));
+        seedDaysSpinner.setMaximumSize(new Dimension(60, 20));
+        
+        seedHoursSpinner = new JSpinner(seedHoursModel);
+        seedHoursSpinner.setPreferredSize(new Dimension(50, 20));
+        seedHoursSpinner.setMaximumSize(new Dimension(60, 20));
+        
+        JFormattedTextField seedDaysField = ((JSpinner.DefaultEditor)seedDaysSpinner.getEditor()).getTextField();
+        seedDaysField.addKeyListener(new PeriodicFieldValidator(seedDaysField));        
+        JFormattedTextField seedHoursField = ((JSpinner.DefaultEditor)seedHoursSpinner.getEditor()).getTextField();
+        seedHoursField.addKeyListener(new PeriodicFieldValidator(seedHoursField));
 
-        seedRatioLabel = new JLabel(I18n.tr("Ratio:"));
-        seedTimeLabel = new JLabel(I18n.tr("Maximum days:"));
         chooseTorrentsCheckBox = new JCheckBox(I18n.tr("Let me choose files to download when starting a torrent"));
         chooseTorrentsCheckBox.setOpaque(false);
 
         if (torrentManager.get().isValid()) {
             add(uploadTorrentsForeverButton, "span 3, wrap");
             add(uploadTorrentsControlButton, "span 3, wrap");
-            add(seedRatioLabel, "gapleft 20");
+            add(new JLabel(I18n.tr("Ratio:")), "split 2, gapleft 20");
             add(seedRatioSpinner, "span, wrap");
-            add(seedTimeLabel, "gapleft 20");
-            add(seedTimeSpinner, "span, wrap");
+            add(new JLabel(I18n.tr("Maximum days:")), "gapleft 20, split 4");
+            add(seedDaysSpinner, "");
+            add(new JLabel("Hours:"), "gapleft 20");
+            add(seedHoursSpinner, "wrap");
             add(chooseTorrentsCheckBox, "span, gaptop 10, gapbottom 5, wrap");
         } else {
             add(new MultiLineLabel(I18n.tr("There was an error loading bittorrent. You will not be able to use bittorrent capabilities until this is resolved."),
@@ -120,7 +138,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
         BittorrentSettings.UPLOAD_TORRENTS_FOREVER.setValue(uploadTorrentsForeverButton.isSelected());
         if (!uploadTorrentsForeverButton.isSelected()) {
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatioModel.getNumber().floatValue());
-            BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.setValue(((Double) Math.ceil(((Double) seedTimeSpinner.getValue()).doubleValue() * 60 * 60 * 24)).intValue());
+            BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.setValue(
+                    getSeconds((Integer)seedDaysSpinner.getValue(), (Integer)seedDaysSpinner.getValue()));
         }
 
         BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(chooseTorrentsCheckBox
@@ -141,8 +160,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
     boolean hasChanged() {
         return BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue() != uploadTorrentsForeverButton.isSelected()
                 || ((Float) seedRatioSpinner.getValue()).floatValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue()
-                || ((Double) Math.ceil(((Double) seedTimeSpinner.getValue()).doubleValue() * 60 * 60 * 24))
-                        .intValue() != BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue()
+                || getSeconds((Integer)seedDaysSpinner.getValue(), (Integer)seedDaysSpinner.getValue())
+                    != BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue()
                 || chooseTorrentsCheckBox.isSelected() != BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue();
     }
 
@@ -151,29 +170,36 @@ public class BitTorrentOptionPanel extends OptionPanel {
         boolean auto = BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue();
         if (auto) {
             uploadTorrentsForeverButton.setSelected(true);
-        } else {
+        } 
+        else {
             uploadTorrentsControlButton.setSelected(true);
         }
 
         seedRatioSpinner.setValue(BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.get().doubleValue());
-        seedTimeSpinner.setValue(getDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()));
+        seedDaysSpinner.setValue(getWholeDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get()));
         chooseTorrentsCheckBox.setSelected(BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue());
     }
 
-    private double getDays(Integer integer) {
-        return integer.doubleValue() / (60 * 60 * 24);
+    private static int getWholeDays(Integer integer) {
+        return (int) Math.floor(integer.doubleValue() / (60 * 60 * 24));
+    }
+    
+    private static int getRemainderHours(Integer totalSeconds, int days) {
+        return (int)Math.round(totalSeconds.doubleValue() / (60 *60) - days*24);
     }
 
+    private static int getSeconds(int days, int hours) {
+        return days*24*60*60 + hours*60*60;
+    }
+    
     /**
      * Updates the state of the components based on whether the user has opted
      * to control the bittorrent settings manually, or let limewire control
      * them.
      */
     private void updateState(boolean uploadForever) {
-        seedRatioLabel.setEnabled(!uploadForever);
         seedRatioSpinner.setEnabled(!uploadForever);
-        seedTimeLabel.setEnabled(!uploadForever);
-        seedTimeSpinner.setEnabled(!uploadForever);
+        seedDaysSpinner.setEnabled(!uploadForever);
     }
 
 }

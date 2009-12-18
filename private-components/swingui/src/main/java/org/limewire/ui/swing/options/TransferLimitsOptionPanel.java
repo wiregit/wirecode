@@ -1,12 +1,7 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.text.ParseException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -16,7 +11,6 @@ import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -26,6 +20,7 @@ import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.components.EmbeddedComponentLabel;
+import org.limewire.ui.swing.components.PeriodicFieldValidator;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -243,52 +238,6 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         @Override
         public void itemStateChanged(ItemEvent e) {
             component.setVisible(checkBox.isSelected());
-        }
-    }
-    
-    /**
-     * An implementation of {@link KeyListener} that will attempt to validate, and if needed,
-     *  reset invalid input of a {@link JSpinner} between pauses in typing.
-     */
-    private static class PeriodicFieldValidator implements KeyListener {
-
-        private final Timer timer = new Timer(600, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int position = field.getCaretPosition();
-                String orignalString = field.getText();
-                
-                if (!"".equals(field.getText())) {
-                    try {
-                        field.commitEdit();
-                        field.setText(orignalString);
-                        field.setCaretPosition(position);
-                    } catch (ParseException e1) {
-                        field.setValue(field.getValue());
-                        field.setCaretPosition(field.getText().length());
-                    }
-                }
-            }
-        });
-        
-        private final JFormattedTextField field;
-        
-        public PeriodicFieldValidator(JFormattedTextField field) {
-            this.field = field;
-            
-            timer.setRepeats(false);
-        }
-        
-        @Override
-        public void keyTyped(KeyEvent e) {
-            timer.stop();
-            timer.start();
-        }
-        @Override
-        public void keyPressed(KeyEvent e) {
-        }
-        @Override
-        public void keyReleased(KeyEvent e) {
         }
     }
 }
