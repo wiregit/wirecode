@@ -139,7 +139,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         if (!uploadTorrentsForeverButton.isSelected()) {
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatioModel.getNumber().floatValue());
             BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.setValue(
-                    getSeconds((Integer)seedDaysSpinner.getValue(), (Integer)seedDaysSpinner.getValue()));
+                    getSeconds((Integer)seedDaysSpinner.getValue(), (Integer)seedHoursSpinner.getValue()));
         }
 
         BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(chooseTorrentsCheckBox
@@ -160,7 +160,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
     boolean hasChanged() {
         return BittorrentSettings.UPLOAD_TORRENTS_FOREVER.getValue() != uploadTorrentsForeverButton.isSelected()
                 || ((Float) seedRatioSpinner.getValue()).floatValue() != BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.getValue()
-                || getSeconds((Integer)seedDaysSpinner.getValue(), (Integer)seedDaysSpinner.getValue())
+                || getSeconds((Integer)seedDaysSpinner.getValue(), (Integer)seedHoursSpinner.getValue())
                     != BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue()
                 || chooseTorrentsCheckBox.isSelected() != BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue();
     }
@@ -200,6 +200,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
     private void updateState(boolean uploadForever) {
         seedRatioSpinner.setEnabled(!uploadForever);
         seedDaysSpinner.setEnabled(!uploadForever);
+        seedHoursSpinner.setEnabled(!uploadForever);
     }
 
 }
