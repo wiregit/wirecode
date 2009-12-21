@@ -199,11 +199,19 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
     public void dispose() {
     }
     
+    /**
+     * Pulls new tracker data and refreshes the model.
+     */
     private void refreshTable() {
         trackerList = torrent.getTrackers();
         table.repaint();
     }
     
+    /**
+     * Attempts to add a tracker.
+     * 
+     * @return true if the add was successful and the tracker was valid.
+     */
     private boolean addTracker(String url, int tier) {
         boolean duplicate = false;
         for ( TorrentTracker tracker : trackerList ) {
@@ -226,6 +234,11 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         return false;
     }
     
+    /**
+     * Removes the tracker at the given row from the model.
+     * 
+     * @return true if a row was actually removed.
+     */
     private boolean removeTracker(int row) {
         
         if (row == 0) {

@@ -143,5 +143,5 @@ public interface UploadItem extends PropertiableFile {
      * 
      * <p>NOTE: May include upload only sources.
      */
-    public List<SourceInfo> getSourcesDetails();
+    public List<SourceInfo> getTransferDetails();
 }

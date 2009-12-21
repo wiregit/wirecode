@@ -448,7 +448,7 @@ class CoreUploadItem implements UploadItem {
     }
 
     @Override
-    public List<SourceInfo> getSourcesDetails() {
+    public List<SourceInfo> getTransferDetails() {
         return uploader.getTransferDetails();
     }
 }

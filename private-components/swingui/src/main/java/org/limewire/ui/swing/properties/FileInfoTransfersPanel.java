@@ -179,7 +179,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         if (download != null) {
             sources = download.getSourcesDetails();
         } else {
-            sources = upload.getSourcesDetails();
+            sources = upload.getTransferDetails();
         }
                 
         for( SourceInfo info : sources ) {
