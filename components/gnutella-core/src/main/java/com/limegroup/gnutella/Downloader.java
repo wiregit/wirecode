@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadPiecesInfo;
-import org.limewire.core.api.download.DownloadSourceInfo;
+import org.limewire.core.api.download.SourceInfo;
 import org.limewire.io.Address;
 import org.limewire.listener.ListenerSupport;
 
@@ -227,7 +227,7 @@ public interface Downloader extends BandwidthTracker,
     public List<Address> getSourcesAsAddresses();
     
     /** @return All the sources and their details. */
-    public List<DownloadSourceInfo> getSourcesDetails();
+    public List<SourceInfo> getSourcesDetails();
     
     /** @return A structure containing the state of each piece in the download. */
     public DownloadPiecesInfo getPieceInfo();

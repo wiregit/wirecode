@@ -28,7 +28,7 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadPiecesInfo;
-import org.limewire.core.api.download.DownloadSourceInfo;
+import org.limewire.core.api.download.SourceInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.network.BandwidthCollector;
@@ -2843,9 +2843,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     @Override
-    public List<DownloadSourceInfo> getSourcesDetails() {
+    public List<SourceInfo> getSourcesDetails() {
         synchronized(this) {
-            List<DownloadSourceInfo> sources = new ArrayList<DownloadSourceInfo>(_workers.size());
+            List<SourceInfo> sources = new ArrayList<SourceInfo>(_workers.size());
             for(DownloadWorker worker : _workers) {
                 sources.add(new SourceDetails(worker));
             }

@@ -157,7 +157,7 @@ public interface DownloadItem extends PropertiableFile {
 	 * 
      * <p>NOTE: May include upload only sources.
 	 */
-	public List<DownloadSourceInfo> getSourcesDetails();
+	public List<SourceInfo> getSourcesDetails();
 	
 	/**
 	 * @return A structure that holds the state of each download piece.

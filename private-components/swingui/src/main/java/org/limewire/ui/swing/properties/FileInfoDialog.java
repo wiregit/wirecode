@@ -25,10 +25,13 @@ import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.download.UploadPropertyKey;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.core.api.upload.UploadItem;
+import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.properties.FileInfoTabPanel.FileInfoTabListener;
@@ -47,15 +50,29 @@ public class FileInfoDialog extends LimeJDialog {
     
     /**
      * Type of FileInfoDialog that can be created.
-     * 
-     * LOCAL_FILE - File exists within the current LimeWire,
-     * DOWNLOADNG_FILE - File is in the process of downloading or a portion
-     *  of the file has been downloaded already,
-     * REMOTE_FILE - File exists on one or more computers but not
-     *  within this LimeWire
      */
     public static enum FileInfoType {
-        LOCAL_FILE, DOWNLOADING_FILE, REMOTE_FILE
+        /**
+         * File exists within the current LimeWire.
+         */
+        LOCAL_FILE,
+        
+        /**
+         * File is in the process of downloading or a portion
+         *  of the file has been downloaded already,
+         */
+        DOWNLOADING_FILE,
+        
+        /**
+         * File it contained on one or more networked computers but not
+         *  within this client.
+         */
+        REMOTE_FILE,
+        
+        /**
+         * The file represents a current upload.
+         */
+        UPLOADING_FILE;
     }
     
     @Resource private Color backgroundColor;
@@ -150,21 +167,23 @@ public class FileInfoDialog extends LimeJDialog {
                     } else if (tab == Tabs.TRACKERS) {
                         cards.put(tab, fileInfoFactory.createTrackersPanel(type, propertiableFile));
                     } else if(tab == Tabs.TRANSFERS) {
-                        if(propertiableFile instanceof DownloadItem) {
-                            cards.put(tab, fileInfoFactory.createTransferPanel(type, (DownloadItem)propertiableFile));    
-                        } 
-                        else {
-                            throw new IllegalStateException("Should not have a transfers tab for a non download");
-                        }
+                        cards.put(tab, fileInfoFactory.createTransferPanel(type, propertiableFile));    
                     } else if(tab == Tabs.BITTORENT) {
-                        if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT) != null) {
+                        if(propertiableFile instanceof DownloadItem) {
                             Torrent torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);
-                            if(torrent.hasMetaData()) {
+                            if (torrent != null && torrent.hasMetaData()) {
                                 //we can't show the file info panel for torrents without metadata.
                                 cards.put(tab, fileInfoFactory.createBittorentPanel(torrent));
                             }
-                        } else {
-                            throw new IllegalStateException("No DownloadItem or Torrent found for BITTORENT tab.");
+                        } else if (propertiableFile instanceof UploadItem) {
+                            Torrent torrent = (Torrent)((UploadItem)propertiableFile).getUploadProperty(UploadPropertyKey.TORRENT);
+                            if (torrent != null && torrent.hasMetaData()) {
+                                //we can't show the file info panel for torrents without metadata.
+                                cards.put(tab, fileInfoFactory.createBittorentPanel(torrent));
+                            }
+                        } 
+                        else {
+                            throw new IllegalStateException("No Torrent found for BITTORENT tab.");
                         }
                     } else if (tab == Tabs.PIECES) {
                         if(propertiableFile instanceof DownloadItem) {
@@ -218,11 +237,21 @@ public class FileInfoDialog extends LimeJDialog {
                 Torrent torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);
                 if(torrent != null && torrent.hasMetaData()) {
                     tabs.add(Tabs.BITTORENT);
+                    tabs.add(Tabs.TRACKERS);
                 }
             }
-            tabs.add(Tabs.TRACKERS);
             tabs.add(Tabs.TRANSFERS);
             tabs.add(Tabs.PIECES);
+            break;
+        case UPLOADING_FILE:
+            if(propertiableFile instanceof UploadItem && ((UploadItem)propertiableFile).getUploadItemType() == UploadItemType.BITTORRENT) {
+                Torrent torrent = (Torrent)((UploadItem)propertiableFile).getUploadProperty(UploadPropertyKey.TORRENT);
+                if(torrent != null && torrent.hasMetaData()) {
+                    tabs.add(Tabs.BITTORENT);
+                    tabs.add(Tabs.TRACKERS);
+                }
+            }
+            tabs.add(Tabs.TRANSFERS);
             break;
         case REMOTE_FILE:
             break;

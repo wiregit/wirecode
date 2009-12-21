@@ -53,7 +53,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
     private final JPanel component;
     
     private List<TorrentTracker> trackerList = null;
-    private final JXTable table;
+    private JXTable table;
     
     
     public FileInfoTrackersPanel(FileInfoType type, PropertiableFile propertiableFile, TableDecorator tableDecorator) {
@@ -72,6 +72,10 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         }
         
         trackerList = torrent.getTrackers();
+        
+        if (trackerList == null) {
+            return;
+        }
         
         AbstractTableModel model = new AbstractTableModel() {
             

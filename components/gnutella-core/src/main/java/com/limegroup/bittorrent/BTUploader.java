@@ -4,17 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.core.api.download.SourceInfo;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -343,5 +347,17 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
             torrent.setAutoManaged(true);
         }
         torrent.resume();
+    }
+
+    @Override
+    public List<SourceInfo> getTransferDetails() {
+        
+        List<TorrentPeer> peers = torrent.getTorrentPeers();
+        List<SourceInfo> sourceInfoList = new ArrayList<SourceInfo>(peers.size());
+        
+        for (TorrentPeer peer : peers) {
+            sourceInfoList.add(new TorrentSourceInfoAdapter(peer));
+        }
+        return sourceInfoList;
     }
 }

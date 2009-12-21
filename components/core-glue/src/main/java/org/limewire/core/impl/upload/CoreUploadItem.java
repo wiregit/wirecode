@@ -10,6 +10,7 @@ import java.util.List;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.download.SourceInfo;
 import org.limewire.core.api.download.UploadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
@@ -444,5 +445,10 @@ class CoreUploadItem implements UploadItem {
                 return friendPresence.hasFeatures(LimewireFeature.ID);
             }
         }
+    }
+
+    @Override
+    public List<SourceInfo> getSourcesDetails() {
+        return uploader.getTransferDetails();
     }
 }

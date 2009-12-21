@@ -25,7 +25,7 @@ import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.download.DownloadPiecesInfo;
-import org.limewire.core.api.download.DownloadSourceInfo;
+import org.limewire.core.api.download.SourceInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.BittorrentSettings;
@@ -683,13 +683,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public List<DownloadSourceInfo> getSourcesDetails() {
+    public List<SourceInfo> getSourcesDetails() {
         
         List<TorrentPeer> peers = torrent.getTorrentPeers();
-        List<DownloadSourceInfo> sourceInfoList = new ArrayList<DownloadSourceInfo>(peers.size());
+        List<SourceInfo> sourceInfoList = new ArrayList<SourceInfo>(peers.size());
         
         for (TorrentPeer peer : peers) {
-            sourceInfoList.add(new DownloadSourceInfoAdapter(peer));
+            sourceInfoList.add(new TorrentSourceInfoAdapter(peer));
         }
         return sourceInfoList;
     }
@@ -959,36 +959,4 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         return torrent;
     }
 
-    private static class DownloadSourceInfoAdapter implements DownloadSourceInfo {
-        private final TorrentPeer source;
-
-        public DownloadSourceInfoAdapter(TorrentPeer source) {
-            this.source = source;
-        }
-
-        @Override
-        public String getClientName() {
-            return source.getClientName();
-        }
-
-        @Override
-        public float getDownloadSpeed() {
-            return source.getDownloadSpeed();
-        }
-
-        @Override
-        public String getIPAddress() {
-            return source.getIPAddress();
-        }
-
-        @Override
-        public float getUploadSpeed() {
-            return source.getUploadSpeed();
-        }
-
-        @Override
-        public boolean isEncyrpted() {
-            return source.isEncrypted();
-        }
-    }
 }

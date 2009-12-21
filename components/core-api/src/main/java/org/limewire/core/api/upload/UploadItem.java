@@ -3,8 +3,10 @@ package org.limewire.core.api.upload;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.SourceInfo;
 import org.limewire.core.api.download.UploadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
@@ -135,4 +137,11 @@ public interface UploadItem extends PropertiableFile {
      * property does not exist for this UploadItem. 
      */
     public Object getUploadProperty(UploadPropertyKey key);
+    
+    /**
+     * @return A list of details pertaining to the sources associated with the download.
+     * 
+     * <p>NOTE: May include upload only sources.
+     */
+    public List<SourceInfo> getSourcesDetails();
 }

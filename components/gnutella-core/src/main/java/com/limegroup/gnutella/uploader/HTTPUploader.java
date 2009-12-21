@@ -2,9 +2,12 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.limewire.collection.Range;
+import org.limewire.core.api.download.SourceInfo;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
@@ -277,5 +280,10 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public float getSeedRatio() {
         //not applicable
         return -1;
+    }
+
+    @Override
+    public List<SourceInfo> getTransferDetails() {
+        return Collections.emptyList();
     }
 }

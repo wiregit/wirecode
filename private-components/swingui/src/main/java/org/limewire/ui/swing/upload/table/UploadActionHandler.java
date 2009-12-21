@@ -50,7 +50,7 @@ class UploadActionHandler {
         } else if (actionCommmand == LOCATE_ON_DISK_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
-            JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.LOCAL_FILE);
+            JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.UPLOADING_FILE);
             dialog.setVisible(true);
         } else if (actionCommmand == REMOVE_COMMAND){
             uploadMediator.remove(item);

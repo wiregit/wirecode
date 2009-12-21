@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.downloader;
 
-import org.limewire.core.api.download.DownloadSourceInfo;
+import org.limewire.core.api.download.SourceInfo;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.InsufficientDataException;
 
-class SourceDetails implements DownloadSourceInfo {
+class SourceDetails implements SourceInfo {
     
     private final String name;
     private final float speed;
