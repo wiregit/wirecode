@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-12-21 11:30-0500\n"
+"POT-Creation-Date: 2009-12-22 11:30-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -733,7 +733,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:287
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:216
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:15
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:252
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:281
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:125
 msgid "OK"
 msgstr ""
@@ -955,7 +955,7 @@ msgid "Use TLS"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:84
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:149
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:153
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:372
 msgid "Add"
 msgstr ""
@@ -1363,7 +1363,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:219
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:272
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:301
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:143
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:116
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:254
@@ -3382,7 +3382,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:221
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:290
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:149
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:174
 msgid "Address"
 msgstr ""
 
@@ -3906,7 +3906,7 @@ msgstr ""
 msgid "Priority"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:201
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:220
 #, java-format
 msgid "{0} Properties"
 msgstr ""
@@ -4043,50 +4043,50 @@ msgstr ""
 msgid "Files"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:81
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:85
 msgid "URL"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:84
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:88
 msgid "Tier"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:145
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:149
 msgid "Add Tracker:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:147
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:151
 msgid "Tier:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:80
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:98
 msgid "Total Completed:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:87
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:116
 msgid "Total Leechers:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:91
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:120
 msgid "Total Seeders:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:150
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:175
 msgid "Client"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:151
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:176
 msgid "Upload"
 msgstr ""
 
 #. Add Download menu item.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:151
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:176
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:77
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:190
 msgid "Download"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:209
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:237
 #, java-format
 msgid "{0}%"
 msgstr ""
