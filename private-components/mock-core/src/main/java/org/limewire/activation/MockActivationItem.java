@@ -25,7 +25,7 @@ public class MockActivationItem implements ActivationItem {
     }
 
     @Override
-    public URL getURL() {
+    public String getURL() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -46,6 +46,12 @@ public class MockActivationItem implements ActivationItem {
     public boolean isSubscription() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public String getFirstSupportedVersion() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

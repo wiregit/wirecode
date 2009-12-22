@@ -12,7 +12,6 @@ import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,15 +23,23 @@ import javax.swing.WindowConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXTable;
+import org.limewire.activation.api.ActivationError;
+import org.limewire.activation.api.ActivationEvent;
+import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationState;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
+import org.limewire.ui.swing.components.ColoredBusyLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 
@@ -53,34 +60,34 @@ public class ActivationPanel {
     private final static String EDIT_PANEL = "EDIT_PANEL";
     private final static String OK_PANEL = "OK_PANEL";
     
-    /**
-     * States the UI can exist in.
-     */
-    enum ActivationState {
-        NO_LICENSE,
-        ACTIVATING,
-        INVALID_KEY,
-        EDIT_KEY,
-        EXPIRED_KEY,
-        ACTIVATED
-    };
+    private final ActivationManager activationManager;
+    private ActivationListener listener;
+
     
     private JPanel activationPanel;
     private JDialog dialog;
     private JTextField licenseField;
+    private ColoredBusyLabel busyLabel;
     private JButton editButton;
-    private JXTable table;
+    private ActivationTable table;
     private JLabel licenseKeyErrorLabel;
     private JLabel licenseExpirationLabel;
     private JPanel cardPanel;
     private CardLayout cardLayout;
     
-    Map<String, JComponent> cardMap = new HashMap<String, JComponent>();
+    private EventList<ActivationItem> eventList;
+    
+    Map<String, ButtonPanel> cardMap = new HashMap<String, ButtonPanel>();
+    private String selectedCard = null;
     
     @Inject
     public ActivationPanel(ActivationManager activationManager) {
+        this.activationManager = activationManager;
+        listener = new ActivationListener();
         
-        activationPanel = new JPanel(new MigLayout("fill, insets 20 20 20 20"));
+        eventList = new BasicEventList<ActivationItem>();
+        
+        activationPanel = new JPanel(new MigLayout("fill, gap 0, insets 10 20 18 20"));
         
         initComponents();
     }
@@ -100,6 +107,9 @@ public class ActivationPanel {
         licenseField.setForeground(fontColor);
         TextFieldClipboardControl.install(licenseField);
         
+        busyLabel = new ColoredBusyLabel(new Dimension(20,20));
+        busyLabel.setVisible(false);
+        
         editButton = new JButton(new EditAction());
         
         licenseKeyErrorLabel = new JLabel(I18n.tr("Sorry, the key you entered is invalid. Please trye again."));
@@ -110,17 +120,17 @@ public class ActivationPanel {
         licenseExpirationLabel.setFont(font);
         licenseExpirationLabel.setForeground(errorColor);
         
-        table = new JXTable();
+        table = new ActivationTable(eventList);
         JScrollPane scrollPane = new JScrollPane(table);
-//        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         
         activationPanel.add(licenseKeyErrorLabel, "skip 1, span 2, growx, wrap");
         
         activationPanel.add(licenseKey, "gapright 10");
         activationPanel.add(licenseField, "grow, push");
-        activationPanel.add(editButton, "wrap");
+        activationPanel.add(busyLabel, "gapleft 6, aligny 50%, hidemode 2");
+        activationPanel.add(editButton, "gapleft 40, wrap");
         
-        activationPanel.add(licenseExpirationLabel, "span, growx, wrap");
+        activationPanel.add(licenseExpirationLabel, "span, growx, gaptop 6, gapbottom 6, wrap");
         
         activationPanel.add(scrollPane, "span, grow, wrap, gapbottom 20");
         
@@ -131,10 +141,17 @@ public class ActivationPanel {
         activationPanel.add(cardPanel, "span, growx, wrap");
     }
     
+    @Inject
+    public void register() {
+        activationManager.addListener(listener);
+    }
+
     public void show() {
-        //TODO: ActivationManager.getActivationState();
-        //TODO: load the table with data ActivationManager.getActivationData()
-        setActivationState(ActivationState.NO_LICENSE);
+        // Setting the ActivationState and ErrorState initialize all of the
+        // fields and views before being shown.
+        licenseField.setText(activationManager.getLicenseKey());
+        setActivationState(activationManager.getActivationState());
+        setActivationError(activationManager.getActivationError());
         
         dialog = new LimeJDialog();
         dialog.setModal(true);
@@ -166,78 +183,107 @@ public class ActivationPanel {
     }
     
     private void dispose() {
+        if(listener != null) {
+            activationManager.removeListener(listener);
+        }
         if(dialog != null) {
             dialog.dispose();
             dialog = null;
         }
     }
         
+    /**
+     * Updates the UI information based on the current state of the 
+     * ActivationManager.
+     */
     private void setActivationState(ActivationState state) {
+        if(selectedCard != null) {
+            cardMap.get(selectedCard).setState(state);
+        }
         switch(state) {
-            case NO_LICENSE:
-                editButton.setVisible(false);
-                setLicenseKeyErrorVisible(false);
-                setLicenseExperiationVisible(false);
-                licenseField.setEditable(true);
+        case UNINITIALIZED:
+        case NOT_ACTIVATED:
+            editButton.setVisible(false);
+            licenseField.setEditable(true);
+            setBusyLabel(false);
+            selectCard(NO_LICENSE_PANEL);
+            return;
+        case ACTIVATING:
+            editButton.setVisible(false);
+            licenseField.setEditable(false);
+            setBusyLabel(true);
+            if(!selectedCard.equals(NO_LICENSE_PANEL) && !selectedCard.equals(EDIT_PANEL)) {
                 selectCard(NO_LICENSE_PANEL);
-                return;
-            case ACTIVATING:
-                editButton.setVisible(false);
-                setLicenseKeyErrorVisible(false);
-                setLicenseExperiationVisible(false);
-                licenseField.setEditable(false);
-                selectCard(NO_LICENSE_PANEL);
-                return;
-            case INVALID_KEY:
-                editButton.setVisible(false);
-                setLicenseKeyErrorVisible(true);
-                setLicenseExperiationVisible(false);
-                licenseField.setEditable(false);
-                selectCard(NO_LICENSE_PANEL);
-                return;
-            case EDIT_KEY:
-                editButton.setVisible(false);
-                setLicenseKeyErrorVisible(false);
-                setLicenseExperiationVisible(false);
-                licenseField.setEditable(true);
-                selectCard(EDIT_PANEL);
-                return;
-            case EXPIRED_KEY:
-                editButton.setVisible(false);
-                setLicenseKeyErrorVisible(false);
-                setLicenseExperiationVisible(true);
-                licenseField.setEditable(false);
-                selectCard(OK_PANEL);
-                return;
-            case ACTIVATED:
-                editButton.setVisible(true);
-                setLicenseKeyErrorVisible(false);
-                setLicenseExperiationVisible(false);
-                licenseField.setEditable(false);
-                selectCard(OK_PANEL);
-                return;
+            }
+            return;
+        case ACTIVATED:
+            editButton.setVisible(true);
+            licenseField.setEditable(false);
+            setBusyLabel(false);
+            selectCard(OK_PANEL);
+
+            eventList.clear();
+            eventList.addAll(activationManager.getActivationItems());
+            return;
         }
         throw new IllegalStateException("Unknown state: " + state);
+    }
+    
+    private void setActivationError(ActivationError error) {
+        switch(error) {
+        case NO_ERROR:
+            setLicenseKeyErrorVisible(false);
+            setLicenseExperiationVisible(false);
+            return;
+        case NO_KEY:
+            setLicenseKeyErrorVisible(false);
+            setLicenseExperiationVisible(false);
+            return;
+        case EXPIRED_KEY:
+            setLicenseKeyErrorVisible(false);
+            setLicenseExperiationVisible(true);
+            return;
+        case INVALID_KEY:
+            setLicenseKeyErrorVisible(true);
+            setLicenseExperiationVisible(false);
+            return;
+        }
+        throw new IllegalStateException("Unknown state: " + error);
+    }
+    
+    private void setEditState() {
+        editButton.setVisible(false);
+        licenseField.setEditable(true);
+        licenseField.requestFocusInWindow();
+        licenseField.selectAll();
+        setBusyLabel(false);
+        selectCard(EDIT_PANEL);
     }
     
     private void selectCard(String card) {
         if(!cardMap.containsKey(card)) {
             if(card.equals(NO_LICENSE_PANEL)) {
-                JPanel panel = getNoLicenseButtonPanel();
+                ButtonPanel panel = new NoLicenseButtonPanel();
                 cardMap.put(card, panel);
                 cardPanel.add(panel, card);
             } else if(card.equals(OK_PANEL)) {
-                JPanel panel = getActivatedLicenseButtonPanel();
+                ButtonPanel panel = new ActivatedButtonPanel();
                 cardMap.put(card, panel);
                 cardPanel.add(panel, card);
             } else if(card.equals(EDIT_PANEL)) {
-                JPanel panel = getEditLicenseButtonPanel();
+                ButtonPanel panel = new EditButtonPanel();
                 cardMap.put(card, panel);
                 cardPanel.add(panel, card);
             }
         }
+        selectedCard = card;
         cardLayout.show(cardPanel, card);
-     }
+    }
+    
+    private void setBusyLabel(boolean isVisible) {
+        busyLabel.setVisible(isVisible);
+        busyLabel.setBusy(isVisible);
+    }
     
     private void setLicenseKeyErrorVisible(boolean isVisible) {
         licenseKeyErrorLabel.setVisible(isVisible);
@@ -245,45 +291,66 @@ public class ActivationPanel {
     
     private void setLicenseExperiationVisible(boolean isVisible) {
         licenseExpirationLabel.setVisible(isVisible);
+    }   
+    
+    private abstract class ButtonPanel extends JPanel {
+        
+        public ButtonPanel() {
+            super(new MigLayout("fillx, gap 0, insets 0"));
+            setOpaque(false);
+        }
+        
+        public abstract void setState(ActivationState state);
     }
     
-    private JPanel getNoLicenseButtonPanel() {
-        JPanel p = new JPanel(new MigLayout("fillx, insets 0"));
-        p.setOpaque(false);
+    private class NoLicenseButtonPanel extends ButtonPanel {
+        private JButton activateButton;
         
-        JButton goPro = new JButton(new UrlAction(I18n.tr("Go Pro"),"http://www.limewire.com/client_redirect/?page=gopro"));
-        JButton activate = new JButton(new ActivateAction());
-        JButton later = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
+        public NoLicenseButtonPanel() {
+            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go Pro"),"http://www.limewire.com/client_redirect/?page=gopro"));
+            activateButton = new JButton(new ActivateAction());
+            JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
+            
+            add(goProButton, "push");
+            add(activateButton, "split, tag ok");
+            add(laterButton, "tag cancel, wrap");
+        }
         
-        p.add(goPro, "push");
-        p.add(activate, "split, tag ok");
-        p.add(later, "tag cancel");
+        @Override
+        public void setState(ActivationState state) {
+            activateButton.setEnabled(state != ActivationState.ACTIVATING);
+        }
+    }
+
+    private class EditButtonPanel extends ButtonPanel {
+        private JButton updateButton;
         
-        return p;
+        public EditButtonPanel() {
+            updateButton = new JButton(new UpdateAction());
+            JButton cancelButton = new JButton(new CancelAction());
+            
+            add(updateButton, "alignx 100%, gapright 10, tag ok, split");
+            add(cancelButton, "wrap, tag cancel");
+        }
+        
+        @Override
+        public void setState(ActivationState state) {
+            updateButton.setEnabled(state != ActivationState.ACTIVATING);
+        }
     }
     
-    private JPanel getEditLicenseButtonPanel() {
-        JPanel p = new JPanel(new MigLayout("fillx, insets 0"));
-        p.setOpaque(false);
+    private class ActivatedButtonPanel extends ButtonPanel {
+
+        public ActivatedButtonPanel() {
+            JButton okButton = new JButton(new OKDialogAction());
+            
+            add(okButton, "alignx 100%, tag ok, wrap");
+        }
         
-        JButton updateButton = new JButton(new UpdateAction());
-        JButton cancelButton = new JButton(new CancelAction());
-        
-        p.add(updateButton, "alignx 100%, tag ok, split");
-        p.add(cancelButton, "wrap, tag cancel");
-        
-        return p;
-    }
-    
-    private JPanel getActivatedLicenseButtonPanel() {
-        JPanel p = new JPanel(new MigLayout("fillx, insets 0"));
-        p.setOpaque(false);
-        
-        JButton okButton = new JButton(new OKDialogAction());
-        
-        p.add(okButton, "alignx 100%, wrap");
-        
-        return p;
+        @Override
+        public void setState(ActivationState state) {
+            //NO STATE CHANGE
+        }
     }
     
     private class EditAction extends AbstractAction {
@@ -295,9 +362,7 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            setActivationState(ActivationState.EDIT_KEY);
-            licenseField.requestFocusInWindow();
-            licenseField.selectAll();
+            setEditState();
         }
     }
     
@@ -313,7 +378,8 @@ public class ActivationPanel {
         }
     }
     
-    //TODO: this seems exactly the same as the UpdateAction
+    //TODO: this is exactly the same as UpdateAction
+    // only the text differs
     private class ActivateAction extends AbstractAction {
         public ActivateAction() {
             putValue(Action.NAME, I18n.tr("Activate"));
@@ -322,11 +388,7 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO: try contacting the server
-            //TODO: key check to avoid hitting the server unnecessarily
-            //TODO: what state is this??
-//            setActivationState(ActivationState.ACTIVATED);
-            setActivationState(ActivationState.ACTIVATING);
+            activationManager.activateKey(licenseField.getText().trim());
         }
     }
     
@@ -338,10 +400,19 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO: try contacting the server
-            //TODO: key check to avoid hitting the server unnecessarily
-            //TODO: what state is this??
-            setActivationState(ActivationState.ACTIVATING);
+            activationManager.activateKey(licenseField.getText().trim());
+        }
+    }
+    
+    private class ActivationListener implements EventListener<ActivationEvent> {
+        @Override
+        public void handleEvent(final ActivationEvent event) {
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    setActivationState(event.getData());
+                    setActivationError(event.getError());                  
+                }
+            });
         }
     }
 }

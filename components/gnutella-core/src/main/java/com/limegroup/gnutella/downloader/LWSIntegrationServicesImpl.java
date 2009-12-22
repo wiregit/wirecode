@@ -491,7 +491,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 add(res, "service.version.number"   ,LimeWireUtils.getServiceVersionNumber());
                 add(res, "is.alpha.release"         ,LimeWireUtils.isAlphaRelease());
                 add(res, "is.beta.release"          ,LimeWireUtils.isBetaRelease());
-                add(res, "is.pro"                   ,LimeWireUtils.isPro());
+//                add(res, "is.pro"                   ,LimeWireUtils.isPro());
                 add(res, "is.testing.version"       ,LimeWireUtils.isTestingVersion());
                 return res.toString();
             }

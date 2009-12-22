@@ -1,6 +1,5 @@
 package org.limewire.activation.api;
 
-import java.net.URL;
 
 //TODO: This API may change, these methods are partly brainstorming for items
 //      needed to be retrieved from the server and stored on the server.
@@ -41,6 +40,12 @@ public interface ActivationItem {
     /**
      * Returns a URL related to this feature.
      */
-    public URL getURL();
+    public String getURL();
+    
+    /**
+     * Returns the first version that this feature is enabled in.
+     * @return
+     */
+    public String getFirstSupportedVersion();
 
 }

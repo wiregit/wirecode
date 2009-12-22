@@ -37,7 +37,7 @@ public abstract class TableRendererEditor extends JXPanel implements TableCellRe
     }
 
     @Override
-    public final Object getCellEditorValue() {
+    public Object getCellEditorValue() {
         return null;
     }
 
@@ -53,8 +53,6 @@ public abstract class TableRendererEditor extends JXPanel implements TableCellRe
                 listeners.remove(lis);
         }
     }
-    
-    
 
     @Override
     public final Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -102,5 +100,4 @@ public abstract class TableRendererEditor extends JXPanel implements TableCellRe
         }
         return true;
     }
-
 }

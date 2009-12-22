@@ -27,7 +27,7 @@ public class CalendarRenderer extends DefaultLimeTableCellRenderer {
         if(!(value instanceof Long)) {
             setText("");
         } else {
-            setText(GuiUtils.msec2DateTime((Long)value)); 
+            setText(GuiUtils.msec2Date((Long)value)); 
         }
         return this;
     }

@@ -102,11 +102,11 @@ public final class LimeWireUtils {
 
     private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
 
-    /**
-     * Variable for whether or not this is a PRO version of LimeWire. 
-     */
-    @InspectablePrimitive("pro")
-    private static boolean _isPro = false;
+//    /**
+//     * Variable for whether or not this is a PRO version of LimeWire. 
+//     */
+//    @InspectablePrimitive("pro")
+//    private static boolean _isPro = false;
 
     /** Whether or not a temporary directory is in use. */
     private static boolean temporaryDirectoryInUse;
@@ -129,7 +129,7 @@ public final class LimeWireUtils {
 		else {
 			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
                            substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
-            _isPro = true;
+//            _isPro = true;
 		}
 	}
     
@@ -209,14 +209,14 @@ public final class LimeWireUtils {
         return 2;
     }
 
-    /**
-     * Accessor for whether or not this is LimeWire pro.
-     *
-     * @return <tt>true</tt> if it is pro, otherwise <tt>false</tt>
-     */
-    public static boolean isPro() {
-        return _isPro;
-    }
+//    /**
+//     * Accessor for whether or not this is LimeWire pro.
+//     *
+//     * @return <tt>true</tt> if it is pro, otherwise <tt>false</tt>
+//     */
+//    public static boolean isPro() {
+//        return _isPro;
+//    }
     
     /**
      * Accessor for whether or not this is a testing version
@@ -422,13 +422,13 @@ public final class LimeWireUtils {
     /**
      * Updates a URL to contain common information about the LW installation.
      */
-    public static String addLWInfoToUrl(String url, byte[] myClientGUID) {
+    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro) {
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
         url += "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
-            "&pro="   + LimeWireUtils.isPro() + 
+            "&pro="   + isPro + 
             "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
             "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
             "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +

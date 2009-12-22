@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.connection.ConnectionItem;
 import org.limewire.core.api.connection.ConnectionLifecycleEventType;
@@ -45,6 +46,7 @@ public class GnutellaConnectionManagerImpl
     private final ConnectionManager connectionManager;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     private final ConnectionServices connectionServices;
+    private final ActivationManager activationManager;
 
     /** Mapping of connections to ConnectionItem instances. */
     private final Map<RoutedConnection, ConnectionItem> connectionMap;
@@ -64,10 +66,12 @@ public class GnutellaConnectionManagerImpl
     @Inject
     public GnutellaConnectionManagerImpl(
             ConnectionManager connectionManager,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            ActivationManager activationManager) {
         
         this.connectionManager = Objects.nonNull(connectionManager, "connectionManager");
         this.connectionServices = connectionServices;
+        this.activationManager = activationManager;
 
         // Create map of connection items.
         connectionMap = new HashMap<RoutedConnection, ConnectionItem>();
@@ -176,7 +180,8 @@ public class GnutellaConnectionManagerImpl
         } else {
             int preferred = connectionManager.getPreferredConnectionCount();
             // account for pro having more connections.
-            if(LimeWireUtils.isPro()) {
+//            if(LimeWireUtils.isPro()) {
+            if(activationManager.isPro()) {
                 preferred -= 2;
             }
             

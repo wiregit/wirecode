@@ -26,7 +26,7 @@ public class ApplicationImplTest extends BaseTestCase {
         
         final ApplicationServices applicationServices = context.mock(ApplicationServices.class); 
             
-        final ApplicationImpl applicationImpl = new ApplicationImpl(applicationServices, null);
+        final ApplicationImpl applicationImpl = new ApplicationImpl(applicationServices, null, null);
         
         context.checking(new Expectations() {{
             allowing(applicationServices).getMyGUID();
@@ -58,7 +58,7 @@ public class ApplicationImplTest extends BaseTestCase {
         
         final LifecycleManager lifecycleManager = context.mock(LifecycleManager.class); 
             
-        final ApplicationImpl applicationImpl = new ApplicationImpl(null, lifecycleManager);
+        final ApplicationImpl applicationImpl = new ApplicationImpl(null, lifecycleManager, null);
         
         context.checking(new Expectations() {{
             exactly(1).of(lifecycleManager).start();
@@ -82,7 +82,7 @@ public class ApplicationImplTest extends BaseTestCase {
         NoSuchFieldException, IllegalAccessException, ClassNotFoundException, 
         NoSuchMethodException, InvocationTargetException {
         
-        final ApplicationImpl applicationImpl = new ApplicationImpl(null, null);
+        final ApplicationImpl applicationImpl = new ApplicationImpl(null, null, null);
         
         PrivateAccessor testVersionAccessor = new PrivateAccessor(LimeWireUtils.class, null, "testVersion");
         PrivateAccessor isProAccessor = new PrivateAccessor(LimeWireUtils.class, null, "_isPro");

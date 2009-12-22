@@ -2,8 +2,12 @@ package org.limewire.activation;
 
 import java.util.List;
 
+import org.limewire.activation.api.ActivationError;
+import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationState;
+import org.limewire.listener.EventListener;
 
 public class MockActivationManager implements ActivationManager {
 
@@ -31,4 +35,32 @@ public class MockActivationManager implements ActivationManager {
         return false;
     }
 
+    @Override
+    public boolean isPro() {
+        return false;
+    }
+
+    @Override
+    public void addListener(EventListener<ActivationEvent> listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public ActivationError getActivationError() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ActivationState getActivationState() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean removeListener(EventListener<ActivationEvent> listener) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

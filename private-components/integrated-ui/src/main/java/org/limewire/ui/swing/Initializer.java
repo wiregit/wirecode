@@ -2,10 +2,12 @@ package org.limewire.ui.swing;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -20,6 +22,7 @@ import javax.swing.plaf.basic.BasicHTML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.InstallSettings;
@@ -30,6 +33,7 @@ import org.limewire.net.FirewallService;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
+import org.limewire.setting.ActivationSettings;
 import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.support.ErrorHandler;
@@ -156,7 +160,9 @@ final class Initializer {
         
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
-        switchSplashes(awtSplash, splashImage, LimeWireUtils.isPro());
+//        switchSplashes(awtSplash, splashImage, LimeWireUtils.isPro());
+        switchSplashes(awtSplash, ActivationSettings.LAST_START_WAS_PRO.getValue() ? getProSplashImage() : splashImage, 
+                ActivationSettings.LAST_START_WAS_PRO.getValue());
         
         startEarlyCore();
         
@@ -698,6 +704,18 @@ final class Initializer {
             }
         });
         return response.get() == JOptionPane.OK_OPTION;
+    }
+    
+    /**
+     * Gets the image to be used as the splash.
+     */
+    private static Image getProSplashImage() {
+        URL imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
+        if (imageURL != null) {
+            return Toolkit.getDefaultToolkit().createImage(imageURL);
+        } else {
+            return null;
+        }
     }
 }
 

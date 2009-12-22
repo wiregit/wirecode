@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.connection.ConnectionLifecycleEventType;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
@@ -298,6 +299,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     private final ConnectionCheckerManager connectionCheckerManager;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final ActivationManager activationManager;
     
     @Inject
     public ConnectionManagerImpl(NetworkManager networkManager,
@@ -314,7 +316,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
              Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
             PingRequestFactory pingRequestFactory, 
-            NetworkInstanceUtils networkInstanceUtils) {
+            NetworkInstanceUtils networkInstanceUtils,
+            ActivationManager activationManager) {
         this.networkManager = networkManager;
         this.hostCatcher = hostCatcher;
         this.connectionDispatcher = connectionDispatcher;
@@ -330,6 +333,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         this.connectionCheckerManager = connectionCheckerManager;
         this.pingRequestFactory = pingRequestFactory;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.activationManager = activationManager;
         
         Version v = null;
         try {
@@ -2229,7 +2233,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         else if(isIdle())
             setPreferredConnections(ConnectionSettings.IDLE_CONNECTIONS.getValue());
         else
-            setPreferredConnections(PREFERRED_CONNECTIONS_FOR_LEAF);
+            setPreferredConnections(activationManager.isPro() ? 5 : 3);
     }
     
     /**

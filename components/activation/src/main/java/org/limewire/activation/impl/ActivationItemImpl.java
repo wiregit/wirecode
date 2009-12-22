@@ -10,7 +10,7 @@ public class ActivationItemImpl implements ActivationItem {
     private long datePurchased;
     private long dateExpired;
     private boolean isExpired;
-    private URL url;
+    private String url;
     private boolean isSubscription;
     
     
@@ -27,7 +27,7 @@ public class ActivationItemImpl implements ActivationItem {
         return licenseName;
     }
     @Override
-    public URL getURL() {
+    public String getURL() {
         return url;
     }
     @Override
@@ -43,5 +43,10 @@ public class ActivationItemImpl implements ActivationItem {
     @Override
     public boolean isSubscription() {
         return isSubscription;
+    }
+    @Override
+    public String getFirstSupportedVersion() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

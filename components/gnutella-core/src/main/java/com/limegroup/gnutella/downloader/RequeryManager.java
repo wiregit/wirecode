@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  *  A manager for controlling how requeries are sent in downloads.
@@ -54,6 +54,7 @@ class RequeryManager implements DHTEventListener {
     private final AltLocFinder altLocFinder;
     
     private final DHTManager dhtManager;
+    private final ActivationManager activationManager;
     
     /** The type of the last query this sent out. */
     private volatile QueryType lastQueryType;
@@ -89,12 +90,15 @@ class RequeryManager implements DHTEventListener {
             DownloadManager manager,
             AltLocFinder finder,
             DHTManager dhtManager,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            ActivationManager activationManager) {
         this.requeryListener = requeryListener;
         this.downloadManager = manager;
         this.altLocFinder = finder;
         this.dhtManager = dhtManager;
         this.connectionServices = connectionServices;
+        this.activationManager = activationManager;
+        
         dhtManager.addEventListener(this);
     }
     
@@ -143,7 +147,8 @@ class RequeryManager implements DHTEventListener {
     /** Returns true if a query can be sent right now. */
     boolean canSendQueryNow() {
         // PRO users can always send the DHT query, but only Gnutella after activate.
-        if(LimeWireUtils.isPro())
+//        if(LimeWireUtils.isPro())
+        if(activationManager.isPro())
             return canSendDHTQueryNow() || (activated && canSendQueryAfterActivate());
         else
             return activated && canSendQueryAfterActivate();

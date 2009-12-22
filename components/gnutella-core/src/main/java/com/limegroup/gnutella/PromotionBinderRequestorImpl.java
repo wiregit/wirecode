@@ -9,6 +9,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.params.HttpParams;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.promotion.AbstractPromotionBinderRequestor;
 import org.limewire.promotion.PromotionBinderFactory;
@@ -24,12 +25,15 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     
     private final LimeHttpClient exe;
     private final ApplicationServices applicationServices;
+    private final ActivationManager activationManager;
     
     @Inject
-    public PromotionBinderRequestorImpl(PromotionBinderFactory binderFactory, LimeHttpClient exe, ApplicationServices applicationServices) {
+    public PromotionBinderRequestorImpl(PromotionBinderFactory binderFactory, LimeHttpClient exe, 
+            ApplicationServices applicationServices, ActivationManager activationManager) {
         super(binderFactory);
         this.exe = exe;
         this.applicationServices = applicationServices;
+        this.activationManager = activationManager;
     }
  
     @Override
@@ -50,6 +54,6 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     
     @Override
     public String alterUrl(String url) {
-        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID());
+        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isPro());
     } 
 }

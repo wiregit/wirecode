@@ -79,14 +79,14 @@ public class ConnectionCheckerManagerImplTest extends BaseTestCase {
                 Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager, ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner, 
-                 Provider<IPFilter> ipFilter,
+                Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
                 PingRequestFactory pingRequestFactory,
                 NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                     capabilitiesVMFactory, managedConnectionFactory, queryUnicaster,
                     socketsManager, connectionServices, nodeAssigner, ipFilter, connectionCheckerManager,
-                    pingRequestFactory, networkInstanceUtils);
+                    pingRequestFactory, networkInstanceUtils, null);
         }
         
         @Override
