@@ -6,6 +6,8 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
+import org.limewire.core.api.search.store.ReleaseResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.components.DisposalListenerList;
 import org.limewire.ui.swing.filter.FilterableSource;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
@@ -89,6 +91,11 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
     void addSearchResults(Collection<? extends SearchResult> result);
     
     /**
+     * Adds the specified store result to the results list.
+     */
+    void addStoreResult(ReleaseResult releaseResult);
+    
+    /**
      * Removes all results from the model
      */
     void clear();
@@ -98,4 +105,37 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      */
     SearchType getSearchType();
     
+    /**
+     * Returns the style for store results.
+     */
+    StoreStyle getStoreStyle();
+    
+    /**
+     * Sets the store style to the specified value.
+     */
+    void setStoreStyle(StoreStyle storeStyle);
+    
+    /**
+     * Adds the specified listener to the list that is notified when the 
+     * model data is updated.
+     */
+    void addModelListener(ModelListener listener);
+    
+    /**
+     * Removes the specified listener from the list that is notified when the 
+     * model data is updated.
+     */
+    void removeModelListener(ModelListener listener);
+    
+    /**
+     * Defines a listener that is notified when model data is updated.
+     */
+    public interface ModelListener {
+        
+        /** Invoked when the specified store result is updated. */
+        void storeResultUpdated(VisualStoreResult vsr);
+        
+        /** Invoked when the style for store results is updated. */
+        void storeStyleUpdated(StoreStyle storeStyle);
+    }
 }

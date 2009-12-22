@@ -7,13 +7,11 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
+import org.limewire.core.api.search.store.StoreEnabled;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -22,6 +20,8 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import net.miginfocom.swing.MigLayout;
 
 /** Library Option View */
 public class LibraryOptionPanel extends OptionPanel {
@@ -39,15 +39,18 @@ public class LibraryOptionPanel extends OptionPanel {
     
     private final Provider<UnsafeTypeOptionPanel> unsafeOptionPanelProvider;
     private final Provider<ITunesOptionPanel> iTunesOptionPanelProvider;
-    
+    private final Provider<Boolean> storeEnabled;
+
     @Inject
     public LibraryOptionPanel(Provider<UnsafeTypeOptionPanel> unsafeTypeOptionPanelProvider,
-            Provider<ITunesOptionPanel> iTunesOptionPanelProvider,
-            Application application) {
+                              Provider<ITunesOptionPanel> iTunesOptionPanelProvider,
+                              Application application,
+                              @StoreEnabled Provider<Boolean> storeEnabled) {
         this.application = application;
         this.unsafeOptionPanelProvider = unsafeTypeOptionPanelProvider;
         this.iTunesOptionPanelProvider = iTunesOptionPanelProvider;
-        
+        this.storeEnabled = storeEnabled;
+
         GuiUtils.assignResources(this);
         
         this.playerPanel = new UsePlayerPanel();
@@ -203,7 +206,7 @@ public class LibraryOptionPanel extends OptionPanel {
         private void addModifyInfo() {
             
             Icon myFilesIcon = null;
-            if (StoreMediator.canShowStoreButton()) {
+            if (storeEnabled.get()) {
                 myFilesIcon = sharingMyFilesIcon;
             } else {
                 myFilesIcon = sharingMyFilesNoStoreIcon;

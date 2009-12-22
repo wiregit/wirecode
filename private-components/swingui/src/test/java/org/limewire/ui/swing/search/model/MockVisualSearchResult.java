@@ -13,6 +13,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 
 public class MockVisualSearchResult implements VisualSearchResult {
     private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();
@@ -37,6 +38,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
     @Override
     public boolean isAnonymous() {
         return true;
+    }
+    
+    @Override
+    public boolean isStore() {
+        return false;
     }
     
     @Override
@@ -175,11 +181,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public String getNavSelectionId() {
-        return null;
-    }
-
-    @Override
     public String getMagnetLink() {
         return null;
     }
@@ -234,6 +235,18 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public void toggleChildrenVisibility() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public RowDisplayResult getRowDisplayResult() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setRowDisplayResult(RowDisplayResult rowDisplayResult) {
         // TODO Auto-generated method stub
         
     }

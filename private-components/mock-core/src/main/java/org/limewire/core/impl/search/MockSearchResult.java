@@ -184,7 +184,7 @@ public class MockSearchResult implements Cloneable, SearchResult {
 
     @Override
     public float getRelevance(String query) {
-        return 1;
+        return sources.size();
     }
     
     @Override

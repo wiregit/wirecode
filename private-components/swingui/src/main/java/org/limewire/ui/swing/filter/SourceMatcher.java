@@ -33,6 +33,9 @@ class SourceMatcher<E extends FilterableItem> implements Matcher<E> {
         case ANY_FRIEND:
             return (item.getFriends().size() > 0);
             
+        case STORE:
+            return item.isStore();
+            
         case FRIEND:
         default:
             // Compare friend names against SourceItem name.

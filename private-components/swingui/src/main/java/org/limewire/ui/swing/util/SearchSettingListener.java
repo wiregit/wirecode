@@ -11,7 +11,7 @@ import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 
-public class SearchSettingListener implements SettingListener {
+public class SearchSettingListener implements SettingListener<Boolean> {
     private final JComboBox combo;
     private final BooleanSetting booleanSetting;
     private final SearchCategory searchCategory;

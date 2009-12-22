@@ -5,10 +5,10 @@ import org.limewire.setting.AbstractSetting;
 /**
  * A listener for {@link AbstractSetting}s.
  */
-public interface SettingListener {
+public interface SettingListener<T> {
     
     /**
      * Invoked when a {@link AbstractSetting} changed its state.
      */
-    public void settingChanged(SettingEvent evt);
+    public void settingChanged(SettingEvent<T> evt);
 }

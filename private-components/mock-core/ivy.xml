@@ -21,6 +21,7 @@
         <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="none" name="glazedlists" rev="${glazedlists.version}" conf="compile,runtime"/>
         <dependency org="none" name="google-collect" rev="${google-collect.version}" conf="compile,runtime"/>
+        <dependency org="none" name="json" rev="${json.version}" conf="compile,runtime"/>
         
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
     </dependencies>

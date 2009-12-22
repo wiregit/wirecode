@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -39,6 +37,7 @@ import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.SortOption;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -73,7 +72,7 @@ public class SortAndFilterPanel implements Disposable {
     private SortOption sortBy;
     
     private boolean repopulatingCombo;
-    private SettingListener viewTypeListener;
+    private SettingListener<Integer> viewTypeListener;
 
     /**
      * Constructs a SortAndFilterPanel with the specified search results data
@@ -186,7 +185,7 @@ public class SortAndFilterPanel implements Disposable {
             }
         });
 
-        viewTypeListener = new SettingListener() {
+        viewTypeListener = new SettingListener<Integer>() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtilities.invokeLater(new Runnable(){

@@ -16,10 +16,13 @@
         <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        
         <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="none" name="guice-assistedinject" rev="${guice-assistedinject.version}" conf="compile,runtime"/>
         <dependency org="none" name="glazedlists" rev="${glazedlists.version}" conf="compile,runtime"/>
 	    <dependency org="none" name="google-collect" rev="${google-collect.version}" conf="compile,runtime"/>
+        <dependency org="none" name="json" rev="${json.version}" conf="compile,runtime"/>
+        <dependency org="none" name="MozillaInterfaces" rev="${MozillaInterfaces.version}" conf="compile,runtime"/>
         
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
     </dependencies>

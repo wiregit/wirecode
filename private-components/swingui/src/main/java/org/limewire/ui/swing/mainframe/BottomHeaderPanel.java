@@ -21,8 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
@@ -53,11 +51,12 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Control panel that is displayed above the downloads/uploads tables.
@@ -218,7 +217,7 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
             }
         });
         
-        SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener() {
+        SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener<Boolean>() {
            @Override
             public void settingChanged(SettingEvent evt) {
                SwingUtils.invokeNowOrLater(new Runnable() {
@@ -230,7 +229,7 @@ public class BottomHeaderPanel implements TransferTrayNavigator {
             } 
         });
         
-        UploadSettings.SHOW_UPLOADS_IN_TRAY.addSettingListener(new SettingListener() {
+        UploadSettings.SHOW_UPLOADS_IN_TRAY.addSettingListener(new SettingListener<Boolean>() {
            @Override
             public void settingChanged(SettingEvent evt) {
                SwingUtils.invokeNowOrLater(new Runnable() {

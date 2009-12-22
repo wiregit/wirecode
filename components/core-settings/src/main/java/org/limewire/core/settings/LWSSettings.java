@@ -84,5 +84,23 @@ public final class LWSSettings extends LimeProps {
      */
     public static final BooleanSetting HAS_LOADED_LWS_GEO =
         FACTORY.createBooleanSetting("HAS_LOADED_LWS_GEO", false);
+    
+    /**
+     * The login pop-up URL.
+     */
+    public static final StringSetting LWS_CLIENT_LOGIN_POPUP_URL = FACTORY.createRemoteStringSetting(
+            "LWS_CLIENT_LOGIN_POPUP_URL", "https://store.limewire.com/client_login_popup", "LWSSettings.lwsClientLoginPopupURL");
+   
+    /**
+     * The cookie domain.
+     */
+    public static final StringSetting LWS_COOKIE_DOMAIN = FACTORY.createStringSetting(
+            "LWS_COOKIE_DOMAIN", ".store.limewire.com");
+    
+    /**
+     * True if Store related items should be shown, false otherwise.
+     */
+    public static final BooleanSetting SHOW_STORE_COMPONENTS = 
+        FACTORY.createBooleanSetting("SHOW_STORE_COMPONENTS", false);
    
 }

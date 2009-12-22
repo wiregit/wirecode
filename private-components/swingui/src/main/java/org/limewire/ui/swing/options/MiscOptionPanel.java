@@ -187,7 +187,7 @@ public class MiscOptionPanel extends OptionPanel {
         }
     }
 
-    private class FriendsChatPanel extends OptionPanel implements SettingListener {
+    private class FriendsChatPanel extends OptionPanel implements SettingListener<String> {
 
         private JCheckBox autoLoginCheckBox;
         private JComboBox serviceComboBox;

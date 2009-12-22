@@ -14,9 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.limewire.core.api.Category;
+import org.limewire.core.api.search.store.StoreEnabled;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.FileSetting;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -34,6 +33,8 @@ import org.limewire.ui.swing.util.SaveDirectoryHandler;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import net.miginfocom.swing.MigLayout;
+
 /**
  * Downloads Option View.
  */
@@ -41,6 +42,7 @@ public class TransferOptionPanel extends OptionPanel {
 
     private final Provider<IconManager> iconManager;
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
+    private final Provider<Boolean> storeEnabled;
     private final TransferLimitsOptionPanel connectionsOptionPanel;
     private final BitTorrentOptionPanel bitTorrentOptionPanel;
 
@@ -52,9 +54,11 @@ public class TransferOptionPanel extends OptionPanel {
     public TransferOptionPanel(Provider<IconManager> iconManager,
             ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory,
             Provider<TransferLimitsOptionPanel> connectionOptionPanel,
-            Provider<BitTorrentOptionPanel> bitTorrentOptionPanel) {
+            Provider<BitTorrentOptionPanel> bitTorrentOptionPanel,
+            @StoreEnabled Provider<Boolean> storeEnabled) {
         this.iconManager = iconManager;
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
+        this.storeEnabled = storeEnabled;
         this.connectionsOptionPanel = connectionOptionPanel.get();
         this.bitTorrentOptionPanel = bitTorrentOptionPanel.get();
         
@@ -179,7 +183,7 @@ public class TransferOptionPanel extends OptionPanel {
             
             // only show the store download option if the geo location
             // can be used to purchase from the LWS
-            if(SwingUiSettings.SHOW_STORE_COMPONENTS.get()) {
+            if(storeEnabled.get()) {
                 add(new JLabel(I18n.tr("Configure how LimeWire Store downloads are organized")));
                 add(new JButton(new DialogDisplayAction(TransferOptionPanel.this, storeOptionPanel, I18n.tr("Store File Organization"), I18n.tr("Configure..."), I18n.tr("Configure how files downloaded from the LimeWire Store are organized"))));
             }

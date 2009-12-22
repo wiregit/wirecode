@@ -11,6 +11,8 @@ public interface PropertiableHeadings {
     String getHeading(PropertiableFile propertiable);
     
     String getSubHeading(PropertiableFile propertiable);
+    
+    String getSubHeading(PropertiableFile propertiable, boolean album);
 
     String getFileSize(PropertiableFile propertiable);
 }

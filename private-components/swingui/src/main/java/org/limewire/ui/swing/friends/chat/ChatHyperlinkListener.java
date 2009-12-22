@@ -14,19 +14,19 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.html.FormSubmitEvent;
 
 import org.limewire.core.api.download.DownloadAction;
+import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
-import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.friend.FileMetaDataConverter;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.InvalidDataException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.DownloadExceptionHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -125,7 +125,7 @@ class ChatHyperlinkListener implements javax.swing.event.HyperlinkListener {
 
     private void handleLinkClick(String linkDescription, URL url) {
 
-        if (ChatDocumentBuilder.LIBRARY_LINK.equals(linkDescription)) {
+        if ("#library".equals(linkDescription)) {
             ChatFriend libraryChatFriend = conversation.getChatFriend();
             LOG.debugf("Opening a view to {0}'s library", libraryChatFriend.getName());
 //            libraryNavigator.selectFriendLibrary(libraryChatFriend.getFriend());

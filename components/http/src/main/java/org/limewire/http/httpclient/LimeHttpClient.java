@@ -3,6 +3,7 @@ package org.limewire.http.httpclient;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.CookieStore;
 import org.apache.http.params.HttpParams;
 
 /**
@@ -20,6 +21,10 @@ public interface LimeHttpClient extends HttpClient {
      * Set credentials that are used by the credentials provider.
      */
     public void setCredentials(Credentials credentials);
+    
+    public void setCookieStore(final CookieStore cookieStore);
+    
+    public CookieStore getCookieStore();
 
     /**
      * Does any necessary cleanup to allow 

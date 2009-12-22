@@ -8,6 +8,7 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.setting.evt.SettingEvent.EventType;
 import org.limewire.inspection.Inspectable;
+import org.limewire.listener.EventListener;
 
 
 /**
@@ -89,7 +90,7 @@ public abstract class AbstractSetting<T> implements Setting<T>, Inspectable {
     /**
      * List of {@link SettingListener}.
      */
-    private Collection<SettingListener> listeners = null;
+    private Collection<SettingListener<T>> listeners = null;
     
     /**
      * Constructs a new setting with the specified key and default
@@ -116,23 +117,42 @@ public abstract class AbstractSetting<T> implements Setting<T>, Inspectable {
     /* (non-Javadoc)
      * @see org.limewire.setting.Setting#addSettingListener(org.limewire.setting.evt.SettingListener)
      */
-    public void addSettingListener(SettingListener l) {
+    public void addSettingListener(SettingListener<T> l) {
         if (l == null) {
             throw new NullPointerException("SettingListener is null");
         }
         
         synchronized (this) {
             if (listeners == null) {
-                listeners = new ArrayList<SettingListener>();
+                listeners = new ArrayList<SettingListener<T>>();
             }
             listeners.add(l);
         }        
+    }
+
+    @Override
+    public void addListener(EventListener<T> tEventListener) {
+        addSettingListener(new SettingListenerEventListenerAdapter<T>(tEventListener));
+    }
+
+    @Override
+    public boolean removeListener(EventListener<T> tEventListener) {
+        for(SettingListener<T> listener : listeners) {
+            if(listener instanceof SettingListenerEventListenerAdapter) {
+                EventListener eventListener = ((SettingListenerEventListenerAdapter)listener).listener;
+                if(eventListener == tEventListener) {
+                    removeSettingListener(listener);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     /* (non-Javadoc)
      * @see org.limewire.setting.Setting#removeSettingListener(org.limewire.setting.evt.SettingListener)
      */
-    public void removeSettingListener(SettingListener l) {
+    public void removeSettingListener(SettingListener<T> l) {
         if (l == null) {
             throw new NullPointerException("SettingListener is null");
         }
@@ -314,6 +334,20 @@ public abstract class AbstractSetting<T> implements Setting<T>, Inspectable {
             };
             
             SettingsGroupManager.instance().execute(command);
+        }
+    }
+    
+    private class SettingListenerEventListenerAdapter<T> implements SettingListener<T> {
+        
+        final EventListener<T> listener;
+
+        public SettingListenerEventListenerAdapter(EventListener<T> listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public void settingChanged(SettingEvent<T> evt) {
+            listener.handleEvent(evt.getSetting().get());
         }
     }
 }

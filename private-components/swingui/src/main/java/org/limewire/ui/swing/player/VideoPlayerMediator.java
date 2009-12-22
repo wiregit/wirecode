@@ -6,6 +6,7 @@ import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -26,8 +27,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
-import net.sf.fmj.concurrent.ExecutorServiceManager;
-
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.file.CategoryManager;
@@ -41,11 +40,13 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
-
-import ca.odell.glazedlists.EventList;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.EventList;
+import net.sf.fmj.concurrent.ExecutorServiceManager;
 
 @Singleton
 class VideoPlayerMediator implements PlayerMediator {
@@ -78,7 +79,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Inject
     void register(){
-        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
+        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener<Boolean>(){
             @Override
             public void settingChanged(final SettingEvent evt) {
                 SwingUtilities.invokeLater(new Runnable(){
@@ -194,6 +195,10 @@ class VideoPlayerMediator implements PlayerMediator {
     }
     
 
+    @Override
+    public void play(URL url) {
+        throw new NotImplementedException();
+    }
 
     /**
      * Initializes an FMJ player for the video if possible, launches natively if

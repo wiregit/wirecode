@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -141,7 +142,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         panel.add(label     , "gap 6 6, wrap");
         panel.add(list      , "hmax " + listHeight + ", grow, wrap");
-        panel.add(moreButton, "gap 6 6");
+        panel.add(moreButton, "gap 6 6, hidemode 3");
     }
     
     /**
@@ -298,11 +299,15 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             @Override
             public List<SourceItem> getChildren(E parent) {
                 List<SourceItem> list = new ArrayList<SourceItem>();
-                if (parent.isAnonymous()) {
-                    list.add(SourceItem.ANONYMOUS_SOURCE);
-                }
-                if (parent.getFriends().size() > 0) {
-                    list.add(SourceItem.ANY_FRIEND_SOURCE);
+                if (parent.isStore()) {
+                    list.add(SourceItem.STORE_SOURCE);
+                } else {
+                    if (parent.isAnonymous()) {
+                        list.add(SourceItem.ANONYMOUS_SOURCE);
+                    }
+                    if (parent.getFriends().size() > 0) {
+                        list.add(SourceItem.ANY_FRIEND_SOURCE);
+                    }
                 }
                 return list;
             }
@@ -321,8 +326,12 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         CollectionList.Model<E, Friend> model = new CollectionList.Model<E, Friend>() {
             @Override
             public List<Friend> getChildren(E parent) {
-                Collection<Friend> friends = parent.getFriends();
-                return new ArrayList<Friend>(friends);
+                if (!parent.isStore()) {
+                    Collection<Friend> friends = parent.getFriends();
+                    return new ArrayList<Friend>(friends);
+                } else {
+                    return Collections.emptyList();
+                }
             }
         };
         
@@ -335,13 +344,13 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     /**
      * Determines whether anonymous sources are found, and updates the current
-     * unique list being displayed.  When anonymous sources are found, the
-     * P2P Network/Any Friends list is used; otherwise, the friends-only list
-     * is used.
+     * unique list being displayed.  When anonymous or store sources are found,
+     * the P2P Network list is used; otherwise, the friends-only list is used.
      */
     private void updateAnonymousFound() {
-        // Determine if anonymous sources are found.
-        boolean found = uniqueSourceList.contains(SourceItem.ANONYMOUS_SOURCE);
+        // Determine if anonymous or store sources are found.
+        boolean found = uniqueSourceList.contains(SourceItem.ANONYMOUS_SOURCE) ||
+            uniqueSourceList.contains(SourceItem.STORE_SOURCE);
         
         // Update current unique list only if changed.
         UniqueList<SourceItem> newList = found ? uniqueSourceList : uniqueFriendList;
@@ -367,8 +376,9 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * when the state changes.
      */
     private void updateAnyFriendFound() {
-        // Determine if any friend sources are found.
-        boolean found = uniqueSourceList.contains(SourceItem.ANY_FRIEND_SOURCE);
+        // Determine if any friend or store sources are found.
+        boolean found = uniqueSourceList.contains(SourceItem.ANY_FRIEND_SOURCE) ||
+            uniqueSourceList.contains(SourceItem.STORE_SOURCE);
         
         // Update indicator if necessary.
         if (anyFriendFound == found) return;
@@ -381,12 +391,15 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     }
     
     /**
-     * Updates the visibility of the more button.  For the P2P Network/Any 
-     * Friends list, the button is always displayed; for the Friends-only list,
-     * the button is displayed when there are more than three friends.  
+     * Updates the visibility of the more button.  For the P2P Network list, 
+     * the button is displayed when Any Friends are available; for the 
+     * Friends-only list, the button is displayed when there are more than 
+     * three friends.  
      */
     private void updateMoreVisibility() {
-        boolean visible = (currentUniqueList == uniqueSourceList) || (uniqueFriendList.size() > 3);
+        boolean visible = 
+            ((currentUniqueList == uniqueSourceList) && uniqueSourceList.contains(SourceItem.ANY_FRIEND_SOURCE)) ||
+            ((currentUniqueList == uniqueFriendList) && (uniqueFriendList.size() > 3));
         
         if (!moreButton.isVisible() && visible) {
             moreButton.setVisible(true);

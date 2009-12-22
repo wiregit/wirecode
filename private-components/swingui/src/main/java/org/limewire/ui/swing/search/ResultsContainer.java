@@ -7,6 +7,7 @@ import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanelFactory;
@@ -21,7 +22,7 @@ import com.google.inject.assistedinject.Assisted;
  * 
  * @see org.limewire.ui.swing.search.SearchResultsPanel
  */
-public class ResultsContainer extends JXPanel {
+public class ResultsContainer extends JXPanel implements Disposable {
 
     /** Results panel containing display tables. */
     private final BaseResultPanel baseResultPanel;
@@ -47,6 +48,11 @@ public class ResultsContainer extends JXPanel {
         add(baseResultPanel, BorderLayout.CENTER);
     }
 
+    @Override
+    public void dispose() {
+        baseResultPanel.dispose();
+    }
+    
     /**
      * Changes whether the list view or table view is displayed.
      * @param mode LIST or TABLE

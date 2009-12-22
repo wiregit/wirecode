@@ -1,17 +1,15 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.util.List;
 
 import org.limewire.friend.api.ChatState;
 import org.limewire.ui.swing.friends.chat.Message.Type;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 /**
  *
  */
 class ChatDocumentBuilder {
-    static final String LIBRARY_LINK = "#library";
     static final String MY_LIBRARY_LINK = "#mylibrary";
 
     private static final String LINE_BREAK = "<br/>";

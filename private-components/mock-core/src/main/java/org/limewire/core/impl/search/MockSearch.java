@@ -14,23 +14,31 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.api.search.store.StoreManager;
+import org.limewire.core.api.search.store.ReleaseResult;
+import org.limewire.core.api.search.store.StoreSearchListener;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 import org.limewire.friend.api.FriendPresence;
 
-
+/**
+ * Implementation of Search for the mock core.
+ */
 public class MockSearch implements Search {
     public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
 
-    private SearchDetails searchDetails;
-    private CopyOnWriteArrayList<SearchListener> listeners =
+    private final SearchDetails searchDetails;
+    private final StoreManager storeManager;
+    private final CopyOnWriteArrayList<SearchListener> listeners =
         new CopyOnWriteArrayList<SearchListener>();
 
     private int repeatCount = 0;
 
-    public MockSearch(SearchDetails searchDetails) {
+    public MockSearch(SearchDetails searchDetails, StoreManager storeManager) {
         this.searchDetails = searchDetails;
+        this.storeManager = storeManager;
     }
 
     @Override
@@ -51,10 +59,29 @@ public class MockSearch implements Search {
     
     @Override
     public void start() {
+        // Notify search listeners.
         for (SearchListener listener : listeners) {
             listener.searchStarted(this);
         }
+        
+        // Create listener for store results.
+        StoreSearchListener storeSearchListener = new StoreSearchListener() {
+            @Override
+            public void resultsFound(ReleaseResult[] storeResults) {
+                for (ReleaseResult storeResult : storeResults) {
+                    handleStoreResult(storeResult);
+                }
+            }
+            
+            @Override
+            public void styleUpdated(StoreStyle storeStyle) {
+                handleStoreStyle(storeStyle);
+            }
+        };
+        
+        // Add mock results.
         addResults("");
+        storeManager.startSearch(searchDetails, storeSearchListener);
     }
     
     @Override
@@ -86,6 +113,18 @@ public class MockSearch implements Search {
         }
     }
     
+    private void handleStoreResult(ReleaseResult releaseResult) {
+        for (SearchListener listener : listeners) {
+            listener.handleStoreResult(this, releaseResult);
+        }
+    }
+    
+    private void handleStoreStyle(StoreStyle storeStyle) {
+        for (SearchListener listener : listeners) {
+            listener.handleStoreStyle(this, storeStyle);
+        }
+    }
+    
     @Override
     public void repeat() {
         for (SearchListener listener : listeners) {
@@ -108,7 +147,6 @@ public class MockSearch implements Search {
             addRecordsWedding(i);
         }
         if(query.indexOf("monkey") > -1){
-            addRecordsWedding(i);
             addRecordsMonkey(i);
         }
         if(query.indexOf("water") > -1){
@@ -402,8 +440,8 @@ public class MockSearch implements Search {
 
         msr = new MockSearchResult();
         name = "No Monkeying in the cafeteria";
-        msr.setExtension("avi");
-        msr.setResultType(Category.VIDEO);
+        msr.setExtension("mp3");
+        msr.setResultType(Category.AUDIO);
         msr.setSize(9876L);
         msr.addSource("134.11.4.123");
         msr.setUrn("www.bracket.edu" + i);
@@ -530,8 +568,8 @@ public class MockSearch implements Search {
         
         msr = new MockSearchResult();
         name = "Don't Monkey With me";
-        msr.setExtension("avi");
-        msr.setResultType(Category.VIDEO);
+        msr.setExtension("mp3");
+        msr.setResultType(Category.AUDIO);
         msr.setSize(93876L);
         msr.addSource("127.1.34.21");
         msr.setUrn("www.Sepbracket.edu" + i);
@@ -1189,6 +1227,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.NAME, name);
         handleSearchResult(msr);
     }
+    
     static class MockRemoteHost implements RemoteHost {
         private final String description;
         
@@ -1213,7 +1252,7 @@ public class MockSearch implements Search {
 
         @Override
         public FriendPresence getFriendPresence() {
-            return new MockFriendPresence(new MockFriend(description));
+            return new MockFriendPresence(new MockFriend(description), description);
         }
     }
 }

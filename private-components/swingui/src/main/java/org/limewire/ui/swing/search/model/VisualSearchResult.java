@@ -8,14 +8,14 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.filter.FilterableItem;
-import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 
 /**
  * Defines an interface for a displayed search result.  The displayed result
  * may be supported by multiple sources, and may also contain an aggregation 
  * of similar results.   
  */
-public interface VisualSearchResult extends NavSelectable, PropertiableFile, FilterableItem {
+public interface VisualSearchResult extends PropertiableFile, FilterableItem {
 
     /**
      * Returns a list of core SearchResult values associated with this visual 
@@ -159,4 +159,19 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      */
     boolean isLicensed();
 
+    /**
+     * Returns row display data for the result.  RowDisplayResult is used for
+     * the List view, and includes display information such as:
+     * <ul>
+     *   <li>the row height in pixels</li>
+     *   <li>highlighted heading and subheading as HTML text</li>
+     *   <li>metadata that matches the search term</li>
+     * </ul>
+     */
+    RowDisplayResult getRowDisplayResult();
+    
+    /**
+     * Sets row display data for the result.
+     */
+    void setRowDisplayResult(RowDisplayResult rowDisplayResult);
 }

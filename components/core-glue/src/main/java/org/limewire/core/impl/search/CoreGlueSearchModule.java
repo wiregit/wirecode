@@ -11,11 +11,16 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 
+/**
+ * Guice module to configure the Search API for the live core. 
+ */
 public class CoreGlueSearchModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(SearchFactory.class).toProvider(FactoryProvider.newFactory(SearchFactory.class, CoreSearch.class));
+        bind(SearchFactory.class).toProvider(FactoryProvider.newFactory(
+                SearchFactory.class, CoreSearch.class));
+        
         EventMulticaster<SearchEvent> searchMulticaster = new EventMulticasterImpl<SearchEvent>();
         bind(new TypeLiteral<EventBroadcaster<SearchEvent>>(){}).toInstance(searchMulticaster);
         bind(new TypeLiteral<ListenerSupport<SearchEvent>>(){}).toInstance(searchMulticaster);

@@ -3,7 +3,6 @@ package org.limewire.ui.swing.friends.chat;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.FriendPresence;
-
 import static org.limewire.ui.swing.util.I18n.tr;
 
 /**
@@ -12,7 +11,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 class MessageFileOfferImpl extends AbstractMessageImpl implements MessageFileOffer {
 
     private static final String DOWNLOAD_FROM_LIBRARY = tr("Download it now, or get it from them " +
-            "{0}later{1}.","<a href=\"" + ChatDocumentBuilder.LIBRARY_LINK + "\">", "</a>");
+            "{0}later{1}.","<a href=\"" + "#library" + "\">", "</a>");
 
     private final FileMetaData fileMetadata;
     private DownloadState downloadState;

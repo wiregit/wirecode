@@ -19,6 +19,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.Objects;
@@ -29,7 +30,7 @@ import com.google.inject.Provider;
  * An implementation of VisualSearchResult for displaying actual search 
  * results. 
  */
-class SearchResultAdapter implements VisualSearchResult, Comparable {
+class SearchResultAdapter extends AbstractResultAdapter {
 
     private static final Log LOG = LogFactory.getLog(SearchResultAdapter.class);
     
@@ -52,13 +53,10 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     private boolean anonymous;
     private boolean visible;
     private boolean childrenVisible;    
-    private Boolean spamCache;    
-    private boolean preExistingDownload = false;    
+    private Boolean spamCache;      
     private float relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
-    
-    private final VisualSearchResultStatusListener changeListener;
 
     /**
      * Constructs a SearchResultAdapter with the specified List of core results
@@ -67,11 +65,11 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     public SearchResultAdapter(SearchResult source,
             Provider<PropertiableHeadings> propertiableHeadings,
             VisualSearchResultStatusListener changeListener, String query) {
+        super(changeListener);
         this.propertiableHeadings = propertiableHeadings;
         this.remoteHosts = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
         this.visible = true;
         this.childrenVisible = false;
-        this.changeListener = changeListener;
         
         addNewSource(source, query);
     }
@@ -79,6 +77,11 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     @Override
     public boolean isAnonymous() {
         return anonymous;
+    }
+    
+    @Override
+    public boolean isStore() {
+        return false;
     }
     
     @Override
@@ -305,11 +308,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     }
 
     @Override
-    public URN getNavSelectionId() {
-        return getUrn();
-    }
-
-    @Override
     public String getMagnetLink() {
         //TODO: add other search results as alternative results to the magnet.
         // A bit too intensive for the release.
@@ -370,37 +368,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
              }
         }
         return false;
-    }
-
-    @Override
-    public boolean isPreExistingDownload() {
-        return preExistingDownload;
-    }
-
-    @Override
-    public void setPreExistingDownload(boolean preExistingDownload) {
-        this.preExistingDownload = preExistingDownload;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        if(!(o instanceof SearchResultAdapter)) 
-            return -1;
-        
-        SearchResultAdapter sra = (SearchResultAdapter) o;
-        return getHeading().compareTo(sra.getHeading());
-    }
-
-    private void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
-        if (oldValue != newValue) {
-            changeListener.resultChanged(this, propertyName, oldValue, newValue);
-        }
-    }
-
-    private void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-        if (!Objects.equalOrNull(oldValue, newValue)) {
-            changeListener.resultChanged(this, propertyName, oldValue, newValue);
-        }
     }
     
     private static class RemoteHostComparator implements Comparator<RemoteHost> {

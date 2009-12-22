@@ -126,7 +126,7 @@ public class LimeWireSwingUI extends JPanel {
 	
 	@Inject
 	public void registerListener(){
-	    SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener() {
+	    SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener<Boolean>() {
 	       @Override
 	        public void settingChanged(SettingEvent evt) {
 	           SwingUtils.invokeNowOrLater(new Runnable() {

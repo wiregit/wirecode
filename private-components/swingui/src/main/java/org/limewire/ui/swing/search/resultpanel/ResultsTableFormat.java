@@ -7,8 +7,10 @@ import java.util.List;
 
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
+import org.limewire.core.api.search.store.ReleaseResult.SortPriority;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.VisualStoreResult;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
@@ -206,22 +208,36 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     }
     
     /**
-     * Compares the Spam Column. This column is never displayed to the user. Its used
-     * to sort classic search results based on files marked as spam and files not 
-     * marked as spam. 
+     * Compares values in the Spam column.  This column is never displayed to
+     * the user.  It is used to pre-sort classic search results based on files 
+     * marked as spam, and files marked as store results. 
      */
     public static class IsSpamComparator implements Comparator<VisualSearchResult> {
         @Override
         public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+            // Sort spam results to the bottom.
             boolean spam1 = o1.isSpam();
             boolean spam2 = o2.isSpam();
             
-            if(!spam1 && spam2)
+            if (!spam1 && spam2) {
                 return -1;
-            else if(spam1 && !spam2)
+            } else if (spam1 && !spam2) {
                 return 1;
-            else 
+            }
+            
+            // Sort store results according to their sort priority.
+            SortPriority prio1 = (o1 instanceof VisualStoreResult) ?
+                    ((VisualStoreResult) o1).getSortPriority() : SortPriority.MIXED;
+            SortPriority prio2 = (o2 instanceof VisualStoreResult) ?
+                    ((VisualStoreResult) o2).getSortPriority() : SortPriority.MIXED;
+                    
+            if (prio1 == prio2) {
                 return 0;
+            } else if ((prio1 == SortPriority.TOP) || (prio2 == SortPriority.BOTTOM)) {
+                return -1;
+            } else {
+                return 1;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.api.URNFactory;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.magnet.MagnetFactory;
@@ -55,6 +56,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(MagnetFactory.class).to(MagnetFactoryImpl.class);
         bind(ItunesMediator.class).to(ItunesMediatorImpl.class);
         bind(InspectionsCommunicator.class).to(InspectionsCommunicatorImpl.class);
+        bind(URNFactory.class).to(URNFactoryImpl.class);
         
         install(new CoreGlueSpamModule());
         install(new CoreGlueConnectionModule());

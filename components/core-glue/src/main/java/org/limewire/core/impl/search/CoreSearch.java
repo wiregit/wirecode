@@ -18,6 +18,8 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.api.search.store.ReleaseResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.core.settings.PromotionSettings;
@@ -74,17 +76,17 @@ public class CoreSearch implements Search {
 
     @Inject
     public CoreSearch(@Assisted SearchDetails searchDetails,
-            SearchServices searchServices,
-            QueryReplyListenerList listenerList,
-            PromotionSearcher promotionSearcher,
-            FriendSearcher friendSearcher,
-            Provider<GeocodeInformation> geoLocation,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            EventBroadcaster<SearchEvent> searchEventBroadcaster,
-            LimeXMLDocumentFactory xmlDocumentFactory,
-            Clock clock,
-            AdvancedQueryStringBuilder compositeQueryBuilder,
-            RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
+                      SearchServices searchServices,
+                      QueryReplyListenerList listenerList,
+                      PromotionSearcher promotionSearcher,
+                      FriendSearcher friendSearcher,
+                      Provider<GeocodeInformation> geoLocation,
+                      @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                      EventBroadcaster<SearchEvent> searchEventBroadcaster,
+                      LimeXMLDocumentFactory xmlDocumentFactory,
+                      Clock clock,
+                      AdvancedQueryStringBuilder compositeQueryBuilder,
+                      RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
@@ -137,40 +139,25 @@ public class CoreSearch implements Search {
             doKeywordSearch(initial);
             break;
         case WHATS_NEW:
-            doWhatsNewSearch(initial);
+            doWhatsNewSearch();
             break;
         }
     }
     
-    private void doWhatsNewSearch(boolean initial) {
+    private void doWhatsNewSearch() {
         searchServices.queryWhatIsNew(searchGuid,
                 searchDetails.getSearchCategory());
         
         // TODO: Search friends too.
+        // TODO: Search store too.
     }
     
     private void doKeywordSearch(boolean initial) {
-        String query = searchDetails.getSearchQuery();
-        String advancedQuery = "";
-        Map<FilePropertyKey, String> advancedSearch = searchDetails.getAdvancedDetails();
-        if(advancedSearch != null && advancedSearch.size() > 0) {
-            if(query == null || query.equals("")) {
-                query = compositeQueryBuilder.createSimpleCompositeQuery(advancedSearch);
-            }
-            advancedQuery = compositeQueryBuilder.createXMLQueryString(advancedSearch, searchDetails.getSearchCategory().getCategory());
-        }
-        
-        String mutated = searchServices.mutateQuery(query);
-        searchServices.query(searchGuid, mutated, advancedQuery,
-                searchDetails.getSearchCategory());
-        
-        backgroundExecutor.execute(new Runnable() {
-            @Override
-            public void run() { 
-                friendSearcher.doSearch(searchDetails, friendSearchListener);
-            }
-        });        
-        
+        doGnutellaSearch();
+        doPromotionSearch(initial);
+    }
+
+    private void doPromotionSearch(boolean initial) {
         if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
@@ -197,17 +184,51 @@ public class CoreSearch implements Search {
                             target);
                     handleSponsoredResults(coreSponsoredResult);
                 }
+
+                @Override
+                public void process(ReleaseResult storeResult) {
+                    handleStoreResult(storeResult);
+                }
+
+                @Override
+                public void process(StoreStyle styleResult) {
+                    handleStoreStyle(styleResult);
+                }
             };
             
-            final String finalQuery = query;
             backgroundExecutor.execute(new Runnable() {
                 @Override
                 public void run() { 
-                    promotionSearcher.search(finalQuery, callback, geoLocation.get());
+                    promotionSearcher.search(searchDetails, callback, geoLocation.get());
                 }
             });            
         }
     }
+
+    private void doGnutellaSearch() {
+        String query = searchDetails.getSearchQuery();
+        String advancedQuery = "";
+        Map<FilePropertyKey, String> advancedSearch = searchDetails.getAdvancedDetails();
+        if(advancedSearch != null && advancedSearch.size() > 0) {
+            if(query == null || query.equals("")) {
+                query = compositeQueryBuilder.createSimpleCompositeQuery(advancedSearch);
+            }
+            advancedQuery = compositeQueryBuilder.createXMLQueryString(advancedSearch, searchDetails.getSearchCategory().getCategory());
+        }
+
+        String mutated = searchServices.mutateQuery(query);
+        searchServices.query(searchGuid, mutated, advancedQuery,
+                searchDetails.getSearchCategory());
+
+        backgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() { 
+                friendSearcher.doSearch(searchDetails, friendSearchListener);
+            }
+        });
+    }
+
+    
     
     /**
      * Stops current search and repeats search.
@@ -252,6 +273,18 @@ public class CoreSearch implements Search {
         List<SponsoredResult> resultList =  Arrays.asList(sponsoredResults);
         for(SearchListener listener : searchListeners) {
             listener.handleSponsoredResults(CoreSearch.this, resultList);
+        }
+    }
+    
+    private void handleStoreResult(ReleaseResult releaseResult) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleStoreResult(this, releaseResult);
+        }
+    }
+    
+    private void handleStoreStyle(StoreStyle storeStyle) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleStoreStyle(this, storeStyle);
         }
     }
     

@@ -22,13 +22,13 @@ import com.google.inject.Inject;
 public class OptionPanelStateManager {
     
     private final Map<Setting, Object> activeSettingMap;
-    private final Map<Setting, SettingListener> settingListeners;
+    private final Map<Setting, SettingListener<Boolean>> settingListeners;
     private final Set<SettingChangedListener> listeners;
     
     @Inject
     public OptionPanelStateManager() {
         activeSettingMap = new HashMap<Setting, Object>();
-        settingListeners = new HashMap<Setting, SettingListener>();
+        settingListeners = new HashMap<Setting, SettingListener<Boolean>>();
         listeners = new HashSet<SettingChangedListener>();
     }
     
@@ -91,10 +91,10 @@ public class OptionPanelStateManager {
         public void settingChanged(Setting setting);
     }
 
-    public void registerSettingListener(final Setting setting) {
-        SettingListener settingListener = settingListeners.get(setting);
+    public void registerSettingListener(final Setting<Boolean> setting) {
+        SettingListener<Boolean> settingListener = settingListeners.get(setting);
         if(settingListener == null) {
-            settingListener = new SettingListener() {
+            settingListener = new SettingListener<Boolean>() {
                 @Override
                 public void settingChanged(final SettingEvent evt) {
                     SwingUtilities.invokeLater(new Runnable() {

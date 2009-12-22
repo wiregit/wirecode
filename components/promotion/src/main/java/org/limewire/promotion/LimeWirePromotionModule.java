@@ -3,6 +3,7 @@ package org.limewire.promotion;
 import org.limewire.inject.AbstractModule;
 import org.limewire.promotion.impressions.ImpressionsCollector;
 import org.limewire.promotion.impressions.ImpressionsCollectorImpl;
+import org.limewire.promotion.search.LimeWirePromotionSearchModule;
 
 public class LimeWirePromotionModule extends AbstractModule {
     
@@ -25,6 +26,7 @@ public class LimeWirePromotionModule extends AbstractModule {
         bind(PromotionBinderFactory.class).to(PromotionBinderFactoryImpl.class);
         bind(PromotionBinderRequestor.class).to(promotionBinderRequestorClass);
         bind(PromotionServices.class).to(promotionServices);
+        install(new LimeWirePromotionSearchModule());
     }
     
     

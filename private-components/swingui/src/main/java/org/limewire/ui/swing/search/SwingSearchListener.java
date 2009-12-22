@@ -7,6 +7,8 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.api.search.store.ReleaseResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -64,6 +66,16 @@ class SwingSearchListener implements SearchListener {
                 sponsoredView.addSponsoredResults(sponsoredResults);
             }
         });
+    }
+    
+    @Override
+    public void handleStoreResult(Search search, ReleaseResult releaseResult) {
+        searchResultsModel.addStoreResult(releaseResult);
+    }
+    
+    @Override
+    public void handleStoreStyle(Search search, StoreStyle storeStyle) {
+        searchResultsModel.setStoreStyle(storeStyle);
     }
 
     @Override

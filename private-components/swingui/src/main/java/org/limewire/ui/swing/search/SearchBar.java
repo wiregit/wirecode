@@ -14,8 +14,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.AutoCompleteDictionary;
@@ -48,6 +46,8 @@ import org.limewire.util.I18NConvert;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * The search bar component at the top of the UI main window.  This includes
@@ -138,7 +138,7 @@ public class SearchBar extends JXPanel {
                 }
             }
         });
-        SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.addSettingListener(new SettingListener() {
+        SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.addSettingListener(new SettingListener<Boolean>() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtils.invokeNowOrLater(new Runnable() {

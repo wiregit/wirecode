@@ -20,9 +20,9 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.upload.UploadItem;
+import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
-import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -41,14 +41,14 @@ import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 /**
  * Mediator to control the interaction between the uploads table and various
@@ -102,7 +102,7 @@ public class UploadMediator {
         
         // Add setting listener to clear finished uploads.  When set, we clear
         // finished uploads and hide the "clear finished" button.
-        SharingSettings.CLEAR_UPLOAD.addSettingListener(new SettingListener() {
+        SharingSettings.CLEAR_UPLOAD.addSettingListener(new SettingListener<Boolean>() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtils.invokeNowOrLater(new Runnable() {

@@ -17,9 +17,11 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchDetails.SearchType;
+import org.limewire.core.api.search.store.ReleaseResult;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.DisposalListener;
@@ -27,6 +29,9 @@ import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.ui.swing.util.SwingUtils;
+
+import com.google.inject.Provider;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -39,8 +44,6 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import ca.odell.glazedlists.util.concurrent.Lock;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
-
-import com.google.inject.Provider;
 
 /**
  * The default implementation of SearchResultsModel containing the results of
@@ -92,6 +95,9 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     /** Current sort option. */
     private SortOption sortOption;
+    
+    /** Current store style. */
+    private StoreStyle storeStyle;
 
     /** Current matcher editor for filtered search results. */
     private MatcherEditor<VisualSearchResult> filterEditor;
@@ -102,7 +108,9 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     /** Matcher editor for visible search results. */
     private final VisibleMatcherEditor visibleEditor = new VisibleMatcherEditor();
     
-    private List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
+    private final List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
+    
+    private final List<ModelListener> modelListeners = new ArrayList<ModelListener>();
     
     /** Headings to create search results with. */
     private final Provider<PropertiableHeadings> propertiableHeadings;
@@ -250,6 +258,17 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     public SearchType getSearchType() {
         return searchInfo.getSearchType();
     }
+    
+    @Override
+    public StoreStyle getStoreStyle() {
+        return storeStyle;
+    }
+    
+    @Override
+    public void setStoreStyle(StoreStyle storeStyle) {
+        this.storeStyle = storeStyle;
+        fireStoreStyleUpdated(storeStyle);
+    }
 
     /**
      * Returns a list of filtered results.
@@ -357,6 +376,14 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {
+        // Process store result change and return; store results are not grouped.
+        if (vsr instanceof VisualStoreResult) {
+            if (VisualStoreResult.ALBUM_ICON.equals(propertyName) || VisualStoreResult.TRACKS.equals(propertyName)) {
+                fireStoreResultUpdated((VisualStoreResult) vsr);
+            }
+            return;
+        }
+        
         // Scan through the list & find the item.
         URN urn = vsr.getUrn();
         int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
@@ -418,6 +445,28 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         }        
         
         listQueuer.addAll(results);
+    }
+    
+    @Override
+    public void addStoreResult(final ReleaseResult releaseResult) {
+        // Add store result on EDT so events are forwarded to the UI correctly.
+        SwingUtils.invokeNowOrLater(new Runnable() {
+            @Override
+            public void run() {
+                // Find URN in results list.
+                URN urn = releaseResult.getUrn();
+                int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
+                
+                // Add store result if not in list.
+                if (idx < 0) {
+                    idx = -(idx + 1);
+                    ReleaseResultAdapter vsr = new ReleaseResultAdapter(releaseResult, 
+                            propertiableHeadings, BasicSearchResultsModel.this);
+                    groupedUrnResults.add(idx, vsr);
+                }
+                
+            }
+        });
     }
     
     /**
@@ -595,9 +644,31 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         disposalListeners.remove(listener);
     }
     
+    @Override
+    public void addModelListener(ModelListener listener) {
+        modelListeners.add(listener);
+    }
+    
+    @Override
+    public void removeModelListener(ModelListener listener) {
+        modelListeners.remove(listener);
+    }
+    
     private void notifyDisposalListeners(){
         for (DisposalListener listener : disposalListeners){
             listener.objectDisposed(this);
+        }
+    }
+    
+    private void fireStoreResultUpdated(VisualStoreResult vsr) {
+        for (ModelListener listener : modelListeners) {
+            listener.storeResultUpdated(vsr);
+        }
+    }
+    
+    private void fireStoreStyleUpdated(StoreStyle storeStyle) {
+        for (ModelListener listener : modelListeners) {
+            listener.storeStyleUpdated(storeStyle);
         }
     }
     

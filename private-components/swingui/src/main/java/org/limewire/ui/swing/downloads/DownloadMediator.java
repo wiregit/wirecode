@@ -115,7 +115,7 @@ public class DownloadMediator {
         
         // Add setting listener to clear finished downloads.  When set, we
         // clear finished downloads and hide the "clear finished" button.
-        SharingSettings.CLEAR_DOWNLOAD.addSettingListener(new SettingListener() {
+        SharingSettings.CLEAR_DOWNLOAD.addSettingListener(new SettingListener<Boolean>() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtils.invokeNowOrLater(new Runnable() {

@@ -7,11 +7,17 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.core.api.search.SearchDetails;
+import org.limewire.core.api.search.store.ReleaseResult;
+import org.limewire.core.api.search.store.StoreManager;
+import org.limewire.core.api.search.store.StoreSearchListener;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.promotion.SearcherDatabase.QueryResult;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestriction;
 import org.limewire.promotion.impressions.ImpressionsCollector;
+import org.limewire.core.api.search.store.StoreSearchEnabled;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,6 +36,9 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     private final PromotionBinderRepository promotionBinderRepository;
 
     private final PromotionServices promotionServices;
+    
+    private final StoreManager storeManager;
+    private final Provider<Boolean> storeSearchEnabled;
 
     private final ExecutorService exec;
 
@@ -37,15 +46,18 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     @Inject
     public PromotionSearcherImpl(final KeywordUtilImpl keywordUtil,
-            final SearcherDatabase searcherDatabase,
-            final ImpressionsCollector impressionsCollector,
-            final PromotionBinderRepository promotionBinderRepository,
-            final PromotionServices promotionServices) {
+                                 final SearcherDatabase searcherDatabase,
+                                 final ImpressionsCollector impressionsCollector,
+                                 final PromotionBinderRepository promotionBinderRepository,
+                                 final PromotionServices promotionServices, StoreManager storeManager,
+                                 @StoreSearchEnabled final Provider<Boolean> storeSearchEnabled) {
         this.keywordUtil = keywordUtil;
         this.searcherDatabase = searcherDatabase;
         this.impressionsCollector = impressionsCollector;
         this.promotionBinderRepository = promotionBinderRepository;
         this.promotionServices = promotionServices;
+        this.storeManager = storeManager;
+        this.storeSearchEnabled = storeSearchEnabled;
         this.exec = ExecutorsHelper.newThreadPool("SearcherThread");
     }
 
@@ -67,7 +79,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * @param callback the recipient of the results
      * @param userLocation this can be <code>null</code>
      */
-    public void search(final String query, final PromotionSearchResultsCallback callback,
+    public void search(final SearchDetails query, final PromotionSearchResultsCallback callback,
             final GeocodeInformation userLocation) {
         if (isEnabled()) {
             exec.execute(new Searcher(query, callback, userLocation));
@@ -85,7 +97,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * method. When the search has completed, this thread dies.
      */
     private class Searcher implements Runnable {
-        private final String query;
+        private final SearchDetails query;
 
         private final PromotionSearchResultsCallback callback;
 
@@ -97,11 +109,11 @@ public class PromotionSearcherImpl implements PromotionSearcher {
         /** Two character territory of user ('US') or null if not known. */
         private final String userTerritory;
 
-        Searcher(String query, PromotionSearchResultsCallback callback,
+        Searcher(SearchDetails query, PromotionSearchResultsCallback callback,
                 GeocodeInformation userLocation) {
             this.query = query;
             this.callback = callback;
-            this.normalizedQuery = keywordUtil.normalizeQuery(query);
+            this.normalizedQuery = keywordUtil.normalizeQuery(query.getSearchQuery());
             // Now calculate our latitude/longitude from the Geocode, or null
             if (userLocation == null) {
                 this.userLatLon = null;
@@ -156,13 +168,17 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                 //
                 return;
             }
+            
+            if(storeSearchEnabled.get() && isWhitelisted(normalizedQuery, results)) {
+                doStoreSearch();
+            }
 
             removeInvalidResults(results, timeQueried);
 
             List<QueryResult> visibleResults = new ArrayList<QueryResult>(results.size());
             for (QueryResult result : results) {
                 if (result.getPromotionMessageContainer().isImpressionOnly()) {
-                    impressionsCollector.recordImpression(query, timeQueried, new Date(), result
+                    impressionsCollector.recordImpression(query.getSearchQuery(), timeQueried, new Date(), result
                             .getPromotionMessageContainer(), result.getBinderUniqueName());
                 } else {
                     visibleResults.add(result);
@@ -181,7 +197,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                     callback.process(result.getPromotionMessageContainer());
                     // record we just showed this result.
                     impressionsCollector
-                            .recordImpression(query, timeQueried, new Date(), result
+                            .recordImpression(query.getSearchQuery(), timeQueried, new Date(), result
                                     .getPromotionMessageContainer(), result
                                     .getBinderUniqueName());
                 }
@@ -193,6 +209,17 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                 if (shownResults >= maxNumberOfResults.get())
                     break;
             }
+        }
+
+        private boolean isWhitelisted(String query, List<QueryResult> results) {
+            return true;
+            // uncomment to compare against the whitelist
+//            for(QueryResult result : results) {
+//                if(result.getQuery().equals(query)) {
+//                    return true;
+//                }
+//            }
+//            return false;
         }
 
         private boolean isMessageValid(final PromotionMessageContainer promotionMessageContainer,
@@ -265,6 +292,30 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                     continue;
                 }
             }
+        }
+        
+        /**
+         * Performs store search based on initial indicator.  
+         */
+        private void doStoreSearch() {
+            // For now, we only perform store search on initial search.
+            // Create listener for store results.
+            StoreSearchListener storeSearchListener = new StoreSearchListener() {
+                @Override
+                public void resultsFound(ReleaseResult[] storeResults) {
+                    for (ReleaseResult storeResult : storeResults) {
+                        callback.process(storeResult);
+                    }
+                }
+                
+                @Override
+                public void styleUpdated(StoreStyle storeStyle) {
+                    callback.process(storeStyle);
+                }
+            };
+            
+            // Start store search.
+            storeManager.startSearch(query, storeSearchListener); 
         }
     }
 

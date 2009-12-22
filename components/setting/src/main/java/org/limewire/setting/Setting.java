@@ -1,13 +1,13 @@
 package org.limewire.setting;
 
-import org.limewire.inject.MutableProvider;
+import org.limewire.inject.BroadcastingMutableProvider;
 import org.limewire.setting.evt.SettingListener;
 
 /**
  * Defines the interface for a setting that can be used
  * within this package.
  */
-public interface Setting<T> extends MutableProvider<T> {    
+public interface Setting<T> extends BroadcastingMutableProvider<T> {    
     
     /** Gets the current value of the setting. */
     T get();
@@ -22,17 +22,17 @@ public interface Setting<T> extends MutableProvider<T> {
     /**
      * Registers a {@link SettingListener}.
      */
-    void addSettingListener(SettingListener l);
+    void addSettingListener(SettingListener<T> l);
 
     /**
      * Removes a {@link SettingListener}.
      */
-    void removeSettingListener(SettingListener l);
+    void removeSettingListener(SettingListener<T> l);
 
     /**
      * Returns all {@link SettingListener}s or null of there are none.
      */
-    SettingListener[] getSettingListeners();
+    SettingListener<T>[] getSettingListeners();
 
     /**
      * Reload value from properties object.

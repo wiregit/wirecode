@@ -6,7 +6,7 @@ import org.limewire.setting.Setting;
 /**
  * SettingEvent are fired when a {@link AbstractSetting} changed its state.
  */
-public class SettingEvent {
+public class SettingEvent<T> {
     
     /**
      * Various types of events that may occur.
@@ -40,7 +40,7 @@ public class SettingEvent {
     
     private final EventType type;
     
-    private final Setting setting;
+    private final Setting<T> setting;
     
     /**
      * Create a SettingEvent.
@@ -48,7 +48,7 @@ public class SettingEvent {
      * @param type the type of the Event
      * @param setting the Setting that triggered the event
      */
-    public SettingEvent(EventType type, Setting setting) {
+    public SettingEvent(EventType type, Setting<T> setting) {
         if (type == null) {
             throw new NullPointerException("EventType is null");
         }
@@ -71,7 +71,7 @@ public class SettingEvent {
     /**
      * Returns the Setting that triggered the event.
      */
-    public Setting getSetting() {
+    public Setting<T> getSetting() {
         return setting;
     }
     

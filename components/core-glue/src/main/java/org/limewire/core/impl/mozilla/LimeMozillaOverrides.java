@@ -2,10 +2,17 @@ package org.limewire.core.impl.mozilla;
 
 import org.limewire.core.settings.MozillaSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.impl.search.store.XPComDownloadImpl;
+import org.limewire.core.impl.search.store.XPComDownloadFactory;
+import org.limewire.promotion.search.StoreAuthStateFactory;
+import org.limewire.promotion.search.StoreAuthStateImpl;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.XPCOMUtils;
+import org.mozilla.interfaces.nsIComponentRegistrar;
 import org.mozilla.interfaces.nsIDownloadManager;
+import org.mozilla.interfaces.nsIPrefBranch;
 import org.mozilla.interfaces.nsIPrefService;
+import org.mozilla.xpcom.Mozilla;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -15,10 +22,15 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 public class LimeMozillaOverrides {
 
     private final LimeMozillaDownloadManagerListenerImpl downloadManagerListener;
+    private final XPComDownloadFactory xpComDownloadFactory;
+    private final StoreAuthStateFactory storeAuthStateFactory;
 
     @Inject
-    public LimeMozillaOverrides(LimeMozillaDownloadManagerListenerImpl downloadManagerListener) {
+    public LimeMozillaOverrides(LimeMozillaDownloadManagerListenerImpl downloadManagerListener,
+                                XPComDownloadFactory xpComDownloadFactory, StoreAuthStateFactory storeAuthStateFactory) {
         this.downloadManagerListener = downloadManagerListener;
+        this.xpComDownloadFactory = xpComDownloadFactory;
+        this.storeAuthStateFactory = storeAuthStateFactory;
     }
 
     public void overrideMozillaDefaults() {
@@ -69,6 +81,27 @@ public class LimeMozillaOverrides {
                 prefService.getBranch("network.http.").setIntPref("max-connections", max);
                 prefService.getBranch("network.http.").setIntPref("max-connections-per-server",
                         max / 2);
+                
+                
+                Mozilla mozilla = Mozilla.getInstance();
+                nsIComponentRegistrar registrar = mozilla.getComponentRegistrar();
+                // Register LimeComponent factory.
+                
+                // TODO registry pattern
+                registrar.registerFactory(XPComDownloadImpl.CID, "XPComDownload",
+                       XPComDownloadImpl.CONTRACT_ID, xpComDownloadFactory);
+                registrar.registerFactory(StoreAuthStateImpl.CID, "StoreAuthState",
+                       StoreAuthStateImpl.CONTRACT_ID, storeAuthStateFactory);
+                
+                // Set strict_origin_policy=false for local files - prevents dialog
+                // prompt when local file JavaScript enables UniversalXPConnect.
+                nsIPrefBranch rootBranch = prefService.getBranch("");
+                rootBranch.setBoolPref("security.fileuri.strict_origin_policy", 0);
+                // Grant UniversalXPConnect privileges for local files.
+                nsIPrefBranch prefBranch = prefService.getBranch("capability.principal.codebase.");
+                prefBranch.setCharPref("lime.granted", "UniversalXPConnect");
+                prefBranch.setCharPref("lime.id", "file://");
+                prefBranch.setCharPref("lime.subjectName", "");
             }
         });
     }

@@ -8,8 +8,14 @@ import org.limewire.ui.swing.util.I18n;
 
 @LazySingleton
 public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBuilder {
-
+    
+    @Override
     public String getHeadingDocument(SearchHeading heading, BasicDownloadState downloadState, boolean isSpam) {
+        return getHeadingDocument(heading, downloadState, isSpam, true);
+    }
+
+    public String getHeadingDocument(SearchHeading heading, BasicDownloadState downloadState, boolean isSpam,
+                                     boolean underline) {
         if (isSpam) {
             return I18n.tr("{0} is marked as spam.", wrapHeading(heading.getText()));
         } else {
@@ -18,7 +24,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                 String downloadMessage = I18n.tr("Downloading {0}...");
                 return MessageFormat.format(downloadMessage, wrapHeading(heading.getText(downloadMessage)));
             case NOT_STARTED:
-                return wrapHeading(underLine(wrapForDownload(heading.getText())));
+                return wrapHeading(underLine(wrapForDownload(heading.getText()), underline));
             case DOWNLOADED:
             case LIBRARY:
                 String message = I18n.tr("{0} is in your Library.");
@@ -39,7 +45,11 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
         return "<a href=\"#download\">" + heading + "</a>";
     }
 
-    private String underLine(String heading) {
-        return "<u>" + heading + "</u>";
+    private String underLine(String heading, boolean underline) {
+        if(underline) {
+            return "<u>" + heading + "</u>";
+        } else {
+            return heading;
+        }
     }
 }

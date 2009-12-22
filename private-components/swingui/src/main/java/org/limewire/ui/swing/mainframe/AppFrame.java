@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.EventObject;
+import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
@@ -26,6 +27,7 @@ import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
+import org.limewire.core.api.search.store.StoreEnabled;
 import org.limewire.core.impl.MockModule;
 import org.limewire.core.settings.GeocodeSettings;
 import org.limewire.core.settings.InstallSettings;
@@ -35,6 +37,7 @@ import org.limewire.geocode.GeocodeInformation.Property;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.inject.LimeWireInjectModule;
 import org.limewire.inject.Modules;
+import org.limewire.inject.MutableProvider;
 import org.limewire.inspection.Inspector;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -81,6 +84,8 @@ public class AppFrame extends SingleFrameApplication {
     private boolean isStartup = false;
 
     @Inject private static volatile Injector injector;
+    @Inject private static volatile @StoreEnabled
+    MutableProvider<Boolean> storeEnabled;
 
     private static volatile boolean started;
 
@@ -233,7 +238,7 @@ public class AppFrame extends SingleFrameApplication {
             // check if the geo locates, otherwise register a listener for when it
             // is calculated. 
             if(geoLocation.get().isEmpty()) {
-                GeocodeSettings.GEO_LOCATION.addSettingListener(new SettingListener(){                    
+                GeocodeSettings.GEO_LOCATION.addSettingListener(new SettingListener<Properties >(){                    
                     @Override
                     public void settingChanged(SettingEvent evt) {
                         if(!geoLocation.get().isEmpty()) {
@@ -272,7 +277,7 @@ public class AppFrame extends SingleFrameApplication {
         // reset the geo setting so we properlly reassociate this LW install
         // with the the LWS.
         LWSSettings.HAS_LOADED_LWS_GEO.set(false);
-        SwingUiSettings.SHOW_STORE_COMPONENTS.set(false);
+        storeEnabled.set(false);
 
         // check if the geolocation already exists, this will ensure the 
         // ui visuals in the setup wizard are correct.
@@ -325,7 +330,7 @@ public class AppFrame extends SingleFrameApplication {
             	}
         	}
         	LWSSettings.HAS_LOADED_LWS_GEO.set(true);
-        	SwingUiSettings.SHOW_STORE_COMPONENTS.set(showStoreComponents);
+        	storeEnabled.set(showStoreComponents);
         }
     }
    

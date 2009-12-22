@@ -23,8 +23,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.swingx.JXPanel;
@@ -39,24 +37,25 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
-import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
+import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.search.SearchResultsMessagePanel.MessageType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
+import org.limewire.ui.swing.search.resultpanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * This is the top-level container for the search results display.  
@@ -118,7 +117,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private Component messagePanelsGap;
     
     /** Listener for changes in the view type. */
-    private final SettingListener viewTypeListener;
+    private final SettingListener<Integer> viewTypeListener;
     
     /** Listener for updates to the result count. */
     private final ListEventListener<VisualSearchResult> resultCountListener;
@@ -155,7 +154,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     /** This is the active OverlayType for the JXLayer */
     private OverlayType overlayType = OverlayType.NONE;
     
-    private SettingListener messagePanelGapHider;
+    private SettingListener<Boolean> messagePanelGapHider;
     
     /**
      * Constructs a SearchResultsPanel with the specified components.
@@ -196,7 +195,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         // Create results container with tables.
         resultsContainer = containerFactory.create(searchResultsModel);
         
-        viewTypeListener = new SettingListener() {
+        viewTypeListener = new SettingListener<Integer>() {
             int oldSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
             @Override
             public void settingChanged(SettingEvent evt) {
@@ -259,7 +258,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         // we need to hear about that in this class so that we can make the gap separating the message box from
         // the search results disappear
         if (messagePanel.isShowClassicSearchResultsHint()) {
-            messagePanelGapHider = new SettingListener() {
+            messagePanelGapHider = new SettingListener<Boolean>() {
                 @Override
                 public void settingChanged(SettingEvent evt) {
                     if (!SwingUiSettings.SHOW_CLASSIC_REMINDER.getValue()) {
@@ -332,6 +331,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         sortAndFilterPanel.dispose();
         filterPanel.dispose();
         messagePanel.dispose();
+        resultsContainer.dispose();
         browseFailedPanel.dispose();
         searchResultsModel.dispose();
         browseStatusPanel.dispose();

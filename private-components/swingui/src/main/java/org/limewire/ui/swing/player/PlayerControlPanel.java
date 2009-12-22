@@ -21,8 +21,6 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicSliderUI;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
@@ -38,14 +36,16 @@ import org.limewire.ui.swing.components.MarqueeButton;
 import org.limewire.ui.swing.components.VolumeSlider;
 import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
 import org.limewire.ui.swing.library.LibraryMediator;
-import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Provider;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Main UI container for the media player.
@@ -116,7 +116,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
     
     private final CategoryManager categoryManager;
     
-    private SettingListener settingListener;
+    private SettingListener<Boolean> settingListener;
     
     /**
      * Constructs a PlayerPanel with the specified component providers and
@@ -255,7 +255,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         getPlayerMediator().addMediatorListener(this);
         
         // Stop player if disabled, and show/hide player.
-        settingListener = new SettingListener(){
+        settingListener = new SettingListener<Boolean>(){
             @Override
             public void settingChanged(final SettingEvent evt) {
                 SwingUtilities.invokeLater(new Runnable(){
@@ -299,7 +299,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      * Initializes the progress component.
      */
     private void initProgressControl() {
-        // The progress slider UI has been offsetting the value of the slider to account for
+        //The progress slider UI has been offsetting the value of the slider to account for
         // the size of the position knob, but since we're overriding the foreground painter to not
         // paint a knob, this is causing the slider to be positioned incorrectly.
         // So, let's override the BasicSliderUI to make the position knob small enough to not

@@ -1,10 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel.list;
 
-import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingAndMetadata;
-import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingAndSubheading;
-import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingOnly;
-import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +11,14 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingAndMetadata;
+import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingAndSubheading;
+import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingOnly;
+import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 
+/**
+ * The default implementation of ListViewRowHeightRule.
+ */
 public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     private static final Log LOG = LogFactory.getLog(ListViewRowHeightRuleImpl.class);
     
@@ -59,7 +61,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     }
 
     @Override
-    public RowDisplayResult getDisplayResult(VisualSearchResult vsr) {
+    public RowDisplayResult createDisplayResult(VisualSearchResult vsr) {
         if (vsr.isSpam()) {
             return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState());
         }
@@ -97,6 +99,47 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             throw new UnsupportedOperationException("Unhandled download state: " + vsr.getDownloadState());
         }
     }
+    
+    @Override
+    public RowDisplayResult createDisplayResult(VisualSearchResult vsr, int rowHeight) {
+        // Create row result for spam.
+        if (vsr.isSpam()) {
+            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState(), rowHeight);
+        }
+        
+        // Create row result based on download state.
+        switch(vsr.getDownloadState()) {
+        case DOWNLOADING:
+        case DOWNLOADED:
+        case LIBRARY:
+            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState(), rowHeight);
+            
+        case NOT_STARTED:
+            // Create heading with highlighted search term.
+            String heading = vsr.getHeading();
+            String highlightedHeading = highlightMatches(heading);
+            
+            // Create subheading with highlighted search term.
+            String subheading = vsr.getSubHeading();
+            String highlightedSubheading = highlightMatches(subheading);
+
+            // If heading and subheading not highlighted, find matching property
+            // and return row result containing highlighted property value.
+            if (!isDifferentLength(heading, highlightedHeading) && 
+                    !isDifferentLength(subheading, highlightedSubheading)) {
+                PropertyMatch propertyMatch = getPropertyMatch(vsr);
+                if (propertyMatch != null) {
+                    return newResult(HeadingSubHeadingAndMetadata, vsr, highlightedHeading, highlightedSubheading, propertyMatch, rowHeight);
+                }
+            }
+            
+            // Return row result with highlighed heading and subheading.
+            return newResult(HeadingAndSubheading, vsr, highlightedHeading, highlightedSubheading, null, rowHeight);
+        
+        default:
+            throw new UnsupportedOperationException("Unhandled download state: " + vsr.getDownloadState());
+        }
+    }
 
     private RowDisplayResultImpl newResult(RowDisplayConfig config, VisualSearchResult vsr, String heading,
             String subheading, PropertyMatch propertyMatch) {
@@ -112,6 +155,22 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             subheading = OPEN_HTML + subheading + CLOSE_HTML;
         }
         return new RowDisplayResultImpl(config, heading, propertyMatch, subheading, vsr.isSpam(), vsr.getDownloadState());
+    }
+
+    private RowDisplayResultImpl newResult(RowDisplayConfig config, VisualSearchResult vsr, String heading,
+            String subheading, PropertyMatch propertyMatch, int rowHeight) {
+        if (emptyOrNull(subheading)) {
+            if (propertyMatch == null || (propertyMatch.getKey() == null || EMPTY_STRING.equals(propertyMatch.getKey()))) {
+                config = HeadingOnly;
+            } else {
+                config = HeadingAndMetadata;
+            }
+        }
+        
+        if (subheading.length() > 0) {
+            subheading = OPEN_HTML + subheading + CLOSE_HTML;
+        }
+        return new RowDisplayResultImpl(config, heading, propertyMatch, subheading, vsr.isSpam(), vsr.getDownloadState(), rowHeight);
     }
 
     private boolean emptyOrNull(String val) {
@@ -177,6 +236,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         private final PropertyMatch metadata;
         private final boolean spam;
         private final BasicDownloadState initialDownloadState;
+        private final int rowHeight;
         
         public RowDisplayResultImpl(RowDisplayConfig config, String heading, PropertyMatch metadata,
                 String subheading, boolean spam, BasicDownloadState downloadState) {
@@ -186,6 +246,18 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             this.subheading = subheading;
             this.spam = spam;
             this.initialDownloadState = downloadState;
+            this.rowHeight = config.getRowHeight();
+        }
+        
+        public RowDisplayResultImpl(RowDisplayConfig config, String heading, PropertyMatch metadata,
+                String subheading, boolean spam, BasicDownloadState downloadState, int rowHeight) {
+            this.config = config;
+            this.heading = heading;
+            this.metadata = metadata;
+            this.subheading = subheading;
+            this.spam = spam;
+            this.initialDownloadState = downloadState;
+            this.rowHeight = rowHeight;
         }
 
         @Override
@@ -201,6 +273,11 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         @Override
         public PropertyMatch getMetadata() {
             return metadata;
+        }
+        
+        @Override
+        public int getRowHeight() {
+            return rowHeight;
         }
 
         @Override

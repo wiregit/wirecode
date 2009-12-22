@@ -38,6 +38,7 @@
 	<classpathentry kind="src" output="components/lwsserver/build/tests" path="components/lwsserver/src/test/java"/>
 	<classpathentry kind="src" output="components/lwsserver/build/test-common" path="components/lwsserver/src/test-common/java"/>
 	<classpathentry kind="src" output="private-components/mock-core/build/classes" path="private-components/mock-core/src/main/java"/>
+    <classpathentry kind="src" output="private-components/mock-core/src/main/resources" path="private-components/mock-core/src/main/resources"/>
 	<classpathentry kind="src" output="components/mojito/build/classes" path="components/mojito/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/java"/>
 	<classpathentry kind="src" output="components/mojito/src/test/resources" path="components/mojito/src/test/resources"/>

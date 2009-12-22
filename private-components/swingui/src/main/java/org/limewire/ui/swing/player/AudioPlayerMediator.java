@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,11 +27,11 @@ import org.limewire.ui.swing.settings.MediaPlayerSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.EventList;
 
 /**
  * Mediator that controls the interaction between the player view, the current
@@ -317,6 +318,23 @@ class AudioPlayerMediator implements PlayerMediator {
     }
     
     /* (non-Javadoc)
+     * @see org.limewire.ui.swing.player.IPlayerMediator#play(java.io.File)
+     */
+    @Override
+    public void play(URL url) {
+        // Stop current song.
+        stop();
+        
+        // Play new song.
+        this.fileItem = null;
+        loadAndPlay(url);
+        
+        // Clear play and shuffle lists.
+        setActivePlaylist(null);
+        shuffleList.clear();
+    }
+    
+    /* (non-Javadoc)
      * @see org.limewire.ui.swing.player.IPlayerMediator#play(org.limewire.core.api.library.LocalFileItem)
      */
     @Override
@@ -339,6 +357,13 @@ class AudioPlayerMediator implements PlayerMediator {
         player.loadSong(fileToPlay);
         player.playSong();
         inspectable.started(fileToPlay);
+    }
+    
+    private void loadAndPlay(URL url) {
+        AudioPlayer player = getPlayer();
+        player.loadSong(url);
+        player.playSong();
+        //inspectable.started(url);
     }
     
     /* (non-Javadoc)

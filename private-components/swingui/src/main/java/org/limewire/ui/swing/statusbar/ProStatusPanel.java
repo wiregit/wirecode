@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ProStatusPanel extends HyperlinkButton implements SettingListener, ActionListener {
+public class ProStatusPanel extends HyperlinkButton implements SettingListener<String []>, ActionListener {
 
     private final Set<InvisibilityCondition> conditions = new HashSet<InvisibilityCondition>();
     

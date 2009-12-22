@@ -37,4 +37,9 @@ public interface FilterableItem extends PropertiableFile {
      */
     boolean isSpam();
     
+    /**
+     * Returns an indicator that determines if the item is from the store.
+     */
+    boolean isStore();
+    
 }

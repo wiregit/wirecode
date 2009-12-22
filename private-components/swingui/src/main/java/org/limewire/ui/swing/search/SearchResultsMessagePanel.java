@@ -12,8 +12,6 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.setting.evt.SettingEvent;
@@ -26,6 +24,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
+import net.miginfocom.swing.MigLayout;
+
 /**
  * A message panel that appears (sometimes) above the search results.
  * If the user tries to start a search before the application
@@ -35,7 +35,7 @@ import org.limewire.ui.swing.util.SwingUtils;
  * will be shown here.  It also may show a hint to the user regarding how to 
  * switch to the classic search results view.
  */
-class SearchResultsMessagePanel extends JXPanel implements SettingListener {
+class SearchResultsMessagePanel extends JXPanel implements SettingListener<Boolean> {
     
     /**
      * This enumeration indicates which type of message should be shown.

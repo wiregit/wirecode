@@ -13,8 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
@@ -27,6 +25,8 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import net.miginfocom.swing.MigLayout;
 
 public class MiniPlayerPanel extends JPanel {
   
@@ -105,7 +105,7 @@ public class MiniPlayerPanel extends JPanel {
         playerMediator.get().addMediatorListener(new PlayerListener());
         
         //hide the player if setting is disabled
-        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
+        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener<Boolean>(){
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtilities.invokeLater(new Runnable(){

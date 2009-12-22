@@ -18,24 +18,25 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.api.search.store.ReleaseResult;
+import org.limewire.core.api.search.store.StoreEnabled;
+import org.limewire.core.api.search.store.StoreStyle;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.inject.BroadcastingMutableProvider;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
@@ -59,6 +60,7 @@ import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.DefaultSearchRepeater;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
+import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
@@ -66,10 +68,8 @@ import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.search.SearchResultMediator;
 import org.limewire.ui.swing.search.UiSearchListener;
-import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
 import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
@@ -77,6 +77,8 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
@@ -87,7 +89,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final JXButton friendButton;
     private final SearchBar searchBar;    
 
-    private final FlexibleTabList searchList;    
+    private final FlexibleTabList searchList;
+
     @SuppressWarnings("unused")
     @InspectableContainer
     private final class LazyInspectableContainer {
@@ -133,7 +136,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     Provider<AdvancedSearchPanel> advancedSearchPanel,
                     Provider<FriendsButton> friendsButtonProvider,
                     AllFriendsRefreshManager allFriendsRefreshManager,
-                    ButtonDecorator buttonDecorator) {        
+                    ButtonDecorator buttonDecorator,
+                    @StoreEnabled BroadcastingMutableProvider<Boolean> storeEnabled) {
         GuiUtils.assignResources(this);
         this.searchHandler = searchHandler;
         this.searchBar = searchBar;
@@ -175,15 +179,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
         add(libraryButton, "gapleft 5, gapbottom 2, gaptop 0");
-        if (StoreMediator.canShowStoreButton()) {
+        if (storeEnabled.get()) {
             add(createStoreButton(), "gapleft 3, gapbottom 2, gaptop 0");
         } else {
         	// if the store button is not shown, add a listener in case the geo
         	// needs to be updated.
-            SwingUiSettings.SHOW_STORE_COMPONENTS.addSettingListener(new SettingListener(){
+            storeEnabled.addListener(new EventListener<Boolean>(){
                 @Override
-                public void settingChanged(SettingEvent evt) {
-                    if(StoreMediator.canShowStoreButton()) {
+                public void handleEvent(Boolean storeEnabled) {
+                    if(storeEnabled) {
                         SwingUtilities.invokeLater(new Runnable(){
                             public void run() {
                                 JXButton storeButton = createStoreButton();
@@ -536,6 +540,16 @@ class TopPanel extends JXPanel implements SearchNavigator {
             // do nothing
         }
         
+        @Override
+        public void handleStoreResult(Search search, ReleaseResult releaseResult) {
+            // do nothing
+        }
+        
+        @Override
+        public void handleStoreStyle(Search search, StoreStyle storeStyle) {
+            // do nothing
+        }
+        
         void killBusy() {
             if (busyTimer != null && busyTimer.isRunning()) {
                 busyTimer.stop();
@@ -596,6 +610,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
         public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {}
         @Override
         public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
+        @Override
+        public void handleStoreResult(Search search, ReleaseResult releaseResult) {}
+        @Override
+        public void handleStoreStyle(Search search, StoreStyle storeStyle) {}
     }
 
     /**

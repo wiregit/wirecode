@@ -6,6 +6,7 @@ import static org.limewire.util.Objects.compareToNullIgnoreCase;
 import java.util.Comparator;
 
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.search.store.ReleaseResult.SortPriority;
 
 /**
  * Factory class for creating sort comparators.
@@ -28,101 +29,64 @@ public class SortFactory {
             return getStringPropertyPlusNameComparator(FilePropertyKey.COMPANY, true);
 
         case DATE_CREATED:
-            return new SimilarResultsGroupingDelegateComparator(getDateComparator(FilePropertyKey.DATE_CREATED, false), getNameComparator(true)); 
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getDateComparator(FilePropertyKey.DATE_CREATED, false), getNameComparator(true)); 
 
         case FILE_EXTENSION:
         case TYPE:
-            return new SimilarResultsGroupingComparator() {
-                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
-
-                @Override
-                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    int compare = compareToNull(vsr1.getFileExtension(), vsr2.getFileExtension());
-                    if (compare == 0) {
-                        compare = nameComparator.compare(vsr1, vsr2);
-                    }
-                    return compare;
-                }
-            };
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getExtensionComparator(), getNameComparator(true));
 
         case CATEGORY:
-            return new SimilarResultsGroupingComparator() {
-                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
-
-                @Override
-                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    int compare = compareToNull(vsr1.getCategory(), vsr2.getCategory());
-                    if (compare == 0) {
-                        compare = nameComparator.compare(vsr1, vsr2);
-                    }
-                    return compare;
-                }
-            };
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getCategoryComparator(), getNameComparator(true));
 
         case LENGTH:
-            return new SimilarResultsGroupingDelegateComparator(getLongComparator(FilePropertyKey.LENGTH, false), getNameComparator(true));
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getLongComparator(FilePropertyKey.LENGTH, false), getNameComparator(true));
 
         case NAME:
         case TITLE:
-            return new SimilarResultsGroupingDelegateComparator(getNameComparator(true));
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getNameComparator(true));
 
         case PLATFORM:
             return getStringPropertyPlusNameComparator(FilePropertyKey.COMPANY, true);
 
         case QUALITY:
-            return new SimilarResultsGroupingDelegateComparator(getLongComparator(FilePropertyKey.QUALITY, false), getNameComparator(true));
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getLongComparator(FilePropertyKey.QUALITY, false), getNameComparator(true));
 
         case RELEVANCE_ITEM:
             return getRelevanceComparator();
 
         case SIZE_HIGH_TO_LOW:
-            return new SimilarResultsGroupingComparator() {
-                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
-
-                @Override
-                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    int compare = compareToNull(vsr2.getSize(), vsr1.getSize(), false);
-                    if (compare == 0) {
-                        compare = nameComparator.compare(vsr1, vsr2);
-                    }
-                    return compare;
-                }
-            };
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getSizeComparator(false), getNameComparator(true));
 
         case SIZE_LOW_TO_HIGH:
-            return new SimilarResultsGroupingComparator() {
-                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
-
-                @Override
-                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    int compare = compareToNull(vsr1.getSize(), vsr2.getSize(), false);
-                    if (compare == 0) {
-                        compare = nameComparator.compare(vsr1, vsr2);
-                    }
-                    return compare;
-                }
-            };
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getSizeComparator(true), getNameComparator(true));
 
         case YEAR:
-            return new SimilarResultsGroupingComparator() {
-                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
-
-                private Comparator<VisualSearchResult> propertyComparator = getLongComparator(
-                        FilePropertyKey.YEAR, true);
-
-                @Override
-                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    int compare = propertyComparator.compare(vsr1, vsr2);
-                    if (compare == 0) {
-                        compare = nameComparator.compare(vsr1, vsr2);
-                    }
-                    return compare;
-                }
-            };
+            return new SimilarResultsGroupingDelegateComparator(
+                    getPriorityComparator(false), getLongComparator(FilePropertyKey.YEAR, true), getNameComparator(true));
         
         default:
             throw new IllegalArgumentException("unknown item " +  sortOption);
         }
+    }
+
+    /**
+     * Returns a search result Comparator for category types.
+     */
+    static Comparator<VisualSearchResult> getCategoryComparator() {
+        return new Comparator<VisualSearchResult>() {
+            @Override
+            public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                return compareToNull(vsr1.getCategory(), vsr2.getCategory());
+            }
+        };
     }
     
     /**
@@ -137,6 +101,18 @@ public class SortFactory {
                 Long v1 = (Long) vsr1.getProperty(key);
                 Long v2 = (Long) vsr2.getProperty(key);
                 return compareNullCheck(v1, v2, ascending, true);
+            }
+        };
+    }
+
+    /**
+     * Returns a search result Comparator for file extensions.
+     */
+    static Comparator<VisualSearchResult> getExtensionComparator() {
+        return new Comparator<VisualSearchResult>() {
+            @Override
+            public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                return compareToNull(vsr1.getFileExtension(), vsr2.getFileExtension());
             }
         };
     }
@@ -174,12 +150,60 @@ public class SortFactory {
     }
 
     /**
+     * Returns a search result Comparator that compares the sort priority
+     * field for store results.
+     */
+    static Comparator<VisualSearchResult> getPriorityComparator(
+            final boolean ascending) {
+        return new Comparator<VisualSearchResult>() {
+            @Override
+            public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                // Define sort order.
+                int result = ascending ? 1 : -1;
+                
+                if (vsr1 instanceof VisualStoreResult) {
+                    SortPriority sp1 = ((VisualStoreResult) vsr1).getSortPriority();
+                    if (vsr2 instanceof VisualStoreResult) {
+                        SortPriority sp2 = ((VisualStoreResult) vsr2).getSortPriority();
+                        // Compare two store results.
+                        if (sp1 == sp2) {
+                            return 0;
+                        } else if (sp1 == SortPriority.TOP) {
+                            return result;
+                        } else if (sp2 == SortPriority.TOP) {
+                            return -result;
+                        } else {
+                            return (sp1 == SortPriority.MIXED) ? result : -result;
+                        }
+                        
+                    } else {
+                        // Compare store vs. non-store results.
+                        return (sp1 == SortPriority.TOP) ? result : 
+                            ((sp1 == SortPriority.BOTTOM) ? -result : 0);
+                    }
+                    
+                } else if (vsr2 instanceof VisualStoreResult) {
+                    SortPriority sp2 = ((VisualStoreResult) vsr2).getSortPriority();
+                    // Compare non-store vs. store results.
+                    return (sp2 == SortPriority.TOP) ? -result : 
+                        ((sp2 == SortPriority.BOTTOM) ? result : 0);
+                    
+                } else {
+                    // Two non-store results always equal.
+                    return 0;
+                }
+            }
+        };
+    }
+    
+    /**
      * Returns a search result Comparator that compares the relevance and name
      * values.
      */
     @SuppressWarnings("unchecked")
     static Comparator<VisualSearchResult> getRelevanceComparator() {
         return new SimilarResultsGroupingDelegateComparator(
+                getPriorityComparator(false), 
                 getRelevanceComparator(false), getNameComparator(true));
     }
 
@@ -196,6 +220,20 @@ public class SortFactory {
                 float r2 = vsr2.getRelevance();
                 return ascending ? compareToNull(r1, r2, false) 
                         : compareToNull(r2, r1, false);
+            }
+        };
+    }
+
+    /**
+     * Returns a search result Comparator for size values.
+     */
+    static Comparator<VisualSearchResult> getSizeComparator(
+            final boolean ascending) {
+        return new Comparator<VisualSearchResult>() {
+            @Override
+            public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                return ascending ? compareToNull(vsr1.getSize(), vsr2.getSize(), false)
+                        : compareToNull(vsr2.getSize(), vsr1.getSize(), false);
             }
         };
     }
@@ -225,6 +263,7 @@ public class SortFactory {
     static Comparator<VisualSearchResult> getStringPropertyPlusNameComparator(
             final FilePropertyKey filePropertyKey, final boolean ascending) {
         return new SimilarResultsGroupingDelegateComparator(
+                getPriorityComparator(false),
                 getStringComparator(filePropertyKey, ascending), getNameComparator(ascending));
     }
     

@@ -10,20 +10,21 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.SegmentLayout;
-import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
+
+import com.google.inject.Provider;
+
+import net.miginfocom.swing.MigLayout;
 
 public class SetupPage2 extends WizardPage {
     private final JCheckBox shareDownloadedFilesCheckBox;
@@ -33,13 +34,16 @@ public class SetupPage2 extends WizardPage {
     @Resource private Icon sharingMyFilesNoStoreIcon;
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
+    private final Provider<Boolean> storeEnabled;
 
-    public SetupPage2(SetupComponentDecorator decorator, Application application, 
-            LibraryData libraryData) {
+    public SetupPage2(SetupComponentDecorator decorator, Application application,
+                      LibraryData libraryData,
+                      Provider<Boolean> storeEnabled) {
         
         super(decorator, application);
         
         this.libraryData = libraryData;
+        this.storeEnabled = storeEnabled;
 
         GuiUtils.assignResources(this);
 
@@ -149,7 +153,7 @@ public class SetupPage2 extends WizardPage {
         JPanel outerPanel = new JPanel(new GridBagLayout());
         
         Icon myFilesIcon = null;
-        if (StoreMediator.canShowStoreButton()) {
+        if (storeEnabled.get()) {
             myFilesIcon = sharingMyFilesIcon;
         } else {
             myFilesIcon = sharingMyFilesNoStoreIcon;
