@@ -198,7 +198,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         add(friendButton, "gapleft 3, gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 11, gapbottom 2, gaptop 1");
-        add(searchList, "gapleft 10, gaptop 4, gapbottom 0, grow, push");
+        add(searchList.getComponent(), "gapleft 10, gaptop 4, gapbottom 0, grow, push");
         
         navigator.addNavigationListener(new NavigationListener() {
             @Override

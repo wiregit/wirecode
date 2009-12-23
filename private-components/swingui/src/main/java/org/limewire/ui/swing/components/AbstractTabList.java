@@ -28,6 +28,10 @@ import org.jdesktop.swingx.painter.Painter;
  * @see FlexibleTabList
  */
 public abstract class AbstractTabList extends JXPanel {
+    /** Indicator for animated tab layouts. */
+    protected enum AnimationMode {
+        NONE, ADDED, REMOVED, SELECTED;
+    }
     
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
@@ -60,7 +64,7 @@ public abstract class AbstractTabList extends JXPanel {
         }
         
         // Layout tabs in container.
-        layoutTabs();
+        layoutTabs(AnimationMode.NONE);
     }
     
     /**
@@ -84,7 +88,7 @@ public abstract class AbstractTabList extends JXPanel {
             public void propertyChange(PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                     if (evt.getNewValue().equals(Boolean.TRUE)) {
-                        layoutTabs();
+                        layoutTabs(AnimationMode.SELECTED);
                     }
                 }
             }
@@ -99,12 +103,21 @@ public abstract class AbstractTabList extends JXPanel {
     protected abstract void layoutTabs();
 
     /**
+     * Updates the layout to display the visible tabs with the specified
+     * animation mode.  By default, the layout is not animated.  Subclasses
+     * may override this method to enable animated transitions.
+     */
+    protected void layoutTabs(AnimationMode animationMode) {
+        layoutTabs();
+    }
+    
+    /**
      * Adds the specified tab to the list at the specified index.  This method
      * also calls <code>layoutTabs()</code> to update the visible tabs.
      */
     protected void addTab(FancyTab tab, int i) {
         tabs.add(i, tab);
-        layoutTabs();
+        layoutTabs(AnimationMode.ADDED);
     }
     
     /**
@@ -118,6 +131,7 @@ public abstract class AbstractTabList extends JXPanel {
         assert idx != -1;
         tabs.remove(tab);
         tab.removeFromGroup(tabGroup);
+        layoutTabs(AnimationMode.REMOVED);
         
         // Shift the selection to the tab to the left (or right, if idx==0)
         if (selected && !tabs.isEmpty()) {
@@ -127,8 +141,6 @@ public abstract class AbstractTabList extends JXPanel {
             } else if (idx > 0 && tabs.size() > 0) {
                 tabs.get(idx - 1).getTabActionMap().getMainAction().putValue(Action.SELECTED_KEY, true);
             } // else empty, no need to layout.
-        } else {            
-            layoutTabs();
         }
     }
     
@@ -145,7 +157,7 @@ public abstract class AbstractTabList extends JXPanel {
                 break;
             }
         }
-        layoutTabs();
+        layoutTabs(AnimationMode.NONE);
     }
     
     /**
