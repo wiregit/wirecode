@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.properties;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.net.MalformedURLException;
@@ -54,7 +55,6 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
     
     private List<TorrentTracker> trackerList = null;
     private JXTable table;
-    
     
     public FileInfoTrackersPanel(FileInfoType type, PropertiableFile propertiableFile, TableDecorator tableDecorator) {
         component = new JPanel(new MigLayout("fillx, gap 0, insets 0 0 20 0"));
@@ -126,7 +126,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         
         table.setCellSelectionEnabled(false);
         table.setShowGrid(false, false);
-        //table.setEditable(false);
+        table.setSortable(false);
         
         TableColumn tierColumn = table.getColumn(TIER_COLUMN);
         tierColumn.setMaxWidth(45);
@@ -150,6 +150,10 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         final JTextField trackerUrlTextField = new JTextField(100);
         JLabel tierLabel = new JLabel(I18n.tr("Tier:"));
         final JSpinner tierSpinner = new JSpinner(new SpinnerNumberModel(0,0,20,1));
+        final JLabel errorLabel = new JLabel(I18n.tr("Tracker URL Invalid"));
+        errorLabel.setForeground(Color.RED);
+        errorLabel.setVisible(false);
+        
         JButton addButton = new JButton(new AbstractAction(I18n.tr("Add")) {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -160,6 +164,10 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
                     refreshTable();
                     trackerUrlTextField.setText("");
                     tierSpinner.setValue(0);
+                    errorLabel.setVisible(false);
+                } 
+                else {
+                    errorLabel.setVisible(true);
                 }
             }
         });
@@ -175,6 +183,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         component.add(tierLabel, "gapright 5");
         component.add(tierSpinner, "gapright 10");
         component.add(addButton, "wrap");
+        component.add(errorLabel, "hidemode 3");
     }
     
     @Override
@@ -256,13 +265,22 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
 
     private class RemoveRenderer extends JPanel implements TableCellRenderer {
         
+        private final RemoveButton button;
+
         public RemoveRenderer() {       
-            add(new RemoveButton());
+            button = new RemoveButton();
+            add(button);
         }
         
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+            
+            if (value != null) {
+                int currentRow = ((Integer)value).intValue();
+                button.setVisible(currentRow != 0);
+            }
+            
             return this;
         }
     }
@@ -272,9 +290,11 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
         private int currentRow = -1;
+
+        private final RemoveButton button;
         
         public RemoveEditor() {       
-            RemoveButton button = new RemoveButton();
+            button = new RemoveButton();
             button.removeActionHandListener();
             button.addActionListener(new AbstractAction() {
                 @Override
@@ -291,8 +311,10 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
+            
             if (value != null) {
                 currentRow = ((Integer)value).intValue();
+                button.setVisible(currentRow != 0);
             }
             
             return this;
