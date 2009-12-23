@@ -131,7 +131,6 @@ public abstract class AbstractTabList extends JXPanel {
         assert idx != -1;
         tabs.remove(tab);
         tab.removeFromGroup(tabGroup);
-        layoutTabs(AnimationMode.REMOVED);
         
         // Shift the selection to the tab to the left (or right, if idx==0)
         if (selected && !tabs.isEmpty()) {
@@ -141,6 +140,8 @@ public abstract class AbstractTabList extends JXPanel {
             } else if (idx > 0 && tabs.size() > 0) {
                 tabs.get(idx - 1).getTabActionMap().getMainAction().putValue(Action.SELECTED_KEY, true);
             } // else empty, no need to layout.
+        } else {
+            layoutTabs(AnimationMode.REMOVED);
         }
     }
     

@@ -16,6 +16,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -42,7 +43,7 @@ import com.google.inject.Inject;
  * <p>FlexibleTabList is used to display the search tabs at the top of the main
  * window.</p>
  */
-public class FlexibleTabList extends AbstractTabList implements TransitionTarget {
+public class FlexibleTabList extends AbstractTabList {
     private static final int MAX_TAB_WIDTH = 205;
     private static final int MIN_TAB_WIDTH = 115;
     private static final int RIGHT_INSET = 3;
@@ -61,7 +62,7 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
     
     private int maxVisibleTabs;
     private int vizStartIdx = -1;
-    private boolean performingLayout;
+    private boolean pendingLayout;
     private List<FancyTab> pendingVisibleTabs;
     
     /**
@@ -85,20 +86,14 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
         // Wrap the tab list in a parent component. (JXLayer also works here.)
         // This is needed to work around a bug in the Animated Transitions
         // library.  To work correctly, the library requires the bounds of the
-        // tab list container relative to its parent to start at location (0, 0).
+        // animated container relative to its parent to start at location (0, 0).
         parent = new JPanel(new BorderLayout());
         parent.setOpaque(false);
         parent.add(this, BorderLayout.CENTER);
         
         // Set up animation.
-        animator = new Animator(300);
-        animator.addTarget(new TimingTargetAdapter() {
-            @Override
-            public void end() {
-                performingLayout = false;
-            }
-        });
-        transition = new ScreenTransition(this, this, animator);
+        animator = new Animator(300, new AnimationListener());
+        transition = new ScreenTransition(this, new TransitionAdapter(), animator);
         
         // Add listener to adjust tab layout when container is resized. 
         addComponentListener(new ComponentAdapter() {
@@ -128,16 +123,6 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
     }
 
     /**
-     * Called when the transition animation is started to set up the end layout
-     * of the tab list.
-     */
-    @Override
-    public void setupNextScreen() {
-        // Add visible tabs to container.
-        doTabLayout(pendingVisibleTabs);
-    }
-
-    /**
      * Creates a new tab with the specified action map.  This calls the 
      * superclass method to create the tab, sets the minimum and maximum widths,
      * and adds close actions. 
@@ -160,39 +145,47 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
     
     @Override
     protected void layoutTabs() {
-        // Add visible tabs to container.
-        List<FancyTab> visibleTabs = getPendingVisibleTabs();
-        doTabLayout(visibleTabs);
+        // Do tab layout immediately.
+        if (!pendingLayout) {
+            List<FancyTab> visibleTabs = getPendingVisibleTabs();
+            doTabLayout(visibleTabs);
+            revalidate();
+            repaint();
+        }
     }
     
     @Override
     protected void layoutTabs(AnimationMode animationMode) {
-        // Skip if layout is in progress.
-        if (performingLayout) return;
-        performingLayout = true;
+        // Must be called on UI thread.
+        assert SwingUtilities.isEventDispatchThread();
         
-        // Get index of first existing tab.
-        int oldStartIdx = vizStartIdx;
-        
-        // Get new list of visible tabs.
-        List<FancyTab> visibleTabs = getPendingVisibleTabs();
-        
-        // Animate layout when tab added or removed.  Tab selection is also
-        // animated iff the tabs are shifting position.
-        if (animationMode == AnimationMode.ADDED || animationMode == AnimationMode.REMOVED ||
-                (animationMode == AnimationMode.SELECTED && oldStartIdx != vizStartIdx)) {
-            // Set up tab effects and start layout animation.
-            setupTabEffects(animationMode, oldStartIdx, visibleTabs);
-            pendingVisibleTabs = visibleTabs;
-            transition.start();
-            
-        } else {
-            // Layout tabs without animation.
-            EffectsManager.clearAllEffects();
-            doTabLayout(visibleTabs);
-            revalidate();
-            repaint();
-            performingLayout = false;
+        // Skip if layout is pending or in progress.
+        if (!pendingLayout) {
+            pendingLayout = true;
+
+            // Get old index of first visible tab.
+            int oldStartIdx = vizStartIdx;
+
+            // Get new list of visible tabs.
+            List<FancyTab> visibleTabs = getPendingVisibleTabs();
+
+            // Animate layout when tab added, removed or selected.
+            if (animationMode == AnimationMode.ADDED || 
+                    animationMode == AnimationMode.REMOVED ||
+                    animationMode == AnimationMode.SELECTED) {
+                // Set up tab effects and start layout animation.
+                setupTabEffects(animationMode, oldStartIdx, visibleTabs);
+                pendingVisibleTabs = visibleTabs;
+                transition.start();
+
+            } else {
+                // Layout tabs without animation.
+                EffectsManager.clearAllEffects();
+                doTabLayout(visibleTabs);
+                revalidate();
+                repaint();
+                pendingLayout = false;
+            }
         }
     }
     
@@ -233,12 +226,12 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
         // Set move-in effects on visible tabs.
         for (FancyTab tab : visibleTabs) {
             if (vizStartIdx == oldStartIdx) {
-                // When tab removed, tabs slide in from the right.
                 // When tab added, tabs slide in from the left.
-                if (mode == AnimationMode.REMOVED) {
-                    EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(getWidth() - RIGHT_INSET, getHeight() / 2, true), TransitionType.APPEARING);
-                } else {
+                // When tab removed or selected, tabs slide in from the right.
+                if (mode == AnimationMode.ADDED) {
                     EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(-MIN_TAB_WIDTH, 0, false), TransitionType.APPEARING);
+                } else {
+                    EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(getWidth() - RIGHT_INSET, getHeight() / 2, true), TransitionType.APPEARING);
                 }
             } else if (vizStartIdx < oldStartIdx || oldStartIdx < 0) {
                 // New tabs slide in from the left.
@@ -391,9 +384,16 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            pendingLayout = true;
+            
+            // Remove all tabs.
             while (!getTabs().isEmpty()) {
                 getTabs().get(0).remove();
             }
+            
+            // Update tab layout. 
+            pendingLayout = false;
+            layoutTabs(AnimationMode.REMOVED);
         }
     }
     
@@ -407,6 +407,9 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            pendingLayout = true;
+            
+            // Remove all other tabs.
             while (getTabs().size() > 1) {
                 FancyTab tab = getTabs().get(0);
                 if (isFrom(tab, (Component) e.getSource())) {
@@ -414,6 +417,10 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
                 }
                 tab.remove();
             }
+            
+            // Update tab layout. 
+            pendingLayout = false;
+            layoutTabs(AnimationMode.REMOVED);
         }
         
         private boolean isFrom(JComponent parent, Component child) {
@@ -428,6 +435,28 @@ public class FlexibleTabList extends AbstractTabList implements TransitionTarget
                 }
             }
             return false;
+        }
+    }
+    
+    /**
+     * Listener to handle animation events. 
+     */
+    private class AnimationListener extends TimingTargetAdapter {
+        @Override
+        public void end() {
+            // Reset indicator to re-enable layout requests.
+            pendingLayout = false;
+        }
+    }
+    
+    /**
+     * Transition listener to handle request to set up the next tab layout.
+     */
+    private class TransitionAdapter implements TransitionTarget {
+        @Override
+        public void setupNextScreen() {
+            // Add pending visible tabs to container.
+            doTabLayout(pendingVisibleTabs);
         }
     }
 }
