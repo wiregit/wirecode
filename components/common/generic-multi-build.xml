@@ -49,6 +49,9 @@
 		<delete>
 			<fileset dir="${basedir}" includes="**/build/**/*.class"/>
 		</delete>
+		<delete>
+			<fileset dir="${basedir}" includes="**/clover/clover.db"/>
+		</delete>		
 	    <do.multi-ant target="clean"/>
 	</target>
     
