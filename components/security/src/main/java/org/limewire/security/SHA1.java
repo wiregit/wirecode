@@ -62,6 +62,7 @@ import java.security.MessageDigest;
  *      John Wiley &amp; Sons, 1996</li>
  * </ol>
  */
+///CLOVER:OFF
 public final class SHA1 extends MessageDigest implements Cloneable {
 
     /**
@@ -705,3 +706,4 @@ public final class SHA1 extends MessageDigest implements Cloneable {
         hC += /* c= */ (c << 30) | (c >>> 2);
     }
 }
+///CLOVER:ON
