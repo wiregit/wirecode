@@ -114,7 +114,7 @@
         </for>
 	</target>
     
-    <target name="javadoc" depends="initialize">
+    <target name="javadoc" depends="publish-dependencies">
         <do.multi-ant target="javadoc"/> 
         <!-- TODO: build one big javadoc. -->
 	</target>
