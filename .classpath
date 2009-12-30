@@ -158,10 +158,10 @@
 	<classpathentry kind="lib" path="lib/jars/osx/asm-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/cglib-2.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/slf4j-api-1.5.8.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jna-3.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/slf4j-jdk14-1.5.8.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/rococoa-cocoa-20091217-1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/rococoa-core-20091217-1.jar"/>
-	<classpathentry kind="lib" path="lib/jars/fmj-20091008-20.jar" sourcepath="lib/sources/fmj-source.zip" />
+	<classpathentry kind="lib" path="lib/jars/fmj-20091008-20.jar" sourcepath="lib/sources/fmj-source.zip"/>
+	<classpathentry kind="lib" path="lib/jars/jna-3.2.4.jar" sourcepath="lib/sources/jna-3.2.4-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -488,8 +488,8 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
             
             @Override
-            public String getLibraryVersion() {
-                return "0.0.0";
+            public long getLibraryBuildVersion() {
+                return 0;
             }
             
             @Override
