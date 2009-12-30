@@ -402,9 +402,9 @@
     </tstamp>
     
     <macrodef name="do.javadoc" description="Generates a javadoc for the source.">    	
-        <attribute name="windowtitle" default="LimeWire ${component} Component API for ${timestamp.today}"/>
-        <attribute name="doctitle" default="LimeWire ${component} Component API &lt;br/&gt; for ${timestamp.today}"/>
-        <attribute name="header" default="LimeWire ${component} Component API"/>
+        <attribute name="windowtitle" default="LimeWire ${component} component API for ${timestamp.today}"/>
+        <attribute name="doctitle" default="LimeWire ${component} component API &lt;br/&gt; for ${timestamp.today}"/>
+        <attribute name="header" default="LimeWire ${component} component API"/>
         <element name="more-javadoc-elements" optional="true"/>
         <attribute name="classpathrefid" default="build.limewire.components.this.src.classpath"/>
         <attribute name="sourcepath" default="${limewire.components.this.src}"/>
@@ -416,7 +416,7 @@
     	    <javadoc destdir="${dist.limewire.components.this.javadoc}"
                      windowtitle="@{windowtitle}"
                      header="@{header}"
-                     doctitle="@{doctitle}"                     
+                     doctitle="@{doctitle}"
     	        	 use="true"
                      author="false"
     	        	 version="false"
@@ -425,21 +425,37 @@
                 <link href="http://java.sun.com/javase/6/docs/api/"/>
                 <link href="http://jakarta.apache.org/commons/logging/apidocs/"/>
                 <link href="http://www.icu-project.org/apiref/icu4j/"/>
+                <link href="http://www.limewire.org/nightly/modules/bittorrent-api/api/"/>
                 <link href="http://www.limewire.org/nightly/modules/collection/api/"/>
                 <link href="http://www.limewire.org/nightly/modules/common/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/core-api/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/core-glue/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/core-settings/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/friend/api/"/>
                 <link href="http://www.limewire.org/nightly/modules/geocode/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/lwsserver/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/promotion/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/core/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/gnutella-core/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/http/api/"/>
                 <link href="http://www.limewire.org/nightly/modules/io/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/libtorrent/api/"/>
+                <link href="http://www.limewire.org/nightly/modules/lwsserver/api/"/>
                 <link href="http://www.limewire.org/nightly/modules/mojito/api/"/>
                 <link href="http://www.limewire.org/nightly/modules/mojito-ui/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/nio/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/rudp/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/security/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/setting/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/statistic/api/"/>
-                <link href="http://www.limewire.org/nightly/modules/test-util/api/"/>
+    	    	<link href="http://www.limewire.org/nightly/modules/net/api/"/>
+            	<link href="http://www.limewire.org/nightly/modules/nio/api/"/>
+            	<link href="http://www.limewire.org/nightly/modules/player/api/"/>
+            	<link href="http://www.limewire.org/nightly/modules/player-api/api/"/>
+    	    	<link href="http://www.limewire.org/nightly/modules/promotion/api/"/>
+        		<link href="http://www.limewire.org/nightly/modules/rudp/api/"/>
+        		<link href="http://www.limewire.org/nightly/modules/security/api/"/>
+        		<link href="http://www.limewire.org/nightly/modules/setting/api/"/>
+        		<link href="http://www.limewire.org/nightly/modules/statistic/api/"/>
+    	    	<link href="http://www.limewire.org/nightly/modules/swarm/api/"/>
+    	    	<link href="http://www.limewire.org/nightly/modules/test-util/api/"/>
+    			<link href="http://www.limewire.org/nightly/modules/xmpp/api/"/>
+    			<link href="http://www.limewire.org/nightly/modules/xmpp-api/api/"/>
+				<link href="http://www.limewire.org/nightly/modules/integrated-ui/api/"/>
+				<link href="http://www.limewire.org/nightly/modules/mock-core/api/"/>
+				<link href="http://www.limewire.org/nightly/modules/swingui/api/"/>
 				<!-- TODO: add more components as time goes on, and figure out a way to not require this. -->
 				
      	        <classpath refid="@{classpathrefid}"/>
@@ -448,6 +464,7 @@
                     <fileset dir="@{sourcepath}" includes="@{includes}" excludes="@{excludes}"/>
                 </sourcefiles>
      	        <more-javadoc-elements/>
+    	    	<bottom><![CDATA[Copyright &#169; 2009 <a href="http://www.limewire.org">Lime Wire LLC</a>. All Rights Reserved.]]></bottom>    	    	
     	    </javadoc>
 	    </sequential>
     </macrodef>
