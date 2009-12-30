@@ -402,9 +402,9 @@
     </tstamp>
     
     <macrodef name="do.javadoc" description="Generates a javadoc for the source.">    	
-        <attribute name="windowtitle" default="LimeWire ${component} component API for ${timestamp.today}"/>
-        <attribute name="doctitle" default="LimeWire ${component} component API &lt;br/&gt; for ${timestamp.today}"/>
-        <attribute name="header" default="LimeWire ${component} component API"/>
+        <attribute name="windowtitle" default="LimeWire ${component} component api for ${timestamp.today}"/>
+        <attribute name="doctitle" default="LimeWire ${component} component api &lt;br/&gt; for ${timestamp.today}"/>
+        <attribute name="header" default="LimeWire ${component} component api"/>
         <element name="more-javadoc-elements" optional="true"/>
         <attribute name="classpathrefid" default="build.limewire.components.this.src.classpath"/>
         <attribute name="sourcepath" default="${limewire.components.this.src}"/>
