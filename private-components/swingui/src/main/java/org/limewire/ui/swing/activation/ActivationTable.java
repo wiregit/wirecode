@@ -6,9 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Date;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -17,15 +15,9 @@ import javax.swing.ListSelectionModel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.renderer.CellContext;
-import org.jdesktop.swingx.renderer.ComponentProvider;
-import org.jdesktop.swingx.renderer.DefaultTableRenderer;
-import org.jdesktop.swingx.renderer.WrappingIconPanel;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
@@ -71,7 +63,7 @@ class ActivationTable extends MouseableTable {
         
 //        getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellRenderer(new DefaultTableRenderer(new LicenseTest()));
         getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellRenderer(new LicenseTypeEditorRenderer());
-//        getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());
+        getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());
         
         getColumn(ActivationTableFormat.DATE_REGISTERED_INDEX).setCellRenderer(new DateRenderer());
         
@@ -212,11 +204,13 @@ class ActivationTable extends MouseableTable {
 
         private final JLabel nameLabel;
         private final HyperlinkButton licenseButton;
+        private final UrlAction licenseAction;
         
         public LicenseTypeEditorRenderer() {
             nameLabel = new JLabel();
             nameLabel.setVisible(false);
-            licenseButton = new HyperlinkButton(I18n.tr("Lost your license?"));
+            licenseAction = new UrlAction(I18n.tr("Lost your license?"), "http://www.limewire.com/client_redirect/?page=gopro");
+            licenseButton = new HyperlinkButton(licenseAction);
             licenseButton.setVisible(false);
             
             setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));
@@ -234,12 +228,16 @@ class ActivationTable extends MouseableTable {
         @Override
         protected Component doTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
-            if(value instanceof ActivationItem) {
+            if(value instanceof LostLicenseItem) {
+                LostLicenseItem item = (LostLicenseItem) value;
+                nameLabel.setVisible(false);
+                licenseButton.setText(item.getLicenseName());
+                licenseButton.setVisible(true);
+            } else if(value instanceof ActivationItem) {
                 nameLabel.setText(getText((ActivationItem) value));
                 nameLabel.setVisible(true);
                 nameLabel.setForeground(getForeground());
                 licenseButton.setVisible(false);
-                
             } else {
                 nameLabel.setVisible(false);
                 licenseButton.setVisible(false);
@@ -250,7 +248,13 @@ class ActivationTable extends MouseableTable {
         @Override
         protected Component doTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            if(value instanceof ActivationItem) {
+            if(value instanceof LostLicenseItem) {
+                LostLicenseItem item = (LostLicenseItem) value;
+                nameLabel.setVisible(false);
+                licenseButton.setText(item.getLicenseName());
+                licenseAction.setURL(item.getLicenseName());
+                licenseButton.setVisible(true);
+            } else if(value instanceof ActivationItem) {
                 nameLabel.setText(getText((ActivationItem) value));
                 nameLabel.setVisible(true);
 //                nameLabel.setForeground(getForeground());
@@ -280,7 +284,7 @@ class ActivationTable extends MouseableTable {
                 boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             
-            if(!(value instanceof Long)) {
+            if(!(value instanceof Long) || (Long)value < 0) {
                 setText("");
             } else {
                 setText(GuiUtils.msec2Date((Long)value)); 
@@ -332,7 +336,7 @@ class ActivationTable extends MouseableTable {
         @Override
         protected Component doTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
-            if(value instanceof ActivationItem) {
+            if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() > 0) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
                 iconButton.setVisible(!item.isActiveVersion());
@@ -352,13 +356,13 @@ class ActivationTable extends MouseableTable {
         @Override
         protected Component doTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            if(value instanceof ActivationItem) {
+            if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() > 0) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
                 iconButton.setVisible(!item.isActiveVersion());
                 renewButton.setVisible(item.isExpired());
             } else {
-                dateLabel.setVisible(false);
+                dateLabel.setText("");
                 iconButton.setVisible(false);
                 renewButton.setVisible(false);
             }

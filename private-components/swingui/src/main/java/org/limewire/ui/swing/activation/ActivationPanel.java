@@ -86,6 +86,7 @@ public class ActivationPanel {
         listener = new ActivationListener();
         
         eventList = new BasicEventList<ActivationItem>();
+        clearTable();
         
         activationPanel = new JPanel(new MigLayout("fill, gap 0, insets 10 20 18 20"));
         
@@ -112,7 +113,7 @@ public class ActivationPanel {
         
         editButton = new JButton(new EditAction());
         
-        licenseKeyErrorLabel = new JLabel(I18n.tr("Sorry, the key you entered is invalid. Please trye again."));
+        licenseKeyErrorLabel = new JLabel(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
         licenseKeyErrorLabel.setFont(font);
         licenseKeyErrorLabel.setForeground(errorColor);
         
@@ -244,11 +245,17 @@ public class ActivationPanel {
             setLicenseExperiationVisible(true);
             return;
         case INVALID_KEY:
+            clearTable();
             setLicenseKeyErrorVisible(true);
             setLicenseExperiationVisible(false);
             return;
         }
         throw new IllegalStateException("Unknown state: " + error);
+    }
+    
+    private void clearTable() {
+        eventList.clear();
+        eventList.add(new LostLicenseItem());
     }
     
     private void setEditState() {
