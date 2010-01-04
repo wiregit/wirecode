@@ -1,4 +1,5 @@
 activation.version=1.1
+AnimatedTransitions.version=0.11
 aopalliance.version=
 AppFramework.version=
 AppleJavaExtensions.version=
@@ -69,5 +70,6 @@ slf4j-jdk14.version=1.5.8
 smack.version=
 smackx.version=
 swingx.version=1.0
+TimingFramework.version=1.0
 tritonus.version=
 xerces.version=

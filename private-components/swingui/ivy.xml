@@ -51,6 +51,8 @@
         <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="none" name="glazedlists" rev="${glazedlists.version}" conf="compile,runtime"/>
         <dependency org="none" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
+        <dependency org="none" name="TimingFramework" rev="${TimingFramework.version}" conf="compile,runtime"/>
+        <dependency org="none" name="AnimatedTransitions" rev="${AnimatedTransitions.version}" conf="compile,runtime"/>
                 
         <!-- runtime dependencies. -->
         <dependency org="none" name="messages" rev="" conf="runtime"/>
