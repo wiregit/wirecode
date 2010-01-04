@@ -69,7 +69,7 @@ public class LookupSettings extends MojitoProps {
      * The number of parallel FIND_VALUE lookups.
      */
     public static final IntSetting FIND_VALUE_PARALLEL_LOOKUPS
-        = FACTORY.createRemoteIntSetting("FIND_VALUE_PARALLEL_LOOKUPS", 10, 
+        = FACTORY.createRemoteIntSetting("FIND_VALUE_PARALLEL_LOOKUPS", 5, 
                 "Mojito.FindValueParallelLookups", 1, 30);
 
     /**
