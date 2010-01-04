@@ -101,7 +101,7 @@ public class FlexibleTabList extends AbstractTabList {
             public void componentResized(ComponentEvent e) {
                 // Redo tab layout when number of tabs changes.
                 if (calculateVisibleTabCount() != maxVisibleTabs) {
-                    layoutTabs(AnimationMode.NONE);
+                    layoutTabs(ChangeType.NONE);
                 }
             }
         });
@@ -147,7 +147,7 @@ public class FlexibleTabList extends AbstractTabList {
     protected void layoutTabs() {
         // Do tab layout immediately.
         if (!pendingLayout) {
-            List<FancyTab> visibleTabs = getPendingVisibleTabs();
+            List<FancyTab> visibleTabs = getPendingVisibleTabs(false);
             doTabLayout(visibleTabs);
             revalidate();
             repaint();
@@ -155,7 +155,7 @@ public class FlexibleTabList extends AbstractTabList {
     }
     
     @Override
-    protected void layoutTabs(AnimationMode animationMode) {
+    protected void layoutTabs(ChangeType changeType) {
         // Must be called on UI thread.
         assert SwingUtilities.isEventDispatchThread();
         
@@ -167,14 +167,14 @@ public class FlexibleTabList extends AbstractTabList {
             int oldStartIdx = vizStartIdx;
 
             // Get new list of visible tabs.
-            List<FancyTab> visibleTabs = getPendingVisibleTabs();
+            List<FancyTab> visibleTabs = getPendingVisibleTabs(changeType == ChangeType.ADDED);
 
             // Animate layout when tab added, removed or selected.
-            if (animationMode == AnimationMode.ADDED || 
-                    animationMode == AnimationMode.REMOVED ||
-                    animationMode == AnimationMode.SELECTED) {
+            if (changeType == ChangeType.ADDED || 
+                    changeType == ChangeType.REMOVED ||
+                    changeType == ChangeType.SELECTED) {
                 // Set up tab effects and start layout animation.
-                setupTabEffects(animationMode, oldStartIdx, visibleTabs);
+                setupTabEffects(changeType, oldStartIdx, visibleTabs);
                 pendingVisibleTabs = visibleTabs;
                 transition.start();
 
@@ -219,7 +219,7 @@ public class FlexibleTabList extends AbstractTabList {
     /**
      * Sets up the animation effects when the tab layout changes.
      */
-    private void setupTabEffects(AnimationMode mode, int oldStartIdx, List<FancyTab> visibleTabs) {
+    private void setupTabEffects(ChangeType mode, int oldStartIdx, List<FancyTab> visibleTabs) {
         // Remove existing effects.
         EffectsManager.clearAllEffects();
         
@@ -228,7 +228,7 @@ public class FlexibleTabList extends AbstractTabList {
             if (vizStartIdx == oldStartIdx) {
                 // When tab added, tabs slide in from the left.
                 // When tab removed or selected, tabs slide in from the right.
-                if (mode == AnimationMode.ADDED) {
+                if (mode == ChangeType.ADDED) {
                     EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(-MIN_TAB_WIDTH, 0, false), TransitionType.APPEARING);
                 } else {
                     EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(getWidth() - RIGHT_INSET, getHeight() / 2, true), TransitionType.APPEARING);
@@ -264,7 +264,7 @@ public class FlexibleTabList extends AbstractTabList {
      * still keeping the selected tab in view.  If there's no selected tab,
      * this bumps everything to the left one.
      */
-    private List<FancyTab> getPendingVisibleTabs() {
+    private List<FancyTab> getPendingVisibleTabs(boolean tabAdded) {
         // Calculate maximum visible tabs.
         maxVisibleTabs = calculateVisibleTabCount();
         
@@ -285,7 +285,8 @@ public class FlexibleTabList extends AbstractTabList {
             
             // If we had a selection, make sure that we shift in the
             // appropriate distance to keep that selection in view.
-            FancyTab selectedTab = getSelectedTab();
+            // We always select the first tab when a new tab is added.
+            FancyTab selectedTab = tabAdded ? tabs.get(0) : getSelectedTab();
             if (selectedTab != null && !vizTabs.contains(selectedTab)) {
                 int selIdx = tabs.indexOf(selectedTab);
                 if (vizStartIdx > selIdx) { // We have to shift left
@@ -393,7 +394,7 @@ public class FlexibleTabList extends AbstractTabList {
             
             // Update tab layout. 
             pendingLayout = false;
-            layoutTabs(AnimationMode.REMOVED);
+            layoutTabs(ChangeType.REMOVED);
         }
     }
     
@@ -420,7 +421,7 @@ public class FlexibleTabList extends AbstractTabList {
             
             // Update tab layout. 
             pendingLayout = false;
-            layoutTabs(AnimationMode.REMOVED);
+            layoutTabs(ChangeType.REMOVED);
         }
         
         private boolean isFrom(JComponent parent, Component child) {

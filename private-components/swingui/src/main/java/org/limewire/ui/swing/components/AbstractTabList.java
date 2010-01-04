@@ -28,8 +28,8 @@ import org.jdesktop.swingx.painter.Painter;
  * @see FlexibleTabList
  */
 public abstract class AbstractTabList extends JXPanel {
-    /** Indicator for animated tab layouts. */
-    protected enum AnimationMode {
+    /** Change type indicator used for animating tab layouts. */
+    protected enum ChangeType {
         NONE, ADDED, REMOVED, SELECTED;
     }
     
@@ -64,7 +64,7 @@ public abstract class AbstractTabList extends JXPanel {
         }
         
         // Layout tabs in container.
-        layoutTabs(AnimationMode.NONE);
+        layoutTabs(ChangeType.NONE);
     }
     
     /**
@@ -88,7 +88,7 @@ public abstract class AbstractTabList extends JXPanel {
             public void propertyChange(PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                     if (evt.getNewValue().equals(Boolean.TRUE)) {
-                        layoutTabs(AnimationMode.SELECTED);
+                        layoutTabs(ChangeType.SELECTED);
                     }
                 }
             }
@@ -104,10 +104,10 @@ public abstract class AbstractTabList extends JXPanel {
 
     /**
      * Updates the layout to display the visible tabs with the specified
-     * animation mode.  By default, the layout is not animated.  Subclasses
+     * change type.  By default, the layout is not animated.  Subclasses
      * may override this method to enable animated transitions.
      */
-    protected void layoutTabs(AnimationMode animationMode) {
+    protected void layoutTabs(ChangeType changeType) {
         layoutTabs();
     }
     
@@ -117,7 +117,7 @@ public abstract class AbstractTabList extends JXPanel {
      */
     protected void addTab(FancyTab tab, int i) {
         tabs.add(i, tab);
-        layoutTabs(AnimationMode.ADDED);
+        layoutTabs(ChangeType.ADDED);
     }
     
     /**
@@ -141,7 +141,7 @@ public abstract class AbstractTabList extends JXPanel {
                 tabs.get(idx - 1).getTabActionMap().getMainAction().putValue(Action.SELECTED_KEY, true);
             } // else empty, no need to layout.
         } else {
-            layoutTabs(AnimationMode.REMOVED);
+            layoutTabs(ChangeType.REMOVED);
         }
     }
     
@@ -158,7 +158,7 @@ public abstract class AbstractTabList extends JXPanel {
                 break;
             }
         }
-        layoutTabs(AnimationMode.NONE);
+        layoutTabs(ChangeType.NONE);
     }
     
     /**
