@@ -16,9 +16,9 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadPropertyKey;
-import org.limewire.core.api.download.SourceInfo;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.io.Address;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 

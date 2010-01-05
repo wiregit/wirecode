@@ -1,7 +1,7 @@
 package com.limegroup.bittorrent;
 
 import org.limewire.bittorrent.TorrentPeer;
-import org.limewire.core.api.download.SourceInfo;
+import org.limewire.core.api.transfer.SourceInfo;
 
 class TorrentSourceInfoAdapter implements SourceInfo {
     private final TorrentPeer source;

@@ -18,7 +18,7 @@ import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.core.api.download.SourceInfo;
+import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ActivityCallback;

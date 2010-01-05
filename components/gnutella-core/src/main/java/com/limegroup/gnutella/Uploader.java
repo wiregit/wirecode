@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.List;
 
-import org.limewire.core.api.download.SourceInfo;
+import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.io.Connectable;
 
 import com.limegroup.gnutella.library.FileDesc;

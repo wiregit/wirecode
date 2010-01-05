@@ -6,10 +6,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.download.SourceInfo;
-import org.limewire.core.api.download.UploadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.core.api.transfer.SourceInfo;
 
 /**
  * A single upload.

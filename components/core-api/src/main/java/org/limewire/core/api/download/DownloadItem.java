@@ -9,6 +9,7 @@ import java.util.List;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Address;
 

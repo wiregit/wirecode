@@ -281,7 +281,7 @@ public interface Torrent {
     public List<TorrentTracker> getTrackers();
     
     /**
-     * Adds a tracker to a torrent at a given priority.
+     * Adds a tracker to a torrent at a given tier.
      */
     public void addTracker(String url, int tier);
     

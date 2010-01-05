@@ -1,7 +1,7 @@
-package org.limewire.core.api.download;
+package org.limewire.core.api.transfer;
 
 /**
- * Stores details for an active peer;  
+ * Stores details for an active peer.
  */
 public interface SourceInfo {
     
@@ -21,12 +21,12 @@ public interface SourceInfo {
     String getClientName();
     
     /**
-     * Returns the current total upload speed to this peer in bytes/sec.
+     * Returns the current total upload speed to this source in bytes/sec.
      */
     float getUploadSpeed();
     
     /**
-     * Returns the current total download speed from this peer in bytes/sec.
+     * Returns the current total download speed from this source in bytes/sec.
      */
     float getDownloadSpeed();
 }

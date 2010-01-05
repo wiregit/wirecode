@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadPiecesInfo;
-import org.limewire.core.api.download.SourceInfo;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;

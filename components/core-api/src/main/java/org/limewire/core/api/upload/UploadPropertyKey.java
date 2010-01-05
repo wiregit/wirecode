@@ -1,4 +1,4 @@
-package org.limewire.core.api.download;
+package org.limewire.core.api.upload;
 
 /**
  * Used in the getUploadProperty method in UploadItem to allow getting

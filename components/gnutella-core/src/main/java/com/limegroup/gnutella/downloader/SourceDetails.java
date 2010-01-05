@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import org.limewire.core.api.download.SourceInfo;
+import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.InsufficientDataException;

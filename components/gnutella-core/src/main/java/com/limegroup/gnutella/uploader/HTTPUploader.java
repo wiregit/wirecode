@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.limewire.collection.Range;
-import org.limewire.core.api.download.SourceInfo;
+import org.limewire.core.api.transfer.SourceInfo;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
