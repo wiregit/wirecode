@@ -91,8 +91,9 @@ public class FlexibleTabList extends AbstractTabList {
         parent.setOpaque(false);
         parent.add(this, BorderLayout.CENTER);
         
-        // Set up animation.
+        // Set up animation to run for 0.3 seconds at 33 frames per second.
         animator = new Animator(300, new AnimationListener());
+        animator.setResolution(30);
         transition = new ScreenTransition(this, new TransitionAdapter(), animator);
         
         // Add listener to adjust tab layout when container is resized. 
@@ -145,6 +146,9 @@ public class FlexibleTabList extends AbstractTabList {
     
     @Override
     protected void layoutTabs() {
+        // Must be called on UI thread.
+        assert SwingUtilities.isEventDispatchThread();
+        
         // Do layout only if not pending or in progress.
         if (!pendingLayout) {
             List<FancyTab> visibleTabs = getPendingVisibleTabs(false);
@@ -336,17 +340,22 @@ public class FlexibleTabList extends AbstractTabList {
     }
     
     /**
-     * Freezes the current tab layout.  This method is useful when we want to
-     * aggregate multiple tab additions/deletions into a single layout update.
-     * The <code>updateTabLayout()</code> method should be called to unfreeze
-     * and update the layout.
+     * Freezes the current tab layout.  This method may be called when we want
+     * to aggregate multiple tab additions/deletions into a single layout
+     * update.  The <code>updateTabLayout()</code> method should be called to
+     * unfreeze and update the layout.
+     * 
+     * @see #updateTabLayout(ChangeType)
      */
     public void freezeTabLayout() {
+        assert SwingUtilities.isEventDispatchThread();
         pendingLayout = true;
     }
     
     /**
      * Updates the tab layout.
+     * 
+     * @see #freezeTabLayout()
      */
     public void updateTabLayout(ChangeType changeType) {
         pendingLayout = false;

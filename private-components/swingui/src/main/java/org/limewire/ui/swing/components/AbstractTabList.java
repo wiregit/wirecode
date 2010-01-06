@@ -158,7 +158,7 @@ public abstract class AbstractTabList extends JXPanel {
                 break;
             }
         }
-        layoutTabs(ChangeType.NONE);
+        layoutTabs(ChangeType.REMOVED);
     }
     
     /**
