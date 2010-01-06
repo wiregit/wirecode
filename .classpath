@@ -163,5 +163,7 @@
 	<classpathentry kind="lib" path="lib/jars/osx/rococoa-core-20091217-1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/fmj-20091008-20.jar" sourcepath="lib/sources/fmj-source.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jna-3.2.4.jar" sourcepath="lib/sources/jna-3.2.4-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jars/AnimatedTransitions-0.11.jar" sourcepath="lib/sources/AnimatedTransitions-0.11-src.zip"/>
+	<classpathentry kind="lib" path="lib/jars/TimingFramework-1.0.jar" sourcepath="lib/sources/TimingFramework-1.0-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

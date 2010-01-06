@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
@@ -13,11 +14,20 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.animation.timing.Animator;
+import org.jdesktop.animation.timing.TimingTargetAdapter;
+import org.jdesktop.animation.transitions.EffectsManager;
+import org.jdesktop.animation.transitions.ScreenTransition;
+import org.jdesktop.animation.transitions.TransitionTarget;
+import org.jdesktop.animation.transitions.EffectsManager.TransitionType;
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.animate.EffectsUtils;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -45,10 +55,15 @@ public class FlexibleTabList extends AbstractTabList {
     private final ComboBoxDecorator comboBoxDecorator;
     private final Action closeOtherAction;
     private final Action closeAllAction;
+
+    private final JComponent parent;
+    private final Animator animator;
+    private final ScreenTransition transition;
     
     private int maxVisibleTabs;
     private int vizStartIdx = -1;
-
+    private boolean pendingLayout;
+    private List<FancyTab> pendingVisibleTabs;
     
     /**
      * Constructs a FlexibleTabList with the specified combobox decorator.
@@ -68,18 +83,38 @@ public class FlexibleTabList extends AbstractTabList {
         
         maxVisibleTabs = Integer.MAX_VALUE;
         
+        // Wrap the tab list in a parent component. (JXLayer also works here.)
+        // This is needed to work around a bug in the Animated Transitions
+        // library.  To work correctly, the library requires the bounds of the
+        // animated container relative to its parent to start at location (0, 0).
+        parent = new JPanel(new BorderLayout());
+        parent.setOpaque(false);
+        parent.add(this, BorderLayout.CENTER);
+        
+        // Set up animation to run for 0.3 seconds at 33 frames per second.
+        animator = new Animator(300, new AnimationListener());
+        animator.setResolution(30);
+        transition = new ScreenTransition(this, new TransitionAdapter(), animator);
+        
         // Add listener to adjust tab layout when container is resized. 
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 // Redo tab layout when number of tabs changes.
                 if (calculateVisibleTabCount() != maxVisibleTabs) {
-                    layoutTabs();
+                    layoutTabs(ChangeType.NONE);
                 }
             }
         });
     }
 
+    /**
+     * Returns the display component.
+     */
+    public JComponent getComponent() {
+        return parent;
+    }
+    
     /** 
      * Adds a new tab using the specified action map at the specified index. 
      */
@@ -109,21 +144,73 @@ public class FlexibleTabList extends AbstractTabList {
         return tab;
     }
     
-    /** 
-     * Updates the layout to display the visible tabs.  This method removes all 
-     * visible tabs, and lays them out again. 
-     */
     @Override
     protected void layoutTabs() {
+        // Must be called on UI thread.
+        assert SwingUtilities.isEventDispatchThread();
+        
+        // Do layout only if not pending or in progress.
+        if (!pendingLayout) {
+            List<FancyTab> visibleTabs = getPendingVisibleTabs(false);
+            doTabLayout(visibleTabs);
+            revalidate();
+            repaint();
+        }
+    }
+    
+    @Override
+    protected void layoutTabs(ChangeType changeType) {
+        // Must be called on UI thread.
+        assert SwingUtilities.isEventDispatchThread();
+        
+        // Skip if layout is pending or in progress.
+        if (!pendingLayout) {
+            pendingLayout = true;
+
+            // Get old index of first visible tab.
+            int oldStartIdx = vizStartIdx;
+
+            // Get new list of visible tabs.
+            List<FancyTab> visibleTabs = getPendingVisibleTabs(changeType == ChangeType.ADDED);
+
+            // Animate layout when tab added, removed or selected.
+            if (changeType == ChangeType.ADDED || 
+                    changeType == ChangeType.REMOVED ||
+                    changeType == ChangeType.SELECTED) {
+                // Set up tab effects and start layout animation.
+                setupTabEffects(changeType, oldStartIdx, visibleTabs);
+                pendingVisibleTabs = visibleTabs;
+                transition.start();
+
+            } else {
+                // Layout tabs without animation.
+                EffectsManager.clearAllEffects();
+                doTabLayout(visibleTabs);
+                revalidate();
+                repaint();
+                pendingLayout = false;
+            }
+        }
+    }
+    
+    /** 
+     * Adds the specified list of visible tabs to the layout.  This method 
+     * removes all previously visible tabs, and adds the specified tabs to 
+     * the layout. 
+     */
+    private void doTabLayout(List<FancyTab> visibleTabs) {
+        // Remove all tabs.
         removeAll();
-        List<FancyTab> visibleTabs = getPendingVisibleTabs();
+        
+        // Add visible tabs to container.
         for (FancyTab tab : visibleTabs) {
             add(tab, "growy");
         }
         
         // Add "more" button if some tabs not visible.
-        if (visibleTabs.size() < getTabs().size()) {
-            FancyTabMoreButton more = new FancyTabMoreButton(getTabs());
+        List<FancyTab> allTabs = getTabs();
+        if (visibleTabs.size() < allTabs.size()) {
+            FancyTabMoreButton more = new FancyTabMoreButton(allTabs);
             comboBoxDecorator.decorateIconComboBox(more);
             more.setIcon(moreDefaultIcon);
             more.setPressedIcon(morePressedIcon);
@@ -131,9 +218,45 @@ public class FlexibleTabList extends AbstractTabList {
             more.setSelectedIcon(morePressedIcon);
             add(more, "gapleft 0:" + String.valueOf(MIN_TAB_WIDTH));
         }
+    }
+    
+    /**
+     * Sets up the animation effects when the tab layout changes.
+     */
+    private void setupTabEffects(ChangeType mode, int oldStartIdx, List<FancyTab> visibleTabs) {
+        // Remove existing effects.
+        EffectsManager.clearAllEffects();
         
-        revalidate();
-        repaint();
+        // Set move-in effects on visible tabs.
+        for (FancyTab tab : visibleTabs) {
+            if (vizStartIdx == oldStartIdx) {
+                // When tab added, tabs slide in from the left.
+                // When tab removed or selected, tabs slide in from the right.
+                if (mode == ChangeType.ADDED) {
+                    EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(-MIN_TAB_WIDTH, 0, false), TransitionType.APPEARING);
+                } else {
+                    EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(getWidth() - RIGHT_INSET, getHeight() / 2, true), TransitionType.APPEARING);
+                }
+            } else if (vizStartIdx < oldStartIdx || oldStartIdx < 0) {
+                // New tabs slide in from the left.
+                EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(-MIN_TAB_WIDTH, 0, false), TransitionType.APPEARING);
+            } else {
+                // New tabs slide in from the right.
+                EffectsManager.setEffect(tab, EffectsUtils.createMoveInEffect(getWidth() - RIGHT_INSET, getHeight() / 2, true), TransitionType.APPEARING);
+            }
+        }
+        
+        // Set move-out effects on all tabs.
+        List<FancyTab> allTabs = getTabs();
+        for (FancyTab tab : allTabs) {
+            if (vizStartIdx <= oldStartIdx) {
+                // Old tabs slide out to the right.
+                EffectsManager.setEffect(tab, EffectsUtils.createMoveOutEffect(getWidth() - RIGHT_INSET, getHeight() / 2, true), TransitionType.DISAPPEARING);
+            } else {
+                // Old tabs slide out to the left.
+                EffectsManager.setEffect(tab, EffectsUtils.createMoveOutEffect(-MIN_TAB_WIDTH, 0, false), TransitionType.DISAPPEARING);
+            }
+        }
     }
     
     /**
@@ -145,7 +268,7 @@ public class FlexibleTabList extends AbstractTabList {
      * still keeping the selected tab in view.  If there's no selected tab,
      * this bumps everything to the left one.
      */
-    private List<FancyTab> getPendingVisibleTabs() {
+    private List<FancyTab> getPendingVisibleTabs(boolean tabAdded) {
         // Calculate maximum visible tabs.
         maxVisibleTabs = calculateVisibleTabCount();
         
@@ -166,7 +289,8 @@ public class FlexibleTabList extends AbstractTabList {
             
             // If we had a selection, make sure that we shift in the
             // appropriate distance to keep that selection in view.
-            FancyTab selectedTab = getSelectedTab();
+            // We always select the first tab when a new tab is added.
+            FancyTab selectedTab = tabAdded ? tabs.get(0) : getSelectedTab();
             if (selectedTab != null && !vizTabs.contains(selectedTab)) {
                 int selIdx = tabs.indexOf(selectedTab);
                 if (vizStartIdx > selIdx) { // We have to shift left
@@ -213,6 +337,29 @@ public class FlexibleTabList extends AbstractTabList {
             actionMaps.add(tab.getTabActionMap());
         }
         setTabActionMaps(actionMaps);
+    }
+    
+    /**
+     * Freezes the current tab layout.  This method may be called when we want
+     * to aggregate multiple tab additions/deletions into a single layout
+     * update.  The <code>updateTabLayout()</code> method should be called to
+     * unfreeze and update the layout.
+     * 
+     * @see #updateTabLayout(ChangeType)
+     */
+    public void freezeTabLayout() {
+        assert SwingUtilities.isEventDispatchThread();
+        pendingLayout = true;
+    }
+    
+    /**
+     * Updates the tab layout.
+     * 
+     * @see #freezeTabLayout()
+     */
+    public void updateTabLayout(ChangeType changeType) {
+        pendingLayout = false;
+        layoutTabs(changeType);
     }
     
     /**
@@ -265,9 +412,15 @@ public class FlexibleTabList extends AbstractTabList {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            freezeTabLayout();
+            
+            // Remove all tabs.
             while (!getTabs().isEmpty()) {
                 getTabs().get(0).remove();
             }
+            
+            // Update tab layout.
+            updateTabLayout(ChangeType.REMOVED);
         }
     }
     
@@ -281,6 +434,9 @@ public class FlexibleTabList extends AbstractTabList {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            freezeTabLayout();
+            
+            // Remove all other tabs.
             while (getTabs().size() > 1) {
                 FancyTab tab = getTabs().get(0);
                 if (isFrom(tab, (Component) e.getSource())) {
@@ -288,6 +444,9 @@ public class FlexibleTabList extends AbstractTabList {
                 }
                 tab.remove();
             }
+            
+            // Update tab layout. 
+            updateTabLayout(ChangeType.REMOVED);
         }
         
         private boolean isFrom(JComponent parent, Component child) {
@@ -302,6 +461,28 @@ public class FlexibleTabList extends AbstractTabList {
                 }
             }
             return false;
+        }
+    }
+    
+    /**
+     * Listener to handle animation events. 
+     */
+    private class AnimationListener extends TimingTargetAdapter {
+        @Override
+        public void end() {
+            // Reset indicator to re-enable layout requests.
+            pendingLayout = false;
+        }
+    }
+    
+    /**
+     * Transition listener to handle request to set up the next tab layout.
+     */
+    private class TransitionAdapter implements TransitionTarget {
+        @Override
+        public void setupNextScreen() {
+            // Add pending visible tabs to container.
+            doTabLayout(pendingVisibleTabs);
         }
     }
 }

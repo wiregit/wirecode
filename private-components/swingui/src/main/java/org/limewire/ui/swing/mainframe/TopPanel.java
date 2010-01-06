@@ -42,6 +42,7 @@ import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SelectableJXButton;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.components.AbstractTabList.ChangeType;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.home.HomeMediator;
@@ -198,7 +199,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         add(friendButton, "gapleft 3, gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 11, gapbottom 2, gaptop 1");
-        add(searchList, "gapleft 10, gaptop 4, gapbottom 0, grow, push");
+        add(searchList.getComponent(), "gapleft 10, gaptop 4, gapbottom 0, grow, push");
         
         navigator.addNavigationListener(new NavigationListener() {
             @Override
@@ -288,13 +289,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         advancedPanel.addSearchListener(new UiSearchListener() {
             @Override
-             public void searchTriggered(SearchInfo searchInfo) {
+            public void searchTriggered(SearchInfo searchInfo) {
+                searchList.freezeTabLayout();
                 searchHandler.doSearch(searchInfo);
                 if ((searchInfo.getSearchCategory() != SearchCategory.PROGRAM || LibrarySettings.ALLOW_PROGRAMS.getValue())) {
                     searchNavItem.remove();
                 }
-             } 
-         });       
+                searchList.updateTabLayout(ChangeType.ADDED);
+            }
+        });
         
         return searchNavItem;
     }
