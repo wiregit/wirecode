@@ -29,7 +29,7 @@ import org.jdesktop.swingx.painter.Painter;
  */
 public abstract class AbstractTabList extends JXPanel {
     /** Change type indicator used for animating tab layouts. */
-    protected enum ChangeType {
+    public enum ChangeType {
         NONE, ADDED, REMOVED, SELECTED;
     }
     

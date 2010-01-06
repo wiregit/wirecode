@@ -145,7 +145,7 @@ public class FlexibleTabList extends AbstractTabList {
     
     @Override
     protected void layoutTabs() {
-        // Do tab layout immediately.
+        // Do layout only if not pending or in progress.
         if (!pendingLayout) {
             List<FancyTab> visibleTabs = getPendingVisibleTabs(false);
             doTabLayout(visibleTabs);
@@ -336,6 +336,24 @@ public class FlexibleTabList extends AbstractTabList {
     }
     
     /**
+     * Freezes the current tab layout.  This method is useful when we want to
+     * aggregate multiple tab additions/deletions into a single layout update.
+     * The <code>updateTabLayout()</code> method should be called to unfreeze
+     * and update the layout.
+     */
+    public void freezeTabLayout() {
+        pendingLayout = true;
+    }
+    
+    /**
+     * Updates the tab layout.
+     */
+    public void updateTabLayout(ChangeType changeType) {
+        pendingLayout = false;
+        layoutTabs(changeType);
+    }
+    
+    /**
      * Sets the text for the Close All tabs action.
      */
     public void setCloseAllText(String closeAllText) {
@@ -385,16 +403,15 @@ public class FlexibleTabList extends AbstractTabList {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            pendingLayout = true;
+            freezeTabLayout();
             
             // Remove all tabs.
             while (!getTabs().isEmpty()) {
                 getTabs().get(0).remove();
             }
             
-            // Update tab layout. 
-            pendingLayout = false;
-            layoutTabs(ChangeType.REMOVED);
+            // Update tab layout.
+            updateTabLayout(ChangeType.REMOVED);
         }
     }
     
@@ -408,7 +425,7 @@ public class FlexibleTabList extends AbstractTabList {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            pendingLayout = true;
+            freezeTabLayout();
             
             // Remove all other tabs.
             while (getTabs().size() > 1) {
@@ -420,8 +437,7 @@ public class FlexibleTabList extends AbstractTabList {
             }
             
             // Update tab layout. 
-            pendingLayout = false;
-            layoutTabs(ChangeType.REMOVED);
+            updateTabLayout(ChangeType.REMOVED);
         }
         
         private boolean isFrom(JComponent parent, Component child) {
