@@ -5,5 +5,6 @@ public enum ActivationError {
     NO_ERROR,
     NO_KEY,
     INVALID_KEY,
-    EXPIRED_KEY
+    EXPIRED_KEY,
+    BLOCKED_KEY,
 }

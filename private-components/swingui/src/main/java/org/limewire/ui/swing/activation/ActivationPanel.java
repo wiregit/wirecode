@@ -7,6 +7,8 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,6 +108,15 @@ public class ActivationPanel {
         licenseField = new JTextField();
         licenseField.setFont(font);
         licenseField.setForeground(fontColor);
+        licenseField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int key = e.getKeyCode();
+                if (key == KeyEvent.VK_ENTER && licenseField.isEditable()) {
+                    activationManager.activateKey(licenseField.getText().trim());
+                }
+            }
+        });
         TextFieldClipboardControl.install(licenseField);
         
         busyLabel = new ColoredBusyLabel(new Dimension(20,20));
@@ -113,7 +124,7 @@ public class ActivationPanel {
         
         editButton = new JButton(new EditAction());
         
-        licenseKeyErrorLabel = new JLabel(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
+        licenseKeyErrorLabel = new JLabel(" ");
         licenseKeyErrorLabel.setFont(font);
         licenseKeyErrorLabel.setForeground(errorColor);
         
@@ -246,6 +257,13 @@ public class ActivationPanel {
             return;
         case INVALID_KEY:
             clearTable();
+            licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
+            setLicenseKeyErrorVisible(true);
+            setLicenseExperiationVisible(false);
+            return;
+        case BLOCKED_KEY:
+            clearTable();
+            licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
             setLicenseKeyErrorVisible(true);
             setLicenseExperiationVisible(false);
             return;

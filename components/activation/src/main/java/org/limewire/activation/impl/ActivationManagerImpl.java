@@ -53,6 +53,10 @@ public class ActivationManagerImpl implements ActivationManager {
                     activationError = ActivationError.NO_ERROR;
                     listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
                     ActivationSettings.ACTIVATION_KEY.set(key);
+                } else if (key.equals("54321")) {
+                    currentState = ActivationState.NOT_ACTIVATED;
+                    activationError = ActivationError.BLOCKED_KEY;
+                    listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.BLOCKED_KEY));
                 } else {
                     currentState = ActivationState.NOT_ACTIVATED;
                     activationError = ActivationError.INVALID_KEY;
