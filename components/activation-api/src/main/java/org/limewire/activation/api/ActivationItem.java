@@ -5,7 +5,7 @@ package org.limewire.activation.api;
 //      needed to be retrieved from the server and stored on the server.
 public interface ActivationItem {
 
-    public int getModuleID();
+    public ActivationID getModuleID();
     
     /**
      * Returns a user facing name for this item.
@@ -26,28 +26,23 @@ public interface ActivationItem {
      * Returns true if this item was purchased but is now
      * expired, false otherwise.
      */
-    public boolean isExpired();
+    public boolean isActive();
     
     /**
      * Returns true if this item can be used in this
      * version of LimeWire, false otherwise.
      */
-    public boolean isActiveVersion();
-    
-//    /**
-//     * Returns true if this item is auto-renewing, false otherwise.
-//     */
-//    public boolean isSubscription();
-    
+    public boolean isUseable();
+
     /**
      * Returns a URL related to this feature.
      */
     public String getURL();
     
-    /**
-     * Returns the first version that this feature is enabled in.
-     * @return
-     */
-    public String getFirstSupportedVersion();
+//    /**
+//     * Returns the first version that this feature is enabled in.
+//     * @return
+//     */
+//    public String getFirstSupportedVersion();
 
 }

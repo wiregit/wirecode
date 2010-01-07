@@ -2,12 +2,12 @@ package org.limewire.activation.api;
 
 import org.limewire.listener.DefaultDataEvent;
 
-public class ActivationModuleEvent extends DefaultDataEvent<Integer> {
+public class ActivationModuleEvent extends DefaultDataEvent<ActivationID> {
 
     private final boolean isActive;
     
-    public ActivationModuleEvent(int data, boolean isActive) {
-        super(data);
+    public ActivationModuleEvent(ActivationID moduleID, boolean isActive) {
+        super(moduleID);
         
         this.isActive = isActive;
     }

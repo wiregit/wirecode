@@ -33,7 +33,7 @@ public interface ActivationManager {
      */
     public boolean isValidKey(String key);
         
-    public boolean isActive(int id);
+    public boolean isActive(ActivationID id);
     
     public void addModuleListener(EventListener<ActivationModuleEvent> listener);
     

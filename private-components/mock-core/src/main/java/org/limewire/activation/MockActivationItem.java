@@ -1,7 +1,6 @@
 package org.limewire.activation;
 
-import java.net.URL;
-
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 
 public class MockActivationItem implements ActivationItem {
@@ -31,13 +30,13 @@ public class MockActivationItem implements ActivationItem {
     }
 
     @Override
-    public boolean isActiveVersion() {
+    public boolean isUseable() {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean isExpired() {
+    public boolean isActive() {
         // TODO Auto-generated method stub
         return false;
     }
@@ -47,16 +46,16 @@ public class MockActivationItem implements ActivationItem {
 //        // TODO Auto-generated method stub
 //        return false;
 //    }
+//
+//    @Override
+//    public String getFirstSupportedVersion() {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
 
     @Override
-    public String getFirstSupportedVersion() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public int getModuleID() {
-        return 0;
+    public ActivationID getModuleID() {
+        return ActivationID.PRO_MODULE;
     }
 
 }

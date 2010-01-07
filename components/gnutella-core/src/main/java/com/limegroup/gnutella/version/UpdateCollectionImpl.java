@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -298,7 +299,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationManager.PRO_MODULE_ID));
+        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.PRO_MODULE));
         data.setUpdateURL(url);
         
         try {

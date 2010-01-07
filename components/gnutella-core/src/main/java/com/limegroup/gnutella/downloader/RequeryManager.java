@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.settings.LookupSettings;
@@ -148,7 +149,7 @@ class RequeryManager implements DHTEventListener {
     boolean canSendQueryNow() {
         // PRO users can always send the DHT query, but only Gnutella after activate.
 //        if(LimeWireUtils.isPro())
-        if(activationManager.isActive(ActivationManager.PRO_MODULE_ID))
+        if(activationManager.isActive(ActivationID.PRO_MODULE))
             return canSendDHTQueryNow() || (activated && canSendQueryAfterActivate());
         else
             return activated && canSendQueryAfterActivate();

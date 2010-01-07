@@ -1,5 +1,6 @@
 package org.limewire.core.impl;
 
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
@@ -28,7 +29,7 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
     
     @Override
     public String addClientInfoToUrl(String baseUrl) {
-        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isActive(ActivationManager.PRO_MODULE_ID));
+        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.PRO_MODULE));
     }
     
     @Override
@@ -61,7 +62,7 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
 
     @Override
     public boolean isProVersion() {
-        return activationManager.isActive(ActivationManager.PRO_MODULE_ID);
+        return activationManager.isActive(ActivationID.PRO_MODULE);
 //       return LimeWireUtils.isPro();
     }
     

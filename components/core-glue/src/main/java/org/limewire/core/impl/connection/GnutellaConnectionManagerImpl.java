@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.connection.ConnectionItem;
@@ -181,7 +182,7 @@ public class GnutellaConnectionManagerImpl
             int preferred = connectionManager.getPreferredConnectionCount();
             // account for pro having more connections.
 //            if(LimeWireUtils.isPro()) {
-            if(activationManager.isActive(ActivationManager.PRO_MODULE_ID)) {
+            if(activationManager.isActive(ActivationID.PRO_MODULE)) {
                 preferred -= 2;
             }
             

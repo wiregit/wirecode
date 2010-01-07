@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.activation;
 
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.ui.swing.util.I18n;
 
@@ -14,11 +15,11 @@ public class LostLicenseItem implements ActivationItem {
     public long getDatePurchased() {
         return -1;
     }
-
-    @Override
-    public String getFirstSupportedVersion() {
-        return null;
-    }
+//
+//    @Override
+//    public String getFirstSupportedVersion() {
+//        return null;
+//    }
 
     @Override
     public String getLicenseName() {
@@ -31,18 +32,18 @@ public class LostLicenseItem implements ActivationItem {
     }
 
     @Override
-    public boolean isActiveVersion() {
+    public boolean isUseable() {
         return false;
     }
 
     @Override
-    public boolean isExpired() {
+    public boolean isActive() {
         return false;
     }
 
     @Override
-    public int getModuleID() {
-        return -1;
+    public ActivationID getModuleID() {
+        return ActivationID.UNKNOWN_MODULE;
     }
 
 //    @Override

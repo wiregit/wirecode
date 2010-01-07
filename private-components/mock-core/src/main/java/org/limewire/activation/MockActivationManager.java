@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
@@ -67,7 +68,7 @@ public class MockActivationManager implements ActivationManager {
     }
 
     @Override
-    public boolean isActive(int id) {
+    public boolean isActive(ActivationID id) {
         // TODO Auto-generated method stub
         return false;
     }

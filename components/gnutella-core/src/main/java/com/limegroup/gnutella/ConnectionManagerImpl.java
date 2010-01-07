@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.connection.ConnectionLifecycleEventType;
 import org.limewire.core.settings.ApplicationSettings;
@@ -2234,7 +2235,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             setPreferredConnections(ConnectionSettings.IDLE_CONNECTIONS.getValue());
         else
             //TODO: revert this to a method call, install script change
-            setPreferredConnections(activationManager.isActive(ActivationManager.PRO_MODULE_ID) ? 5 : 3);
+            setPreferredConnections(activationManager.isActive(ActivationID.PRO_MODULE) ? 5 : 3);
     }
     
     /**

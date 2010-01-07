@@ -9,6 +9,11 @@ public class ActivationSettings extends LimeProps {
     public static final StringSetting ACTIVATION_HOST = FACTORY.createRemoteStringSetting(
             "ACTIVATION_HOST", "www.limewire.com", "ActivationSettings.activationHost");
     
+    //TODO: set the correct link here. This will be used to determine what location a given module
+    // should use for renewing. 
+    public static final StringSetting ACTIVATION_RENEWAL_HOST = FACTORY.createRemoteStringSetting(
+            "ACTIVATION_RENEWAL_HOST", "www.limewire.com", "ActivationSettings.activationRenewalHost");
+    
     /**
      * Returns whether this was considered a PRO version at the last shutdown. This is
      * needed for starting up some UI components before ActivationManager can be fully
