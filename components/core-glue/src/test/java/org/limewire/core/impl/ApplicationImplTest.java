@@ -85,7 +85,7 @@ public class ApplicationImplTest extends BaseTestCase {
         final ApplicationImpl applicationImpl = new ApplicationImpl(null, null, null);
         
         PrivateAccessor testVersionAccessor = new PrivateAccessor(LimeWireUtils.class, null, "testVersion");
-        PrivateAccessor isProAccessor = new PrivateAccessor(LimeWireUtils.class, null, "_isPro");
+//        PrivateAccessor isProAccessor = new PrivateAccessor(LimeWireUtils.class, null, "_isPro");
        
         testVersionAccessor.setValue("hello");
         String version1 = applicationImpl.getVersion();
@@ -98,12 +98,12 @@ public class ApplicationImplTest extends BaseTestCase {
         // Not fully testable since based on final String LimeWireUtils.LIMEWIRE_VERSION
         applicationImpl.isTestingVersion();
         
-        isProAccessor.setValue(true);
-        boolean isPro1 = applicationImpl.isProVersion();
-        isProAccessor.setValue(false);
-        boolean isPro2 = applicationImpl.isProVersion();
-        isProAccessor.reset();
-        assertTrue(isPro1);
-        assertFalse(isPro2);
+//        isProAccessor.setValue(true);
+//        boolean isPro1 = applicationImpl.isProVersion();
+//        isProAccessor.setValue(false);
+//        boolean isPro2 = applicationImpl.isProVersion();
+//        isProAccessor.reset();
+//        assertTrue(isPro1);
+//        assertFalse(isPro2);
     }
 }

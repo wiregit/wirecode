@@ -6,6 +6,7 @@ import org.limewire.ui.swing.painter.factories.ProgressPainterFactory;
 
 import com.google.inject.AbstractModule;
 
+//TODO: this does't work at all anymore
 public class LimeWireUiPainterModule extends AbstractModule {
 
     private final boolean isPro;

@@ -25,6 +25,8 @@ import org.jdesktop.application.SessionStorage;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.core.settings.GeocodeSettings;
@@ -400,7 +402,7 @@ public class AppFrame extends SingleFrameApplication {
                     Modules.providersFrom(injector),
                     new LimeWireInjectModule(),
                     thiz,
-                    new LimeWireSwingUiModule(injector.getInstance(Application.class).isProVersion()),
+                    new LimeWireSwingUiModule(injector.getInstance(ActivationManager.class).isActive(ActivationID.PRO_MODULE)),
                     new AbstractModule() {
                         @Override
                         protected void configure() {                            

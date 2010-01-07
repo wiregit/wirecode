@@ -3,6 +3,8 @@ package org.limewire.ui.swing.menu;
 import java.awt.event.ActionEvent;
 import java.util.Random;
 
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
@@ -27,13 +29,15 @@ class HelpMenu extends MnemonicMenu {
     private final Provider<Navigator> navigatorProvider;
     private final Provider<HomeMediator> homeMediatorProvider;
     private final Provider<AboutAction> aboutAction;
+    private final ActivationManager activationManager;
     
     @Inject
     public HelpMenu(Application application, 
             Provider<TrayNotifier> trayNotifierProvider,
             Provider<Navigator> navigatorProvider, 
             Provider<HomeMediator> homeMediatorProvider,
-            Provider<AboutAction> aboutAction) {
+            Provider<AboutAction> aboutAction,
+            ActivationManager activationManager) {
         
         super(I18n.tr("&Help"));
 
@@ -43,6 +47,7 @@ class HelpMenu extends MnemonicMenu {
         this.navigatorProvider = navigatorProvider;
         this.homeMediatorProvider = homeMediatorProvider;
         this.aboutAction = aboutAction;
+        this.activationManager = activationManager;
     }
 
     @Override
@@ -63,7 +68,7 @@ class HelpMenu extends MnemonicMenu {
             add(new UrlAction(I18n.tr("&Give Feedback"), "http://www.limewire.com/client_redirect/?page=betaTesting", application));
         }
         
-        if(!application.isProVersion()) {
+        if(!activationManager.isActive(ActivationID.PRO_MODULE)) {
             addSeparator();
             add(new UrlAction(I18n.tr("Get Personalized &Tech Support"),"http://www.limewire.com/client_redirect/?page=gopro", application));
         }

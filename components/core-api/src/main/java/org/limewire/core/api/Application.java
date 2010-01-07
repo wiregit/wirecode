@@ -30,10 +30,10 @@ public interface Application {
     /** Returns the version of the program. */
     String getVersion();
 
-    /** 
-     * Returns true if this version of LimeWire is a 'Pro' Version. 
-     */
-    public boolean isProVersion();
+//    /** 
+//     * Returns true if this version of LimeWire is a 'Pro' Version. 
+//     */
+//    public boolean isProVersion();
 
     /**
      * Returns true if this version of LimeWire is a beta version.

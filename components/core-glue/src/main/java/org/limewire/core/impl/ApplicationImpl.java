@@ -60,11 +60,11 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
         return LimeWireUtils.getLimeWireVersion();
     }
 
-    @Override
-    public boolean isProVersion() {
-        return activationManager.isActive(ActivationID.PRO_MODULE);
-//       return LimeWireUtils.isPro();
-    }
+//    @Override
+//    public boolean isProVersion() {
+//        return activationManager.isActive(ActivationID.PRO_MODULE);
+////       return LimeWireUtils.isPro();
+//    }
     
     @Override
     public boolean isBetaVersion() {

@@ -10,8 +10,12 @@ import java.util.Set;
 
 import javax.swing.Timer;
 
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Application;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.listener.EventListener;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -86,14 +90,33 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
     private boolean isInitialised = false;
     
     private final Application application;
+    private final ActivationManager activationManager; 
 
     @Inject
-    public ProStatusPanel(Application application) {
+    public ProStatusPanel(Application application, ActivationManager activationManager) {
         this.application = application;
+        this.activationManager = activationManager;
+        
         setName("ProStatusPanel");        
-        if (application.isProVersion()) {
+        if (activationManager.isActive(ActivationID.PRO_MODULE)) {
             addCondition(InvisibilityCondition.IS_PRO);
         }
+    }
+    
+    @Inject
+    public void register() {
+        activationManager.addModuleListener(new EventListener<ActivationModuleEvent>(){
+            @Override
+            public void handleEvent(ActivationModuleEvent event) {
+                if(event.getData() == ActivationID.PRO_MODULE) {
+                    if(event.isActive()) {
+                        addCondition(InvisibilityCondition.IS_PRO);
+                    } else {
+                        removeCondition(InvisibilityCondition.IS_PRO);
+                    }
+                }
+            }
+        });
     }
     
     /**
