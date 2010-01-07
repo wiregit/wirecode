@@ -144,7 +144,7 @@ public class ActivationPanel {
         licenseExpirationLabel.setForeground(errorColor);
         
         unsupportedMessagePanel = new UnsupportedMessagePanel();
-//        unsupportedMessagePanel.setVisible(false);
+        unsupportedMessagePanel.setVisible(false);
         
         table = new ActivationTable(eventList);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -161,7 +161,7 @@ public class ActivationPanel {
         
         activationPanel.add(scrollPane, "span, grow, wrap, gapbottom 20");
         
-//        activationPanel.add(unsupportedMessagePanel, "span, grow, wrap");
+        activationPanel.add(unsupportedMessagePanel, "hidemode 3, span, grow, wrap");
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);

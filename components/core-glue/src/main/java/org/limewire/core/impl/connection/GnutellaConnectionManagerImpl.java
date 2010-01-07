@@ -32,7 +32,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * An implementation of GnutellaConnectionManager for the live core. 
