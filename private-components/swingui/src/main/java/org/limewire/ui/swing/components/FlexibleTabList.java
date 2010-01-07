@@ -332,11 +332,13 @@ public class FlexibleTabList extends AbstractTabList {
      */
     private void recreateTabs() {
         List<FancyTab> tabs = getTabs();
-        List<TabActionMap> actionMaps = new ArrayList<TabActionMap>(tabs.size());
-        for (FancyTab tab : tabs) {
-            actionMaps.add(tab.getTabActionMap());
+        if (tabs.size() > 0) {
+            List<TabActionMap> actionMaps = new ArrayList<TabActionMap>(tabs.size());
+            for (FancyTab tab : tabs) {
+                actionMaps.add(tab.getTabActionMap());
+            }
+            setTabActionMaps(actionMaps);
         }
-        setTabActionMaps(actionMaps);
     }
     
     /**
