@@ -1,6 +1,7 @@
 package org.limewire.activation.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +64,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 } else if (key.equals("54321")) {
                     currentState = ActivationState.NOT_ACTIVATED;
                     activationError = ActivationError.BLOCKED_KEY;
+                    setActivationItems(Collections.EMPTY_LIST);
                     listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.BLOCKED_KEY));
                 } else {
                     currentState = ActivationState.NOT_ACTIVATED;
                     activationError = ActivationError.INVALID_KEY;
+                    setActivationItems(Collections.EMPTY_LIST);
                     listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
 //                    ActivationSettings.ACTIVATION_KEY.set("");
                 }
@@ -102,13 +105,21 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     public void setActivationItems(List<ActivationItem> items) {
+        List<ActivationItem> oldItems;
         synchronized (this) {
+            oldItems = new ArrayList<ActivationItem>(itemMap.values());
             itemMap.clear();
             for(ActivationItem item : items) {
                 itemMap.put(item.getModuleID(), item);
             }
         }
         save();
+        // we need to disable anything that may have been previously active
+        for(ActivationItem item : oldItems) {
+            if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
+                moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), false));
+        }
+        // activate any new items that were added
         for(ActivationItem item : items) {
             if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
                 moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), item.isActive()));
