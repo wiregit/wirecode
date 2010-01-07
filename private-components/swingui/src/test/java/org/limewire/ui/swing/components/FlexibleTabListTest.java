@@ -8,6 +8,7 @@ import javax.swing.Action;
 
 import org.limewire.ui.swing.components.AbstractTabList.ChangeType;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Guice;
@@ -48,12 +49,17 @@ public class FlexibleTabListTest extends BaseTestCase {
             public void actionPerformed(ActionEvent e) {
             }
         }; 
-        TabActionMap tabActionMap = new TabActionMap(mainAction, null, null, null);
+        final TabActionMap tabActionMap = new TabActionMap(mainAction, null, null, null);
         
-        // Add tab without animation.
-        tabList.freezeTabLayout();
-        tabList.addTabActionMapAt(tabActionMap, 0);
-        tabList.updateTabLayout(ChangeType.NONE);
+        SwingUtils.invokeNowOrWait(new Runnable() {
+            @Override
+            public void run() {
+                // Add tab without animation.
+                tabList.freezeTabLayout();
+                tabList.addTabActionMapAt(tabActionMap, 0);
+                tabList.updateTabLayout(ChangeType.NONE);
+            }
+        });
         
         // Verify number of tabs.
         int expectedReturn = 1;
