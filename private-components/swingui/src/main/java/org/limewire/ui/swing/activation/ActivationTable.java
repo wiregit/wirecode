@@ -47,7 +47,7 @@ class ActivationTable extends MouseableTable {
         
         model = new DefaultEventTableModel<ActivationItem>(eventList, new ActivationTableFormat());
         setModel(model);
-        
+
         setShowHorizontalLines(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setColumnSelectionAllowed(false);

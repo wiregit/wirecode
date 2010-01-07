@@ -6,6 +6,9 @@ import org.limewire.listener.EventListener;
 
 public interface ActivationManager {
 
+    public static final int PRO_MODULE_ID = 0;
+    public static final int AVG_MODULE_ID = 1;
+    
     public List<ActivationItem> getActivationItems();
     
     public String getLicenseKey();
@@ -29,12 +32,12 @@ public interface ActivationManager {
      * key is valid, false otherwise.
      */
     public boolean isValidKey(String key);
+        
+    public boolean isActive(int id);
     
-    /**
-     * Returns true if 
-     * @return
-     */
-    public boolean isPro();
+    public void addModuleListener(EventListener<ActivationModuleEvent> listener);
+    
+    public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener);
     
     public void addListener(EventListener<ActivationEvent> listener);
     

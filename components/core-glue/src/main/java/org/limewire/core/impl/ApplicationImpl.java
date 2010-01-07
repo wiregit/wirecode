@@ -28,7 +28,7 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
     
     @Override
     public String addClientInfoToUrl(String baseUrl) {
-        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isPro());
+        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isActive(ActivationManager.PRO_MODULE_ID));
     }
     
     @Override
@@ -61,7 +61,7 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
 
     @Override
     public boolean isProVersion() {
-        return activationManager.isPro();
+        return activationManager.isActive(ActivationManager.PRO_MODULE_ID);
 //       return LimeWireUtils.isPro();
     }
     

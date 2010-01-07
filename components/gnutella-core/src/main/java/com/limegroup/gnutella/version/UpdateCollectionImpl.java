@@ -298,7 +298,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isPro());
+        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationManager.PRO_MODULE_ID));
         data.setUpdateURL(url);
         
         try {

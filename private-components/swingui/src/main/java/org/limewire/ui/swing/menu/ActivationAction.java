@@ -15,7 +15,7 @@ public class ActivationAction extends AbstractAction {
     
     @Inject
     public ActivationAction(Provider<ActivationPanel> activationPanelProvider) {
-        super(I18n.tr("&Activate..."));
+        super(I18n.tr("&License..."));
         
         this.activationPanelProvider = activationPanelProvider;
     }

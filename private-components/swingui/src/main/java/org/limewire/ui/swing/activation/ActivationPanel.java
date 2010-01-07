@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -35,6 +36,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.ColoredBusyLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -57,6 +59,10 @@ public class ActivationPanel {
     private Color fontColor;
     @Resource
     private Color errorColor;
+    @Resource 
+    private Icon licenseErrorIcon;
+    @Resource
+    private Icon unsupportedIcon;
     
     private final static String NO_LICENSE_PANEL = "NO_LICENSE_PANEL";
     private final static String EDIT_PANEL = "EDIT_PANEL";
@@ -70,10 +76,12 @@ public class ActivationPanel {
     private JDialog dialog;
     private JTextField licenseField;
     private ColoredBusyLabel busyLabel;
+    private JLabel licenseErrorLabel;
     private JButton editButton;
     private ActivationTable table;
     private JLabel licenseKeyErrorLabel;
     private JLabel licenseExpirationLabel;
+    private UnsupportedMessagePanel unsupportedMessagePanel;
     private JPanel cardPanel;
     private CardLayout cardLayout;
     
@@ -122,6 +130,9 @@ public class ActivationPanel {
         busyLabel = new ColoredBusyLabel(new Dimension(20,20));
         busyLabel.setVisible(false);
         
+        licenseErrorLabel = new JLabel(licenseErrorIcon);
+        licenseErrorLabel.setVisible(false);
+        
         editButton = new JButton(new EditAction());
         
         licenseKeyErrorLabel = new JLabel(" ");
@@ -132,6 +143,9 @@ public class ActivationPanel {
         licenseExpirationLabel.setFont(font);
         licenseExpirationLabel.setForeground(errorColor);
         
+        unsupportedMessagePanel = new UnsupportedMessagePanel();
+//        unsupportedMessagePanel.setVisible(false);
+        
         table = new ActivationTable(eventList);
         JScrollPane scrollPane = new JScrollPane(table);
         
@@ -140,11 +154,14 @@ public class ActivationPanel {
         activationPanel.add(licenseKey, "gapright 10");
         activationPanel.add(licenseField, "grow, push");
         activationPanel.add(busyLabel, "gapleft 6, aligny 50%, hidemode 2");
+        activationPanel.add(licenseErrorLabel, "gapleft 6, aligny 50%, hidemode 2");
         activationPanel.add(editButton, "gapleft 40, wrap");
         
         activationPanel.add(licenseExpirationLabel, "span, growx, gaptop 6, gapbottom 6, wrap");
         
         activationPanel.add(scrollPane, "span, grow, wrap, gapbottom 20");
+        
+//        activationPanel.add(unsupportedMessagePanel, "span, grow, wrap");
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
@@ -246,14 +263,17 @@ public class ActivationPanel {
         case NO_ERROR:
             setLicenseKeyErrorVisible(false);
             setLicenseExperiationVisible(false);
+            licenseErrorLabel.setVisible(false);
             return;
         case NO_KEY:
             setLicenseKeyErrorVisible(false);
             setLicenseExperiationVisible(false);
+            licenseErrorLabel.setVisible(false);
             return;
         case EXPIRED_KEY:
             setLicenseKeyErrorVisible(false);
             setLicenseExperiationVisible(true);
+            licenseErrorLabel.setVisible(false);
             return;
         case INVALID_KEY:
             clearTable();
@@ -266,6 +286,7 @@ public class ActivationPanel {
             licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
             setLicenseKeyErrorVisible(true);
             setLicenseExperiationVisible(false);
+            licenseErrorLabel.setVisible(true);
             return;
         }
         throw new IllegalStateException("Unknown state: " + error);
@@ -333,7 +354,7 @@ public class ActivationPanel {
         
         public NoLicenseButtonPanel() {
             JButton goProButton = new JButton(new UrlAction(I18n.tr("Go Pro"),"http://www.limewire.com/client_redirect/?page=gopro"));
-            activateButton = new JButton(new ActivateAction());
+            activateButton = new JButton(new ActivateAction(I18n.tr("Activate"), I18n.tr("Activate the License Key")));
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
             
             add(goProButton, "push");
@@ -351,7 +372,7 @@ public class ActivationPanel {
         private JButton updateButton;
         
         public EditButtonPanel() {
-            updateButton = new JButton(new UpdateAction());
+            updateButton = new JButton(new ActivateAction(I18n.tr("Update"), I18n.tr("Update the saved key")));
             JButton cancelButton = new JButton(new CancelAction());
             
             add(updateButton, "alignx 100%, gapright 10, tag ok, split");
@@ -375,6 +396,14 @@ public class ActivationPanel {
         @Override
         public void setState(ActivationState state) {
             //NO STATE CHANGE
+        }
+    }
+    
+    private class UnsupportedMessagePanel extends JPanel {
+        public UnsupportedMessagePanel() {
+            
+            add(new JLabel(unsupportedIcon), "aligny 50%, spany");
+            add(new MultiLineLabel(I18n.tr("You're current version of LimeWire does not support one or more of your purchased features.")),"grow");
         }
     }
     
@@ -403,24 +432,10 @@ public class ActivationPanel {
         }
     }
     
-    //TODO: this is exactly the same as UpdateAction
-    // only the text differs
     private class ActivateAction extends AbstractAction {
-        public ActivateAction() {
-            putValue(Action.NAME, I18n.tr("Activate"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Activate the License Key"));
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            activationManager.activateKey(licenseField.getText().trim());
-        }
-    }
-    
-    private class UpdateAction extends AbstractAction {
-        public UpdateAction() {
-            putValue(Action.NAME, I18n.tr("Update"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Update the saved key"));
+        public ActivateAction(String name, String description) {
+            putValue(Action.NAME, name);
+            putValue(Action.SHORT_DESCRIPTION, description);
         }
         
         @Override

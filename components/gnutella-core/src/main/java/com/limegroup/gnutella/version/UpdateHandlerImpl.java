@@ -451,7 +451,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         
         UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
                     ApplicationSettings.getLanguage(),
-                    activationManager.isPro(),
+                    activationManager.isActive(ActivationManager.PRO_MODULE_ID),
 //                    LimeWireUtils.isPro(),
                     style,
                     javaV);
@@ -548,7 +548,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isPro()));
+        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationManager.PRO_MODULE_ID)));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();

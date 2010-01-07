@@ -41,8 +41,13 @@ public class LostLicenseItem implements ActivationItem {
     }
 
     @Override
-    public boolean isSubscription() {
-        return false;
+    public int getModuleID() {
+        return -1;
     }
+
+//    @Override
+//    public boolean isSubscription() {
+//        return false;
+//    }
 
 }

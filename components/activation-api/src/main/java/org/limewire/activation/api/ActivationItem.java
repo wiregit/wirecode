@@ -5,6 +5,8 @@ package org.limewire.activation.api;
 //      needed to be retrieved from the server and stored on the server.
 public interface ActivationItem {
 
+    public int getModuleID();
+    
     /**
      * Returns a user facing name for this item.
      */
@@ -32,10 +34,10 @@ public interface ActivationItem {
      */
     public boolean isActiveVersion();
     
-    /**
-     * Returns true if this item is auto-renewing, false otherwise.
-     */
-    public boolean isSubscription();
+//    /**
+//     * Returns true if this item is auto-renewing, false otherwise.
+//     */
+//    public boolean isSubscription();
     
     /**
      * Returns a URL related to this feature.

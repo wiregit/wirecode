@@ -41,17 +41,22 @@ public class MockActivationItem implements ActivationItem {
         // TODO Auto-generated method stub
         return false;
     }
-
-    @Override
-    public boolean isSubscription() {
-        // TODO Auto-generated method stub
-        return false;
-    }
+//
+//    @Override
+//    public boolean isSubscription() {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
 
     @Override
     public String getFirstSupportedVersion() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public int getModuleID() {
+        return 0;
     }
 
 }

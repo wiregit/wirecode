@@ -6,6 +6,7 @@ import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.listener.EventListener;
 
@@ -36,11 +37,6 @@ public class MockActivationManager implements ActivationManager {
     }
 
     @Override
-    public boolean isPro() {
-        return false;
-    }
-
-    @Override
     public void addListener(EventListener<ActivationEvent> listener) {
         // TODO Auto-generated method stub
         
@@ -60,6 +56,24 @@ public class MockActivationManager implements ActivationManager {
 
     @Override
     public boolean removeListener(EventListener<ActivationEvent> listener) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void addModuleListener(EventListener<ActivationModuleEvent> listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean isActive(int id) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) {
         // TODO Auto-generated method stub
         return false;
     }
