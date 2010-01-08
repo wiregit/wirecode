@@ -47,12 +47,12 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
             for (int counter = offs; counter < offs+stringLength; counter++)
             {
                 // disallow more than 14 characters. that is the length of the key with the hyphens
-                if (counter < 14) {
+                if ((offs+modifiedStringToInsert.length()) < 14) {
                     modifiedStringToInsert.append(stringToInsert.charAt(counter-offs));
                 }
 
                 // here we insert a hyphen into the license key if the user is at the 3rd or the 8th position
-                if (counter == 3 || counter == 8) {
+                if ((offs+modifiedStringToInsert.length()) == 4 || (offs+modifiedStringToInsert.length()) == 9) {
                     // if the user is copying and pasting the key, it might have hyphens already. check for that
                     // and only add the hyphens if they don't exist already
                     if (counter + 1 >= (offs+stringLength) || stringToInsert.charAt(counter-offs+1) != '-')
@@ -64,6 +64,11 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
         }
     }
 
+    @Override
+    public String getText() {
+        return super.getText().replaceAll("-", "");
+    }
+    
     /**
      * Returns the effective insets rendered by a custom painter.  This can be
      * used to determine the actual dimensions as drawn on the screen.
